@@ -4,6 +4,7 @@ from abc import abstractmethod
 from collections.abc import Sequence
 from typing import TypeAlias
 import keras
+import pandas as pd
 from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
@@ -31,7 +32,7 @@ class ParamsDict:
 
     def __getitem__(self, keys: str | Sequence[str]) -> Tensor:
         if isinstance(keys, str):
-            return self._data[keys]
+            return keras.ops.convert_to_tensor(self._data[keys])
 
         return keras.ops.transpose(keras.ops.convert_to_tensor([self._data[key] for key in keys]))
 
@@ -42,12 +43,16 @@ class ParamsDict:
         if not isinstance(values, Sequence):
             values = [values]
 
-        for key, val in zip(keys, values, strict=False):
+        for key, val in zip(keys, values, strict=True):
             self._data[key] = val
 
     def copy(self) -> "ParamsDict":
         """Create a copy of the object."""
         return ParamsDict(dict(self._data.items()))
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """Convert the object into a dataframe."""
+        return pd.DataFrame(self._data)
 
 
 class BaseSGDFitter(keras.Model):
