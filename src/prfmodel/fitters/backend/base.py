@@ -29,8 +29,25 @@ class ParamsDict:
     def __init__(self, data: dict):
         self._data = data
 
-    def __getitem__(self, keys: Sequence[str]) -> Tensor:
-        return keras.ops.transpose(keras.ops.convert_to_tensor([self._data[k] for k in keys]))
+    def __getitem__(self, keys: str | Sequence[str]) -> Tensor:
+        if isinstance(keys, str):
+            return self._data[keys]
+
+        return keras.ops.transpose(keras.ops.convert_to_tensor([self._data[key] for key in keys]))
+
+    def __setitem__(self, keys: str | Sequence[str], values: Tensor | Sequence[Tensor]) -> None:
+        if isinstance(keys, str):
+            keys = [keys]
+
+        if not isinstance(values, Sequence):
+            values = [values]
+
+        for key, val in zip(keys, values, strict=False):
+            self._data[key] = val
+
+    def copy(self) -> "ParamsDict":
+        """Create a copy of the object."""
+        return ParamsDict(dict(self._data.items()))
 
 
 class BaseSGDFitter(keras.Model):

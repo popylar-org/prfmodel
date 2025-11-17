@@ -18,6 +18,8 @@ class TorchSGDFitter(BaseSGDFitter):
         self.zero_grad()
 
         params = ParamsDict({v.name: v.value for v in self.trainable_variables + self.non_trainable_variables})
+        # Make model predictions with parameters on natural scale
+        params = self.adapter.inverse(params)
 
         y_pred = self.model(x, params, dtype=self.dtype)
 

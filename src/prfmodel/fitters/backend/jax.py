@@ -36,6 +36,8 @@ class JAXSGDFitter(BaseSGDFitter):
                     )
                 },
             )
+            # Make model predictions with parameters on natural scale
+            params = self.adapter.inverse(params)
             y_pred = self.model(x, params, dtype=dtype)
             loss = self.compute_loss(y=y, y_pred=y_pred)
 
