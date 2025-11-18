@@ -33,7 +33,7 @@ def transform(request: pytest.FixtureRequest):
 
 @pytest.mark.parametrize("params_wrapper", [pd.DataFrame, ParamsDict])
 @pytest.mark.parametrize("transform", [(["x"], np.log, np.exp), (["y", "z"], np.sqrt, np.square)], indirect=True)
-def test_parameter_transform(transform: ParameterTransform, params_wrapper: type, params: pd.DataFrame):
+def test_parameter_transform(transform: ParameterTransform, params_wrapper: type, params: dict):
     """Test that forward and backward transformation gives the correct result."""
     params = params_wrapper(params)
 
@@ -63,7 +63,7 @@ def test_parameter_transform(transform: ParameterTransform, params_wrapper: type
 
 
 @pytest.mark.parametrize("params_wrapper", [pd.DataFrame, ParamsDict])
-def test_parameter_constraint_lower(params_wrapper: type, params: pd.DataFrame):
+def test_parameter_constraint_lower(params_wrapper: type, params: dict):
     """Test that lower constraint gives correct result."""
     params = params_wrapper(params)
     transform = ParameterConstraint(
@@ -73,11 +73,11 @@ def test_parameter_constraint_lower(params_wrapper: type, params: pd.DataFrame):
 
     result_forward = transform.forward(params)
 
-    assert np.all(np.asarray(result_forward["z"]) > np.asarray(result_forward["x"]))
+    np.testing.assert_array_less(np.asarray(result_forward["x"]), np.asarray(result_forward["z"]))
 
 
 @pytest.mark.parametrize("params_wrapper", [pd.DataFrame, ParamsDict])
-def test_parameter_constraint_upper(params_wrapper: type, params: pd.DataFrame):
+def test_parameter_constraint_upper(params_wrapper: type, params: dict):
     """Test that upper constraint gives correct result."""
     params = params_wrapper(params)
     transform = ParameterConstraint(
@@ -87,7 +87,7 @@ def test_parameter_constraint_upper(params_wrapper: type, params: pd.DataFrame):
 
     result_forward = transform.forward(params)
 
-    assert np.all(np.asarray(result_forward["x"]) < np.asarray(result_forward["z"]))
+    np.testing.assert_array_less(np.asarray(result_forward["x"]), np.asarray(result_forward["z"]))
 
 
 def test_parameter_constraint_lower_upper_error():
@@ -102,7 +102,7 @@ def test_parameter_constraint_lower_upper_error():
 
 @pytest.mark.parametrize("params_wrapper", [pd.DataFrame, ParamsDict])
 @pytest.mark.parametrize("transform_fun", [lambda x: x**2, np.exp, np.log])
-def test_parameter_constraint_upper_transform(params_wrapper: type, transform_fun: Callable, params: pd.DataFrame):
+def test_parameter_constraint_upper_transform(params_wrapper: type, transform_fun: Callable, params: dict):
     """Test that upper constraint with transform function gives correct result."""
     params = params_wrapper(params)
     transform = ParameterConstraint(
@@ -113,11 +113,11 @@ def test_parameter_constraint_upper_transform(params_wrapper: type, transform_fu
 
     result_forward = transform.forward(params)
 
-    assert np.all(np.asarray(result_forward["x"]) < transform_fun(np.asarray(result_forward["z"])))
+    np.testing.assert_array_less(np.asarray(result_forward["x"]), transform_fun(np.asarray(result_forward["z"])))
 
 
 @pytest.mark.parametrize("params_wrapper", [pd.DataFrame, ParamsDict])
-def test_parameter_constraint_lower_fixed(params_wrapper: type, params: pd.DataFrame):
+def test_parameter_constraint_lower_fixed(params_wrapper: type, params: dict):
     """Test that lower constraint with fixed value gives correct result."""
     fixed = -3.0
     params = params_wrapper(params)
@@ -128,11 +128,11 @@ def test_parameter_constraint_lower_fixed(params_wrapper: type, params: pd.DataF
 
     result_forward = transform.forward(params)
 
-    assert np.all(np.asarray(result_forward["x"]) > fixed)
+    np.testing.assert_array_less(fixed, np.asarray(result_forward["x"]))
 
 
 @pytest.mark.parametrize("params_wrapper", [pd.DataFrame, ParamsDict])
-def test_parameter_constraint_upper_fixed(params_wrapper: type, params: pd.DataFrame):
+def test_parameter_constraint_upper_fixed(params_wrapper: type, params: dict):
     """Test that upper constraint with fixed value gives correct result."""
     fixed = 3.0
     params = params_wrapper(params)
@@ -143,11 +143,11 @@ def test_parameter_constraint_upper_fixed(params_wrapper: type, params: pd.DataF
 
     result_forward = transform.forward(params)
 
-    assert np.all(np.asarray(result_forward["x"]) < fixed)
+    np.testing.assert_array_less(np.asarray(result_forward["x"]), fixed)
 
 
 @pytest.mark.parametrize("params_wrapper", [pd.DataFrame, ParamsDict])
-def test_adapter(params_wrapper: type, params: pd.DataFrame):
+def test_adapter(params_wrapper: type, params: dict):
     """Test that Adapter returns the correct object type."""
     adapter = Adapter(
         transforms=[

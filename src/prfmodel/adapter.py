@@ -2,10 +2,13 @@
 
 from collections.abc import Callable
 from collections.abc import Sequence
+from typing import TypeVar
 import pandas as pd
 from keras import ops
 from prfmodel.fitters.backend.base import ParamsDict
 from prfmodel.typing import Tensor
+
+P = TypeVar("P", pd.DataFrame, ParamsDict)
 
 
 class ParameterTransform:
@@ -68,7 +71,7 @@ class ParameterTransform:
         self.forward_fun = forward_fun
         self.inverse_fun = inverse_fun
 
-    def forward(self, parameters: pd.DataFrame) -> pd.DataFrame:
+    def forward(self, parameters: P) -> P:
         """
         Apply the forward transformation.
 
@@ -91,7 +94,7 @@ class ParameterTransform:
 
         return parameters
 
-    def inverse(self, parameters: pd.DataFrame) -> pd.DataFrame:
+    def inverse(self, parameters: P) -> P:
         """
         Apply the inverse transformation.
 
@@ -197,14 +200,14 @@ class ParameterConstraint(ParameterTransform):
 
         if transform_fun is None:
 
-            def identity(x: float | Tensor) -> float | Tensor:
+            def identity(x: float | Tensor | None) -> float | Tensor | None:
                 return x
 
             transform_fun = identity
 
         self.transform_fun = transform_fun
 
-    def _forward_lower(self, parameters: pd.DataFrame) -> pd.DataFrame:
+    def _forward_lower(self, parameters: ParamsDict) -> ParamsDict:
         parameters = parameters.copy()
 
         lower = parameters[self.lower] if isinstance(self.lower, str) else self.lower
@@ -215,7 +218,7 @@ class ParameterConstraint(ParameterTransform):
 
         return parameters
 
-    def _forward_upper(self, parameters: pd.DataFrame) -> pd.DataFrame:
+    def _forward_upper(self, parameters: ParamsDict) -> ParamsDict:
         parameters = parameters.copy()
 
         upper = parameters[self.upper] if isinstance(self.upper, str) else self.upper
@@ -226,7 +229,7 @@ class ParameterConstraint(ParameterTransform):
 
         return parameters
 
-    def _inverse_lower(self, parameters: pd.DataFrame) -> pd.DataFrame:
+    def _inverse_lower(self, parameters: ParamsDict) -> ParamsDict:
         parameters = parameters.copy()
 
         lower = parameters[self.lower] if isinstance(self.lower, str) else self.lower
@@ -237,7 +240,7 @@ class ParameterConstraint(ParameterTransform):
 
         return parameters
 
-    def _inverse_upper(self, parameters: pd.DataFrame) -> pd.DataFrame:
+    def _inverse_upper(self, parameters: ParamsDict) -> ParamsDict:
         parameters = parameters.copy()
 
         upper = parameters[self.upper] if isinstance(self.upper, str) else self.upper
@@ -248,7 +251,7 @@ class ParameterConstraint(ParameterTransform):
 
         return parameters
 
-    def forward(self, parameters: pd.DataFrame) -> pd.DataFrame:
+    def forward(self, parameters: P) -> P:
         """
         Apply the forward constraint transformation.
 
@@ -267,19 +270,19 @@ class ParameterConstraint(ParameterTransform):
             `parameter_names`.
 
         """
-        is_dataframe = isinstance(parameters, pd.DataFrame)
+        if isinstance(parameters, pd.DataFrame):
+            param_dict = ParamsDict(parameters.to_dict(orient="list"))
+        else:
+            param_dict = parameters
 
-        if is_dataframe:
-            parameters = ParamsDict(parameters.to_dict(orient="list"))
+        param_dict = self._forward_lower(param_dict) if self.lower is not None else self._forward_upper(param_dict)
 
-        parameters = self._forward_lower(parameters) if self.lower is not None else self._forward_upper(parameters)
+        if isinstance(parameters, pd.DataFrame):
+            return param_dict.to_dataframe()
 
-        if is_dataframe:
-            return parameters.to_dataframe()
+        return param_dict
 
-        return parameters
-
-    def inverse(self, parameters: pd.DataFrame) -> pd.DataFrame:
+    def inverse(self, parameters: P) -> P:
         """
         Apply the inverse constraint transformation.
 
@@ -298,17 +301,17 @@ class ParameterConstraint(ParameterTransform):
             `parameter_names`.
 
         """
-        is_dataframe = isinstance(parameters, pd.DataFrame)
+        if isinstance(parameters, pd.DataFrame):
+            param_dict = ParamsDict(parameters.to_dict(orient="list"))
+        else:
+            param_dict = parameters
 
-        if is_dataframe:
-            parameters = ParamsDict(parameters.to_dict(orient="list"))
+        param_dict = self._inverse_lower(param_dict) if self.lower is not None else self._inverse_upper(param_dict)
 
-        parameters = self._inverse_lower(parameters) if self.lower is not None else self._inverse_upper(parameters)
+        if isinstance(parameters, pd.DataFrame):
+            return param_dict.to_dataframe()
 
-        if is_dataframe:
-            return parameters.to_dataframe()
-
-        return parameters
+        return param_dict
 
 
 class Adapter:
@@ -356,7 +359,7 @@ class Adapter:
 
         self.transforms = transforms
 
-    def forward(self, parameters: pd.DataFrame) -> pd.DataFrame:
+    def forward(self, parameters: P) -> P:
         """
         Apply the forward transformations sequentially.
 
@@ -379,7 +382,7 @@ class Adapter:
 
         return parameters
 
-    def inverse(self, parameters: pd.DataFrame) -> pd.DataFrame:
+    def inverse(self, parameters: P) -> P:
         """
         Apply the inverse transformations sequentially.
 
