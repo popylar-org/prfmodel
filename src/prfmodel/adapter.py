@@ -5,8 +5,8 @@ from collections.abc import Sequence
 from typing import TypeVar
 import pandas as pd
 from keras import ops
-from prfmodel.fitters.backend.base import ParamsDict
 from prfmodel.typing import Tensor
+from prfmodel.utils import ParamsDict
 
 P = TypeVar("P", pd.DataFrame, ParamsDict)
 

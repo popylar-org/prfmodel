@@ -8,7 +8,7 @@ import pytest
 from prfmodel.adapter import Adapter
 from prfmodel.adapter import ParameterConstraint
 from prfmodel.adapter import ParameterTransform
-from prfmodel.fitters.backend.base import ParamsDict
+from prfmodel.utils import ParamsDict
 
 
 @pytest.fixture

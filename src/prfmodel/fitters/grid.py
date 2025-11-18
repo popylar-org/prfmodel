@@ -13,8 +13,8 @@ from tqdm import tqdm
 from prfmodel.models.base import BaseModel
 from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
+from prfmodel.utils import ParamsDict
 from prfmodel.utils import get_dtype
-from .backend.base import ParamsDict
 
 
 class GridHistory:

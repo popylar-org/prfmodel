@@ -3,8 +3,8 @@
 import tensorflow as tf
 from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
+from prfmodel.utils import ParamsDict
 from .base import BaseSGDFitter
-from .base import ParamsDict
 from .base import SGDState
 
 
