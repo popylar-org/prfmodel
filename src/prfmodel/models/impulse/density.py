@@ -1,5 +1,6 @@
 """Density functions."""
 
+from collections.abc import Callable
 from keras import ops
 from prfmodel.backend import gammaln
 from prfmodel.typing import Tensor
@@ -73,3 +74,59 @@ def gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True)
         return ops.exp(shape * ops.log(rate) + dens - gammaln(shape))
 
     return ops.exp(dens)
+
+
+def _shift_density(
+    fun: Callable,
+    value: Tensor,
+    shift: Tensor,
+    **kwargs,
+) -> Tensor:
+    value = ops.convert_to_tensor(value)
+    shift = ops.convert_to_tensor(shift)
+
+    value_shifted = value - shift
+    value_shifted_is_positive = value_shifted > 0.0
+    # Replace values <= 0 with ones and replace their density later with zeros
+    value_shifted_valid = ops.where(value_shifted_is_positive, value_shifted, 1.0)
+
+    return ops.where(value_shifted_is_positive, fun(value_shifted_valid, **kwargs), 0.0)
+
+
+def shifted_gamma_density(
+    value: Tensor,
+    shape: Tensor,
+    rate: Tensor,
+    shift: Tensor,
+    norm: bool = True,
+) -> Tensor:
+    """
+    Calculate the density of a shifted gamma distribution.
+
+    The gamma distribution is shifted by `shift` and padded with zeros if necessary.
+
+    Parameters
+    ----------
+    value : Tensor
+        The values at which to evaluate the shifted gamma distribution.
+    shape : Tensor
+        The shape parameter. Must be > 0.
+    rate : Tensor
+        The rate parameter. Must be > 0.
+    shift : Tensor
+        The shift parameter. When > 0, shifts the distribution to the right.
+    norm : bool, default=True
+        Whether to compute the normalized density.
+
+    Returns
+    -------
+    Tensor
+        The density of the shifted gamma distribution at `value`. The density for shifted values that are zero or lower
+        is zero.
+
+    See Also
+    --------
+    gamma_density : The (unshifted) gamma distribution density.
+
+    """
+    return _shift_density(gamma_density, value, shift, shape=shape, rate=rate, norm=norm)
