@@ -41,3 +41,16 @@ class TestTwoGammaImpulse(TestImpulseSetup):
     def irf_model(self):
         """Impulse response model object."""
         return TwoGammaImpulse(self.duration, self.offset, self.resolution)
+
+    @pytest.fixture
+    def irf_model_default(self):
+        """Impulse response model object with default parameters."""
+        default_params = {
+            "shape_1": 6.0,
+            "rate_1": 0.9,
+            "shape_2": 12.0,
+            "rate_2": 0.9,
+            "weight": 0.35,
+        }
+
+        return TwoGammaImpulse(self.duration, self.offset, self.resolution, default_params)

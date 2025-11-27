@@ -26,6 +26,8 @@ class ShiftedGammaImpulse(BaseImpulse):
     resolution : float, default=1.0
         The time resultion of the impulse response (in seconds), that is the number of points per second at which the
         impulse response function is evaluated.
+    default_parameters : dict of float, optional
+        Dictionary with scalar default parameter values. Keys must be valid parameter names.
 
     Notes
     -----
@@ -70,7 +72,7 @@ class ShiftedGammaImpulse(BaseImpulse):
         """
         return ["shape", "rate", "shift"]
 
-    def __call__(self, parameters: pd.DataFrame, dtype: str | None) -> Tensor:
+    def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the impulse response.
 
@@ -89,6 +91,7 @@ class ShiftedGammaImpulse(BaseImpulse):
             The predicted impulse response with shape `(num_batches, num_frames)` and dtype `dtype`.
 
         """
+        parameters = self._join_default_parameters(parameters)
         dtype = get_dtype(dtype)
         frames = ops.cast(self.frames, dtype=dtype)
         shape = convert_parameters_to_tensor(parameters[["shape"]], dtype=dtype)

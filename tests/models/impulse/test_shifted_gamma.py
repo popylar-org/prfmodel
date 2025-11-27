@@ -39,3 +39,14 @@ class TestShiftedGammaImpulse(TestImpulseSetup):
     def irf_model(self):
         """Impulse response model object."""
         return ShiftedGammaImpulse(self.duration, self.offset, self.resolution)
+
+    @pytest.fixture
+    def irf_model_default(self):
+        """Impulse response model object with default parameters."""
+        default_params = {
+            "shape": 6.0,
+            "rate": 0.9,
+            "shift": 5.0,
+        }
+
+        return ShiftedGammaImpulse(self.duration, self.offset, self.resolution, default_params)

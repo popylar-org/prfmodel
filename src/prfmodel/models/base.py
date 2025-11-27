@@ -139,6 +139,8 @@ class BaseImpulse(BaseModel):
     resolution : float, default=1.0
         The time resultion of the impulse response (in seconds), that is the number of points per second at which the
         impulse response function is evaluated.
+    default_parameters : dict of float, optional
+        Dictionary with scalar default parameter values. Keys must be valid parameter names.
 
     """
 
@@ -147,12 +149,24 @@ class BaseImpulse(BaseModel):
         duration: float = 32.0,
         offset: float = 0.0001,
         resolution: float = 1.0,
+        default_parameters: dict[str, float] | None = None,
     ):
         super().__init__()
 
         self.duration = duration
         self.offset = offset
         self.resolution = resolution
+
+        if default_parameters is not None:
+            if any(key not in self.parameter_names for key in default_parameters):
+                msg = "Invalid default parameter name, please provide valid parameter default parameter names"
+                raise ValueError(msg)
+
+            if any(not isinstance(val, float) for val in default_parameters.values()):
+                msg = "Default parameters must be single float values"
+                raise ValueError(msg)
+
+        self.default_parameters = default_parameters
 
         self._frames: Tensor | None = None
 
@@ -173,6 +187,15 @@ class BaseImpulse(BaseModel):
             self._frames = ops.expand_dims(ops.linspace(self.offset, self.duration, self.num_frames), 0)
 
         return self._frames
+
+    def _join_default_parameters(self, parameters: pd.DataFrame) -> pd.DataFrame:
+        if self.default_parameters is not None:
+            parameters = parameters.copy()
+
+            for key, val in self.default_parameters.items():
+                parameters[key] = val
+
+        return parameters
 
     @abstractmethod
     def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
