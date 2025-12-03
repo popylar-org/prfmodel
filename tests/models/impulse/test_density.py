@@ -3,9 +3,13 @@
 from itertools import product
 import numpy as np
 import pytest
+from scipy import differentiate
 from scipy import integrate
 from scipy import special
+from scipy import stats
+from prfmodel.models.impulse import derivative_gamma_density
 from prfmodel.models.impulse import gamma_density
+from prfmodel.models.impulse import shifted_derivative_gamma_density
 from prfmodel.models.impulse import shifted_gamma_density
 
 
@@ -26,6 +30,36 @@ class TestGammaDensitySetup:
     def parameter_range(self):
         """Range of shape and rate parameters."""
         return np.round(np.linspace(0.1, 5.0, 5), 2)
+
+    def _check_peak(
+        self,
+        frames: np.ndarray,
+        response: np.ndarray,
+        expected_mode: np.ndarray,
+        shift: np.ndarray = None,
+    ) -> None:
+        frames = frames.squeeze()
+        # Get maximum of response
+        peak_frame_idx = np.argmax(response, axis=1)
+        # Get time frame with maximum
+        peak_response = frames[peak_frame_idx]
+
+        shift = [None] * len(expected_mode) if shift is None else shift.squeeze()
+
+        for ep, pr, idx, sh in zip(expected_mode, peak_response, peak_frame_idx, shift, strict=False):
+            # Expected mode is later than time frames
+            if ep >= frames.max():
+                assert idx == (len(frames) - 1), "Peak response must be in last frame"
+            # Expected mode is earlier than time frames
+            elif ep <= frames.min():
+                if sh is None:
+                    assert idx == 0, "Peak response must be in first frame"
+                else:
+                    first_nonzero_idx = np.argmax(frames > sh)
+                    assert idx == first_nonzero_idx, "Peak response must be in first nonzero frame"
+            else:
+                # The observed peak should not differ from expected peak more than the resolution
+                assert abs(pr - ep) <= self.resolution
 
 
 class TestGammaDensity(TestGammaDensitySetup):
@@ -54,24 +88,10 @@ class TestGammaDensity(TestGammaDensitySetup):
 
         assert np.all(resp > 0.0)
 
-        frames = frames.squeeze()
         # Calc expected analytical mode of each parameter combination
         expected_mode = np.where(shape < 1, 0, (shape - 1) / rate).squeeze()
-        # Find the frame of the peak response
-        peak_frame_idx = np.argmax(resp, axis=1)
-        # Find the peak response of each parameter combination
-        peak_response = frames[peak_frame_idx]
 
-        for ep, pr, idx in zip(expected_mode, peak_response, peak_frame_idx, strict=False):
-            # If the expected mode is beyond the last frame, the peak response should be in the last frame
-            if ep >= frames.max():
-                assert idx == (len(frames) - 1), "Peak response must be in last frame"
-            # If the expected mode is before the first frame, the peak response should be in the first frame
-            elif ep <= frames.min():
-                assert idx == 0, "Peak response must be in first frame"
-            # Difference between expected mode and peak response should not be larger than frame resolution
-            else:
-                assert abs(pr - ep) <= self.resolution
+        self._check_peak(frames, resp, expected_mode)
 
     def test_gamma_density_integral(self):
         """Test that the integral of normalized density is 1."""
@@ -146,22 +166,92 @@ class TestShiftedGammaDensity(TestGammaDensitySetup):
 
         assert np.all(resp >= 0.0)
 
-        frames = frames.squeeze()
         # Calc expected analytical mode of each parameter combination
         expected_mode = (np.where(shape < 1, 0, (shape - 1) / rate) + shift).squeeze()
-        # Find the frame of the peak response
-        peak_frame_idx = np.argmax(resp, axis=1)
-        # Find the peak response of each parameter combination
-        peak_response = frames[peak_frame_idx]
 
-        for ep, pr, idx, sh in zip(expected_mode, peak_response, peak_frame_idx, shift.squeeze(), strict=False):
-            # If the expected mode is beyond the last frame, the peak response should be in the last frame
-            if ep >= frames.max():
-                assert idx == (len(frames) - 1), "Peak response must be in last frame"
-            # If the expected mode is before the first frame, the peak response should be in the first nonzero frame
-            elif ep <= frames.min():
-                first_nonzero_idx = np.argmax(frames > sh)
-                assert idx == first_nonzero_idx, "Peak response must be in first nonzero frame"
-            # Difference between expected mode and peak response should not be larger than frame resolution
-            else:
-                assert abs(pr - ep) <= self.resolution
+        self._check_peak(frames, resp, expected_mode, shift)
+
+
+class TestDerivativeGammaDensity(TestGammaDensitySetup):
+    """Tests for derivative_gamma_density function."""
+
+    @pytest.fixture
+    def parameters(self, parameter_range: np.ndarray):
+        """Shape and rate parameter combinations."""
+        return np.array(list(product(parameter_range, parameter_range)))
+
+    def test_derivative_gamma_density(self, frames: np.ndarray, parameters: np.ndarray):
+        """Test that the derivative gamma density is close to the approximate derivative from scipy."""
+        # Parameters must have shape (n, 1)
+        shape = np.expand_dims(parameters[:, 0], 1)
+        rate = np.expand_dims(parameters[:, 1], 1)
+
+        frames = frames[:, 1:]  # Don't compare at first frame because non-analytic derivativ is not stable
+
+        frames = frames.squeeze()
+
+        resp = np.asarray(derivative_gamma_density(frames, shape, rate))
+
+        # Calc the approximate derivative for each parameter combination
+        ref = np.array(
+            [
+                differentiate.derivative(
+                    lambda x, p=p: stats.gamma.pdf(x, a=p[0], scale=1 / p[1]),
+                    frames,
+                ).df
+                for p in parameters
+            ],
+        )
+
+        assert np.all(np.isclose(resp, ref))
+
+
+class TestShiftedDerivativeGammaDensity(TestGammaDensitySetup):
+    """Tests for shifted_derivative_gamma_density function."""
+
+    @pytest.fixture
+    def parameter_range(self):
+        """
+        Range of shape and rate parameters.
+
+        We only test for values >= 2 because the derivative behaves well in this range.
+
+        """
+        return np.round(np.linspace(2.0, 5.0, 5), 2)
+
+    @pytest.fixture
+    def shift_parameter_range(self):
+        """
+        Range for shift parameter.
+
+        We only test for values >= 0 because the derivative behaves well in this range.
+
+        """
+        return np.linspace(0.0, 5.0, num=5)
+
+    @pytest.fixture
+    def parameters(self, parameter_range: np.ndarray, shift_parameter_range: np.ndarray):
+        """Shape, rate, and shift parameter combinations."""
+        return np.array(list(product(parameter_range, parameter_range, shift_parameter_range)))
+
+    def test_shifted_derivative_gamma_density(self, frames: np.ndarray, parameters: np.ndarray):
+        """
+        Test that shifted gamma density peaks at correct frame across combinations of shape, rate, and shift parameters.
+
+        Argument `parameters` is a three-dimensional array where the first column is the shape, the second column
+        the rate parameter, and the third columnt the shift parameter of each parameter combination.
+
+        The peak of the gamma density is tested against the shifted expected analytical mode of the gamma distribution.
+
+        """
+        # Parameters must have shape (n, 1)
+        shape = np.expand_dims(parameters[:, 0], 1)
+        rate = np.expand_dims(parameters[:, 1], 1)
+        shift = np.expand_dims(parameters[:, 2], 1)
+
+        resp = np.asarray(shifted_derivative_gamma_density(frames, shape, rate, shift))
+
+        # Calc expected analytical mode of each parameter combination
+        expected_mode = ((shape - 1 - np.sqrt(shape - 1)) / rate + shift).squeeze()
+
+        self._check_peak(frames, resp, expected_mode, shift)
