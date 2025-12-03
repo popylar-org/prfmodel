@@ -13,7 +13,7 @@ from prfmodel.models.gaussian import GridMuDimensionsError
 from prfmodel.models.gaussian import _check_gaussian_args
 from prfmodel.models.gaussian import _expand_gaussian_args
 from prfmodel.models.gaussian import predict_gaussian_response
-from prfmodel.models.impulse import TwoGammaImpulse
+from prfmodel.models.impulse import ShiftedDerivativeGammaImpulse
 from prfmodel.models.temporal import BaselineAmplitude
 from prfmodel.stimulus import GridDimensionsError
 from prfmodel.stimulus import Stimulus
@@ -229,7 +229,7 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
     @pytest.fixture
     def impulse_model(self):
         """Impulse response model object."""
-        return TwoGammaImpulse()
+        return ShiftedDerivativeGammaImpulse()
 
     @pytest.fixture
     def temporal_model(self):
@@ -244,11 +244,9 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
                 "mu_x": [0.0, 1.0, 0.0],
                 "mu_y": [1.0, 0.0, 0.0],
                 "sigma": [1.0, 2.0, 3.0],
-                "shape_1": [6.0, 7.0, 5.0],
-                "rate_1": [0.9, 1.0, 0.8],
-                "shape_2": [7.0, 6.0, 5.0],
-                "rate_2": [0.9, 1.0, 0.8],
-                "weight": [0.35, 0.25, 0.45],
+                "shape": [6.0, 7.0, 5.0],
+                "rate": [0.9, 1.0, 0.8],
+                "shift": [5.0, 5.0, 5.0],
                 "baseline": [0.0, 0.1, 0.2],
                 "amplitude": [1.1, 1.0, 0.9],
             },
@@ -265,7 +263,7 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
     def test_parameter_names(
         self,
         prf_model: Gaussian2DPRFModel,
-        impulse_model: TwoGammaImpulse,
+        impulse_model: ShiftedDerivativeGammaImpulse,
         temporal_model: BaselineAmplitude,
         response_model: Gaussian2DResponse,
     ):
@@ -279,10 +277,10 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
     @pytest.mark.parametrize(
         ("impulse_model", "temporal_model"),
         [
-            (TwoGammaImpulse(), BaselineAmplitude()),  # Test with class instances
-            (TwoGammaImpulse, BaselineAmplitude),  # Test with classes
-            (TwoGammaImpulse(), None),
-            (TwoGammaImpulse, None),
+            (ShiftedDerivativeGammaImpulse(), BaselineAmplitude()),  # Test with class instances
+            (ShiftedDerivativeGammaImpulse, BaselineAmplitude),  # Test with classes
+            (ShiftedDerivativeGammaImpulse(), None),
+            (ShiftedDerivativeGammaImpulse, None),
             (None, BaselineAmplitude()),
             (None, BaselineAmplitude),
             (None, None),

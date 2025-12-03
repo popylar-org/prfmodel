@@ -11,7 +11,7 @@ from .base import BasePRFModel
 from .base import BasePRFResponse
 from .base import BaseTemporal
 from .encoding import encode_prf_response
-from .impulse import TwoGammaImpulse
+from .impulse import ShiftedDerivativeGammaImpulse
 from .impulse import convolve_prf_impulse_response
 from .temporal import BaselineAmplitude
 
@@ -26,9 +26,9 @@ class SimplePRFModel(BasePRFModel):
     ----------
     prf_model : BasePRFResponse
         A population receptive field response model instance.
-    impulse_model : BaseImpulse or type or None, default=TwoGammaImpulse, optional
+    impulse_model : BaseImpulse or type or None, default=ShiftedDerivativeGammaImpulse, optional
         An impulse response model class or instance. Reponse model classes will be instantiated during object
-        initialization. The default creates a `TwoGammaImpulse` instance with default values.
+        initialization. The default creates a `ShiftedDerivativeGammaImpulse` instance with default values.
         values.
     temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
         A temporal model class or instance. Temporal model instances will be instantiated during initialization.
@@ -49,7 +49,7 @@ class SimplePRFModel(BasePRFModel):
     def __init__(
         self,
         prf_model: BasePRFResponse,
-        impulse_model: BaseImpulse | type[BaseImpulse] | None = TwoGammaImpulse,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = ShiftedDerivativeGammaImpulse,
         temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
     ):
         if impulse_model is not None and isinstance(impulse_model, type):

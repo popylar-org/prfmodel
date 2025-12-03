@@ -15,7 +15,7 @@ from .base import BaseTemporal
 from .base import BatchDimensionError
 from .base import ShapeError
 from .composite import SimplePRFModel
-from .impulse import TwoGammaImpulse
+from .impulse import ShiftedDerivativeGammaImpulse
 from .temporal import BaselineAmplitude
 
 
@@ -248,10 +248,10 @@ class Gaussian2DPRFModel(SimplePRFModel):
 
     Parameters
     ----------
-    impulse_model : BaseImpulse or type or None, default=TwoGammaImpulse, optional
+    impulse_model : BaseImpulse or type or None, default=ShiftedDerivativeGammaImpulse, optional
         An impulse response model class or instance. Reponse model classes will be instantiated during object
-        initialization. The default creates a `TwoGammaImpulse` instance with default values.
-        values.
+        initialization. The default creates a :class:`~prfmodel.models.impulse.ShiftedDerivativeGammaImpulse`
+        instance with default values.
     temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
         A temporal model class or instance. Temporal model instances will be instantiated during initialization.
         The default creates a `BaselineAmplitude` instance.
@@ -270,7 +270,7 @@ class Gaussian2DPRFModel(SimplePRFModel):
 
     def __init__(
         self,
-        impulse_model: BaseImpulse | type[BaseImpulse] | None = TwoGammaImpulse,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = ShiftedDerivativeGammaImpulse,
         temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
     ):
         super().__init__(

@@ -102,7 +102,7 @@ The list of parameters that need to be set to make model predictions can be obta
 prf_model.parameter_names
 ```
 
-The parameters `mu_x`, `mu_y`, and `sigma` define the location and size of the predicted Gaussian pRF and are of primary interest. We simulate a pRF with its center at (-2.1, 1.45) and a size of 1.35. We will ignore the other parameters for now (however, we still need to set values for them). We store the parameter values in a `pandas.DataFrame` object.
+The parameters `mu_x`, `mu_y`, and `sigma` define the location and size of the predicted Gaussian pRF and are of primary interest. We simulate a pRF with its center at (-2.1, 1.45) and a size of 1.35. The parameters `shape`, `rate`, and `shift` determine the impulse response that is convolved with our pRF response. The parameters `baseline` and `amplitude` shift and scale our convolved response, respectively. We store the parameter values in a `pandas.DataFrame` object.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -112,11 +112,9 @@ true_params = pd.DataFrame(
         "mu_x": [-2.1],
         "mu_y": [1.45],
         "sigma": [1.35],
-        "shape_1": [6.0],
-        "rate_1": [0.9],
-        "shape_2": [12.0],
-        "rate_2": [0.9],
-        "weight": [0.35],
+        "shape": [6.0],
+        "rate": [0.9],
+        "shift": [2.5],
         "baseline": [10.0],
         "amplitude": [1.2],
     },
@@ -156,11 +154,9 @@ param_ranges = {
     "mu_x": np.linspace(-3.0, 3.0, 10),
     "mu_y": np.linspace(-3.0, 3.0, 10),
     "sigma": np.linspace(0.5, 3.0, 10),
-    "shape_1": [6.0],
-    "rate_1": [0.9],
-    "shape_2": [12.0],
-    "rate_2": [0.9],
-    "weight": [0.35],
+    "shape": [6.0],
+    "rate": [0.9],
+    "shift": [2.5],
     "baseline": [0.0],
     "amplitude": [1.0],
 }
@@ -264,7 +260,7 @@ sgd_fitter = SGDFitter(
 sgd_history, sgd_params = sgd_fitter.fit(
     data=simulated_response,
     init_parameters=ls_params,
-    fixed_parameters=["shape_1", "shape_2", "rate_1", "rate_2", "weight"],
+    fixed_parameters=["shape", "rate", "shift"],
 )
 ```
 
