@@ -53,9 +53,11 @@ Because we use simulated data in this tutorial, we load an example stimulus that
 The stimulus simulates a bar moving in different directions through a two-dimensional visual field.
 
 ```{code-cell} ipython3
-from prfmodel.examples import load_2d_bar_stimulus
+from prfmodel.examples import load_2d_prf_bar_stimulus
 
-stimulus = load_2d_bar_stimulus()
+num_frames = 200  # Simulate 200 time frames
+
+stimulus = load_2d_prf_bar_stimulus()
 print(stimulus)
 ```
 
@@ -68,9 +70,9 @@ We can visualize the stimulus using `animate_2d_stimulus`.
 
 ```{code-cell} ipython3
 from IPython.display import HTML
-from prfmodel.stimulus import animate_2d_stimulus
+from prfmodel.stimulus import animate_2d_prf_stimulus
 
-ani = animate_2d_stimulus(stimulus, interval=25)  # Pause 25 ms between time frames
+ani = animate_2d_prf_stimulus(stimulus, interval=25)  # Pause 25 ms between time frames
 
 HTML(ani.to_html5_video())
 ```

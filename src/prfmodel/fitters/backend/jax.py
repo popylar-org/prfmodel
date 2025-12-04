@@ -3,7 +3,7 @@
 import jax
 import jax.numpy as jnp
 import keras
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from .base import BaseSGDFitter
@@ -17,7 +17,7 @@ class JAXSGDFitter(BaseSGDFitter):
         self,
         trainable_variables: list,
         non_trainable_variables: list,
-        x: Stimulus,
+        x: PRFStimulus,
         y: Tensor,
         dtype: str | None,
     ) -> tuple[Tensor, tuple[Tensor, list]]:
@@ -48,7 +48,7 @@ class JAXSGDFitter(BaseSGDFitter):
     def _get_state(self) -> SGDState:
         return self.trainable_variables, self.non_trainable_variables, self.optimizer.variables, self.metrics_variables
 
-    def _update_model_weights(self, x: Stimulus, y: Tensor, state: SGDState) -> tuple[dict, SGDState]:
+    def _update_model_weights(self, x: PRFStimulus, y: Tensor, state: SGDState) -> tuple[dict, SGDState]:
         if state is None:
             msg = "State must not be None when using JAX backend"
             raise TypeError(msg)

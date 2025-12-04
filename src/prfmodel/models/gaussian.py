@@ -3,8 +3,8 @@
 import math
 import pandas as pd
 from keras import ops
-from prfmodel.stimulus import GridDimensionsError
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import GridDimensionsError
+from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
@@ -164,7 +164,7 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     return ops.exp(-resp) / volume
 
 
-class Gaussian2DResponse(BasePRFResponse):
+class Gaussian2DPRFResponse(BasePRFResponse):
     """
     Two-dimensional isotropic Gaussian population receptive field response model.
 
@@ -209,7 +209,7 @@ class Gaussian2DResponse(BasePRFResponse):
         """Names of parameters used by the model: `mu_y`, `mu_x`, `sigma`."""
         return ["mu_y", "mu_x", "sigma"]
 
-    def __call__(self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the model response for a stimulus with a 2D grid.
 
@@ -276,7 +276,7 @@ class Gaussian2DPRFModel(SimplePRFModel):
         temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
     ):
         super().__init__(
-            prf_model=Gaussian2DResponse(),
+            prf_model=Gaussian2DPRFResponse(),
             impulse_model=impulse_model,
             temporal_model=temporal_model,
         )

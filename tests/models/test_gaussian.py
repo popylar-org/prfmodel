@@ -10,16 +10,16 @@ from prfmodel.models.base import BaseTemporal
 from prfmodel.models.base import BatchDimensionError
 from prfmodel.models.base import ShapeError
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.models.gaussian import Gaussian2DResponse
+from prfmodel.models.gaussian import Gaussian2DPRFResponse
 from prfmodel.models.gaussian import GridMuDimensionsError
 from prfmodel.models.gaussian import _check_gaussian_args
 from prfmodel.models.gaussian import _expand_gaussian_args
 from prfmodel.models.gaussian import predict_gaussian_response
 from prfmodel.models.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.temporal import BaselineAmplitude
-from prfmodel.stimulus import GridDimensionsError
-from prfmodel.stimulus import Stimulus
-from tests.conftest import StimulusSetup
+from prfmodel.stimulus.prf import GridDimensionsError
+from prfmodel.stimulus.prf import PRFStimulus
+from tests.conftest import PRFStimulusSetup
 from .conftest import parametrize_dtype
 
 
@@ -196,21 +196,21 @@ class TestPredictGaussianResponse(TestSetup):
         self._validate_gaussian(preds, grid_3d, mu_3d, sigma)
 
 
-class TestGaussian2DResponse(StimulusSetup):
+class TestGaussian2DPRFResponse(PRFStimulusSetup):
     """Tests for Gaussian2DResponse class."""
 
     @pytest.fixture
     def response_model(self):
         """Response model object."""
-        return Gaussian2DResponse()
+        return Gaussian2DPRFResponse()
 
-    def test_parameter_names(self, response_model: Gaussian2DResponse):
+    def test_parameter_names(self, response_model: Gaussian2DPRFResponse):
         """Test that correct parameter names are returned."""
         # Order of parameter names does not matter
         assert set(response_model.parameter_names) & {"mu_y", "mu_x", "sigma"}
 
     @parametrize_dtype
-    def test_predict(self, response_model: Gaussian2DResponse, stimulus: Stimulus, dtype: str):
+    def test_predict(self, response_model: Gaussian2DPRFResponse, stimulus: PRFStimulus, dtype: str):
         """Test that response prediction returns correct shape."""
         # 3 voxels
         params = pd.DataFrame(
@@ -227,7 +227,7 @@ class TestGaussian2DResponse(StimulusSetup):
         assert preds.shape == (params.shape[0], stimulus.design.shape[1], stimulus.design.shape[2])
 
 
-class TestGaussian2DPRFModel(TestGaussian2DResponse):
+class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
     """Tests for the Gaussian2DPRFModel class."""
 
     @pytest.fixture
@@ -277,7 +277,7 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
         prf_model: Gaussian2DPRFModel,
         impulse_model: DerivativeTwoGammaImpulse,
         temporal_model: BaselineAmplitude,
-        response_model: Gaussian2DResponse,
+        response_model: Gaussian2DPRFResponse,
     ):
         """Test that parameter names of composite model match parameter names of submodels."""
         param_names = response_model.parameter_names
@@ -302,7 +302,7 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
         self,
         impulse_model: BaseImpulse,
         temporal_model: BaseTemporal,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction returns correct shape.
@@ -335,7 +335,7 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
         num_regression: NumericRegressionFixture,
         impulse_model: BaseImpulse,
         temporal_model: BaseTemporal,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction matches reference file."""

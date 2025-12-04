@@ -1,7 +1,7 @@
 """Tensorflow fitter implementations."""
 
 import tensorflow as tf
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from .base import BaseSGDFitter
@@ -17,7 +17,7 @@ class TensorFlowSGDFitter(BaseSGDFitter):
     def _get_state(self) -> SGDState:
         return None
 
-    def _update_model_weights(self, x: Stimulus, y: Tensor, state: SGDState) -> tuple[dict, SGDState]:
+    def _update_model_weights(self, x: PRFStimulus, y: Tensor, state: SGDState) -> tuple[dict, SGDState]:
         with tf.GradientTape() as tape:
             # Important to create this inside gradient tape because we transform keras variables
             params = ParamsDict({v.name: v.value for v in self.trainable_variables + self.non_trainable_variables})

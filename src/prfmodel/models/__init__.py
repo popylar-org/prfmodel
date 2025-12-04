@@ -1,4 +1,4 @@
-"""Population receptive field models."""
+"""Population receptive and connective field models."""
 
 from .base import BaseModel
 from .base import BasePRFModel

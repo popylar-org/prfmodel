@@ -11,7 +11,7 @@ from prfmodel.adapter import ParameterTransform
 from prfmodel.fitters.sgd import SGDFitter
 from prfmodel.fitters.sgd import SGDHistory
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from tests.conftest import TestSetup
@@ -63,7 +63,7 @@ class TestSGDFitter(TestSetup):
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
         dataframe_regression: DataFrameRegressionFixture,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         optimizer: type[keras.optimizers.Optimizer],
         loss: type[keras.losses.Loss],
@@ -97,7 +97,7 @@ class TestSGDFitter(TestSetup):
     def test_fit_fixed_params(
         self,
         dataframe_regression: DataFrameRegressionFixture,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
         dtype: str,
@@ -126,7 +126,7 @@ class TestSGDFitter(TestSetup):
     def test_fit_adapter(
         self,
         dataframe_regression: DataFrameRegressionFixture,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
         dtype: str,

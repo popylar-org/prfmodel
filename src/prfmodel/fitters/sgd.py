@@ -8,7 +8,7 @@ from keras import ops
 from tqdm import tqdm
 from prfmodel.adapter import Adapter
 from prfmodel.models.base import BaseModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 
 match keras.backend.backend():
@@ -96,7 +96,7 @@ class SGDFitter(BackendSGDFitter):
     def __init__(  # noqa: PLR0913 (too many arguments in function definition)
         self,
         model: BaseModel,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         adapter: Adapter | None = None,
         optimizer: keras.optimizers.Optimizer | None = None,
         loss: keras.losses.Loss | Callable | None = None,

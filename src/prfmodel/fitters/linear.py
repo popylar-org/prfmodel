@@ -6,7 +6,7 @@ import pandas as pd
 from keras import ops
 from tqdm import tqdm
 from prfmodel.models.base import BaseModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 
@@ -55,7 +55,7 @@ class LeastSquaresFitter:
     def __init__(
         self,
         model: BaseModel,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         dtype: str | None = None,
     ):
         self.model = model

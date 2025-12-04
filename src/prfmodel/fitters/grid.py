@@ -11,7 +11,7 @@ from keras import ops
 from more_itertools import chunked
 from tqdm import tqdm
 from prfmodel.models.base import BasePRFModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from prfmodel.utils import get_dtype
@@ -69,7 +69,7 @@ class GridFitter:
     def __init__(
         self,
         model: BasePRFModel,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         loss: keras.losses.Loss | Callable | None = None,
         dtype: str | None = None,
     ):

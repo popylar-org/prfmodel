@@ -7,7 +7,7 @@ from pytest_regressions.dataframe_regression import DataFrameRegressionFixture
 from prfmodel.fitters.linear import LeastSquaresFitter
 from prfmodel.fitters.linear import LeastSquaresHistory
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus import PRFStimulus
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model
 from .conftest import parametrize_dtype
@@ -33,7 +33,7 @@ class TestLeastSquaresFitter(TestSetup):
     )
     def test_fit_names_value_error(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
         slope_name: str,
@@ -58,7 +58,7 @@ class TestLeastSquaresFitter(TestSetup):
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
         dataframe_regression: DataFrameRegressionFixture,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
         intercept_name: str | None,
@@ -87,7 +87,7 @@ class TestLeastSquaresFitter(TestSetup):
     @pytest.mark.parametrize("intercept_name", [None, "baseline"])
     def test_fit_batch_size(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
         intercept_name: str | None,

@@ -5,7 +5,7 @@ from abc import abstractmethod
 from collections.abc import Sequence
 import pandas as pd
 from keras import ops
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _get_norm_fun
 
@@ -94,14 +94,14 @@ class BasePRFResponse(BaseModel):
     """
 
     @abstractmethod
-    def __call__(self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the model response for a stimulus.
 
         Parameters
         ----------
-        stimulus : Stimulus
-            Stimulus object.
+        stimulus : PRFStimulus
+            Population receptive field stimulus object.
         parameters : pandas.DataFrame
             Dataframe with columns containing different model parameters and rows containing parameter values
             for different voxels.
@@ -313,7 +313,7 @@ class BasePRFModel(BaseModel):
         return list(dict.fromkeys(param_names))
 
     @abstractmethod
-    def __call__(self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict a composite population receptive field response to a stimulus.
 

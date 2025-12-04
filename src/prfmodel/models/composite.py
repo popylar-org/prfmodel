@@ -3,7 +3,7 @@
 from typing import cast
 import pandas as pd
 from keras import ops
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from .base import BaseImpulse
@@ -64,14 +64,14 @@ class SimplePRFModel(BasePRFModel):
             temporal_model=temporal_model,
         )
 
-    def __call__(self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict a simple population receptive field model response to a stimulus.
 
         Parameters
         ----------
-        stimulus : Stimulus
-            Stimulus object.
+        stimulus : PRFStimulus
+            Population receptive field stimulus object.
         parameters : pandas.DataFrame
             Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
             for different voxels.

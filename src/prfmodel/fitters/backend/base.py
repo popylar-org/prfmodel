@@ -3,7 +3,7 @@
 from abc import abstractmethod
 from typing import TypeAlias
 import keras
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 
@@ -33,5 +33,5 @@ class BaseSGDFitter(keras.Model):
         pass
 
     @abstractmethod
-    def _update_model_weights(self, x: Stimulus, y: Tensor, state: SGDState) -> tuple[dict, SGDState]:
+    def _update_model_weights(self, x: PRFStimulus, y: Tensor, state: SGDState) -> tuple[dict, SGDState]:
         pass

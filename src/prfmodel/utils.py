@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from keras import ops
 from keras.config import floatx
-from .stimulus import Stimulus
+from .stimulus import PRFStimulus
 from .typing import Tensor
 
 _EXPECTED_NDIM = 2
@@ -130,7 +130,7 @@ def batched(fn: Callable) -> Callable:
 
     @functools.wraps(fn)
     def wrapper(
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         parameters: pd.DataFrame,
         batch_size: int | None = None,
         **kwargs,
