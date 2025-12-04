@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import PRFStimulus
 
 parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32"])
 
@@ -26,7 +26,7 @@ class TestSetup:
 
         design = np.ones((self.num_frames, self.height, self.width))
 
-        return Stimulus(
+        return PRFStimulus(
             design=design,
             grid=grid,
             dimension_labels=["y", "x"],

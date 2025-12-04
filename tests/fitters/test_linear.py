@@ -6,7 +6,7 @@ import pytest
 from prfmodel.fitters.linear import LeastSquaresFitter
 from prfmodel.fitters.linear import LeastSquaresHistory
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import PRFStimulus
 from .conftest import TestSetup
 from .conftest import parametrize_dtype
 
@@ -26,7 +26,7 @@ class TestLeastSquaresFitter(TestSetup):
     @pytest.mark.parametrize("target_parameters", [[], ["a", "b", "c"]])
     def test_fit_target_parameters_value_error(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
         target_parameters: tuple[str],
@@ -45,7 +45,7 @@ class TestLeastSquaresFitter(TestSetup):
     @pytest.mark.parametrize("target_parameters", [None, ("a", "b", "c")])
     def test_fit_target_parameters_type_error(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
         target_parameters: tuple[str],
@@ -65,7 +65,7 @@ class TestLeastSquaresFitter(TestSetup):
     @pytest.mark.parametrize("target_parameters", [["amplitude"], ["baseline"], ["amplitude", "baseline"]])
     def test_fit(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
         target_parameters: tuple[str],
