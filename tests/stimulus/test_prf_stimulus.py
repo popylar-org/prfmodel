@@ -105,8 +105,13 @@ def test_ne(stimulus: PRFStimulus):
 
 def test_hash(stimulus: PRFStimulus):
     """Test hash of two PRFStimulus objects."""
-    with pytest.raises(TypeError):
-        _ = hash(stimulus)
+    stimulus_2 = PRFStimulus(
+        design=np.zeros((1, 2, 1)),
+        grid=np.zeros((2, 1, 2)),
+        dimension_labels=["x", "y"],
+    )
+
+    assert hash(stimulus) == hash(stimulus_2)
 
 
 @pytest.mark.parametrize(
