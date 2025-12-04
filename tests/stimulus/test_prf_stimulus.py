@@ -88,9 +88,6 @@ def test_eq(stimulus: PRFStimulus):
 
     assert stimulus == stimulus_2
 
-    with pytest.raises(TypeError):
-        _ = stimulus == np.zeros((0, 0, 0))
-
 
 def test_ne(stimulus: PRFStimulus):
     """Test inequality of two PRFStimulus objects."""
@@ -103,10 +100,15 @@ def test_ne(stimulus: PRFStimulus):
     assert stimulus != stimulus_3
 
 
-def test_hash(stimulus: PRFStimulus):
-    """Test hash of two PRFStimulus objects."""
+def test_ne_different_type(stimulus: PRFStimulus):
+    """Test inequality of PRFStimulus object and object with different type."""
+    assert stimulus != np.zeros((3, 3, 3))
+
+
+def test_hash_error(stimulus: PRFStimulus):
+    """Test that hashing raises an error."""
     with pytest.raises(TypeError):
-        _ = hash(stimulus)
+        hash(stimulus)
 
 
 @pytest.mark.parametrize(

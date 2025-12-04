@@ -1,11 +1,13 @@
 """Container for population receptive field stimulus design and grid."""
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Literal
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
+from .base import Stimulus
 
 
 class GridDesignShapeError(Exception):
@@ -78,7 +80,8 @@ class StimulusDimensionError(Exception):
         super().__init__(f"Stimulus frames have {actual} dimensions, but expected {expected}.")
 
 
-class PRFStimulus:
+@dataclass(frozen=True, eq=False)
+class PRFStimulus(Stimulus):
     """
     Container for a population receptive field stimulus design and its associated grid.
 
@@ -134,14 +137,11 @@ class PRFStimulus:
 
     """
 
-    # We don't want the object to be hashable because it's mutable
-    __hash__ = None  # type: ignore[assignment]
+    design: np.ndarray
+    grid: np.ndarray
+    dimension_labels: Sequence[str] | None = None
 
-    def __init__(self, design: np.ndarray, grid: np.ndarray, dimension_labels: Sequence[str] | None = None):
-        self.design = design
-        self.grid = grid
-        self.dimension_labels = dimension_labels
-
+    def __post_init__(self):
         self._check_grid_design_shape()
         self._check_grid_dimensions()
         self._check_dimension_labels()
@@ -157,33 +157,6 @@ class PRFStimulus:
     def _check_dimension_labels(self) -> None:
         if self.dimension_labels is not None and not self.grid.shape[-1] == len(self.dimension_labels):
             raise DimensionLabelsError(len(self.dimension_labels), self.grid.shape[-1])
-
-    def __repr__(self) -> str:
-        return f"""{self.__class__.__name__}(
-            design={np.array_repr(self.design)},
-            grid={np.array_repr(self.grid)},
-            dimension_labels={self.dimension_labels}
-        )"""
-
-    def __str__(self) -> str:
-        design_shape_str = ", ".join([str(s) for s in self.design.shape])
-        grid_shape_str = ", ".join([str(s) for s in self.grid.shape])
-
-        return f"{self.__class__.__name__}(design=array[{design_shape_str}], grid=array[{grid_shape_str}], dimension_labels={self.dimension_labels})"  # noqa: E501
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, PRFStimulus):
-            msg = "PRFStimulus objects can only be compared against other PRFStimulus objects"
-            raise TypeError(msg)
-
-        if self.design.shape != other.design.shape or self.grid.shape != other.grid.shape:
-            return False
-
-        design_equal = np.all(self.design == other.design)
-        grid_equal = np.all(self.grid == other.grid)
-        dimensions_labels_equal = self.dimension_labels == other.dimension_labels
-
-        return bool(design_equal and grid_equal and dimensions_labels_equal)
 
     @classmethod
     def create_2d_bar_stimulus(  # noqa: PLR0913 (too many arguments)
@@ -310,7 +283,7 @@ def animate_2d_prf_stimulus(  # noqa: PLR0913
 
     Parameters
     ----------
-    prf_stimulus : PRFStimulus
+    stimulus : PRFStimulus
         The population receptive field stimulus to visualize.
     title : str or None, optional
         Title for the video animation.
@@ -333,7 +306,7 @@ def animate_2d_prf_stimulus(  # noqa: PLR0913
     Raises
     ------
     StimulusDimensionError
-        If `prf_stimulus` is not 2-dimensional.
+        If `stimulus` is not 2-dimensional.
 
     Notes
     -----
@@ -395,6 +368,7 @@ def plot_2d_prf_stimulus(
     ------
     StimulusDimensionError
         If the stimulus is not 2-dimensional.
+
     """
     fig, ax, grid_limits = _setup_2d_plot(stimulus, title, **kwargs)
 

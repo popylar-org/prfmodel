@@ -10,8 +10,8 @@ import pandas as pd
 from keras import ops
 from more_itertools import chunked
 from tqdm import tqdm
-from prfmodel.models.base import BasePRFModel
-from prfmodel.stimulus import PRFStimulus
+from prfmodel.models.base import BaseModel
+from prfmodel.stimulus.base import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from prfmodel.utils import get_dtype
@@ -68,8 +68,8 @@ class GridFitter:
 
     def __init__(
         self,
-        model: BasePRFModel,
-        stimulus: PRFStimulus,
+        model: BaseModel,
+        stimulus: Stimulus,
         loss: keras.losses.Loss | Callable | None = None,
         dtype: str | None = None,
     ):
@@ -160,7 +160,7 @@ class GridFitter:
         params = np.stack(batch).T
         param_dict = ParamsDict(dict(zip(parameter_names, params, strict=True)))
 
-        pred = ops.expand_dims(self.model(self.stimulus, param_dict), 1)  # type: ignore[arg-type]
+        pred = ops.expand_dims(self.model(self.stimulus, param_dict), 1)  # type: ignore[operator]
         losses = self.loss(data, pred)
 
         min_loss = ops.convert_to_numpy(ops.amin(losses, axis=0))

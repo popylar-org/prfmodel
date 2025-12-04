@@ -5,25 +5,31 @@ import pytest
 from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.models.impulse import DerivativeTwoGammaImpulse
+from prfmodel.stimulus.prf import PRFStimulus
 
 parametrize_impulse_model = pytest.mark.parametrize("model", [None, {"delay": 6.0, "dispersion": 0.9}], indirect=True)
 
 
 class PRFStimulusSetup:
-    """Test setup for stimulus object."""
+    """Test setup for pRF stimulus object."""
 
     start_frame: int = 40
     end_frame: int = 65
 
     @pytest.fixture
     def stimulus(self):
-        """2D bar stimulus object."""
-        stimululus = load_2d_prf_bar_stimulus()
+        """2D bar prF stimulus object."""
+        stimulus = load_2d_prf_bar_stimulus()
 
         # Select subset of time frames that contain a single bar movement across screen
-        stimululus.design = stimululus.design[self.start_frame : self.end_frame]
+        design_sub = stimulus.design[self.start_frame : self.end_frame]
 
-        return stimululus
+        # Stimulus is immutable so we need to recreated it
+        return PRFStimulus(
+            design=design_sub,
+            grid=stimulus.grid,
+            dimension_labels=stimulus.dimension_labels,
+        )
 
 
 class TestSetup(PRFStimulusSetup):
