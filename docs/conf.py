@@ -103,3 +103,7 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "pandas": ("http://pandas.pydata.org/docs/", None),
 }
+
+# -- Options for myst-nb
+
+nb_kernel_rgx_aliases = {"python312": "python3"}
