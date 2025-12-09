@@ -207,7 +207,13 @@ class ParameterConstraint(ParameterTransform):
 
         self.transform_fun = transform_fun
 
+    def _check_bound_name(self, bound: str | float | None, parameters: ParamsDict) -> None:
+        if isinstance(bound, str) and bound not in parameters.columns:
+            msg = f"Parameters must contain the parameterized (dynamic) bound {bound}"
+            raise ValueError(msg)
+
     def _forward_lower(self, parameters: ParamsDict) -> ParamsDict:
+        self._check_bound_name(self.lower, parameters)
         parameters = parameters.copy()
 
         lower = parameters[self.lower] if isinstance(self.lower, str) else self.lower
@@ -219,6 +225,7 @@ class ParameterConstraint(ParameterTransform):
         return parameters
 
     def _forward_upper(self, parameters: ParamsDict) -> ParamsDict:
+        self._check_bound_name(self.upper, parameters)
         parameters = parameters.copy()
 
         upper = parameters[self.upper] if isinstance(self.upper, str) else self.upper
@@ -230,6 +237,7 @@ class ParameterConstraint(ParameterTransform):
         return parameters
 
     def _inverse_lower(self, parameters: ParamsDict) -> ParamsDict:
+        self._check_bound_name(self.lower, parameters)
         parameters = parameters.copy()
 
         lower = parameters[self.lower] if isinstance(self.lower, str) else self.lower
@@ -241,6 +249,7 @@ class ParameterConstraint(ParameterTransform):
         return parameters
 
     def _inverse_upper(self, parameters: ParamsDict) -> ParamsDict:
+        self._check_bound_name(self.upper, parameters)
         parameters = parameters.copy()
 
         upper = parameters[self.upper] if isinstance(self.upper, str) else self.upper

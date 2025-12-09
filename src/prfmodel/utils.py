@@ -115,6 +115,11 @@ class ParamsDict:
         for key, val in zip(keys, values, strict=True):
             self._data[key] = val
 
+    @property
+    def columns(self) -> list[str]:
+        """Return the names of parameter columns."""
+        return list(self._data.keys())
+
     def copy(self) -> "ParamsDict":
         """Create a copy of the object."""
         return ParamsDict(dict(self._data.items()))

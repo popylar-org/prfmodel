@@ -142,6 +142,33 @@ def test_parameter_constraint_lower_upper_error():
 
 
 @parameterize_params_wrapper
+def test_parameter_constraint_value_error(params_wrapper: type, params: dict):
+    """Test that missing string bound names return an error."""
+    params = params_wrapper(params)
+
+    transform_lower = ParameterConstraint(
+        parameter_names=["x"],
+        lower="foo",
+    )
+    transform_upper = ParameterConstraint(
+        parameter_names=["x"],
+        lower="bar",
+    )
+
+    with pytest.raises(ValueError):
+        _ = transform_lower.forward(params)
+
+    with pytest.raises(ValueError):
+        _ = transform_lower.inverse(params)
+
+    with pytest.raises(ValueError):
+        _ = transform_upper.forward(params)
+
+    with pytest.raises(ValueError):
+        _ = transform_upper.inverse(params)
+
+
+@parameterize_params_wrapper
 @pytest.mark.parametrize("transform_fun", [lambda x: x**2, np.exp, np.log])
 def test_parameter_constraint_upper_transform(params_wrapper: type, transform_fun: Callable, params: dict):
     """Test that upper constraint with transform function gives correct result."""
