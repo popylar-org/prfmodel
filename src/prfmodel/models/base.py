@@ -234,13 +234,10 @@ class BaseTemporal(BaseModel):
         """
 
 
-class BasePRFModel(BaseModel):
+class BaseComposite(BaseModel):
     """
-    Abstract base class for creating composite population receptive field models.
+    Base class for creating composite models.
 
-    Cannot be instantiated on its own.
-    Can only be used as a parent class for creating custom composite population receptive field models.
-    Subclasses must override the `__call__` method.
     This class is intented for combining multiple submodels into a composite model with a custom `__call__`
     method that defines how the submodels interact to make a composite prediction.
 
@@ -279,28 +276,3 @@ class BasePRFModel(BaseModel):
 
         # Make sure no duplicates are returned
         return list(set(param_names))
-
-    @abstractmethod
-    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
-        """
-        Predict a composite population receptive field response to a stimulus.
-
-        Parameters
-        ----------
-        stimulus : Stimulus
-            Stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
-
-        Returns
-        -------
-        Tensor
-            Model predictions with the same shape as `inputs` and dtype `dtype`.
-            Model predictions of shape (num_voxels, num_frames). The number of voxels is the number of rows in
-            `parameters`. The number of frames is the number of frames in the stimulus design.
-
-        """

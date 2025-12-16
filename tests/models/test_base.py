@@ -3,7 +3,6 @@
 import pytest
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseModel
-from prfmodel.models.base import BasePRFModel
 from prfmodel.models.base import BasePRFResponse
 from prfmodel.models.base import BaseTemporal
 from prfmodel.models.base import BatchDimensionError
@@ -63,9 +62,3 @@ class TestBaseTemporal(TestBaseModel):
     """Tests for BaseTemporal class."""
 
     model_class = BaseTemporal
-
-
-class TestBasePRFModel(TestBaseModel):
-    """Tests for BasePRFModel class."""
-
-    model_class = BasePRFModel
