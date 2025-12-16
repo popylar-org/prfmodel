@@ -5,7 +5,8 @@ from abc import abstractmethod
 from collections.abc import Sequence
 import pandas as pd
 from keras import ops
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.cf import CFStimulus
+from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 
 _MIN_PARAMETER_DIM = 2
@@ -95,14 +96,51 @@ class BasePRFResponse(BaseModel):
     """
 
     @abstractmethod
-    def __call__(self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the model response for a stimulus.
 
         Parameters
         ----------
-        stimulus : Stimulus
-            Stimulus object.
+        stimulus : PRFStimulus
+            Population receptive field stimulus object.
+        parameters : pandas.DataFrame
+            Dataframe with columns containing different model parameters and rows containing parameter values
+            for different voxels.
+        dtype : str, optional
+            The dtype of the prediction result. If `None` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        Tensor
+            Model predictions of shape `(num_voxels, ...)` and dtype `dtype`. The number of voxels is the
+            number of rows in `parameters`. The number and size of other axes depends on the stimulus.
+
+        """
+
+
+class BaseCFResponse(BaseModel):
+    """
+    Abstract base class for connective field response models.
+
+    Cannot be instantiated on its own.
+    Can only be used as a parent class to create custom connective field models.
+    Subclasses must override the abstract `__call__` method.
+
+    #TODO: Link to Example on how to create custom response models.
+
+    """
+
+    @abstractmethod
+    def __call__(self, stimulus: CFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+        """
+        Predict the model response for a stimulus.
+
+        Parameters
+        ----------
+        stimulus : CFStimulus
+            Connective field stimulus object.
         parameters : pandas.DataFrame
             Dataframe with columns containing different model parameters and rows containing parameter values
             for different voxels.
@@ -234,13 +272,10 @@ class BaseTemporal(BaseModel):
         """
 
 
-class BasePRFModel(BaseModel):
+class BaseComposite(BaseModel):
     """
-    Abstract base class for creating composite population receptive field models.
+    Base class for creating composite models.
 
-    Cannot be instantiated on its own.
-    Can only be used as a parent class for creating custom composite population receptive field models.
-    Subclasses must override the `__call__` method.
     This class is intented for combining multiple submodels into a composite model with a custom `__call__`
     method that defines how the submodels interact to make a composite prediction.
 
@@ -279,28 +314,3 @@ class BasePRFModel(BaseModel):
 
         # Make sure no duplicates are returned
         return list(set(param_names))
-
-    @abstractmethod
-    def __call__(self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
-        """
-        Predict a composite population receptive field response to a stimulus.
-
-        Parameters
-        ----------
-        stimulus : Stimulus
-            Stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
-
-        Returns
-        -------
-        Tensor
-            Model predictions with the same shape as `inputs` and dtype `dtype`.
-            Model predictions of shape (num_voxels, num_frames). The number of voxels is the number of rows in
-            `parameters`. The number of frames is the number of frames in the stimulus design.
-
-        """

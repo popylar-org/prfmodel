@@ -8,15 +8,18 @@ from prfmodel.models.base import BaseTemporal
 from prfmodel.models.base import BatchDimensionError
 from prfmodel.models.base import ShapeError
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.models.gaussian import Gaussian2DResponse
+from prfmodel.models.gaussian import Gaussian2DPRFResponse
+from prfmodel.models.gaussian import GaussianCFModel
+from prfmodel.models.gaussian import GaussianCFResponse
 from prfmodel.models.gaussian import GridMuDimensionsError
 from prfmodel.models.gaussian import _check_gaussian_args
 from prfmodel.models.gaussian import _expand_gaussian_args
 from prfmodel.models.gaussian import predict_gaussian_response
 from prfmodel.models.impulse import TwoGammaImpulse
 from prfmodel.models.temporal import BaselineAmplitude
-from prfmodel.stimulus import GridDimensionsError
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.cf import CFStimulus
+from prfmodel.stimulus.prf import GridDimensionsError
+from prfmodel.stimulus.prf import PRFStimulus
 from .conftest import parametrize_dtype
 
 
@@ -123,6 +126,16 @@ class TestSetup:
         """Gaussian sigma parameters."""
         return np.expand_dims(np.array([1.0, 1.5, 2.0]), axis=1)  # (num_voxels, 1)
 
+    @pytest.fixture
+    def distance_matrix(self):
+        """Distance matrix."""
+        return np.ones((self.width, self.width))
+
+    @pytest.fixture
+    def source_response(self):
+        """Source response."""
+        return np.array([[1.5, 2.0, 0.2, 3.1, 1.7]]).T  # (distance_matrix.shape[0], 1)
+
 
 class TestExpandGaussianArgs(TestSetup):
     """Tests for _expand_gaussian_args function."""
@@ -174,34 +187,34 @@ class TestPredictGaussianResponse(TestSetup):
         assert preds.shape == (3, self.height, self.width, self.depth)
 
 
-class TestGaussian2DResponse(TestSetup):
-    """Tests for Gaussian2DResponse class."""
+class TestGaussian2DPRFResponse(TestSetup):
+    """Tests for Gaussian2DPRFResponse class."""
 
     num_frames: int = 10
 
     @pytest.fixture
     def response_model(self):
         """Response model object."""
-        return Gaussian2DResponse()
+        return Gaussian2DPRFResponse()
 
     @pytest.fixture
     def stimulus(self, grid_2d: np.ndarray):
         """2D stimulus object."""
         design = np.ones((self.num_frames, self.height, self.width))
 
-        return Stimulus(
+        return PRFStimulus(
             design=design,
             grid=grid_2d,
             dimension_labels=["y", "x"],
         )
 
-    def test_parameter_names(self, response_model: Gaussian2DResponse):
+    def test_parameter_names(self, response_model: Gaussian2DPRFResponse):
         """Test that correct parameter names are returned."""
         # Order of parameter names does not matter
         assert set(response_model.parameter_names) & {"mu_y", "mu_x", "sigma"}
 
     @parametrize_dtype
-    def test_predict(self, response_model: Gaussian2DResponse, stimulus: Stimulus, dtype: str):
+    def test_predict(self, response_model: Gaussian2DPRFResponse, stimulus: PRFStimulus, dtype: str):
         """Test that response prediction returns correct shape."""
         # 3 voxels
         params = pd.DataFrame(
@@ -218,7 +231,45 @@ class TestGaussian2DResponse(TestSetup):
         assert preds.shape == (params.shape[0], self.height, self.width)  # (num_voxels, height, width)
 
 
-class TestGaussian2DPRFModel(TestGaussian2DResponse):
+class TestGaussianCFResponse(TestSetup):
+    """Tests for GaussianCFResponse class."""
+
+    @pytest.fixture
+    def response_model(self):
+        """Response model object."""
+        return GaussianCFResponse()
+
+    @pytest.fixture
+    def stimulus(self, distance_matrix: np.ndarray, source_response: np.ndarray):
+        """Stimulus object."""
+        return CFStimulus(
+            distance_matrix=distance_matrix,
+            source_response=source_response,
+        )
+
+    def test_parameter_names(self, response_model: GaussianCFResponse):
+        """Test that correct parameter names are returned."""
+        # Order of parameter names does not matter
+        assert set(response_model.parameter_names) & {"center_index", "sigma"}
+
+    @parametrize_dtype
+    def test_predict(self, response_model: GaussianCFResponse, stimulus: CFStimulus, dtype: str):
+        """Test that response prediction returns correct shape."""
+        # 3 voxels
+        params = pd.DataFrame(
+            {
+                "center_index": [0, 1, 2],
+                "sigma": [1.0, 2.0, 3.0],
+            },
+        )
+
+        preds = np.asarray(response_model(stimulus, params, dtype))
+
+        # Check result shape
+        assert preds.shape == (params.shape[0], self.width)  # (num_voxels, distance_matrix.shape[0])
+
+
+class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
     """Tests for the Gaussian2DPRFModel class."""
 
     @pytest.fixture
@@ -267,7 +318,7 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
         prf_model: Gaussian2DPRFModel,
         impulse_model: TwoGammaImpulse,
         temporal_model: BaselineAmplitude,
-        response_model: Gaussian2DResponse,
+        response_model: Gaussian2DPRFResponse,
     ):
         """Test that parameter names of composite model match parameter names of submodels."""
         param_names = response_model.parameter_names
@@ -292,7 +343,7 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
         self,
         impulse_model: BaseImpulse,
         temporal_model: BaseTemporal,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction returns correct shape."""
@@ -304,3 +355,69 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
         resp = prf_model(stimulus, params)
 
         assert resp.shape == (params.shape[0], self.num_frames)
+
+
+class TestGaussianCFModel(TestGaussianCFResponse):
+    """Tests for the GaussianCFModel class."""
+
+    @pytest.fixture
+    def cf_model(self):
+        """CF model object."""
+        return GaussianCFModel()
+
+    @pytest.fixture
+    def temporal_model(self):
+        """Temporal model object."""
+        return BaselineAmplitude()
+
+    @pytest.fixture
+    def params(self):
+        """Dataframe with parameters."""
+        return pd.DataFrame(
+            {
+                "center_index": [0, 1, 2],
+                "sigma": [1.0, 2.0, 3.0],
+                "baseline": [0.0, 0.1, 0.2],
+                "amplitude": [1.1, 1.0, 0.9],
+            },
+        )
+
+    def test_submodels_inherit_basemodel(self):
+        """Test that submodels that do not inherit from BaseModel raise an error."""
+        with pytest.raises(TypeError):
+            GaussianCFModel(temporal_model="test")
+
+    def test_parameter_names(
+        self,
+        cf_model: GaussianCFModel,
+        temporal_model: BaselineAmplitude,
+        response_model: GaussianCFResponse,
+    ):
+        """Test that parameter names of composite model match parameter names of submodels."""
+        param_names = response_model.parameter_names
+        param_names.extend(temporal_model.parameter_names)
+
+        assert cf_model.parameter_names == list(set(param_names))
+
+    @pytest.mark.parametrize(
+        "temporal_model",
+        [
+            BaselineAmplitude(),  # Test with class instance
+            BaselineAmplitude,  # Test with class
+            None,
+        ],
+    )
+    def test_predict(
+        self,
+        temporal_model: BaseTemporal,
+        stimulus: CFStimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that model prediction returns correct shape."""
+        prf_model = GaussianCFModel(
+            temporal_model=temporal_model,
+        )
+
+        resp = prf_model(stimulus, params)
+
+        assert resp.shape == (params.shape[0], 1)

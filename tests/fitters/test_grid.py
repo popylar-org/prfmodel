@@ -7,7 +7,7 @@ import pytest
 from prfmodel.fitters.grid import GridFitter
 from prfmodel.fitters.grid import GridHistory
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimulus.prf import PRFStimulus
 from .conftest import TestSetup
 from .conftest import parametrize_dtype
 
@@ -44,7 +44,7 @@ class TestGridFitter(TestSetup):
     @pytest.mark.parametrize("loss", [None, keras.losses.MeanSquaredError(reduction="none")])
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         loss: keras.losses.Loss,
         params: pd.DataFrame,
