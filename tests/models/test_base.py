@@ -1,6 +1,7 @@
 """Test model base classes."""
 
 import pytest
+from prfmodel.models.base import BaseCFResponse
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseModel
 from prfmodel.models.base import BasePRFResponse
@@ -50,6 +51,12 @@ class TestBasePRFResponse(TestBaseModel):
     """Tests for BasePRFResponse class."""
 
     model_class = BasePRFResponse
+
+
+class TestBaseCFResponse(TestBaseModel):
+    """Tests for BasePRFResponse class."""
+
+    model_class = BaseCFResponse
 
 
 class TestBaseImpulse(TestBaseModel):

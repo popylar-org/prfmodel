@@ -1,5 +1,6 @@
 """Population receptive and connective field models."""
 
+from .base import BaseCFResponse
 from .base import BaseComposite
 from .base import BaseModel
 from .base import BasePRFResponse
@@ -9,6 +10,7 @@ from .gaussian import Gaussian2DPRFModel
 from .gaussian import GaussianCFModel
 
 __all__ = [
+    "BaseCFResponse",
     "BaseComposite",
     "BaseModel",
     "BasePRFResponse",
