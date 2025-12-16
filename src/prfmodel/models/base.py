@@ -5,6 +5,7 @@ from abc import abstractmethod
 from collections.abc import Sequence
 import pandas as pd
 from keras import ops
+from prfmodel.stimulus.base import Stimulus
 from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _get_norm_fun
@@ -266,14 +267,13 @@ class BaseTemporal(BaseModel):
         """
 
 
-class BasePRFModel(BaseModel):
+class BaseComposite(BaseModel):
     """
-    Abstract base class for creating composite population receptive field models.
+    Base class for creating composite models.
 
-    Cannot be instantiated on its own.
-    Can only be used as a parent class for creating custom composite population receptive field models.
-    Subclasses must override the `__call__` method.
-    This class is intented for combining multiple submodels into a composite model with a custom `__call__`
+    Cannot be instantiated on its own. Can only be used as a parent class to create custom composite models.
+    Subclasses must override the abstract `__call__` method.
+    This class is intended for combining multiple submodels into a composite model with a custom `__call__`
     method that defines how the submodels interact to make a composite prediction.
 
     #TODO: Link to Example on how to create custom composite models.
@@ -313,13 +313,18 @@ class BasePRFModel(BaseModel):
         return list(dict.fromkeys(param_names))
 
     @abstractmethod
-    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def __call__(
+        self,
+        stimulus: Stimulus,
+        parameters: pd.DataFrame,
+        dtype: str | None = None,
+    ) -> Tensor:
         """
-        Predict a composite population receptive field response to a stimulus.
+        Predict a composite model response to a stimulus.
 
         Parameters
         ----------
-        stimulus : Stimulus
+        stimulus : Stimulus.
             Stimulus object.
         parameters : pandas.DataFrame
             Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
@@ -331,8 +336,7 @@ class BasePRFModel(BaseModel):
         Returns
         -------
         Tensor
-            Model predictions with the same shape as `inputs` and dtype `dtype`.
-            Model predictions of shape (num_voxels, num_frames). The number of voxels is the number of rows in
-            `parameters`. The number of frames is the number of frames in the stimulus design.
+            Composite model predictions of shape `(num_voxels, num_frames)` and dtype `dtype`. The number of voxels is
+            the number of rows in `parameters`.
 
         """

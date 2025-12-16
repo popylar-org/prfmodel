@@ -1,4 +1,4 @@
-"""Composite population receptive field models."""
+"""Composite models."""
 
 from typing import cast
 import pandas as pd
@@ -6,8 +6,8 @@ from keras import ops
 from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
+from .base import BaseComposite
 from .base import BaseImpulse
-from .base import BasePRFModel
 from .base import BasePRFResponse
 from .base import BaseTemporal
 from .encoding import encode_prf_response
@@ -16,7 +16,7 @@ from .impulse import convolve_prf_impulse_response
 from .temporal import BaselineAmplitude
 
 
-class SimplePRFModel(BasePRFModel):
+class SimplePRFModel(BaseComposite):
     """
     Simple composite population receptive field model.
 
@@ -64,7 +64,13 @@ class SimplePRFModel(BasePRFModel):
             temporal_model=temporal_model,
         )
 
-    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def __call__(
+        self,
+        # We can safely override the type check here
+        stimulus: PRFStimulus,  # type: ignore[override]
+        parameters: pd.DataFrame,
+        dtype: str | None = None,
+    ) -> Tensor:
         """
         Predict a simple population receptive field model response to a stimulus.
 
