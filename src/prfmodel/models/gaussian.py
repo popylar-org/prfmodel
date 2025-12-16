@@ -1,19 +1,23 @@
-"""Gaussian population receptive field response models."""
+"""Gaussian response models."""
 
 import math
+import numpy as np
 import pandas as pd
 from keras import ops
+from prfmodel.stimulus.cf import CFStimulus
 from prfmodel.stimulus.prf import GridDimensionsError
 from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
+from .base import BaseCFResponse
 from .base import BaseImpulse
 from .base import BasePRFResponse
 from .base import BaseTemporal
 from .base import BatchDimensionError
 from .base import ShapeError
+from .composite import SimpleCFModel
 from .composite import SimplePRFModel
 from .impulse import DerivativeTwoGammaImpulse
 from .temporal import BaselineAmplitude
@@ -241,6 +245,63 @@ class Gaussian2DPRFResponse(BasePRFResponse):
         return predict_gaussian_response(grid, mu, sigma)
 
 
+class GaussianCFResponse(BaseCFResponse):
+    """
+    Gaussian connective field response model.
+
+    Predicts a response to a stimulus distance matrix.
+    The model has two parameters: `center_index` is the index of the row in the stimulus distance matrix that is the
+    center of the Gaussian; `sigma` for the width of the Gaussian.
+
+    """
+
+    @property
+    def parameter_names(self) -> list[str]:
+        """Names of parameters used by the model: `center_index`, `sigma`."""
+        return ["center_index", "sigma"]
+
+    def __call__(self, stimulus: CFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+        """
+        Predict the model response for a stimulus with a distance matrix.
+
+        Parameters
+        ----------
+        stimulus : CFStimulus
+            Connective field stimulus object with a distance matrix.
+        parameters : pandas.DataFrame
+            Dataframe with columns containing different model parameters and rows containing parameter values
+            for different voxels. Must contain the columns `center_index` and `sigma`.
+        dtype : str, optional
+            The dtype of the prediction result. If `None` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        Tensor
+            Model predictions of shape `(num_voxels, num_rows)` and dtype `dtype`.
+            `num_voxels` is the number of rows in `parameters` and `num_rows` is the number of rows in the stimulus
+            distance matrix.
+
+        """
+        dtype = get_dtype(dtype)
+        # Distance matrix is numpy array so we also create a numpy array to safely index
+        # The dtype is only used for indexing so it can be hardcoded
+        center_index = np.asarray(parameters[["center_index"]], dtype=np.int32)[:, 0]
+        sigma = convert_parameters_to_tensor(parameters[["sigma"]], dtype=dtype)
+        distance_matrix = ops.convert_to_tensor(stimulus.distance_matrix[center_index], dtype=dtype)
+
+        sigma_squared = ops.square(sigma)
+
+        # Gaussian response
+        resp = ops.square(distance_matrix)
+        resp /= 2.0 * sigma_squared
+
+        # Divide by volume to normalize (only two dimensions, so exponent cancels out)
+        volume = ops.sqrt(2.0 * math.pi * sigma_squared)
+
+        return ops.exp(-resp) / volume
+
+
 class Gaussian2DPRFModel(SimplePRFModel):
     """
     Two-dimensional isotropic Gaussian population receptive field model.
@@ -278,5 +339,37 @@ class Gaussian2DPRFModel(SimplePRFModel):
         super().__init__(
             prf_model=Gaussian2DPRFResponse(),
             impulse_model=impulse_model,
+            temporal_model=temporal_model,
+        )
+
+
+class GaussianCFModel(SimpleCFModel):
+    """
+    Gaussian connective field model.
+
+    This is a generic class that combines a Gaussian connective field and temporal model response.
+
+    Parameters
+    ----------
+    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
+        A temporal model class or instance. Temporal model instances will be instantiated during initialization.
+        The default creates a `BaselineAmplitude` instance.
+
+    Notes
+    -----
+    The simple composite model follows three steps:
+
+    1. The Gaussian connective field response model makes a prediction for the stimulus distance matrix.
+    2. The connective field response is encoded with the source response.
+    3. The temporal model modifies the encoded response.
+
+    """
+
+    def __init__(
+        self,
+        temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
+    ):
+        super().__init__(
+            cf_model=GaussianCFResponse(),
             temporal_model=temporal_model,
         )

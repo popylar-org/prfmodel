@@ -6,6 +6,7 @@ from collections.abc import Sequence
 import pandas as pd
 from keras import ops
 from prfmodel.stimulus.base import Stimulus
+from prfmodel.stimulus.cf import CFStimulus
 from prfmodel.stimulus.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _get_norm_fun
@@ -103,6 +104,43 @@ class BasePRFResponse(BaseModel):
         ----------
         stimulus : PRFStimulus
             Population receptive field stimulus object.
+        parameters : pandas.DataFrame
+            Dataframe with columns containing different model parameters and rows containing parameter values
+            for different voxels.
+        dtype : str, optional
+            The dtype of the prediction result. If `None` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        Tensor
+            Model predictions of shape `(num_voxels, ...)` and dtype `dtype`. The number of voxels is the
+            number of rows in `parameters`. The number and size of other axes depends on the stimulus.
+
+        """
+
+
+class BaseCFResponse(BaseModel):
+    """
+    Abstract base class for connective field response models.
+
+    Cannot be instantiated on its own.
+    Can only be used as a parent class to create custom connective field models.
+    Subclasses must override the abstract `__call__` method.
+
+    #TODO: Link to Example on how to create custom response models.
+
+    """
+
+    @abstractmethod
+    def __call__(self, stimulus: CFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+        """
+        Predict the model response for a stimulus.
+
+        Parameters
+        ----------
+        stimulus : CFStimulus
+            Connective field stimulus object.
         parameters : pandas.DataFrame
             Dataframe with columns containing different model parameters and rows containing parameter values
             for different voxels.
