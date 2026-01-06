@@ -1,6 +1,8 @@
 """Tests for convolution functions."""
 
 import numpy as np
+import pytest
+from prfmodel.models.base import BatchDimensionError
 from prfmodel.models.impulse.convolve import _pad_response
 from prfmodel.models.impulse.convolve import _prepare_prf_impulse_response
 from prfmodel.models.impulse.convolve import convolve_prf_impulse_response
@@ -50,3 +52,9 @@ def test_convolve_prf_impulse_response():
     resp_conv = convolve_prf_impulse_response(prf_response, irf_response)
 
     assert resp_conv.shape == (num_batches, num_prf_frames)
+
+
+def test_convolve_prf_impulse_response_batch_dimension_error():
+    """Test that convolve_prf_impulse_response raises error when batch dimension does not match."""
+    with pytest.raises(BatchDimensionError):
+        _ = convolve_prf_impulse_response(np.ones((20, 10)), np.ones((10, 3)))
