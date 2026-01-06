@@ -36,7 +36,7 @@ def gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True)
 
     .. math::
 
-        f(x) = x^{\mathtt{\alpha} - 1} e^{\mathtt{\lambda} x}.
+        f(x) = x^{\mathtt{\alpha} - 1} e^{-\mathtt{\lambda} x}.
 
     When `norm=True`, the density is multiplied with a normalizing constant:
 
