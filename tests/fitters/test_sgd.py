@@ -109,7 +109,7 @@ class TestSGDFitter(TestSetup):
         adapter = Adapter(
             [
                 ParameterTransform(["sigma", "shape"], keras.ops.log, keras.ops.exp),
-                ParameterConstraint(["shape"], lower="rate", transform_fun=keras.ops.log),
+                ParameterConstraint(["shape"], lower="rate", bound_fun=keras.ops.log),
             ],
         )
 

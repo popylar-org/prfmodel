@@ -169,10 +169,10 @@ class SGDFitter(BackendSGDFitter):
         if fixed_parameters is None:
             fixed_parameters = []
 
-        # Initialize parameters on forward scale
-        init_parameters_forward = self.adapter.forward(init_parameters)
+        # Initialize parameters on transformed scale
+        init_parameters_transformed = self.adapter.transform(init_parameters)
 
-        self._create_variables(init_parameters_forward, fixed_parameters)
+        self._create_variables(init_parameters_transformed, fixed_parameters)
 
         self.optimizer.build(self.trainable_variables)
 

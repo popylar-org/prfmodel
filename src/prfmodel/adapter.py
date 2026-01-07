@@ -22,19 +22,19 @@ class ParameterTransform:
     ----------
     parameter_names : Sequence of str
         Names of parameters to be transformed.
-    forward_fun : Callable
-        Function to apply to parameters for the forward transformation. During model fitting, parameters will be
-        optimized on the scale of the forward transformation (e.g., for a log-transformation, parameters will be
+    transform_fun : Callable
+        Function to apply to parameters for the transformation. During model fitting, parameters will be
+        optimized on the scale of the transformation (e.g., for a log-transformation, parameters will be
         optimized on the log-scale).
     inverse_fun : Callable
-        Function to apply to parameters for the inverse transformation. Should be the inverse of `forward_fun`
+        Function to apply to parameters for the inverse transformation. Should be the inverse of `transform_fun`
         or the identity function (e.g., `lambda x: x`). During model fitting, model predictions will
-        be made using parameters on the scale of the inverse-transformation (e.g., for a log-transformation, model
+        be made using parameters on the scale of the inverse transformation (e.g., for a log-transformation, model
         predictions will be made with parameters on the natural scale).
 
     Notes
     -----
-    When using the transform within stochastic gradient descent, the forward and inverse functions should allow for
+    When using the transform within stochastic gradient descent, the transform and inverse functions should allow for
     gradient tracking (e.g., by using functions from the `keras.ops` module).
 
     Examples
@@ -48,11 +48,11 @@ class ParameterTransform:
     >>> })
     >>> transform = ParameterTransform(
     >>>     parameter_names=["x"],
-    >>>     forward_fun=np.log,
+    >>>     transform_fun=np.log,
     >>>     inverse_fun=np.exp,
     >>> )
-    >>> params_forward = transform.forward(params)
-    >>> print(params_forward)
+    >>> params_transformed = transform.transform(params)
+    >>> print(params_transformed)
               x
     0  0.000000
     1  0.693147
@@ -61,19 +61,19 @@ class ParameterTransform:
 
     Inverse transformation returns the original parameters for finite values.
 
-    >>> params_inverse = transform.inverse(params_forward)
+    >>> params_inverse = transform.inverse(params_transformed)
     >>> assert all(params_inverse == params)
 
     """
 
-    def __init__(self, parameter_names: Sequence[str], forward_fun: Callable, inverse_fun: Callable):
+    def __init__(self, parameter_names: Sequence[str], transform_fun: Callable, inverse_fun: Callable):
         self.parameter_names = parameter_names
-        self.forward_fun = forward_fun
+        self.transform_fun = transform_fun
         self.inverse_fun = inverse_fun
 
-    def forward(self, parameters: P) -> P:
+    def transform(self, parameters: P) -> P:
         """
-        Apply the forward transformation.
+        Apply the transformation.
 
         Parameters
         ----------
@@ -84,13 +84,13 @@ class ParameterTransform:
         Returns
         -------
         pd.DataFrame
-            Dataframe with the forward transformation applied to the parameters specified in `parameter_names`.
+            Dataframe with the transformation applied to the parameters specified in `parameter_names`.
 
         """
         parameters = parameters.copy()
 
         for param in self.parameter_names:
-            parameters[param] = self.forward_fun(parameters[param])
+            parameters[param] = self.transform_fun(parameters[param])
 
         return parameters
 
@@ -135,7 +135,7 @@ class ParameterConstraint(ParameterTransform):
     upper : str or float, optional
         Upper bound of parameter constraint. If the argument has type `str`, it will use another parameter as the
         dynamic upper bound. An argument of type `float` will be used as a static upper bound.
-    transform_fun : Callable, optional
+    bound_fun : Callable, optional
         Function to apply to the lower or upper bound before applying the constraint.
 
     Examples
@@ -152,8 +152,8 @@ class ParameterConstraint(ParameterTransform):
     >>>     parameter_names=["x"],
     >>>     lower="lower_bound",
     >>> )
-    >>> params_forward = constraint.forward(params)
-    >>> params_inverse = constraint.inverse(params_forward)
+    >>> params_transformed = constraint.transform(params)
+    >>> params_inverse = constraint.inverse(params_transformed)
     >>> assert np.allclose(params_inverse["x"], params["x"])
 
     Constrain a parameter to be greater than a fixed value.
@@ -162,8 +162,8 @@ class ParameterConstraint(ParameterTransform):
     >>>     parameter_names=["x"],
     >>>     lower=1.0,
     >>> )
-    >>> params_forward = constraint.forward(params)
-    >>> params_inverse = constraint.inverse(params_forward)
+    >>> params_transformed = constraint.transform(params)
+    >>> params_inverse = constraint.inverse(params_transformed)
     >>> assert np.allclose(params_inverse["x"], params["x"])
 
     Constrain a parameter to be greater than the square of another parameter.
@@ -171,10 +171,10 @@ class ParameterConstraint(ParameterTransform):
     >>> constraint = ParameterContraint(
     >>>     parameter_names=["x"],
     >>>     lower="lower_bound",
-    >>>     transform_fun=lambda x: x**2
+    >>>     bound_fun=lambda x: x**2
     >>> )
-    >>> params_forward = constraint.forward(params)
-    >>> params_inverse = constraint.inverse(params_forward)
+    >>> params_transformed = constraint.transform(params)
+    >>> params_inverse = constraint.inverse(params_transformed)
     >>> assert np.allclose(params_inverse["x"], params["x"])
 
     """
@@ -184,12 +184,12 @@ class ParameterConstraint(ParameterTransform):
         parameter_names: Sequence[str],
         lower: str | float | None = None,
         upper: str | float | None = None,
-        transform_fun: Callable | None = None,
+        bound_fun: Callable | None = None,
     ):
-        forward_fun = ops.exp
+        transform_fun = ops.exp
         inverse_fun = ops.log
 
-        super().__init__(parameter_names, forward_fun, inverse_fun)
+        super().__init__(parameter_names, transform_fun, inverse_fun)
 
         if lower is not None and upper is not None:
             msg = "Lower and upper bound must not be provided at the same time"
@@ -198,41 +198,41 @@ class ParameterConstraint(ParameterTransform):
         self.lower = lower
         self.upper = upper
 
-        if transform_fun is None:
+        if bound_fun is None:
 
             def identity(x: float | Tensor | None) -> float | Tensor | None:
                 return x
 
-            transform_fun = identity
+            bound_fun = identity
 
-        self.transform_fun = transform_fun
+        self.bound_fun = bound_fun
 
     def _check_bound_name(self, bound: str | float | None, parameters: ParamsDict) -> None:
         if isinstance(bound, str) and bound not in parameters.columns:
             msg = f"Parameters must contain the parameterized (dynamic) bound {bound}"
             raise ValueError(msg)
 
-    def _forward_lower(self, parameters: ParamsDict) -> ParamsDict:
+    def _transform_lower(self, parameters: ParamsDict) -> ParamsDict:
         self._check_bound_name(self.lower, parameters)
         parameters = parameters.copy()
 
         lower = parameters[self.lower] if isinstance(self.lower, str) else self.lower
-        lower = self.transform_fun(lower)
+        lower = self.bound_fun(lower)
 
         for param in self.parameter_names:
-            parameters[param] = self.forward_fun(parameters[param]) + lower
+            parameters[param] = self.transform_fun(parameters[param]) + lower
 
         return parameters
 
-    def _forward_upper(self, parameters: ParamsDict) -> ParamsDict:
+    def _transform_upper(self, parameters: ParamsDict) -> ParamsDict:
         self._check_bound_name(self.upper, parameters)
         parameters = parameters.copy()
 
         upper = parameters[self.upper] if isinstance(self.upper, str) else self.upper
-        upper = self.transform_fun(upper)
+        upper = self.bound_fun(upper)
 
         for param in self.parameter_names:
-            parameters[param] = -self.forward_fun(-parameters[param]) + upper
+            parameters[param] = -self.transform_fun(-parameters[param]) + upper
 
         return parameters
 
@@ -241,7 +241,7 @@ class ParameterConstraint(ParameterTransform):
         parameters = parameters.copy()
 
         lower = parameters[self.lower] if isinstance(self.lower, str) else self.lower
-        lower = self.transform_fun(lower)
+        lower = self.bound_fun(lower)
 
         for param in self.parameter_names:
             parameters[param] = self.inverse_fun(parameters[param] - lower)
@@ -253,16 +253,16 @@ class ParameterConstraint(ParameterTransform):
         parameters = parameters.copy()
 
         upper = parameters[self.upper] if isinstance(self.upper, str) else self.upper
-        upper = self.transform_fun(upper)
+        upper = self.bound_fun(upper)
 
         for param in self.parameter_names:
             parameters[param] = -self.inverse_fun(-parameters[param] + upper)
 
         return parameters
 
-    def forward(self, parameters: P) -> P:
+    def transform(self, parameters: P) -> P:
         """
-        Apply the forward constraint transformation.
+        Apply the constraint transformation.
 
         Transforms parameters by constraining them to be within specified bounds using exponential transformations.
 
@@ -275,7 +275,7 @@ class ParameterConstraint(ParameterTransform):
         Returns
         -------
         pd.DataFrame
-            Dataframe with the forward constraint transformation applied to the parameters specified in
+            Dataframe with the constraint transformation applied to the parameters specified in
             `parameter_names`.
 
         """
@@ -284,7 +284,7 @@ class ParameterConstraint(ParameterTransform):
         else:
             param_dict = parameters
 
-        param_dict = self._forward_lower(param_dict) if self.lower is not None else self._forward_upper(param_dict)
+        param_dict = self._transform_lower(param_dict) if self.lower is not None else self._transform_upper(param_dict)
 
         if isinstance(parameters, pd.DataFrame):
             return param_dict.to_dataframe()
@@ -347,17 +347,17 @@ class Adapter:
     >>> })
     >>> transform_x = ParameterTransform(
     >>>     parameter_names=["x"],
-    >>>     forward_fun=np.log,
+    >>>     transform_fun=np.log,
     >>>     inverse_fun=np.exp,
     >>> )
     >>> transform_y = ParameterTransform(
     >>>     parameter_names=["y"],
-    >>>     forward_fun=np.sqrt,
+    >>>     transform_fun=np.sqrt,
     >>>     inverse_fun=np.square,
     >>> )
     >>> adapter = Adapter(transforms=[transform_x, transform_y])
-    >>> params_forward = adapter.forward(params)
-    >>> params_inverse = adapter.inverse(params_forward)
+    >>> params_transformed = adapter.transform(params)
+    >>> params_inverse = adapter.inverse(params_transformed)
     >>> assert all(params_inverse == params)
 
     """
@@ -368,11 +368,11 @@ class Adapter:
 
         self.transforms = transforms
 
-    def forward(self, parameters: P) -> P:
+    def transform(self, parameters: P) -> P:
         """
-        Apply the forward transformations sequentially.
+        Apply the transformations sequentially.
 
-        Applies each forward transformation in the list of transforms to the parameters in order.
+        Applies each transformation in the list of transforms to the parameters in order.
 
         Parameters
         ----------
@@ -383,11 +383,11 @@ class Adapter:
         Returns
         -------
         pd.DataFrame
-            Transformed parameters after applying all forward transformations.
+            Transformed parameters after applying all transformations.
 
         """
         for transform in self.transforms:
-            parameters = transform.forward(parameters)
+            parameters = transform.transform(parameters)
 
         return parameters
 

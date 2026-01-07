@@ -36,22 +36,22 @@ def transform(request: pytest.FixtureRequest):
 @parameterize_params_wrapper
 @pytest.mark.parametrize("transform", [(["x"], np.log, np.exp), (["y", "z"], np.sqrt, np.square)], indirect=True)
 def test_parameter_transform(transform: ParameterTransform, params_wrapper: type, params: dict):
-    """Test that forward and backward transformation gives the correct result."""
+    """Test that transformation and inverse give the correct results."""
     params = params_wrapper(params)
 
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=RuntimeWarning)
-        result_forward = transform.forward(params)
+        result_transformed = transform.transform(params)
         result_inverse = transform.inverse(params)
 
         for param in transform.parameter_names:
-            ref_forward = np.asarray(transform.forward_fun(params[param]))
-            result_forward_param = np.asarray(result_forward[param])
+            ref_transformed = np.asarray(transform.transform_fun(params[param]))
+            result_transformed_param = np.asarray(result_transformed[param])
             np.testing.assert_allclose(
-                result_forward_param,
-                ref_forward,
+                result_transformed_param,
+                ref_transformed,
                 equal_nan=True,
-                err_msg="Forward transform does not give correct results",
+                err_msg="Transform does not give correct results",
             )
 
             ref_inverse = np.asarray(transform.inverse_fun(params[param]))
@@ -65,12 +65,12 @@ def test_parameter_transform(transform: ParameterTransform, params_wrapper: type
 
 
 @parameterize_params_wrapper
-def test_parameter_transform_forward_inverse(params_wrapper: type, params: dict):
-    """Test that forward(inverse(input)) == input for valid transform ranges."""
+def test_parameter_transform_inverse(params_wrapper: type, params: dict):
+    """Test that transform(inverse(input)) == input for valid transform ranges."""
     params = params_wrapper(params)
     transform = ParameterTransform(["z"], np.log, np.exp)
-    result_forward = transform.forward(params)
-    result_inverse = transform.inverse(result_forward)
+    result_transformed = transform.transform(params)
+    result_inverse = transform.inverse(result_transformed)
 
     np.testing.assert_allclose(np.asarray(result_inverse["z"]), np.asarray(params["z"]))
 
@@ -84,21 +84,21 @@ def test_parameter_constraint_lower(params_wrapper: type, params: dict):
         lower="x",
     )
 
-    result_forward = transform.forward(params)
+    result_transformed = transform.transform(params)
 
-    np.testing.assert_array_less(np.asarray(result_forward["x"]), np.asarray(result_forward["z"]))
+    np.testing.assert_array_less(np.asarray(result_transformed["x"]), np.asarray(result_transformed["z"]))
 
 
 @parameterize_params_wrapper
-def test_parameter_constraint_lower_forward_inverse(params_wrapper: type, params: dict):
-    """Test that forward(inverse(input)) == input."""
+def test_parameter_constraint_lower_inverse(params_wrapper: type, params: dict):
+    """Test that transform(inverse(input)) == input."""
     params = params_wrapper(params)
     transform = ParameterConstraint(
         parameter_names=["z"],
         lower="x",
     )
-    result_forward = transform.forward(params)
-    result_inverse = transform.inverse(result_forward)
+    result_transformed = transform.transform(params)
+    result_inverse = transform.inverse(result_transformed)
 
     np.testing.assert_allclose(np.asarray(result_inverse["z"]), np.asarray(params["z"]))
 
@@ -112,21 +112,21 @@ def test_parameter_constraint_upper(params_wrapper: type, params: dict):
         upper="z",
     )
 
-    result_forward = transform.forward(params)
+    result_transformed = transform.transform(params)
 
-    np.testing.assert_array_less(np.asarray(result_forward["x"]), np.asarray(result_forward["z"]))
+    np.testing.assert_array_less(np.asarray(result_transformed["x"]), np.asarray(result_transformed["z"]))
 
 
 @parameterize_params_wrapper
-def test_parameter_constraint_upper_forward_inverse(params_wrapper: type, params: dict):
-    """Test that forward(inverse(input)) == input."""
+def test_parameter_constraint_upper_inverse(params_wrapper: type, params: dict):
+    """Test that transform(inverse(input)) == input."""
     params = params_wrapper(params)
     transform = ParameterConstraint(
         parameter_names=["x"],
         lower="z",
     )
-    result_forward = transform.forward(params)
-    result_inverse = transform.inverse(result_forward)
+    result_transformed = transform.transform(params)
+    result_inverse = transform.inverse(result_transformed)
 
     np.testing.assert_allclose(np.asarray(result_inverse["x"]), np.asarray(params["x"]), rtol=1e-6)
 
@@ -156,13 +156,13 @@ def test_parameter_constraint_value_error(params_wrapper: type, params: dict):
     )
 
     with pytest.raises(ValueError):
-        _ = transform_lower.forward(params)
+        _ = transform_lower.transform(params)
 
     with pytest.raises(ValueError):
         _ = transform_lower.inverse(params)
 
     with pytest.raises(ValueError):
-        _ = transform_upper.forward(params)
+        _ = transform_upper.transform(params)
 
     with pytest.raises(ValueError):
         _ = transform_upper.inverse(params)
@@ -176,12 +176,15 @@ def test_parameter_constraint_upper_transform(params_wrapper: type, transform_fu
     transform = ParameterConstraint(
         parameter_names=["x"],
         upper="z",
-        transform_fun=transform_fun,
+        bound_fun=transform_fun,
     )
 
-    result_forward = transform.forward(params)
+    result_transformed = transform.transform(params)
 
-    np.testing.assert_array_less(np.asarray(result_forward["x"]), transform_fun(np.asarray(result_forward["z"])))
+    np.testing.assert_array_less(
+        np.asarray(result_transformed["x"]),
+        transform_fun(np.asarray(result_transformed["z"])),
+    )
 
 
 @parameterize_params_wrapper
@@ -194,9 +197,9 @@ def test_parameter_constraint_lower_fixed(params_wrapper: type, params: dict):
         lower=fixed,
     )
 
-    result_forward = transform.forward(params)
+    result_transformed = transform.transform(params)
 
-    np.testing.assert_array_less(fixed, np.asarray(result_forward["x"]))
+    np.testing.assert_array_less(fixed, np.asarray(result_transformed["x"]))
 
 
 @parameterize_params_wrapper
@@ -209,9 +212,9 @@ def test_parameter_constraint_upper_fixed(params_wrapper: type, params: dict):
         upper=fixed,
     )
 
-    result_forward = transform.forward(params)
+    result_transformed = transform.transform(params)
 
-    np.testing.assert_array_less(np.asarray(result_forward["x"]), fixed)
+    np.testing.assert_array_less(np.asarray(result_transformed["x"]), fixed)
 
 
 @parameterize_params_wrapper
@@ -221,7 +224,7 @@ def test_adapter(params_wrapper: type, params: dict):
         transforms=[
             ParameterTransform(["x"], np.log, np.exp),
             ParameterTransform(["y"], np.sqrt, np.log),
-            ParameterConstraint(["x"], lower="z", transform_fun=np.abs),
+            ParameterConstraint(["x"], lower="z", bound_fun=np.abs),
         ],
     )
 
@@ -230,8 +233,8 @@ def test_adapter(params_wrapper: type, params: dict):
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=RuntimeWarning)
 
-        result_forward = adapter.forward(params)
-        result_inverse = adapter.inverse(result_forward)
+        result_transformed = adapter.transform(params)
+        result_inverse = adapter.inverse(result_transformed)
 
-    assert isinstance(result_forward, params_wrapper)
+    assert isinstance(result_transformed, params_wrapper)
     assert isinstance(result_inverse, params_wrapper)
