@@ -1,0 +1,73 @@
+prfmodel.models.temporal
+========================
+
+.. py:module:: prfmodel.models.temporal
+
+.. autoapi-nested-parse::
+
+   Temporal response models.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.models.temporal.BaselineAmplitude
+
+
+Module Contents
+---------------
+
+.. py:class:: BaselineAmplitude
+
+
+
+   Linear baseline and amplitude model.
+
+   Transforms a temporal response by multiplying it with an amplitude and adding a baseline.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   >>>     "baseline": [5.0, 10.0, -3.0],
+   >>>     "amplitude": [2.0, -1.0, 1.0],
+   >>> })
+   >>> num_frames = 10
+   >>> inputs = np.ones((params.shape[0], num_frames))
+   >>> model = BaselineAmplitude()
+   >>> resp = model(inputs, params)
+   >>> print(resp.shape) # (num_rows, num_frames)
+   (3, 10)
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      Names of parameters used by the model.
+
+      Parameter names are: `baseline` and `amplitude`.
+
+
+   .. py:method:: __call__(inputs: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the model response.
+
+      :param inputs: Input tensor with temporal response and shape (num_batches, num_frames).
+      :type inputs: Tensor
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels. Must contain the columns `baseline` and `amplitude`.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions with the same shape as `inputs` and dtype `dtype`.
+      :rtype: Tensor
+
+
+

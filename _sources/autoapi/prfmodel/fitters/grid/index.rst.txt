@@ -1,0 +1,88 @@
+prfmodel.fitters.grid
+=====================
+
+.. py:module:: prfmodel.fitters.grid
+
+.. autoapi-nested-parse::
+
+   Grid fitters.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.fitters.grid.GridHistory
+   prfmodel.fitters.grid.GridFitter
+
+
+Module Contents
+---------------
+
+.. py:class:: GridHistory(history: dict | None)
+
+   Grid search metric history.
+
+   Logs losses and metrics over data batches resulting from a grid search.
+
+   .. attribute:: history
+
+      Dictionary with keys indicating metric names and values containing metric values for each data batch.
+
+      :type: dict
+
+
+.. py:class:: GridFitter(model: prfmodel.models.base.BaseModel, stimulus: prfmodel.stimulus.Stimulus, loss: keras.losses.Loss | collections.abc.Callable | None = None, dtype: str | None = None)
+
+   Fit population receptive field models with grid search.
+
+   Estimates model parameters by evaluating the model on a grid of parameter combinations and finding the
+   minimum loss.
+
+   :param model: Population receptive field model instance that can be fit to data.
+                 The model must implement `__call__` to make predictions that can be compared to data.
+   :type model: BaseModel
+   :param stimulus: Stimulus object used to make model predictions.
+   :type stimulus: Stimulus
+   :param loss: Loss instance or function with the signature `f(y, y_pred)`, where `y` is the target data and `y_pred` are the
+                model predicitons. Default is `None` where a `keras.optimizers.MeanSquaredError` loss is used. Note that, when
+                a `keras.losses.Loss` instance is used, the argument `reduction` must be set to `"none"` to enable loss
+                computation for all data batches.
+   :type loss: keras.optimizers.Loss or Callable, optional
+   :param dtype: The dtype used for fitting. If `None` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+   .. rubric:: Notes
+
+   Depending on the size of the parameter grid and the number of batches in the data, the search can be very
+   memory-intensive. For this reason, the grid is first split into chunks that are evaluated iteratively.
+
+
+   .. py:property:: dtype
+      :type: str
+
+
+      The dtype that is used during fitting.
+
+
+   .. py:method:: fit(data: prfmodel.typing.Tensor, parameter_values: dict[str, prfmodel.typing.Tensor | numpy.ndarray], chunk_size: int | None = None) -> tuple[GridHistory, pandas.DataFrame]
+
+      Fit a population receptive field model to target data.
+
+      :param data: Target data to fit the model to. Must have shape (num_batches, num_frames), where `num_batches` is the
+                   number of batches for which parameters are estimated and `num_frames` is the number of time steps.
+      :type data: Tensor
+      :param parameter_values: Dictionary with keys indicating model parameters and values indicating parameter values in the grid. The
+                               grid is constructed by taking all combinations of parameters values (i.e., the cartesian product).
+      :type parameter_values: dict
+      :param chunk_size: Size of each chunk of the grid that is evaluated at the same time.
+      :type chunk_size: int, optional
+
+      :returns: * *GridHistory* -- A history object that contains loss and metric values for each data batch.
+                * *pandas.DataFrame* -- A dataframe with final model parameters.
+
+
+

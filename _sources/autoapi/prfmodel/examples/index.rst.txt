@@ -1,0 +1,50 @@
+prfmodel.examples
+=================
+
+.. py:module:: prfmodel.examples
+
+.. autoapi-nested-parse::
+
+   Example stimuli and data.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   prfmodel.examples.load_2d_bar_stimulus
+
+
+Module Contents
+---------------
+
+.. py:function:: load_2d_bar_stimulus() -> prfmodel.stimulus.Stimulus
+
+   Load a two-dimensional bar stimulus.
+
+   Loads an example stimulus that moves in eight directions (vertical, horizontal, diagonal) through a two-dimensional
+   space.
+
+   :returns: A stimulus object with a `design` with shape (200, 101, 101) and a `grid` with shape (101, 101, 2).
+   :rtype: Stimulus
+
+   .. rubric:: Notes
+
+   The stimulus was created with the validation framework developed by Lerma-Usabiaga et al (2020)[1]_.
+   It has 200 time frames, with 101 pixels in the x- and y-dimension, spanning a visual field of 20 degrees
+   vertically and horizontally.
+
+   .. seealso::
+
+      :py:obj:`prfmodel.stimulus.animate_2d_stimulus`
+          Create an animation for a two-dimensional stimulus.
+
+   .. rubric:: References
+
+   .. [1] Lerma-Usabiaga, G., Benson, N., Winawer, J., & Wandell, B. A. (2020). A validation framework for
+       neuroimaging software: The case of population receptive fields. *PLOS Computational Biology, 16*(6),
+       e1007924. https://doi.org/10.1371/journal.pcbi.1007924
+
+

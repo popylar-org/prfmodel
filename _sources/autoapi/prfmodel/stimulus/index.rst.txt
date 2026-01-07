@@ -1,0 +1,230 @@
+prfmodel.stimulus
+=================
+
+.. py:module:: prfmodel.stimulus
+
+.. autoapi-nested-parse::
+
+   Containers for stimuli and stimulus grids.
+
+
+
+Exceptions
+----------
+
+.. autoapisummary::
+
+   prfmodel.stimulus.GridDesignShapeError
+   prfmodel.stimulus.GridDimensionsError
+   prfmodel.stimulus.DimensionLabelsError
+   prfmodel.stimulus.StimulusDimensionError
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.stimulus.Stimulus
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   prfmodel.stimulus.animate_2d_stimulus
+   prfmodel.stimulus.plot_2d_stimulus
+
+
+Module Contents
+---------------
+
+.. py:exception:: GridDesignShapeError(design_shape: tuple[int, Ellipsis], grid_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when the shapes of the stimulus design and grid do not match.
+
+   :param design_shape: Shape of the design array.
+   :type design_shape: tuple of int
+   :param grid_shape: Shape of the grid array.
+   :type grid_shape: tuple of int
+
+
+.. py:exception:: GridDimensionsError(grid_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when number of grid dimensions except for the last does not match last grid dimension size.
+
+   :param grid_shape: Shape of the grid array.
+   :type grid_shape: tuple of int
+
+
+.. py:exception:: DimensionLabelsError(dimensions_len: int, grid_dim: int)
+
+
+
+   Exception raised when the number of dimensions does not match the grid's last dimension.
+
+   :param dimensions_len: Length of the dimensions sequence.
+   :type dimensions_len: int
+   :param grid_dim: Size of the last dimension of the grid.
+   :type grid_dim: int
+
+
+.. py:exception:: StimulusDimensionError(actual: int, expected: int)
+
+
+
+   Exception raised when Stimulus does not have the right number of dimensions.
+
+   The dimension for the frames is ignored.
+
+   :param actual: Number of dimensions in the stimulus grid.
+   :type actual: int
+   :param expected: Number of expected dimensions in the stimulus grid.
+   :type expected: int
+
+
+.. py:class:: Stimulus(design: numpy.ndarray, grid: numpy.ndarray, dimension_labels: collections.abc.Sequence[str] | None = None)
+
+   Container for a stimulus design and its associated grid.
+
+   :param design: The stimulus design array containing the stimulus value in one or more dimensions over different time frames.
+                  The first axis is assumed to be time frames. Additional axes represent design dimensions.
+   :type design: numpy.ndarray
+   :param grid: The coordinate system of the design. The last axis is the number of design dimensions
+                excluding the time frame dimension. The shape excluding the last axis must match the shape
+                of the design excluding the first axis.
+   :type grid: numpy.ndarray
+   :param dimension_labels: Names of the grid dimensions (e.g., `["y", "x"]`). If given, the number of labels must match the last grid axis.
+   :type dimension_labels: Sequence[str] or None, optional
+
+   :raises GridDesignShapeError: If the design and grid dimensions do not match.
+   :raises GridDimensionsError: If the number of dimensions of the grid except the last does not match the size of the last grid dimension.
+   :raises DimensionLabelsError: If the number of dimensions does not match the grid's last dimension.
+
+   .. rubric:: Notes
+
+   The shapes of the design and grid must match according to `design.shape[1:] == grid.shape[:-1]`.
+   That is, all design dimensions but the first must have the same size as the grid
+   dimensions excluding the last grid dimension.
+
+   .. rubric:: Examples
+
+   Create a stimulus on a 2D grid.
+
+   >>> import numpy as np
+   >>> num_frames, width, height = 10, 16, 16
+   >>> design = np.ones((num_frames, width, height))
+   >>> pixel_size = 0.05
+   >>> x = (np.arange(width) - (width - 1) / 2) * pixel_size
+   >>> y = (np.arange(height) - (height - 1) / 2) * pixel_size
+   >>> xv, yv = np.meshgrid(x, y)
+   >>> grid = np.stack((xv, yv), axis=-1)  # shape (height, width, 2)
+   >>> grid = np.stack((xv, yv), axis=-1)  # shape (height, width, 2)
+   >>> # The coordinates of the bottom-left corner:
+   >>> grid[0, 0, :]
+   array([-0.375, -0.375])
+   >>> # The coordinates of the top-right corner:
+   >>> grid[15, 15, :]
+   array([0.375, 0.375])
+   >>> stimulus = Stimulus(design=design, grid=grid, dimension_labels=["y", "x"])
+   >>> print(stimulus)
+   Stimulus(design=array[10, 16, 16], grid=array[16, 16, 2], dimension_labels=['y', 'x'])
+
+
+   .. py:method:: create_2d_bar_stimulus(num_frames: int = 100, width: int = 128, height: int = 128, bar_width: int = 20, direction: str = 'horizontal', pixel_size: float = 0.05) -> Stimulus
+      :classmethod:
+
+
+      Create a bar stimulus that moves across a 2D screen.
+
+      The stimulus starts and ends moving just outside the screen.
+
+      :param num_frames: Number of time frames in the stimulus.
+      :type num_frames: int, optional
+      :param width: Width of the stimulus grid (in pixels).
+      :type width: int, optional
+      :param height: Height of the stimulus grid (in pixels).
+      :type height: int, optional
+      :param bar_width: Width of the moving bar (in pixels).
+      :type bar_width: int, optional
+      :param direction: Direction in which the bar moves.
+      :type direction: {"horizontal", "vertical"}, optional
+      :param pixel_size: Size of a pixel in spatial units.
+      :type pixel_size: float, optional
+
+      :returns: A Stimulus instance with the generated design and grid.
+      :rtype: Stimulus
+
+      :raises ValueError: If `direction` is not "horizontal" or "vertical".
+
+      .. rubric:: Examples
+
+      >>> stimulus = Stimulus.create_2d_bar_stimulus(num_frames=200)
+      >>> print(stimulus)
+      Stimulus(design=array[200, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
+
+
+
+.. py:function:: animate_2d_stimulus(stimulus: Stimulus, title: str | None = None, origin: Literal['upper', 'lower'] = 'lower', interval: int = 50, blit: bool = True, repeat_delay: int = 1000, **kwargs) -> matplotlib.animation.ArtistAnimation
+
+   Animate a 2d stimulus.
+
+   :param stimulus: The stimulus to visualize.
+   :type stimulus: Stimulus
+   :param title: Title for the video animation.
+   :type title: str or None, optional
+   :param origin: `origin` argument for :meth:`matplotlib.axes.Axes.imshow`.
+   :type origin: str, optional
+   :param interval: `interval` argument passed to :class:`matplotlib.animation.ArtistAnimation`.
+   :type interval: int, optional
+   :param blit: `blit` argument passed to :class:`matplotlib.animation.ArtistAnimation`.
+   :type blit: bool, optional
+   :param repeat_delay: `repeat_delay` argument passed to :class:`matplotlib.animation.ArtistAnimation`.
+   :type repeat_delay: int, optional
+   :param kwargs: Extra arguments passed to :func:`matplotlib.pyplot.subplots`
+                  and :class:`matplotlib.animation.ArtistAnimation`.
+
+   :rtype: matplotlib.animation.ArtistAnimation
+
+   :raises StimulusDimensionError: If `stimulus` is not 2-dimensional.
+
+   .. rubric:: Notes
+
+   The function uses matplotlib under the hood, and you can use the :data:`matplotlib.rcParams`
+   to customize the animation, as described on the
+   `matplotlib docs <https://matplotlib.org/stable/users/explain/customizing.html>`_.
+
+   .. rubric:: Examples
+
+   >>> from IPython.display import HTML
+   >>> from prfmodel.stimulus import Stimulus, make_video
+   >>> bar_stimulus = Stimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64)
+   >>> ani = make_2d_animation(bar_stimulus)
+   >>> video = ani.to_html5_video()
+   >>> HTML(video)
+
+
+.. py:function:: plot_2d_stimulus(stimulus: Stimulus, frame_idx: int, origin: Literal['upper', 'lower'] = 'lower', title: str | None = None, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Plot a single frame of a 2d stimulus.
+
+   :param stimulus: The stimulus to visualize.
+   :type stimulus: Stimulus
+   :param frame_idx: Index of the frame to plot.
+   :type frame_idx: int
+   :param origin: `origin` argument for :meth:`matplotlib.axes.Axes.imshow`.
+   :type origin: str, optional
+   :param title: Title for the plot.
+   :type title: str or None, optional
+   :param kwargs: Extra arguments passed to :func:`matplotlib.pyplot.subplots`.
+
+   :rtype: tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   :raises StimulusDimensionError: If the stimulus is not 2-dimensional.
+
+
