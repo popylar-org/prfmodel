@@ -4,6 +4,9 @@ import keras
 import numpy as np
 import pandas as pd
 import pytest
+from prfmodel.adapter import Adapter
+from prfmodel.adapter import ParameterConstraint
+from prfmodel.adapter import ParameterTransform
 from prfmodel.fitters.sgd import SGDFitter
 from prfmodel.fitters.sgd import SGDHistory
 from prfmodel.models.gaussian import Gaussian2DPRFModel
@@ -94,3 +97,32 @@ class TestSGDFitter(TestSetup):
         self._check_history(history)
         self._check_sgd_params(sgd_params, params)
         assert np.all(sgd_params[fixed] == params[fixed].astype(get_dtype(dtype)))
+
+    def test_fit_adapter(
+        self,
+        stimulus: Stimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        dtype: str,
+    ):
+        """Test that fit with an adapter returns parameters with the correct shape."""
+        adapter = Adapter(
+            [
+                ParameterTransform(["sigma", "shape"], keras.ops.log, keras.ops.exp),
+                ParameterConstraint(["shape"], lower="rate", bound_fun=keras.ops.log),
+            ],
+        )
+
+        fitter = SGDFitter(
+            model=model,
+            stimulus=stimulus,
+            adapter=adapter,
+            dtype=dtype,
+        )
+
+        observed = model(stimulus, params)
+
+        history, sgd_params = fitter.fit(observed, params, num_steps=self.num_steps)
+
+        self._check_history(history)
+        self._check_sgd_params(sgd_params, params)

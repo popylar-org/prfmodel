@@ -6,6 +6,7 @@ import keras
 import pandas as pd
 from keras import ops
 from tqdm import tqdm
+from prfmodel.adapter import Adapter
 from prfmodel.models.base import BaseModel
 from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
@@ -73,6 +74,8 @@ class SGDFitter(BackendSGDFitter):
         The model must implement `__call__` to make predictions that can be compared to data.
     stimulus : Stimulus
         Stimulus object used to make model predictions.
+    adapter : Adapter, optional
+        Adapter object to apply transformations to parameters during fitting.
     optimizer : keras.optimizers.Optimizer, optional
         Optimizer instance. Default is `None` where a `keras.optimizers.Adam` optimizer is used.
     loss : keras.optimizers.Loss or Callable, optional
@@ -90,10 +93,11 @@ class SGDFitter(BackendSGDFitter):
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913 (too many arguments in function definition)
         self,
         model: BaseModel,
         stimulus: Stimulus,
+        adapter: Adapter | None = None,
         optimizer: keras.optimizers.Optimizer | None = None,
         loss: keras.losses.Loss | Callable | None = None,
         dtype: str | None = None,
@@ -103,12 +107,16 @@ class SGDFitter(BackendSGDFitter):
         self.model = model
         self.stimulus = stimulus
 
+        if adapter is None:
+            adapter = Adapter()
+
         if optimizer is None:
             optimizer = keras.optimizers.Adam()
 
         if loss is None:
             loss = keras.losses.MeanSquaredError()
 
+        self.adapter = adapter
         self.optimizer = optimizer
         self.loss = loss
         self.dtype = dtype
@@ -161,7 +169,10 @@ class SGDFitter(BackendSGDFitter):
         if fixed_parameters is None:
             fixed_parameters = []
 
-        self._create_variables(init_parameters, fixed_parameters)
+        # Initialize parameters on transformed scale
+        init_parameters_transformed = self.adapter.transform(init_parameters)
+
+        self._create_variables(init_parameters_transformed, fixed_parameters)
 
         self.optimizer.build(self.trainable_variables)
 
@@ -204,6 +215,9 @@ class SGDFitter(BackendSGDFitter):
         params = pd.DataFrame(
             {v.name: ops.convert_to_numpy(v.value) for v in self.trainable_variables + self.non_trainable_variables},
         )
+
+        # Transform parameters back to natural scale
+        params = self.adapter.inverse(params)
 
         self._delete_variables(init_parameters)
 

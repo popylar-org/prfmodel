@@ -5,8 +5,8 @@ import jax.numpy as jnp
 import keras
 from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
+from prfmodel.utils import ParamsDict
 from .base import BaseSGDFitter
-from .base import ParamsDict
 from .base import SGDState
 
 
@@ -36,6 +36,8 @@ class JAXSGDFitter(BaseSGDFitter):
                     )
                 },
             )
+            # Make model predictions with parameters on natural scale
+            params = self.adapter.inverse(params)
             y_pred = self.model(x, params, dtype=dtype)
             loss = self.compute_loss(y=y, y_pred=y_pred)
 
