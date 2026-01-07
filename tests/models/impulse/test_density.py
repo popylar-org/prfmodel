@@ -1,5 +1,6 @@
 """Tests for density functions."""
 
+from functools import partial
 from itertools import product
 import numpy as np
 import pytest
@@ -16,7 +17,7 @@ from prfmodel.models.impulse import shifted_gamma_density
 class TestGammaDensitySetup:
     """Setup for testing gamma density functions."""
 
-    duration = 32
+    duration = 32.0
     offset = 0.0001
     resolution = 0.1
 
@@ -31,35 +32,14 @@ class TestGammaDensitySetup:
         """Range of shape and rate parameters."""
         return np.round(np.linspace(0.1, 5.0, 5), 2)
 
-    def _check_peak(
-        self,
-        frames: np.ndarray,
-        response: np.ndarray,
-        expected_mode: np.ndarray,
-        shift: np.ndarray = None,
-    ) -> None:
-        frames = frames.squeeze()
-        # Get maximum of response
-        peak_frame_idx = np.argmax(response, axis=1)
-        # Get time frame with maximum
-        peak_response = frames[peak_frame_idx]
+    @pytest.fixture
+    def shift_parameter_range(self):
+        """Range for shift parameter."""
+        return np.linspace(-5, 5, num=5)
 
-        shift = [None] * len(expected_mode) if shift is None else shift.squeeze()
-
-        for ep, pr, idx, sh in zip(expected_mode, peak_response, peak_frame_idx, shift, strict=False):
-            # Expected mode is later than time frames
-            if ep >= frames.max():
-                assert idx == (len(frames) - 1), "Peak response must be in last frame"
-            # Expected mode is earlier than time frames
-            elif ep <= frames.min():
-                if sh is None:
-                    assert idx == 0, "Peak response must be in first frame"
-                else:
-                    first_nonzero_idx = np.argmax(frames > sh)
-                    assert idx == first_nonzero_idx, "Peak response must be in first nonzero frame"
-            else:
-                # The observed peak should not differ from expected peak more than the resolution
-                assert abs(pr - ep) <= self.resolution
+    @staticmethod
+    def _calc_gamma_pdf(x: np.ndarray, shape: float, rate: float, shift: float = 0.0) -> np.ndarray:
+        return stats.gamma.pdf(x, a=shape, loc=shift, scale=1 / rate)
 
 
 class TestGammaDensity(TestGammaDensitySetup):
@@ -72,12 +52,10 @@ class TestGammaDensity(TestGammaDensitySetup):
 
     def test_gamma_density(self, frames: np.ndarray, parameters: np.ndarray):
         """
-        Test that gamma density peaks at correct frame across combinations of shape and rate parameters.
+        Test that gamma density is the same as `scipy.stats.gamma.pdf`.
 
         Argument `parameters` is a two-dimensional array where the first column is the shape and the second column
         the rate parameter of each parameter combination.
-
-        The peak of the gamma density is tested against the expected analytical mode of the gamma distribution.
 
         """
         # Parameters must have shape (n, 1)
@@ -86,12 +64,9 @@ class TestGammaDensity(TestGammaDensitySetup):
 
         resp = np.asarray(gamma_density(frames, shape, rate))
 
-        assert np.all(resp > 0.0)
+        ref = self._calc_gamma_pdf(frames, shape, rate)
 
-        # Calc expected analytical mode of each parameter combination
-        expected_mode = np.where(shape < 1, 0, (shape - 1) / rate).squeeze()
-
-        self._check_peak(frames, resp, expected_mode)
+        assert np.all(np.isclose(resp, ref))
 
     def test_gamma_density_integral(self):
         """Test that the integral of normalized density is 1."""
@@ -138,23 +113,16 @@ class TestShiftedGammaDensity(TestGammaDensitySetup):
     """Tests for shifted_gamma_density function."""
 
     @pytest.fixture
-    def shift_parameter_range(self):
-        """Range for shift parameter."""
-        return np.linspace(-5, 5, num=5)
-
-    @pytest.fixture
     def parameters(self, parameter_range: np.ndarray, shift_parameter_range: np.ndarray):
         """Shape, rate, and shift parameter combinations."""
         return np.array(list(product(parameter_range, parameter_range, shift_parameter_range)))
 
     def test_shifted_gamma_density(self, frames: np.ndarray, parameters: np.ndarray):
         """
-        Test that shifted gamma density peaks at correct frame across combinations of shape, rate, and shift parameters.
+        Test that shifted gamma density is the same as `scipy.stats.gamma.pdf`.
 
         Argument `parameters` is a three-dimensional array where the first column is the shape, the second column
         the rate parameter, and the third columnt the shift parameter of each parameter combination.
-
-        The peak of the gamma density is tested against the shifted expected analytical mode of the gamma distribution.
 
         """
         # Parameters must have shape (n, 1)
@@ -164,12 +132,9 @@ class TestShiftedGammaDensity(TestGammaDensitySetup):
 
         resp = np.asarray(shifted_gamma_density(frames, shape, rate, shift))
 
-        assert np.all(resp >= 0.0)
+        ref = self._calc_gamma_pdf(frames, shape, rate, shift)
 
-        # Calc expected analytical mode of each parameter combination
-        expected_mode = (np.where(shape < 1, 0, (shape - 1) / rate) + shift).squeeze()
-
-        self._check_peak(frames, resp, expected_mode, shift)
+        assert np.all(np.isclose(resp, ref))
 
 
 class TestDerivativeGammaDensity(TestGammaDensitySetup):
@@ -181,12 +146,17 @@ class TestDerivativeGammaDensity(TestGammaDensitySetup):
         return np.array(list(product(parameter_range, parameter_range)))
 
     def test_derivative_gamma_density(self, frames: np.ndarray, parameters: np.ndarray):
-        """Test that the derivative gamma density is close to the approximate derivative from scipy."""
+        """
+        Test that the derivative gamma density is close to the approximate derivative from scipy.
+
+        Note that the approximate derivative is unstable at the first time frame, so we omit it for testing.
+
+        """
         # Parameters must have shape (n, 1)
         shape = np.expand_dims(parameters[:, 0], 1)
         rate = np.expand_dims(parameters[:, 1], 1)
 
-        frames = frames[:, 1:]  # Don't compare at first frame because non-analytic derivativ is not stable
+        frames = frames[:, 1:]  # Don't compare at first frame because non-analytic derivative is not stable
 
         frames = frames.squeeze()
 
@@ -195,10 +165,7 @@ class TestDerivativeGammaDensity(TestGammaDensitySetup):
         # Calc the approximate derivative for each parameter combination
         ref = np.array(
             [
-                differentiate.derivative(
-                    lambda x, p=p: stats.gamma.pdf(x, a=p[0], scale=1 / p[1]),
-                    frames,
-                ).df
+                differentiate.derivative(partial(self._calc_gamma_pdf, shape=p[0], rate=p[1]), frames).df
                 for p in parameters
             ],
         )
@@ -210,38 +177,16 @@ class TestShiftedDerivativeGammaDensity(TestGammaDensitySetup):
     """Tests for shifted_derivative_gamma_density function."""
 
     @pytest.fixture
-    def parameter_range(self):
-        """
-        Range of shape and rate parameters.
-
-        We only test for values >= 2 because the derivative behaves well in this range.
-
-        """
-        return np.round(np.linspace(2.0, 5.0, 5), 2)
-
-    @pytest.fixture
-    def shift_parameter_range(self):
-        """
-        Range for shift parameter.
-
-        We only test for values >= 0 because the derivative behaves well in this range.
-
-        """
-        return np.linspace(0.0, 5.0, num=5)
-
-    @pytest.fixture
     def parameters(self, parameter_range: np.ndarray, shift_parameter_range: np.ndarray):
         """Shape, rate, and shift parameter combinations."""
         return np.array(list(product(parameter_range, parameter_range, shift_parameter_range)))
 
     def test_shifted_derivative_gamma_density(self, frames: np.ndarray, parameters: np.ndarray):
         """
-        Test that shifted gamma density peaks at correct frame across combinations of shape, rate, and shift parameters.
+        Test that the shifted derivative gamma density is close to the approximate derivative from scipy.
 
-        Argument `parameters` is a three-dimensional array where the first column is the shape, the second column
-        the rate parameter, and the third columnt the shift parameter of each parameter combination.
-
-        The peak of the gamma density is tested against the shifted expected analytical mode of the gamma distribution.
+        Note that the shifted approximate derivative is unstable at the first non-zero time frame,
+        so we omit it for testing.
 
         """
         # Parameters must have shape (n, 1)
@@ -251,7 +196,24 @@ class TestShiftedDerivativeGammaDensity(TestGammaDensitySetup):
 
         resp = np.asarray(shifted_derivative_gamma_density(frames, shape, rate, shift))
 
-        # Calc expected analytical mode of each parameter combination
-        expected_mode = ((shape - 1 - np.sqrt(shape - 1)) / rate + shift).squeeze()
+        # Shift time frames
+        frames_shifted = frames - shift
+        # Don't compare at first non-zero frame because non-analytic derivative is not stable
+        first_nonzero_idx = (frames_shifted > 0).argmax(axis=1)  # Get index of first non-zero farme
+        # Delete first non-zero frame in shifted frame and analytic response
+        frames_shifted = np.delete(frames_shifted, first_nonzero_idx, axis=1)
+        resp = np.delete(resp, first_nonzero_idx, axis=1)
+        # Set frames <= 0 temporarily to 1 and replace their response with 0 later
+        frames_shifted_valid = np.where(frames_shifted > 0.0, frames_shifted, 1.0)
 
-        self._check_peak(frames, resp, expected_mode, shift)
+        # Calc the approximate derivative for each parameter combination
+        ref = np.array(
+            [
+                differentiate.derivative(partial(self._calc_gamma_pdf, shape=p[0], rate=p[1]), fr).df
+                for p, fr in zip(parameters, frames_shifted_valid, strict=True)
+            ],
+        )
+        # Replace response for frames <= 0 with 0
+        shifted_ref = np.where(frames_shifted > 0.0, ref, 0.0)
+
+        assert np.all(np.isclose(resp, shifted_ref))
