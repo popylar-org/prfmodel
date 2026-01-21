@@ -1,0 +1,124 @@
+prfmodel.utils
+==============
+
+.. py:module:: prfmodel.utils
+
+.. autoapi-nested-parse::
+
+   Utility functions.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   prfmodel.utils.DTYPES
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.utils.ParamsDict
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   prfmodel.utils.convert_parameters_to_tensor
+   prfmodel.utils.get_dtype
+
+
+Module Contents
+---------------
+
+.. py:data:: DTYPES
+
+   Accepted dtypes for `prfmodel.typing.Tensor` objects.
+
+   Accepted dtypes are: `"bfloat16"`, `"float16"`, `"float32"`, and `"float64"`.
+
+.. py:function:: convert_parameters_to_tensor(parameters: pandas.DataFrame, dtype: str) -> prfmodel.typing.Tensor
+
+   Convert model parameters in a dataframe into a tensor.
+
+   :param parameters: Dataframe with columns containing different model parameters and rows containing
+                      parameter values for different voxels.
+   :type parameters: pandas.DataFrame
+
+   :returns: Tensor with the first axis corresponding to voxels and the second axis corresponding to different parameters.
+   :rtype: Tensor
+
+   .. rubric:: Examples
+
+   Single parameters:
+
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   >>>     "param_1": [0.0, 1.0, 2.0],
+   >>> })
+   >>> x = convert_parameters_to_tensor(params)
+   >>> print(x.shape)
+   (3, 1)
+
+   Multiple parameters:
+
+   >>> params = pd.DataFrame({
+   >>>     "param_1": [0.0, 1.0, 2.0],
+   >>>     "param_2": [0.0, -1.0, -2.0],
+   >>> })
+   >>> x = covert_parameters_to_tensor(params)
+   >>> print(x.shape)
+   (3, 2)
+
+
+.. py:function:: get_dtype(dtype: str | None) -> str
+
+   Get the (default) dtype.
+
+   Utility function to pass through a dtype or get the default dtype set by `keras.config.floatx()`.
+
+   :param dtype: The dtype to pass through. If `None`, returns `keras.config.floatx()`.
+   :type dtype: str or None
+
+   :returns: The dtype.
+   :rtype: str
+
+   :raises ValueError: When `dtype` is not of the values defined in `DTYPES`.
+
+
+.. py:class:: ParamsDict(data: dict)
+
+   A dictionary-like object that supports dataframe-style column selection but returns Keras tensors.
+
+   Serves as an adapter during fitting to supply parameters to models while avoiding converting tensors into
+   actual dataframes.
+
+   :param data: Dictionary of parameter tensors to perform column style selection on.
+   :type data: dict
+
+
+   .. py:property:: columns
+      :type: list[str]
+
+
+      Return the names of parameter columns.
+
+
+   .. py:method:: copy() -> ParamsDict
+
+      Create a copy of the object.
+
+
+
+   .. py:method:: to_dataframe() -> pandas.DataFrame
+
+      Convert the object into a dataframe.
+
+
+
