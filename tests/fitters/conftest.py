@@ -6,7 +6,7 @@ import pytest
 from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.stimulus import Stimulus
 
-parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32"])
+parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32", "float64"])
 
 
 class TestSetup:
@@ -49,7 +49,7 @@ class TestSetup:
                 "shape": [6.0, 6.0, 6.0],
                 "rate": [0.9, 0.9, 0.9],
                 "shift": [5.0, 5.0, 5.0],
-                "baseline": [0.0, 0.0, 0.0],
-                "amplitude": [1.0, 1.0, 1.0],
+                "baseline": [0.1, -0.1, 0.5],
+                "amplitude": [-2.0, 1.2, 0.1],
             },
         )

@@ -17,6 +17,8 @@ kernelspec:
 
 **Difficulty**: Beginner
 
+**Important**: This tutorial requires pycortex which is only available for Linux and MacOS. See [](#installing-pycortex) for details.
+
 This tutorial explains how to fit a population receptive field (pRF) model to blood oxygnenation level-dependent (BOLD) functional magnetic resonance imaging
 (fMRI) data.
 
@@ -48,7 +50,7 @@ if find_spec("tensorflow") is None:
 +++
 
 Before we start modelling, we need to make sure that we have all the requirements to visualize the BOLD response data. To visualize fMRI data, we can project it onto an anatomical surface of the brain. In this tutorial, we use a standardized surface based on the
-surface of the Human Connectome Project (see https://doi.org/10.6084/m9.figshare.13372958). For visualization, we use the `pycortex` package which has an internal database where different surfaces can be stored and accessed. We download the surface and store it under the
+surface of the Human Connectome Project (see https://doi.org/10.6084/m9.figshare.13372958). For visualization, we use the pycortex package which has an internal database where different surfaces can be stored and accessed. We download the surface and store it under the
 subject name `hcp_999999`.
 
 ```{code-cell} ipython3
@@ -60,12 +62,12 @@ subject = "hcp_999999"
 download_surface(subject)
 ```
 
-We can visualize a flatmap of the surface with `pycortex`. The color of the flatmap shows the curvature of the surface and several brain regions have been overlayed for orientation (e.g., V1).
+We can visualize a flatmap of the surface with pycortex. The color of the flatmap shows the curvature of the surface and several brain regions have been overlayed for orientation (e.g., V1).
 
 ```{code-cell} ipython3
 import cortex as cx
 
-curv_vertices = cx.db.get_surfinfo(subject=subject, type='curvature')
+curv_vertices = cx.db.get_surfinfo(subject=subject, type="curvature")
 cx.quickshow(curv_vertices);
 ```
 
@@ -78,7 +80,7 @@ Now that we have the anatomical surface, we load BOLD response data from a singl
 ```{code-cell} ipython3
 from prfmodel.examples import load_single_subject_fmri_data
 
-response, stimulus = load_single_subject_fmri_data(dest_path="data", hemisphere="both", unit="psc")
+response, stimulus = load_single_subject_fmri_data(dest_dir="data", hemisphere="both", unit="psc")
 response.shape  # shape (num_vertices, num_frames)
 ```
 
@@ -155,8 +157,8 @@ Before we model the BOLD response, we should always look at the timecourses and 
 1.5 seconds for this dataset.
 
 ```{code-cell} ipython3
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 num_random_vertices = 100
 
@@ -183,7 +185,7 @@ We can get an even better overview by plotting a heatmap of all timecourses in t
 ```{code-cell} ipython3
 fig, ax = plt.subplots(1, 1, figsize=(12, 6))
 
-im = ax.imshow(response_roi, aspect=1.0 / 25.0, cmap='inferno')
+im = ax.imshow(response_roi, aspect=1.0 / 25.0, cmap="inferno")
 
 ax.set_xlabel("Time frame (in TR)")
 ax.set_ylabel("Vertices in ROI")
@@ -340,7 +342,7 @@ from prfmodel.fitters.grid import GridFitter
 grid_fitter = GridFitter(
     model=prf_model,
     stimulus=stimulus,
-    loss=CosineSimilarity(reduction="none")  # Grid fitter needs no aggregation of loss
+    loss=CosineSimilarity(reduction="none"),  # Grid fitter needs no aggregation of loss
 )
 
 # Run grid search
@@ -373,7 +375,7 @@ axarr[0, 0].legend()
 for ax in axarr[4, :]:
     ax.set_xlabel("Time frame (in TR)")
 
-axarr[2, 0].set_ylabel("BOLD response (in PSC)");
+axarr[2, 0].set_ylabel("BOLD response (in PSC)")
 
 fig.tight_layout()
 ```
@@ -393,7 +395,8 @@ ls_fitter = LeastSquaresFitter(
 ls_history, ls_params = ls_fitter.fit(
     data=response_roi,
     parameters=grid_params,
-    target_parameters=["baseline", "amplitude"],  # Names of parameters to be optimized with least squares
+    slope_name="amplitude",  # Names of parameters to be optimized with least squares
+    intercept_name="baseline",
 )
 
 ls_params
@@ -493,7 +496,7 @@ angle_roi = calc_angle(ls_params["mu_x"], ls_params["mu_y"])
 angle[mask_roi] = np.where(is_above_threshold, angle_roi, np.nan)
 
 polar_v = cx.Vertex2D(dim1=angle, dim2=mask_roi, subject=subject,
-                      cmap='Retinotopy_HSV_alpha', vmin=-np.pi, vmax=np.pi, vmin2=0.0, vmax2=1)
+                      cmap="Retinotopy_HSV_alpha", vmin=-np.pi, vmax=np.pi, vmin2=0.0, vmax2=1)
 
 _ = cx.quickshow(polar_v, with_rois=True, with_curvature=True)
 ```
@@ -513,7 +516,7 @@ eccentricity_roi = calc_eccentricity(ls_params["mu_x"], ls_params["mu_y"])
 eccentricity[mask_roi] = np.where(is_above_threshold, eccentricity_roi, np.nan)
 
 polar_v = cx.Vertex2D(dim1=eccentricity, dim2=mask_roi, subject=subject,
-                      cmap='Retinotopy_HSV_alpha', vmin=0, vmax=15.0, vmin2=0.0, vmax2=1)
+                      cmap="Retinotopy_HSV_alpha", vmin=0, vmax=15.0, vmin2=0.0, vmax2=1)
 
 _ = cx.quickshow(polar_v, with_rois=True, with_curvature=True)
 ```

@@ -4,9 +4,9 @@ import io
 import os
 import urllib
 import zipfile
+from collections.abc import Sequence
 from importlib.resources import files
 from pathlib import Path
-import cortex as cx
 import numpy as np
 from nilearn.surface import load_surf_data
 from scipy.io import loadmat
@@ -67,6 +67,8 @@ def download_surface(subject: str = "hcp_999999") -> None:
         Identifier of the subject for which to download and store the surface.
 
     """
+    import cortex as cx  # noqa: PLC0415 (import should be at top level)
+
     if subject == "hcp_999999":
         if subject not in cx.db.subjects:
             with urllib.request.urlopen("https://ndownloader.figshare.com/files/25768841") as response:
@@ -82,7 +84,7 @@ def download_surface(subject: str = "hcp_999999") -> None:
         raise ValueError(msg)
 
 
-def _load_single_subject_fmri_stimulus(dest_path: str) -> Stimulus:
+def _load_single_subject_fmri_stimulus(dest_path: str | os.PathLike) -> Stimulus:
     design_path = Path(dest_path) / "vis_design.mat"
     design = np.transpose(loadmat(design_path)["stim"])
 
@@ -110,7 +112,7 @@ def _load_single_subject_fmri_stimulus(dest_path: str) -> Stimulus:
     return Stimulus(new_design, coordinates, ["y", "x"])
 
 
-def _get_hemisphere(hemisphere: str) -> str:
+def _get_hemisphere(hemisphere: str) -> Sequence[str]:
     hemisphere_dict = {
         "both": ("L", "R"),
         "left": ("L"),
@@ -175,7 +177,7 @@ def load_single_subject_fmri_data(
     `link <https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209>`_ for further details).
 
     """
-    hemisphere = _get_hemisphere(hemisphere)
+    _hemisphere = _get_hemisphere(hemisphere)
 
     file_url = "https://ndownloader.figshare.com/files/26577941"
 
@@ -186,7 +188,7 @@ def load_single_subject_fmri_data(
             load_surf_data(Path(dest_dir) / f"sub-02_task-prf_space-59k_hemi-{hemi}_run-median_desc-bold.func.gii"),
             dtype=np.float64,
         )
-        for hemi in hemisphere
+        for hemi in _hemisphere
     ]
 
     response_combined = np.concatenate(response_hemishperes)
