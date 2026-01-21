@@ -94,7 +94,7 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
 
     design = ops.expand_dims(design, 0)
     response = ops.expand_dims(response, 1)
-    x = response * design
     # Do not sum over the first two dimensions: num_batches, num_frames
     axes = tuple(ops.arange(2, len(design.shape)))
-    return ops.sum(x, axis=axes)
+    # tensordot is much more memory efficient that standard multiplication
+    return ops.squeeze(ops.tensordot(response, design, axes=[axes, axes]), axis=(1, 2))
