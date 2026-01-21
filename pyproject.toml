@@ -29,8 +29,10 @@ dependencies = [
     "keras",
     "matplotlib",
     "more-itertools",
+    "nilearn",
     "numpy<2.0.0",
     "pandas",
+    "pycortex",
     "scipy",
     "tqdm"
 ]
