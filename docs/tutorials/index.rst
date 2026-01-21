@@ -13,6 +13,7 @@ List of tutorials:
    :glob:
 
    simple_prf_simulated.md
+   simple_prf_empirical_fmri.md
 
 Tutorial development
 --------------------
