@@ -1,10 +1,98 @@
 """Tests for examples."""
 
+import tempfile
+import cortex as cx
+import numpy as np
+import pytest
+from prfmodel.examples import download_surface
 from prfmodel.examples import load_2d_bar_stimulus
+from prfmodel.examples import load_brain_atlas
+from prfmodel.examples import load_single_subject_fmri_data
 from prfmodel.stimulus import Stimulus
+
+_NUM_VERTICES = 118584
+_NUM_FRAMES = 120
+_MIN_ROI_IDX = 0
+_MAX_ROI_IDX = 179
 
 
 def test_load_2d_bar_stimulus():
     """Test that load_2d_bar_stimulus returns stimulus object."""
     stimulus = load_2d_bar_stimulus()
     assert isinstance(stimulus, Stimulus)
+
+
+def test_download_surface():
+    """Test that download_surface returns the correct data shape."""
+    subject = "hcp_999999"
+
+    download_surface(subject)
+
+    vertex = cx.db.get_surfinfo(subject)
+
+    assert vertex.data.shape == (_NUM_VERTICES,)
+
+
+def test_download_surface_value_error():
+    """Test that download_surface raises error for unknown subject identifier."""
+    with pytest.raises(ValueError):
+        download_surface("test")
+
+
+def test_load_single_subject_fmri_data():
+    """Test that load_single_subject_fmri_data returns objects with the correct data shapes."""
+    response, stimulus = load_single_subject_fmri_data(tempfile.tempdir)
+
+    assert response.shape == (_NUM_VERTICES, _NUM_FRAMES)
+    assert stimulus.design.shape == (_NUM_FRAMES, 100, 100)
+    assert stimulus.grid.shape == (100, 100, 2)
+
+
+def test_load_single_subject_fmri_data_units():
+    """Test that load_single_subject_fmri_data returns response data with the correct unit."""
+    response, _ = load_single_subject_fmri_data(tempfile.tempdir, unit="psc")
+    assert np.allclose(response.mean(axis=1), 0.0, atol=1e-6)
+
+    response, _ = load_single_subject_fmri_data(tempfile.tempdir, unit="z_score")
+    assert np.allclose(response.mean(axis=1), 0.0, atol=1e-6)
+    assert np.allclose(response.std(axis=1), 1.0, atol=1e-6)
+
+    response, _ = load_single_subject_fmri_data(tempfile.tempdir, unit="raw")
+    assert not np.allclose(response.mean(axis=1), 0.0, atol=1e-6)
+    assert not np.allclose(response.std(axis=1), 1.0, atol=1e-6)
+
+
+@pytest.mark.parametrize("hemisphere", ["left", "right"])
+def test_load_single_subject_fmri_data_hemispheres(hemisphere: str):
+    """Test that load_single_subject_fmri_data returns response data with the hemisphere shape."""
+    response, _ = load_single_subject_fmri_data(tempfile.tempdir, hemisphere=hemisphere)
+    assert response.shape == (_NUM_VERTICES // 2, _NUM_FRAMES)
+
+
+def test_load_single_subject_fmri_data_value_error():
+    """Test that load_single_subject_fmri_data raises error for unknown hemispheres and units."""
+    with pytest.raises(ValueError):
+        load_single_subject_fmri_data(tempfile.tempdir, hemisphere="test")
+
+    with pytest.raises(ValueError):
+        load_single_subject_fmri_data(tempfile.tempdir, unit="test")
+
+
+def test_load_brain_atlas():
+    """Test that load_brain_atlas returns object with correct range and shape."""
+    atlas = load_brain_atlas(tempfile.tempdir)
+
+    assert atlas.shape == (_NUM_VERTICES,)
+    assert atlas.min() == _MIN_ROI_IDX
+    assert atlas.max() == _MAX_ROI_IDX
+
+
+@pytest.mark.parametrize("hemisphere", ["left", "right"])
+def test_load_brain_atlas_hemispheres(hemisphere: str):
+    """Test that load_brain_atlas returns object with correct hemisphere range and shape."""
+    atlas = load_brain_atlas(tempfile.tempdir, hemisphere=hemisphere)
+    atlas = np.mod(atlas, 180)  # hemisphere indices are symmetric
+
+    assert atlas.shape == (_NUM_VERTICES // 2,)
+    assert atlas.min() == _MIN_ROI_IDX
+    assert atlas.max() == _MAX_ROI_IDX
