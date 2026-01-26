@@ -11,8 +11,7 @@ A modern Python implementation for population receptive field model fitting.
 
 ## Installation
 
-**Requirements**: prfmodel requires Python version >= 3.10 and <= 3.12. Please note that some tutorials require
-pycortex which can only be installed on MacOS or Linux.
+**Requirements**: prfmodel requires Python version >= 3.10 and <= 3.12.
 
 To install the development version of prfmodel from GitHub, run:
 
