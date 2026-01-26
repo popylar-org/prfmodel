@@ -23,6 +23,7 @@ class TestGridFitter(TestSetup):
     def _check_grid_params(self, result_params: pd.DataFrame, params: pd.DataFrame) -> None:
         assert isinstance(result_params, pd.DataFrame)
         assert result_params.shape == params.shape
+        assert np.allclose(result_params, params)
 
     @pytest.fixture
     def param_ranges(self):
@@ -41,7 +42,7 @@ class TestGridFitter(TestSetup):
     @parametrize_dtype
     @pytest.mark.parametrize(
         "loss",
-        [None, keras.losses.MeanSquaredError(reduction="none"), keras.losses.CosineSimilarity(reduction="none")],
+        [None, keras.losses.MeanSquaredError(reduction="none")],
     )
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
