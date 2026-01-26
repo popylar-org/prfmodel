@@ -1,10 +1,9 @@
 """Setup for fitter tests."""
 
-import numpy as np
 import pandas as pd
 import pytest
+from prfmodel.examples import load_2d_bar_stimulus
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import Stimulus
 
 parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32"])
 
@@ -12,25 +11,14 @@ parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32"])
 class TestSetup:
     """Setup parameters and objects for fitter tests."""
 
-    width: int = 5
-    height: int = 4
-    num_frames: int = 10
-
     @pytest.fixture
     def stimulus(self):
         """Stimulus object."""
-        y = np.linspace(-2, 2, num=self.height)
-        x = np.linspace(-2, 2, num=self.width)
-        xv, yv = np.meshgrid(x, y)
-        grid = np.stack((xv, yv), axis=-1)
+        stimulus = load_2d_bar_stimulus()
 
-        design = np.ones((self.num_frames, self.height, self.width))
+        stimulus.design = stimulus.design[:25]
 
-        return Stimulus(
-            design=design,
-            grid=grid,
-            dimension_labels=["y", "x"],
-        )
+        return stimulus
 
     @pytest.fixture
     def model(self):
