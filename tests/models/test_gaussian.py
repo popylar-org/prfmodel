@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from scipy import stats
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseTemporal
 from prfmodel.models.base import BatchDimensionError
@@ -155,23 +156,36 @@ class TestExpandGaussianArgs(TestSetup):
 class TestPredictGaussianResponse(TestSetup):
     """Tests for predict_gaussian_response function."""
 
+    @staticmethod
+    def _validate_gaussian(predictions: np.ndarray, grid: np.ndarray, mu: np.ndarray, sigma: np.ndarray) -> None:
+        expected = np.stack(
+            [
+                stats.multivariate_normal.pdf(grid, mean=mu[i], cov=sigma[i, 0] ** 2 * np.eye(grid.shape[-1]))
+                for i in range(mu.shape[0])
+            ],
+        )
+        assert np.allclose(predictions, expected)
+
     def test_predict_gaussian_response_1d(self, grid_1d: np.ndarray, mu_1d: np.ndarray, sigma: np.ndarray):
         """Test that 1D response prediction returns correct shape."""
-        preds = predict_gaussian_response(grid_1d, mu_1d, sigma)
+        preds = np.asarray(predict_gaussian_response(grid_1d, mu_1d, sigma))
 
         assert preds.shape == (3, self.height)
+        self._validate_gaussian(preds, grid_1d, mu_1d, sigma)
 
     def test_predict_gaussian_response_2d(self, grid_2d: np.ndarray, mu_2d: np.ndarray, sigma: np.ndarray):
         """Test that 2D response prediction returns correct shape."""
-        preds = predict_gaussian_response(grid_2d, mu_2d, sigma)
+        preds = np.asarray(predict_gaussian_response(grid_2d, mu_2d, sigma))
 
         assert preds.shape == (3, self.height, self.width)
+        self._validate_gaussian(preds, grid_2d, mu_2d, sigma)
 
     def test_predict_gaussian_response_3d(self, grid_3d: np.ndarray, mu_3d: np.ndarray, sigma: np.ndarray):
         """Test that 3D response prediction returns correct shape."""
-        preds = predict_gaussian_response(grid_3d, mu_3d, sigma)
+        preds = np.asarray(predict_gaussian_response(grid_3d, mu_3d, sigma))
 
         assert preds.shape == (3, self.height, self.width, self.depth)
+        self._validate_gaussian(preds, grid_3d, mu_3d, sigma)
 
 
 class TestGaussian2DResponse(TestSetup):
