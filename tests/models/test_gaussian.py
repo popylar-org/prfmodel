@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from scipy import stats
+from prfmodel.examples import load_2d_bar_stimulus
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseTemporal
 from prfmodel.models.base import BatchDimensionError
@@ -188,10 +189,8 @@ class TestPredictGaussianResponse(TestSetup):
         self._validate_gaussian(preds, grid_3d, mu_3d, sigma)
 
 
-class TestGaussian2DResponse(TestSetup):
+class TestGaussian2DResponse:
     """Tests for Gaussian2DResponse class."""
-
-    num_frames: int = 10
 
     @pytest.fixture
     def response_model(self):
@@ -199,15 +198,13 @@ class TestGaussian2DResponse(TestSetup):
         return Gaussian2DResponse()
 
     @pytest.fixture
-    def stimulus(self, grid_2d: np.ndarray):
-        """2D stimulus object."""
-        design = np.ones((self.num_frames, self.height, self.width))
+    def stimulus(self):
+        """2D bar stimulus object."""
+        stimululus = load_2d_bar_stimulus()
 
-        return Stimulus(
-            design=design,
-            grid=grid_2d,
-            dimension_labels=["y", "x"],
-        )
+        stimululus.design = stimululus.design[:25]
+
+        return stimululus
 
     def test_parameter_names(self, response_model: Gaussian2DResponse):
         """Test that correct parameter names are returned."""
@@ -228,8 +225,8 @@ class TestGaussian2DResponse(TestSetup):
 
         preds = np.asarray(response_model(stimulus, params, dtype))
 
-        # Check result shape
-        assert preds.shape == (params.shape[0], self.height, self.width)  # (num_voxels, height, width)
+        # Check result shape (num_voxels, height, width)
+        assert preds.shape == (params.shape[0], stimulus.design.shape[1], stimulus.design.shape[2])
 
 
 class TestGaussian2DPRFModel(TestGaussian2DResponse):
@@ -315,4 +312,4 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
 
         resp = prf_model(stimulus, params)
 
-        assert resp.shape == (params.shape[0], self.num_frames)
+        assert resp.shape == (params.shape[0], stimulus.design.shape[0])
