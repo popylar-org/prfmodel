@@ -39,7 +39,10 @@ class TestGridFitter(TestSetup):
         }
 
     @parametrize_dtype
-    @pytest.mark.parametrize("loss", [None, keras.losses.MeanSquaredError(reduction="none")])
+    @pytest.mark.parametrize(
+        "loss",
+        [None, keras.losses.MeanSquaredError(reduction="none"), keras.losses.CosineSimilarity(reduction="none")],
+    )
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
         stimulus: Stimulus,
