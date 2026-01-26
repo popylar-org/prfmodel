@@ -29,6 +29,7 @@ dependencies = [
     "keras",
     "matplotlib",
     "more-itertools",
+    "nilearn",
     "numpy<2.0.0",
     "pandas",
     "scipy",
@@ -154,5 +155,5 @@ filename = "src/prfmodel/__init__.py"
 filename = "pyproject.toml"
 
 [[tool.mypy.overrides]]
-module = ["keras.*"]
+module = ["keras.*", "nilearn.*"]
 ignore_missing_imports = true
