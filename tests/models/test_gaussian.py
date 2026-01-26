@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from pytest_regressions.num_regression import NumericRegressionFixture
 from scipy import stats
 from prfmodel.examples import load_2d_bar_stimulus
 from prfmodel.models.base import BaseImpulse
@@ -313,3 +314,30 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
         resp = prf_model(stimulus, params)
 
         assert resp.shape == (params.shape[0], stimulus.design.shape[0])
+
+    @pytest.mark.parametrize(
+        ("impulse_model", "temporal_model"),
+        [
+            (ShiftedDerivativeGammaImpulse(), BaselineAmplitude()),  # Test with class instances
+            (ShiftedDerivativeGammaImpulse(), None),
+            (None, BaselineAmplitude()),
+            (None, None),
+        ],
+    )
+    def test_predict_regression(
+        self,
+        num_regression: NumericRegressionFixture,
+        impulse_model: BaseImpulse,
+        temporal_model: BaseTemporal,
+        stimulus: Stimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that model prediction matches reference file."""
+        prf_model = Gaussian2DPRFModel(
+            impulse_model=impulse_model,
+            temporal_model=temporal_model,
+        )
+
+        resp = prf_model(stimulus, params)
+
+        num_regression.check({f"response_{i}": x for i, x in enumerate(resp)})
