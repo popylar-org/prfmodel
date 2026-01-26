@@ -29,6 +29,7 @@ dependencies = [
     "keras",
     "matplotlib",
     "more-itertools",
+    "nilearn",
     "numpy<2.0.0",
     "pandas",
     "scipy",
@@ -63,7 +64,8 @@ dev = [
     "pandas-stubs",
     "jupyter",
     "types-tqdm",
-    "ipykernel"
+    "ipykernel",
+    "scipy-stubs",
 ]
 publishing = [
     "build",
@@ -73,6 +75,7 @@ publishing = [
 torch = ["torch"]
 jax = ["jax"]
 tensorflow = ["tensorflow"]
+pycortex = ["pycortex"]
 
 [project.urls]
 Repository = "https://github.com/popylar-org/prfmodel"
@@ -154,5 +157,9 @@ filename = "src/prfmodel/__init__.py"
 filename = "pyproject.toml"
 
 [[tool.mypy.overrides]]
-module = ["keras.*"]
+module = [
+    "keras.*",
+    "nilearn.*",
+    "cortex.*",
+]
 ignore_missing_imports = true
