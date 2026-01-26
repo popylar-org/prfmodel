@@ -33,7 +33,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip setuptools
           python -m pip install .[dev,publishing,tensorflow]
-      - name: Run unit tests
+      - name: Run unit tests with examples
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        run: python -m pytest -v --examples
+        env:
+          KERAS_BACKEND: tensorflow
+      - name: Run unit tests without examples
+        if: matrix.os != 'ubuntu-latest' || matrix.python-version != '3.12'
         run: python -m pytest -v
         env:
           KERAS_BACKEND: tensorflow
@@ -49,7 +55,7 @@ jobs:
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: 3.12
+          python-version: '3.12'
       - name: Python info
         shell: bash -e {0}
         run: |
