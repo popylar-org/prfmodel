@@ -95,7 +95,7 @@ class SimplePRFModel(BasePRFModel):
         if self.models["impulse_model"] is not None:
             impulse_model = cast("BaseImpulse", self.models["impulse_model"])
             impulse_response = impulse_model(parameters, dtype=dtype)
-            response = convolve_prf_impulse_response(response, impulse_response)
+            response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
 
         if self.models["temporal_model"] is not None:
             temporal_model = cast("BaseTemporal", self.models["temporal_model"])
