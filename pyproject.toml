@@ -49,6 +49,7 @@ dev = [
     "coverage [toml]",
     "pytest",
     "pytest-cov",
+    "pytest-regressions[dataframe,num]",  # install pandas and numpy extensions
     "ruff",
     "tox",
     "myst_nb",

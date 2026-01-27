@@ -36,6 +36,10 @@ class TestBaselineAmplitdue:
         resp = model(inputs, params, dtype)
 
         assert resp.shape == inputs.shape
+        assert np.allclose(
+            resp,
+            inputs * np.expand_dims(params["amplitude"], 1) + np.expand_dims(params["baseline"], 1),
+        )
 
     def test_shape_error(self, model: BaselineAmplitude, params: pd.DataFrame):
         """Test that ShapeError is raised."""

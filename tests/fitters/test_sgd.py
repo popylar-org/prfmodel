@@ -4,6 +4,7 @@ import keras
 import numpy as np
 import pandas as pd
 import pytest
+from pytest_regressions.dataframe_regression import DataFrameRegressionFixture
 from prfmodel.adapter import Adapter
 from prfmodel.adapter import ParameterConstraint
 from prfmodel.adapter import ParameterTransform
@@ -44,6 +45,7 @@ class TestSGDFitter(TestSetup):
     )
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
+        dataframe_regression: DataFrameRegressionFixture,
         stimulus: Stimulus,
         model: Gaussian2DPRFModel,
         optimizer: type[keras.optimizers.Optimizer],
@@ -74,8 +76,14 @@ class TestSGDFitter(TestSetup):
         self._check_history(history)
         self._check_sgd_params(sgd_params, params)
 
+        dataframe_regression.check(
+            sgd_params,
+            default_tolerance={"atol": 1e-6},
+        )
+
     def test_fit_fixed_params(
         self,
+        dataframe_regression: DataFrameRegressionFixture,
         stimulus: Stimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
@@ -98,8 +106,14 @@ class TestSGDFitter(TestSetup):
         self._check_sgd_params(sgd_params, params)
         assert np.all(sgd_params[fixed] == params[fixed].astype(get_dtype(dtype)))
 
+        dataframe_regression.check(
+            sgd_params,
+            default_tolerance={"atol": 1e-6},
+        )
+
     def test_fit_adapter(
         self,
+        dataframe_regression: DataFrameRegressionFixture,
         stimulus: Stimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
@@ -126,3 +140,8 @@ class TestSGDFitter(TestSetup):
 
         self._check_history(history)
         self._check_sgd_params(sgd_params, params)
+
+        dataframe_regression.check(
+            sgd_params,
+            default_tolerance={"atol": 1e-6},
+        )
