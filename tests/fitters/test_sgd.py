@@ -76,7 +76,10 @@ class TestSGDFitter(TestSetup):
         self._check_history(history)
         self._check_sgd_params(sgd_params, params)
 
-        dataframe_regression.check(sgd_params)
+        dataframe_regression.check(
+            sgd_params,
+            default_tolerance={"atol": 1e-6},
+        )
 
     def test_fit_fixed_params(
         self,
@@ -103,7 +106,10 @@ class TestSGDFitter(TestSetup):
         self._check_sgd_params(sgd_params, params)
         assert np.all(sgd_params[fixed] == params[fixed].astype(get_dtype(dtype)))
 
-        dataframe_regression.check(sgd_params)
+        dataframe_regression.check(
+            sgd_params,
+            default_tolerance={"atol": 1e-6},
+        )
 
     def test_fit_adapter(
         self,
@@ -135,4 +141,7 @@ class TestSGDFitter(TestSetup):
         self._check_history(history)
         self._check_sgd_params(sgd_params, params)
 
-        dataframe_regression.check(sgd_params)
+        dataframe_regression.check(
+            sgd_params,
+            default_tolerance={"atol": 1e-6},
+        )

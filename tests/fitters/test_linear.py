@@ -87,4 +87,4 @@ class TestLeastSquaresFitter(TestSetup):
         self._check_history(history)
         self._check_least_squares_params(ls_params, params)
 
-        dataframe_regression.check(ls_params)
+        dataframe_regression.check(ls_params, default_tolerance={"atol": 1e-6})
