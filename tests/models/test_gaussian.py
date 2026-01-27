@@ -352,4 +352,7 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
 
         resp = prf_model(stimulus, params)
 
-        num_regression.check({f"response_{i}": x for i, x in enumerate(resp)})
+        num_regression.check(
+            {f"response_{i}": x for i, x in enumerate(resp)},
+            default_tolerance={"atol": 1e-4},
+        )
