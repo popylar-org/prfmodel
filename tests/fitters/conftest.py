@@ -2,23 +2,14 @@
 
 import pandas as pd
 import pytest
-from prfmodel.examples import load_2d_bar_stimulus
 from prfmodel.models.gaussian import Gaussian2DPRFModel
+from tests.conftest import StimulusSetup
 
 parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32"])
 
 
-class TestSetup:
+class TestSetup(StimulusSetup):
     """Setup parameters and objects for fitter tests."""
-
-    @pytest.fixture
-    def stimulus(self):
-        """Stimulus object."""
-        stimulus = load_2d_bar_stimulus()
-
-        stimulus.design = stimulus.design[:25]
-
-        return stimulus
 
     @pytest.fixture
     def model(self):

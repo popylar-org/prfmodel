@@ -5,7 +5,6 @@ import pandas as pd
 import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
 from scipy import stats
-from prfmodel.examples import load_2d_bar_stimulus
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseTemporal
 from prfmodel.models.base import BatchDimensionError
@@ -20,6 +19,7 @@ from prfmodel.models.impulse import ShiftedDerivativeGammaImpulse
 from prfmodel.models.temporal import BaselineAmplitude
 from prfmodel.stimulus import GridDimensionsError
 from prfmodel.stimulus import Stimulus
+from tests.conftest import StimulusSetup
 from .conftest import parametrize_dtype
 
 
@@ -196,22 +196,13 @@ class TestPredictGaussianResponse(TestSetup):
         self._validate_gaussian(preds, grid_3d, mu_3d, sigma)
 
 
-class TestGaussian2DResponse:
+class TestGaussian2DResponse(StimulusSetup):
     """Tests for Gaussian2DResponse class."""
 
     @pytest.fixture
     def response_model(self):
         """Response model object."""
         return Gaussian2DResponse()
-
-    @pytest.fixture
-    def stimulus(self):
-        """2D bar stimulus object."""
-        stimululus = load_2d_bar_stimulus()
-
-        stimululus.design = stimululus.design[:25]
-
-        return stimululus
 
     def test_parameter_names(self, response_model: Gaussian2DResponse):
         """Test that correct parameter names are returned."""
