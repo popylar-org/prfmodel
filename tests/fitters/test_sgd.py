@@ -16,6 +16,7 @@ from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from .conftest import TestSetup
 from .conftest import parametrize_dtype
+from .conftest import parametrize_impulse_model
 
 
 @parametrize_dtype
@@ -111,6 +112,7 @@ class TestSGDFitter(TestSetup):
             default_tolerance={"atol": 1e-6},
         )
 
+    @parametrize_impulse_model
     def test_fit_adapter(
         self,
         dataframe_regression: DataFrameRegressionFixture,
@@ -136,7 +138,13 @@ class TestSGDFitter(TestSetup):
 
         observed = model(stimulus, params)
 
-        history, sgd_params = fitter.fit(observed, params, num_steps=self.num_steps)
+        fixed_parameters = None
+
+        # We need to fix the default parameters of the impulse model because they won't have gradients
+        if model.models["impulse_model"].default_parameters is not None:
+            fixed_parameters = model.models["impulse_model"].default_parameters.keys()
+
+        history, sgd_params = fitter.fit(observed, params, num_steps=self.num_steps, fixed_parameters=fixed_parameters)
 
         self._check_history(history)
         self._check_sgd_params(sgd_params, params)

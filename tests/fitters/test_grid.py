@@ -10,6 +10,7 @@ from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.stimulus import Stimulus
 from .conftest import TestSetup
 from .conftest import parametrize_dtype
+from .conftest import parametrize_impulse_model
 
 
 class TestGridFitter(TestSetup):
@@ -40,6 +41,7 @@ class TestGridFitter(TestSetup):
         }
 
     @parametrize_dtype
+    @parametrize_impulse_model
     @pytest.mark.parametrize(
         "loss",
         [None, keras.losses.MeanSquaredError(reduction="none")],
