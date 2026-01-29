@@ -18,9 +18,9 @@ class TensorFlowSGDFitter(BaseSGDFitter):
         return None
 
     def _update_model_weights(self, x: Stimulus, y: Tensor, state: SGDState) -> tuple[dict, SGDState]:
-        params = ParamsDict({v.name: v.value for v in self.trainable_variables + self.non_trainable_variables})
-
         with tf.GradientTape() as tape:
+            # Important to create this inside gradient tape because we transform keras variables
+            params = ParamsDict({v.name: v.value for v in self.trainable_variables + self.non_trainable_variables})
             # Make model predictions with parameters on natural scale
             params = self.adapter.inverse(params)
             y_pred = self.model(x, params, dtype=self.dtype)
