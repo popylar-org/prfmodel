@@ -137,6 +137,9 @@ class BaseImpulse(BaseModel):
     resolution : float, default=1.0
         The time resultion of the impulse response (in seconds), that is the number of points per second at which the
         impulse response function is evaluated.
+    norm : str, optional, default="sum"
+        The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, or `None`. If `None`, no
+        normalization is performed.
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Keys must be valid parameter names.
 
@@ -147,6 +150,7 @@ class BaseImpulse(BaseModel):
         duration: float = 32.0,
         offset: float = 0.0001,
         resolution: float = 1.0,
+        norm: str | None = "sum",
         default_parameters: dict[str, float] | None = None,
     ):
         super().__init__()
@@ -154,6 +158,7 @@ class BaseImpulse(BaseModel):
         self.duration = duration
         self.offset = offset
         self.resolution = resolution
+        self.norm = norm
 
         if default_parameters is not None:
             if any(key not in self.parameter_names for key in default_parameters):
