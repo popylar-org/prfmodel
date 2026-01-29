@@ -8,8 +8,6 @@ from keras import ops
 from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
 
-_MIN_PARAMETER_DIM = 2
-
 
 class BatchDimensionError(Exception):
     """

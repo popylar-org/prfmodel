@@ -6,9 +6,9 @@ from keras import ops
 from prfmodel.stimulus import GridDimensionsError
 from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
+from prfmodel.utils import _MIN_PARAMETER_DIM
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
-from .base import _MIN_PARAMETER_DIM
 from .base import BaseImpulse
 from .base import BasePRFResponse
 from .base import BaseTemporal
