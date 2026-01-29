@@ -99,6 +99,50 @@ def _get_common_shape(data: dict) -> tuple[int, ...]:
         raise ValueError(msg) from exc
 
 
+def normalize_response(response: Tensor, norm: str | None = "sum") -> Tensor:
+    """
+    Normalize a response.
+
+    Normalizes a response in the second dimension.
+
+    Parameters
+    ----------
+    response : Tensor
+        Response with shape (num_voxels, num_frames).
+    norm : str, optional, default="sum"
+        Normalization to apply.
+
+    Returns
+    -------
+    Tensor
+        The normalized response with shape (num_voxels, num_frames).
+
+    """
+    response_ndim = ops.ndim(response)
+
+    if response_ndim != _MIN_PARAMETER_DIM:
+        msg = f"Response must have two dimensions but {response_ndim} dimensions were found"
+        raise ValueError(msg)
+
+    if norm is None:
+        return response
+
+    norm_dict = {
+        "sum": ops.sum,
+        "max": ops.max,
+        "mean": ops.mean,
+        "norm": ops.norm,
+    }
+
+    if norm not in norm_dict:
+        msg = f"Argument 'norm' must be in {list(norm_dict.keys())}"
+        raise ValueError(msg)
+
+    norm_fun = norm_dict[norm]
+
+    return response / norm_fun(response, axis=1, keepdims=True)
+
+
 class ParamsDict:
     """
     A dictionary-like object that supports dataframe-style column selection but returns Keras tensors.

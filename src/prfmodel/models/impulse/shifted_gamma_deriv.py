@@ -6,6 +6,7 @@ from prfmodel.models.base import BaseImpulse
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
+from prfmodel.utils import normalize_response
 from .density import shifted_derivative_gamma_density
 
 
@@ -108,4 +109,4 @@ class ShiftedDerivativeGammaImpulse(BaseImpulse):
 
         dens = shifted_derivative_gamma_density(frames, shape, rate, shift)
 
-        return dens / ops.max(dens, axis=1, keepdims=True)
+        return normalize_response(dens)

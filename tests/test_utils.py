@@ -4,6 +4,44 @@ import keras
 import numpy as np
 import pytest
 from prfmodel.utils import ParamsDict
+from prfmodel.utils import normalize_response
+
+
+@pytest.mark.parametrize("norm", ["sum", "mean", "max"])
+def test_normalize_response(norm: str):
+    """Test that normalize_response returns correct result."""
+    response = np.expand_dims(np.linspace(-5, 5, 100), 0)
+    response_norm = np.asarray(normalize_response(response, norm=norm))
+
+    assert response_norm.shape == response.shape
+
+    match norm:
+        case "sum":
+            norm_fun = keras.ops.sum
+        case "mean":
+            norm_fun = keras.ops.mean
+        case "max":
+            norm_fun = keras.ops.max
+
+    assert np.all(response_norm == response / norm_fun(response, axis=1, keepdims=True))
+
+
+def test_normalize_response_error():
+    """Test that normalize_response raises an error for wrong input shape."""
+    response = np.ones((10,))
+
+    with pytest.raises(ValueError):
+        normalize_response(response)
+
+    response = 10
+
+    with pytest.raises(ValueError):
+        normalize_response(response)
+
+    response = np.ones((10, 2, 1))
+
+    with pytest.raises(ValueError):
+        normalize_response(response)
 
 
 class TestParamsDict:
