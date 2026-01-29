@@ -3,9 +3,9 @@
 import pandas as pd
 from keras import ops
 from prfmodel.typing import Tensor
+from prfmodel.utils import _MIN_PARAMETER_DIM
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
-from .base import _MIN_PARAMETER_DIM
 from .base import BaseTemporal
 from .base import ShapeError
 

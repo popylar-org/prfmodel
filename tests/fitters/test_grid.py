@@ -10,6 +10,7 @@ from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.stimulus import Stimulus
 from .conftest import TestSetup
 from .conftest import parametrize_dtype
+from .conftest import parametrize_impulse_model
 
 
 class TestGridFitter(TestSetup):
@@ -23,6 +24,7 @@ class TestGridFitter(TestSetup):
     def _check_grid_params(self, result_params: pd.DataFrame, params: pd.DataFrame) -> None:
         assert isinstance(result_params, pd.DataFrame)
         assert result_params.shape == params.shape
+        assert np.allclose(result_params, params)
 
     @pytest.fixture
     def param_ranges(self):
@@ -39,7 +41,11 @@ class TestGridFitter(TestSetup):
         }
 
     @parametrize_dtype
-    @pytest.mark.parametrize("loss", [None, keras.losses.MeanSquaredError(reduction="none")])
+    @parametrize_impulse_model
+    @pytest.mark.parametrize(
+        "loss",
+        [None, keras.losses.MeanSquaredError(reduction="none")],
+    )
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
         stimulus: Stimulus,

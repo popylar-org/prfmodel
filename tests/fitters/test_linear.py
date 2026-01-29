@@ -3,12 +3,14 @@
 import numpy as np
 import pandas as pd
 import pytest
+from pytest_regressions.dataframe_regression import DataFrameRegressionFixture
 from prfmodel.fitters.linear import LeastSquaresFitter
 from prfmodel.fitters.linear import LeastSquaresHistory
 from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.stimulus import Stimulus
 from .conftest import TestSetup
 from .conftest import parametrize_dtype
+from .conftest import parametrize_impulse_model
 
 
 class TestLeastSquaresFitter(TestSetup):
@@ -62,9 +64,11 @@ class TestLeastSquaresFitter(TestSetup):
             _ = fitter.fit(observed, params, target_parameters=target_parameters)
 
     @parametrize_dtype
+    @parametrize_impulse_model
     @pytest.mark.parametrize("target_parameters", [["amplitude"], ["baseline"], ["amplitude", "baseline"]])
-    def test_fit(
+    def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
+        dataframe_regression: DataFrameRegressionFixture,
         stimulus: Stimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
@@ -84,3 +88,5 @@ class TestLeastSquaresFitter(TestSetup):
 
         self._check_history(history)
         self._check_least_squares_params(ls_params, params)
+
+        dataframe_regression.check(ls_params, default_tolerance={"atol": 1e-6})

@@ -1,41 +1,30 @@
 """Setup for fitter tests."""
 
-import numpy as np
 import pandas as pd
 import pytest
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.models.impulse import ShiftedDerivativeGammaImpulse
+from tests.conftest import StimulusSetup
 
 parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32"])
 
+parametrize_impulse_model = pytest.mark.parametrize("model", [None, {"shape": 6.0, "rate": 0.9}], indirect=True)
 
-class TestSetup:
+
+class TestSetup(StimulusSetup):
     """Setup parameters and objects for fitter tests."""
 
-    width: int = 5
-    height: int = 4
-    num_frames: int = 10
-
     @pytest.fixture
-    def stimulus(self):
-        """Stimulus object."""
-        y = np.linspace(-2, 2, num=self.height)
-        x = np.linspace(-2, 2, num=self.width)
-        xv, yv = np.meshgrid(x, y)
-        grid = np.stack((xv, yv), axis=-1)
-
-        design = np.ones((self.num_frames, self.height, self.width))
-
-        return Stimulus(
-            design=design,
-            grid=grid,
-            dimension_labels=["y", "x"],
-        )
-
-    @pytest.fixture
-    def model(self):
+    def model(self, request: pytest.FixtureRequest):
         """Gaussian 2D pRF model instance."""
-        return Gaussian2DPRFModel()
+        # Only when fixture is parameterized we access the 'param' attribute
+        default_parameters = request.param if hasattr(request, "param") else None
+
+        return Gaussian2DPRFModel(
+            impulse_model=ShiftedDerivativeGammaImpulse(
+                default_parameters=default_parameters,
+            ),
+        )
 
     @pytest.fixture
     def params(self):

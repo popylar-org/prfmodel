@@ -6,9 +6,9 @@ from keras import ops
 from prfmodel.stimulus import GridDimensionsError
 from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
+from prfmodel.utils import _MIN_PARAMETER_DIM
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
-from .base import _MIN_PARAMETER_DIM
 from .base import BaseImpulse
 from .base import BasePRFResponse
 from .base import BaseTemporal
@@ -145,6 +145,8 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     mu = ops.convert_to_tensor(mu)
     sigma = ops.convert_to_tensor(sigma)
 
+    num_dims = grid.shape[-1]
+
     _check_gaussian_args(grid, mu, sigma)
 
     # Expand axes to enable keras.ops autocasting
@@ -157,7 +159,7 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     resp /= 2 * sigma_squared
 
     # Divide by volume to normalize
-    volume = ops.sqrt(2 * math.pi * sigma_squared)
+    volume = (2 * math.pi * sigma_squared) ** (num_dims / 2)
 
     return ops.exp(-resp) / volume
 
