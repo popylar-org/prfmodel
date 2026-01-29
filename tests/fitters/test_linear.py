@@ -10,6 +10,7 @@ from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.stimulus import Stimulus
 from .conftest import TestSetup
 from .conftest import parametrize_dtype
+from .conftest import parametrize_impulse_model
 
 
 class TestLeastSquaresFitter(TestSetup):
@@ -63,6 +64,7 @@ class TestLeastSquaresFitter(TestSetup):
             _ = fitter.fit(observed, params, target_parameters=target_parameters)
 
     @parametrize_dtype
+    @parametrize_impulse_model
     @pytest.mark.parametrize("target_parameters", [["amplitude"], ["baseline"], ["amplitude", "baseline"]])
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
