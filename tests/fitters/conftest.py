@@ -8,7 +8,7 @@ from tests.conftest import StimulusSetup
 
 parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32"])
 
-parametrize_impulse_model = pytest.mark.parametrize("model", [None, {"shape": 6.0, "rate": 0.9}], indirect=True)
+parametrize_impulse_model = pytest.mark.parametrize("model", [None, {"delay": 6.0, "dispersion": 0.9}], indirect=True)
 
 
 class TestSetup(StimulusSetup):
@@ -35,8 +35,8 @@ class TestSetup(StimulusSetup):
                 "mu_x": [-1.0, 1.0, 0.0],
                 "mu_y": [1.0, -1.0, 0.0],
                 "sigma": [1.0, 2.0, 3.0],
-                "shape": [6.0, 6.0, 6.0],
-                "rate": [0.9, 0.9, 0.9],
+                "delay": [6.0 / 0.9, 6.0 / 0.9, 6.0 / 0.9],
+                "dispersion": [0.9, 0.9, 0.9],
                 "shift": [5.0, 5.0, 5.0],
                 "baseline": [0.0, 0.0, 0.0],
                 "amplitude": [1.0, 1.0, 1.0],

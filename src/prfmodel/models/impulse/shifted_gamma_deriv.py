@@ -6,6 +6,7 @@ from prfmodel.models.base import BaseImpulse
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
+from prfmodel.utils import normalize_response
 from .density import shifted_derivative_gamma_density
 
 
@@ -14,7 +15,8 @@ class ShiftedDerivativeGammaImpulse(BaseImpulse):
     Shifted derivative of the gamma distribution impulse response model.
 
     Predicts an impulse response that is a shifted derivative of the gamma distribution.
-    The model has three parameters: `shape`, `rate`, and `shift`.
+    The model has three parameters: `delay` refers to the positive peak, `dispersion` to the
+    rate, and `shift` to the onset of the gamma distribution.
 
     Parameters
     ----------
@@ -26,25 +28,22 @@ class ShiftedDerivativeGammaImpulse(BaseImpulse):
     resolution : float, default=1.0
         The time resultion of the impulse response (in seconds), that is the number of points per second at which the
         impulse response function is evaluated.
+    norm : str, optional, default="sum"
+        The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, or `None`. If `None`, no
+        normalization is performed.
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Keys must be valid parameter names.
 
     Notes
     -----
-    The predicted impulse response at time :math:`t` with `shape` :math:`\alpha`, `rate` :math:`\lambda`,
-    and `shift` :math:`\delta` is:
+    The predicted impulse response at time math:`t` with :math:`\alpha = delay / dispersion`,
+    :math:`\lambda = dispersion`, and :math:`\delta = shift` is:
 
     .. math::
 
-        f(t) = \hat{f}_{\text{gamma}}'(t - \delta; \alpha, \lambda)
+        f(t) = f_{\text{gamma}}'(t - \delta; \alpha, \lambda)
 
-    The derivative of the gamma distribution density is divided by its maximum,
-    so that its highest peak has an amplitude of 1:
-
-    .. math::
-        \hat{f}_{\text{gamma}}'(t; \alpha, \lambda, \delta) = \frac{f_{\text{gamma}}'(t - \delta; \alpha, \lambda)}
-        {\text{max}(f_{\text{gamma}}'(t - \delta; \alpha, \lambda))}
-
+    The response prior to the onset of the gamma distribution is set to zero.
     The derivative of the gamma distribution density with respect to time :math:`t` is calculated analytically
     as a function of the original gamma distribution density :math:`f_{\text{gamma}}(t; \alpha, \lambda)`:
 
@@ -57,8 +56,8 @@ class ShiftedDerivativeGammaImpulse(BaseImpulse):
     --------
     >>> import pandas as pd
     >>> params = pd.DataFrame({
-    >>>     "shape": [2.0, 1.0, 1.5],
-    >>>     "rate": [1.0, 1.0, 1.0],
+    >>>     "delay": [2.0, 1.0, 1.5],
+    >>>     "dispersion": [1.0, 1.0, 1.0],
     >>>     "shift": [1.0, 2.0, 5.0],
     >>> })
     >>> impulse_model = ShiftedDerivativeGammaImpulse(
@@ -75,10 +74,10 @@ class ShiftedDerivativeGammaImpulse(BaseImpulse):
         """
         Names of parameters used by the model.
 
-        Parameter names are: `shape`, `rate`, and `shift`.
+        Parameter names are: `delay`, `dispersion`, and `shift`.
 
         """
-        return ["shape", "rate", "shift"]
+        return ["delay", "dispersion", "shift"]
 
     def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -88,7 +87,7 @@ class ShiftedDerivativeGammaImpulse(BaseImpulse):
         ----------
         parameters : pandas.DataFrame
             Dataframe with columns containing different model parameters and rows containing parameter values
-            for different batches. Must contain the columns `shape`, `rate`, and `shift`.
+            for different batches. Must contain the columns `delay`, `dispersion`, and `shift`.
         dtype : str, optional
             The dtype of the prediction result. If `None` (the default), uses the dtype from
             :func:`prfmodel.utils.get_dtype`.
@@ -102,10 +101,10 @@ class ShiftedDerivativeGammaImpulse(BaseImpulse):
         parameters = self._join_default_parameters(parameters)
         dtype = get_dtype(dtype)
         frames = ops.cast(self.frames, dtype=dtype)
-        shape = convert_parameters_to_tensor(parameters[["shape"]], dtype=dtype)
-        rate = convert_parameters_to_tensor(parameters[["rate"]], dtype=dtype)
+        delay = convert_parameters_to_tensor(parameters[["delay"]], dtype=dtype)
+        dispersion = convert_parameters_to_tensor(parameters[["dispersion"]], dtype=dtype)
         shift = convert_parameters_to_tensor(parameters[["shift"]], dtype=dtype)
 
-        dens = shifted_derivative_gamma_density(frames, shape, rate, shift)
+        dens = shifted_derivative_gamma_density(frames, delay / dispersion, dispersion, shift)
 
-        return dens / ops.max(dens, axis=1, keepdims=True)
+        return normalize_response(dens)
