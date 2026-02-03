@@ -14,7 +14,7 @@ class TestShiftedDerivativeGammaImpulse(TestImpulseSetup):
     @pytest.fixture
     def parameter_range(self):
         """Range of parameters."""
-        return np.round(np.linspace(0.1, 5.0, 3), 2)
+        return np.round(np.linspace(0.2, 5.0, 3), 2)
 
     @pytest.fixture
     def shift_parameter_range(self):

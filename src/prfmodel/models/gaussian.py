@@ -6,7 +6,7 @@ from keras import ops
 from prfmodel.stimulus import GridDimensionsError
 from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
-from prfmodel.utils import _MIN_PARAMETER_DIM
+from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 from .base import BaseImpulse
@@ -42,13 +42,13 @@ def _check_gaussian_args(grid: Tensor, mu: Tensor, sigma: Tensor) -> None:
     if not len(grid.shape[:-1]) == grid.shape[-1]:
         raise GridDimensionsError(grid.shape)
 
-    if len(mu.shape) < _MIN_PARAMETER_DIM:
+    if len(mu.shape) < _EXPECTED_NDIM:
         raise ShapeError(
             arg_name="mu",
             arg_shape=mu.shape,
         )
 
-    if len(sigma.shape) < _MIN_PARAMETER_DIM:
+    if len(sigma.shape) < _EXPECTED_NDIM:
         raise ShapeError(
             arg_name="sigma",
             arg_shape=sigma.shape,
