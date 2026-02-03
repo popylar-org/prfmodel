@@ -6,13 +6,11 @@ from .density import gamma_density
 from .density import shifted_derivative_gamma_density
 from .density import shifted_gamma_density
 from .shifted_gamma import ShiftedGammaImpulse
-from .shifted_gamma_deriv import ShiftedDerivativeGammaImpulse
 from .two_gamma import TwoGammaImpulse
 from .two_gamma_deriv import DerivativeTwoGammaImpulse
 
 __all__ = [
     "DerivativeTwoGammaImpulse",
-    "ShiftedDerivativeGammaImpulse",
     "ShiftedGammaImpulse",
     "TwoGammaImpulse",
     "convolve_prf_impulse_response",
