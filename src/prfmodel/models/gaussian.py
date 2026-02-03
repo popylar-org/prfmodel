@@ -15,7 +15,7 @@ from .base import BaseTemporal
 from .base import BatchDimensionError
 from .base import ShapeError
 from .composite import SimplePRFModel
-from .impulse import ShiftedDerivativeGammaImpulse
+from .impulse import DerivativeTwoGammaImpulse
 from .temporal import BaselineAmplitude
 
 
@@ -272,7 +272,7 @@ class Gaussian2DPRFModel(SimplePRFModel):
 
     def __init__(
         self,
-        impulse_model: BaseImpulse | type[BaseImpulse] | None = ShiftedDerivativeGammaImpulse,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
     ):
         super().__init__(
