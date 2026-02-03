@@ -3,6 +3,8 @@
 import numpy as np
 import pandas as pd
 import pytest
+from pytest_regressions.num_regression import NumericRegressionFixture
+from scipy import stats
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseTemporal
 from prfmodel.models.base import BatchDimensionError
@@ -17,6 +19,7 @@ from prfmodel.models.impulse import ShiftedDerivativeGammaImpulse
 from prfmodel.models.temporal import BaselineAmplitude
 from prfmodel.stimulus import GridDimensionsError
 from prfmodel.stimulus import Stimulus
+from tests.conftest import StimulusSetup
 from .conftest import parametrize_dtype
 
 
@@ -155,45 +158,51 @@ class TestExpandGaussianArgs(TestSetup):
 class TestPredictGaussianResponse(TestSetup):
     """Tests for predict_gaussian_response function."""
 
+    @staticmethod
+    def _validate_gaussian(predictions: np.ndarray, grid: np.ndarray, mu: np.ndarray, sigma: np.ndarray) -> None:
+        """Validate the predicted Gaussian response against a reference.
+
+        Compares the predicted Gaussian response against the response from a multivariate
+        Gaussian in `scipy.stats`.
+
+        """
+        expected = np.stack(
+            [
+                stats.multivariate_normal.pdf(grid, mean=mu[i], cov=sigma[i, 0] ** 2 * np.eye(grid.shape[-1]))
+                for i in range(mu.shape[0])
+            ],
+        )
+        assert np.allclose(predictions, expected)
+
     def test_predict_gaussian_response_1d(self, grid_1d: np.ndarray, mu_1d: np.ndarray, sigma: np.ndarray):
-        """Test that 1D response prediction returns correct shape."""
-        preds = predict_gaussian_response(grid_1d, mu_1d, sigma)
+        """Test that 1D response prediction returns correct result."""
+        preds = np.asarray(predict_gaussian_response(grid_1d, mu_1d, sigma))
 
         assert preds.shape == (3, self.height)
+        self._validate_gaussian(preds, grid_1d, mu_1d, sigma)
 
     def test_predict_gaussian_response_2d(self, grid_2d: np.ndarray, mu_2d: np.ndarray, sigma: np.ndarray):
-        """Test that 2D response prediction returns correct shape."""
-        preds = predict_gaussian_response(grid_2d, mu_2d, sigma)
+        """Test that 2D response prediction returns correct result."""
+        preds = np.asarray(predict_gaussian_response(grid_2d, mu_2d, sigma))
 
         assert preds.shape == (3, self.height, self.width)
+        self._validate_gaussian(preds, grid_2d, mu_2d, sigma)
 
     def test_predict_gaussian_response_3d(self, grid_3d: np.ndarray, mu_3d: np.ndarray, sigma: np.ndarray):
-        """Test that 3D response prediction returns correct shape."""
-        preds = predict_gaussian_response(grid_3d, mu_3d, sigma)
+        """Test that 3D response prediction returns correct result."""
+        preds = np.asarray(predict_gaussian_response(grid_3d, mu_3d, sigma))
 
         assert preds.shape == (3, self.height, self.width, self.depth)
+        self._validate_gaussian(preds, grid_3d, mu_3d, sigma)
 
 
-class TestGaussian2DResponse(TestSetup):
+class TestGaussian2DResponse(StimulusSetup):
     """Tests for Gaussian2DResponse class."""
-
-    num_frames: int = 10
 
     @pytest.fixture
     def response_model(self):
         """Response model object."""
         return Gaussian2DResponse()
-
-    @pytest.fixture
-    def stimulus(self, grid_2d: np.ndarray):
-        """2D stimulus object."""
-        design = np.ones((self.num_frames, self.height, self.width))
-
-        return Stimulus(
-            design=design,
-            grid=grid_2d,
-            dimension_labels=["y", "x"],
-        )
 
     def test_parameter_names(self, response_model: Gaussian2DResponse):
         """Test that correct parameter names are returned."""
@@ -214,8 +223,8 @@ class TestGaussian2DResponse(TestSetup):
 
         preds = np.asarray(response_model(stimulus, params, dtype))
 
-        # Check result shape
-        assert preds.shape == (params.shape[0], self.height, self.width)  # (num_voxels, height, width)
+        # Check result shape (num_voxels, height, width)
+        assert preds.shape == (params.shape[0], stimulus.design.shape[1], stimulus.design.shape[2])
 
 
 class TestGaussian2DPRFModel(TestGaussian2DResponse):
@@ -293,7 +302,13 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
         stimulus: Stimulus,
         params: pd.DataFrame,
     ):
-        """Test that model prediction returns correct shape."""
+        """Test that model prediction returns correct shape.
+
+        Tests model prediction shape for both classes and class instances. Does not perform regression tests because
+        predictions should be identical for classes and class instances, creating more reference files than necessary.
+        Instead we perform regression tests in a separate test.
+
+        """
         prf_model = Gaussian2DPRFModel(
             impulse_model=impulse_model,
             temporal_model=temporal_model,
@@ -301,4 +316,34 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
 
         resp = prf_model(stimulus, params)
 
-        assert resp.shape == (params.shape[0], self.num_frames)
+        assert resp.shape == (params.shape[0], stimulus.design.shape[0])
+
+    @pytest.mark.parametrize(
+        ("impulse_model", "temporal_model"),
+        [
+            (ShiftedDerivativeGammaImpulse(), BaselineAmplitude()),  # Test with class instances
+            (ShiftedDerivativeGammaImpulse(), None),
+            (None, BaselineAmplitude()),
+            (None, None),
+        ],
+    )
+    def test_predict_regression(
+        self,
+        num_regression: NumericRegressionFixture,
+        impulse_model: BaseImpulse,
+        temporal_model: BaseTemporal,
+        stimulus: Stimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that model prediction matches reference file."""
+        prf_model = Gaussian2DPRFModel(
+            impulse_model=impulse_model,
+            temporal_model=temporal_model,
+        )
+
+        resp = prf_model(stimulus, params)
+
+        num_regression.check(
+            {f"response_{i}": x for i, x in enumerate(resp)},
+            default_tolerance={"atol": 1e-4},
+        )
