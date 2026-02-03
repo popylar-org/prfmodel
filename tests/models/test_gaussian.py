@@ -15,7 +15,7 @@ from prfmodel.models.gaussian import GridMuDimensionsError
 from prfmodel.models.gaussian import _check_gaussian_args
 from prfmodel.models.gaussian import _expand_gaussian_args
 from prfmodel.models.gaussian import predict_gaussian_response
-from prfmodel.models.impulse import ShiftedDerivativeGammaImpulse
+from prfmodel.models.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.temporal import BaselineAmplitude
 from prfmodel.stimulus import GridDimensionsError
 from prfmodel.stimulus import Stimulus
@@ -238,7 +238,7 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
     @pytest.fixture
     def impulse_model(self):
         """Impulse response model object."""
-        return ShiftedDerivativeGammaImpulse()
+        return DerivativeTwoGammaImpulse()
 
     @pytest.fixture
     def temporal_model(self):
@@ -255,7 +255,10 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
                 "sigma": [1.0, 2.0, 3.0],
                 "delay": [6.0, 7.0, 5.0],
                 "dispersion": [0.9, 1.0, 0.8],
-                "shift": [5.0, 5.0, 5.0],
+                "undershoot": [12.0, 11.0, 13.0],
+                "u_dispersion": [0.9, 1.0, 0.8],
+                "ratio": [0.48, 0.48, 0.48],
+                "weight_deriv": [0.5, 0.5, 0.5],
                 "baseline": [0.0, 0.1, 0.2],
                 "amplitude": [1.1, 1.0, 0.9],
             },
@@ -272,7 +275,7 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
     def test_parameter_names(
         self,
         prf_model: Gaussian2DPRFModel,
-        impulse_model: ShiftedDerivativeGammaImpulse,
+        impulse_model: DerivativeTwoGammaImpulse,
         temporal_model: BaselineAmplitude,
         response_model: Gaussian2DResponse,
     ):
@@ -286,10 +289,10 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
     @pytest.mark.parametrize(
         ("impulse_model", "temporal_model"),
         [
-            (ShiftedDerivativeGammaImpulse(), BaselineAmplitude()),  # Test with class instances
-            (ShiftedDerivativeGammaImpulse, BaselineAmplitude),  # Test with classes
-            (ShiftedDerivativeGammaImpulse(), None),
-            (ShiftedDerivativeGammaImpulse, None),
+            (DerivativeTwoGammaImpulse(), BaselineAmplitude()),  # Test with class instances
+            (DerivativeTwoGammaImpulse, BaselineAmplitude),  # Test with classes
+            (DerivativeTwoGammaImpulse(), None),
+            (DerivativeTwoGammaImpulse, None),
             (None, BaselineAmplitude()),
             (None, BaselineAmplitude),
             (None, None),
@@ -321,8 +324,8 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
     @pytest.mark.parametrize(
         ("impulse_model", "temporal_model"),
         [
-            (ShiftedDerivativeGammaImpulse(), BaselineAmplitude()),  # Test with class instances
-            (ShiftedDerivativeGammaImpulse(), None),
+            (DerivativeTwoGammaImpulse(), BaselineAmplitude()),  # Test with class instances
+            (DerivativeTwoGammaImpulse(), None),
             (None, BaselineAmplitude()),
             (None, None),
         ],
