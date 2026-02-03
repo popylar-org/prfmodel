@@ -1,4 +1,4 @@
-"""Population receptive field models."""
+"""Impulse response models."""
 
 from .convolve import convolve_prf_impulse_response
 from .density import derivative_gamma_density
