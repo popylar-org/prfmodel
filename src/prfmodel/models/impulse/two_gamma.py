@@ -39,11 +39,15 @@ class TwoGammaImpulse(BaseImpulse):
     -----
     The predicted impulse response at time :math:`t` with :math:`\alpha_1 = delay / dispersion`,
     :math:`\lambda_1 = dispersion`, :math:`\alpha_2  = undershoot / u\_dispersion`, :math:`\lambda_2 = u\_dispersion`,
-    and :math:`w = ratio` is:
+    and :math:`\omega = ratio` is:
 
     .. math::
 
-        f(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - w f_{\text{gamma}}(t; \alpha_2, \lambda_2)
+        f(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega f_{\text{gamma}}(t; \alpha_2, \lambda_2)
+
+    See Also
+    --------
+    gamma_density : Density of the gamma distribution.
 
     Examples
     --------
@@ -97,11 +101,14 @@ class TwoGammaImpulse(BaseImpulse):
         parameters = self._join_default_parameters(parameters)
         dtype = get_dtype(dtype)
         frames = ops.cast(self.frames, dtype=dtype)
+
         delay = convert_parameters_to_tensor(parameters[["delay"]], dtype=dtype)
         dispersion = convert_parameters_to_tensor(parameters[["dispersion"]], dtype=dtype)
         undershoot = convert_parameters_to_tensor(parameters[["undershoot"]], dtype=dtype)
         u_dispersion = convert_parameters_to_tensor(parameters[["u_dispersion"]], dtype=dtype)
         ratio = convert_parameters_to_tensor(parameters[["ratio"]], dtype=dtype)
+
         dens_1 = gamma_density(frames, delay / dispersion, dispersion)
         dens_2 = gamma_density(frames, undershoot / u_dispersion, u_dispersion)
+
         return normalize_response(dens_1 - ratio * dens_2, self.norm)

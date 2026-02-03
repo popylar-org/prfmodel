@@ -45,6 +45,10 @@ class ShiftedGammaImpulse(BaseImpulse):
 
     The response prior to the onset of the gamma distribution is set to zero.
 
+    See Also
+    --------
+    shifted_gamma_density : Shifted density of the gamma distribution.
+
     Examples
     --------
     >>> import pandas as pd

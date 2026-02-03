@@ -52,6 +52,11 @@ class ShiftedDerivativeGammaImpulse(BaseImpulse):
         f_{\text{gamma}}'(t; \alpha, \lambda) = f_{\text{gamma}}(t; \alpha, \lambda)
         \frac{(\alpha - 1)}{t} - \lambda
 
+    See Also
+    --------
+    shifted_gamma_density : Shifted density of the gamma distribution.
+    shifted_derivative_gamma_density : Shifted derivative density of the gamma distribution.
+
     Examples
     --------
     >>> import pandas as pd
