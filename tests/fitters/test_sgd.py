@@ -124,8 +124,8 @@ class TestSGDFitter(TestSetup):
         """Test that fit with an adapter returns parameters with the correct shape."""
         adapter = Adapter(
             [
-                ParameterTransform(["sigma", "shape"], keras.ops.log, keras.ops.exp),
-                ParameterConstraint(["shape"], lower="rate", bound_fun=keras.ops.log),
+                ParameterTransform(["sigma", "delay"], keras.ops.log, keras.ops.exp),
+                ParameterConstraint(["delay"], lower="dispersion", bound_fun=keras.ops.log),
             ],
         )
 

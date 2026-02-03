@@ -33,20 +33,20 @@ class TestShiftedDerivativeGammaImpulse(TestImpulseSetup):
                 ),
             ),
         )
-        return pd.DataFrame.from_records(values, columns=["shape", "rate", "shift"])
+        return pd.DataFrame.from_records(values, columns=["delay", "dispersion", "shift"])
 
     @pytest.fixture
     def irf_model(self):
         """Impulse response model object."""
-        return ShiftedDerivativeGammaImpulse(self.duration, self.offset, self.resolution)
+        return ShiftedDerivativeGammaImpulse(self.duration, self.offset, self.resolution, self.norm)
 
     @pytest.fixture
     def irf_model_default(self):
         """Impulse response model object with default parameters."""
         default_params = {
-            "shape": 6.0,
-            "rate": 0.9,
+            "delay": 6.0,
+            "dispersion": 0.9,
             "shift": 5.0,
         }
 
-        return ShiftedDerivativeGammaImpulse(self.duration, self.offset, self.resolution, default_params)
+        return ShiftedDerivativeGammaImpulse(self.duration, self.offset, self.resolution, self.norm, default_params)
