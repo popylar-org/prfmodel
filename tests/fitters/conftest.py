@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.models.impulse import ShiftedDerivativeGammaImpulse
+from prfmodel.models.impulse import DerivativeTwoGammaImpulse
 from tests.conftest import StimulusSetup
 
 parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32"])
@@ -21,7 +21,7 @@ class TestSetup(StimulusSetup):
         default_parameters = request.param if hasattr(request, "param") else None
 
         return Gaussian2DPRFModel(
-            impulse_model=ShiftedDerivativeGammaImpulse(
+            impulse_model=DerivativeTwoGammaImpulse(
                 default_parameters=default_parameters,
             ),
         )
@@ -35,9 +35,12 @@ class TestSetup(StimulusSetup):
                 "mu_x": [-1.0, 1.0, 0.0],
                 "mu_y": [1.0, -1.0, 0.0],
                 "sigma": [1.0, 2.0, 3.0],
-                "delay": [6.0 / 0.9, 6.0 / 0.9, 6.0 / 0.9],
+                "delay": [6.0, 6.0, 6.0],
                 "dispersion": [0.9, 0.9, 0.9],
-                "shift": [5.0, 5.0, 5.0],
+                "undershoot": [12.0, 12.0, 12.0],
+                "u_dispersion": [0.9, 0.9, 0.9],
+                "ratio": [0.48, 0.48, 0.48],
+                "weight_deriv": [0.5, 0.5, 0.5],
                 "baseline": [0.0, 0.0, 0.0],
                 "amplitude": [1.0, 1.0, 1.0],
             },
