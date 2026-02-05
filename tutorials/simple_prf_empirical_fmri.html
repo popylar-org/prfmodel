@@ -1,0 +1,2433 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="API Reference" href="../autoapi/index.html"><link rel="prev" title="How to fit a population receptive field model to simulated data" href="simple_prf_simulated.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>How to fit a population receptive field model to fMRI data - prfmodel 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">How to fit a population receptive field model to fMRI data</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../autoapi/prfmodel/index.html">prfmodel</a><input aria-label="Toggle navigation of prfmodel" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/prfmodel/adapter/index.html">prfmodel.adapter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/prfmodel/backend/index.html">prfmodel.backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/prfmodel/examples/index.html">prfmodel.examples</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../autoapi/prfmodel/fitters/index.html">prfmodel.fitters</a><input aria-label="Toggle navigation of prfmodel.fitters" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/fitters/grid/index.html">prfmodel.fitters.grid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/fitters/linear/index.html">prfmodel.fitters.linear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/fitters/sgd/index.html">prfmodel.fitters.sgd</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../autoapi/prfmodel/models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/base/index.html">prfmodel.models.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/encoding/index.html">prfmodel.models.encoding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/gaussian/index.html">prfmodel.models.gaussian</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../autoapi/prfmodel/models/impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/prfmodel/models/impulse/convolve/index.html">prfmodel.models.impulse.convolve</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/prfmodel/models/impulse/density/index.html">prfmodel.models.impulse.density</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/prfmodel/models/impulse/shifted_gamma/index.html">prfmodel.models.impulse.shifted_gamma</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/prfmodel/models/impulse/two_gamma/index.html">prfmodel.models.impulse.two_gamma</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/prfmodel/models/impulse/two_gamma_deriv/index.html">prfmodel.models.impulse.two_gamma_deriv</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/temporal/index.html">prfmodel.models.temporal</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/prfmodel/stimulus/index.html">prfmodel.stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/prfmodel/typing/index.html">prfmodel.typing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../autoapi/prfmodel/utils/index.html">prfmodel.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../_sources/tutorials/simple_prf_empirical_fmri.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="how-to-fit-a-population-receptive-field-model-to-fmri-data">
+<h1>How to fit a population receptive field model to fMRI data<a class="headerlink" href="#how-to-fit-a-population-receptive-field-model-to-fmri-data" title="Link to this heading">¶</a></h1>
+<p><strong>Author</strong>: Malte Lüken (m.luken&#64;esciencecenter.nl)</p>
+<p><strong>Difficulty</strong>: Beginner</p>
+<p><strong>Important</strong>: This tutorial requires pycortex which is only available for Linux and MacOS. See <a class="reference internal" href="../installation.html#installing-pycortex"><span class="std std-ref">Installing pycortex</span></a> for details.</p>
+<p>This tutorial explains how to fit a population receptive field (pRF) model to blood oxygnenation level-dependent (BOLD) functional magnetic resonance imaging
+(fMRI) data.</p>
+<p>A pRF model maps neural activity in a brain region of interest (ROI; e.g., V1 in the human visual cortex)
+to an experimental stimulus (e.g., a bar moving through the visual field). Here, we use the visual domain as an example,
+where the the pRF is the part of the visual field that stimulates activity in the region of interest.</p>
+<p>Because prfmodel uses Keras for model fitting, we need to make sure that a backend is installed before we begin.
+In this tutorial, we use the TensorFlow backend.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_spec</span>
+
+<span class="c1"># Set keras backend to &#39;tensorflow&#39; (this is normally the default)</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;KERAS_BACKEND&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;tensorflow&quot;</span>
+<span class="c1"># Hide tensorflow info messages</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_CPP_MIN_LOG_LEVEL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+
+<span class="k">if</span> <span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;tensorflow&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Could not find the tensorflow package. Please install tensorflow with &#39;pip install .[tensorflow]&#39;&quot;</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="loading-the-surface">
+<h2>Loading the surface<a class="headerlink" href="#loading-the-surface" title="Link to this heading">¶</a></h2>
+<p>Before we start modelling, we need to make sure that we have all the requirements to visualize the BOLD response data. To visualize fMRI data, we can project it onto an anatomical surface of the brain. In this tutorial, we use a standardized surface based on the
+surface of the Human Connectome Project (see https://doi.org/10.6084/m9.figshare.13372958). For visualization, we use the pycortex package which has an internal database where different surfaces can be stored and accessed. We download the surface and store it under the
+subject name <code class="docutils literal notranslate"><span class="pre">hcp_999999</span></code>.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.examples</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_surface</span>
+
+<span class="n">subject</span> <span class="o">=</span> <span class="s2">&quot;hcp_999999&quot;</span>
+
+<span class="c1"># Download and store surface in pycortex database</span>
+<span class="n">download_surface</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can visualize a flatmap of the surface with pycortex. The color of the flatmap shows the curvature of the surface and several brain regions have been overlayed for orientation (e.g., V1).</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">cortex</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">cx</span>
+
+<span class="n">curv_vertices</span> <span class="o">=</span> <span class="n">cx</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">get_surfinfo</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;curvature&quot;</span><span class="p">)</span>
+<span class="n">cx</span><span class="o">.</span><span class="n">quickshow</span><span class="p">(</span><span class="n">curv_vertices</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Generating a flatmap cache
+** (inkscape:5317): WARNING **: 13:24:55.553: Failed to wrap object of type &#39;GtkRecentManager&#39;. Hint: this error is commonly caused by failing to call a library init() function.
+</pre></div>
+</div>
+<img alt="../_images/bd6e380a6a71bb897c4dd809e1d442074e4b6d1aa1985dfc68d8ee3efc07e960.png" src="../_images/bd6e380a6a71bb897c4dd809e1d442074e4b6d1aa1985dfc68d8ee3efc07e960.png" />
+</div>
+</div>
+</section>
+<section id="loading-the-bold-response">
+<h2>Loading the BOLD response<a class="headerlink" href="#loading-the-bold-response" title="Link to this heading">¶</a></h2>
+<p>Now that we have the anatomical surface, we load BOLD response data from a single subject that can be represented on the surface mesh. Importantly, we load data from both hemispheres of the subject by setting <code class="docutils literal notranslate"><span class="pre">hemisphere=&quot;both&quot;</span></code>. We want to convert the BOLD response signal to percent signal change (PSC) and select <code class="docutils literal notranslate"><span class="pre">unit=&quot;psc&quot;</span></code>.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.examples</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_single_subject_fmri_data</span>
+
+<span class="n">response</span><span class="p">,</span> <span class="n">stimulus</span> <span class="o">=</span> <span class="n">load_single_subject_fmri_data</span><span class="p">(</span><span class="n">dest_dir</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">hemisphere</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;psc&quot;</span><span class="p">)</span>
+<span class="n">response</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># shape (num_vertices, num_frames)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(118584, 120)
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">response</span></code> object contains the BOLD response timecourse for each voxel on the surface mesh. It has shape <code class="docutils literal notranslate"><span class="pre">(num_vertices,</span> <span class="pre">num_frames)</span></code> where <code class="docutils literal notranslate"><span class="pre">num_vertices</span></code> is the number of vertices on the surface mesh and <code class="docutils literal notranslate"><span class="pre">num_frames</span></code> the number of time frames of the recording. The timecourses from the left and right hemishperes are concatenated (left is first). Because the data has been converted to PSC, each timecourse should have a mean of zero.</p>
+<p>We can plot the standard deviation of each timecourse on the surface flatmap.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Calculate standard deviation of each timecourse</span>
+<span class="n">response_sd</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Plot response SD on surface flatmap</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">cx</span><span class="o">.</span><span class="n">quickshow</span><span class="p">(</span><span class="n">cx</span><span class="o">.</span><span class="n">Vertex</span><span class="p">(</span><span class="n">response_sd</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;inferno&quot;</span><span class="p">));</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>** (inkscape:5340): WARNING **: 13:25:03.939: Failed to wrap object of type &#39;GtkRecentManager&#39;. Hint: this error is commonly caused by failing to call a library init() function.
+</pre></div>
+</div>
+<img alt="../_images/626f562bf2a26674fced2c8364ef1d244f46fcb2248b0511803fa686d498bd59.png" src="../_images/626f562bf2a26674fced2c8364ef1d244f46fcb2248b0511803fa686d498bd59.png" />
+</div>
+</div>
+<p>We can see that there is high variation in the signal in the visual areas (i.e., V1-V3) as we would expect for a visual stimulus. However, we also see high variation at the edge of the surface flatmap.</p>
+<p>In this tutorial, we will only use timecourses for vertices in V1 to keep things computationally simple. To select the vertices belonging to V1, we first load an atlas that maps vertices to brain regions. This atlas is based on the multimodal parcelation atlas from the Human Connectome Project (see Glasser et al., 2016).</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.examples</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_brain_atlas</span>
+
+<span class="n">atlas</span> <span class="o">=</span> <span class="n">load_brain_atlas</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+<span class="n">atlas</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># shape (num_vertices,)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(118584,)
+</pre></div>
+</div>
+</div>
+</div>
+<p>In the atlas, V1 has the index <code class="docutils literal notranslate"><span class="pre">1</span></code>, therefore, we create a mask to select the timecourses of vertices with this index.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">v1_index</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Index of V1</span>
+
+<span class="c1"># Create boolean mask to select ROI</span>
+<span class="n">mask_roi</span> <span class="o">=</span> <span class="n">atlas</span> <span class="o">==</span> <span class="n">v1_index</span>
+
+<span class="n">response_roi</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="n">mask_roi</span><span class="p">]</span>
+<span class="n">response_roi</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(2939, 120)
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can see that we have around 3000 vertices for both hemishperes within our ROI.</p>
+</section>
+<section id="inspecting-the-stimulus">
+<h2>Inspecting the stimulus<a class="headerlink" href="#inspecting-the-stimulus" title="Link to this heading">¶</a></h2>
+<p>For pRF modeling, we also need the experimental stimulus that the subject has seen during the fMRI recording. Information about the stimulus is contained in the <code class="docutils literal notranslate"><span class="pre">stimulus</span></code> object that we loaded together with the BOLD response.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Stimulus(design=array[120, 100, 100], grid=array[100, 100, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])
+</pre></div>
+</div>
+</div>
+</div>
+<p>When printing the <code class="docutils literal notranslate"><span class="pre">stimulus</span></code> object, we can see that it has three attributes. In this experiment, the <code class="docutils literal notranslate"><span class="pre">design</span></code> attribute defines how
+the visual field changes over time. It has shape <code class="docutils literal notranslate"><span class="pre">(num_frames,</span> <span class="pre">width,</span> <span class="pre">height)</span></code>, where width and hight define the number of pixels at which the visual field is recorded. The <code class="docutils literal notranslate"><span class="pre">grid</span></code> attribute maps each pixel to its xy-coordinate in the visual field (i.e., the degree of visual angle).</p>
+<p>We can visualize the stimulus using <code class="docutils literal notranslate"><span class="pre">animate_2d_stimulus</span></code>.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTML</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimulus</span><span class="w"> </span><span class="kn">import</span> <span class="n">animate_2d_stimulus</span>
+
+<span class="n">ani</span> <span class="o">=</span> <span class="n">animate_2d_stimulus</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>  <span class="c1"># Pause 25 ms between time frames</span>
+
+<span class="n">HTML</span><span class="p">(</span><span class="n">ani</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><video width="640" height="480" controls autoplay loop>
+  <source type="video/mp4" src="data:video/mp4;base64,AAAAIGZ0eXBNNFYgAAACAE00ViBpc29taXNvMmF2YzEAAAAIZnJlZQAAaTRtZGF0AAACrgYF//+q
+3EXpvebZSLeWLNgg2SPu73gyNjQgLSBjb3JlIDE2NCByMzEwOCAzMWUxOWY5IC0gSC4yNjQvTVBF
+Ry00IEFWQyBjb2RlYyAtIENvcHlsZWZ0IDIwMDMtMjAyMyAtIGh0dHA6Ly93d3cudmlkZW9sYW4u
+b3JnL3gyNjQuaHRtbCAtIG9wdGlvbnM6IGNhYmFjPTEgcmVmPTMgZGVibG9jaz0xOjA6MCBhbmFs
+eXNlPTB4MzoweDExMyBtZT1oZXggc3VibWU9NyBwc3k9MSBwc3lfcmQ9MS4wMDowLjAwIG1peGVk
+X3JlZj0xIG1lX3JhbmdlPTE2IGNocm9tYV9tZT0xIHRyZWxsaXM9MSA4eDhkY3Q9MSBjcW09MCBk
+ZWFkem9uZT0yMSwxMSBmYXN0X3Bza2lwPTEgY2hyb21hX3FwX29mZnNldD0tMiB0aHJlYWRzPTYg
+bG9va2FoZWFkX3RocmVhZHM9MSBzbGljZWRfdGhyZWFkcz0wIG5yPTAgZGVjaW1hdGU9MSBpbnRl
+cmxhY2VkPTAgYmx1cmF5X2NvbXBhdD0wIGNvbnN0cmFpbmVkX2ludHJhPTAgYmZyYW1lcz0zIGJf
+cHlyYW1pZD0yIGJfYWRhcHQ9MSBiX2JpYXM9MCBkaXJlY3Q9MSB3ZWlnaHRiPTEgb3Blbl9nb3A9
+MCB3ZWlnaHRwPTIga2V5aW50PTI1MCBrZXlpbnRfbWluPTI1IHNjZW5lY3V0PTQwIGludHJhX3Jl
+ZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAu
+NjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAP
+PmWIhAAz//727L4FNf2f0JcRLMXaSnA+KqSAgHc0wAAAAwAAAwAABIRT+ionVsXUeAAAAwJaAJRd
+/XoX02/AAnJJ2qxvqvk9/oSx/vn3i6bioNzIY7xYtQgmniuxwk5+xPCS8TrXPHLSCNcxW1cIEShK
+sTxgb1qa9DzhpEhuu7wva/p6HXEM2yp2Qbcm5i1hTwB8PG70JxTmdd3oJWicMQHQ//EeOWpR22qJ
+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
+AQAAAAx1cmwgAAAAAQAABV9zdGJsAAAAt3N0c2QAAAAAAAAAAQAAAKdhdmMxAAAAAAAAAAEAAAAA
+AAAAAAAAAAAAAAAAAoAB4ABIAAAASAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAGP//AAAANWF2Y0MBZAAf/+EAGGdkAB+s2UCgPaEAAAMAAQAAAwBQDxgxlgEABmjr48si
+wP34+AAAAAAcdXVpZGtoQPJfJE/FujmlG88DI/MAAAAAAAAAGHN0dHMAAAAAAAAAAQAAAHgAAAEA
+AAAAFHN0c3MAAAAAAAAAAQAAAAEAAAJQY3R0cwAAAAAAAABIAAAAAQAAAgAAAAABAAAFAAAAAAEA
+AAIAAAAAAQAAAAAAAAABAAABAAAAAAEAAAUAAAAAAQAAAgAAAAABAAAAAAAAAAEAAAEAAAAAAQAA
+BQAAAAABAAACAAAAAAEAAAAAAAAAAQAAAQAAAAABAAAFAAAAAAEAAAIAAAAAAQAAAAAAAAABAAAB
+AAAAAAwAAAIAAAAAAQAABAAAAAACAAABAAAAAAIAAAIAAAAAAQAAAwAAAAABAAABAAAAAAQAAAIA
+AAAAAQAAAwAAAAABAAABAAAAAAkAAAIAAAAAAQAABQAAAAABAAACAAAAAAEAAAAAAAAAAQAAAQAA
+AAABAAAFAAAAAAEAAAIAAAAAAQAAAAAAAAABAAABAAAAAAEAAAUAAAAAAQAAAgAAAAABAAAAAAAA
+AAEAAAEAAAAAAQAABQAAAAABAAACAAAAAAEAAAAAAAAAAQAAAQAAAAABAAADAAAAAAEAAAEAAAAA
+AgAAAgAAAAABAAADAAAAAAEAAAEAAAAACQAAAgAAAAABAAADAAAAAAEAAAEAAAAABAAAAgAAAAAB
+AAAEAAAAAAIAAAEAAAAADAAAAgAAAAABAAAFAAAAAAEAAAIAAAAAAQAAAAAAAAABAAABAAAAAAEA
+AAUAAAAAAQAAAgAAAAABAAAAAAAAAAEAAAEAAAAAAQAABQAAAAABAAACAAAAAAEAAAAAAAAAAQAA
+AQAAAAABAAAFAAAAAAEAAAIAAAAAAQAAAAAAAAABAAABAAAAAAEAAAIAAAAAHHN0c2MAAAAAAAAA
+AQAAAAEAAAB4AAAAAQAAAfRzdHN6AAAAAAAAAAAAAAB4AAAR9AAAAFkAAAAgAAAAHgAAABcAAAAr
+AAAAHQAAABcAAAAVAAAAKgAAAB4AAAAXAAAAFQAAAhcAAAA3AAAAFwAAACwAAADvAAACEAAAAOcA
+AAGYAAABFAAAAfsAAAEFAAABxwAAAOwAAAFsAAAA0gAAAOAAAAE/AAAASwAAACsAAAEZAAABlgAA
+AbsAAAFnAAAA/wAAAREAAAECAAABRwAAAQ4AAADPAAABFwAAAQMAAAEXAAABdgAAAUsAAAEPAAAA
+5wAAAL8AAACyAAAARQAAACwAAAAqAAAAFAAAABwAAAAZAAAAFAAAABQAAAAcAAAAGAAAABQAAAAU
+AAAAHAAAABgAAAAUAAAAFAAAAUsAAAAqAAAA1AAAAbEAAAGLAAABCQAAAPkAAAEGAAABTAAAAW8A
+AAFJAAABJAAAAR8AAADyAAABFwAAAUYAAAFCAAAA5wAAAOoAAAEEAAAAowAAAXEAAAB8AAAAKwAA
+ARgAAAJEAAAAsgAAAYIAAAEhAAACBQAAAT0AAAHHAAAAzQAAAdwAAACaAAAA6gAAAEUAAAAuAAAA
+JwAAABgAAAAkAAAAHQAAABgAAAAXAAAAIQAAABcAAAAVAAAAFAAAABwAAAAWAAAAFAAAABQAAAAc
+AAAAFHN0Y28AAAAAAAAAAQAAADAAAABidWR0YQAAAFptZXRhAAAAAAAAACFoZGxyAAAAAAAAAABt
+ZGlyYXBwbAAAAAAAAAAAAAAAAC1pbHN0AAAAJal0b28AAAAdZGF0YQAAAAEAAAAATGF2ZjYwLjE2
+LjEwMA==
+">
+  Your browser does not support the video tag.
+</video></div></div>
+</div>
+<p>We can see that the stimulus consists of four rectangular bars that move vertically and horizontally across a screen spanning a range of 20 degrees of visual angle.</p>
+</section>
+<section id="inspecting-the-data">
+<h2>Inspecting the data<a class="headerlink" href="#inspecting-the-data" title="Link to this heading">¶</a></h2>
+<p>Before we model the BOLD response, we should always look at the timecourses and inspect the quality of the data. To do this we draw a sample of random vertices and plot their BOLD response over time. Note that the unit of time frames is repetition time (TR) which is
+1.5 seconds for this dataset.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">num_random_vertices</span> <span class="o">=</span> <span class="mi">100</span>
+
+<span class="c1"># Set random seed for reproducibility</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+
+<span class="c1"># Select random vertices</span>
+<span class="n">random_vertices</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">response_roi</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">num_random_vertices</span><span class="p">)</span>
+<span class="n">response_random_vertices</span> <span class="o">=</span> <span class="n">response_roi</span><span class="p">[</span><span class="n">random_vertices</span><span class="p">]</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">response_random_vertices</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time frame (in TR)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;BOLD response (in PSC)&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/69feb77e7724aedd31c56e34730c8e64ea72ba53197c4ac7f97a44255e678e69.png" src="../_images/69feb77e7724aedd31c56e34730c8e64ea72ba53197c4ac7f97a44255e678e69.png" />
+</div>
+</div>
+<p>We can see that the timecourses of many vertices in the ROI have four regular peaks in the signal. These peaks correspond
+to the bars moving through the visual field. The goal of our pRF model is to predict these peaks as closely as possible.</p>
+<p>We can get an even better overview by plotting a heatmap of all timecourses in the ROI.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">im</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">response_roi</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">25.0</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;inferno&quot;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time frame (in TR)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Vertices in ROI&quot;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;BOLD response (in PSC)&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/3450c5a2fb574ee8248134ce6e4d9d4ca7fbedaa3afc9799f84dcc523f2e251d.png" src="../_images/3450c5a2fb574ee8248134ce6e4d9d4ca7fbedaa3afc9799f84dcc523f2e251d.png" />
+</div>
+</div>
+<p>Again, we can see the four peaks in the BOLD response of ROI vertices from both hemispheres. However, the location of the peaks in the timecourse differs between vertices and hemispheres.</p>
+</section>
+<section id="defining-the-prf-model">
+<h2>Defining the pRF model<a class="headerlink" href="#defining-the-prf-model" title="Link to this heading">¶</a></h2>
+<p>Now that we have our BOLD response data and stimulus in place, we can create a pRF model to <em>predict</em> a response to this stimulus in our
+region of interest (i.e., V1). We use the most popular pRF model that is based on the seminal paper
+by Dumoulin and Wandell (2008): It assumes that the stimulus (our moving bar) elicits a response that follows a
+Gaussian shape in two-dimensional visual space. This response is then summed and convolved with an impulse response
+that follows the shape of the hemodynamic response in the brain. Finally, a baseline and amplitude parameter shift and scale
+our predicted response to the simulated (or observed) BOLD response.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code> class performs all these steps to make a combined prediction. However, we need to add a custom impulse
+response model to account for the fact that each time frame is one TR (1.5 seconds). Thus, we set the resolution
+of our predicted impulse response to the TR.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.gaussian</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian2DPRFModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.impulse</span><span class="w"> </span><span class="kn">import</span> <span class="n">DerivativeTwoGammaImpulse</span>
+
+<span class="c1"># Define repetition time (TR)</span>
+<span class="n">tr</span> <span class="o">=</span> <span class="mf">1.5</span>
+
+<span class="c1"># Create custom impulse response model</span>
+<span class="n">impulse_model</span> <span class="o">=</span> <span class="n">DerivativeTwoGammaImpulse</span><span class="p">(</span>
+    <span class="n">resolution</span><span class="o">=</span><span class="n">tr</span><span class="p">,</span>
+    <span class="n">offset</span><span class="o">=</span><span class="n">tr</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can visualize the predicted impulse response for a set of default parameters.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="c1"># Define default parameters for impulse response</span>
+<span class="n">impulse_default_params</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;delay&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.0</span><span class="p">],</span>
+    <span class="s2">&quot;dispersion&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">],</span>
+    <span class="s2">&quot;undershoot&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">12.0</span><span class="p">],</span>
+    <span class="s2">&quot;u_dispersion&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">],</span>
+    <span class="s2">&quot;ratio&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.48</span><span class="p">],</span>
+    <span class="s2">&quot;weight_deriv&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">],</span>
+<span class="p">})</span>
+
+<span class="c1"># Predict impulse response with default parameters</span>
+<span class="n">impulse_response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">impulse_model</span><span class="p">(</span><span class="n">impulse_default_params</span><span class="p">))</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">impulse_response</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time frame (in TR)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Impulse response&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2026-02-05 13:25:13.966809: E external/local_xla/xla/stream_executor/cuda/cuda_platform.cc:51] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: UNKNOWN ERROR (303)
+</pre></div>
+</div>
+<img alt="../_images/9765076013d038dafb3e730b72125d303b8887ccd2f035bd38463d2f8b881a64.png" src="../_images/9765076013d038dafb3e730b72125d303b8887ccd2f035bd38463d2f8b881a64.png" />
+</div>
+</div>
+<p>We insert the impulse model into the <code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code> that makes combined model predictions.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define pRF model with custom impulse response submodel</span>
+<span class="n">prf_model</span> <span class="o">=</span> <span class="n">Gaussian2DPRFModel</span><span class="p">(</span>
+    <span class="n">impulse_model</span><span class="o">=</span><span class="n">impulse_model</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We define a set of starting parameters to make a combined prediction with our pRF model.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Combine pRF starting parameters with impulse response default parameters</span>
+<span class="n">start_params</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;mu_x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+        <span class="s2">&quot;mu_y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+        <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">],</span>
+        <span class="s2">&quot;baseline&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+        <span class="s2">&quot;amplitude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">),</span> <span class="n">impulse_default_params</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Make prediction with pRF model</span>
+<span class="n">simulated_response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">start_params</span><span class="p">))</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">simulated_response</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time frame (in TR)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Predicted BOLD response (in PSC)&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/c32ec4d62d9bc590725de9ea13ea5eb3088c9d8a51c5156b140b7b830707ade8.png" src="../_images/c32ec4d62d9bc590725de9ea13ea5eb3088c9d8a51c5156b140b7b830707ade8.png" />
+</div>
+</div>
+<p>We can see the expected four peaks corresponding to the moving bars. When comparing the predicted response with the observed BOLD responses, we can see that their scales differ by roughly a factor of 10. We can control the scale of the predicted response with the <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> parameter.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Adjust amplitude of starting parameters</span>
+<span class="n">start_params</span><span class="p">[</span><span class="s2">&quot;amplitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+<span class="c1"># Make a new prediction with pRF model</span>
+<span class="n">simulated_response_scaled</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">start_params</span><span class="p">))</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">simulated_response_scaled</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time frame (in TR)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Predicted BOLD response (in PSC)&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/4f364a0d5b66911df242c879ee357ef83c872f3533675d55c2093972f526e95b.png" src="../_images/4f364a0d5b66911df242c879ee357ef83c872f3533675d55c2093972f526e95b.png" />
+</div>
+</div>
+<p>Now, the predicted response looks much closer to the observed responses.</p>
+</section>
+<section id="fitting-the-prf-model">
+<h2>Fitting the pRF model<a class="headerlink" href="#fitting-the-prf-model" title="Link to this heading">¶</a></h2>
+<p>We will fit the pRF model to our BOLD response data using two stages. We begin with a grid search to find good values for our parameters of interest (<code class="docutils literal notranslate"><span class="pre">mu_x</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>, and <code class="docutils literal notranslate"><span class="pre">sigma</span></code>). Then, we use least squares to estimate the <code class="docutils literal notranslate"><span class="pre">baseline</span></code> and <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> of
+our model.</p>
+<p><strong>Note</strong>: Typically, we would also use stochastic gradient descent (SGD) to finetune our model fits after the least-squares stage. To keep the tutorial computationally simple, we omit this step here but encourage readers to explore this approach at the end.</p>
+<p>Let’s start with the grid search by defining ranges of <code class="docutils literal notranslate"><span class="pre">mu_x</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>, and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> that we want to construct a grid
+of parameter values from. For <code class="docutils literal notranslate"><span class="pre">baseline</span></code> and <code class="docutils literal notranslate"><span class="pre">amplitude</span></code>, we only provide a single value so that they will stay constant
+across the entire grid.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">param_ranges</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;mu_x&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>  <span class="c1"># Range of visual field in experiment</span>
+    <span class="s2">&quot;mu_y&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+    <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.005</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+    <span class="s2">&quot;delay&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.0</span><span class="p">],</span>
+    <span class="s2">&quot;dispersion&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">],</span>
+    <span class="s2">&quot;undershoot&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">12.0</span><span class="p">],</span>
+    <span class="s2">&quot;u_dispersion&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">],</span>
+    <span class="s2">&quot;ratio&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.48</span><span class="p">],</span>
+    <span class="s2">&quot;weight_deriv&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">],</span>
+    <span class="s2">&quot;baseline&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+    <span class="s2">&quot;amplitude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>For all three parameters, we defined ranges of 20 values that will be used to construct the grid. That is, the
+grid search will evaluate all possible combinations of these values and return the combination that fits the simulated
+data best. This will result in a grid containing <span class="math notranslate nohighlight">\(20 ^ 3 = 8000\)</span> parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.</p>
+<p>Let’s construct the <code class="docutils literal notranslate"><span class="pre">GridFitter</span></code> and perform the grid search. Note that we set <code class="docutils literal notranslate"><span class="pre">chunk_size=20</span></code> to let the <code class="docutils literal notranslate"><span class="pre">GridFitter</span></code>
+evaluate 20 parameter combinations at the same time (which saves us some memory). As the <code class="docutils literal notranslate"><span class="pre">loss</span></code> (i.e., the metric to minimize between model predictions and data), we use cosine similarity which ignores differences in scale between model predictions and observed data.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">keras.losses</span><span class="w"> </span><span class="kn">import</span> <span class="n">CosineSimilarity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.fitters.grid</span><span class="w"> </span><span class="kn">import</span> <span class="n">GridFitter</span>
+
+<span class="c1"># Create grid fitter object</span>
+<span class="n">grid_fitter</span> <span class="o">=</span> <span class="n">GridFitter</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">prf_model</span><span class="p">,</span>
+    <span class="n">stimulus</span><span class="o">=</span><span class="n">stimulus</span><span class="p">,</span>
+    <span class="n">loss</span><span class="o">=</span><span class="n">CosineSimilarity</span><span class="p">(</span><span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">),</span>  <span class="c1"># Grid fitter needs no aggregation of loss</span>
+<span class="p">)</span>
+
+<span class="c1"># Run grid search</span>
+<span class="n">grid_history</span><span class="p">,</span> <span class="n">grid_params</span> <span class="o">=</span> <span class="n">grid_fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">response_roi</span><span class="p">,</span>
+    <span class="n">parameter_values</span><span class="o">=</span><span class="n">param_ranges</span><span class="p">,</span>
+    <span class="n">chunk_size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">grid_params</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing parameter grid chunks:   0%|          | 0/400 [00:00&lt;?, ?it/s]
+Processing parameter grid chunks:   0%|          | 0/400 [00:00&lt;?, ?it/s, loss=-0.177]
+Processing parameter grid chunks:   0%|          | 0/400 [00:00&lt;?, ?it/s, loss=-0.181]
+Processing parameter grid chunks:   0%|          | 0/400 [00:00&lt;?, ?it/s, loss=-0.186]
+Processing parameter grid chunks:   1%|          | 3/400 [00:00&lt;00:16, 23.58it/s, loss=-0.186]
+Processing parameter grid chunks:   1%|          | 3/400 [00:00&lt;00:16, 23.58it/s, loss=-0.19]
+Processing parameter grid chunks:   1%|          | 3/400 [00:00&lt;00:16, 23.58it/s, loss=-0.195]
+Processing parameter grid chunks:   1%|          | 3/400 [00:00&lt;00:16, 23.58it/s, loss=-0.2]
+Processing parameter grid chunks:   2%|▏         | 6/400 [00:00&lt;00:14, 26.74it/s, loss=-0.2]
+Processing parameter grid chunks:   2%|▏         | 6/400 [00:00&lt;00:14, 26.74it/s, loss=-0.205]
+Processing parameter grid chunks:   2%|▏         | 6/400 [00:00&lt;00:14, 26.74it/s, loss=-0.212]
+Processing parameter grid chunks:   2%|▏         | 6/400 [00:00&lt;00:14, 26.74it/s, loss=-0.219]
+Processing parameter grid chunks:   2%|▏         | 9/400 [00:00&lt;00:13, 28.02it/s, loss=-0.219]
+Processing parameter grid chunks:   2%|▏         | 9/400 [00:00&lt;00:13, 28.02it/s, loss=-0.227]
+Processing parameter grid chunks:   2%|▏         | 9/400 [00:00&lt;00:13, 28.02it/s, loss=-0.235]
+Processing parameter grid chunks:   2%|▏         | 9/400 [00:00&lt;00:13, 28.02it/s, loss=-0.243]
+Processing parameter grid chunks:   3%|▎         | 12/400 [00:00&lt;00:13, 28.53it/s, loss=-0.243]
+Processing parameter grid chunks:   3%|▎         | 12/400 [00:00&lt;00:13, 28.53it/s, loss=-0.25]
+Processing parameter grid chunks:   3%|▎         | 12/400 [00:00&lt;00:13, 28.53it/s, loss=-0.256]
+Processing parameter grid chunks:   3%|▎         | 12/400 [00:00&lt;00:13, 28.53it/s, loss=-0.262]
+Processing parameter grid chunks:   4%|▍         | 15/400 [00:00&lt;00:13, 28.86it/s, loss=-0.262]
+Processing parameter grid chunks:   4%|▍         | 15/400 [00:00&lt;00:13, 28.86it/s, loss=-0.267]
+Processing parameter grid chunks:   4%|▍         | 15/400 [00:00&lt;00:13, 28.86it/s, loss=-0.273]
+Processing parameter grid chunks:   4%|▍         | 15/400 [00:00&lt;00:13, 28.86it/s, loss=-0.279]
+Processing parameter grid chunks:   4%|▍         | 18/400 [00:00&lt;00:13, 28.95it/s, loss=-0.279]
+Processing parameter grid chunks:   4%|▍         | 18/400 [00:00&lt;00:13, 28.95it/s, loss=-0.284]
+Processing parameter grid chunks:   4%|▍         | 18/400 [00:00&lt;00:13, 28.95it/s, loss=-0.287]
+Processing parameter grid chunks:   4%|▍         | 18/400 [00:00&lt;00:13, 28.95it/s, loss=-0.289]
+Processing parameter grid chunks:   5%|▌         | 21/400 [00:00&lt;00:13, 29.02it/s, loss=-0.289]
+Processing parameter grid chunks:   5%|▌         | 21/400 [00:00&lt;00:13, 29.02it/s, loss=-0.289]
+Processing parameter grid chunks:   5%|▌         | 21/400 [00:00&lt;00:13, 29.02it/s, loss=-0.289]
+Processing parameter grid chunks:   5%|▌         | 21/400 [00:00&lt;00:13, 29.02it/s, loss=-0.289]
+Processing parameter grid chunks:   6%|▌         | 24/400 [00:00&lt;00:12, 29.28it/s, loss=-0.289]
+Processing parameter grid chunks:   6%|▌         | 24/400 [00:00&lt;00:12, 29.28it/s, loss=-0.29]
+Processing parameter grid chunks:   6%|▌         | 24/400 [00:00&lt;00:12, 29.28it/s, loss=-0.29]
+Processing parameter grid chunks:   6%|▌         | 24/400 [00:00&lt;00:12, 29.28it/s, loss=-0.29]
+Processing parameter grid chunks:   6%|▌         | 24/400 [00:00&lt;00:12, 29.28it/s, loss=-0.29]
+Processing parameter grid chunks:   7%|▋         | 28/400 [00:00&lt;00:12, 29.58it/s, loss=-0.29]
+Processing parameter grid chunks:   7%|▋         | 28/400 [00:01&lt;00:12, 29.58it/s, loss=-0.291]
+Processing parameter grid chunks:   7%|▋         | 28/400 [00:01&lt;00:12, 29.58it/s, loss=-0.291]
+Processing parameter grid chunks:   7%|▋         | 28/400 [00:01&lt;00:12, 29.58it/s, loss=-0.292]
+Processing parameter grid chunks:   8%|▊         | 31/400 [00:01&lt;00:12, 29.67it/s, loss=-0.292]
+Processing parameter grid chunks:   8%|▊         | 31/400 [00:01&lt;00:12, 29.67it/s, loss=-0.292]
+Processing parameter grid chunks:   8%|▊         | 31/400 [00:01&lt;00:12, 29.67it/s, loss=-0.293]
+Processing parameter grid chunks:   8%|▊         | 31/400 [00:01&lt;00:12, 29.67it/s, loss=-0.293]
+Processing parameter grid chunks:   8%|▊         | 34/400 [00:01&lt;00:12, 29.75it/s, loss=-0.293]
+Processing parameter grid chunks:   8%|▊         | 34/400 [00:01&lt;00:12, 29.75it/s, loss=-0.293]
+Processing parameter grid chunks:   8%|▊         | 34/400 [00:01&lt;00:12, 29.75it/s, loss=-0.293]
+Processing parameter grid chunks:   8%|▊         | 34/400 [00:01&lt;00:12, 29.75it/s, loss=-0.293]
+Processing parameter grid chunks:   9%|▉         | 37/400 [00:01&lt;00:12, 29.35it/s, loss=-0.293]
+Processing parameter grid chunks:   9%|▉         | 37/400 [00:01&lt;00:12, 29.35it/s, loss=-0.294]
+Processing parameter grid chunks:   9%|▉         | 37/400 [00:01&lt;00:12, 29.35it/s, loss=-0.294]
+Processing parameter grid chunks:   9%|▉         | 37/400 [00:01&lt;00:12, 29.35it/s, loss=-0.296]
+Processing parameter grid chunks:  10%|█         | 40/400 [00:01&lt;00:12, 29.36it/s, loss=-0.296]
+Processing parameter grid chunks:  10%|█         | 40/400 [00:01&lt;00:12, 29.36it/s, loss=-0.296]
+Processing parameter grid chunks:  10%|█         | 40/400 [00:01&lt;00:12, 29.36it/s, loss=-0.297]
+Processing parameter grid chunks:  10%|█         | 40/400 [00:01&lt;00:12, 29.36it/s, loss=-0.297]
+Processing parameter grid chunks:  11%|█         | 43/400 [00:01&lt;00:12, 29.42it/s, loss=-0.297]
+Processing parameter grid chunks:  11%|█         | 43/400 [00:01&lt;00:12, 29.42it/s, loss=-0.297]
+Processing parameter grid chunks:  11%|█         | 43/400 [00:01&lt;00:12, 29.42it/s, loss=-0.297]
+Processing parameter grid chunks:  11%|█         | 43/400 [00:01&lt;00:12, 29.42it/s, loss=-0.297]
+Processing parameter grid chunks:  12%|█▏        | 46/400 [00:01&lt;00:11, 29.53it/s, loss=-0.297]
+Processing parameter grid chunks:  12%|█▏        | 46/400 [00:01&lt;00:11, 29.53it/s, loss=-0.297]
+Processing parameter grid chunks:  12%|█▏        | 46/400 [00:01&lt;00:11, 29.53it/s, loss=-0.297]
+Processing parameter grid chunks:  12%|█▏        | 46/400 [00:01&lt;00:11, 29.53it/s, loss=-0.298]
+Processing parameter grid chunks:  12%|█▏        | 49/400 [00:01&lt;00:11, 29.45it/s, loss=-0.298]
+Processing parameter grid chunks:  12%|█▏        | 49/400 [00:01&lt;00:11, 29.45it/s, loss=-0.298]
+Processing parameter grid chunks:  12%|█▏        | 49/400 [00:01&lt;00:11, 29.45it/s, loss=-0.298]
+Processing parameter grid chunks:  12%|█▏        | 49/400 [00:01&lt;00:11, 29.45it/s, loss=-0.298]
+Processing parameter grid chunks:  12%|█▏        | 49/400 [00:01&lt;00:11, 29.45it/s, loss=-0.298]
+Processing parameter grid chunks:  13%|█▎        | 53/400 [00:01&lt;00:11, 29.74it/s, loss=-0.298]
+Processing parameter grid chunks:  13%|█▎        | 53/400 [00:01&lt;00:11, 29.74it/s, loss=-0.298]
+Processing parameter grid chunks:  13%|█▎        | 53/400 [00:01&lt;00:11, 29.74it/s, loss=-0.298]
+Processing parameter grid chunks:  13%|█▎        | 53/400 [00:01&lt;00:11, 29.74it/s, loss=-0.299]
+Processing parameter grid chunks:  14%|█▍        | 56/400 [00:01&lt;00:11, 29.73it/s, loss=-0.299]
+Processing parameter grid chunks:  14%|█▍        | 56/400 [00:01&lt;00:11, 29.73it/s, loss=-0.299]
+Processing parameter grid chunks:  14%|█▍        | 56/400 [00:01&lt;00:11, 29.73it/s, loss=-0.299]
+Processing parameter grid chunks:  14%|█▍        | 56/400 [00:02&lt;00:11, 29.73it/s, loss=-0.299]
+Processing parameter grid chunks:  15%|█▍        | 59/400 [00:02&lt;00:11, 29.13it/s, loss=-0.299]
+Processing parameter grid chunks:  15%|█▍        | 59/400 [00:02&lt;00:11, 29.13it/s, loss=-0.299]
+Processing parameter grid chunks:  15%|█▍        | 59/400 [00:02&lt;00:11, 29.13it/s, loss=-0.3]
+Processing parameter grid chunks:  15%|█▍        | 59/400 [00:02&lt;00:11, 29.13it/s, loss=-0.3]
+Processing parameter grid chunks:  16%|█▌        | 62/400 [00:02&lt;00:11, 29.34it/s, loss=-0.3]
+Processing parameter grid chunks:  16%|█▌        | 62/400 [00:02&lt;00:11, 29.34it/s, loss=-0.3]
+Processing parameter grid chunks:  16%|█▌        | 62/400 [00:02&lt;00:11, 29.34it/s, loss=-0.3]
+Processing parameter grid chunks:  16%|█▌        | 62/400 [00:02&lt;00:11, 29.34it/s, loss=-0.301]
+Processing parameter grid chunks:  16%|█▌        | 62/400 [00:02&lt;00:11, 29.34it/s, loss=-0.301]
+Processing parameter grid chunks:  16%|█▋        | 66/400 [00:02&lt;00:11, 29.68it/s, loss=-0.301]
+Processing parameter grid chunks:  16%|█▋        | 66/400 [00:02&lt;00:11, 29.68it/s, loss=-0.301]
+Processing parameter grid chunks:  16%|█▋        | 66/400 [00:02&lt;00:11, 29.68it/s, loss=-0.301]
+Processing parameter grid chunks:  16%|█▋        | 66/400 [00:02&lt;00:11, 29.68it/s, loss=-0.302]
+Processing parameter grid chunks:  17%|█▋        | 69/400 [00:02&lt;00:11, 29.68it/s, loss=-0.302]
+Processing parameter grid chunks:  17%|█▋        | 69/400 [00:02&lt;00:11, 29.68it/s, loss=-0.302]
+Processing parameter grid chunks:  17%|█▋        | 69/400 [00:02&lt;00:11, 29.68it/s, loss=-0.302]
+Processing parameter grid chunks:  17%|█▋        | 69/400 [00:02&lt;00:11, 29.68it/s, loss=-0.303]
+Processing parameter grid chunks:  18%|█▊        | 72/400 [00:02&lt;00:11, 29.35it/s, loss=-0.303]
+Processing parameter grid chunks:  18%|█▊        | 72/400 [00:02&lt;00:11, 29.35it/s, loss=-0.303]
+Processing parameter grid chunks:  18%|█▊        | 72/400 [00:02&lt;00:11, 29.35it/s, loss=-0.303]
+Processing parameter grid chunks:  18%|█▊        | 72/400 [00:02&lt;00:11, 29.35it/s, loss=-0.303]
+Processing parameter grid chunks:  19%|█▉        | 75/400 [00:02&lt;00:11, 29.44it/s, loss=-0.303]
+Processing parameter grid chunks:  19%|█▉        | 75/400 [00:02&lt;00:11, 29.44it/s, loss=-0.303]
+Processing parameter grid chunks:  19%|█▉        | 75/400 [00:02&lt;00:11, 29.44it/s, loss=-0.303]
+Processing parameter grid chunks:  19%|█▉        | 75/400 [00:02&lt;00:11, 29.44it/s, loss=-0.303]
+Processing parameter grid chunks:  20%|█▉        | 78/400 [00:02&lt;00:10, 29.41it/s, loss=-0.303]
+Processing parameter grid chunks:  20%|█▉        | 78/400 [00:02&lt;00:10, 29.41it/s, loss=-0.303]
+Processing parameter grid chunks:  20%|█▉        | 78/400 [00:02&lt;00:10, 29.41it/s, loss=-0.304]
+Processing parameter grid chunks:  20%|█▉        | 78/400 [00:02&lt;00:10, 29.41it/s, loss=-0.305]
+Processing parameter grid chunks:  20%|██        | 81/400 [00:02&lt;00:10, 29.51it/s, loss=-0.305]
+Processing parameter grid chunks:  20%|██        | 81/400 [00:02&lt;00:10, 29.51it/s, loss=-0.305]
+Processing parameter grid chunks:  20%|██        | 81/400 [00:02&lt;00:10, 29.51it/s, loss=-0.305]
+Processing parameter grid chunks:  20%|██        | 81/400 [00:02&lt;00:10, 29.51it/s, loss=-0.306]
+Processing parameter grid chunks:  21%|██        | 84/400 [00:02&lt;00:10, 29.56it/s, loss=-0.306]
+Processing parameter grid chunks:  21%|██        | 84/400 [00:02&lt;00:10, 29.56it/s, loss=-0.306]
+Processing parameter grid chunks:  21%|██        | 84/400 [00:02&lt;00:10, 29.56it/s, loss=-0.306]
+Processing parameter grid chunks:  21%|██        | 84/400 [00:02&lt;00:10, 29.56it/s, loss=-0.306]
+Processing parameter grid chunks:  21%|██        | 84/400 [00:03&lt;00:10, 29.56it/s, loss=-0.307]
+Processing parameter grid chunks:  22%|██▏       | 88/400 [00:03&lt;00:10, 29.80it/s, loss=-0.307]
+Processing parameter grid chunks:  22%|██▏       | 88/400 [00:03&lt;00:10, 29.80it/s, loss=-0.307]
+Processing parameter grid chunks:  22%|██▏       | 88/400 [00:03&lt;00:10, 29.80it/s, loss=-0.308]
+Processing parameter grid chunks:  22%|██▏       | 88/400 [00:03&lt;00:10, 29.80it/s, loss=-0.309]
+Processing parameter grid chunks:  23%|██▎       | 91/400 [00:03&lt;00:10, 29.39it/s, loss=-0.309]
+Processing parameter grid chunks:  23%|██▎       | 91/400 [00:03&lt;00:10, 29.39it/s, loss=-0.309]
+Processing parameter grid chunks:  23%|██▎       | 91/400 [00:03&lt;00:10, 29.39it/s, loss=-0.309]
+Processing parameter grid chunks:  23%|██▎       | 91/400 [00:03&lt;00:10, 29.39it/s, loss=-0.309]
+Processing parameter grid chunks:  24%|██▎       | 94/400 [00:03&lt;00:10, 29.52it/s, loss=-0.309]
+Processing parameter grid chunks:  24%|██▎       | 94/400 [00:03&lt;00:10, 29.52it/s, loss=-0.31]
+Processing parameter grid chunks:  24%|██▎       | 94/400 [00:03&lt;00:10, 29.52it/s, loss=-0.31]
+Processing parameter grid chunks:  24%|██▎       | 94/400 [00:03&lt;00:10, 29.52it/s, loss=-0.31]
+Processing parameter grid chunks:  24%|██▎       | 94/400 [00:03&lt;00:10, 29.52it/s, loss=-0.31]
+Processing parameter grid chunks:  24%|██▍       | 98/400 [00:03&lt;00:10, 29.66it/s, loss=-0.31]
+Processing parameter grid chunks:  24%|██▍       | 98/400 [00:03&lt;00:10, 29.66it/s, loss=-0.31]
+Processing parameter grid chunks:  24%|██▍       | 98/400 [00:03&lt;00:10, 29.66it/s, loss=-0.311]
+Processing parameter grid chunks:  24%|██▍       | 98/400 [00:03&lt;00:10, 29.66it/s, loss=-0.313]
+Processing parameter grid chunks:  25%|██▌       | 101/400 [00:03&lt;00:10, 29.51it/s, loss=-0.313]
+Processing parameter grid chunks:  25%|██▌       | 101/400 [00:03&lt;00:10, 29.51it/s, loss=-0.313]
+Processing parameter grid chunks:  25%|██▌       | 101/400 [00:03&lt;00:10, 29.51it/s, loss=-0.313]
+Processing parameter grid chunks:  25%|██▌       | 101/400 [00:03&lt;00:10, 29.51it/s, loss=-0.313]
+Processing parameter grid chunks:  25%|██▌       | 101/400 [00:03&lt;00:10, 29.51it/s, loss=-0.313]
+Processing parameter grid chunks:  26%|██▋       | 105/400 [00:03&lt;00:09, 29.77it/s, loss=-0.313]
+Processing parameter grid chunks:  26%|██▋       | 105/400 [00:03&lt;00:09, 29.77it/s, loss=-0.313]
+Processing parameter grid chunks:  26%|██▋       | 105/400 [00:03&lt;00:09, 29.77it/s, loss=-0.314]
+Processing parameter grid chunks:  26%|██▋       | 105/400 [00:03&lt;00:09, 29.77it/s, loss=-0.314]
+Processing parameter grid chunks:  26%|██▋       | 105/400 [00:03&lt;00:09, 29.77it/s, loss=-0.315]
+Processing parameter grid chunks:  27%|██▋       | 109/400 [00:03&lt;00:09, 29.81it/s, loss=-0.315]
+Processing parameter grid chunks:  27%|██▋       | 109/400 [00:03&lt;00:09, 29.81it/s, loss=-0.317]
+Processing parameter grid chunks:  27%|██▋       | 109/400 [00:03&lt;00:09, 29.81it/s, loss=-0.317]
+Processing parameter grid chunks:  27%|██▋       | 109/400 [00:03&lt;00:09, 29.81it/s, loss=-0.318]
+Processing parameter grid chunks:  27%|██▋       | 109/400 [00:03&lt;00:09, 29.81it/s, loss=-0.318]
+Processing parameter grid chunks:  28%|██▊       | 113/400 [00:03&lt;00:09, 30.02it/s, loss=-0.318]
+Processing parameter grid chunks:  28%|██▊       | 113/400 [00:03&lt;00:09, 30.02it/s, loss=-0.319]
+Processing parameter grid chunks:  28%|██▊       | 113/400 [00:03&lt;00:09, 30.02it/s, loss=-0.319]
+Processing parameter grid chunks:  28%|██▊       | 113/400 [00:03&lt;00:09, 30.02it/s, loss=-0.319]
+Processing parameter grid chunks:  29%|██▉       | 116/400 [00:03&lt;00:09, 29.83it/s, loss=-0.319]
+Processing parameter grid chunks:  29%|██▉       | 116/400 [00:03&lt;00:09, 29.83it/s, loss=-0.319]
+Processing parameter grid chunks:  29%|██▉       | 116/400 [00:04&lt;00:09, 29.83it/s, loss=-0.319]
+Processing parameter grid chunks:  29%|██▉       | 116/400 [00:04&lt;00:09, 29.83it/s, loss=-0.32]
+Processing parameter grid chunks:  30%|██▉       | 119/400 [00:04&lt;00:09, 29.84it/s, loss=-0.32]
+Processing parameter grid chunks:  30%|██▉       | 119/400 [00:04&lt;00:09, 29.84it/s, loss=-0.321]
+Processing parameter grid chunks:  30%|██▉       | 119/400 [00:04&lt;00:09, 29.84it/s, loss=-0.322]
+Processing parameter grid chunks:  30%|██▉       | 119/400 [00:04&lt;00:09, 29.84it/s, loss=-0.322]
+Processing parameter grid chunks:  30%|███       | 122/400 [00:04&lt;00:09, 29.68it/s, loss=-0.322]
+Processing parameter grid chunks:  30%|███       | 122/400 [00:04&lt;00:09, 29.68it/s, loss=-0.323]
+Processing parameter grid chunks:  30%|███       | 122/400 [00:04&lt;00:09, 29.68it/s, loss=-0.323]
+Processing parameter grid chunks:  30%|███       | 122/400 [00:04&lt;00:09, 29.68it/s, loss=-0.323]
+Processing parameter grid chunks:  31%|███▏      | 125/400 [00:04&lt;00:09, 29.71it/s, loss=-0.323]
+Processing parameter grid chunks:  31%|███▏      | 125/400 [00:04&lt;00:09, 29.71it/s, loss=-0.324]
+Processing parameter grid chunks:  31%|███▏      | 125/400 [00:04&lt;00:09, 29.71it/s, loss=-0.324]
+Processing parameter grid chunks:  31%|███▏      | 125/400 [00:04&lt;00:09, 29.71it/s, loss=-0.325]
+Processing parameter grid chunks:  32%|███▏      | 128/400 [00:04&lt;00:09, 29.71it/s, loss=-0.325]
+Processing parameter grid chunks:  32%|███▏      | 128/400 [00:04&lt;00:09, 29.71it/s, loss=-0.326]
+Processing parameter grid chunks:  32%|███▏      | 128/400 [00:04&lt;00:09, 29.71it/s, loss=-0.328]
+Processing parameter grid chunks:  32%|███▏      | 128/400 [00:04&lt;00:09, 29.71it/s, loss=-0.33]
+Processing parameter grid chunks:  32%|███▏      | 128/400 [00:04&lt;00:09, 29.71it/s, loss=-0.33]
+Processing parameter grid chunks:  33%|███▎      | 132/400 [00:04&lt;00:08, 29.93it/s, loss=-0.33]
+Processing parameter grid chunks:  33%|███▎      | 132/400 [00:04&lt;00:08, 29.93it/s, loss=-0.331]
+Processing parameter grid chunks:  33%|███▎      | 132/400 [00:04&lt;00:08, 29.93it/s, loss=-0.332]
+Processing parameter grid chunks:  33%|███▎      | 132/400 [00:04&lt;00:08, 29.93it/s, loss=-0.332]
+Processing parameter grid chunks:  34%|███▍      | 135/400 [00:04&lt;00:08, 29.80it/s, loss=-0.332]
+Processing parameter grid chunks:  34%|███▍      | 135/400 [00:04&lt;00:08, 29.80it/s, loss=-0.332]
+Processing parameter grid chunks:  34%|███▍      | 135/400 [00:04&lt;00:08, 29.80it/s, loss=-0.332]
+Processing parameter grid chunks:  34%|███▍      | 135/400 [00:04&lt;00:08, 29.80it/s, loss=-0.333]
+Processing parameter grid chunks:  34%|███▍      | 138/400 [00:04&lt;00:08, 29.39it/s, loss=-0.333]
+Processing parameter grid chunks:  34%|███▍      | 138/400 [00:04&lt;00:08, 29.39it/s, loss=-0.333]
+Processing parameter grid chunks:  34%|███▍      | 138/400 [00:04&lt;00:08, 29.39it/s, loss=-0.334]
+Processing parameter grid chunks:  34%|███▍      | 138/400 [00:04&lt;00:08, 29.39it/s, loss=-0.336]
+Processing parameter grid chunks:  35%|███▌      | 141/400 [00:04&lt;00:08, 29.42it/s, loss=-0.336]
+Processing parameter grid chunks:  35%|███▌      | 141/400 [00:04&lt;00:08, 29.42it/s, loss=-0.336]
+Processing parameter grid chunks:  35%|███▌      | 141/400 [00:04&lt;00:08, 29.42it/s, loss=-0.336]
+Processing parameter grid chunks:  35%|███▌      | 141/400 [00:04&lt;00:08, 29.42it/s, loss=-0.336]
+Processing parameter grid chunks:  36%|███▌      | 144/400 [00:04&lt;00:08, 29.31it/s, loss=-0.336]
+Processing parameter grid chunks:  36%|███▌      | 144/400 [00:04&lt;00:08, 29.31it/s, loss=-0.337]
+Processing parameter grid chunks:  36%|███▌      | 144/400 [00:04&lt;00:08, 29.31it/s, loss=-0.337]
+Processing parameter grid chunks:  36%|███▌      | 144/400 [00:04&lt;00:08, 29.31it/s, loss=-0.338]
+Processing parameter grid chunks:  37%|███▋      | 147/400 [00:04&lt;00:08, 29.38it/s, loss=-0.338]
+Processing parameter grid chunks:  37%|███▋      | 147/400 [00:05&lt;00:08, 29.38it/s, loss=-0.339]
+Processing parameter grid chunks:  37%|███▋      | 147/400 [00:05&lt;00:08, 29.38it/s, loss=-0.341]
+Processing parameter grid chunks:  37%|███▋      | 147/400 [00:05&lt;00:08, 29.38it/s, loss=-0.344]
+Processing parameter grid chunks:  37%|███▋      | 147/400 [00:05&lt;00:08, 29.38it/s, loss=-0.346]
+Processing parameter grid chunks:  38%|███▊      | 151/400 [00:05&lt;00:08, 29.77it/s, loss=-0.346]
+Processing parameter grid chunks:  38%|███▊      | 151/400 [00:05&lt;00:08, 29.77it/s, loss=-0.347]
+Processing parameter grid chunks:  38%|███▊      | 151/400 [00:05&lt;00:08, 29.77it/s, loss=-0.348]
+Processing parameter grid chunks:  38%|███▊      | 151/400 [00:05&lt;00:08, 29.77it/s, loss=-0.349]
+Processing parameter grid chunks:  38%|███▊      | 154/400 [00:05&lt;00:08, 29.20it/s, loss=-0.349]
+Processing parameter grid chunks:  38%|███▊      | 154/400 [00:05&lt;00:08, 29.20it/s, loss=-0.35]
+Processing parameter grid chunks:  38%|███▊      | 154/400 [00:05&lt;00:08, 29.20it/s, loss=-0.35]
+Processing parameter grid chunks:  38%|███▊      | 154/400 [00:05&lt;00:08, 29.20it/s, loss=-0.351]
+Processing parameter grid chunks:  39%|███▉      | 157/400 [00:05&lt;00:08, 29.34it/s, loss=-0.351]
+Processing parameter grid chunks:  39%|███▉      | 157/400 [00:05&lt;00:08, 29.34it/s, loss=-0.351]
+Processing parameter grid chunks:  39%|███▉      | 157/400 [00:05&lt;00:08, 29.34it/s, loss=-0.351]
+Processing parameter grid chunks:  39%|███▉      | 157/400 [00:05&lt;00:08, 29.34it/s, loss=-0.352]
+Processing parameter grid chunks:  40%|████      | 160/400 [00:05&lt;00:08, 29.49it/s, loss=-0.352]
+Processing parameter grid chunks:  40%|████      | 160/400 [00:05&lt;00:08, 29.49it/s, loss=-0.354]
+Processing parameter grid chunks:  40%|████      | 160/400 [00:05&lt;00:08, 29.49it/s, loss=-0.354]
+Processing parameter grid chunks:  40%|████      | 160/400 [00:05&lt;00:08, 29.49it/s, loss=-0.354]
+Processing parameter grid chunks:  41%|████      | 163/400 [00:05&lt;00:08, 29.35it/s, loss=-0.354]
+Processing parameter grid chunks:  41%|████      | 163/400 [00:05&lt;00:08, 29.35it/s, loss=-0.354]
+Processing parameter grid chunks:  41%|████      | 163/400 [00:05&lt;00:08, 29.35it/s, loss=-0.355]
+Processing parameter grid chunks:  41%|████      | 163/400 [00:05&lt;00:08, 29.35it/s, loss=-0.355]
+Processing parameter grid chunks:  42%|████▏     | 166/400 [00:05&lt;00:07, 29.35it/s, loss=-0.355]
+Processing parameter grid chunks:  42%|████▏     | 166/400 [00:05&lt;00:07, 29.35it/s, loss=-0.357]
+Processing parameter grid chunks:  42%|████▏     | 166/400 [00:05&lt;00:07, 29.35it/s, loss=-0.358]
+Processing parameter grid chunks:  42%|████▏     | 166/400 [00:05&lt;00:07, 29.35it/s, loss=-0.36]
+Processing parameter grid chunks:  42%|████▏     | 169/400 [00:05&lt;00:07, 29.21it/s, loss=-0.36]
+Processing parameter grid chunks:  42%|████▏     | 169/400 [00:05&lt;00:07, 29.21it/s, loss=-0.364]
+Processing parameter grid chunks:  42%|████▏     | 169/400 [00:05&lt;00:07, 29.21it/s, loss=-0.367]
+Processing parameter grid chunks:  42%|████▏     | 169/400 [00:05&lt;00:07, 29.21it/s, loss=-0.368]
+Processing parameter grid chunks:  43%|████▎     | 172/400 [00:05&lt;00:07, 29.34it/s, loss=-0.368]
+Processing parameter grid chunks:  43%|████▎     | 172/400 [00:05&lt;00:07, 29.34it/s, loss=-0.369]
+Processing parameter grid chunks:  43%|████▎     | 172/400 [00:05&lt;00:07, 29.34it/s, loss=-0.37]
+Processing parameter grid chunks:  43%|████▎     | 172/400 [00:05&lt;00:07, 29.34it/s, loss=-0.37]
+Processing parameter grid chunks:  44%|████▍     | 175/400 [00:05&lt;00:07, 29.52it/s, loss=-0.37]
+Processing parameter grid chunks:  44%|████▍     | 175/400 [00:05&lt;00:07, 29.52it/s, loss=-0.371]
+Processing parameter grid chunks:  44%|████▍     | 175/400 [00:06&lt;00:07, 29.52it/s, loss=-0.371]
+Processing parameter grid chunks:  44%|████▍     | 175/400 [00:06&lt;00:07, 29.52it/s, loss=-0.372]
+Processing parameter grid chunks:  44%|████▍     | 175/400 [00:06&lt;00:07, 29.52it/s, loss=-0.372]
+Processing parameter grid chunks:  45%|████▍     | 179/400 [00:06&lt;00:07, 29.81it/s, loss=-0.372]
+Processing parameter grid chunks:  45%|████▍     | 179/400 [00:06&lt;00:07, 29.81it/s, loss=-0.373]
+Processing parameter grid chunks:  45%|████▍     | 179/400 [00:06&lt;00:07, 29.81it/s, loss=-0.375]
+Processing parameter grid chunks:  45%|████▍     | 179/400 [00:06&lt;00:07, 29.81it/s, loss=-0.375]
+Processing parameter grid chunks:  46%|████▌     | 182/400 [00:06&lt;00:07, 29.84it/s, loss=-0.375]
+Processing parameter grid chunks:  46%|████▌     | 182/400 [00:06&lt;00:07, 29.84it/s, loss=-0.375]
+Processing parameter grid chunks:  46%|████▌     | 182/400 [00:06&lt;00:07, 29.84it/s, loss=-0.375]
+Processing parameter grid chunks:  46%|████▌     | 182/400 [00:06&lt;00:07, 29.84it/s, loss=-0.376]
+Processing parameter grid chunks:  46%|████▋     | 185/400 [00:06&lt;00:07, 29.82it/s, loss=-0.376]
+Processing parameter grid chunks:  46%|████▋     | 185/400 [00:06&lt;00:07, 29.82it/s, loss=-0.377]
+Processing parameter grid chunks:  46%|████▋     | 185/400 [00:06&lt;00:07, 29.82it/s, loss=-0.378]
+Processing parameter grid chunks:  46%|████▋     | 185/400 [00:06&lt;00:07, 29.82it/s, loss=-0.379]
+Processing parameter grid chunks:  47%|████▋     | 188/400 [00:06&lt;00:07, 29.75it/s, loss=-0.379]
+Processing parameter grid chunks:  47%|████▋     | 188/400 [00:06&lt;00:07, 29.75it/s, loss=-0.381]
+Processing parameter grid chunks:  47%|████▋     | 188/400 [00:06&lt;00:07, 29.75it/s, loss=-0.384]
+Processing parameter grid chunks:  47%|████▋     | 188/400 [00:06&lt;00:07, 29.75it/s, loss=-0.387]
+Processing parameter grid chunks:  48%|████▊     | 191/400 [00:06&lt;00:07, 29.72it/s, loss=-0.387]
+Processing parameter grid chunks:  48%|████▊     | 191/400 [00:06&lt;00:07, 29.72it/s, loss=-0.389]
+Processing parameter grid chunks:  48%|████▊     | 191/400 [00:06&lt;00:07, 29.72it/s, loss=-0.39]
+Processing parameter grid chunks:  48%|████▊     | 191/400 [00:06&lt;00:07, 29.72it/s, loss=-0.39]
+Processing parameter grid chunks:  48%|████▊     | 194/400 [00:06&lt;00:06, 29.60it/s, loss=-0.39]
+Processing parameter grid chunks:  48%|████▊     | 194/400 [00:06&lt;00:06, 29.60it/s, loss=-0.391]
+Processing parameter grid chunks:  48%|████▊     | 194/400 [00:06&lt;00:06, 29.60it/s, loss=-0.391]
+Processing parameter grid chunks:  48%|████▊     | 194/400 [00:06&lt;00:06, 29.60it/s, loss=-0.391]
+Processing parameter grid chunks:  48%|████▊     | 194/400 [00:06&lt;00:06, 29.60it/s, loss=-0.392]
+Processing parameter grid chunks:  50%|████▉     | 198/400 [00:06&lt;00:06, 29.92it/s, loss=-0.392]
+Processing parameter grid chunks:  50%|████▉     | 198/400 [00:06&lt;00:06, 29.92it/s, loss=-0.392]
+Processing parameter grid chunks:  50%|████▉     | 198/400 [00:06&lt;00:06, 29.92it/s, loss=-0.393]
+Processing parameter grid chunks:  50%|████▉     | 198/400 [00:06&lt;00:06, 29.92it/s, loss=-0.396]
+Processing parameter grid chunks:  50%|████▉     | 198/400 [00:06&lt;00:06, 29.92it/s, loss=-0.396]
+Processing parameter grid chunks:  50%|█████     | 202/400 [00:06&lt;00:06, 30.11it/s, loss=-0.396]
+Processing parameter grid chunks:  50%|█████     | 202/400 [00:06&lt;00:06, 30.11it/s, loss=-0.396]
+Processing parameter grid chunks:  50%|█████     | 202/400 [00:06&lt;00:06, 30.11it/s, loss=-0.396]
+Processing parameter grid chunks:  50%|█████     | 202/400 [00:06&lt;00:06, 30.11it/s, loss=-0.397]
+Processing parameter grid chunks:  50%|█████     | 202/400 [00:06&lt;00:06, 30.11it/s, loss=-0.397]
+Processing parameter grid chunks:  52%|█████▏    | 206/400 [00:06&lt;00:06, 29.92it/s, loss=-0.397]
+Processing parameter grid chunks:  52%|█████▏    | 206/400 [00:07&lt;00:06, 29.92it/s, loss=-0.397]
+Processing parameter grid chunks:  52%|█████▏    | 206/400 [00:07&lt;00:06, 29.92it/s, loss=-0.398]
+Processing parameter grid chunks:  52%|█████▏    | 206/400 [00:07&lt;00:06, 29.92it/s, loss=-0.399]
+Processing parameter grid chunks:  52%|█████▏    | 209/400 [00:07&lt;00:06, 29.87it/s, loss=-0.399]
+Processing parameter grid chunks:  52%|█████▏    | 209/400 [00:07&lt;00:06, 29.87it/s, loss=-0.401]
+Processing parameter grid chunks:  52%|█████▏    | 209/400 [00:07&lt;00:06, 29.87it/s, loss=-0.403]
+Processing parameter grid chunks:  52%|█████▏    | 209/400 [00:07&lt;00:06, 29.87it/s, loss=-0.404]
+Processing parameter grid chunks:  53%|█████▎    | 212/400 [00:07&lt;00:06, 29.82it/s, loss=-0.404]
+Processing parameter grid chunks:  53%|█████▎    | 212/400 [00:07&lt;00:06, 29.82it/s, loss=-0.404]
+Processing parameter grid chunks:  53%|█████▎    | 212/400 [00:07&lt;00:06, 29.82it/s, loss=-0.405]
+Processing parameter grid chunks:  53%|█████▎    | 212/400 [00:07&lt;00:06, 29.82it/s, loss=-0.405]
+Processing parameter grid chunks:  54%|█████▍    | 215/400 [00:07&lt;00:06, 29.84it/s, loss=-0.405]
+Processing parameter grid chunks:  54%|█████▍    | 215/400 [00:07&lt;00:06, 29.84it/s, loss=-0.406]
+Processing parameter grid chunks:  54%|█████▍    | 215/400 [00:07&lt;00:06, 29.84it/s, loss=-0.406]
+Processing parameter grid chunks:  54%|█████▍    | 215/400 [00:07&lt;00:06, 29.84it/s, loss=-0.406]
+Processing parameter grid chunks:  55%|█████▍    | 218/400 [00:07&lt;00:06, 29.82it/s, loss=-0.406]
+Processing parameter grid chunks:  55%|█████▍    | 218/400 [00:07&lt;00:06, 29.82it/s, loss=-0.407]
+Processing parameter grid chunks:  55%|█████▍    | 218/400 [00:07&lt;00:06, 29.82it/s, loss=-0.407]
+Processing parameter grid chunks:  55%|█████▍    | 218/400 [00:07&lt;00:06, 29.82it/s, loss=-0.41]
+Processing parameter grid chunks:  55%|█████▌    | 221/400 [00:07&lt;00:06, 29.64it/s, loss=-0.41]
+Processing parameter grid chunks:  55%|█████▌    | 221/400 [00:07&lt;00:06, 29.64it/s, loss=-0.41]
+Processing parameter grid chunks:  55%|█████▌    | 221/400 [00:07&lt;00:06, 29.64it/s, loss=-0.411]
+Processing parameter grid chunks:  55%|█████▌    | 221/400 [00:07&lt;00:06, 29.64it/s, loss=-0.411]
+Processing parameter grid chunks:  56%|█████▌    | 224/400 [00:07&lt;00:05, 29.70it/s, loss=-0.411]
+Processing parameter grid chunks:  56%|█████▌    | 224/400 [00:07&lt;00:05, 29.70it/s, loss=-0.411]
+Processing parameter grid chunks:  56%|█████▌    | 224/400 [00:07&lt;00:05, 29.70it/s, loss=-0.412]
+Processing parameter grid chunks:  56%|█████▌    | 224/400 [00:07&lt;00:05, 29.70it/s, loss=-0.412]
+Processing parameter grid chunks:  56%|█████▌    | 224/400 [00:07&lt;00:05, 29.70it/s, loss=-0.413]
+Processing parameter grid chunks:  57%|█████▋    | 228/400 [00:07&lt;00:05, 30.02it/s, loss=-0.413]
+Processing parameter grid chunks:  57%|█████▋    | 228/400 [00:07&lt;00:05, 30.02it/s, loss=-0.413]
+Processing parameter grid chunks:  57%|█████▋    | 228/400 [00:07&lt;00:05, 30.02it/s, loss=-0.414]
+Processing parameter grid chunks:  57%|█████▋    | 228/400 [00:07&lt;00:05, 30.02it/s, loss=-0.415]
+Processing parameter grid chunks:  58%|█████▊    | 231/400 [00:07&lt;00:05, 29.99it/s, loss=-0.415]
+Processing parameter grid chunks:  58%|█████▊    | 231/400 [00:07&lt;00:05, 29.99it/s, loss=-0.416]
+Processing parameter grid chunks:  58%|█████▊    | 231/400 [00:07&lt;00:05, 29.99it/s, loss=-0.416]
+Processing parameter grid chunks:  58%|█████▊    | 231/400 [00:07&lt;00:05, 29.99it/s, loss=-0.416]
+Processing parameter grid chunks:  58%|█████▊    | 231/400 [00:07&lt;00:05, 29.99it/s, loss=-0.417]
+Processing parameter grid chunks:  59%|█████▉    | 235/400 [00:07&lt;00:05, 30.03it/s, loss=-0.417]
+Processing parameter grid chunks:  59%|█████▉    | 235/400 [00:07&lt;00:05, 30.03it/s, loss=-0.417]
+Processing parameter grid chunks:  59%|█████▉    | 235/400 [00:08&lt;00:05, 30.03it/s, loss=-0.417]
+Processing parameter grid chunks:  59%|█████▉    | 235/400 [00:08&lt;00:05, 30.03it/s, loss=-0.417]
+Processing parameter grid chunks:  60%|█████▉    | 238/400 [00:08&lt;00:05, 29.87it/s, loss=-0.417]
+Processing parameter grid chunks:  60%|█████▉    | 238/400 [00:08&lt;00:05, 29.87it/s, loss=-0.418]
+Processing parameter grid chunks:  60%|█████▉    | 238/400 [00:08&lt;00:05, 29.87it/s, loss=-0.418]
+Processing parameter grid chunks:  60%|█████▉    | 238/400 [00:08&lt;00:05, 29.87it/s, loss=-0.421]
+Processing parameter grid chunks:  60%|██████    | 241/400 [00:08&lt;00:05, 29.40it/s, loss=-0.421]
+Processing parameter grid chunks:  60%|██████    | 241/400 [00:08&lt;00:05, 29.40it/s, loss=-0.421]
+Processing parameter grid chunks:  60%|██████    | 241/400 [00:08&lt;00:05, 29.40it/s, loss=-0.421]
+Processing parameter grid chunks:  60%|██████    | 241/400 [00:08&lt;00:05, 29.40it/s, loss=-0.422]
+Processing parameter grid chunks:  61%|██████    | 244/400 [00:08&lt;00:05, 29.25it/s, loss=-0.422]
+Processing parameter grid chunks:  61%|██████    | 244/400 [00:08&lt;00:05, 29.25it/s, loss=-0.422]
+Processing parameter grid chunks:  61%|██████    | 244/400 [00:08&lt;00:05, 29.25it/s, loss=-0.422]
+Processing parameter grid chunks:  61%|██████    | 244/400 [00:08&lt;00:05, 29.25it/s, loss=-0.423]
+Processing parameter grid chunks:  62%|██████▏   | 247/400 [00:08&lt;00:05, 29.33it/s, loss=-0.423]
+Processing parameter grid chunks:  62%|██████▏   | 247/400 [00:08&lt;00:05, 29.33it/s, loss=-0.423]
+Processing parameter grid chunks:  62%|██████▏   | 247/400 [00:08&lt;00:05, 29.33it/s, loss=-0.423]
+Processing parameter grid chunks:  62%|██████▏   | 247/400 [00:08&lt;00:05, 29.33it/s, loss=-0.424]
+Processing parameter grid chunks:  62%|██████▎   | 250/400 [00:08&lt;00:05, 29.52it/s, loss=-0.424]
+Processing parameter grid chunks:  62%|██████▎   | 250/400 [00:08&lt;00:05, 29.52it/s, loss=-0.425]
+Processing parameter grid chunks:  62%|██████▎   | 250/400 [00:08&lt;00:05, 29.52it/s, loss=-0.425]
+Processing parameter grid chunks:  62%|██████▎   | 250/400 [00:08&lt;00:05, 29.52it/s, loss=-0.425]
+Processing parameter grid chunks:  62%|██████▎   | 250/400 [00:08&lt;00:05, 29.52it/s, loss=-0.426]
+Processing parameter grid chunks:  64%|██████▎   | 254/400 [00:08&lt;00:04, 29.78it/s, loss=-0.426]
+Processing parameter grid chunks:  64%|██████▎   | 254/400 [00:08&lt;00:04, 29.78it/s, loss=-0.426]
+Processing parameter grid chunks:  64%|██████▎   | 254/400 [00:08&lt;00:04, 29.78it/s, loss=-0.426]
+Processing parameter grid chunks:  64%|██████▎   | 254/400 [00:08&lt;00:04, 29.78it/s, loss=-0.426]
+Processing parameter grid chunks:  64%|██████▍   | 257/400 [00:08&lt;00:04, 29.79it/s, loss=-0.426]
+Processing parameter grid chunks:  64%|██████▍   | 257/400 [00:08&lt;00:04, 29.79it/s, loss=-0.426]
+Processing parameter grid chunks:  64%|██████▍   | 257/400 [00:08&lt;00:04, 29.79it/s, loss=-0.427]
+Processing parameter grid chunks:  64%|██████▍   | 257/400 [00:08&lt;00:04, 29.79it/s, loss=-0.428]
+Processing parameter grid chunks:  65%|██████▌   | 260/400 [00:08&lt;00:04, 29.83it/s, loss=-0.428]
+Processing parameter grid chunks:  65%|██████▌   | 260/400 [00:08&lt;00:04, 29.83it/s, loss=-0.429]
+Processing parameter grid chunks:  65%|██████▌   | 260/400 [00:08&lt;00:04, 29.83it/s, loss=-0.429]
+Processing parameter grid chunks:  65%|██████▌   | 260/400 [00:08&lt;00:04, 29.83it/s, loss=-0.43]
+Processing parameter grid chunks:  66%|██████▌   | 263/400 [00:08&lt;00:04, 29.79it/s, loss=-0.43]
+Processing parameter grid chunks:  66%|██████▌   | 263/400 [00:08&lt;00:04, 29.79it/s, loss=-0.43]
+Processing parameter grid chunks:  66%|██████▌   | 263/400 [00:08&lt;00:04, 29.79it/s, loss=-0.43]
+Processing parameter grid chunks:  66%|██████▌   | 263/400 [00:09&lt;00:04, 29.79it/s, loss=-0.431]
+Processing parameter grid chunks:  66%|██████▋   | 266/400 [00:09&lt;00:04, 29.59it/s, loss=-0.431]
+Processing parameter grid chunks:  66%|██████▋   | 266/400 [00:09&lt;00:04, 29.59it/s, loss=-0.431]
+Processing parameter grid chunks:  66%|██████▋   | 266/400 [00:09&lt;00:04, 29.59it/s, loss=-0.431]
+Processing parameter grid chunks:  66%|██████▋   | 266/400 [00:09&lt;00:04, 29.59it/s, loss=-0.431]
+Processing parameter grid chunks:  67%|██████▋   | 269/400 [00:09&lt;00:04, 29.61it/s, loss=-0.431]
+Processing parameter grid chunks:  67%|██████▋   | 269/400 [00:09&lt;00:04, 29.61it/s, loss=-0.432]
+Processing parameter grid chunks:  67%|██████▋   | 269/400 [00:09&lt;00:04, 29.61it/s, loss=-0.432]
+Processing parameter grid chunks:  67%|██████▋   | 269/400 [00:09&lt;00:04, 29.61it/s, loss=-0.433]
+Processing parameter grid chunks:  68%|██████▊   | 272/400 [00:09&lt;00:04, 29.70it/s, loss=-0.433]
+Processing parameter grid chunks:  68%|██████▊   | 272/400 [00:09&lt;00:04, 29.70it/s, loss=-0.433]
+Processing parameter grid chunks:  68%|██████▊   | 272/400 [00:09&lt;00:04, 29.70it/s, loss=-0.433]
+Processing parameter grid chunks:  68%|██████▊   | 272/400 [00:09&lt;00:04, 29.70it/s, loss=-0.433]
+Processing parameter grid chunks:  69%|██████▉   | 275/400 [00:09&lt;00:04, 29.76it/s, loss=-0.433]
+Processing parameter grid chunks:  69%|██████▉   | 275/400 [00:09&lt;00:04, 29.76it/s, loss=-0.433]
+Processing parameter grid chunks:  69%|██████▉   | 275/400 [00:09&lt;00:04, 29.76it/s, loss=-0.433]
+Processing parameter grid chunks:  69%|██████▉   | 275/400 [00:09&lt;00:04, 29.76it/s, loss=-0.434]
+Processing parameter grid chunks:  69%|██████▉   | 275/400 [00:09&lt;00:04, 29.76it/s, loss=-0.434]
+Processing parameter grid chunks:  70%|██████▉   | 279/400 [00:09&lt;00:04, 30.02it/s, loss=-0.434]
+Processing parameter grid chunks:  70%|██████▉   | 279/400 [00:09&lt;00:04, 30.02it/s, loss=-0.435]
+Processing parameter grid chunks:  70%|██████▉   | 279/400 [00:09&lt;00:04, 30.02it/s, loss=-0.436]
+Processing parameter grid chunks:  70%|██████▉   | 279/400 [00:09&lt;00:04, 30.02it/s, loss=-0.436]
+Processing parameter grid chunks:  70%|███████   | 282/400 [00:09&lt;00:03, 29.77it/s, loss=-0.436]
+Processing parameter grid chunks:  70%|███████   | 282/400 [00:09&lt;00:03, 29.77it/s, loss=-0.436]
+Processing parameter grid chunks:  70%|███████   | 282/400 [00:09&lt;00:03, 29.77it/s, loss=-0.436]
+Processing parameter grid chunks:  70%|███████   | 282/400 [00:09&lt;00:03, 29.77it/s, loss=-0.437]
+Processing parameter grid chunks:  71%|███████▏  | 285/400 [00:09&lt;00:03, 29.52it/s, loss=-0.437]
+Processing parameter grid chunks:  71%|███████▏  | 285/400 [00:09&lt;00:03, 29.52it/s, loss=-0.437]
+Processing parameter grid chunks:  71%|███████▏  | 285/400 [00:09&lt;00:03, 29.52it/s, loss=-0.437]
+Processing parameter grid chunks:  71%|███████▏  | 285/400 [00:09&lt;00:03, 29.52it/s, loss=-0.437]
+Processing parameter grid chunks:  71%|███████▏  | 285/400 [00:09&lt;00:03, 29.52it/s, loss=-0.437]
+Processing parameter grid chunks:  72%|███████▏  | 289/400 [00:09&lt;00:03, 29.71it/s, loss=-0.437]
+Processing parameter grid chunks:  72%|███████▏  | 289/400 [00:09&lt;00:03, 29.71it/s, loss=-0.437]
+Processing parameter grid chunks:  72%|███████▏  | 289/400 [00:09&lt;00:03, 29.71it/s, loss=-0.438]
+Processing parameter grid chunks:  72%|███████▏  | 289/400 [00:09&lt;00:03, 29.71it/s, loss=-0.438]
+Processing parameter grid chunks:  72%|███████▏  | 289/400 [00:09&lt;00:03, 29.71it/s, loss=-0.438]
+Processing parameter grid chunks:  73%|███████▎  | 293/400 [00:09&lt;00:03, 29.84it/s, loss=-0.438]
+Processing parameter grid chunks:  73%|███████▎  | 293/400 [00:09&lt;00:03, 29.84it/s, loss=-0.438]
+Processing parameter grid chunks:  73%|███████▎  | 293/400 [00:09&lt;00:03, 29.84it/s, loss=-0.438]
+Processing parameter grid chunks:  73%|███████▎  | 293/400 [00:10&lt;00:03, 29.84it/s, loss=-0.438]
+Processing parameter grid chunks:  74%|███████▍  | 296/400 [00:10&lt;00:03, 29.69it/s, loss=-0.438]
+Processing parameter grid chunks:  74%|███████▍  | 296/400 [00:10&lt;00:03, 29.69it/s, loss=-0.438]
+Processing parameter grid chunks:  74%|███████▍  | 296/400 [00:10&lt;00:03, 29.69it/s, loss=-0.439]
+Processing parameter grid chunks:  74%|███████▍  | 296/400 [00:10&lt;00:03, 29.69it/s, loss=-0.439]
+Processing parameter grid chunks:  75%|███████▍  | 299/400 [00:10&lt;00:03, 29.67it/s, loss=-0.439]
+Processing parameter grid chunks:  75%|███████▍  | 299/400 [00:10&lt;00:03, 29.67it/s, loss=-0.44]
+Processing parameter grid chunks:  75%|███████▍  | 299/400 [00:10&lt;00:03, 29.67it/s, loss=-0.441]
+Processing parameter grid chunks:  75%|███████▍  | 299/400 [00:10&lt;00:03, 29.67it/s, loss=-0.441]
+Processing parameter grid chunks:  76%|███████▌  | 302/400 [00:10&lt;00:03, 29.72it/s, loss=-0.441]
+Processing parameter grid chunks:  76%|███████▌  | 302/400 [00:10&lt;00:03, 29.72it/s, loss=-0.441]
+Processing parameter grid chunks:  76%|███████▌  | 302/400 [00:10&lt;00:03, 29.72it/s, loss=-0.441]
+Processing parameter grid chunks:  76%|███████▌  | 302/400 [00:10&lt;00:03, 29.72it/s, loss=-0.441]
+Processing parameter grid chunks:  76%|███████▋  | 305/400 [00:10&lt;00:03, 29.76it/s, loss=-0.441]
+Processing parameter grid chunks:  76%|███████▋  | 305/400 [00:10&lt;00:03, 29.76it/s, loss=-0.441]
+Processing parameter grid chunks:  76%|███████▋  | 305/400 [00:10&lt;00:03, 29.76it/s, loss=-0.441]
+Processing parameter grid chunks:  76%|███████▋  | 305/400 [00:10&lt;00:03, 29.76it/s, loss=-0.441]
+Processing parameter grid chunks:  77%|███████▋  | 308/400 [00:10&lt;00:03, 29.61it/s, loss=-0.441]
+Processing parameter grid chunks:  77%|███████▋  | 308/400 [00:10&lt;00:03, 29.61it/s, loss=-0.441]
+Processing parameter grid chunks:  77%|███████▋  | 308/400 [00:10&lt;00:03, 29.61it/s, loss=-0.441]
+Processing parameter grid chunks:  77%|███████▋  | 308/400 [00:10&lt;00:03, 29.61it/s, loss=-0.441]
+Processing parameter grid chunks:  78%|███████▊  | 311/400 [00:10&lt;00:03, 29.58it/s, loss=-0.441]
+Processing parameter grid chunks:  78%|███████▊  | 311/400 [00:10&lt;00:03, 29.58it/s, loss=-0.441]
+Processing parameter grid chunks:  78%|███████▊  | 311/400 [00:10&lt;00:03, 29.58it/s, loss=-0.441]
+Processing parameter grid chunks:  78%|███████▊  | 311/400 [00:10&lt;00:03, 29.58it/s, loss=-0.441]
+Processing parameter grid chunks:  78%|███████▊  | 314/400 [00:10&lt;00:02, 29.66it/s, loss=-0.441]
+Processing parameter grid chunks:  78%|███████▊  | 314/400 [00:10&lt;00:02, 29.66it/s, loss=-0.441]
+Processing parameter grid chunks:  78%|███████▊  | 314/400 [00:10&lt;00:02, 29.66it/s, loss=-0.441]
+Processing parameter grid chunks:  78%|███████▊  | 314/400 [00:10&lt;00:02, 29.66it/s, loss=-0.441]
+Processing parameter grid chunks:  79%|███████▉  | 317/400 [00:10&lt;00:02, 29.48it/s, loss=-0.441]
+Processing parameter grid chunks:  79%|███████▉  | 317/400 [00:10&lt;00:02, 29.48it/s, loss=-0.441]
+Processing parameter grid chunks:  79%|███████▉  | 317/400 [00:10&lt;00:02, 29.48it/s, loss=-0.442]
+Processing parameter grid chunks:  79%|███████▉  | 317/400 [00:10&lt;00:02, 29.48it/s, loss=-0.442]
+Processing parameter grid chunks:  80%|████████  | 320/400 [00:10&lt;00:02, 29.59it/s, loss=-0.442]
+Processing parameter grid chunks:  80%|████████  | 320/400 [00:10&lt;00:02, 29.59it/s, loss=-0.442]
+Processing parameter grid chunks:  80%|████████  | 320/400 [00:10&lt;00:02, 29.59it/s, loss=-0.442]
+Processing parameter grid chunks:  80%|████████  | 320/400 [00:10&lt;00:02, 29.59it/s, loss=-0.442]
+Processing parameter grid chunks:  81%|████████  | 323/400 [00:10&lt;00:02, 29.40it/s, loss=-0.442]
+Processing parameter grid chunks:  81%|████████  | 323/400 [00:10&lt;00:02, 29.40it/s, loss=-0.442]
+Processing parameter grid chunks:  81%|████████  | 323/400 [00:10&lt;00:02, 29.40it/s, loss=-0.442]
+Processing parameter grid chunks:  81%|████████  | 323/400 [00:11&lt;00:02, 29.40it/s, loss=-0.442]
+Processing parameter grid chunks:  82%|████████▏ | 326/400 [00:11&lt;00:02, 29.26it/s, loss=-0.442]
+Processing parameter grid chunks:  82%|████████▏ | 326/400 [00:11&lt;00:02, 29.26it/s, loss=-0.442]
+Processing parameter grid chunks:  82%|████████▏ | 326/400 [00:11&lt;00:02, 29.26it/s, loss=-0.442]
+Processing parameter grid chunks:  82%|████████▏ | 326/400 [00:11&lt;00:02, 29.26it/s, loss=-0.442]
+Processing parameter grid chunks:  82%|████████▏ | 329/400 [00:11&lt;00:02, 29.22it/s, loss=-0.442]
+Processing parameter grid chunks:  82%|████████▏ | 329/400 [00:11&lt;00:02, 29.22it/s, loss=-0.442]
+Processing parameter grid chunks:  82%|████████▏ | 329/400 [00:11&lt;00:02, 29.22it/s, loss=-0.442]
+Processing parameter grid chunks:  82%|████████▏ | 329/400 [00:11&lt;00:02, 29.22it/s, loss=-0.442]
+Processing parameter grid chunks:  83%|████████▎ | 332/400 [00:11&lt;00:02, 29.00it/s, loss=-0.442]
+Processing parameter grid chunks:  83%|████████▎ | 332/400 [00:11&lt;00:02, 29.00it/s, loss=-0.442]
+Processing parameter grid chunks:  83%|████████▎ | 332/400 [00:11&lt;00:02, 29.00it/s, loss=-0.442]
+Processing parameter grid chunks:  83%|████████▎ | 332/400 [00:11&lt;00:02, 29.00it/s, loss=-0.442]
+Processing parameter grid chunks:  84%|████████▍ | 335/400 [00:11&lt;00:02, 28.95it/s, loss=-0.442]
+Processing parameter grid chunks:  84%|████████▍ | 335/400 [00:11&lt;00:02, 28.95it/s, loss=-0.442]
+Processing parameter grid chunks:  84%|████████▍ | 335/400 [00:11&lt;00:02, 28.95it/s, loss=-0.442]
+Processing parameter grid chunks:  84%|████████▍ | 335/400 [00:11&lt;00:02, 28.95it/s, loss=-0.442]
+Processing parameter grid chunks:  84%|████████▍ | 338/400 [00:11&lt;00:02, 29.24it/s, loss=-0.442]
+Processing parameter grid chunks:  84%|████████▍ | 338/400 [00:11&lt;00:02, 29.24it/s, loss=-0.442]
+Processing parameter grid chunks:  84%|████████▍ | 338/400 [00:11&lt;00:02, 29.24it/s, loss=-0.442]
+Processing parameter grid chunks:  84%|████████▍ | 338/400 [00:11&lt;00:02, 29.24it/s, loss=-0.442]
+Processing parameter grid chunks:  84%|████████▍ | 338/400 [00:11&lt;00:02, 29.24it/s, loss=-0.442]
+Processing parameter grid chunks:  86%|████████▌ | 342/400 [00:11&lt;00:01, 29.80it/s, loss=-0.442]
+Processing parameter grid chunks:  86%|████████▌ | 342/400 [00:11&lt;00:01, 29.80it/s, loss=-0.442]
+Processing parameter grid chunks:  86%|████████▌ | 342/400 [00:11&lt;00:01, 29.80it/s, loss=-0.442]
+Processing parameter grid chunks:  86%|████████▌ | 342/400 [00:11&lt;00:01, 29.80it/s, loss=-0.442]
+Processing parameter grid chunks:  86%|████████▌ | 342/400 [00:11&lt;00:01, 29.80it/s, loss=-0.442]
+Processing parameter grid chunks:  86%|████████▋ | 346/400 [00:11&lt;00:01, 29.01it/s, loss=-0.442]
+Processing parameter grid chunks:  86%|████████▋ | 346/400 [00:11&lt;00:01, 29.01it/s, loss=-0.442]
+Processing parameter grid chunks:  86%|████████▋ | 346/400 [00:11&lt;00:01, 29.01it/s, loss=-0.442]
+Processing parameter grid chunks:  86%|████████▋ | 346/400 [00:11&lt;00:01, 29.01it/s, loss=-0.442]
+Processing parameter grid chunks:  87%|████████▋ | 349/400 [00:11&lt;00:01, 26.03it/s, loss=-0.442]
+Processing parameter grid chunks:  87%|████████▋ | 349/400 [00:11&lt;00:01, 26.03it/s, loss=-0.442]
+Processing parameter grid chunks:  87%|████████▋ | 349/400 [00:11&lt;00:01, 26.03it/s, loss=-0.442]
+Processing parameter grid chunks:  87%|████████▋ | 349/400 [00:11&lt;00:01, 26.03it/s, loss=-0.442]
+Processing parameter grid chunks:  88%|████████▊ | 352/400 [00:11&lt;00:01, 26.45it/s, loss=-0.442]
+Processing parameter grid chunks:  88%|████████▊ | 352/400 [00:12&lt;00:01, 26.45it/s, loss=-0.442]
+Processing parameter grid chunks:  88%|████████▊ | 352/400 [00:12&lt;00:01, 26.45it/s, loss=-0.442]
+Processing parameter grid chunks:  88%|████████▊ | 352/400 [00:12&lt;00:01, 26.45it/s, loss=-0.442]
+Processing parameter grid chunks:  89%|████████▉ | 355/400 [00:12&lt;00:01, 26.57it/s, loss=-0.442]
+Processing parameter grid chunks:  89%|████████▉ | 355/400 [00:12&lt;00:01, 26.57it/s, loss=-0.442]
+Processing parameter grid chunks:  89%|████████▉ | 355/400 [00:12&lt;00:01, 26.57it/s, loss=-0.442]
+Processing parameter grid chunks:  89%|████████▉ | 355/400 [00:12&lt;00:01, 26.57it/s, loss=-0.442]
+Processing parameter grid chunks:  90%|████████▉ | 358/400 [00:12&lt;00:01, 27.24it/s, loss=-0.442]
+Processing parameter grid chunks:  90%|████████▉ | 358/400 [00:12&lt;00:01, 27.24it/s, loss=-0.442]
+Processing parameter grid chunks:  90%|████████▉ | 358/400 [00:12&lt;00:01, 27.24it/s, loss=-0.442]
+Processing parameter grid chunks:  90%|████████▉ | 358/400 [00:12&lt;00:01, 27.24it/s, loss=-0.442]
+Processing parameter grid chunks:  90%|█████████ | 361/400 [00:12&lt;00:01, 27.73it/s, loss=-0.442]
+Processing parameter grid chunks:  90%|█████████ | 361/400 [00:12&lt;00:01, 27.73it/s, loss=-0.442]
+Processing parameter grid chunks:  90%|█████████ | 361/400 [00:12&lt;00:01, 27.73it/s, loss=-0.442]
+Processing parameter grid chunks:  90%|█████████ | 361/400 [00:12&lt;00:01, 27.73it/s, loss=-0.442]
+Processing parameter grid chunks:  91%|█████████ | 364/400 [00:12&lt;00:01, 26.42it/s, loss=-0.442]
+Processing parameter grid chunks:  91%|█████████ | 364/400 [00:12&lt;00:01, 26.42it/s, loss=-0.442]
+Processing parameter grid chunks:  91%|█████████ | 364/400 [00:12&lt;00:01, 26.42it/s, loss=-0.442]
+Processing parameter grid chunks:  91%|█████████ | 364/400 [00:12&lt;00:01, 26.42it/s, loss=-0.443]
+Processing parameter grid chunks:  92%|█████████▏| 367/400 [00:12&lt;00:01, 24.95it/s, loss=-0.443]
+Processing parameter grid chunks:  92%|█████████▏| 367/400 [00:12&lt;00:01, 24.95it/s, loss=-0.443]
+Processing parameter grid chunks:  92%|█████████▏| 367/400 [00:12&lt;00:01, 24.95it/s, loss=-0.443]
+Processing parameter grid chunks:  92%|█████████▏| 367/400 [00:12&lt;00:01, 24.95it/s, loss=-0.443]
+Processing parameter grid chunks:  92%|█████████▏| 367/400 [00:12&lt;00:01, 24.95it/s, loss=-0.443]
+Processing parameter grid chunks:  93%|█████████▎| 371/400 [00:12&lt;00:01, 26.67it/s, loss=-0.443]
+Processing parameter grid chunks:  93%|█████████▎| 371/400 [00:12&lt;00:01, 26.67it/s, loss=-0.443]
+Processing parameter grid chunks:  93%|█████████▎| 371/400 [00:12&lt;00:01, 26.67it/s, loss=-0.443]
+Processing parameter grid chunks:  93%|█████████▎| 371/400 [00:12&lt;00:01, 26.67it/s, loss=-0.443]
+Processing parameter grid chunks:  94%|█████████▎| 374/400 [00:12&lt;00:00, 27.51it/s, loss=-0.443]
+Processing parameter grid chunks:  94%|█████████▎| 374/400 [00:12&lt;00:00, 27.51it/s, loss=-0.443]
+Processing parameter grid chunks:  94%|█████████▎| 374/400 [00:12&lt;00:00, 27.51it/s, loss=-0.443]
+Processing parameter grid chunks:  94%|█████████▎| 374/400 [00:12&lt;00:00, 27.51it/s, loss=-0.443]
+Processing parameter grid chunks:  94%|█████████▍| 377/400 [00:12&lt;00:00, 27.67it/s, loss=-0.443]
+Processing parameter grid chunks:  94%|█████████▍| 377/400 [00:12&lt;00:00, 27.67it/s, loss=-0.443]
+Processing parameter grid chunks:  94%|█████████▍| 377/400 [00:12&lt;00:00, 27.67it/s, loss=-0.443]
+Processing parameter grid chunks:  94%|█████████▍| 377/400 [00:12&lt;00:00, 27.67it/s, loss=-0.443]
+Processing parameter grid chunks:  95%|█████████▌| 380/400 [00:12&lt;00:00, 28.20it/s, loss=-0.443]
+Processing parameter grid chunks:  95%|█████████▌| 380/400 [00:13&lt;00:00, 28.20it/s, loss=-0.443]
+Processing parameter grid chunks:  95%|█████████▌| 380/400 [00:13&lt;00:00, 28.20it/s, loss=-0.443]
+Processing parameter grid chunks:  95%|█████████▌| 380/400 [00:13&lt;00:00, 28.20it/s, loss=-0.443]
+Processing parameter grid chunks:  96%|█████████▌| 383/400 [00:13&lt;00:00, 28.64it/s, loss=-0.443]
+Processing parameter grid chunks:  96%|█████████▌| 383/400 [00:13&lt;00:00, 28.64it/s, loss=-0.443]
+Processing parameter grid chunks:  96%|█████████▌| 383/400 [00:13&lt;00:00, 28.64it/s, loss=-0.443]
+Processing parameter grid chunks:  96%|█████████▌| 383/400 [00:13&lt;00:00, 28.64it/s, loss=-0.443]
+Processing parameter grid chunks:  96%|█████████▋| 386/400 [00:13&lt;00:00, 28.94it/s, loss=-0.443]
+Processing parameter grid chunks:  96%|█████████▋| 386/400 [00:13&lt;00:00, 28.94it/s, loss=-0.443]
+Processing parameter grid chunks:  96%|█████████▋| 386/400 [00:13&lt;00:00, 28.94it/s, loss=-0.443]
+Processing parameter grid chunks:  96%|█████████▋| 386/400 [00:13&lt;00:00, 28.94it/s, loss=-0.443]
+Processing parameter grid chunks:  97%|█████████▋| 389/400 [00:13&lt;00:00, 28.98it/s, loss=-0.443]
+Processing parameter grid chunks:  97%|█████████▋| 389/400 [00:13&lt;00:00, 28.98it/s, loss=-0.443]
+Processing parameter grid chunks:  97%|█████████▋| 389/400 [00:13&lt;00:00, 28.98it/s, loss=-0.443]
+Processing parameter grid chunks:  97%|█████████▋| 389/400 [00:13&lt;00:00, 28.98it/s, loss=-0.443]
+Processing parameter grid chunks:  98%|█████████▊| 392/400 [00:13&lt;00:00, 29.04it/s, loss=-0.443]
+Processing parameter grid chunks:  98%|█████████▊| 392/400 [00:13&lt;00:00, 29.04it/s, loss=-0.443]
+Processing parameter grid chunks:  98%|█████████▊| 392/400 [00:13&lt;00:00, 29.04it/s, loss=-0.443]
+Processing parameter grid chunks:  98%|█████████▊| 392/400 [00:13&lt;00:00, 29.04it/s, loss=-0.443]
+Processing parameter grid chunks:  99%|█████████▉| 395/400 [00:13&lt;00:00, 29.24it/s, loss=-0.443]
+Processing parameter grid chunks:  99%|█████████▉| 395/400 [00:13&lt;00:00, 29.24it/s, loss=-0.443]
+Processing parameter grid chunks:  99%|█████████▉| 395/400 [00:13&lt;00:00, 29.24it/s, loss=-0.443]
+Processing parameter grid chunks:  99%|█████████▉| 395/400 [00:13&lt;00:00, 29.24it/s, loss=-0.443]
+Processing parameter grid chunks: 100%|█████████▉| 398/400 [00:13&lt;00:00, 29.27it/s, loss=-0.443]
+Processing parameter grid chunks: 100%|█████████▉| 398/400 [00:13&lt;00:00, 29.27it/s, loss=-0.443]
+Processing parameter grid chunks: 100%|█████████▉| 398/400 [00:13&lt;00:00, 29.27it/s, loss=-0.443]
+Processing parameter grid chunks: 100%|██████████| 400/400 [00:13&lt;00:00, 29.25it/s, loss=-0.443]
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mu_x</th>
+      <th>mu_y</th>
+      <th>sigma</th>
+      <th>delay</th>
+      <th>dispersion</th>
+      <th>undershoot</th>
+      <th>u_dispersion</th>
+      <th>ratio</th>
+      <th>weight_deriv</th>
+      <th>baseline</th>
+      <th>amplitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-5.789474</td>
+      <td>-10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-5.789474</td>
+      <td>-10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-5.789474</td>
+      <td>-10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-5.789474</td>
+      <td>-10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-5.789474</td>
+      <td>10.0</td>
+      <td>0.531053</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2934</th>
+      <td>10.000000</td>
+      <td>10.0</td>
+      <td>4.739474</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2935</th>
+      <td>3.684211</td>
+      <td>10.0</td>
+      <td>0.531053</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2936</th>
+      <td>3.684211</td>
+      <td>-10.0</td>
+      <td>0.531053</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2937</th>
+      <td>5.789474</td>
+      <td>-10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>2938</th>
+      <td>5.789474</td>
+      <td>10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>2939 rows × 11 columns</p>
+</div></div></div>
+</div>
+<p>We can see that the estimates for <code class="docutils literal notranslate"><span class="pre">mu_x</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>, and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> are one combination in our grid. We can use them to make model predictions and compare them against the observed responses. To keep things simple, we only compare predictions for 10 random vertices.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make predictions with best grid parameters</span>
+<span class="n">grid_pred_response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">grid_params</span><span class="p">))</span>
+
+<span class="c1"># Only plot first 10 vertices</span>
+<span class="n">num_vertices</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axarr</span><span class="o">.</span><span class="n">flatten</span><span class="p">()):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">response_roi</span><span class="p">[</span><span class="n">random_vertices</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Observed&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">grid_pred_response</span><span class="p">[</span><span class="n">random_vertices</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Predicted (grid)&quot;</span><span class="p">)</span>
+
+<span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axarr</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="p">:]:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time frame (in TR)&quot;</span><span class="p">)</span>
+
+<span class="n">axarr</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;BOLD response (in PSC)&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/2283b3dbdd6cb83247b7308ed4f0468e582ea47666c4b53c0af344af5ba8da0e.png" src="../_images/2283b3dbdd6cb83247b7308ed4f0468e582ea47666c4b53c0af344af5ba8da0e.png" />
+</div>
+</div>
+<p>We can see that the pRF model predictions differ substantially from the observed BOLD responses. This is because they still differ in scale (remember that differences in scale were ignored by the cosine similarity loss in the grid search). To align the scales, we can optimize the <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> of the pRF model together with the <code class="docutils literal notranslate"><span class="pre">baseline</span></code> using least squares.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.fitters.linear</span><span class="w"> </span><span class="kn">import</span> <span class="n">LeastSquaresFitter</span>
+
+<span class="c1"># Create least-squares fitter</span>
+<span class="n">ls_fitter</span> <span class="o">=</span> <span class="n">LeastSquaresFitter</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">prf_model</span><span class="p">,</span>
+    <span class="n">stimulus</span><span class="o">=</span><span class="n">stimulus</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Run least squares fit</span>
+<span class="n">ls_history</span><span class="p">,</span> <span class="n">ls_params</span> <span class="o">=</span> <span class="n">ls_fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">response_roi</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="n">grid_params</span><span class="p">,</span>
+    <span class="n">slope_name</span><span class="o">=</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span>  <span class="c1"># Names of parameters to be optimized with least squares</span>
+    <span class="n">intercept_name</span><span class="o">=</span><span class="s2">&quot;baseline&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ls_params</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mu_x</th>
+      <th>mu_y</th>
+      <th>sigma</th>
+      <th>delay</th>
+      <th>dispersion</th>
+      <th>undershoot</th>
+      <th>u_dispersion</th>
+      <th>ratio</th>
+      <th>weight_deriv</th>
+      <th>baseline</th>
+      <th>amplitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-5.789474</td>
+      <td>-10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>-2.720567e-09</td>
+      <td>-6.839910e-16</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>-5.789474</td>
+      <td>-10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>-2.720567e-09</td>
+      <td>-6.839910e-16</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-5.789474</td>
+      <td>-10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>5.441135e-09</td>
+      <td>1.367982e-15</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-5.789474</td>
+      <td>-10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>5.441135e-09</td>
+      <td>1.367982e-15</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-5.789474</td>
+      <td>10.0</td>
+      <td>0.531053</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>-2.270636e-02</td>
+      <td>5.179286e-02</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>2934</th>
+      <td>10.000000</td>
+      <td>10.0</td>
+      <td>4.739474</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>-2.068671e-02</td>
+      <td>1.080770e-01</td>
+    </tr>
+    <tr>
+      <th>2935</th>
+      <td>3.684211</td>
+      <td>10.0</td>
+      <td>0.531053</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>-1.248720e-02</td>
+      <td>1.099022e-02</td>
+    </tr>
+    <tr>
+      <th>2936</th>
+      <td>3.684211</td>
+      <td>-10.0</td>
+      <td>0.531053</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>-2.115984e-02</td>
+      <td>1.889210e-02</td>
+    </tr>
+    <tr>
+      <th>2937</th>
+      <td>5.789474</td>
+      <td>-10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>5.441135e-09</td>
+      <td>1.813444e-15</td>
+    </tr>
+    <tr>
+      <th>2938</th>
+      <td>5.789474</td>
+      <td>10.0</td>
+      <td>0.005000</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.000000e+00</td>
+      <td>0.000000e+00</td>
+    </tr>
+  </tbody>
+</table>
+<p>2939 rows × 11 columns</p>
+</div></div></div>
+</div>
+<p>We can see that the amplitudes are substantially lower compared to the starting value (and our initial guess) for many vertices in our ROI.</p>
+<p>Let’s compare the model predictions against the observed responses again.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Make predictions with least squares parameters</span>
+<span class="n">ls_pred_response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">ls_params</span><span class="p">))</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ax</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axarr</span><span class="o">.</span><span class="n">flatten</span><span class="p">()):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">response_roi</span><span class="p">[</span><span class="n">random_vertices</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Observed&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ls_pred_response</span><span class="p">[</span><span class="n">random_vertices</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Predicted (grid)&quot;</span><span class="p">)</span>
+
+<span class="n">axarr</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axarr</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="p">:]:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time frame (in TR)&quot;</span><span class="p">)</span>
+
+<span class="n">axarr</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;BOLD response (in PSC)&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/984a687d26b1702157f8cdaa685b76e7be748280fedac3f21bbc158e32de0f84.png" src="../_images/984a687d26b1702157f8cdaa685b76e7be748280fedac3f21bbc158e32de0f84.png" />
+</div>
+</div>
+<p>For some of the randomly sample vertices, the prediction is now quite close to the observed BOLD response. However, for other vertices, there are still substantial differences. We can quantify how well the predictions align with the observed timecourses using the R-squared metric. This metric indicates the proportion of variance in the observed data explained by our model predictions.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">keras.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">R2Score</span>
+
+<span class="n">r2_metric</span> <span class="o">=</span> <span class="n">R2Score</span><span class="p">(</span><span class="n">class_aggregation</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># Don&#39;t aggregate score over vertices</span>
+
+<span class="n">r_squared</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">r2_metric</span><span class="p">(</span><span class="n">response_roi</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">ls_pred_response</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>  <span class="c1"># Transpose to compute score across time frames</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can look at the distribution of R-squared values across vertices in the ROI.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">r_squared</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;R-squared&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Frequency&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/ae762f7e9600ea19b281492c31812493eed1583b9cbed54b2e1cc0fd002e7c4d.png" src="../_images/ae762f7e9600ea19b281492c31812493eed1583b9cbed54b2e1cc0fd002e7c4d.png" />
+</div>
+</div>
+<p>We can see that many vertices have a score close to zero meaning that the pRF model does not predict the observed response well. However, a substantial amount of vertices also have higher scores.</p>
+</section>
+<section id="analyzing-the-prf-results">
+<h2>Analyzing the pRF results<a class="headerlink" href="#analyzing-the-prf-results" title="Link to this heading">¶</a></h2>
+<p>To analyze and interpret the pRF parameters, we will zoom in on vertices with R-squared &gt; 0.15 which is roughly one third of the vertices in the ROI.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create mask for vertices above R-squared threshold</span>
+<span class="n">is_above_threshold</span> <span class="o">=</span> <span class="n">r_squared</span> <span class="o">&gt;</span> <span class="mf">0.6</span>
+
+<span class="c1"># Compute proportion of vertices above threshold</span>
+<span class="n">is_above_threshold</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.2851309969377339
+</pre></div>
+</div>
+</div>
+</div>
+<p>For these vertices, we can look at different quantities to interpret the pRFs estimated by our model.</p>
+<p>First, we look at the pRF size indicated by <code class="docutils literal notranslate"><span class="pre">sigma</span></code> and plot it on the surface flatmap.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Allocate size vector for the entire surface</span>
+<span class="n">size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+<span class="c1"># Fill ROI with estimated size parameters</span>
+<span class="n">size</span><span class="p">[</span><span class="n">mask_roi</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_above_threshold</span><span class="p">,</span> <span class="n">ls_params</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+<span class="n">polar_v</span> <span class="o">=</span> <span class="n">cx</span><span class="o">.</span><span class="n">Vertex2D</span><span class="p">(</span><span class="n">dim1</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="n">mask_roi</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                      <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;inferno&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">vmin2</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">vmax2</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">cx</span><span class="o">.</span><span class="n">quickshow</span><span class="p">(</span><span class="n">polar_v</span><span class="p">,</span> <span class="n">with_rois</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_curvature</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>** (inkscape:5388): WARNING **: 13:25:38.115: Failed to wrap object of type &#39;GtkRecentManager&#39;. Hint: this error is commonly caused by failing to call a library init() function.
+</pre></div>
+</div>
+<img alt="../_images/ff518c22c14dc7c875d3f4c7e4d5e6a2b9fee85d109843408a92954626f18e8e.png" src="../_images/ff518c22c14dc7c875d3f4c7e4d5e6a2b9fee85d109843408a92954626f18e8e.png" />
+</div>
+</div>
+<p>We can see that many of the pRFs in our selected vertices have a small size (~ 1 degree of visual angle) and that only some of the vertices closer to V2 have pRF with larger sizes.</p>
+<p>Besides the pRF size, we can also look at the position of the pRF relative to the center of the screen. First, we compute the angle of the center of the pRF relative to the center.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">calc_angle</span><span class="p">(</span><span class="n">mu_x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mu_y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the polar angle of a pRF from the x- and y-coordinate of its center.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">mu_x</span> <span class="o">+</span> <span class="n">mu_y</span> <span class="o">*</span> <span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+
+<span class="c1"># Allocate angle vector for the entire surface</span>
+<span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+<span class="c1"># Fill ROI with estimated angle</span>
+<span class="n">angle_roi</span> <span class="o">=</span> <span class="n">calc_angle</span><span class="p">(</span><span class="n">ls_params</span><span class="p">[</span><span class="s2">&quot;mu_x&quot;</span><span class="p">],</span> <span class="n">ls_params</span><span class="p">[</span><span class="s2">&quot;mu_y&quot;</span><span class="p">])</span>
+<span class="n">angle</span><span class="p">[</span><span class="n">mask_roi</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_above_threshold</span><span class="p">,</span> <span class="n">angle_roi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+<span class="n">polar_v</span> <span class="o">=</span> <span class="n">cx</span><span class="o">.</span><span class="n">Vertex2D</span><span class="p">(</span><span class="n">dim1</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="n">mask_roi</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                      <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Retinotopy_HSV_alpha&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">vmin2</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">vmax2</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">cx</span><span class="o">.</span><span class="n">quickshow</span><span class="p">(</span><span class="n">polar_v</span><span class="p">,</span> <span class="n">with_rois</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_curvature</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>** (inkscape:5401): WARNING **: 13:25:40.613: Failed to wrap object of type &#39;GtkRecentManager&#39;. Hint: this error is commonly caused by failing to call a library init() function.
+</pre></div>
+</div>
+<img alt="../_images/2fdbb08229abc700d9724dc305c06ee8df1f2577e723be61a070bb054da29219.png" src="../_images/2fdbb08229abc700d9724dc305c06ee8df1f2577e723be61a070bb054da29219.png" />
+</div>
+</div>
+<p>The flatmap shows that the left hemisphere contains many vertices with a positive pRF angle, meaning that the center of the pRF is on the right side of the screen. In contrast, many vertices in the right hemishpere have negative pRF angle, suggesting that the pRF is located on the left side of the screen.</p>
+<p>We can also look at the eccentricity, that is, the distance of the pRF center from the center of the screen.</p>
+<div class="cell config_scroll_outputs docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">calc_eccentricity</span><span class="p">(</span><span class="n">mu_x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mu_y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the eccentricity of a pRF from the x- and y-coordinate of its center.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">mu_x</span> <span class="o">+</span> <span class="n">mu_y</span> <span class="o">*</span> <span class="mi">1</span><span class="n">j</span><span class="p">)</span>
+
+<span class="n">eccentricity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],),</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+<span class="n">eccentricity_roi</span> <span class="o">=</span> <span class="n">calc_eccentricity</span><span class="p">(</span><span class="n">ls_params</span><span class="p">[</span><span class="s2">&quot;mu_x&quot;</span><span class="p">],</span> <span class="n">ls_params</span><span class="p">[</span><span class="s2">&quot;mu_y&quot;</span><span class="p">])</span>
+<span class="n">eccentricity</span><span class="p">[</span><span class="n">mask_roi</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">is_above_threshold</span><span class="p">,</span> <span class="n">eccentricity_roi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+<span class="n">polar_v</span> <span class="o">=</span> <span class="n">cx</span><span class="o">.</span><span class="n">Vertex2D</span><span class="p">(</span><span class="n">dim1</span><span class="o">=</span><span class="n">eccentricity</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=</span><span class="n">mask_roi</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="n">subject</span><span class="p">,</span>
+                      <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Retinotopy_HSV_alpha&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mf">15.0</span><span class="p">,</span> <span class="n">vmin2</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">vmax2</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">cx</span><span class="o">.</span><span class="n">quickshow</span><span class="p">(</span><span class="n">polar_v</span><span class="p">,</span> <span class="n">with_rois</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_curvature</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>** (inkscape:5414): WARNING **: 13:25:43.129: Failed to wrap object of type &#39;GtkRecentManager&#39;. Hint: this error is commonly caused by failing to call a library init() function.
+</pre></div>
+</div>
+<img alt="../_images/b8eeea7ee5827879efc2c9498d84614c588b3b78150c2c59c5e33451b663b31c.png" src="../_images/b8eeea7ee5827879efc2c9498d84614c588b3b78150c2c59c5e33451b663b31c.png" />
+</div>
+</div>
+<p>For eccentricity, we can see segments with gradual transitions in both hemispheres that correspond to pRFs that are closer or further away from the center of the screen.</p>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading">¶</a></h2>
+<p>In this tutorial, we showed how to fit a two-dimensional Gausian pRF model to empirical fMRI data collected from an experiment in the visual domain. First, we plotted the raw BOLD response data on a surface flatmap. Second, we inspected the experimental stimulus and the raw BOLD timecourses. Then, we defined a pRF model and optimized its parameters using a grid search followed by least-squares to adjust for baseline and amplitude differences. Finally, we visualized the estimated parameters and derived measures on the surface flatmap.</p>
+</section>
+<section id="next-steps">
+<h2>Next steps<a class="headerlink" href="#next-steps" title="Link to this heading">¶</a></h2>
+<p>When comparing the timecourses predicted by our pRF model with the observed timecourses, we saw that there were still substantial differences between them for many vertices. This notion is supported by the relatively low number of vertices with an R-squared score above 0.15. This means that the predictions by our pRF model can potentially be improved. We suggest different directions for improving the pRF model fit:</p>
+<ul class="simple">
+<li><p>Increasing the number of points in the parameter grid for the grid search</p></li>
+<li><p>Finetuning the pRF model parameters with stochastic gradient descent with <code class="docutils literal notranslate"><span class="pre">prfmodel.fitters.SGDFitter</span></code></p></li>
+<li><p>Applying preprocessing steps before fitting the pRF model (e.g., high-pass filtering)</p></li>
+<li><p>Optimizing the impulse response model parameters in the grid search</p></li>
+<li><p>Building a more complex pRF model (e.g., compressive spatial summation, see Kay et al., 2013; we will cover this in another tutorial soon)</p></li>
+</ul>
+</section>
+<section id="stay-tuned">
+<h2>Stay Tuned<a class="headerlink" href="#stay-tuned" title="Link to this heading">¶</a></h2>
+<p>More tutorials on fitting models to empirical data and creating custom models are in the making.</p>
+<p>For questions and issues, please make an issue on <a class="reference external" href="https://github.com/popylar-org/prfmodel/issues">GitHub</a> or
+contact Malte Lüken (m.luken&#64;esciencecenter.nl).</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<p>Dumoulin, S. O., &amp; Wandell, B. A. (2008). Population receptive field estimates in human visual cortex. <em>NeuroImage, 39</em>(2), 647–660. https://doi.org/10.1016/j.neuroimage.2007.09.034</p>
+<p>Glasser, M. F., Coalson, T. S., Robinson, E. C., Hacker, C. D., Harwell, J., Yacoub, E., Ugurbil, K., Andersson, J., Beckmann, C. F., Jenkinson, M., Smith, S. M., &amp; Van Essen, D. C. (2016). A multi-modal parcellation of human cerebral cortex. <em>Nature, 536</em>(7615), 171–178. https://doi.org/10.1038/nature18933</p>
+<p>Kay, K. N., Winawer, J., Mezer, A., &amp; Wandell, B. A. (2013). Compressive spatial summation in human visual cortex. Journal of Neurophysiology, 110(2), 481–494. https://doi.org/10.1152/jn.00105.2013</p>
+<p>Van Essen, D. C., Ugurbil, K., Auerbach, E., Barch, D., Behrens, T. E. J., Bucholz, R., Chang, A., Chen, L., Corbetta, M., Curtiss, S. W., Della Penna, S., Feinberg, D., Glasser, M. F., Harel, N., Heath, A. C., Larson-Prior, L., Marcus, D., Michalareas, G., Moeller, S., … WU-Minn HCP Consortium. (2012). The Human Connectome Project: A data acquisition perspective. <em>NeuroImage, 62</em>(4), 2222–2231. https://doi.org/10.1016/j.neuroimage.2012.02.018</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../autoapi/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">API Reference</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="simple_prf_simulated.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">How to fit a population receptive field model to simulated data</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">How to fit a population receptive field model to fMRI data</a><ul>
+<li><a class="reference internal" href="#loading-the-surface">Loading the surface</a></li>
+<li><a class="reference internal" href="#loading-the-bold-response">Loading the BOLD response</a></li>
+<li><a class="reference internal" href="#inspecting-the-stimulus">Inspecting the stimulus</a></li>
+<li><a class="reference internal" href="#inspecting-the-data">Inspecting the data</a></li>
+<li><a class="reference internal" href="#defining-the-prf-model">Defining the pRF model</a></li>
+<li><a class="reference internal" href="#fitting-the-prf-model">Fitting the pRF model</a></li>
+<li><a class="reference internal" href="#analyzing-the-prf-results">Analyzing the pRF results</a></li>
+<li><a class="reference internal" href="#conclusion">Conclusion</a></li>
+<li><a class="reference internal" href="#next-steps">Next steps</a></li>
+<li><a class="reference internal" href="#stay-tuned">Stay Tuned</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    </body>
+</html>

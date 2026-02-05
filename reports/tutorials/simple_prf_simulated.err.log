@@ -1,0 +1,76 @@
+Traceback (most recent call last):
+  File "/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/nbclient/client.py", line 1323, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+  File "/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+import matplotlib.pyplot as plt
+
+simulated_response = prf_model(stimulus, true_params)
+
+_ = plt.plot(simulated_response[0])
+------------------
+
+----- stderr -----
+2026-02-05 13:26:03.299011: E external/local_xla/xla/stream_executor/cuda/cuda_platform.cc:51] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: UNKNOWN ERROR (303)
+------------------
+
+[31m---------------------------------------------------------------------------[39m
+[31mKeyError[39m                                  Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[7][39m[32m, line 3[39m
+[32m      1[39m [38;5;28;01mimport[39;00m[38;5;250m [39m[34;01mmatplotlib[39;00m[34;01m.[39;00m[34;01mpyplot[39;00m[38;5;250m [39m[38;5;28;01mas[39;00m[38;5;250m [39m[34;01mplt[39;00m
+[32m----> [39m[32m3[39m simulated_response = [43mprf_model[49m[43m([49m[43mstimulus[49m[43m,[49m[43m [49m[43mtrue_params[49m[43m)[49m
+[32m      5[39m _ = plt.plot(simulated_response[[32m0[39m])
+
+[36mFile [39m[32m/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/prfmodel/models/composite.py:97[39m, in [36mSimplePRFModel.__call__[39m[34m(self, stimulus, parameters, dtype)[39m
+[32m     95[39m [38;5;28;01mif[39;00m [38;5;28mself[39m.models[[33m"[39m[33mimpulse_model[39m[33m"[39m] [38;5;129;01mis[39;00m [38;5;129;01mnot[39;00m [38;5;28;01mNone[39;00m:
+[32m     96[39m     impulse_model = cast([33m"[39m[33mBaseImpulse[39m[33m"[39m, [38;5;28mself[39m.models[[33m"[39m[33mimpulse_model[39m[33m"[39m])
+[32m---> [39m[32m97[39m     impulse_response = [43mimpulse_model[49m[43m([49m[43mparameters[49m[43m,[49m[43m [49m[43mdtype[49m[43m=[49m[43mdtype[49m[43m)[49m
+[32m     98[39m     response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
+[32m    100[39m [38;5;28;01mif[39;00m [38;5;28mself[39m.models[[33m"[39m[33mtemporal_model[39m[33m"[39m] [38;5;129;01mis[39;00m [38;5;129;01mnot[39;00m [38;5;28;01mNone[39;00m:
+
+[36mFile [39m[32m/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/prfmodel/models/impulse/two_gamma_deriv.py:118[39m, in [36mDerivativeTwoGammaImpulse.__call__[39m[34m(self, parameters, dtype)[39m
+[32m    115[39m dtype = get_dtype(dtype)
+[32m    116[39m frames = ops.cast([38;5;28mself[39m.frames, dtype=dtype)
+[32m--> [39m[32m118[39m delay = convert_parameters_to_tensor([43mparameters[49m[43m[[49m[43m[[49m[33;43m"[39;49m[33;43mdelay[39;49m[33;43m"[39;49m[43m][49m[43m][49m, dtype=dtype)
+[32m    119[39m dispersion = convert_parameters_to_tensor(parameters[[[33m"[39m[33mdispersion[39m[33m"[39m]], dtype=dtype)
+[32m    120[39m undershoot = convert_parameters_to_tensor(parameters[[[33m"[39m[33mundershoot[39m[33m"[39m]], dtype=dtype)
+
+[36mFile [39m[32m/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pandas/core/frame.py:4384[39m, in [36mDataFrame.__getitem__[39m[34m(self, key)[39m
+[32m   4382[39m     [38;5;28;01mif[39;00m is_iterator(key):
+[32m   4383[39m         key = [38;5;28mlist[39m(key)
+[32m-> [39m[32m4384[39m     indexer = [38;5;28;43mself[39;49m[43m.[49m[43mcolumns[49m[43m.[49m[43m_get_indexer_strict[49m[43m([49m[43mkey[49m[43m,[49m[43m [49m[33;43m"[39;49m[33;43mcolumns[39;49m[33;43m"[39;49m[43m)[49m[[32m1[39m]
+[32m   4386[39m [38;5;66;03m# take() does not accept boolean indexers[39;00m
+[32m   4387[39m [38;5;28;01mif[39;00m [38;5;28mgetattr[39m(indexer, [33m"[39m[33mdtype[39m[33m"[39m, [38;5;28;01mNone[39;00m) == [38;5;28mbool[39m:
+
+[36mFile [39m[32m/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py:6302[39m, in [36mIndex._get_indexer_strict[39m[34m(self, key, axis_name)[39m
+[32m   6299[39m [38;5;28;01melse[39;00m:
+[32m   6300[39m     keyarr, indexer, new_indexer = [38;5;28mself[39m._reindex_non_unique(keyarr)
+[32m-> [39m[32m6302[39m [38;5;28;43mself[39;49m[43m.[49m[43m_raise_if_missing[49m[43m([49m[43mkeyarr[49m[43m,[49m[43m [49m[43mindexer[49m[43m,[49m[43m [49m[43maxis_name[49m[43m)[49m
+[32m   6304[39m keyarr = [38;5;28mself[39m.take(indexer)
+[32m   6305[39m [38;5;28;01mif[39;00m [38;5;28misinstance[39m(key, Index):
+[32m   6306[39m     [38;5;66;03m# GH 42790 - Preserve name from an Index[39;00m
+
+[36mFile [39m[32m/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/pandas/core/indexes/base.py:6352[39m, in [36mIndex._raise_if_missing[39m[34m(self, key, indexer, axis_name)[39m
+[32m   6350[39m [38;5;28;01mif[39;00m nmissing:
+[32m   6351[39m     [38;5;28;01mif[39;00m nmissing == [38;5;28mlen[39m(indexer):
+[32m-> [39m[32m6352[39m         [38;5;28;01mraise[39;00m [38;5;167;01mKeyError[39;00m([33mf[39m[33m"[39m[33mNone of [[39m[38;5;132;01m{[39;00mkey[38;5;132;01m}[39;00m[33m] are in the [[39m[38;5;132;01m{[39;00maxis_name[38;5;132;01m}[39;00m[33m][39m[33m"[39m)
+[32m   6354[39m     not_found = [38;5;28mlist[39m(ensure_index(key)[missing_mask.nonzero()[[32m0[39m]].unique())
+[32m   6355[39m     [38;5;28;01mraise[39;00m [38;5;167;01mKeyError[39;00m([33mf[39m[33m"[39m[38;5;132;01m{[39;00mnot_found[38;5;132;01m}[39;00m[33m not in index[39m[33m"[39m)
+
+[31mKeyError[39m: "None of [Index(['delay'], dtype='str')] are in the [columns]"
+
