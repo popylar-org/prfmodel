@@ -28,16 +28,23 @@ class TestGridFitter(TestSetup):
 
     @pytest.fixture
     def param_ranges(self):
-        """Parameter ranges."""
+        """Parameter ranges.
+
+        The data-generating parameters need to be included in the grid for the grid search to exactly recover them.
+
+        """
         return {
             "mu_x": list(range(-2, 3, 1)),
             "mu_y": list(range(-2, 3, 1)),
             "sigma": list(range(1, 4, 1)),
-            "shape": [6.0],
-            "rate": [0.9],
-            "shift": [5.0],
-            "baseline": [0.0],
-            "amplitude": [1.0],
+            "delay": [6.0],
+            "dispersion": [0.9],
+            "undershoot": [12.0],
+            "u_dispersion": [0.9],
+            "ratio": [0.48],
+            "weight_deriv": [0.5],
+            "baseline": [0.1, -0.1, 0.5],
+            "amplitude": [-2.0, 1.2, 0.1],
         }
 
     @parametrize_dtype

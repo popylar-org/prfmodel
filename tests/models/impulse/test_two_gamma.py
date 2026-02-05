@@ -17,12 +17,12 @@ class TestTwoGammaImpulse(TestImpulseSetup):
         return np.round(np.linspace(0.1, 5.0, 3), 2)
 
     @pytest.fixture
-    def weight_range(self):
+    def ratio_range(self):
         """Range of weigth parameter."""
         return np.linspace(0.0, 1.0, 3)
 
     @pytest.fixture
-    def parameters(self, parameter_range: np.ndarray, weight_range: np.ndarray):
+    def parameters(self, parameter_range: np.ndarray, ratio_range: np.ndarray):
         """Model parameter combinations."""
         values = np.array(
             list(
@@ -31,26 +31,26 @@ class TestTwoGammaImpulse(TestImpulseSetup):
                     parameter_range,
                     parameter_range,
                     parameter_range,
-                    weight_range,
+                    ratio_range,
                 ),
             ),
         )
-        return pd.DataFrame.from_records(values, columns=["shape_1", "rate_1", "shape_2", "rate_2", "weight"])
+        return pd.DataFrame.from_records(values, columns=["delay", "dispersion", "undershoot", "u_dispersion", "ratio"])
 
     @pytest.fixture
     def irf_model(self):
         """Impulse response model object."""
-        return TwoGammaImpulse(self.duration, self.offset, self.resolution)
+        return TwoGammaImpulse(self.duration, self.offset, self.resolution, self.norm)
 
     @pytest.fixture
     def irf_model_default(self):
         """Impulse response model object with default parameters."""
         default_params = {
-            "shape_1": 6.0,
-            "rate_1": 0.9,
-            "shape_2": 12.0,
-            "rate_2": 0.9,
-            "weight": 0.35,
+            "delay": 6.0,
+            "dispersion": 0.9,
+            "undershoot": 12.0,
+            "u_dispersion": 0.9,
+            "ratio": 0.35,
         }
 
-        return TwoGammaImpulse(self.duration, self.offset, self.resolution, default_params)
+        return TwoGammaImpulse(self.duration, self.offset, self.resolution, self.norm, default_params)

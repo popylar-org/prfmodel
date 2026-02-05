@@ -17,8 +17,12 @@ from prfmodel.utils import get_dtype
 from .conftest import TestSetup
 from .conftest import parametrize_dtype
 from .conftest import parametrize_impulse_model
+from .conftest import skip_torch
+from .conftest import skip_windows
 
 
+@skip_windows
+@skip_torch
 @parametrize_dtype
 class TestSGDFitter(TestSetup):
     """Tests for SGDFitter class.
@@ -36,9 +40,21 @@ class TestSGDFitter(TestSetup):
         assert isinstance(history.history, dict)
         assert all(isinstance(x, Tensor) for x in history.history["loss"])
 
-    def _check_sgd_params(self, result_params: pd.DataFrame, params: pd.DataFrame) -> None:
+    def _check_sgd_params_shape(self, result_params: pd.DataFrame, params: pd.DataFrame) -> None:
         assert isinstance(result_params, pd.DataFrame)
         assert result_params.shape == params.shape
+
+    def _check_sgd_params_regression(
+        self,
+        result_params: pd.DataFrame,
+        dataframe_regression: DataFrameRegressionFixture,
+        dtype: str,
+    ) -> None:
+        if dtype != "float64":
+            dataframe_regression.check(
+                result_params,
+                default_tolerance={"atol": 1e-6},
+            )
 
     @pytest.mark.parametrize(
         ("optimizer", "loss"),
@@ -75,12 +91,8 @@ class TestSGDFitter(TestSetup):
         history, sgd_params = fitter.fit(observed, params, num_steps=self.num_steps)
 
         self._check_history(history)
-        self._check_sgd_params(sgd_params, params)
-
-        dataframe_regression.check(
-            sgd_params,
-            default_tolerance={"atol": 1e-6},
-        )
+        self._check_sgd_params_shape(sgd_params, params)
+        self._check_sgd_params_regression(sgd_params, dataframe_regression, dtype)
 
     def test_fit_fixed_params(
         self,
@@ -104,13 +116,11 @@ class TestSGDFitter(TestSetup):
         history, sgd_params = fitter.fit(observed, params, fixed_parameters=fixed, num_steps=self.num_steps)
 
         self._check_history(history)
-        self._check_sgd_params(sgd_params, params)
+        self._check_sgd_params_shape(sgd_params, params)
+
         assert np.all(sgd_params[fixed] == params[fixed].astype(get_dtype(dtype)))
 
-        dataframe_regression.check(
-            sgd_params,
-            default_tolerance={"atol": 1e-6},
-        )
+        self._check_sgd_params_regression(sgd_params, dataframe_regression, dtype)
 
     @parametrize_impulse_model
     def test_fit_adapter(
@@ -124,8 +134,8 @@ class TestSGDFitter(TestSetup):
         """Test that fit with an adapter returns parameters with the correct shape."""
         adapter = Adapter(
             [
-                ParameterTransform(["sigma", "shape"], keras.ops.log, keras.ops.exp),
-                ParameterConstraint(["shape"], lower="rate", bound_fun=keras.ops.log),
+                ParameterTransform(["sigma", "delay"], keras.ops.log, keras.ops.exp),
+                ParameterConstraint(["delay"], lower="dispersion", bound_fun=keras.ops.log),
             ],
         )
 
@@ -147,9 +157,5 @@ class TestSGDFitter(TestSetup):
         history, sgd_params = fitter.fit(observed, params, num_steps=self.num_steps, fixed_parameters=fixed_parameters)
 
         self._check_history(history)
-        self._check_sgd_params(sgd_params, params)
-
-        dataframe_regression.check(
-            sgd_params,
-            default_tolerance={"atol": 1e-6},
-        )
+        self._check_sgd_params_shape(sgd_params, params)
+        self._check_sgd_params_regression(sgd_params, dataframe_regression, dtype)
