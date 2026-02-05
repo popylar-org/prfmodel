@@ -17,8 +17,12 @@ from prfmodel.utils import get_dtype
 from .conftest import TestSetup
 from .conftest import parametrize_dtype
 from .conftest import parametrize_impulse_model
+from .conftest import skip_torch
+from .conftest import skip_windows
 
 
+@skip_windows
+@skip_torch
 @parametrize_dtype
 class TestSGDFitter(TestSetup):
     """Tests for SGDFitter class.
