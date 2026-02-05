@@ -17,8 +17,12 @@ from prfmodel.utils import get_dtype
 from .conftest import TestSetup
 from .conftest import parametrize_dtype
 from .conftest import parametrize_impulse_model
+from .conftest import skip_torch
+from .conftest import skip_windows
 
 
+@skip_windows
+@skip_torch
 @parametrize_dtype
 class TestSGDFitter(TestSetup):
     """Tests for SGDFitter class.
@@ -124,8 +128,8 @@ class TestSGDFitter(TestSetup):
         """Test that fit with an adapter returns parameters with the correct shape."""
         adapter = Adapter(
             [
-                ParameterTransform(["sigma", "shape"], keras.ops.log, keras.ops.exp),
-                ParameterConstraint(["shape"], lower="rate", bound_fun=keras.ops.log),
+                ParameterTransform(["sigma", "delay"], keras.ops.log, keras.ops.exp),
+                ParameterConstraint(["delay"], lower="dispersion", bound_fun=keras.ops.log),
             ],
         )
 
