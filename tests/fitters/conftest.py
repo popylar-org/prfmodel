@@ -55,7 +55,7 @@ class TestSetup(StimulusSetup):
                 "u_dispersion": [0.9, 0.9, 0.9],
                 "ratio": [0.48, 0.48, 0.48],
                 "weight_deriv": [0.5, 0.5, 0.5],
-                "baseline": [0.0, 0.0, 0.0],
-                "amplitude": [1.0, 1.0, 1.0],
+                "baseline": [0.1, -0.1, 0.5],
+                "amplitude": [-2.0, 1.2, 0.1],
             },
         )
