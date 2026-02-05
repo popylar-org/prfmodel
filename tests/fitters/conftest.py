@@ -20,7 +20,7 @@ skip_windows = pytest.mark.skipif(
     reason="Slight numerical differences in parameter estimates on Windows",
 )
 
-parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32"])
+parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32", "float64"])
 
 parametrize_impulse_model = pytest.mark.parametrize("model", [None, {"delay": 6.0, "dispersion": 0.9}], indirect=True)
 
