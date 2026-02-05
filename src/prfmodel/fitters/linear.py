@@ -8,8 +8,6 @@ from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 
-_MAX_LINEAR_PARAMS = 2
-
 
 class LeastSquaresHistory:
     """Least squares metric history.
@@ -75,7 +73,8 @@ class LeastSquaresFitter:
         self,
         data: Tensor,
         parameters: pd.DataFrame,
-        target_parameters: str | list[str],
+        slope_name: str,
+        intercept_name: str | None = None,
     ) -> tuple[LeastSquaresHistory, pd.DataFrame]:
         """
         Fit a population receptive field model to target data.
@@ -88,9 +87,11 @@ class LeastSquaresFitter:
         parameters : pandas.DataFrame
             Dataframe with model parameters. Columns must contain different model parameters and
             rows parameter values for each batch in `data`.
-        target_parameters : str or list of str
-            The parameter(s) that will be optimized. Must either be a single parameter name or a list of one or
-            two parameter names (intercept and slope).
+        slope_name : str
+            The name of the parameter that will be the estimated slope. Must refer to a column within `parameters`.
+        intercept_name : str, optional
+            The name of the parameter that will be the estimated intercept. Must refer to a column within `parameters`.
+            If `None`, no intercept is estimated.
 
         Returns
         -------
@@ -101,24 +102,35 @@ class LeastSquaresFitter:
             A dataframe with final model parameters.
 
         """
+        if slope_name not in parameters.columns:
+            msg = "Argument 'intercept_name' must be a column in 'parameters'"
+            raise ValueError(msg)
+
+        if intercept_name is not None and intercept_name not in parameters.columns:
+            msg = "Argument 'intercept_name' must be a column in 'parameters'"
+            raise ValueError(msg)
+
         data = ops.convert_to_tensor(data, dtype=self.dtype)
 
-        if not isinstance(target_parameters, (str, list)):
-            msg = "Argument 'target_parameters' must either be a string or a list of strings"
-            raise TypeError(msg)
-        if isinstance(target_parameters, str):
-            target_parameters = [target_parameters]
+        # Copy parameters to modify them
+        new_parameters = parameters.copy()
 
-        predictions = self.model(self.stimulus, parameters)  # type: ignore[operator]
+        # Reset intercept and slope so that we can replace them with estimates
+        # In order to estimate the correct intercepts and slopes, we first need to set them to zero and one,
+        # respectively, so that model predictions are not modified by their current values; we replace them later
+        # with the estimated values
+        if intercept_name is not None:
+            new_parameters[intercept_name] = 0.0
 
-        if len(target_parameters) == _MAX_LINEAR_PARAMS:
-            intercept = ops.ones_like(predictions)
+        new_parameters[slope_name] = 1.0
+
+        predictions = self.model(self.stimulus, new_parameters, self.dtype)  # type: ignore[operator]
+
+        if intercept_name is not None:
+            intercept = ops.ones_like(predictions, dtype=self.dtype)
             x_list = [intercept, predictions]
-        elif len(target_parameters) == 1:
-            x_list = [predictions]
         else:
-            msg = "Length of 'target_parameters' argument must be 1 (slope-only) or 2 (intercept + slope)"
-            raise ValueError(msg)
+            x_list = [predictions]
 
         x_matrix = ops.stack(x_list, axis=-1)
 
@@ -128,8 +140,12 @@ class LeastSquaresFitter:
 
         residual_sum = ops.convert_to_numpy(ops.sum(ops.square(targets - x_matrix @ best_params), axis=(-2, -1)))
 
-        new_parameters = parameters.copy()
+        best_params = ops.convert_to_numpy(best_params[..., 0])
 
-        new_parameters[target_parameters] = ops.convert_to_numpy(best_params[..., 0])
+        if intercept_name is not None:
+            new_parameters[intercept_name] = best_params[..., 0]
+            new_parameters[slope_name] = best_params[..., 1]  # slope is second column
+        else:
+            new_parameters[slope_name] = best_params[..., 0]  # slope is first column
 
         return LeastSquaresHistory({"loss": residual_sum}), new_parameters
