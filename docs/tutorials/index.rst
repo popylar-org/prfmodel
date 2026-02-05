@@ -26,10 +26,10 @@ To locally convert MyST Markdown files into Jupyter notebooks:
 
 .. code-block:: bash
 
-   jupytext docs/tutorials/tutorial.ipynb --to myst
+   jupytext docs/tutorials/tutorial.md --to ipynb
 
 To locally convert Jupyter notebooks into MyST Markdown files:
 
 .. code-block:: bash
 
-   jupytext docs/tutorials/tutorial.md --to ipynb
+   jupytext docs/tutorials/tutorial.ipynb --to myst
