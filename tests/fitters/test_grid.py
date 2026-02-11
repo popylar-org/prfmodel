@@ -8,9 +8,9 @@ from prfmodel.fitters.grid import GridFitter
 from prfmodel.fitters.grid import GridHistory
 from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.stimulus import Stimulus
-from .conftest import TestSetup
+from tests.conftest import TestSetup
+from tests.conftest import parametrize_impulse_model
 from .conftest import parametrize_dtype
-from .conftest import parametrize_impulse_model
 
 
 class TestGridFitter(TestSetup):

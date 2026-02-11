@@ -14,9 +14,9 @@ from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
-from .conftest import TestSetup
+from tests.conftest import TestSetup
+from tests.conftest import parametrize_impulse_model
 from .conftest import parametrize_dtype
-from .conftest import parametrize_impulse_model
 from .conftest import skip_torch
 from .conftest import skip_windows
 
