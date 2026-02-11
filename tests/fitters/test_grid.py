@@ -6,6 +6,7 @@ import pandas as pd
 import pytest
 from prfmodel.fitters.grid import GridFitter
 from prfmodel.fitters.grid import GridHistory
+from prfmodel.fitters.grid import InfiniteLossWarning
 from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.stimulus import Stimulus
 from tests.conftest import TestSetup
@@ -24,7 +25,7 @@ class TestGridFitter(TestSetup):
     def _check_grid_params(self, result_params: pd.DataFrame, params: pd.DataFrame) -> None:
         assert isinstance(result_params, pd.DataFrame)
         assert result_params.shape == params.shape
-        assert np.allclose(result_params, params)
+        assert np.allclose(result_params, params, equal_nan=True)
 
     @pytest.fixture
     def param_ranges(self):
@@ -72,7 +73,32 @@ class TestGridFitter(TestSetup):
 
         observed = model(stimulus, params)
 
-        history, grid_params = fitter.fit(observed, param_ranges, chunk_size=20)
+        history, grid_params = fitter.fit(observed, param_ranges, batch_size=20)
 
         self._check_history(history)
         self._check_grid_params(grid_params, params)
+
+    def test_fit_infinite_loss_warning(
+        self,
+        stimulus: Stimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        param_ranges: dict[str, np.ndarray],
+    ):
+        """Test that fit returns an infinite loss warning and matching NaN estimates when appropriate."""
+        fitter = GridFitter(
+            model=model,
+            stimulus=stimulus,
+        )
+
+        params_copy = params.copy()
+        params_copy.iloc[0, :] = np.nan
+
+        observed = np.array(model(stimulus, params))  # Need to convert to numpy to assign value
+        observed[0, :] = np.nan
+
+        with pytest.warns(InfiniteLossWarning):
+            history, grid_params = fitter.fit(observed, param_ranges, batch_size=20)
+
+        self._check_history(history)
+        self._check_grid_params(grid_params, params_copy)
