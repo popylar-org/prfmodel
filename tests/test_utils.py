@@ -2,11 +2,17 @@
 
 import keras
 import numpy as np
+import pandas as pd
 import pytest
+from prfmodel.models.gaussian import Gaussian2DPRFModel
+from prfmodel.stimulus import Stimulus
+from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from prfmodel.utils import UndefinedResponseWarning
 from prfmodel.utils import _get_norm_fun
+from prfmodel.utils import batched
 from prfmodel.utils import normalize_response
+from .conftest import TestSetup
 
 
 @pytest.mark.parametrize("norm", [None, "sum", "mean", "max", "norm"])
@@ -102,3 +108,95 @@ class TestParamsDict:
         new_params_dict[params_dict.columns] = params_dict[params_dict.columns]
         x = new_params_dict[params_dict.columns]
         assert x.shape == (self.shape[0], len(params_dict.columns))
+
+
+class TestBatched(TestSetup):
+    """Tests for the batched decorator."""
+
+    def test_batch_size_none_returns_same_result(
+        self,
+        stimulus: Stimulus,
+        params: pd.DataFrame,
+        model: Gaussian2DPRFModel,
+    ):
+        """Test that batch_size=None calls the function once with all voxels."""
+        result_unbatched = model(stimulus, params)
+        result_batched = batched(model)(stimulus, params, batch_size=None)
+
+        assert np.array_equal(np.asarray(result_batched), np.asarray(result_unbatched))
+
+    def test_batched_matches_unbatched(
+        self,
+        stimulus: Stimulus,
+        params: pd.DataFrame,
+        model: Gaussian2DPRFModel,
+    ):
+        """Test that batched results match unbatched results."""
+        result_unbatched = model(stimulus, params)
+        result_batched = batched(model)(stimulus, params, batch_size=3)
+
+        assert np.allclose(np.asarray(result_batched), np.asarray(result_unbatched))
+
+    def test_output_shape(
+        self,
+        stimulus: Stimulus,
+        params: pd.DataFrame,
+        model: Gaussian2DPRFModel,
+    ):
+        """Test that the output shape is (num_voxels, num_frames)."""
+        result = batched(model)(stimulus, params, batch_size=3)
+
+        assert result.shape == (params.shape[0], stimulus.design.shape[0])
+
+    def test_batch_size_larger_than_num_voxels(
+        self,
+        stimulus: Stimulus,
+        params: pd.DataFrame,
+        model: Gaussian2DPRFModel,
+    ):
+        """Test that a batch_size larger than the number of voxels works."""
+        result = batched(model)(stimulus, params, batch_size=100)
+        expected = model(stimulus, params)
+
+        assert np.allclose(np.asarray(result), np.asarray(expected))
+
+    def test_exact_batch_division(
+        self,
+        stimulus: Stimulus,
+        params: pd.DataFrame,
+        model: Gaussian2DPRFModel,
+    ):
+        """Test with a batch_size that evenly divides num_voxels."""
+        result = batched(model)(stimulus, params, batch_size=3)
+        expected = model(stimulus, params)
+
+        assert np.allclose(np.asarray(result), np.asarray(expected))
+
+    def test_passes_kwargs(
+        self,
+        stimulus: Stimulus,
+        params: pd.DataFrame,
+        model: Gaussian2DPRFModel,
+    ):
+        """Test that keyword arguments are forwarded to the wrapped function."""
+        expected_dtype = "float64"
+        result = batched(model)(stimulus, params, batch_size=3, dtype=expected_dtype)
+
+        assert keras.ops.dtype(result) == expected_dtype
+
+    def test_decorator(
+        self,
+        stimulus: Stimulus,
+        params: pd.DataFrame,
+        model: Gaussian2DPRFModel,
+    ):
+        """Test that the decorator syntax works with batch_size as a wrapper kwarg."""
+
+        @batched
+        def batched_call(stimulus: Stimulus, params: pd.DataFrame) -> Tensor:
+            return model(stimulus, params)
+
+        result = batched_call(stimulus, params, batch_size=3)
+        expected = model(stimulus, params)
+
+        assert np.allclose(np.asarray(result), np.asarray(expected))
