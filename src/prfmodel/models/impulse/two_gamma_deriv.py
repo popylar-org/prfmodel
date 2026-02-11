@@ -1,4 +1,4 @@
-"""Weighted difference of two gamma distribution impulse response."""
+"""Weighted difference of two derivative gamma distribution impulse response."""
 
 import pandas as pd
 from keras import ops
@@ -7,17 +7,20 @@ from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 from prfmodel.utils import normalize_response
+from .density import derivative_gamma_density
 from .density import gamma_density
 
 
-class TwoGammaImpulse(BaseImpulse):
+class DerivativeTwoGammaImpulse(BaseImpulse):
     r"""
-    Weighted difference of two gamma distributions impulse response model.
+    Weighted difference of two derivative gamma distributions impulse response model.
 
-    Predicts an impulse response that is the weighted difference of two gamma distributions.
-    The model has five parameters: `delay` and `undershoot` refer to the positive and negative peaks of the response
+    Predicts an impulse response that is the weighted derivative difference of two gamma distributions. This
+    weighted derivative difference is added to the weighted difference of the two gamma distributions.
+    The model has six parameters: `delay` and `undershoot` refer to the positive and negative peaks of the response
     while `dispersion` and `u_dispersion` refer to the rate parameters of the two gamma distributions. The `ratio`
-    parameter indicates the weight of the second gamma distribution.
+    parameter indicates the weight of the second gamma distribution. The `weight_deriv` represents the weight of the
+    derivative difference added to the standard difference.
 
     Parameters
     ----------
@@ -39,15 +42,24 @@ class TwoGammaImpulse(BaseImpulse):
     -----
     The predicted impulse response at time :math:`t` with :math:`\alpha_1 = delay / dispersion`,
     :math:`\lambda_1 = dispersion`, :math:`\alpha_2  = undershoot / u\_dispersion`, :math:`\lambda_2 = u\_dispersion`,
-    and :math:`\omega = ratio` is:
+    :math:`\omega = ratio`, and :math:`\tau = weight\_deriv` is:
 
     .. math::
 
-        f(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega f_{\text{gamma}}(t; \alpha_2, \lambda_2)
+        f(t) = f_{\text{gamma_diff}}(t) - \tau f'_{\text{gamma_diff}}(t)
+
+    .. math::
+
+        f_{\text{gamma_diff}}(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega
+            f_{\text{gamma}}(t; \alpha_2, \lambda_2)
+
+    Positive `weight_deriv` values shift the response to the right.
 
     See Also
     --------
+    TwoGammaImpulse : Weighted difference of two gamma distributions impulse response model.
     gamma_density : Density of the gamma distribution.
+    derivative_gamma_density : Derivative density of the gamma distribution.
 
     Examples
     --------
@@ -58,8 +70,9 @@ class TwoGammaImpulse(BaseImpulse):
     >>>     "undershoot": [1.5, 2.0, 1.0],
     >>>     "u_dispersion": [1.0, 1.0, 1.0],
     >>>     "ratio": [0.7, 0.2, 0.5],
+    >>>     "weight_deriv": [0.5, -0.7, 0.9],
     >>> })
-    >>> impulse_model = TwoGammaImpulse(
+    >>> impulse_model = DerivativeTwoGammaImpulse(
     >>>     duration=100.0 # 100 seconds
     >>> )
     >>> resp = impulse_model(params)
@@ -73,10 +86,10 @@ class TwoGammaImpulse(BaseImpulse):
         """
         Names of parameters used by the model.
 
-        Parameter names are: `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`.
+        Parameter names are: `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`, `weight_deriv`.
 
         """
-        return ["delay", "dispersion", "undershoot", "u_dispersion", "ratio"]
+        return ["delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv"]
 
     def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -87,7 +100,7 @@ class TwoGammaImpulse(BaseImpulse):
         parameters : pandas.DataFrame
             Dataframe with columns containing different model parameters and rows containing parameter values
             for different batches. Must contain the columns `delay`, `dispersion`, `undershoot`, `u_dispersion`,
-            and `ratio`.
+            `ratio`, and `weight_deriv`.
         dtype : str, optional
             The dtype of the prediction result. If `None` (the default), uses the dtype from
             :func:`prfmodel.utils.get_dtype`.
@@ -107,8 +120,15 @@ class TwoGammaImpulse(BaseImpulse):
         undershoot = convert_parameters_to_tensor(parameters[["undershoot"]], dtype=dtype)
         u_dispersion = convert_parameters_to_tensor(parameters[["u_dispersion"]], dtype=dtype)
         ratio = convert_parameters_to_tensor(parameters[["ratio"]], dtype=dtype)
+        weight_deriv = convert_parameters_to_tensor(parameters[["weight_deriv"]], dtype=dtype)
 
         dens_1 = gamma_density(frames, delay / dispersion, dispersion)
         dens_2 = gamma_density(frames, undershoot / u_dispersion, u_dispersion)
 
-        return normalize_response(dens_1 - ratio * dens_2, self.norm)
+        dens_deriv_1 = derivative_gamma_density(frames, delay / dispersion, dispersion)
+        dens_deriv_2 = derivative_gamma_density(frames, undershoot / u_dispersion, u_dispersion)
+
+        diff_dens = dens_1 - ratio * dens_2
+        diff_dens_deriv = dens_deriv_1 - ratio * dens_deriv_2
+
+        return normalize_response(diff_dens - weight_deriv * diff_dens_deriv, self.norm)

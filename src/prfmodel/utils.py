@@ -1,13 +1,15 @@
 """Utility functions."""
 
 import re
+import warnings
+from collections.abc import Callable
 import numpy as np
 import pandas as pd
 from keras import ops
 from keras.config import floatx
 from .typing import Tensor
 
-_MIN_PARAMETER_DIM = 2
+_EXPECTED_NDIM = 2
 
 DTYPES = {"bfloat16", "float16", "float32", "float64"}
 """
@@ -16,6 +18,10 @@ Accepted dtypes for `prfmodel.typing.Tensor` objects.
 Accepted dtypes are: `"bfloat16"`, `"float16"`, `"float32"`, and `"float64"`.
 
 """
+
+
+class UndefinedResponseWarning(UserWarning):
+    """Warning for when a response is undefined and contains NaNs."""
 
 
 def convert_parameters_to_tensor(parameters: pd.DataFrame, dtype: str) -> Tensor:
@@ -99,6 +105,67 @@ def _get_common_shape(data: dict) -> tuple[int, ...]:
         raise ValueError(msg) from exc
 
 
+def _get_norm_fun(norm: str) -> Callable:
+    norm_dict = {
+        "sum": ops.sum,
+        "max": ops.max,
+        "mean": ops.mean,
+        "norm": ops.norm,
+    }
+
+    if norm not in norm_dict:
+        msg = f"Argument 'norm' must be in {list(norm_dict.keys())}"
+        raise ValueError(msg)
+
+    return norm_dict[norm]
+
+
+def normalize_response(response: Tensor, norm: str | None = "sum") -> Tensor:
+    """
+    Normalize a response.
+
+    Divides a response by a normalization (e.g., its sum) computed over the second dimension.
+
+    Parameters
+    ----------
+    response : Tensor
+        Response with shape (num_voxels, num_frames).
+    norm : str, optional, default="sum"
+        Normalization to apply.
+
+    Returns
+    -------
+    Tensor
+        The normalized response with shape (num_voxels, num_frames).
+
+    Notes
+    -----
+    A warning is raised when the normalization is zero which leads to an undefined normalized response.
+
+    """
+    response = ops.convert_to_tensor(response)
+    response_ndim = ops.ndim(response)
+
+    if response_ndim != _EXPECTED_NDIM:
+        msg = f"Response must have two dimensions but {response_ndim} dimensions were found"
+        raise ValueError(msg)
+
+    if norm is None:
+        return response
+
+    norm_fun = _get_norm_fun(norm)
+
+    response_norm = norm_fun(response, axis=1, keepdims=True)
+
+    norm_is_zero = response_norm == ops.cast(0, response.dtype)
+
+    if ops.any(norm_is_zero):
+        msg = "Response norm is zero leading to undefined normalized responses"
+        warnings.warn(message=msg, category=UndefinedResponseWarning)
+
+    return response / response_norm
+
+
 class ParamsDict:
     """
     A dictionary-like object that supports dataframe-style column selection but returns Keras tensors.
@@ -161,12 +228,12 @@ class ParamsDict:
         value_ndim = len(value.shape)
 
         if isinstance(key, str) and (
-            value_ndim < _MIN_PARAMETER_DIM or (value_ndim == _MIN_PARAMETER_DIM and value.shape[1] == 1)
+            value_ndim < _EXPECTED_NDIM or (value_ndim == _EXPECTED_NDIM and value.shape[1] == 1)
         ):
             value = self._reshape_item(key, value)
             self._data[key] = ops.broadcast_to(value, self._item_shape)
 
-        elif isinstance(key, list) and all(isinstance(k, str) for k in key) and value_ndim == _MIN_PARAMETER_DIM:
+        elif isinstance(key, list) and all(isinstance(k, str) for k in key) and value_ndim == _EXPECTED_NDIM:
             value = ops.transpose(ops.broadcast_to(value, (self._item_shape[0], len(key))))
 
             for _key, _val in zip(key, value, strict=True):

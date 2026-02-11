@@ -4,6 +4,54 @@ import keras
 import numpy as np
 import pytest
 from prfmodel.utils import ParamsDict
+from prfmodel.utils import UndefinedResponseWarning
+from prfmodel.utils import _get_norm_fun
+from prfmodel.utils import normalize_response
+
+
+@pytest.mark.parametrize("norm", [None, "sum", "mean", "max", "norm"])
+def test_normalize_response(norm: str):
+    """Test that normalize_response returns correct result."""
+    response = np.expand_dims(np.linspace(-5, 5, 100), 0)
+    response_norm = np.asarray(normalize_response(response, norm=norm))
+
+    assert response_norm.shape == response.shape
+
+    if norm is not None:
+        norm_fun = _get_norm_fun(norm)
+        response_norm_ref = response / np.asarray(norm_fun(response, axis=1, keepdims=True))
+    else:
+        response_norm_ref = response
+
+    assert np.allclose(response_norm, response_norm_ref)
+
+
+def test_normalize_response_error():
+    """Test that normalize_response raises an error for wrong input shape."""
+    response = np.ones((10,))
+
+    with pytest.raises(ValueError):
+        normalize_response(response)
+
+    response = 10
+
+    with pytest.raises(ValueError):
+        normalize_response(response)
+
+    response = np.ones((10, 2, 1))
+
+    with pytest.raises(ValueError):
+        normalize_response(response)
+
+
+def test_normalize_response_zero_norm():
+    """Test that normalize response raises a warning for zero norms."""
+    response = np.zeros((2, 10))
+
+    with pytest.warns(UndefinedResponseWarning):
+        response_norm = np.asarray(normalize_response(response))
+
+    assert np.all(np.isnan(response_norm))
 
 
 class TestParamsDict:
