@@ -80,3 +80,39 @@ class TestLeastSquaresFitter(TestSetup):
 
         if dtype != "float64":
             dataframe_regression.check(ls_params, default_tolerance={"atol": 1e-6})
+
+    @skip_windows
+    @skip_torch
+    @parametrize_impulse_model
+    @pytest.mark.parametrize("intercept_name", [None, "baseline"])
+    def test_fit_batch_size(
+        self,
+        stimulus: Stimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        intercept_name: str | None,
+    ):
+        """Test that fitting with batch_size produces the same results as fitting all at once."""
+        fitter = LeastSquaresFitter(
+            model=model,
+            stimulus=stimulus,
+        )
+
+        observed = model(stimulus, params)
+
+        history_full, params_full = fitter.fit(
+            observed,
+            params,
+            slope_name="amplitude",
+            intercept_name=intercept_name,
+        )
+        history_batched, params_batched = fitter.fit(
+            observed,
+            params,
+            slope_name="amplitude",
+            intercept_name=intercept_name,
+            batch_size=1,
+        )
+
+        pd.testing.assert_frame_equal(params_full, params_batched, atol=1e-4)
+        np.testing.assert_allclose(history_full.history["loss"], history_batched.history["loss"], atol=1e-4)
