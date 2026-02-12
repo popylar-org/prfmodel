@@ -12,9 +12,10 @@ from tests.models.conftest import parametrize_dtype
 class TestImpulseSetup(ABC):
     """Parameters for impulse response model tests."""
 
-    duration = 32
+    duration = 32.0
     offset = 0.0001
     resolution = 1.0
+    norm = "sum"
 
     @pytest.fixture
     @abstractmethod
@@ -33,6 +34,11 @@ class TestImpulseSetup(ABC):
     def test_frames(self, irf_model: BaseImpulse):
         """Test that property frames has correct shape."""
         assert irf_model.frames.shape == (1, irf_model.num_frames)
+
+    def test_norm_error(self, irf_model: BaseImpulse):
+        """Test that an invalid norm argument raises an error."""
+        with pytest.raises(ValueError):
+            irf_model.__class__(norm="test")
 
     @parametrize_dtype
     def test_call(self, irf_model: BaseImpulse, parameters: pd.DataFrame, dtype: str):

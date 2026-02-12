@@ -11,7 +11,6 @@ from scipy import stats
 from prfmodel.models.base import BatchDimensionError
 from prfmodel.models.impulse import derivative_gamma_density
 from prfmodel.models.impulse import gamma_density
-from prfmodel.models.impulse import shifted_derivative_gamma_density
 from prfmodel.models.impulse import shifted_gamma_density
 
 
@@ -289,49 +288,3 @@ class TestDerivativeGammaDensity(TestGammaDensitySetup):
         )
 
         assert np.all(np.isclose(resp, ref))
-
-
-class TestShiftedDerivativeGammaDensity(TestGammaDensitySetup):
-    """Tests for shifted_derivative_gamma_density function."""
-
-    @pytest.fixture
-    def parameters(self, parameter_range: np.ndarray, shift_parameter_range: np.ndarray):
-        """Shape, rate, and shift parameter combinations."""
-        return np.array(list(product(parameter_range, parameter_range, shift_parameter_range)))
-
-    def test_shifted_derivative_gamma_density(self, frames: np.ndarray, parameters: np.ndarray):
-        """
-        Test that the shifted derivative gamma density is close to the approximate derivative from scipy.
-
-        Note that the shifted approximate derivative is unstable at the first non-zero time frame,
-        so we omit it for testing.
-
-        """
-        # Parameters must have shape (n, 1)
-        shape = np.expand_dims(parameters[:, 0], 1)
-        rate = np.expand_dims(parameters[:, 1], 1)
-        shift = np.expand_dims(parameters[:, 2], 1)
-
-        resp = np.asarray(shifted_derivative_gamma_density(frames, shape, rate, shift))
-
-        # Shift time frames
-        frames_shifted = frames - shift
-        # Don't compare at first non-zero frame because non-analytic derivative is not stable
-        first_nonzero_idx = (frames_shifted > 0).argmax(axis=1)  # Get index of first non-zero farme
-        # Delete first non-zero frame in shifted frame and analytic response
-        frames_shifted = np.delete(frames_shifted, first_nonzero_idx, axis=1)
-        resp = np.delete(resp, first_nonzero_idx, axis=1)
-        # Set frames <= 0 temporarily to 1 and replace their response with 0 later
-        frames_shifted_valid = np.where(frames_shifted > 0.0, frames_shifted, 1.0)
-
-        # Calc the approximate derivative for each parameter combination
-        ref = np.array(
-            [
-                differentiate.derivative(partial(self._calc_gamma_pdf, shape=p[0], rate=p[1]), fr).df
-                for p, fr in zip(parameters, frames_shifted_valid, strict=True)
-            ],
-        )
-        # Replace response for frames <= 0 with 0
-        shifted_ref = np.where(frames_shifted > 0.0, ref, 0.0)
-
-        assert np.all(np.isclose(resp, shifted_ref))

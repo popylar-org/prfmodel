@@ -3,7 +3,7 @@
 import pandas as pd
 from keras import ops
 from prfmodel.typing import Tensor
-from prfmodel.utils import _MIN_PARAMETER_DIM
+from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 from .base import BaseTemporal
@@ -67,7 +67,7 @@ class BaselineAmplitude(BaseTemporal):
         dtype = get_dtype(dtype)
         inputs = ops.convert_to_tensor(inputs, dtype=dtype)
 
-        if len(inputs.shape) != _MIN_PARAMETER_DIM:
+        if len(inputs.shape) != _EXPECTED_NDIM:
             raise ShapeError(
                 arg_name="inputs",
                 arg_shape=inputs.shape,
