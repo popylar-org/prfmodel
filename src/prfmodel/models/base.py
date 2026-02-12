@@ -309,8 +309,8 @@ class BasePRFModel(BaseModel):
             if model is not None:
                 param_names.extend(model.parameter_names)
 
-        # Make sure no duplicates are returned
-        return list(set(param_names))
+        # Make sure no duplicates are returned (preserve insertion order)
+        return list(dict.fromkeys(param_names))
 
     @abstractmethod
     def __call__(self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
