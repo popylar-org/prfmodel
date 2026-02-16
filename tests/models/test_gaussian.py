@@ -284,7 +284,7 @@ class TestGaussian2DPRFModel(TestGaussian2DResponse):
         param_names.extend(impulse_model.parameter_names)
         param_names.extend(temporal_model.parameter_names)
 
-        assert prf_model.parameter_names == list(set(param_names))
+        assert prf_model.parameter_names == list(dict.fromkeys(param_names))
 
     @pytest.mark.parametrize(
         ("impulse_model", "temporal_model"),

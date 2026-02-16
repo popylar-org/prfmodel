@@ -6,11 +6,12 @@ import pandas as pd
 import pytest
 from prfmodel.fitters.grid import GridFitter
 from prfmodel.fitters.grid import GridHistory
+from prfmodel.fitters.grid import InfiniteLossWarning
 from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.stimulus import Stimulus
-from .conftest import TestSetup
+from tests.conftest import TestSetup
+from tests.conftest import parametrize_impulse_model
 from .conftest import parametrize_dtype
-from .conftest import parametrize_impulse_model
 
 
 class TestGridFitter(TestSetup):
@@ -24,11 +25,15 @@ class TestGridFitter(TestSetup):
     def _check_grid_params(self, result_params: pd.DataFrame, params: pd.DataFrame) -> None:
         assert isinstance(result_params, pd.DataFrame)
         assert result_params.shape == params.shape
-        assert np.allclose(result_params, params)
+        assert np.allclose(result_params, params, equal_nan=True)
 
     @pytest.fixture
     def param_ranges(self):
-        """Parameter ranges."""
+        """Parameter ranges.
+
+        The data-generating parameters need to be included in the grid for the grid search to exactly recover them.
+
+        """
         return {
             "mu_x": list(range(-2, 3, 1)),
             "mu_y": list(range(-2, 3, 1)),
@@ -39,8 +44,8 @@ class TestGridFitter(TestSetup):
             "u_dispersion": [0.9],
             "ratio": [0.48],
             "weight_deriv": [0.5],
-            "baseline": [0.0],
-            "amplitude": [1.0],
+            "baseline": [0.1, -0.1, 0.5],
+            "amplitude": [-2.0, 1.2, 0.1],
         }
 
     @parametrize_dtype
@@ -68,7 +73,32 @@ class TestGridFitter(TestSetup):
 
         observed = model(stimulus, params)
 
-        history, grid_params = fitter.fit(observed, param_ranges, chunk_size=20)
+        history, grid_params = fitter.fit(observed, param_ranges, batch_size=20)
 
         self._check_history(history)
         self._check_grid_params(grid_params, params)
+
+    def test_fit_infinite_loss_warning(
+        self,
+        stimulus: Stimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        param_ranges: dict[str, np.ndarray],
+    ):
+        """Test that fit returns an infinite loss warning and matching NaN estimates when appropriate."""
+        fitter = GridFitter(
+            model=model,
+            stimulus=stimulus,
+        )
+
+        params_copy = params.copy()
+        params_copy.iloc[0, :] = np.nan
+
+        observed = np.array(model(stimulus, params))  # Need to convert to numpy to assign value
+        observed[0, :] = np.nan
+
+        with pytest.warns(InfiniteLossWarning):
+            history, grid_params = fitter.fit(observed, param_ranges, batch_size=20)
+
+        self._check_history(history)
+        self._check_grid_params(grid_params, params_copy)

@@ -1,5 +1,7 @@
 """Utility functions."""
 
+import functools
+import math
 import re
 import warnings
 from collections.abc import Callable
@@ -7,6 +9,7 @@ import numpy as np
 import pandas as pd
 from keras import ops
 from keras.config import floatx
+from .stimulus import Stimulus
 from .typing import Tensor
 
 _EXPECTED_NDIM = 2
@@ -89,6 +92,65 @@ def get_dtype(dtype: str | None) -> str:
         msg = f"Argument 'dtype' must be one of {DTYPES}"
         raise ValueError(msg)
     return dtype or floatx()
+
+
+def batched(fn: Callable) -> Callable:
+    """Decorate a model prediction function to make batched predictions.
+
+    Splits the `parameters` argument (a :class:`pandas.DataFrame`) along the row (voxel) dimension into
+    chunks of size `batch_size`, calls `fn` for each chunk, and concatenates the results along the first axis.
+
+    The wrapped function gains a ``batch_size`` keyword argument. When ``batch_size`` is ``None`` (the default),
+    all voxels are processed in a single call.
+
+    Parameters
+    ----------
+    fn : callable
+        A model prediction function with signature ``fn(stimulus, parameters, **kwargs)``.
+
+    Returns
+    -------
+    callable
+        Wrapped function with signature ``fn(stimulus, parameters, *, batch_size=None, **kwargs)``.
+
+    Examples
+    --------
+    >>> from prfmodel.utils import batched
+    >>> batched_predict = batched(model)
+    >>> result = batched_predict(stimulus, parameters, batch_size=128)
+
+    As a decorator:
+
+    >>> @batched
+    ... def predict(stimulus, parameters, *, dtype=None):
+    ...     ...
+    >>> result = predict(stimulus, parameters, batch_size=64)
+
+    """
+
+    @functools.wraps(fn)
+    def wrapper(
+        stimulus: Stimulus,
+        parameters: pd.DataFrame,
+        batch_size: int | None = None,
+        **kwargs,
+    ) -> Tensor:
+        if batch_size is None:
+            return fn(stimulus, parameters, **kwargs)
+
+        num_voxels = len(parameters)
+        num_batches = math.ceil(num_voxels / batch_size)
+
+        results = []
+        for i in range(num_batches):
+            start = i * batch_size
+            end = min(start + batch_size, num_voxels)
+            batch_parameters = parameters.iloc[start:end]
+            results.append(fn(stimulus, batch_parameters, **kwargs))
+
+        return ops.concatenate(results, axis=0)
+
+    return wrapper
 
 
 def _get_common_shape(data: dict) -> tuple[int, ...]:

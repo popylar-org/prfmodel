@@ -55,8 +55,6 @@ The stimulus simulates a bar moving in different directions through a two-dimens
 ```{code-cell} ipython3
 from prfmodel.examples import load_2d_bar_stimulus
 
-num_frames = 200  # Simulate 200 time frames
-
 stimulus = load_2d_bar_stimulus()
 print(stimulus)
 ```
@@ -230,7 +228,8 @@ ls_fitter = LeastSquaresFitter(
 ls_history, ls_params = ls_fitter.fit(
     data=simulated_response,
     parameters=grid_params,
-    target_parameters=["baseline", "amplitude"],
+    slope_name="amplitude",  # Names of parameters to be optimized with least squares
+    intercept_name="baseline",
 )
 
 ls_params

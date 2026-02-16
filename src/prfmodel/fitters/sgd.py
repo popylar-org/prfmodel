@@ -122,17 +122,15 @@ class SGDFitter(BackendSGDFitter):
         self.dtype = dtype
 
     def _create_variables(self, init_parameters: pd.DataFrame, fixed_parameters: Sequence[str]) -> None:
-        for key, val in init_parameters.items():
-            setattr(
-                self,
-                str(key),  # Convert from hashable to str
-                keras.Variable(val, dtype=self.dtype, name=key, trainable=key not in fixed_parameters),
-            )
+        # Keras automatically discovers variables stored in dicts and links to them in
+        # 'self.trainable_variables' and 'self.non_trainable_variables'
+        self._parameter_variables = {
+            str(key): keras.Variable(val, dtype=self.dtype, name=key, trainable=key not in fixed_parameters)
+            for key, val in init_parameters.items()
+        }
 
-    def _delete_variables(self, init_parameters: pd.DataFrame) -> None:
-        for key in init_parameters:
-            # Convert from hashable to str
-            delattr(self, str(key))
+    def _delete_variables(self) -> None:
+        del self._parameter_variables
 
     def fit(
         self,
@@ -219,7 +217,7 @@ class SGDFitter(BackendSGDFitter):
         # Transform parameters back to natural scale
         params = self.adapter.inverse(params)
 
-        self._delete_variables(init_parameters)
+        self._delete_variables()
 
-        # Sort result param columns according to inititial parameter columns
+        # Sort result param columns according to initial parameter columns
         return history, params[init_parameters.columns]
