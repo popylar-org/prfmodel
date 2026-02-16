@@ -56,7 +56,7 @@ env
 env3
 .env3
 venv
-.venv
+.venv*
 venv3
 .venv3
 ENV/
