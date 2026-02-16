@@ -1,15 +1,15 @@
-"""Tests for the weighted difference of two gamma distribution impulse response."""
+"""Tests for the weighted derivative difference of two gamma distribution impulse response."""
 
 from itertools import product
 import numpy as np
 import pandas as pd
 import pytest
-from prfmodel.models.impulse import TwoGammaImpulse
+from prfmodel.models.impulse import DerivativeTwoGammaImpulse
 from .conftest import TestImpulseSetup
 
 
-class TestTwoGammaImpulse(TestImpulseSetup):
-    """Tests for TwoGammaImpulse class."""
+class TestDerivativeTwoGammaImpulse(TestImpulseSetup):
+    """Tests for DerivativeTwoGammaImpulse class."""
 
     @pytest.fixture
     def parameter_range(self):
@@ -22,7 +22,12 @@ class TestTwoGammaImpulse(TestImpulseSetup):
         return np.linspace(0.1, 0.9, 3)
 
     @pytest.fixture
-    def parameters(self, parameter_range: np.ndarray, ratio_range: np.ndarray):
+    def weight_deriv_range(self):
+        """Range of weigth parameter."""
+        return np.linspace(-2.0, 2.0, 3)
+
+    @pytest.fixture
+    def parameters(self, parameter_range: np.ndarray, ratio_range: np.ndarray, weight_deriv_range: np.ndarray):
         """Model parameter combinations."""
         values = np.array(
             list(
@@ -32,15 +37,19 @@ class TestTwoGammaImpulse(TestImpulseSetup):
                     parameter_range,
                     parameter_range,
                     ratio_range,
+                    weight_deriv_range,
                 ),
             ),
         )
-        return pd.DataFrame.from_records(values, columns=["delay", "dispersion", "undershoot", "u_dispersion", "ratio"])
+        return pd.DataFrame.from_records(
+            values,
+            columns=["delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv"],
+        )
 
     @pytest.fixture
     def irf_model(self):
         """Impulse response model object."""
-        return TwoGammaImpulse(self.duration, self.offset, self.resolution, self.norm)
+        return DerivativeTwoGammaImpulse(self.duration, self.offset, self.resolution, self.norm)
 
     @pytest.fixture
     def irf_model_default(self):
@@ -50,7 +59,8 @@ class TestTwoGammaImpulse(TestImpulseSetup):
             "dispersion": 0.9,
             "undershoot": 12.0,
             "u_dispersion": 0.9,
-            "ratio": 0.35,
+            "ratio": 0.48,
+            "weight_deriv": -0.5,
         }
 
-        return TwoGammaImpulse(self.duration, self.offset, self.resolution, self.norm, default_params)
+        return DerivativeTwoGammaImpulse(self.duration, self.offset, self.resolution, self.norm, default_params)

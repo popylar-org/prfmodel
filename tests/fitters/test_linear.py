@@ -11,6 +11,8 @@ from prfmodel.stimulus import Stimulus
 from .conftest import TestSetup
 from .conftest import parametrize_dtype
 from .conftest import parametrize_impulse_model
+from .conftest import skip_torch
+from .conftest import skip_windows
 
 
 class TestLeastSquaresFitter(TestSetup):
@@ -63,6 +65,8 @@ class TestLeastSquaresFitter(TestSetup):
         with pytest.raises(TypeError):
             _ = fitter.fit(observed, params, target_parameters=target_parameters)
 
+    @skip_windows
+    @skip_torch
     @parametrize_dtype
     @parametrize_impulse_model
     @pytest.mark.parametrize("target_parameters", [["amplitude"], ["baseline"], ["amplitude", "baseline"]])

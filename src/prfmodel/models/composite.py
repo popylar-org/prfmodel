@@ -11,7 +11,7 @@ from .base import BasePRFModel
 from .base import BasePRFResponse
 from .base import BaseTemporal
 from .encoding import encode_prf_response
-from .impulse import ShiftedDerivativeGammaImpulse
+from .impulse import DerivativeTwoGammaImpulse
 from .impulse import convolve_prf_impulse_response
 from .temporal import BaselineAmplitude
 
@@ -49,7 +49,7 @@ class SimplePRFModel(BasePRFModel):
     def __init__(
         self,
         prf_model: BasePRFResponse,
-        impulse_model: BaseImpulse | type[BaseImpulse] | None = ShiftedDerivativeGammaImpulse,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
     ):
         if impulse_model is not None and isinstance(impulse_model, type):
