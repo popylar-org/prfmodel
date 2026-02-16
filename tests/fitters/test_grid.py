@@ -8,7 +8,7 @@ from prfmodel.fitters.grid import GridFitter
 from prfmodel.fitters.grid import GridHistory
 from prfmodel.fitters.grid import InfiniteLossWarning
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import PRFStimulus
+from prfmodel.stimuli import PRFStimulus
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model
 from .conftest import parametrize_dtype

@@ -70,7 +70,7 @@ We can visualize the stimulus using `animate_2d_stimulus`.
 
 ```{code-cell} ipython3
 from IPython.display import HTML
-from prfmodel.stimulus import animate_2d_prf_stimulus
+from prfmodel.stimuli import animate_2d_prf_stimulus
 
 ani = animate_2d_prf_stimulus(stimulus, interval=25)  # Pause 25 ms between time frames
 

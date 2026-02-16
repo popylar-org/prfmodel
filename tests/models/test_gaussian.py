@@ -19,9 +19,9 @@ from prfmodel.models.gaussian import _expand_gaussian_args
 from prfmodel.models.gaussian import predict_gaussian_response
 from prfmodel.models.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.temporal import BaselineAmplitude
-from prfmodel.stimulus.cf import CFStimulus
-from prfmodel.stimulus.prf import GridDimensionsError
-from prfmodel.stimulus.prf import PRFStimulus
+from prfmodel.stimuli.cf import CFStimulus
+from prfmodel.stimuli.prf import GridDimensionsError
+from prfmodel.stimuli.prf import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 from .conftest import parametrize_dtype
 

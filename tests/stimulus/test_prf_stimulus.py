@@ -7,15 +7,15 @@ from matplotlib import animation
 
 # Needs to be imported to recreate stimulus from repr
 from numpy import array  # noqa: F401
-from prfmodel.stimulus.prf import DimensionLabelsError
-from prfmodel.stimulus.prf import GridDesignShapeError
-from prfmodel.stimulus.prf import GridDimensionsError
-from prfmodel.stimulus.prf import PRFStimulus
-from prfmodel.stimulus.prf import StimulusDimensionError
-from prfmodel.stimulus.prf import _get_grid_limits
-from prfmodel.stimulus.prf import _verify_dimensions
-from prfmodel.stimulus.prf import animate_2d_prf_stimulus
-from prfmodel.stimulus.prf import plot_2d_prf_stimulus
+from prfmodel.stimuli.prf import DimensionLabelsError
+from prfmodel.stimuli.prf import GridDesignShapeError
+from prfmodel.stimuli.prf import GridDimensionsError
+from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.stimuli.prf import StimulusDimensionError
+from prfmodel.stimuli.prf import _get_grid_limits
+from prfmodel.stimuli.prf import _verify_dimensions
+from prfmodel.stimuli.prf import animate_2d_prf_stimulus
+from prfmodel.stimuli.prf import plot_2d_prf_stimulus
 
 
 def test_grid_design_shape_error():

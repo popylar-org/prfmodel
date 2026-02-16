@@ -3,7 +3,7 @@
 from abc import abstractmethod
 from typing import TypeAlias
 import keras
-from prfmodel.stimulus.base import Stimulus
+from prfmodel.stimuli.base import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 

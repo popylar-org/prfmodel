@@ -5,9 +5,9 @@ from abc import abstractmethod
 from collections.abc import Sequence
 import pandas as pd
 from keras import ops
-from prfmodel.stimulus.base import Stimulus
-from prfmodel.stimulus.cf import CFStimulus
-from prfmodel.stimulus.prf import PRFStimulus
+from prfmodel.stimuli.base import Stimulus
+from prfmodel.stimuli.cf import CFStimulus
+from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _get_norm_fun
 

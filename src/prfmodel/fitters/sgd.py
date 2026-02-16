@@ -8,7 +8,7 @@ from keras import ops
 from tqdm import tqdm
 from prfmodel.adapter import Adapter
 from prfmodel.models.base import BaseComposite
-from prfmodel.stimulus.base import Stimulus
+from prfmodel.stimuli.base import Stimulus
 from prfmodel.typing import Tensor
 
 match keras.backend.backend():

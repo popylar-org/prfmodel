@@ -2,7 +2,7 @@
 
 from importlib.resources import files
 import numpy as np
-from prfmodel.stimulus.prf import PRFStimulus
+from prfmodel.stimuli.prf import PRFStimulus
 
 
 def load_2d_prf_bar_stimulus() -> PRFStimulus:
@@ -25,7 +25,7 @@ def load_2d_prf_bar_stimulus() -> PRFStimulus:
 
     See Also
     --------
-    prfmodel.stimulus.prf.animate_2d_prf_stimulus : Create an animation for a two-dimensional stimulus.
+    prfmodel.stimuli.prf.animate_2d_prf_stimulus : Create an animation for a two-dimensional stimulus.
 
     References
     ----------

@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from keras import ops
 from keras.config import floatx
-from .stimulus.base import Stimulus
+from .stimuli.base import Stimulus
 from .typing import Tensor
 
 _EXPECTED_NDIM = 2

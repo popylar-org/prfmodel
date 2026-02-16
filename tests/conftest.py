@@ -5,7 +5,7 @@ import pytest
 from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.models.impulse import DerivativeTwoGammaImpulse
-from prfmodel.stimulus.prf import PRFStimulus
+from prfmodel.stimuli.prf import PRFStimulus
 
 parametrize_impulse_model = pytest.mark.parametrize("model", [None, {"delay": 6.0, "dispersion": 0.9}], indirect=True)
 

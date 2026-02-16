@@ -7,7 +7,7 @@ from pytest_regressions.dataframe_regression import DataFrameRegressionFixture
 from prfmodel.fitters.linear import LeastSquaresFitter
 from prfmodel.fitters.linear import LeastSquaresHistory
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import PRFStimulus
+from prfmodel.stimuli import PRFStimulus
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model
 from .conftest import parametrize_dtype

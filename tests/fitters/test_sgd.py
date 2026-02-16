@@ -11,7 +11,7 @@ from prfmodel.adapter import ParameterTransform
 from prfmodel.fitters.sgd import SGDFitter
 from prfmodel.fitters.sgd import SGDHistory
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus.prf import PRFStimulus
+from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from tests.conftest import TestSetup

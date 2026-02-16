@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import PRFStimulus
+from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from prfmodel.utils import UndefinedResponseWarning

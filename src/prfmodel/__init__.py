@@ -1,7 +1,7 @@
 """Documentation about prfmodel."""
 
 import logging
-from prfmodel.stimulus.prf import PRFStimulus
+from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
 

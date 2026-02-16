@@ -11,7 +11,7 @@ from keras import ops
 from more_itertools import chunked
 from tqdm import tqdm
 from prfmodel.models.base import BaseComposite
-from prfmodel.stimulus.base import Stimulus
+from prfmodel.stimuli.base import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from prfmodel.utils import get_dtype

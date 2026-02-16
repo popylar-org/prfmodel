@@ -4,9 +4,9 @@ import math
 import numpy as np
 import pandas as pd
 from keras import ops
-from prfmodel.stimulus.cf import CFStimulus
-from prfmodel.stimulus.prf import GridDimensionsError
-from prfmodel.stimulus.prf import PRFStimulus
+from prfmodel.stimuli.cf import CFStimulus
+from prfmodel.stimuli.prf import GridDimensionsError
+from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
