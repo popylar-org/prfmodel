@@ -91,8 +91,6 @@ class BasePRFResponse(BaseModel):
     Can only be used as a parent class to create custom population receptive field models.
     Subclasses must override the abstract `__call__` method.
 
-    #TODO: Link to Example on how to create custom response models.
-
     """
 
     @abstractmethod
@@ -128,8 +126,6 @@ class BaseCFResponse(BaseModel):
     Can only be used as a parent class to create custom connective field models.
     Subclasses must override the abstract `__call__` method.
 
-    #TODO: Link to Example on how to create custom response models.
-
     """
 
     @abstractmethod
@@ -164,8 +160,6 @@ class BaseImpulse(BaseModel):
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom impulse response models.
     Subclasses must override the abstract `__call__` method.
-
-    #TODO: Link to Example on how to create custom impulse response models.
 
     Parameters
     ----------
@@ -276,8 +270,6 @@ class BaseTemporal(BaseModel):
     Can only be used as a parent class to create custom temporal models.
     Subclasses must override the abstract `__call__` method.
 
-    #TODO: Link to Example on how to create custom temporal models.
-
     """
 
     @abstractmethod
@@ -313,8 +305,6 @@ class BaseComposite(BaseModel):
     Subclasses must override the abstract `__call__` method.
     This class is intended for combining multiple submodels into a composite model with a custom `__call__`
     method that defines how the submodels interact to make a composite prediction.
-
-    #TODO: Link to Example on how to create custom composite models.
 
     Parameters
     ----------
