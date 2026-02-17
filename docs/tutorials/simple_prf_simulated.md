@@ -184,7 +184,7 @@ grid_fitter = GridFitter(
 grid_history, grid_params = grid_fitter.fit(
     data=simulated_response,
     parameter_values=param_ranges,
-    chunk_size=20,
+    batch_size=20,
 )
 ```
 
