@@ -7,7 +7,7 @@ import pandas as pd
 from keras import ops
 from tqdm import tqdm
 from prfmodel.adapter import Adapter
-from prfmodel.models.base import BaseModel
+from prfmodel.models.base import BaseComposite
 from prfmodel.stimulus.base import Stimulus
 from prfmodel.typing import Tensor
 
@@ -95,7 +95,7 @@ class SGDFitter(BackendSGDFitter):
 
     def __init__(  # noqa: PLR0913 (too many arguments in function definition)
         self,
-        model: BaseModel,
+        model: BaseComposite,
         stimulus: Stimulus,
         adapter: Adapter | None = None,
         optimizer: keras.optimizers.Optimizer | None = None,
