@@ -1,104 +1,119 @@
+from typing import cast
 import pandas as pd
 from keras import ops
-from prfmodel.models.base import BasePRFResponse
-from prfmodel.models.gaussian import predict_gaussian_response
+from prfmodel.models.base import BaseImpulse
+from prfmodel.models.base import BasePRFModel
+from prfmodel.models.base import BaseTemporal
+from prfmodel.models.encoding import encode_prf_response
+from prfmodel.models.gaussian import Gaussian2DResponse
+from prfmodel.models.impulse import DerivativeTwoGammaImpulse
+from prfmodel.models.impulse import convolve_prf_impulse_response
+from prfmodel.models.temporal import DoGAmplitude
 from prfmodel.stimulus import Stimulus
 from prfmodel.typing import Tensor
-from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 
 
-class DifferenceOfGaussians2DResponse(BasePRFResponse):
+class DoG2DPRFModel(BasePRFModel):
     """
-    Two-dimensional difference of Gaussians population receptive field response model.
+    Two-dimensional difference of Gaussians population receptive field model.
 
-    Predicts a response to a stimulus grid.
-    The model has four parameters:
-        - `mu_y` and `mu_x` for the center and `sigma1` for the width of the first Gaussian.
-        - `sigma2` for the width of the second Gaussian (shares the center w/ the first Gaussian: `mu_y` and `mu_x`).
+    Runs two Gaussian pipelines (sigma1 and sigma2) through encode and convolve
+    independently, then combines them as a linear model:
+    y(t) = p1(t) * beta_1 + p2(t) * beta_2 + baseline
 
-    The response is computed as Gaussian(sigma1) - Gaussian(sigma2). ``sigma2`` must be greater than or equal to
-    ``sigma1`` for all voxels.
+    Parameters
+    ----------
+    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
+        An impulse response model class or instance.
+    temporal_model : BaseTemporal or type or None, default=DoGAmplitude
+        A temporal model class or instance.
 
-    Examples
-    --------
-    >>> import numpy as np
-    >>> import pandas as pd
-    >>> import prfmodel as pm
-    >>> # Define a 2D grid
-    >>> num_x, num_y = 20, 10
-    >>> x = np.linspace(-3, 3, num_x)
-    >>> y = np.linspace(-4, 4, num_y)
-    >>> xv, yv = np.meshgrid(x, y)
-    >>> grid = np.stack((xv, yv), axis=-1)  # shape (20, 10, 2)
-    >>> # Define parameters for 3 voxels
-    >>> params = pd.DataFrame({
-    >>>     "mu_x": [0.0, 1.0, 0.0],
-    >>>     "mu_y": [1.0, 0.0, 0.0],
-    >>>     "sigma1": [1.0, 1.5, 2.0],
-    >>>     "sigma2": [2.0, 3.0, 4.0],
-    >>> })
-    >>> # Define dummy design for 10 frames
-    >>> design = np.ones((10, num_y, num_x))
-    >>> # Create stimulus object
-    >>> stimulus = pm.Stimulus(
-    >>>     design=design,
-    >>>     grid=grid,
-    >>>     dimension_labels=("y", "x"),
-    >>> )
-    >>> # Create model instance
-    >>> model = DifferenceOfGaussians2DResponse()
-    >>> # Predict response to stimulus grid
-    >>> resp = model(stimulus, params)
-    >>> print(resp.shape) # (num_voxels, num_y, num_x)
-    (3, 20, 10)
     """
+
+    def __init__(
+        self,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
+        temporal_model: BaseTemporal | type[BaseTemporal] | None = DoGAmplitude,
+    ):
+        if impulse_model is not None and isinstance(impulse_model, type):
+            impulse_model = impulse_model()
+
+        if temporal_model is not None and isinstance(temporal_model, type):
+            temporal_model = temporal_model()
+
+        super().__init__(
+            impulse_model=impulse_model,
+            temporal_model=temporal_model,
+        )
+        self._response_model = Gaussian2DResponse()
 
     @property
     def parameter_names(self) -> list[str]:
-        """Names of parameters used by the model: `mu_y`, `mu_x`, `sigma1`, `sigma2`."""
-        return ["mu_y", "mu_x", "sigma1", "sigma2"]
+        """A list with names of unique parameters used by the model."""
+        param_names = ["mu_y", "mu_x", "sigma1", "sigma2"]
 
-    def __call__(self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+        for model in self.models.values():
+            if model is not None:
+                param_names.extend(model.parameter_names)
+
+        return list(dict.fromkeys(param_names))
+
+    def _predict_single_response(
+        self, stimulus: Stimulus, parameters: pd.DataFrame, sigma_col: str, dtype: str,
+    ) -> Tensor:
+        """Run one Gaussian through encode + convolve."""
+        params_single = parameters[["mu_y", "mu_x"]].copy()
+        params_single["sigma"] = parameters[sigma_col]
+
+        response = self._response_model(stimulus, params_single, dtype=dtype)
+        design = ops.convert_to_tensor(stimulus.design, dtype=dtype)
+        response = encode_prf_response(response, design, dtype=dtype)
+
+        if self.models["impulse_model"] is not None:
+            impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+            impulse_response = impulse_model(parameters, dtype=dtype)
+            response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
+
+        return response
+
+    def predict_responses(
+        self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None,
+    ) -> Tensor:
         """
-        Predict the model response for a stimulus with a 2D grid.
-
-        Parameters
-        ----------
-        stimulus : Stimulus
-            Stimulus object with a 2D stimulus grid.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels. Must contain the columns `mu_y`, `mu_x`, `sigma1` and `sigma2`.
-            ``sigma2`` must be greater than or equal to ``sigma1`` for all voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        Predict the two pipeline responses before applying betas.
 
         Returns
         -------
         Tensor
-            Model predictions of shape `(num_voxels, size_y, size_x)` and dtype `dtype`.
-            `num_voxels` is the number of rows in `parameters` and `size_y` and `size_x` are the sizes of the
-            x and y stimulus grid dimension.
-
-        Raises
-        ------
-        ValueError
-            If any voxel has ``sigma2 < sigma1``.
+            Stacked predictions of shape (num_voxels, 2, num_frames).
 
         """
-        if (parameters["sigma2"] < parameters["sigma1"]).any():
-            msg = "sigma2 must be greater than or equal to sigma1 for all voxels"
-            raise ValueError(msg)
-
         dtype = get_dtype(dtype)
-        mu = convert_parameters_to_tensor(parameters[["mu_y", "mu_x"]], dtype=dtype)
-        sigma1 = convert_parameters_to_tensor(parameters[["sigma1"]], dtype=dtype)
-        sigma2 = convert_parameters_to_tensor(parameters[["sigma2"]], dtype=dtype)
-        grid = ops.convert_to_tensor(stimulus.grid, dtype=dtype)
+        p1 = self._predict_single_response(stimulus, parameters, "sigma1", dtype)
+        p2 = self._predict_single_response(stimulus, parameters, "sigma2", dtype)
 
-        resp1 = predict_gaussian_response(grid, mu, sigma1)
-        resp2 = predict_gaussian_response(grid, mu, sigma2)
+        return ops.stack([p1, p2], axis=1)
 
-        return resp1 - resp2
+    def __call__(
+        self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None,
+    ) -> Tensor:
+        """
+        Predict the DoG composite model response.
+
+        Returns
+        -------
+        Tensor
+            Model predictions of shape (num_voxels, num_frames).
+
+        """
+        dtype = get_dtype(dtype)
+        stacked = self.predict_responses(stimulus, parameters, dtype=dtype)
+
+        if self.models["temporal_model"] is not None:
+            temporal_model = cast("BaseTemporal", self.models["temporal_model"])
+            return temporal_model(stacked, parameters, dtype=dtype)
+
+        # NOTE: When `temporal_model=None`, we return a simple subtraction (resp1 - resp2)
+        # to remain useful without a temporal model. Not sure if this makes sense...
+        return stacked[:, 0] - stacked[:, 1]
