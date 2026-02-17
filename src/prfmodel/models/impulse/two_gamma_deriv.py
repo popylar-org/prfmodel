@@ -46,11 +46,11 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
 
     .. math::
 
-        f(t) = f_{\text{gamma_diff}}(t) - \tau f'_{\text{gamma_diff}}(t)
+        f(t) = f_{\text{diff}}(t) - \tau f'_{\text{diff}}(t)
 
     .. math::
 
-        f_{\text{gamma_diff}}(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega
+        f_{\text{diff}}(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega
             f_{\text{gamma}}(t; \alpha_2, \lambda_2)
 
     Positive `weight_deriv` values shift the response to the right.
