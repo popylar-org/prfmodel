@@ -1,67 +1,98 @@
-"""Test DifferenceOfGaussians2DResponse model class."""
+"""Test TestDoG2DPRFModel model class."""
 
-import numpy as np
 import pandas as pd
 import pytest
-from prfmodel.models.difference_of_gaussians import DifferenceOfGaussians2DResponse
+from prfmodel.models.difference_of_gaussians import DoG2DPRFModel
+from prfmodel.models.impulse import DerivativeTwoGammaImpulse
+from prfmodel.models.temporal import DoGAmplitude
 from prfmodel.stimulus import Stimulus
 from tests.conftest import StimulusSetup
-from .conftest import parametrize_dtype
 
 
-class TestDifferenceOfGaussians2DResponse(StimulusSetup):
-    """Tests for DifferenceOfGaussians2DResponse class."""
+class TestDoG2DPRFModel(StimulusSetup):
+    """Tests for the DoG2DPRFModel class."""
 
     @pytest.fixture
-    def response_model(self):
-        """Response model object."""
-        return DifferenceOfGaussians2DResponse()
+    def prf_model(self):
+        """PRF model object."""
+        return DoG2DPRFModel()
 
-    def test_parameter_names(self, response_model: DifferenceOfGaussians2DResponse):
-        """Test that correct parameter names are returned."""
-        assert set(response_model.parameter_names) == {"mu_y", "mu_x", "sigma1", "sigma2"}
+    @pytest.fixture
+    def impulse_model(self):
+        """Impulse response model object."""
+        return DerivativeTwoGammaImpulse()
 
-    @parametrize_dtype
-    def test_predict(self, response_model: DifferenceOfGaussians2DResponse, stimulus: Stimulus, dtype: str):
-        """Test that response prediction returns correct shape."""
-        params = pd.DataFrame(
+    @pytest.fixture
+    def temporal_model(self):
+        """Temporal model object."""
+        return DoGAmplitude()
+
+    @pytest.fixture
+    def params(self):
+        """Dataframe with parameters."""
+        return pd.DataFrame(
             {
                 "mu_x": [0.0, 1.0, 0.0],
                 "mu_y": [1.0, 0.0, 0.0],
                 "sigma1": [1.0, 1.5, 2.0],
                 "sigma2": [2.0, 3.0, 4.0],
+                "delay": [6.0, 7.0, 5.0],
+                "dispersion": [0.9, 1.0, 0.8],
+                "undershoot": [12.0, 11.0, 13.0],
+                "u_dispersion": [0.9, 1.0, 0.8],
+                "ratio": [0.48, 0.48, 0.48],
+                "weight_deriv": [0.5, 0.5, 0.5],
+                "beta_1": [1.1, 1.0, 0.9],
+                "beta_2": [-0.5, -0.3, -0.1],
+                "baseline": [0.0, 0.1, 0.2],
             },
         )
 
-        preds = np.asarray(response_model(stimulus, params, dtype))
+    def test_parameter_names(
+        self,
+        prf_model: DoG2DPRFModel,
+        impulse_model: DerivativeTwoGammaImpulse,
+        temporal_model: DoGAmplitude,
+    ):
+        """Test that parameter names of composite model match parameter names of submodels."""
+        expected = ["mu_y", "mu_x", "sigma1", "sigma2"]
+        expected.extend(impulse_model.parameter_names)
+        expected.extend(temporal_model.parameter_names)
 
-        assert preds.shape == (params.shape[0], stimulus.design.shape[1], stimulus.design.shape[2])
+        assert prf_model.parameter_names == list(dict.fromkeys(expected))
 
-    def test_sigma2_less_than_sigma1_raises(self, response_model: DifferenceOfGaussians2DResponse, stimulus: Stimulus):
-        """Test that ValueError is raised when sigma2 < sigma1."""
-        params = pd.DataFrame(
-            {
-                "mu_x": [0.0],
-                "mu_y": [0.0],
-                "sigma1": [3.0],
-                "sigma2": [1.0],
-            },
+    @pytest.mark.parametrize(
+        ("impulse_model", "temporal_model"),
+        [
+            (DerivativeTwoGammaImpulse(), DoGAmplitude()),
+            (DerivativeTwoGammaImpulse, DoGAmplitude),
+            (None, None),
+        ],
+    )
+    def test_predict(
+        self,
+        impulse_model,
+        temporal_model,
+        stimulus: Stimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that model prediction returns correct shape."""
+        prf_model = DoG2DPRFModel(
+            impulse_model=impulse_model,
+            temporal_model=temporal_model,
         )
 
-        with pytest.raises(ValueError, match="sigma2 must be greater than or equal to sigma1"):
-            response_model(stimulus, params)
+        resp = prf_model(stimulus, params)
 
-    def test_equal_sigmas_is_zero(self, response_model: DifferenceOfGaussians2DResponse, stimulus: Stimulus):
-        """Test that equal sigma1 and sigma2 produces a zero response."""
-        params = pd.DataFrame(
-            {
-                "mu_x": [0.0],
-                "mu_y": [0.0],
-                "sigma1": [2.0],
-                "sigma2": [2.0],
-            },
-        )
+        assert resp.shape == (params.shape[0], stimulus.design.shape[0])
 
-        preds = np.asarray(response_model(stimulus, params))
+    def test_predict_responses(
+        self,
+        prf_model: DoG2DPRFModel,
+        stimulus: Stimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that predict_responses returns stacked tensor with correct shape."""
+        resp = prf_model.predict_responses(stimulus, params)
 
-        assert np.allclose(preds, 0.0)
+        assert resp.shape == (params.shape[0], 2, stimulus.design.shape[0])
