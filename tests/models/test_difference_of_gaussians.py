@@ -2,6 +2,8 @@
 
 import pandas as pd
 import pytest
+from prfmodel.models.base import BaseImpulse
+from prfmodel.models.base import BaseTemporal
 from prfmodel.models.difference_of_gaussians import DoG2DPRFModel
 from prfmodel.models.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.temporal import DoGAmplitude
@@ -66,13 +68,17 @@ class TestDoG2DPRFModel(StimulusSetup):
         [
             (DerivativeTwoGammaImpulse(), DoGAmplitude()),
             (DerivativeTwoGammaImpulse, DoGAmplitude),
+            (DerivativeTwoGammaImpulse(), None),
+            (None, DoGAmplitude()),
+            (DerivativeTwoGammaImpulse, None),
+            (None, DoGAmplitude),
             (None, None),
         ],
     )
     def test_predict(
         self,
-        impulse_model,
-        temporal_model,
+        impulse_model: BaseImpulse,
+        temporal_model: BaseTemporal,
         stimulus: Stimulus,
         params: pd.DataFrame,
     ):
