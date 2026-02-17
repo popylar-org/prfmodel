@@ -60,7 +60,11 @@ class DoG2DPRFModel(BasePRFModel):
         return list(dict.fromkeys(param_names))
 
     def _predict_single_response(
-        self, stimulus: Stimulus, parameters: pd.DataFrame, sigma_col: str, dtype: str,
+        self,
+        stimulus: Stimulus,
+        parameters: pd.DataFrame,
+        sigma_col: str,
+        dtype: str,
     ) -> Tensor:
         """Run one Gaussian through encode + convolve."""
         params_single = parameters[["mu_y", "mu_x"]].copy()
@@ -78,7 +82,10 @@ class DoG2DPRFModel(BasePRFModel):
         return response
 
     def predict_responses(
-        self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None,
+        self,
+        stimulus: Stimulus,
+        parameters: pd.DataFrame,
+        dtype: str | None = None,
     ) -> Tensor:
         """
         Predict the two pipeline responses before applying betas.
@@ -96,7 +103,10 @@ class DoG2DPRFModel(BasePRFModel):
         return ops.stack([p1, p2], axis=1)
 
     def __call__(
-        self, stimulus: Stimulus, parameters: pd.DataFrame, dtype: str | None = None,
+        self,
+        stimulus: Stimulus,
+        parameters: pd.DataFrame,
+        dtype: str | None = None,
     ) -> Tensor:
         """
         Predict the DoG composite model response.
