@@ -1,0 +1,39 @@
+prfmodel.stimuli.base
+=====================
+
+.. py:module:: prfmodel.stimuli.base
+
+.. autoapi-nested-parse::
+
+   Stimulus base classes.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.stimuli.base.Stimulus
+
+
+Module Contents
+---------------
+
+.. py:class:: Stimulus
+
+   Stimulus base class.
+
+
+   .. py:method:: __repr__() -> str
+
+      Create a round-trippable string representation of the stimulus object.
+
+
+
+   .. py:method:: __str__() -> str
+
+      Create a human-readable string representation of the stimulus object.
+
+
+

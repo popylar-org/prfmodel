@@ -1,0 +1,126 @@
+prfmodel.models.impulse.density
+===============================
+
+.. py:module:: prfmodel.models.impulse.density
+
+.. autoapi-nested-parse::
+
+   Density functions.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   prfmodel.models.impulse.density.gamma_density
+   prfmodel.models.impulse.density.shifted_gamma_density
+   prfmodel.models.impulse.density.derivative_gamma_density
+
+
+Module Contents
+---------------
+
+.. py:function:: gamma_density(value: prfmodel.typing.Tensor, shape: prfmodel.typing.Tensor, rate: prfmodel.typing.Tensor, norm: bool = True) -> prfmodel.typing.Tensor
+
+   Calculate the density of a gamma distribution.
+
+   The distribution uses a shape and rate parameterization.
+   Raises an error when evaluated at negative values.
+
+   :param value: The values at which to evaluate the gamma distribution. Must be > 0 and scalar or with shape (1, m).
+   :type value: Tensor
+   :param shape: The shape parameter. Must be > 0 with shape () and scalar or with shape (n, 1).
+   :type shape: Tensor
+   :param rate: The rate parameter. Must be > 0 and scalar or with shape (n, 1).
+   :type rate: Tensor
+   :param norm: Whether to compute the normalized density.
+   :type norm: bool, default=True
+
+   :returns: The density of the gamma distribution at `value` as a scalar or with shape (n, m).
+   :rtype: Tensor
+
+   .. rubric:: Notes
+
+   The unnormalized density of the gamma distribution
+   with `shape` :math:`\alpha` and `rate` :math:`\lambda` is given by:
+
+   .. math::
+
+       f(x) = x^{\mathtt{\alpha} - 1} e^{-\mathtt{\lambda} x}.
+
+   When `norm=True`, the density is multiplied with a normalizing constant:
+
+   .. math::
+
+       f_{norm} = \frac{\mathtt{\lambda}^{\mathtt{\alpha}}}{\Gamma(\mathtt{\alpha})} * f(x).
+
+
+.. py:function:: shifted_gamma_density(value: prfmodel.typing.Tensor, shape: prfmodel.typing.Tensor, rate: prfmodel.typing.Tensor, shift: prfmodel.typing.Tensor, norm: bool = True) -> prfmodel.typing.Tensor
+
+   Calculate the density of a shifted gamma distribution.
+
+   The gamma distribution is shifted by `shift` and padded with zeros if necessary.
+
+   :param value: The values at which to evaluate the shifted gamma distribution. Must be scalar or with shape (1, m).
+   :type value: Tensor
+   :param shape: The shape parameter. Must be > 0 and scalar or with shape (n, 1).
+   :type shape: Tensor
+   :param rate: The rate parameter. Must be > 0 and scalar or with shape (n, 1).
+   :type rate: Tensor
+   :param shift: The shift parameter. When > 0, shifts the distribution to the right.
+   :type shift: Tensor
+   :param norm: Whether to compute the normalized density.
+   :type norm: bool, default=True
+
+   :returns: The density of the shifted gamma distribution at `value` as a scalar or with shape (n, m).
+             The density for shifted values that are zero or lower is zero.
+   :rtype: Tensor
+
+   .. seealso::
+
+      :py:obj:`gamma_density`
+          The (unshifted) gamma distribution density.
+
+
+.. py:function:: derivative_gamma_density(value: prfmodel.typing.Tensor, shape: prfmodel.typing.Tensor, rate: prfmodel.typing.Tensor) -> prfmodel.typing.Tensor
+
+   Calculate the derivative density of a gamma distribution.
+
+   The distribution uses a shape and rate parameterization.
+   Raises an error when evaluated at negative values.
+
+   :param value: The values at which to evaluate the derivative gamma distribution. Must be > 0 and scalar or with shape (1, m).
+   :type value: Tensor
+   :param shape: The shape parameter. Must be > 0 and scalar or with shape (n, m).
+   :type shape: Tensor
+   :param rate: The rate parameter. Must be > 0 and scalar or with shape (n, m).
+   :type rate: Tensor
+
+   :returns: The derivative density of the gamma distribution at `value` as a scalar or with shape (n, m).
+   :rtype: Tensor
+
+   .. rubric:: Notes
+
+   The density of the gamma distribution
+   with `shape` :math:`\alpha` and `rate` :math:`\lambda` is given by:
+
+   .. math::
+
+       f(x) =  \frac{\mathtt{\lambda}^{\mathtt{\alpha}}}{\Gamma(\mathtt{\alpha})}
+       x^{\mathtt{\alpha} - 1} e^{\mathtt{\lambda} x}.
+
+   The derivative of the density with respect to :math:`x` can be defined as a function of the original density
+   :math:`f(x)`:
+
+   .. math::
+
+       f(x)' = f(x) \frac{(\alpha - 1)}{t} - \lambda
+
+   .. seealso::
+
+      :py:obj:`gamma_density`
+          The gamma distribution density.
+
+

@@ -1,0 +1,83 @@
+prfmodel.stimuli.cf
+===================
+
+.. py:module:: prfmodel.stimuli.cf
+
+.. autoapi-nested-parse::
+
+   Container for connective field stimulus distance matrix and source signal.
+
+
+
+Exceptions
+----------
+
+.. autoapisummary::
+
+   prfmodel.stimuli.cf.DistanceMatrixShapeError
+   prfmodel.stimuli.cf.DistanceMatrixSourceShapeError
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.stimuli.cf.CFStimulus
+
+
+Module Contents
+---------------
+
+.. py:exception:: DistanceMatrixShapeError(distance_matrix_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raise when distance matrix is not a matrix.
+
+   :param distance_matrix_shape: Shape of the distance matrix.
+   :type distance_matrix_shape: tuple of int
+
+
+.. py:exception:: DistanceMatrixSourceShapeError(distance_matrix_shape: tuple[int, Ellipsis], source_response_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when the shapes of the distance matrix and source response do not match.
+
+   :param distance_matrix_shape: Shape of the distance matrix.
+   :type distance_matrix_shape: tuple of int
+   :param source_response_shape: Shape of the source response array.
+   :type source_response_shape: tuple of int
+
+
+.. py:class:: CFStimulus
+
+
+
+   Container for a connective field stimulus distance matrix and source response.
+
+   :param distance_matrix: A matrix with distances between source units (e.g., voxels).
+   :type distance_matrix: numpy.ndarray
+   :param source_response: Array with responses for each source unit with shape `(num_voxels, num_frames)`. `num_voxels` is the number of
+                           source units and `num_frames` the number of time frames for each source response. `num_voxels` must match the
+                           number of rows and columns in `distance_matrix`.
+   :type source_response: numpy.ndarray
+
+   :raises DistanceMatrixShapeError: If the distance matrix has more or less than two dimensions or dimensions of different size.
+   :raises DistanceMatrixSourceShapeError: If the source response has a first dimension with a different size than the number of rows or columns in the
+       distance matrix.
+
+
+   .. py:method:: __repr__() -> str
+
+      Create a round-trippable string representation of the stimulus object.
+
+
+
+   .. py:method:: __str__() -> str
+
+      Create a human-readable string representation of the stimulus object.
+
+
+

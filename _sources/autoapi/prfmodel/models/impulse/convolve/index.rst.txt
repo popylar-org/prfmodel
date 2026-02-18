@@ -1,0 +1,48 @@
+prfmodel.models.impulse.convolve
+================================
+
+.. py:module:: prfmodel.models.impulse.convolve
+
+.. autoapi-nested-parse::
+
+   Convolution functions.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   prfmodel.models.impulse.convolve.convolve_prf_impulse_response
+
+
+Module Contents
+---------------
+
+.. py:function:: convolve_prf_impulse_response(prf_response: prfmodel.typing.Tensor, impulse_response: prfmodel.typing.Tensor, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+   Convolve the encoded response from a population receptive field model with an impulse response.
+
+   Both responses must have the same number of batches but can have different numbers of frames.
+
+   :param prf_response: Encoded population receptive field model response. Must have shape (num_batches, num_response_frames).
+   :type prf_response: Tensor
+   :param impulse_response: Impulse response. Must have shape (num_batches, num_impulse_frames).
+   :type impulse_response: Tensor
+   :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+   :returns: Convolved response with shape (num_batches, num_response_frames).
+   :rtype: Tensor
+
+   .. rubric:: Notes
+
+   Before convolving both responses, the `prf_response` is padded on the left side in the
+   `num_frames` dimension by repeating the first value of each batch. This ensures that the output of the convolution
+   has the same shape as `prf_response` and the `impulse_response` starts at every frame of the `prf_response`.
+
+   :raises BatchDimensionError: If `prf_response` and `impulse_response` have batch (first) dimensions with different sizes.
+
+
