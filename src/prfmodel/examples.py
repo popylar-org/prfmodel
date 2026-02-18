@@ -2,19 +2,19 @@
 
 from importlib.resources import files
 import numpy as np
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimuli.prf import PRFStimulus
 
 
-def load_2d_bar_stimulus() -> Stimulus:
+def load_2d_prf_bar_stimulus() -> PRFStimulus:
     """
-    Load a two-dimensional bar stimulus.
+    Load a two-dimensional population receptive field bar stimulus.
 
     Loads an example stimulus that moves in eight directions (vertical, horizontal, diagonal) through a two-dimensional
     space.
 
     Returns
     -------
-    Stimulus
+    PRFStimulus
         A stimulus object with a `design` with shape (200, 101, 101) and a `grid` with shape (101, 101, 2).
 
     Notes
@@ -25,7 +25,7 @@ def load_2d_bar_stimulus() -> Stimulus:
 
     See Also
     --------
-    prfmodel.stimulus.animate_2d_stimulus : Create an animation for a two-dimensional stimulus.
+    prfmodel.stimuli.prf.animate_2d_prf_stimulus : Create an animation for a two-dimensional stimulus.
 
     References
     ----------
@@ -38,7 +38,7 @@ def load_2d_bar_stimulus() -> Stimulus:
 
     archive = np.load(str(path))
 
-    return Stimulus(
+    return PRFStimulus(
         design=archive["design"],
         grid=archive["grid"],
         dimension_labels=["y", "x"],

@@ -1,4 +1,4 @@
-"""Test stimulus classes."""
+"""Test PRFStimulus class."""
 
 import matplotlib as mpl
 import numpy as np
@@ -7,39 +7,39 @@ from matplotlib import animation
 
 # Needs to be imported to recreate stimulus from repr
 from numpy import array  # noqa: F401
-from prfmodel.stimulus import DimensionLabelsError
-from prfmodel.stimulus import GridDesignShapeError
-from prfmodel.stimulus import GridDimensionsError
-from prfmodel.stimulus import Stimulus
-from prfmodel.stimulus import StimulusDimensionError
-from prfmodel.stimulus import _get_grid_limits
-from prfmodel.stimulus import _verify_dimensions
-from prfmodel.stimulus import animate_2d_stimulus
-from prfmodel.stimulus import plot_2d_stimulus
+from prfmodel.stimuli.prf import DimensionLabelsError
+from prfmodel.stimuli.prf import GridDesignShapeError
+from prfmodel.stimuli.prf import GridDimensionsError
+from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.stimuli.prf import StimulusDimensionError
+from prfmodel.stimuli.prf import _get_grid_limits
+from prfmodel.stimuli.prf import _verify_dimensions
+from prfmodel.stimuli.prf import animate_2d_prf_stimulus
+from prfmodel.stimuli.prf import plot_2d_prf_stimulus
 
 
 def test_grid_design_shape_error():
-    """Check that shape mismatches are detected correctly by Stimulus."""
+    """Check that shape mismatches are detected correctly by PRFStimulus."""
     with pytest.raises(GridDesignShapeError):
-        _ = Stimulus(
+        _ = PRFStimulus(
             design=np.zeros((1, 2)),
             grid=np.zeros((1, 1)),
         )
 
 
 def test_grid_dimension_error():
-    """Check that shape mismatches are detected correctly by Stimulus."""
+    """Check that shape mismatches are detected correctly by PRFStimulus."""
     with pytest.raises(GridDimensionsError):
-        _ = Stimulus(
+        _ = PRFStimulus(
             design=np.zeros((1, 1, 2)),
             grid=np.zeros((1, 2, 1)),
         )
 
 
 def test_dimension_labels_error():
-    """Check that dimension mismatches are detected correctly by Stimulus."""
+    """Check that dimension mismatches are detected correctly by PRFStimulus."""
     with pytest.raises(DimensionLabelsError):
-        _ = Stimulus(
+        _ = PRFStimulus(
             design=np.zeros((1, 2)),
             grid=np.zeros((2, 1)),
             dimension_labels=["x", "y"],
@@ -49,7 +49,7 @@ def test_dimension_labels_error():
 @pytest.fixture
 def stimulus():
     """Stimulus object."""
-    return Stimulus(
+    return PRFStimulus(
         design=np.zeros((1, 2, 1)),
         grid=np.zeros((2, 1, 2)),
         dimension_labels=["x", "y"],
@@ -59,28 +59,28 @@ def stimulus():
 @pytest.fixture
 def stimulus_1d():
     """Stimulus object."""
-    return Stimulus(
+    return PRFStimulus(
         design=np.zeros((1, 2)),
         grid=np.zeros((2, 1)),
         dimension_labels=["x"],
     )
 
 
-def test_repr(stimulus: Stimulus):
-    """Test machine-readable string representation of Stimulus."""
+def test_repr(stimulus: PRFStimulus):
+    """Test machine-readable string representation of PRFStimulus."""
     stimulus_2 = eval(repr(stimulus))  # noqa: S307
 
     assert stimulus == stimulus_2
 
 
-def test_str(stimulus: Stimulus):
-    """Test human-readable string representation of Stimulus."""
-    assert str(stimulus) == "Stimulus(design=array[1, 2, 1], grid=array[2, 1, 2], dimension_labels=['x', 'y'])"
+def test_str(stimulus: PRFStimulus):
+    """Test human-readable string representation of PRFStimulus."""
+    assert str(stimulus) == "PRFStimulus(design=array[1, 2, 1], grid=array[2, 1, 2], dimension_labels=['x', 'y'])"
 
 
-def test_eq(stimulus: Stimulus):
-    """Test equality of two Stimulus objects."""
-    stimulus_2 = Stimulus(
+def test_eq(stimulus: PRFStimulus):
+    """Test equality of two PRFStimulus objects."""
+    stimulus_2 = PRFStimulus(
         design=np.zeros((1, 2, 1)),
         grid=np.zeros((2, 1, 2)),
         dimension_labels=["x", "y"],
@@ -88,13 +88,10 @@ def test_eq(stimulus: Stimulus):
 
     assert stimulus == stimulus_2
 
-    with pytest.raises(TypeError):
-        _ = stimulus == np.zeros((0, 0, 0))
 
-
-def test_ne(stimulus: Stimulus):
-    """Test inequality of two Stimulus objects."""
-    stimulus_3 = Stimulus(
+def test_ne(stimulus: PRFStimulus):
+    """Test inequality of two PRFStimulus objects."""
+    stimulus_3 = PRFStimulus(
         design=np.zeros((1, 2, 2)),
         grid=np.zeros((2, 2, 2)),
         dimension_labels=["x", "y"],
@@ -103,10 +100,15 @@ def test_ne(stimulus: Stimulus):
     assert stimulus != stimulus_3
 
 
-def test_hash(stimulus: Stimulus):
-    """Test hash of two Stimulus objects."""
+def test_ne_different_type(stimulus: PRFStimulus):
+    """Test inequality of PRFStimulus object and object with different type."""
+    assert stimulus != np.zeros((3, 3, 3))
+
+
+def test_hash_error(stimulus: PRFStimulus):
+    """Test that hashing raises an error."""
     with pytest.raises(TypeError):
-        _ = hash(stimulus)
+        hash(stimulus)
 
 
 @pytest.mark.parametrize(
@@ -146,25 +148,25 @@ def test_rectangular_grid(dimensions: str, axis: str):
     design = np.zeros(design_shape)
     grid = np.zeros(grid_shape)
 
-    stimulus = Stimulus(
+    stimulus = PRFStimulus(
         design=design,
         grid=grid,
     )
 
-    assert isinstance(stimulus, Stimulus)
+    assert isinstance(stimulus, PRFStimulus)
 
 
 @pytest.mark.parametrize("direction", ["horizontal", "vertical"])
 def test_create_2d_bar_stimulus(direction: str):
     """Check that a valid 2D bar stimulus can be created."""
-    stimulus = Stimulus.create_2d_bar_stimulus(
+    stimulus = PRFStimulus.create_2d_bar_stimulus(
         num_frames=10,
         width=5,
         height=4,
         direction=direction,
     )
 
-    assert isinstance(stimulus, Stimulus)
+    assert isinstance(stimulus, PRFStimulus)
     # First and last frame should be empty
     assert np.all(stimulus.design[0] == 0.0)
     assert np.all(stimulus.design[-1] == 0.0)
@@ -197,7 +199,7 @@ def test__get_grid_limits():
     assert result == expected, "Grid extent extracted incorrectly"
 
 
-def test__verify_dimensions(stimulus_1d: Stimulus):
+def test__verify_dimensions(stimulus_1d: PRFStimulus):
     """Test that error is raised."""
     with pytest.raises(StimulusDimensionError):
         _verify_dimensions(stimulus_1d, 2)
@@ -206,21 +208,21 @@ def test__verify_dimensions(stimulus_1d: Stimulus):
 @pytest.fixture
 def bar_stimulus():
     """Create bar stimulus to plot."""
-    return Stimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64)
+    return PRFStimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64)
 
 
-def test_animate_2d_stimulus(bar_stimulus: Stimulus):
+def test_animate_2d_stimulus(bar_stimulus: PRFStimulus):
     """Test that animation uses the correct input data."""
-    ani = animate_2d_stimulus(bar_stimulus)
+    ani = animate_2d_prf_stimulus(bar_stimulus)
     assert isinstance(ani, animation.ArtistAnimation), "Wrong type returned"
     reconstructed = np.stack([frame[0].get_array().data for frame in ani._framedata])  # noqa: SLF001
     np.testing.assert_allclose(reconstructed, bar_stimulus.design, err_msg="Animation uses wrong data")
 
 
-def test_plot_2d_stimulus(bar_stimulus: Stimulus):
+def test_plot_2d_stimulus(bar_stimulus: PRFStimulus):
     """Test that plotting uses the correct input data."""
     frame_idx = 10
-    fig, ax = plot_2d_stimulus(bar_stimulus, frame_idx)
+    fig, ax = plot_2d_prf_stimulus(bar_stimulus, frame_idx)
     assert isinstance(fig, mpl.figure.Figure), "Does not create the Figure type"
     assert isinstance(ax, mpl.axes.Axes), "Does not create the Axes type"
     img = ax.images[0]

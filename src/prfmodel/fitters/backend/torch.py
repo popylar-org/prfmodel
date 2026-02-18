@@ -1,7 +1,7 @@
 """PyTorch fitter implementations."""
 
 import torch
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimuli.base import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from .base import BaseSGDFitter

@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 from keras import ops
 from tqdm import tqdm
-from prfmodel.models.base import BaseModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.models.base import BaseComposite
+from prfmodel.stimuli.base import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 
@@ -54,7 +54,7 @@ class LeastSquaresFitter:
 
     def __init__(
         self,
-        model: BaseModel,
+        model: BaseComposite,
         stimulus: Stimulus,
         dtype: str | None = None,
     ):
@@ -157,7 +157,7 @@ class LeastSquaresFitter:
 
         parameter_batch[slope_name] = 1.0
 
-        predictions = self.model(self.stimulus, parameter_batch, self.dtype)  # type: ignore[operator]
+        predictions = self.model(self.stimulus, parameter_batch, self.dtype)
 
         if intercept_name is not None:
             intercept = ops.ones_like(predictions, dtype=self.dtype)

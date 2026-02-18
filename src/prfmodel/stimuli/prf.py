@@ -1,16 +1,18 @@
-"""Containers for stimuli and stimulus grids."""
+"""Container for population receptive field stimulus design and grid."""
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from typing import Literal
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import animation
+from .base import Stimulus
 
 
 class GridDesignShapeError(Exception):
     """
-    Exception raised when the shapes of the stimulus design and grid do not match.
+    Exception raised when the shapes of the design and grid do not match.
 
     Parameters
     ----------
@@ -18,6 +20,7 @@ class GridDesignShapeError(Exception):
         Shape of the design array.
     grid_shape : tuple of int
         Shape of the grid array.
+
     """
 
     def __init__(self, design_shape: tuple[int, ...], grid_shape: tuple[int, ...]):
@@ -52,6 +55,7 @@ class DimensionLabelsError(Exception):
         Length of the dimensions sequence.
     grid_dim : int
         Size of the last dimension of the grid.
+
     """
 
     def __init__(self, dimensions_len: int, grid_dim: int):
@@ -69,15 +73,17 @@ class StimulusDimensionError(Exception):
         Number of dimensions in the stimulus grid.
     expected : int
         Number of expected dimensions in the stimulus grid.
+
     """
 
     def __init__(self, actual: int, expected: int):
         super().__init__(f"Stimulus frames have {actual} dimensions, but expected {expected}.")
 
 
-class Stimulus:
+@dataclass(frozen=True, eq=False)
+class PRFStimulus(Stimulus):
     """
-    Container for a stimulus design and its associated grid.
+    Container for a population receptive field stimulus design and its associated grid.
 
     Parameters
     ----------
@@ -108,7 +114,7 @@ class Stimulus:
 
     Examples
     --------
-    Create a stimulus on a 2D grid.
+    Create a population receptive field stimulus on a 2D grid.
 
     >>> import numpy as np
     >>> num_frames, width, height = 10, 16, 16
@@ -125,20 +131,17 @@ class Stimulus:
     >>> # The coordinates of the top-right corner:
     >>> grid[15, 15, :]
     array([0.375, 0.375])
-    >>> stimulus = Stimulus(design=design, grid=grid, dimension_labels=["y", "x"])
+    >>> stimulus = PRFStimulus(design=design, grid=grid, dimension_labels=["y", "x"])
     >>> print(stimulus)
-    Stimulus(design=array[10, 16, 16], grid=array[16, 16, 2], dimension_labels=['y', 'x'])
+    PRFStimulus(design=array[10, 16, 16], grid=array[16, 16, 2], dimension_labels=['y', 'x'])
 
     """
 
-    # We don't want the object to be hashable because it's mutable
-    __hash__ = None  # type: ignore[assignment]
+    design: np.ndarray
+    grid: np.ndarray
+    dimension_labels: Sequence[str] | None = None
 
-    def __init__(self, design: np.ndarray, grid: np.ndarray, dimension_labels: Sequence[str] | None = None):
-        self.design = design
-        self.grid = grid
-        self.dimension_labels = dimension_labels
-
+    def __post_init__(self):
         self._check_grid_design_shape()
         self._check_grid_dimensions()
         self._check_dimension_labels()
@@ -155,33 +158,6 @@ class Stimulus:
         if self.dimension_labels is not None and not self.grid.shape[-1] == len(self.dimension_labels):
             raise DimensionLabelsError(len(self.dimension_labels), self.grid.shape[-1])
 
-    def __repr__(self) -> str:
-        return f"""{self.__class__.__name__}(
-            design={np.array_repr(self.design)},
-            grid={np.array_repr(self.grid)},
-            dimension_labels={self.dimension_labels}
-        )"""
-
-    def __str__(self) -> str:
-        design_shape_str = ", ".join([str(s) for s in self.design.shape])
-        grid_shape_str = ", ".join([str(s) for s in self.grid.shape])
-
-        return f"{self.__class__.__name__}(design=array[{design_shape_str}], grid=array[{grid_shape_str}], dimension_labels={self.dimension_labels})"  # noqa: E501
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Stimulus):
-            msg = "Stimulus objects can only be compared against other Stimulus objects"
-            raise TypeError(msg)
-
-        if self.design.shape != other.design.shape or self.grid.shape != other.grid.shape:
-            return False
-
-        design_equal = np.all(self.design == other.design)
-        grid_equal = np.all(self.grid == other.grid)
-        dimensions_labels_equal = self.dimension_labels == other.dimension_labels
-
-        return bool(design_equal and grid_equal and dimensions_labels_equal)
-
     @classmethod
     def create_2d_bar_stimulus(  # noqa: PLR0913 (too many arguments)
         cls,
@@ -191,9 +167,9 @@ class Stimulus:
         bar_width: int = 20,
         direction: str = "horizontal",
         pixel_size: float = 0.05,
-    ) -> "Stimulus":
+    ) -> "PRFStimulus":
         """
-        Create a bar stimulus that moves across a 2D screen.
+        Create a population receptive field bar stimulus that moves across a 2D screen.
 
         The stimulus starts and ends moving just outside the screen.
 
@@ -214,8 +190,8 @@ class Stimulus:
 
         Returns
         -------
-        Stimulus
-            A Stimulus instance with the generated design and grid.
+        PRFStimulus
+            A stimulus instance with the generated design and grid.
 
         Raises
         ------
@@ -224,9 +200,9 @@ class Stimulus:
 
         Examples
         --------
-        >>> stimulus = Stimulus.create_2d_bar_stimulus(num_frames=200)
+        >>> stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=200)
         >>> print(stimulus)
-        Stimulus(design=array[200, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
+        PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
 
         """
         # Create a centered grid of x and y coordinates
@@ -273,7 +249,7 @@ class Stimulus:
 
 
 def _setup_2d_plot(
-    stimulus: Stimulus,
+    stimulus: PRFStimulus,
     title: str | None = None,
     **kwargs,
 ) -> tuple[mpl.figure.Figure, mpl.axes.Axes, tuple[float, float, float, float]]:
@@ -294,8 +270,8 @@ def _setup_2d_plot(
     return fig, ax, grid_limits
 
 
-def animate_2d_stimulus(  # noqa: PLR0913
-    stimulus: Stimulus,
+def animate_2d_prf_stimulus(  # noqa: PLR0913
+    stimulus: PRFStimulus,
     title: str | None = None,
     origin: Literal["upper", "lower"] = "lower",
     interval: int = 50,
@@ -303,12 +279,12 @@ def animate_2d_stimulus(  # noqa: PLR0913
     repeat_delay: int = 1000,
     **kwargs,
 ) -> animation.ArtistAnimation:
-    """Animate a 2d stimulus.
+    """Animate a two-dimensional population receptive field stimulus.
 
     Parameters
     ----------
-    stimulus : Stimulus
-        The stimulus to visualize.
+    stimulus : PRFStimulus
+        The population receptive field stimulus to visualize.
     title : str or None, optional
         Title for the video animation.
     origin : str, optional
@@ -341,11 +317,12 @@ def animate_2d_stimulus(  # noqa: PLR0913
     Examples
     --------
     >>> from IPython.display import HTML
-    >>> from prfmodel.stimulus import Stimulus, make_video
-    >>> bar_stimulus = Stimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64)
-    >>> ani = make_2d_animation(bar_stimulus)
+    >>> from prfmodel.stimulus import PRFStimulus, animate_2d_prf_stimulus
+    >>> bar_stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64)
+    >>> ani = animate_2d_prf_stimulus(bar_stimulus)
     >>> video = ani.to_html5_video()
     >>> HTML(video)
+
     """
     fig, ax, grid_limits = _setup_2d_plot(stimulus, title, **kwargs)
 
@@ -361,19 +338,19 @@ def animate_2d_stimulus(  # noqa: PLR0913
     return ani
 
 
-def plot_2d_stimulus(
-    stimulus: Stimulus,
+def plot_2d_prf_stimulus(
+    stimulus: PRFStimulus,
     frame_idx: int,
     origin: Literal["upper", "lower"] = "lower",
     title: str | None = None,
     **kwargs,
 ) -> tuple[mpl.figure.Figure, mpl.axes.Axes]:
-    """Plot a single frame of a 2d stimulus.
+    """Plot a single frame of a two-dimensional population receptive field stimulus.
 
     Parameters
     ----------
-    stimulus : Stimulus
-        The stimulus to visualize.
+    stimulus : PRFStimulus
+        The population receptive field stimulus to visualize.
     frame_idx : int
         Index of the frame to plot.
     origin : str, optional
@@ -391,6 +368,7 @@ def plot_2d_stimulus(
     ------
     StimulusDimensionError
         If the stimulus is not 2-dimensional.
+
     """
     fig, ax, grid_limits = _setup_2d_plot(stimulus, title, **kwargs)
 
@@ -400,10 +378,11 @@ def plot_2d_stimulus(
     return fig, ax
 
 
-def _verify_dimensions(stimulus: Stimulus, expected: int) -> None:
+def _verify_dimensions(stimulus: PRFStimulus, expected: int) -> None:
     """Verify that stimulus has the right dimensions.
 
     This checks for the number of dimensions excluding the first (frame) dimension.
+
     """
     actual = len(stimulus.design.shape)
     if actual != expected + 1:
@@ -414,6 +393,7 @@ def _get_grid_limits(grid: np.ndarray) -> tuple[float, float, float, float]:
     """From a 2D coordinate grid, return its coordinate limits.
 
     Output can be passed as `extent` argument to :class:`matlplotlib.axes.Axes.imshow`
+
     """
     left = grid[0, 0, 0]
     bottom = grid[0, 0, -1]

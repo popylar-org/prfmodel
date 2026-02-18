@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from prfmodel.utils import UndefinedResponseWarning
@@ -115,7 +115,7 @@ class TestBatched(TestSetup):
 
     def test_batch_size_none_returns_same_result(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
         model: Gaussian2DPRFModel,
     ):
@@ -127,7 +127,7 @@ class TestBatched(TestSetup):
 
     def test_batched_matches_unbatched(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
         model: Gaussian2DPRFModel,
     ):
@@ -139,7 +139,7 @@ class TestBatched(TestSetup):
 
     def test_output_shape(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
         model: Gaussian2DPRFModel,
     ):
@@ -150,7 +150,7 @@ class TestBatched(TestSetup):
 
     def test_batch_size_larger_than_num_voxels(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
         model: Gaussian2DPRFModel,
     ):
@@ -162,7 +162,7 @@ class TestBatched(TestSetup):
 
     def test_exact_batch_division(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
         model: Gaussian2DPRFModel,
     ):
@@ -174,7 +174,7 @@ class TestBatched(TestSetup):
 
     def test_passes_kwargs(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
         model: Gaussian2DPRFModel,
     ):
@@ -186,14 +186,14 @@ class TestBatched(TestSetup):
 
     def test_decorator(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
         model: Gaussian2DPRFModel,
     ):
         """Test that the decorator syntax works with batch_size as a wrapper kwarg."""
 
         @batched
-        def batched_call(stimulus: Stimulus, params: pd.DataFrame) -> Tensor:
+        def batched_call(stimulus: PRFStimulus, params: pd.DataFrame) -> Tensor:
             return model(stimulus, params)
 
         result = batched_call(stimulus, params, batch_size=3)

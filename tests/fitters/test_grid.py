@@ -8,7 +8,7 @@ from prfmodel.fitters.grid import GridFitter
 from prfmodel.fitters.grid import GridHistory
 from prfmodel.fitters.grid import InfiniteLossWarning
 from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.stimulus import Stimulus
+from prfmodel.stimuli import PRFStimulus
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model
 from .conftest import parametrize_dtype
@@ -56,7 +56,7 @@ class TestGridFitter(TestSetup):
     )
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         loss: keras.losses.Loss,
         params: pd.DataFrame,
@@ -80,7 +80,7 @@ class TestGridFitter(TestSetup):
 
     def test_fit_infinite_loss_warning(
         self,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
         param_ranges: dict[str, np.ndarray],
