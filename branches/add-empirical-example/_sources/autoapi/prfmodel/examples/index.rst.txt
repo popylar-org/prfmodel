@@ -1,0 +1,124 @@
+prfmodel.examples
+=================
+
+.. py:module:: prfmodel.examples
+
+.. autoapi-nested-parse::
+
+   Example stimuli and data.
+
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   prfmodel.examples.load_2d_prf_bar_stimulus
+   prfmodel.examples.download_surface_mesh
+   prfmodel.examples.load_single_subject_fmri_data
+   prfmodel.examples.load_brain_atlas
+
+
+Module Contents
+---------------
+
+.. py:function:: load_2d_prf_bar_stimulus() -> prfmodel.stimuli.prf.PRFStimulus
+
+   Load a two-dimensional population receptive field bar stimulus.
+
+   Loads an example stimulus that moves in eight directions (vertical, horizontal, diagonal) through a two-dimensional
+   space.
+
+   :returns: A stimulus object with a `design` with shape (200, 101, 101) and a `grid` with shape (101, 101, 2).
+   :rtype: PRFStimulus
+
+   .. rubric:: Notes
+
+   The stimulus was created with the validation framework developed by Lerma-Usabiaga et al (2020)[1]_.
+   It has 200 time frames, with 101 pixels in the x- and y-dimension, spanning a visual field of 20 degrees
+   vertically and horizontally.
+
+   .. seealso::
+
+      :py:obj:`prfmodel.stimuli.prf.animate_2d_prf_stimulus`
+          Create an animation for a two-dimensional stimulus.
+
+   .. rubric:: References
+
+   .. [1] Lerma-Usabiaga, G., Benson, N., Winawer, J., & Wandell, B. A. (2020). A validation framework for
+       neuroimaging software: The case of population receptive fields. *PLOS Computational Biology, 16*(6),
+       e1007924. https://doi.org/10.1371/journal.pcbi.1007924
+
+
+.. py:function:: download_surface_mesh(dest_dir: str | os.PathLike, subject: str = 'hcp_999999', type: str = 'flat') -> dict[str, tuple[numpy.ndarray, numpy.ndarray]]
+
+   Download a standardized cortical surface mesh and return vertex coordinates and faces.
+
+   Downloads the surface mesh for the given subject from Fig Share and extracts the inflated surface meshes for the
+   left and right hemispheres.
+
+   :param dest_dir: Directory where the surface files should be stored.
+   :type dest_dir: str or os.PathLike
+   :param subject: Identifier of the subject for which to download the surface. Currently only ``"hcp_999999"`` is supported.
+   :type subject: str, default="hcp_999999"
+
+   :returns: A dictionary with keys ``"lh"`` and ``"rh"``, each mapping to a tuple of ``(coordinates, faces)`` where
+             ``coordinates`` has shape ``(n_vertices, 3)`` and ``faces`` has shape ``(n_faces, 3)``.
+   :rtype: dict[str, tuple[numpy.ndarray, numpy.ndarray]]
+
+
+.. py:function:: load_single_subject_fmri_data(dest_dir: str | os.PathLike, hemisphere: str = 'both') -> tuple[numpy.ndarray, prfmodel.stimuli.prf.PRFStimulus]
+
+   Load example functional magnetic resonance imaging (fMRI) data for a single subject.
+
+   Loads the blood oxygenation level-dependent (BOLD) response and the visual stimulus used in the experiment.
+   Downloads the data from Fig Share if it does not yet exist.
+
+   :param dest_dir: Directory where the data should be stored. If the directory does not contain all required files the data is
+                    downloaded from Fig Share.
+   :type dest_dir: str or os.PathLike
+   :param hemisphere: Hemisphere(s) for which the BOLD response data should be loaded. Must be either 'left', 'right', or 'both'.
+                      For 'both', the data of both hemispheres are concatenated (left is first).
+   :type hemisphere: str, default="both"
+
+   :returns: * **response** (*numpy.ndarray*) -- The BOLD response in the requested unit.
+             * **stimulus** (*prfmodel.stimulus.Stimulus*) -- The experimental stimulus.
+
+   .. rubric:: Notes
+
+   The data have been obtained by averaging 43 runs across 4 sessions from a single subject in a 7T fMRI scanner
+   using a repitition time of 1.5 (see this
+   `link <https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209>`_ for further details).
+
+
+.. py:function:: load_brain_atlas(dest_path: str | os.PathLike, hemisphere: str = 'both') -> numpy.ndarray
+
+   Load a standardized brain atlas.
+
+   Loads a brain atlas based on multimodal parcellation from the Human Connectome Project
+   (see Glasser et al., 2016)[1]_. The atlas contains indices for different regions of interest. It is subsampled to
+   match the cortical surface of subject `'hcp_999999'` that can be downloaded with
+   :func:`prfmodel.examples.download_surface`.
+
+   :param dest_dir: Directory where the data should be stored. If the directory does not contain all required files the data is
+                    downloaded from Fig Share.
+   :type dest_dir: str or os.PathLike
+   :param hemisphere: Hemisphere(s) for which the atlas should be loaded. Must be either 'left', 'right', or 'both'.
+                      For 'both', the data of both hemispheres are concatenated (left is first).
+   :type hemisphere: str, default="both"
+
+   :returns: The region of interest index of each vertex in the subsampled surface.
+   :rtype: numpy.ndarray
+
+   .. rubric:: Notes
+
+   For details, see this `link <https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209>`_.
+
+   .. rubric:: References
+
+   .. [1] Glasser, M. F., Coalson, T. S., Robinson, E. C., Hacker, C. D., Harwell, J., Yacoub, E., Ugurbil, K.,
+   Andersson, J., Beckmann, C. F., Jenkinson, M., Smith, S. M., & Van Essen, D. C. (2016). A multi-modal parcellation
+   of human cerebral cortex. *Nature, 536*(7615), 171-178. https://doi.org/10.1038/nature18933
+
+

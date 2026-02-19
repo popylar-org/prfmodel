@@ -1,0 +1,128 @@
+prfmodel.models.composite
+=========================
+
+.. py:module:: prfmodel.models.composite
+
+.. autoapi-nested-parse::
+
+   Composite models.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.models.composite.SimplePRFModel
+   prfmodel.models.composite.SimpleCFModel
+
+
+Module Contents
+---------------
+
+.. py:class:: SimplePRFModel(prf_model: prfmodel.models.base.BasePRFResponse, impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = BaselineAmplitude)
+
+
+
+   Simple composite population receptive field model.
+
+   This is a generic class that combines a population receptive field, impulse, and temporal response.
+
+   :param prf_model: A population receptive field response model instance.
+   :type prf_model: BasePRFResponse
+   :param impulse_model: An impulse response model class or instance. Reponse model classes will be instantiated during object
+                         initialization. The default creates a `ShiftedDerivativeGammaImpulse` instance with default values.
+                         values.
+   :type impulse_model: BaseImpulse or type or None, default=ShiftedDerivativeGammaImpulse, optional
+   :param temporal_model: A temporal model class or instance. Temporal model instances will be instantiated during initialization.
+                          The default creates a `BaselineAmplitude` instance.
+   :type temporal_model: BaseTemporal or type or None, default=BaselineAmplitude, optional
+
+   .. rubric:: Notes
+
+   The simple composite model follows five steps:
+
+   1. The population receptive field response model makes a prediction for the stimulus grid.
+   2. The response is encoded with the stimulus design.
+   3. The impulse response model generates an impulse response.
+   4. The encoded response is convolved with the impulse response.
+   5. The temporal model modifies the convolved response.
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict a simple population receptive field model response to a stimulus.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape (num_voxels, num_frames) and dtype `dtype`. The number of voxels is the
+                number of rows in `parameters`. The number of frames is the number of frames in the stimulus design.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters that are used by the submodels.
+
+
+.. py:class:: SimpleCFModel(cf_model: prfmodel.models.base.BaseCFResponse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = BaselineAmplitude)
+
+
+
+   Simple composite connective field model.
+
+   This is a generic class that combines a connective field and temporal response.
+
+   :param cf_model: A connective field response model instance.
+   :type cf_model: BaseCFResponse
+   :param temporal_model: A temporal model class or instance. Temporal model instances will be instantiated during initialization.
+                          The default creates a `BaselineAmplitude` instance.
+   :type temporal_model: BaseTemporal or type or None, default=BaselineAmplitude, optional
+
+   .. rubric:: Notes
+
+   The simple composite model follows three steps:
+
+   1. The connective field response model makes a prediction for the stimulus distance matrix.
+   2. The connective field response is encoded with the source response.
+   3. The temporal model modifies the encoded response.
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.cf.CFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict a simple connective field model response to a stimulus.
+
+      :param stimulus: Connective field stimulus object.
+      :type stimulus: CFStimulus
+      :param parameters: Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape (num_voxels, num_frames) and dtype `dtype`. The number of voxels is the
+                number of rows in `parameters`. The number of frames is the number of frames in the stimulus source
+                response.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters that are used by the submodels.
+
+

@@ -1,0 +1,99 @@
+prfmodel.models.encoding
+========================
+
+.. py:module:: prfmodel.models.encoding
+
+.. autoapi-nested-parse::
+
+   Stimulus encoding classes.
+
+
+
+Exceptions
+----------
+
+.. autoapisummary::
+
+   prfmodel.models.encoding.ResponseDesignShapeError
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   prfmodel.models.encoding.encode_prf_response
+
+
+Module Contents
+---------------
+
+.. py:exception:: ResponseDesignShapeError(response_shape: tuple[int, Ellipsis], design_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when the shapes of the model response and stimulus design do not match.
+
+   Both must have the same shape after the first dimension.
+
+   :param response_shape: Shape of the model response array.
+   :type response_shape: tuple of int
+   :param design_shape: Shape of the design array.
+   :type design_shape: tuple of int
+
+
+.. py:function:: encode_prf_response(response: prfmodel.typing.Tensor, design: prfmodel.typing.Tensor, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+   Encode a population receptive field model response with a stimulus design.
+
+   Multiplies a stimulus design with a model response along the
+   stimulus dimensions and sums over them.
+
+   :param response: The population receptive field model response. The first dimension corresponds to the number of batches.
+                    Additional dimensions correspond to the stimulus dimensions.
+   :type response: Tensor
+   :param design: The stimulus design containing the stimulus value in one or more dimensions over different time frames.
+                  The first axis is assumed to be time frames. Additional axes represent stimulus dimensions.
+   :type design: Tensor
+   :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+   :returns: The stimulus encoded model response with shape (num_batches, num_frames) and dtype `dtype`.
+   :rtype: Tensor
+
+   :raises ResponseDesignShapeError: If the shape of the model response and the stimulus design do not match.
+
+   .. rubric:: Examples
+
+   Encode a 1D model response:
+
+   >>> import numpy as np
+   >>> num_batches = 3
+   >>> num_frames = 10
+   >>> height = 5
+   >>> # Create a dummy stimulus design
+   >>> design = np.ones((num_frames, height))
+   >>> # Create a dummy model response that varies with the height of a stimulus grid
+   >>> resp = np.ones((num_batches, height)) * np.expand_dims(np.sin(np.arange(height)), 0)
+   >>> print(resp.shape) # (num_batches, height)
+   (3, 5)
+   >>> resp_encoded = encode_prf_response(resp, design)
+   >>> print(resp_encoded.shape) (num_batches, num_frames)
+   (3, 10)
+
+   Encode a 2D model response:
+
+   >>> # Add width dimension
+   >>> width = 4
+   >>> # Create a dummy stimulus design
+   >>> design = np.ones((num_frames, height, width))
+   >>> # Create a dummy model response that varies with the width of a stimulus grid
+   >>> resp = np.ones((num_batches, height, width)) * np.expand_dims(np.sin(np.arange(width)), (0, 1))
+   >>> print(resp.shape) # (num_batches, height, width)
+   (3, 5, 4)
+   >>> resp_encoded = encode_prf_response(resp, design)
+   >>> print(resp_encoded.shape) (num_batches, num_frames)
+   (3, 10)
+
+

@@ -1,0 +1,90 @@
+prfmodel.fitters.linear
+=======================
+
+.. py:module:: prfmodel.fitters.linear
+
+.. autoapi-nested-parse::
+
+   Linear fitters.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.fitters.linear.LeastSquaresHistory
+   prfmodel.fitters.linear.LeastSquaresFitter
+
+
+Module Contents
+---------------
+
+.. py:class:: LeastSquaresHistory(history: dict | None)
+
+   Least squares metric history.
+
+   Logs losses and metrics over data batches resulting from least squares fitting.
+
+   .. attribute:: history
+
+      Dictionary with keys indicating metric names and values containing metric values for each data batch.
+
+      :type: dict
+
+
+.. py:class:: LeastSquaresFitter(model: prfmodel.models.base.BaseComposite, stimulus: prfmodel.stimuli.base.Stimulus, dtype: str | None = None)
+
+   Fit population receptive field models with least squares.
+
+   Estimates model parameters by minimizing the sum of least squares between model predictions and data.
+
+   :param model: Population receptive field model instance that can be fit to data.
+                 The model must implement `__call__` to make predictions that can be compared to data.
+   :type model: BaseModel
+   :param stimulus: Stimulus object used to make model predictions.
+   :type stimulus: Stimulus
+   :param dtype: The dtype used for fitting. If `None` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+   .. rubric:: Notes
+
+   This fitter only optmizes one or two model parameters by estimating a general linear model with an intercept and a
+   slope between model predictions and data. Typically, these are baseline and amplitude parameters.
+
+   Internally, the fitter applies `keras.ops.lstsq` to each data batch.
+
+
+   .. py:property:: dtype
+      :type: str
+
+
+      The dtype that is used during fitting.
+
+
+   .. py:method:: fit(data: prfmodel.typing.Tensor, parameters: pandas.DataFrame, slope_name: str, intercept_name: str | None = None, batch_size: int | None = None) -> tuple[LeastSquaresHistory, pandas.DataFrame]
+
+      Fit a population receptive field model to target data.
+
+      :param data: Target data to fit the model to. Must have shape (num_batches, num_frames), where `num_batches` is the
+                   number of batches for which parameters are estimated and `num_frames` is the number of time steps.
+      :type data: Tensor
+      :param parameters: Dataframe with model parameters. Columns must contain different model parameters and
+                         rows parameter values for each batch in `data`.
+      :type parameters: pandas.DataFrame
+      :param slope_name: The name of the parameter that will be the estimated slope. Must refer to a column within `parameters`.
+      :type slope_name: str
+      :param intercept_name: The name of the parameter that will be the estimated intercept. Must refer to a column within `parameters`.
+                             If `None`, no intercept is estimated.
+      :type intercept_name: str, optional
+      :param batch_size: Number of data batches to fit at the same time. If `None` (the default), all batches are fit at once.
+      :type batch_size: int, optional
+
+      :returns: * *LeastSquaresHistory* -- A history object that contains a dict with the key `loss` and the residual sum of squares
+                  for each data batch.
+                * *pandas.DataFrame* -- A dataframe with final model parameters.
+
+
+

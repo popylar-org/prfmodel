@@ -1,0 +1,261 @@
+prfmodel.adapter
+================
+
+.. py:module:: prfmodel.adapter
+
+.. autoapi-nested-parse::
+
+   Adapters and parameter transformations.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.adapter.ParameterTransform
+   prfmodel.adapter.ParameterConstraint
+   prfmodel.adapter.Adapter
+
+
+Module Contents
+---------------
+
+.. py:class:: ParameterTransform(parameter_names: collections.abc.Sequence[str], transform_fun: collections.abc.Callable, inverse_fun: collections.abc.Callable)
+
+   Apply transformations to parameters.
+
+   Instances of this class can be used inside an :class:`Adapter` object to transform specific parameters during
+   model fitting.
+
+   :param parameter_names: Names of parameters to be transformed.
+   :type parameter_names: Sequence of str
+   :param transform_fun: Function to apply to parameters for the transformation. During model fitting, parameters will be
+                         optimized on the scale of the transformation (e.g., for a log-transformation, parameters will be
+                         optimized on the log-scale).
+   :type transform_fun: Callable
+   :param inverse_fun: Function to apply to parameters for the inverse transformation. Should be the inverse of `transform_fun`
+                       or the identity function (e.g., `lambda x: x`). During model fitting, model predictions will
+                       be made using parameters on the scale of the inverse transformation (e.g., for a log-transformation, model
+                       predictions will be made with parameters on the natural scale).
+   :type inverse_fun: Callable
+
+   .. rubric:: Notes
+
+   When using the transform within stochastic gradient descent, the transform and inverse functions should allow for
+   gradient tracking (e.g., by using functions from the `keras.ops` module).
+
+   .. rubric:: Examples
+
+   Log-transform parameters.
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   >>>     "x": np.arange(1, 5)
+   >>> })
+   >>> transform = ParameterTransform(
+   >>>     parameter_names=["x"],
+   >>>     transform_fun=np.log,
+   >>>     inverse_fun=np.exp,
+   >>> )
+   >>> params_transformed = transform.transform(params)
+   >>> print(params_transformed)
+             x
+   0  0.000000
+   1  0.693147
+   2  1.098612
+   3  1.386294
+
+   Inverse transformation returns the original parameters for finite values.
+
+   >>> params_inverse = transform.inverse(params_transformed)
+   >>> assert all(params_inverse == params)
+
+
+   .. py:method:: transform(parameters: P) -> P
+
+      Apply the transformation.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pd.DataFrame
+
+      :returns: Dataframe with the transformation applied to the parameters specified in `parameter_names`.
+      :rtype: pd.DataFrame
+
+
+
+   .. py:method:: inverse(parameters: P) -> P
+
+      Apply the inverse transformation.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pd.DataFrame
+
+      :returns: Dataframe with the inverse transformation applied to the parameters specified in `parameter_names`.
+      :rtype: pd.DataFrame
+
+
+
+.. py:class:: ParameterConstraint(parameter_names: collections.abc.Sequence[str], lower: str | float | None = None, upper: str | float | None = None, bound_fun: collections.abc.Callable | None = None)
+
+
+
+   Constrain parameters to lower or upper bounds.
+
+   Instances of this class can be used inside an :class:`Adapter` object to constrain specific parameters during
+   model fitting using exponential transformation.
+
+   :param parameter_names: Names of parameters to be transformed.
+   :type parameter_names: Sequence of str
+   :param lower: Lower bound of parameter constraint. If the argument has type `str`, it will use another parameter as the
+                 dynamic lower bound. An argument of type `float` will be used as a static lower bound.
+   :type lower: str or float, optional
+   :param upper: Upper bound of parameter constraint. If the argument has type `str`, it will use another parameter as the
+                 dynamic upper bound. An argument of type `float` will be used as a static upper bound.
+   :type upper: str or float, optional
+   :param bound_fun: Function to apply to the lower or upper bound before applying the constraint.
+   :type bound_fun: Callable, optional
+
+   .. rubric:: Examples
+
+   Constrain a parameter to be greater than another parameter.
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   >>>     "x": np.array([0.5, 1.0, 1.5]),
+   >>>     "lower_bound": np.array([0.1, 0.2, 0.3])
+   >>> })
+   >>> constraint = ParameterContraint(
+   >>>     parameter_names=["x"],
+   >>>     lower="lower_bound",
+   >>> )
+   >>> params_transformed = constraint.transform(params)
+   >>> params_inverse = constraint.inverse(params_transformed)
+   >>> assert np.allclose(params_inverse["x"], params["x"])
+
+   Constrain a parameter to be greater than a fixed value.
+
+   >>> constraint = ParameterContraint(
+   >>>     parameter_names=["x"],
+   >>>     lower=1.0,
+   >>> )
+   >>> params_transformed = constraint.transform(params)
+   >>> params_inverse = constraint.inverse(params_transformed)
+   >>> assert np.allclose(params_inverse["x"], params["x"])
+
+   Constrain a parameter to be greater than the square of another parameter.
+
+   >>> constraint = ParameterContraint(
+   >>>     parameter_names=["x"],
+   >>>     lower="lower_bound",
+   >>>     bound_fun=lambda x: x**2
+   >>> )
+   >>> params_transformed = constraint.transform(params)
+   >>> params_inverse = constraint.inverse(params_transformed)
+   >>> assert np.allclose(params_inverse["x"], params["x"])
+
+
+   .. py:method:: transform(parameters: P) -> P
+
+      Apply the constraint transformation.
+
+      Transforms parameters by constraining them to be within specified bounds using exponential transformations.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pd.DataFrame
+
+      :returns: Dataframe with the constraint transformation applied to the parameters specified in
+                `parameter_names`.
+      :rtype: pd.DataFrame
+
+
+
+   .. py:method:: inverse(parameters: P) -> P
+
+      Apply the inverse constraint transformation.
+
+      Transforms parameters back from the constrained space to the natural scale.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pd.DataFrame
+
+      :returns: Dataframe with the inverse constraint transformation applied to the parameters specified in
+                `parameter_names`.
+      :rtype: pd.DataFrame
+
+
+
+.. py:class:: Adapter(transforms: list[ParameterTransform] | None = None)
+
+   Apply a series of transformations to parameters.
+
+   Applies transformations sequentially to different parameters. This can be useful for model fitting to optimize
+   parameters on a different scale instead of their natural one.
+
+   :param transforms: A list of :class:`ParameterTransform` or :class:`ParameterConstraint` objects that will be applied in the
+                      given order. If `None`, no transformations will be applied.
+   :type transforms: list of ParameterTransform, optional
+
+   .. rubric:: Examples
+
+   Apply multiple transformations to different parameters.
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   >>>     "x": np.arange(1, 5),
+   >>>     "y": np.arange(2, 6)
+   >>> })
+   >>> transform_x = ParameterTransform(
+   >>>     parameter_names=["x"],
+   >>>     transform_fun=np.log,
+   >>>     inverse_fun=np.exp,
+   >>> )
+   >>> transform_y = ParameterTransform(
+   >>>     parameter_names=["y"],
+   >>>     transform_fun=np.sqrt,
+   >>>     inverse_fun=np.square,
+   >>> )
+   >>> adapter = Adapter(transforms=[transform_x, transform_y])
+   >>> params_transformed = adapter.transform(params)
+   >>> params_inverse = adapter.inverse(params_transformed)
+   >>> assert all(params_inverse == params)
+
+
+   .. py:method:: transform(parameters: P) -> P
+
+      Apply the transformations sequentially.
+
+      Applies each transformation in the list of transforms to the parameters in order.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pd.DataFrame
+
+      :returns: Transformed parameters after applying all transformations.
+      :rtype: pd.DataFrame
+
+
+
+   .. py:method:: inverse(parameters: P) -> P
+
+      Apply the inverse transformations sequentially.
+
+      Applies each inverse transformation in the list of transforms to the parameters in reverse order.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pd.DataFrame
+
+      :returns: Transformed parameters after applying all inverse transformations in reverse order.
+      :rtype: pd.DataFrame
+
+
+
