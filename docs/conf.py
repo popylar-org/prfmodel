@@ -76,7 +76,7 @@ myst_enable_extensions = [
 
 nb_merge_streams = True
 nb_execution_mode = "cache"
-nb_execution_timeout = 120
+nb_execution_timeout = 500
 nb_execution_raise_on_error = True
 nb_scroll_outputs = True
 

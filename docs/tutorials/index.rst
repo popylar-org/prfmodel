@@ -3,6 +3,9 @@ Tutorials
 
 Here you can find tutorials that explain how to use prfmodel. Stay tuned because more tutorials are in the making.
 
+**Important**: Some of the tutorials require pycortex for visualizing surface data. pycortex can only be installed on
+Linux or MacOS. See :ref:`installing-pycortex` for details.
+
 You want to contribute a tutorial? Make a `pull request <https://github.com/popylar-org/prfmodel/pulls>`_!
 
 List of tutorials:
@@ -13,6 +16,7 @@ List of tutorials:
    :glob:
 
    simple_prf_simulated.md
+   simple_prf_empirical_fmri.md
 
 Tutorial development
 --------------------

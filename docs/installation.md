@@ -59,6 +59,22 @@ To install the JAX backend:
 python -m pip install .[jax]
 ```
 
+(installing-pycortex)=
+## Installing pycortex
+
+Some of the tutorials require pycortex for visualizing surface data. pycortex can only be installed on Linux or MacOS
+and requires Inkscape to be installed. To install Inkscape on Linux/MacOS:
+
+```bash
+sudo apt install inkscape
+```
+
+To install prfmodel with pycortex:
+
+```bash
+python -m pip install .[pycortex]
+```
+
 ## Installing dependencies for package development
 
 For those who want to contribute to the package development, you can make an editable install of the package and
