@@ -1,0 +1,28 @@
+prfmodel.typing
+===============
+
+.. py:module:: prfmodel.typing
+
+.. autoapi-nested-parse::
+
+   Multi-backend variable types.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   prfmodel.typing.Tensor
+
+
+Module Contents
+---------------
+
+.. py:type:: Tensor
+   :canonical: BackendTensor
+
+
+   Backend-specific tensor type.
+

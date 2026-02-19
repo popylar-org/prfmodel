@@ -1,0 +1,489 @@
+prfmodel.models.impulse
+=======================
+
+.. py:module:: prfmodel.models.impulse
+
+.. autoapi-nested-parse::
+
+   Impulse response models.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/prfmodel/models/impulse/convolve/index
+   /autoapi/prfmodel/models/impulse/density/index
+   /autoapi/prfmodel/models/impulse/shifted_gamma/index
+   /autoapi/prfmodel/models/impulse/two_gamma/index
+   /autoapi/prfmodel/models/impulse/two_gamma_deriv/index
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.models.impulse.ShiftedGammaImpulse
+   prfmodel.models.impulse.TwoGammaImpulse
+   prfmodel.models.impulse.DerivativeTwoGammaImpulse
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   prfmodel.models.impulse.convolve_prf_impulse_response
+   prfmodel.models.impulse.derivative_gamma_density
+   prfmodel.models.impulse.gamma_density
+   prfmodel.models.impulse.shifted_gamma_density
+
+
+Package Contents
+----------------
+
+.. py:function:: convolve_prf_impulse_response(prf_response: prfmodel.typing.Tensor, impulse_response: prfmodel.typing.Tensor, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+   Convolve the encoded response from a population receptive field model with an impulse response.
+
+   Both responses must have the same number of batches but can have different numbers of frames.
+
+   :param prf_response: Encoded population receptive field model response. Must have shape (num_batches, num_response_frames).
+   :type prf_response: Tensor
+   :param impulse_response: Impulse response. Must have shape (num_batches, num_impulse_frames).
+   :type impulse_response: Tensor
+   :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+   :returns: Convolved response with shape (num_batches, num_response_frames).
+   :rtype: Tensor
+
+   .. rubric:: Notes
+
+   Before convolving both responses, the `prf_response` is padded on the left side in the
+   `num_frames` dimension by repeating the first value of each batch. This ensures that the output of the convolution
+   has the same shape as `prf_response` and the `impulse_response` starts at every frame of the `prf_response`.
+
+   :raises BatchDimensionError: If `prf_response` and `impulse_response` have batch (first) dimensions with different sizes.
+
+
+.. py:function:: derivative_gamma_density(value: prfmodel.typing.Tensor, shape: prfmodel.typing.Tensor, rate: prfmodel.typing.Tensor) -> prfmodel.typing.Tensor
+
+   Calculate the derivative density of a gamma distribution.
+
+   The distribution uses a shape and rate parameterization.
+   Raises an error when evaluated at negative values.
+
+   :param value: The values at which to evaluate the derivative gamma distribution. Must be > 0 and scalar or with shape (1, m).
+   :type value: Tensor
+   :param shape: The shape parameter. Must be > 0 and scalar or with shape (n, m).
+   :type shape: Tensor
+   :param rate: The rate parameter. Must be > 0 and scalar or with shape (n, m).
+   :type rate: Tensor
+
+   :returns: The derivative density of the gamma distribution at `value` as a scalar or with shape (n, m).
+   :rtype: Tensor
+
+   .. rubric:: Notes
+
+   The density of the gamma distribution
+   with `shape` :math:`\alpha` and `rate` :math:`\lambda` is given by:
+
+   .. math::
+
+       f(x) =  \frac{\mathtt{\lambda}^{\mathtt{\alpha}}}{\Gamma(\mathtt{\alpha})}
+       x^{\mathtt{\alpha} - 1} e^{\mathtt{\lambda} x}.
+
+   The derivative of the density with respect to :math:`x` can be defined as a function of the original density
+   :math:`f(x)`:
+
+   .. math::
+
+       f(x)' = f(x) \frac{(\alpha - 1)}{t} - \lambda
+
+   .. seealso::
+
+      :py:obj:`gamma_density`
+          The gamma distribution density.
+
+
+.. py:function:: gamma_density(value: prfmodel.typing.Tensor, shape: prfmodel.typing.Tensor, rate: prfmodel.typing.Tensor, norm: bool = True) -> prfmodel.typing.Tensor
+
+   Calculate the density of a gamma distribution.
+
+   The distribution uses a shape and rate parameterization.
+   Raises an error when evaluated at negative values.
+
+   :param value: The values at which to evaluate the gamma distribution. Must be > 0 and scalar or with shape (1, m).
+   :type value: Tensor
+   :param shape: The shape parameter. Must be > 0 with shape () and scalar or with shape (n, 1).
+   :type shape: Tensor
+   :param rate: The rate parameter. Must be > 0 and scalar or with shape (n, 1).
+   :type rate: Tensor
+   :param norm: Whether to compute the normalized density.
+   :type norm: bool, default=True
+
+   :returns: The density of the gamma distribution at `value` as a scalar or with shape (n, m).
+   :rtype: Tensor
+
+   .. rubric:: Notes
+
+   The unnormalized density of the gamma distribution
+   with `shape` :math:`\alpha` and `rate` :math:`\lambda` is given by:
+
+   .. math::
+
+       f(x) = x^{\mathtt{\alpha} - 1} e^{-\mathtt{\lambda} x}.
+
+   When `norm=True`, the density is multiplied with a normalizing constant:
+
+   .. math::
+
+       f_{norm} = \frac{\mathtt{\lambda}^{\mathtt{\alpha}}}{\Gamma(\mathtt{\alpha})} * f(x).
+
+
+.. py:function:: shifted_gamma_density(value: prfmodel.typing.Tensor, shape: prfmodel.typing.Tensor, rate: prfmodel.typing.Tensor, shift: prfmodel.typing.Tensor, norm: bool = True) -> prfmodel.typing.Tensor
+
+   Calculate the density of a shifted gamma distribution.
+
+   The gamma distribution is shifted by `shift` and padded with zeros if necessary.
+
+   :param value: The values at which to evaluate the shifted gamma distribution. Must be scalar or with shape (1, m).
+   :type value: Tensor
+   :param shape: The shape parameter. Must be > 0 and scalar or with shape (n, 1).
+   :type shape: Tensor
+   :param rate: The rate parameter. Must be > 0 and scalar or with shape (n, 1).
+   :type rate: Tensor
+   :param shift: The shift parameter. When > 0, shifts the distribution to the right.
+   :type shift: Tensor
+   :param norm: Whether to compute the normalized density.
+   :type norm: bool, default=True
+
+   :returns: The density of the shifted gamma distribution at `value` as a scalar or with shape (n, m).
+             The density for shifted values that are zero or lower is zero.
+   :rtype: Tensor
+
+   .. seealso::
+
+      :py:obj:`gamma_density`
+          The (unshifted) gamma distribution density.
+
+
+.. py:class:: ShiftedGammaImpulse(duration: float = 32.0, offset: float = 0.0001, resolution: float = 1.0, norm: str | None = 'sum', default_parameters: dict[str, float] | None = None)
+
+
+
+   Shifted gamma distribution impulse response model.
+
+   Predicts an impulse response that is a shifted gamma distribution.
+   The model has three parameters: `delay` refers to the positive peak, `dispersion` to the
+   rate, and `shift` to the onset of the gamma distribution.
+
+   :param duration: The duration of the impulse response (in seconds).
+   :type duration: float, default=32.0
+   :param offset: The offset of the impulse response (in seconds). By default a very small offset is added to prevent infinite
+                  response values at t = 0.
+   :type offset: float, default=0.0001
+   :param resolution: The time resultion of the impulse response (in seconds), that is the number of points per second at which the
+                      impulse response function is evaluated.
+   :type resolution: float, default=1.0
+   :param norm: The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
+                no normalization is performed.
+   :type norm: str, optional, default="sum"
+   :param default_parameters: Dictionary with scalar default parameter values. Keys must be valid parameter names.
+   :type default_parameters: dict of float, optional
+
+   .. rubric:: Notes
+
+   The predicted impulse response at time :math:`t` with :math:`\alpha = delay / dispersion`,
+   :math:`\lambda = dispersion`, and :math:`\delta = shift` is:
+
+   .. math::
+
+       f(t) = f_{\text{gamma}}(t - \delta; \alpha, \lambda)
+
+   The response prior to the onset of the gamma distribution is set to zero.
+
+   .. seealso::
+
+      :py:obj:`shifted_gamma_density`
+          Shifted density of the gamma distribution.
+
+   .. rubric:: Examples
+
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   >>>     "delay": [2.0, 1.0, 1.5],
+   >>>     "dispersion": [1.0, 1.0, 1.0],
+   >>>     "shift": [1.0, 2.0, 5.0],
+   >>> })
+   >>> impulse_model = ShiftedGammaImpulse(
+   >>>     duration=100.0 # 100 seconds
+   >>> )
+   >>> resp = impulse_model(params)
+   >>> print(resp.shape) # (num_rows, duration)
+   (3, 100)
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      Names of parameters used by the model.
+
+      Parameter names are: `delay`, `dispersion`, and `shift`.
+
+
+   .. py:method:: __call__(parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the impulse response.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different batches. Must contain the columns `delay`, `dispersion`, and `shift`.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted impulse response with shape `(num_batches, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: num_frames
+      :type: int
+
+
+      The total number of time frames at which the impulse response function is evaluated.
+
+
+   .. py:property:: frames
+      :type: prfmodel.typing.Tensor
+
+
+      The time frames at which the impulse response function is evaluated.
+
+      Time frames are linearly interpolated between `offset` and `duration` and have shape (1, `num_frames`).
+
+
+.. py:class:: TwoGammaImpulse(duration: float = 32.0, offset: float = 0.0001, resolution: float = 1.0, norm: str | None = 'sum', default_parameters: dict[str, float] | None = None)
+
+
+
+   Weighted difference of two gamma distributions impulse response model.
+
+   Predicts an impulse response that is the weighted difference of two gamma distributions.
+   The model has five parameters: `delay` and `undershoot` refer to the positive and negative peaks of the response
+   while `dispersion` and `u_dispersion` refer to the rate parameters of the two gamma distributions. The `ratio`
+   parameter indicates the weight of the second gamma distribution.
+
+   :param duration: The duration of the impulse response (in seconds).
+   :type duration: float, default=32.0
+   :param offset: The offset of the impulse response (in seconds). By default a very small offset is added to prevent infinite
+                  response values at t = 0.
+   :type offset: float, default=0.0001
+   :param resolution: The time resultion of the impulse response (in seconds), that is the number of points per second at which the
+                      impulse response function is evaluated.
+   :type resolution: float, default=1.0
+   :param norm: The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
+                no normalization is performed.
+   :type norm: str, optional, default="sum"
+   :param default_parameters: Dictionary with scalar default parameter values. Keys must be valid parameter names.
+   :type default_parameters: dict of float, optional
+
+   .. rubric:: Notes
+
+   The predicted impulse response at time :math:`t` with :math:`\alpha_1 = delay / dispersion`,
+   :math:`\lambda_1 = dispersion`, :math:`\alpha_2  = undershoot / u\_dispersion`, :math:`\lambda_2 = u\_dispersion`,
+   and :math:`\omega = ratio` is:
+
+   .. math::
+
+       f(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega f_{\text{gamma}}(t; \alpha_2, \lambda_2)
+
+   .. seealso::
+
+      :py:obj:`gamma_density`
+          Density of the gamma distribution.
+
+   .. rubric:: Examples
+
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   >>>     "delay": [2.0, 1.0, 1.5],
+   >>>     "dispersion": [1.0, 1.0, 1.0],
+   >>>     "undershoot": [1.5, 2.0, 1.0],
+   >>>     "u_dispersion": [1.0, 1.0, 1.0],
+   >>>     "ratio": [0.7, 0.2, 0.5],
+   >>> })
+   >>> impulse_model = TwoGammaImpulse(
+   >>>     duration=100.0 # 100 seconds
+   >>> )
+   >>> resp = impulse_model(params)
+   >>> print(resp.shape) # (num_rows, duration)
+   (3, 100)
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      Names of parameters used by the model.
+
+      Parameter names are: `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`.
+
+
+   .. py:method:: __call__(parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the impulse response.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different batches. Must contain the columns `delay`, `dispersion`, `undershoot`, `u_dispersion`,
+                         and `ratio`.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted impulse response with shape `(num_batches, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: num_frames
+      :type: int
+
+
+      The total number of time frames at which the impulse response function is evaluated.
+
+
+   .. py:property:: frames
+      :type: prfmodel.typing.Tensor
+
+
+      The time frames at which the impulse response function is evaluated.
+
+      Time frames are linearly interpolated between `offset` and `duration` and have shape (1, `num_frames`).
+
+
+.. py:class:: DerivativeTwoGammaImpulse(duration: float = 32.0, offset: float = 0.0001, resolution: float = 1.0, norm: str | None = 'sum', default_parameters: dict[str, float] | None = None)
+
+
+
+   Weighted difference of two derivative gamma distributions impulse response model.
+
+   Predicts an impulse response that is the weighted derivative difference of two gamma distributions. This
+   weighted derivative difference is added to the weighted difference of the two gamma distributions.
+   The model has six parameters: `delay` and `undershoot` refer to the positive and negative peaks of the response
+   while `dispersion` and `u_dispersion` refer to the rate parameters of the two gamma distributions. The `ratio`
+   parameter indicates the weight of the second gamma distribution. The `weight_deriv` represents the weight of the
+   derivative difference added to the standard difference.
+
+   :param duration: The duration of the impulse response (in seconds).
+   :type duration: float, default=32.0
+   :param offset: The offset of the impulse response (in seconds). By default a very small offset is added to prevent infinite
+                  response values at t = 0.
+   :type offset: float, default=0.0001
+   :param resolution: The time resultion of the impulse response (in seconds), that is the number of points per second at which the
+                      impulse response function is evaluated.
+   :type resolution: float, default=1.0
+   :param norm: The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
+                no normalization is performed.
+   :type norm: str, optional, default="sum"
+   :param default_parameters: Dictionary with scalar default parameter values. Keys must be valid parameter names.
+   :type default_parameters: dict of float, optional
+
+   .. rubric:: Notes
+
+   The predicted impulse response at time :math:`t` with :math:`\alpha_1 = delay / dispersion`,
+   :math:`\lambda_1 = dispersion`, :math:`\alpha_2  = undershoot / u\_dispersion`, :math:`\lambda_2 = u\_dispersion`,
+   :math:`\omega = ratio`, and :math:`\tau = weight\_deriv` is:
+
+   .. math::
+
+       f(t) = f_{\text{diff}}(t) - \tau f'_{\text{diff}}(t)
+
+   .. math::
+
+       f_{\text{diff}}(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega
+           f_{\text{gamma}}(t; \alpha_2, \lambda_2)
+
+   Positive `weight_deriv` values shift the response to the right.
+
+   .. seealso::
+
+      :py:obj:`TwoGammaImpulse`
+          Weighted difference of two gamma distributions impulse response model.
+
+      :py:obj:`gamma_density`
+          Density of the gamma distribution.
+
+      :py:obj:`derivative_gamma_density`
+          Derivative density of the gamma distribution.
+
+   .. rubric:: Examples
+
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   >>>     "delay": [2.0, 1.0, 1.5],
+   >>>     "dispersion": [1.0, 1.0, 1.0],
+   >>>     "undershoot": [1.5, 2.0, 1.0],
+   >>>     "u_dispersion": [1.0, 1.0, 1.0],
+   >>>     "ratio": [0.7, 0.2, 0.5],
+   >>>     "weight_deriv": [0.5, -0.7, 0.9],
+   >>> })
+   >>> impulse_model = DerivativeTwoGammaImpulse(
+   >>>     duration=100.0 # 100 seconds
+   >>> )
+   >>> resp = impulse_model(params)
+   >>> print(resp.shape) # (num_rows, duration)
+   (3, 100)
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      Names of parameters used by the model.
+
+      Parameter names are: `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`, `weight_deriv`.
+
+
+   .. py:method:: __call__(parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the impulse response.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different batches. Must contain the columns `delay`, `dispersion`, `undershoot`, `u_dispersion`,
+                         `ratio`, and `weight_deriv`.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted impulse response with shape `(num_batches, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: num_frames
+      :type: int
+
+
+      The total number of time frames at which the impulse response function is evaluated.
+
+
+   .. py:property:: frames
+      :type: prfmodel.typing.Tensor
+
+
+      The time frames at which the impulse response function is evaluated.
+
+      Time frames are linearly interpolated between `offset` and `duration` and have shape (1, `num_frames`).
+
+

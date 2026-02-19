@@ -1,0 +1,1358 @@
+prfmodel.fitters
+================
+
+.. py:module:: prfmodel.fitters
+
+.. autoapi-nested-parse::
+
+   Model fitters.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/prfmodel/fitters/grid/index
+   /autoapi/prfmodel/fitters/linear/index
+   /autoapi/prfmodel/fitters/sgd/index
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.fitters.SGDFitter
+
+
+Package Contents
+----------------
+
+.. py:class:: SGDFitter(model: prfmodel.models.base.BaseComposite, stimulus: prfmodel.stimuli.base.Stimulus, adapter: prfmodel.adapter.Adapter | None = None, optimizer: keras.optimizers.Optimizer | None = None, loss: keras.losses.Loss | collections.abc.Callable | None = None, dtype: str | None = None)
+
+
+
+   Fit population receptive field models with stochastic gradient descent (SGD).
+
+   Estimates model parameters iteratively through SGD by minimizing the loss between model predictions and target
+   data.
+
+   :param model: Population receptive field model instance that can be fit to data.
+                 The model must implement `__call__` to make predictions that can be compared to data.
+   :type model: BaseModel
+   :param stimulus: Stimulus object used to make model predictions.
+   :type stimulus: Stimulus
+   :param adapter: Adapter object to apply transformations to parameters during fitting.
+   :type adapter: Adapter, optional
+   :param optimizer: Optimizer instance. Default is `None` where a `keras.optimizers.Adam` optimizer is used.
+   :type optimizer: keras.optimizers.Optimizer, optional
+   :param loss: Loss instance or function with the signatur `f(y, y_pred)`, where `y` are the target data and `y_pred` are the
+                model predicitons. Default is `None` where a `keras.optimizers.MeanSquaredError` loss is used.
+   :type loss: keras.optimizers.Loss or Callable, optional
+   :param dtype: The dtype used for fitting. If `None` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+   .. rubric:: Notes
+
+   At each step during the fitting, the `model` makes a prediction for each batch in the target data
+   given the `stimulus` and the current parameter values. The predictions are then compared to the target data and
+   the parameter values are updated given the `optimizer` schedule.
+
+
+   .. py:attribute:: dtype
+      :value: None
+
+
+      The dtype that is used during fitting.
+
+      If `None`, uses `keras.config.floatx()` which defaults
+      to `float32`.
+
+
+   .. py:method:: fit(data: prfmodel.typing.Tensor, init_parameters: pandas.DataFrame, fixed_parameters: collections.abc.Sequence[str] | None = None, num_steps: int = 1000) -> tuple[SGDHistory, pandas.DataFrame]
+
+      Fit a population receptive field model to target data.
+
+      :param data: Target data to fit the model to. Must have shape (num_batches, num_frames), where `num_batches` is the
+                   number of batches for which parameters are estimated and `num_frames` is the number of time steps.
+      :type data: Tensor
+      :param init_parameters: Dataframe with initial model parameters. Columns must contain different model parameters and
+                              rows parameter values for each batch in `data`.
+      :type init_parameters: pandas.DataFrame
+      :param fixed_parameters: Names of model parameters that are fixed to their starting values, i.e., their values are not optimized
+                               during the fitting. If `None` (the default), all parameters are optimized during fitting.
+      :type fixed_parameters: Sequence of str, optional
+      :param num_steps: Number of optimization steps.
+      :type num_steps: int, default=1000
+
+      :returns: * *SGDHistory* -- A history object that contains loss and metric values for each optimization step.
+                * *pandas.DataFrame* -- A dataframe with final model parameters.
+
+
+
+   .. py:method:: get_layer(name=None, index=None)
+
+      Retrieves a layer based on either its name (unique) or index.
+
+      If `name` and `index` are both provided, `index` will take precedence.
+      Indices are based on order of horizontal graph traversal (bottom-up).
+
+      :param name: String, name of layer.
+      :param index: Integer, index of layer.
+
+      :returns: A layer instance.
+
+
+
+   .. py:method:: summary(line_length=None, positions=None, print_fn=None, expand_nested=False, show_trainable=False, layer_range=None)
+
+      Prints a string summary of the network.
+
+      :param line_length: Total length of printed lines
+                          (e.g. set this to adapt the display to different
+                          terminal window sizes).
+      :param positions: Relative or absolute positions of log elements
+                        in each line. If not provided, becomes
+                        `[0.3, 0.6, 0.70, 1.]`. Defaults to `None`.
+      :param print_fn: Print function to use. By default, prints to `stdout`.
+                       If `stdout` doesn't work in your environment, change to `print`.
+                       It will be called on each line of the summary.
+                       You can set it to a custom function
+                       in order to capture the string summary.
+      :param expand_nested: Whether to expand the nested models.
+                            Defaults to `False`.
+      :param show_trainable: Whether to show if a layer is trainable.
+                             Defaults to `False`.
+      :param layer_range: a list or tuple of 2 strings,
+                          which is the starting layer name and ending layer name
+                          (both inclusive) indicating the range of layers to be printed
+                          in summary. It also accepts regex patterns instead of exact
+                          names. In this case, the start predicate will be
+                          the first element that matches `layer_range[0]`
+                          and the end predicate will be the last element
+                          that matches `layer_range[1]`.
+                          By default `None` considers all layers of the model.
+
+      :raises ValueError: if `summary()` is called before the model is built.
+
+
+
+   .. py:method:: save(filepath, overwrite=True, zipped=None, **kwargs)
+
+      Saves a model as a `.keras` file.
+
+      Note that `model.save()` is an alias for `keras.saving.save_model()`.
+
+      The saved `.keras` file contains:
+
+      - The model's configuration (architecture)
+      - The model's weights
+      - The model's optimizer's state (if any)
+
+      Thus models can be reinstantiated in the exact same state.
+
+      :param filepath: `str` or `pathlib.Path` object.
+                       The path where to save the model. Must end in `.keras`
+                       (unless saving the model as an unzipped directory
+                       via `zipped=False`).
+      :param overwrite: Whether we should overwrite any existing model at
+                        the target location, or instead ask the user via
+                        an interactive prompt.
+      :param zipped: Whether to save the model as a zipped `.keras`
+                     archive (default when saving locally), or as an
+                     unzipped directory (default when saving on the
+                     Hugging Face Hub).
+
+      Example:
+
+      ```python
+      model = keras.Sequential(
+          [
+              keras.layers.Dense(5, input_shape=(3,)),
+              keras.layers.Softmax(),
+          ],
+      )
+      model.save("model.keras")
+      loaded_model = keras.saving.load_model("model.keras")
+      x = keras.random.uniform((10, 3))
+      assert np.allclose(model.predict(x), loaded_model.predict(x))
+      ```
+
+
+
+   .. py:method:: save_weights(filepath, overwrite=True, max_shard_size=None)
+
+      Saves all weights to a single file or sharded files.
+
+      By default, the weights will be saved in a single `.weights.h5` file.
+      If sharding is enabled (`max_shard_size` is not `None`), the weights
+      will be saved in multiple files, each with a size at most
+      `max_shard_size` (in GB). Additionally, a configuration file
+      `.weights.json` will contain the metadata for the sharded files.
+
+      The saved sharded files contain:
+
+      - `*.weights.json`: The configuration file containing 'metadata' and
+          'weight_map'.
+      - `*_xxxxxx.weights.h5`: The sharded files containing only the
+          weights.
+
+      :param filepath: `str` or `pathlib.Path` object. Path where the weights
+                       will be saved.  When sharding, the filepath must end in
+                       `.weights.json`. If `.weights.h5` is provided, it will be
+                       overridden.
+      :param overwrite: Whether to overwrite any existing weights at the target
+                        location or instead ask the user via an interactive prompt.
+      :param max_shard_size: `int` or `float`. Maximum size in GB for each
+                             sharded file. If `None`, no sharding will be done. Defaults to
+                             `None`.
+
+      Example:
+
+      ```python
+      # Instantiate a EfficientNetV2L model with about 454MB of weights.
+      model = keras.applications.EfficientNetV2L(weights=None)
+
+      # Save the weights in a single file.
+      model.save_weights("model.weights.h5")
+
+      # Save the weights in sharded files. Use `max_shard_size=0.25` means
+      # each sharded file will be at most ~250MB.
+      model.save_weights("model.weights.json", max_shard_size=0.25)
+
+      # Load the weights in a new model with the same architecture.
+      loaded_model = keras.applications.EfficientNetV2L(weights=None)
+      loaded_model.load_weights("model.weights.h5")
+      x = keras.random.uniform((1, 480, 480, 3))
+      assert np.allclose(model.predict(x), loaded_model.predict(x))
+
+      # Load the sharded weights in a new model with the same architecture.
+      loaded_model = keras.applications.EfficientNetV2L(weights=None)
+      loaded_model.load_weights("model.weights.json")
+      x = keras.random.uniform((1, 480, 480, 3))
+      assert np.allclose(model.predict(x), loaded_model.predict(x))
+      ```
+
+
+
+   .. py:method:: load_weights(filepath, skip_mismatch=False, **kwargs)
+
+      Load the weights from a single file or sharded files.
+
+      Weights are loaded based on the network's topology. This means the
+      architecture should be the same as when the weights were saved. Note
+      that layers that don't have weights are not taken into account in the
+      topological ordering, so adding or removing layers is fine as long as
+      they don't have weights.
+
+      **Partial weight loading**
+
+      If you have modified your model, for instance by adding a new layer
+      (with weights) or by changing the shape of the weights of a layer, you
+      can choose to ignore errors and continue loading by setting
+      `skip_mismatch=True`. In this case any layer with mismatching weights
+      will be skipped. A warning will be displayed for each skipped layer.
+
+      **Sharding**
+
+      When loading sharded weights, it is important to specify `filepath` that
+      ends with `*.weights.json` which is used as the configuration file.
+      Additionally, the sharded files `*_xxxxx.weights.h5` must be in the same
+      directory as the configuration file.
+
+      :param filepath: `str` or `pathlib.Path` object. Path where the weights
+                       will be saved.  When sharding, the filepath must end in
+                       `.weights.json`.
+      :param skip_mismatch: Boolean, whether to skip loading of layers where
+                            there is a mismatch in the number of weights, or a mismatch in
+                            the shape of the weights.
+
+      Example:
+
+      ```python
+      # Load the weights in a single file.
+      model.load_weights("model.weights.h5")
+
+      # Load the weights in sharded files.
+      model.load_weights("model.weights.json")
+      ```
+
+
+
+   .. py:method:: get_quantization_layer_structure(mode=None)
+
+      Returns the quantization structure for the model.
+
+      This method is intended to be overridden by model authors to provide
+      topology information required for structure-aware quantization modes
+      like 'gptq'.
+
+      :param mode: The quantization mode.
+
+      :returns: `{'pre_block_layers': [list], 'sequential_blocks': [list]}`
+                or `None` if the mode does not require structure or is not
+                supported. `'pre_block_layers'` is a list of layers that
+                the inputs should be passed through, before being passed to
+                the sequential blocks. For example, inputs to an LLM must
+                first be passed through an embedding layer, followed by
+                the transformer.
+      :rtype: A dictionary describing the topology, e.g.
+
+
+
+   .. py:method:: quantize(mode=None, config=None, filters=None, **kwargs)
+
+      Quantize the weights of the model.
+
+      Note that the model must be built first before calling this method.
+      `quantize` will recursively call `quantize(...)` in all layers and
+      will be skipped if the layer doesn't implement the function.
+
+      This method can be called by passing a `mode` string, which uses the
+      default configuration for that mode. Alternatively, a `config` object
+      can be passed to customize the behavior of the quantization (e.g. to
+      use specific quantizers for weights or activations).
+
+      :param mode: The mode of the quantization. Supported modes are:
+                   `"int8"`, `"int4"`, `"float8"`, `"gptq"`. This is
+                   optional if `config` is provided.
+      :param config: The configuration object specifying additional
+                     quantization options. This argument allows to configure
+                     the weight and activation quantizers. be an instance of
+                     `keras.quantizers.QuantizationConfig`.
+      :param filters: Optional filters to apply to the quantization. Can be a
+                      regex string, a list of regex strings, or a callable. Only the
+                      layers which match the filter conditions will be quantized.
+      :param \*\*kwargs: Additional keyword arguments.
+
+      Example:
+
+      Quantize a model to int8 with default configuration:
+
+      ```python
+      # Build the model
+      model = keras.Sequential([
+          keras.Input(shape=(10,)),
+          keras.layers.Dense(10),
+      ])
+      model.build((None, 10))
+
+      # Quantize with default int8 config
+      model.quantize("int8")
+      ```
+
+      Quantize a model to int8 with a custom configuration:
+
+      ```python
+      from keras.quantizers import Int8QuantizationConfig
+      from keras.quantizers import AbsMaxQuantizer
+
+      # Build the model
+      model = keras.Sequential([
+          keras.Input(shape=(10,)),
+          keras.layers.Dense(10),
+      ])
+      model.build((None, 10))
+
+      # Create a custom config
+      config = Int8QuantizationConfig(
+          weight_quantizer=AbsMaxQuantizer(
+              axis=0,
+              value_range=(-127, 127)
+          ),
+          activation_quantizer=AbsMaxQuantizer(
+              axis=-1,
+              value_range=(-127, 127)
+          ),
+      )
+
+      # Quantize with custom config
+      model.quantize(config=config)
+      ```
+
+
+
+   .. py:method:: build_from_config(config)
+
+      Builds the layer's states with the supplied config dict.
+
+      By default, this method calls the `build(config["input_shape"])` method,
+      which creates weights based on the layer's input shape in the supplied
+      config. If your config contains other information needed to load the
+      layer's state, you should override this method.
+
+      :param config: Dict containing the input shape associated with this layer.
+
+
+
+   .. py:method:: to_json(**kwargs)
+
+      Returns a JSON string containing the network configuration.
+
+      To load a network from a JSON save file, use
+      `keras.models.model_from_json(json_string, custom_objects={...})`.
+
+      :param \*\*kwargs: Additional keyword arguments to be passed to
+                         `json.dumps()`.
+
+      :returns: A JSON string.
+
+
+
+   .. py:method:: export(filepath, format='tf_saved_model', verbose=None, input_signature=None, **kwargs)
+
+      Export the model as an artifact for inference.
+
+      :param filepath: `str` or `pathlib.Path` object. The path to save the
+                       artifact.
+      :param format: `str`. The export format. Supported values:
+                     `"tf_saved_model"`, `"onnx"`, `"openvino"`, and `"litert"`.
+                     Defaults to `"tf_saved_model"`.
+      :param verbose: `bool`. Whether to print a message during export. Defaults
+                      to `None`, which uses the default value set by different
+                      backends and formats.
+      :param input_signature: Optional. Specifies the shape and dtype of the
+                              model inputs. Can be a structure of `keras.InputSpec`,
+                              `tf.TensorSpec`, `backend.KerasTensor`, or backend tensor. If
+                              not provided, it will be automatically computed. Defaults to
+                              `None`.
+      :param \*\*kwargs: Additional keyword arguments.
+                         - `is_static`: Optional `bool`. Specific to the JAX backend and
+                             `format="tf_saved_model"`. Indicates whether `fn` is static.
+                             Set to `False` if `fn` involves state updates (e.g., RNG
+                             seeds and counters).
+                         - `jax2tf_kwargs`: Optional `dict`. Specific to the JAX backend
+                             and `format="tf_saved_model"`. Arguments for
+                             `jax2tf.convert`. See the documentation for
+                             [`jax2tf.convert`](
+                                 https://github.com/google/jax/blob/main/jax/experimental/jax2tf/README.md).
+                             If `native_serialization` and `polymorphic_shapes` are not
+                             provided, they will be automatically computed.
+                         - `opset_version`: Optional `int`. Specific to `format="onnx"`.
+                             An integer value that specifies the ONNX opset version.
+                         - LiteRT-specific options: Optional keyword arguments specific
+                             to `format="litert"`. These are passed directly to the
+                             TensorFlow Lite converter and include options like
+                             `optimizations`, `representative_dataset`,
+                             `experimental_new_quantizer`, `allow_custom_ops`,
+                             `enable_select_tf_ops`, etc. See TensorFlow Lite
+                             documentation for all available options.
+
+      **Note:** This feature is currently supported only with TensorFlow, JAX
+      and Torch backends.
+
+      **Note:** Be aware that the exported artifact may contain information
+      from the local file system when using `format="onnx"`, `verbose=True`
+      and Torch backend.
+
+      Examples:
+
+      Here's how to export a TensorFlow SavedModel for inference.
+
+      ```python
+      # Export the model as a TensorFlow SavedModel artifact
+      model.export("path/to/location", format="tf_saved_model")
+
+      # Load the artifact in a different process/environment
+      reloaded_artifact = tf.saved_model.load("path/to/location")
+      predictions = reloaded_artifact.serve(input_data)
+      ```
+
+      Here's how to export an ONNX for inference.
+
+      ```python
+      # Export the model as a ONNX artifact
+      model.export("path/to/location", format="onnx")
+
+      # Load the artifact in a different process/environment
+      ort_session = onnxruntime.InferenceSession("path/to/location")
+      ort_inputs = {
+          k.name: v for k, v in zip(ort_session.get_inputs(), input_data)
+      }
+      predictions = ort_session.run(None, ort_inputs)
+      ```
+
+      Here's how to export a LiteRT (TFLite) for inference.
+
+      ```python
+      # Export the model as a LiteRT artifact
+      model.export("path/to/location", format="litert")
+
+      # Load the artifact in a different process/environment
+      interpreter = tf.lite.Interpreter(model_path="path/to/location")
+      interpreter.allocate_tensors()
+      interpreter.set_tensor(
+          interpreter.get_input_details()[0]['index'], input_data
+      )
+      interpreter.invoke()
+      output_data = interpreter.get_tensor(
+          interpreter.get_output_details()[0]['index']
+      )
+      ```
+
+
+
+   .. py:method:: from_config(config, custom_objects=None)
+      :classmethod:
+
+
+      Creates an operation from its config.
+
+      This method is the reverse of `get_config`, capable of instantiating the
+      same operation from the config dictionary.
+
+      Note: If you override this method, you might receive a serialized dtype
+      config, which is a `dict`. You can deserialize it as follows:
+
+      ```python
+      if "dtype" in config and isinstance(config["dtype"], dict):
+          policy = dtype_policies.deserialize(config["dtype"])
+      ```
+
+      :param config: A Python dictionary, typically the output of `get_config`.
+
+      :returns: An operation instance.
+
+
+
+   .. py:method:: get_state_tree(value_format='backend_tensor')
+
+      Retrieves tree-like structure of model variables.
+
+      This method allows retrieval of different model variables (trainable,
+      non-trainable, optimizer, and metrics). The variables are returned in a
+      nested dictionary format, where the keys correspond to the variable
+      names and the values are the nested representations of the variables.
+
+      :returns:
+
+                A dictionary containing the nested representations of the
+                    requested variables. The keys are the variable names, and the
+                    values are the corresponding nested dictionaries.
+                value_format: One of `"backend_tensor"`, `"numpy_array"`.
+                    The kind of array to return as the leaves of the nested
+                        state tree.
+      :rtype: dict
+
+      Example:
+
+      ```python
+      model = keras.Sequential([
+          keras.Input(shape=(1,), name="my_input"),
+          keras.layers.Dense(1, activation="sigmoid", name="my_dense"),
+      ], name="my_sequential")
+      model.compile(optimizer="adam", loss="mse", metrics=["mae"])
+      model.fit(np.array([[1.0]]), np.array([[1.0]]))
+      state_tree = model.get_state_tree()
+      ```
+
+      The `state_tree` dictionary returned looks like:
+
+      ```
+      {
+          'metrics_variables': {
+              'loss': {
+                  'count': ...,
+                  'total': ...,
+              },
+              'mean_absolute_error': {
+                  'count': ...,
+                  'total': ...,
+              }
+          },
+          'trainable_variables': {
+              'my_sequential': {
+                  'my_dense': {
+                      'bias': ...,
+                      'kernel': ...,
+                  }
+              }
+          },
+          'non_trainable_variables': {},
+          'optimizer_variables': {
+              'adam': {
+                      'iteration': ...,
+                      'learning_rate': ...,
+                      'my_sequential_my_dense_bias_momentum': ...,
+                      'my_sequential_my_dense_bias_velocity': ...,
+                      'my_sequential_my_dense_kernel_momentum': ...,
+                      'my_sequential_my_dense_kernel_velocity': ...,
+                  }
+              }
+          }
+      }
+      ```
+
+
+
+   .. py:method:: set_state_tree(state_tree)
+
+      Assigns values to variables of the model.
+
+      This method takes a dictionary of nested variable values, which
+      represents the state tree of the model, and assigns them to the
+      corresponding variables of the model. The dictionary keys represent the
+      variable names (e.g., `'trainable_variables'`, `'optimizer_variables'`),
+      and the values are nested dictionaries containing the variable
+      paths and their corresponding values.
+
+      :param state_tree: A dictionary representing the state tree of the model.
+                         The keys are the variable names, and the values are nested
+                         dictionaries representing the variable paths and their values.
+
+
+
+   .. py:method:: evaluate(x=None, y=None, batch_size=None, verbose='auto', sample_weight=None, steps=None, callbacks=None, return_dict=False, **kwargs)
+
+      Returns the loss value & metrics values for the model in test mode.
+
+      Computation is done in batches (see the `batch_size` arg.)
+
+      :param x: Input data. It can be:
+                - A NumPy array (or array-like), or a list of arrays
+                (in case the model has multiple inputs).
+                - A backend-native tensor, or a list of tensors
+                (in case the model has multiple inputs).
+                - A dict mapping input names to the corresponding array/tensors,
+                if the model has named inputs.
+                - A `keras.utils.PyDataset` returning `(inputs, targets)` or
+                `(inputs, targets, sample_weights)`.
+                - A `tf.data.Dataset` yielding `(inputs, targets)` or
+                `(inputs, targets, sample_weights)`.
+                - A `torch.utils.data.DataLoader` yielding `(inputs, targets)`
+                or `(inputs, targets, sample_weights)`.
+                - A Python generator function yielding `(inputs, targets)` or
+                `(inputs, targets, sample_weights)`.
+      :param y: Target data. Like the input data `x`, it can be either NumPy
+                array(s) or backend-native tensor(s). If `x` is a
+                `keras.utils.PyDataset`, `tf.data.Dataset`,
+                `torch.utils.data.DataLoader` or a Python generator function,
+                `y` should not be specified since targets will be obtained from
+                `x`.
+      :param batch_size: Integer or `None`.
+                         Number of samples per batch of computation.
+                         If unspecified, `batch_size` will default to 32.
+                         Do not specify the `batch_size` if your input data `x` is a
+                         `keras.utils.PyDataset`, `tf.data.Dataset`,
+                         `torch.utils.data.DataLoader` or Python generator function
+                         since they generate batches.
+      :param verbose: `"auto"`, 0, 1, or 2. Verbosity mode.
+                      0 = silent, 1 = progress bar, 2 = single line.
+                      `"auto"` becomes 1 for most cases.
+                      Note that the progress bar is not
+                      particularly useful when logged to a file, so `verbose=2` is
+                      recommended when not running interactively
+                      (e.g. in a production environment). Defaults to `"auto"`.
+      :param sample_weight: Optional NumPy array or tensor of weights for
+                            the training samples, used for weighting the loss function
+                            (during training only). You can either pass a flat (1D)
+                            NumPy array or tensor with the same length as the input samples
+                            (1:1 mapping between weights and samples), or in the case of
+                            temporal data, you can pass a 2D NumPy array or tensor with
+                            shape `(samples, sequence_length)` to apply a different weight
+                            to every timestep of every sample.
+                            This argument is not supported when `x` is a
+                            `keras.utils.PyDataset`, `tf.data.Dataset`,
+                            `torch.utils.data.DataLoader` or Python generator function.
+                            Instead, provide `sample_weights` as the third element of `x`.
+                            Note that sample weighting does not apply to metrics specified
+                            via the `metrics` argument in `compile()`. To apply sample
+                            weighting to your metrics, you can specify them via the
+                            `weighted_metrics` in `compile()` instead.
+      :param steps: Integer or `None`.
+                    Total number of steps (batches of samples) to draw before
+                    declaring the evaluation round finished. If `steps` is `None`,
+                    it will run until `x` is exhausted. In the case of an infinitely
+                    repeating dataset, it will run indefinitely.
+      :param callbacks: List of `keras.callbacks.Callback` instances.
+                        List of callbacks to apply during evaluation.
+      :param return_dict: If `True`, loss and metric results are returned as a
+                          dict, with each key being the name of the metric.
+                          If `False`, they are returned as a list.
+
+      :returns: Scalar test loss (if the model has a single output and no metrics)
+                or list of scalars (if the model has multiple outputs
+                and/or metrics).
+
+      Note: When using compiled metrics, `evaluate()` may return multiple
+      submetric values, while `model.metrics_names` often lists only
+      top-level names (e.g., 'loss', 'compile_metrics'), leading to a
+      length mismatch. The order of the `evaluate()` output corresponds
+      to the order of metrics specified during `model.compile()`. You can
+      use this order to map the `evaluate()` results to the intended
+      metric. `model.metrics_names` itself will still return only the
+      top-level names.
+
+
+
+   .. py:method:: predict(x, batch_size=None, verbose='auto', steps=None, callbacks=None)
+
+      Generates output predictions for the input samples.
+
+      Computation is done in batches. This method is designed for batch
+      processing of large numbers of inputs. It is not intended for use inside
+      of loops that iterate over your data and process small numbers of inputs
+      at a time.
+
+      For small numbers of inputs that fit in one batch,
+      directly use `__call__()` for faster execution, e.g.,
+      `model(x)`, or `model(x, training=False)` if you have layers such as
+      `BatchNormalization` that behave differently during
+      inference.
+
+      Note: See [this FAQ entry](
+      https://keras.io/getting_started/faq/#whats-the-difference-between-model-methods-predict-and-call)
+      for more details about the difference between `Model` methods
+      `predict()` and `__call__()`.
+
+      :param x: Input data. It can be:
+                - A NumPy array (or array-like), or a list of arrays
+                (in case the model has multiple inputs).
+                - A backend-native tensor, or a list of tensors
+                (in case the model has multiple inputs).
+                - A dict mapping input names to the corresponding array/tensors,
+                if the model has named inputs.
+                - A `keras.utils.PyDataset`.
+                - A `tf.data.Dataset`.
+                - A `torch.utils.data.DataLoader`.
+                - A Python generator function.
+      :param batch_size: Integer or `None`.
+                         Number of samples per batch of computation.
+                         If unspecified, `batch_size` will default to 32.
+                         Do not specify the `batch_size` if your input data `x` is a
+                         `keras.utils.PyDataset`, `tf.data.Dataset`,
+                         `torch.utils.data.DataLoader` or Python generator function
+                         since they generate batches.
+      :param verbose: `"auto"`, 0, 1, or 2. Verbosity mode.
+                      0 = silent, 1 = progress bar, 2 = single line.
+                      `"auto"` becomes 1 for most cases. Note that the progress bar
+                      is not particularly useful when logged to a file,
+                      so `verbose=2` is recommended when not running interactively
+                      (e.g. in a production environment). Defaults to `"auto"`.
+      :param steps: Total number of steps (batches of samples) to draw before
+                    declaring the prediction round finished. If `steps` is `None`,
+                    it will run until `x` is exhausted. In the case of an infinitely
+                    repeating dataset, it will run indefinitely.
+      :param callbacks: List of `keras.callbacks.Callback` instances.
+                        List of callbacks to apply during prediction.
+
+      :returns: NumPy array(s) of predictions.
+
+
+
+   .. py:method:: train_on_batch(x, y=None, sample_weight=None, class_weight=None, return_dict=False)
+
+      Runs a single gradient update on a single batch of data.
+
+      :param x: Input data. Must be array-like.
+      :param y: Target data. Must be array-like.
+      :param sample_weight: Optional array of the same length as x, containing
+                            weights to apply to the model's loss for each sample.
+                            In the case of temporal data, you can pass a 2D array
+                            with shape `(samples, sequence_length)`, to apply a different
+                            weight to every timestep of every sample.
+      :param class_weight: Optional dictionary mapping class indices (integers)
+                           to a weight (float) to apply to the model's loss for the samples
+                           from this class during training. This can be useful to tell the
+                           model to "pay more attention" to samples from an
+                           under-represented class. When `class_weight` is specified
+                           and targets have a rank of 2 or greater, either `y` must
+                           be one-hot encoded, or an explicit final dimension of 1
+                           must be included for sparse class labels.
+      :param return_dict: If `True`, loss and metric results are returned as a
+                          dict, with each key being the name of the metric. If `False`,
+                          they are returned as a list.
+
+      :returns: A scalar loss value (when no metrics and `return_dict=False`),
+                a list of loss and metric values
+                (if there are metrics and `return_dict=False`), or a dict of
+                metric and loss values (if `return_dict=True`).
+
+
+
+   .. py:method:: test_on_batch(x, y=None, sample_weight=None, return_dict=False)
+
+      Test the model on a single batch of samples.
+
+      :param x: Input data. Must be array-like.
+      :param y: Target data. Must be array-like.
+      :param sample_weight: Optional array of the same length as x, containing
+                            weights to apply to the model's loss for each sample.
+                            In the case of temporal data, you can pass a 2D array
+                            with shape `(samples, sequence_length)`, to apply a different
+                            weight to every timestep of every sample.
+      :param return_dict: If `True`, loss and metric results are returned as a
+                          dict, with each key being the name of the metric. If `False`,
+                          they are returned as a list.
+
+      :returns: A scalar loss value (when no metrics and `return_dict=False`),
+                a list of loss and metric values
+                (if there are metrics and `return_dict=False`), or a dict of
+                metric and loss values (if `return_dict=True`).
+
+
+
+   .. py:method:: predict_on_batch(x)
+
+      Returns predictions for a single batch of samples.
+
+      :param x: Input data. It must be array-like.
+
+      :returns: NumPy array(s) of predictions.
+
+
+
+   .. py:method:: compile(optimizer='rmsprop', loss=None, loss_weights=None, metrics=None, weighted_metrics=None, run_eagerly=False, steps_per_execution=1, jit_compile='auto', auto_scale_loss=True)
+
+      Configures the model for training.
+
+      Example:
+
+      ```python
+      model.compile(
+          optimizer=keras.optimizers.Adam(learning_rate=1e-3),
+          loss=keras.losses.BinaryCrossentropy(),
+          metrics=[
+              keras.metrics.BinaryAccuracy(),
+              keras.metrics.FalseNegatives(),
+          ],
+      )
+      ```
+
+      :param optimizer: String (name of optimizer) or optimizer instance. See
+                        `keras.optimizers`.
+      :param loss: Loss function. May be a string (name of loss function), or
+                   a `keras.losses.Loss` instance. See `keras.losses`. A
+                   loss function is any callable with the signature
+                   `loss = fn(y_true, y_pred)`, where `y_true` are the ground truth
+                   values, and `y_pred` are the model's predictions.
+                   `y_true` should have shape `(batch_size, d0, .. dN)`
+                   (except in the case of sparse loss functions such as
+                   sparse categorical crossentropy which expects integer arrays of
+                   shape `(batch_size, d0, .. dN-1)`).
+                   `y_pred` should have shape `(batch_size, d0, .. dN)`.
+                   The loss function should return a float tensor.
+      :param loss_weights: Optional list or dictionary specifying scalar
+                           coefficients (Python floats) to weight the loss contributions of
+                           different model outputs. The loss value that will be minimized
+                           by the model will then be the *weighted sum* of all individual
+                           losses, weighted by the `loss_weights` coefficients.  If a list,
+                           it is expected to have a 1:1 mapping to the model's outputs. If
+                           a dict, it is expected to map output names (strings) to scalar
+                           coefficients.
+      :param metrics: List of metrics to be evaluated by the model during
+                      training and testing. Each of this can be a string (name of a
+                      built-in function), function or a `keras.metrics.Metric`
+                      instance. See `keras.metrics`. Typically you will use
+                      `metrics=['accuracy']`. A function is any callable with the
+                      signature `result = fn(y_true, _pred)`. To specify different
+                      metrics for different outputs of a multi-output model, you could
+                      also pass a dictionary, such as
+                      `metrics={'a':'accuracy', 'b':['accuracy', 'mse']}`.
+                      You can also pass a list to specify a metric or a list of
+                      metrics for each output, such as
+                      `metrics=[['accuracy'], ['accuracy', 'mse']]`
+                      or `metrics=['accuracy', ['accuracy', 'mse']]`. When you pass
+                      the strings 'accuracy' or 'acc', we convert this to one of
+                      `keras.metrics.BinaryAccuracy`,
+                      `keras.metrics.CategoricalAccuracy`,
+                      `keras.metrics.SparseCategoricalAccuracy` based on the
+                      shapes of the targets and of the model output. A similar
+                      conversion is done for the strings `"crossentropy"`
+                      and `"ce"` as well.
+                      The metrics passed here are evaluated without sample weighting;
+                      if you would like sample weighting to apply, you can specify
+                      your metrics via the `weighted_metrics` argument instead.
+      :param weighted_metrics: List of metrics to be evaluated and weighted by
+                               `sample_weight` or `class_weight` during training and testing.
+      :param run_eagerly: Bool. If `True`, this model's forward pass
+                          will never be compiled. It is recommended to leave this
+                          as `False` when training (for best performance),
+                          and to set it to `True` when debugging.
+      :param steps_per_execution: Int. The number of batches to run
+                                  during each a single compiled function call. Running multiple
+                                  batches inside a single compiled function call can
+                                  greatly improve performance on TPUs or small models with a large
+                                  Python overhead. At most, one full epoch will be run each
+                                  execution. If a number larger than the size of the epoch is
+                                  passed, the execution will be truncated to the size of the
+                                  epoch. Note that if `steps_per_execution` is set to `N`,
+                                  `Callback.on_batch_begin` and `Callback.on_batch_end` methods
+                                  will only be called every `N` batches (i.e. before/after
+                                  each compiled function execution).
+                                  Not supported with the PyTorch backend.
+      :param jit_compile: Bool or `"auto"`. Whether to use XLA compilation when
+                          compiling a model. For `jax` and `tensorflow` backends,
+                          `jit_compile="auto"` enables XLA compilation if the model
+                          supports it, and disabled otherwise.
+                          For `torch` backend, `"auto"` will default to eager
+                          execution and `jit_compile=True` will run with `torch.compile`
+                          with the `"inductor"` backend.
+      :param auto_scale_loss: Bool. If `True` and the model dtype policy is
+                              `"mixed_float16"`, the passed optimizer will be automatically
+                              wrapped in a `LossScaleOptimizer`, which will dynamically
+                              scale the loss to prevent underflow.
+
+
+
+   .. py:property:: metrics
+
+      List of all metrics.
+
+
+   .. py:method:: compute_loss(x=None, y=None, y_pred=None, sample_weight=None, training=True)
+
+      Compute the total loss, validate it, and return it.
+
+      Subclasses can optionally override this method to provide custom loss
+      computation logic.
+
+      Example:
+
+      ```python
+      class MyModel(Model):
+          def __init__(self, *args, **kwargs):
+              super().__init__(*args, **kwargs)
+              self.loss_tracker = metrics.Mean(name='loss')
+
+          def compute_loss(self, x, y, y_pred, sample_weight, training=True):
+              loss = ops.mean((y_pred - y) ** 2)
+              loss += ops.sum(self.losses)
+              self.loss_tracker.update_state(loss)
+              return loss
+
+          def reset_metrics(self):
+              self.loss_tracker.reset_state()
+
+          @property
+          def metrics(self):
+              return [self.loss_tracker]
+
+      inputs = layers.Input(shape=(10,), name='my_input')
+      outputs = layers.Dense(10)(inputs)
+      model = MyModel(inputs, outputs)
+      model.add_loss(ops.sum(outputs))
+
+      optimizer = SGD()
+      model.compile(optimizer, loss='mse', steps_per_execution=10)
+      dataset = ...
+      model.fit(dataset, epochs=2, steps_per_epoch=10)
+      print(f"Custom loss: {model.loss_tracker.result()}")
+      ```
+
+      :param x: Input data.
+      :param y: Target data.
+      :param y_pred: Predictions returned by the model (output of `model(x)`)
+      :param sample_weight: Sample weights for weighting the loss function.
+      :param training: Whether we are training or evaluating the model.
+
+      :returns: The total loss as a scalar tensor, or `None` if no loss results
+                (which is the case when called by `Model.test_step`).
+
+
+
+   .. py:method:: compute_metrics(x, y, y_pred, sample_weight=None)
+
+      Update metric states and collect all metrics to be returned.
+
+      Subclasses can optionally override this method to provide custom metric
+      updating and collection logic. Custom metrics are not passed in
+      `compile()`, they can be created in `__init__` or `build`. They are
+      automatically tracked and returned by `self.metrics`.
+
+      Example:
+
+      ```python
+      class MyModel(Sequential):
+          def __init__(self, *args, **kwargs):
+              super().__init__(*args, **kwargs)
+              self.custom_metric = MyMetric(name="custom_metric")
+
+          def compute_metrics(self, x, y, y_pred, sample_weight):
+              # This super call updates metrics from `compile` and returns
+              # results for all metrics listed in `self.metrics`.
+              metric_results = super().compute_metrics(
+                  x, y, y_pred, sample_weight)
+
+              # `metric_results` contains the previous result for
+              # `custom_metric`, this is where we update it.
+              self.custom_metric.update_state(x, y, y_pred, sample_weight)
+              metric_results['custom_metric'] = self.custom_metric.result()
+              return metric_results
+      ```
+
+      :param x: Input data.
+      :param y: Target data.
+      :param y_pred: Predictions returned by the model output of `model.call(x)`.
+      :param sample_weight: Sample weights for weighting the loss function.
+
+      :returns: A `dict` containing values that will be passed to
+                `keras.callbacks.CallbackList.on_train_batch_end()`. Typically,
+                the values of the metrics listed in `self.metrics` are returned.
+                Example: `{'loss': 0.2, 'accuracy': 0.7}`.
+
+
+
+   .. py:method:: get_metrics_result()
+
+      Returns the model's metrics values as a dict.
+
+      If any of the metric result is a dict (containing multiple metrics),
+      each of them gets added to the top level returned dict of this method.
+
+      :returns: A `dict` containing values of the metrics listed in `self.metrics`.
+                Example: `{'loss': 0.2, 'accuracy': 0.7}`.
+
+
+
+   .. py:method:: get_compile_config()
+
+      Returns a serialized config with information for compiling the model.
+
+      This method returns a config dictionary containing all the information
+      (optimizer, loss, metrics, etc.) with which the model was compiled.
+
+      :returns: A dict containing information for compiling the model.
+
+
+
+   .. py:method:: compile_from_config(config)
+
+      Compiles the model with the information given in config.
+
+      This method uses the information in the config (optimizer, loss,
+      metrics, etc.) to compile the model.
+
+      :param config: Dict containing information for compiling the model.
+
+
+
+   .. py:method:: compute_loss_and_updates(trainable_variables, non_trainable_variables, metrics_variables, x, y, sample_weight, training=False, optimizer_variables=None)
+
+      This method is stateless and is intended for use with jax.grad.
+
+
+
+   .. py:property:: path
+
+      The path of the layer.
+
+      If the layer has not been built yet, it will be `None`.
+
+
+   .. py:method:: get_build_config()
+
+      Returns a dictionary with the layer's input shape.
+
+      This method returns a config dict that can be used by
+      `build_from_config(config)` to create all states (e.g. Variables and
+      Lookup tables) needed by the layer.
+
+      By default, the config only contains the input shape that the layer
+      was built with. If you're writing a custom layer that creates state in
+      an unusual way, you should override this method to make sure this state
+      is already created when Keras attempts to load its value upon model
+      loading.
+
+      :returns: A dict containing the input shape associated with the layer.
+
+
+
+   .. py:method:: add_variable(shape, initializer, dtype=None, trainable=True, autocast=True, regularizer=None, constraint=None, name=None)
+
+      Add a weight variable to the layer.
+
+      Alias of `add_weight()`.
+
+
+
+   .. py:method:: add_weight(shape=None, initializer=None, dtype=None, trainable=True, autocast=True, regularizer=None, constraint=None, aggregation='none', overwrite_with_gradient=False, name=None)
+
+      Add a weight variable to the layer.
+
+      :param shape: Shape tuple for the variable. Must be fully-defined
+                    (no `None` entries). Defaults to `()` (scalar) if unspecified.
+      :param initializer: Initializer object to use to populate the initial
+                          variable value, or string name of a built-in initializer
+                          (e.g. `"random_normal"`). If unspecified, defaults to
+                          `"glorot_uniform"` for floating-point variables and to `"zeros"`
+                          for all other types (e.g. int, bool).
+      :param dtype: Dtype of the variable to create, e.g. `"float32"`. If
+                    unspecified, defaults to the layer's variable dtype
+                    (which itself defaults to `"float32"` if unspecified).
+      :param trainable: Boolean, whether the variable should be trainable via
+                        backprop or whether its updates are managed manually. Defaults
+                        to `True`.
+      :param autocast: Boolean, whether to autocast layers variables when
+                       accessing them. Defaults to `True`.
+      :param regularizer: Regularizer object to call to apply penalty on the
+                          weight. These penalties are summed into the loss function
+                          during optimization. Defaults to `None`.
+      :param constraint: Contrainst object to call on the variable after any
+                         optimizer update, or string name of a built-in constraint.
+                         Defaults to `None`.
+      :param aggregation: Optional string, one of `None`, `"none"`, `"mean"`,
+                          `"sum"` or `"only_first_replica"`. Annotates the variable with
+                          the type of multi-replica aggregation to be used for this
+                          variable when writing custom data parallel training loops.
+                          Defaults to `"none"`.
+      :param overwrite_with_gradient: Boolean, whether to overwrite the variable
+                                      with the computed gradient. This is useful for float8 training.
+                                      Defaults to `False`.
+      :param name: String name of the variable. Useful for debugging purposes.
+
+
+
+   .. py:property:: trainable
+
+      Settable boolean, whether this layer should be trainable or not.
+
+
+   .. py:property:: variables
+
+      List of all layer state, including random seeds.
+
+      This extends `layer.weights` to include all state used by the layer
+      including `SeedGenerator`s.
+
+      Note that metrics variables are not included here, use
+      `metrics_variables` to visit all the metric variables.
+
+
+   .. py:property:: trainable_variables
+
+      List of all trainable layer state.
+
+      This is equivalent to `layer.trainable_weights`.
+
+
+   .. py:property:: non_trainable_variables
+
+      List of all non-trainable layer state.
+
+      This extends `layer.non_trainable_weights` to include all state used by
+      the layer including state for metrics and `SeedGenerator`s.
+
+
+   .. py:property:: weights
+
+      List of all weight variables of the layer.
+
+      Unlike, `layer.variables` this excludes metric state and random seeds.
+
+
+   .. py:property:: trainable_weights
+
+      List of all trainable weight variables of the layer.
+
+      These are the weights that get updated by the optimizer during training.
+
+
+   .. py:property:: non_trainable_weights
+
+      List of all non-trainable weight variables of the layer.
+
+      These are the weights that should not be updated by the optimizer during
+      training. Unlike, `layer.non_trainable_variables` this excludes metric
+      state and random seeds.
+
+
+   .. py:property:: metrics_variables
+
+      List of all metric variables.
+
+
+   .. py:method:: get_weights()
+
+      Return the values of `layer.weights` as a list of NumPy arrays.
+
+
+
+   .. py:method:: set_weights(weights)
+
+      Sets the values of `layer.weights` from a list of NumPy arrays.
+
+
+
+   .. py:property:: compute_dtype
+
+      The dtype of the computations performed by the layer.
+
+
+   .. py:property:: variable_dtype
+
+      The dtype of the state (weights) of the layer.
+
+
+   .. py:property:: quantization_mode
+
+      The quantization mode of this layer, `None` if not quantized.
+
+
+   .. py:property:: input_dtype
+
+      The dtype layer inputs should be converted to.
+
+
+   .. py:property:: supports_masking
+
+      Whether this layer supports computing a mask using `compute_mask`.
+
+
+   .. py:method:: stateless_call(trainable_variables, non_trainable_variables, *args, return_losses=False, **kwargs)
+
+      Call the layer without any side effects.
+
+      :param trainable_variables: List of trainable variables of the model.
+      :param non_trainable_variables: List of non-trainable variables of the
+                                      model.
+      :param \*args: Positional arguments to be passed to `call()`.
+      :param return_losses: If `True`, `stateless_call()` will return the list of
+                            losses created during `call()` as part of its return values.
+      :param \*\*kwargs: Keyword arguments to be passed to `call()`.
+
+      :returns:
+
+                A tuple. By default, returns `(outputs, non_trainable_variables)`.
+                    If `return_losses = True`, then returns
+                    `(outputs, non_trainable_variables, losses)`.
+
+      Note: `non_trainable_variables` include not only non-trainable weights
+      such as `BatchNormalization` statistics, but also RNG seed state
+      (if there are any random operations part of the layer, such as dropout),
+      and `Metric` state (if there are any metrics attached to the layer).
+      These are all elements of state of the layer.
+
+      Example:
+
+      ```python
+      model = ...
+      data = ...
+      trainable_variables = model.trainable_variables
+      non_trainable_variables = model.non_trainable_variables
+      # Call the model with zero side effects
+      outputs, non_trainable_variables = model.stateless_call(
+          trainable_variables,
+          non_trainable_variables,
+          data,
+      )
+      # Attach the updated state to the model
+      # (until you do this, the model is still in its pre-call state).
+      for ref_var, value in zip(
+          model.non_trainable_variables, non_trainable_variables
+      ):
+          ref_var.assign(value)
+      ```
+
+
+
+   .. py:method:: add_loss(loss)
+
+      Can be called inside of the `call()` method to add a scalar loss.
+
+      Example:
+
+      ```python
+      class MyLayer(Layer):
+          ...
+          def call(self, x):
+              self.add_loss(ops.sum(x))
+              return x
+      ```
+
+
+
+   .. py:property:: losses
+
+      List of scalar losses from `add_loss`, regularizers and sublayers.
+
+
+   .. py:method:: save_own_variables(store)
+
+      Saves the state of the layer.
+
+      You can override this method to take full control of how the state of
+      the layer is saved upon calling `model.save()`.
+
+      :param store: Dict where the state of the model will be saved.
+
+
+
+   .. py:method:: load_own_variables(store)
+
+      Loads the state of the layer.
+
+      You can override this method to take full control of how the state of
+      the layer is loaded upon calling `keras.models.load_model()`.
+
+      :param store: Dict from which the state of the model will be loaded.
+
+
+
+   .. py:method:: count_params()
+
+      Count the total number of scalars composing the weights.
+
+      :returns: An integer count.
+
+
+
+   .. py:method:: __setattr__(name, value)
+
+      Support self.foo = trackable syntax.
+
+
+
+   .. py:method:: get_config()
+
+      Returns the config of the object.
+
+      An object config is a Python dictionary (serializable)
+      containing the information needed to re-instantiate it.
+
+
+
+   .. py:method:: rematerialized_call(layer_call, *args, **kwargs)
+
+      Enable rematerialization dynamically for layer's call method.
+
+      :param layer_call: The original `call` method of a layer.
+
+      :returns: Rematerialized layer's `call` method.
+
+
+
+   .. py:property:: input
+
+      Retrieves the input tensor(s) of a symbolic operation.
+
+      Only returns the tensor(s) corresponding to the *first time*
+      the operation was called.
+
+      :returns: Input tensor or list of input tensors.
+
+
+   .. py:property:: output
+
+      Retrieves the output tensor(s) of a layer.
+
+      Only returns the tensor(s) corresponding to the *first time*
+      the operation was called.
+
+      :returns: Output tensor or list of output tensors.
+
+
+   .. py:method:: __reduce__()
+
+      __reduce__ is used to customize the behavior of `pickle.pickle()`.
+
+      The method returns a tuple of two elements: a function, and a list of
+      arguments to pass to that function.  In this case we just leverage the
+      keras saving library.
+
+
+

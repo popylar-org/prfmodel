@@ -1,0 +1,738 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.impulse" href="../impulse/index.html"><link rel="prev" title="prfmodel.models.encoding" href="../encoding/index.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>prfmodel.models.gaussian - prfmodel 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tutorials/simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../../index.html">prfmodel</a><input aria-label="Toggle navigation of prfmodel" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../adapter/index.html">prfmodel.adapter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../backend/index.html">prfmodel.backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../examples/index.html">prfmodel.examples</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../fitters/index.html">prfmodel.fitters</a><input aria-label="Toggle navigation of prfmodel.fitters" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../fitters/grid/index.html">prfmodel.fitters.grid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../fitters/linear/index.html">prfmodel.fitters.linear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../fitters/sgd/index.html">prfmodel.fitters.sgd</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../base/index.html">prfmodel.models.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../encoding/index.html">prfmodel.models.encoding</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">prfmodel.models.gaussian</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../impulse/convolve/index.html">prfmodel.models.impulse.convolve</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../impulse/density/index.html">prfmodel.models.impulse.density</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../impulse/shifted_gamma/index.html">prfmodel.models.impulse.shifted_gamma</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../impulse/two_gamma/index.html">prfmodel.models.impulse.two_gamma</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../impulse/two_gamma_deriv/index.html">prfmodel.models.impulse.two_gamma_deriv</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../temporal/index.html">prfmodel.models.temporal</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../stimuli/index.html">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../stimuli/base/index.html">prfmodel.stimuli.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../stimuli/cf/index.html">prfmodel.stimuli.cf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../stimuli/prf/index.html">prfmodel.stimuli.prf</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../typing/index.html">prfmodel.typing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utils/index.html">prfmodel.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../../../../_sources/autoapi/prfmodel/models/gaussian/index.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-prfmodel.models.gaussian">
+<span id="prfmodel-models-gaussian"></span><h1>prfmodel.models.gaussian<a class="headerlink" href="#module-prfmodel.models.gaussian" title="Link to this heading">¶</a></h1>
+<p>Gaussian response models.</p>
+<section id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.gaussian.GridMuDimensionsError" title="prfmodel.models.gaussian.GridMuDimensionsError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GridMuDimensionsError</span></code></a></p></td>
+<td><p>Exception raised when the dimensions of the stimulus grid and the Gaussian mu parameter do not match.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.gaussian.Gaussian2DPRFResponse" title="prfmodel.models.gaussian.Gaussian2DPRFResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gaussian2DPRFResponse</span></code></a></p></td>
+<td><p>Two-dimensional isotropic Gaussian population receptive field response model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.models.gaussian.GaussianCFResponse" title="prfmodel.models.gaussian.GaussianCFResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GaussianCFResponse</span></code></a></p></td>
+<td><p>Gaussian connective field response model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.gaussian.Gaussian2DPRFModel" title="prfmodel.models.gaussian.Gaussian2DPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code></a></p></td>
+<td><p>Two-dimensional isotropic Gaussian population receptive field model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.models.gaussian.GaussianCFModel" title="prfmodel.models.gaussian.GaussianCFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GaussianCFModel</span></code></a></p></td>
+<td><p>Gaussian connective field model.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.gaussian.predict_gaussian_response" title="prfmodel.models.gaussian.predict_gaussian_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict_gaussian_response</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
+<td><p>Predict a isotropic Gaussian population receptive field response.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
+<dl class="py exception">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.GridMuDimensionsError">
+<span class="property"><span class="k"><span class="pre">exception</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.gaussian.</span></span><span class="sig-name descname"><span class="pre">GridMuDimensionsError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu_shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/prfmodel/models/gaussian.html#GridMuDimensionsError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.gaussian.GridMuDimensionsError" title="Link to this definition">¶</a></dt>
+<dd><p>Exception raised when the dimensions of the stimulus grid and the Gaussian mu parameter do not match.</p>
+<p>For a stimulus grid with shape (…, m), the shape of the Gaussian mu parameter must be (num_batches, m).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid_shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Shape of the stimulus grid.</p></li>
+<li><p><strong>mu_shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Shape of the Gaussian mu parameter.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.predict_gaussian_response">
+<span class="sig-prename descclassname"><span class="pre">prfmodel.models.gaussian.</span></span><span class="sig-name descname"><span class="pre">predict_gaussian_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/gaussian.html#predict_gaussian_response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.gaussian.predict_gaussian_response" title="Link to this definition">¶</a></dt>
+<dd><p>Predict a isotropic Gaussian population receptive field response.</p>
+<p>The dimensionality of the Gaussian depends on the number of dimensions of <cite>grid</cite> and <cite>mu</cite>. All dimensions have
+the same size <cite>sigma</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>grid</strong> (<a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor"><em>Tensor</em></a>) – Stimulus grid for which to make predictions.</p></li>
+<li><p><strong>mu</strong> (<a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor"><em>Tensor</em></a>) – Centroid of the population receptive field. Must have at least two dimensions.
+The first dimension corresponds to the number of batches.
+The second dimension corresponds to the number of grid dimensions and must match the size of the
+last <cite>grid</cite> dimension.</p></li>
+<li><p><strong>sigma</strong> (<a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor"><em>Tensor</em></a>) – Size of the population receptive field. Must have at least two dimensions.
+The first dimension corresponds to the number of batches,
+and its size must match the size of the first <cite>mu</cite> dimension.
+The second dimension must have size one (because all Gaussian dimensions have the same size).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The predicted Gaussian population receptive field response with shape (num_batches, …)
+where <cite>…</cite> corresponds to the dimensions of the Gaussian.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference internal" href="../base/index.html#prfmodel.models.base.BatchDimensionError" title="prfmodel.models.base.BatchDimensionError"><strong>BatchDimensionError</strong></a> – If <cite>mu</cite> and <cite>sigma</cite> have batch (first) dimensions with different sizes.</p></li>
+<li><p><a class="reference internal" href="../../stimuli/prf/index.html#prfmodel.stimuli.prf.GridDimensionsError" title="prfmodel.stimuli.prf.GridDimensionsError"><strong>GridDimensionsError</strong></a> – If the grid has mismatching dimensions.</p></li>
+<li><p><a class="reference internal" href="#prfmodel.models.gaussian.GridMuDimensionsError" title="prfmodel.models.gaussian.GridMuDimensionsError"><strong>GridMuDimensionsError</strong></a> – If the grid and mu dimensions do not match.</p></li>
+<li><p><strong>ParameterShapeError</strong> – If <cite>mu</cite> or <cite>sigma</cite> have less than two dimensions.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Predict a 2D Gaussian response:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define a 2D grid</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">num_x</span><span class="p">,</span> <span class="n">num_y</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">num_x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">num_y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (10, 10, 2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define 2D centroids of Gaussian for 3 batches</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="c1"># shape (3, 2), first column y, second column x</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define size of Gaussian for 3 batches</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">]])</span> <span class="c1"># shape (3, 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span> <span class="o">=</span> <span class="n">predict_gaussian_response</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (num_batches, num_y, num_x)</span>
+<span class="go">(3, 10, 10)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.Gaussian2DPRFResponse">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.gaussian.</span></span><span class="sig-name descname"><span class="pre">Gaussian2DPRFResponse</span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/gaussian.html#Gaussian2DPRFResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.gaussian.Gaussian2DPRFResponse" title="Link to this definition">¶</a></dt>
+<dd><p>Two-dimensional isotropic Gaussian population receptive field response model.</p>
+<p>Predicts a response to a stimulus grid.
+The model has three parameters: <cite>mu_y</cite> and <cite>mu_x</cite> for the center and <cite>sigma</cite> for the width of the Gaussian.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">prfmodel</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define a 2D grid</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">num_x</span><span class="p">,</span> <span class="n">num_y</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">num_x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">num_y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (20, 10, 2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define 2D centroids of Gaussian for 3 voxels</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">params</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;mu_x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;mu_y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define dummy design for 10 frames</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">design</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">num_y</span><span class="p">,</span> <span class="n">num_x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create stimulus object</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">pm</span><span class="o">.</span><span class="n">Stimulus</span><span class="p">(</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">dimension_labels</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">),</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create model instance</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">Gaussian2DResponse</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Predict response to stimulus grid</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="c1"># (num_voxels, num_y, num_x)</span>
+<span class="go">(3, 20, 10)</span>
+</pre></div>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.Gaussian2DPRFResponse.parameter_names">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#prfmodel.models.gaussian.Gaussian2DPRFResponse.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p><cite>mu_y</cite>, <cite>mu_x</cite>, <cite>sigma</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Names of parameters used by the model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.Gaussian2DPRFResponse.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../stimuli/prf/index.html#prfmodel.stimuli.prf.PRFStimulus" title="prfmodel.stimuli.prf.PRFStimulus"><span class="pre">prfmodel.stimuli.prf.PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/gaussian.html#Gaussian2DPRFResponse.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.gaussian.Gaussian2DPRFResponse.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Predict the model response for a stimulus with a 2D grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stimulus</strong> (<a class="reference internal" href="../../stimuli/base/index.html#prfmodel.stimuli.base.Stimulus" title="prfmodel.stimuli.base.Stimulus"><em>Stimulus</em></a>) – Stimulus object with a 2D stimulus grid.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns containing different model parameters and rows containing parameter values
+for different voxels. Must contain the columns <cite>mu_y</cite>, <cite>mu_x</cite> and <cite>sigma</cite>.</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <cite>None</cite> (the default), uses the dtype from
+<a class="reference internal" href="../../utils/index.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model predictions of shape <cite>(num_voxels, size_y, size_x)</cite> and dtype <cite>dtype</cite>.
+<cite>num_voxels</cite> is the number of rows in <cite>parameters</cite> and <cite>size_y</cite> and <cite>size_x</cite> are the sizes of the
+x and y stimulus grid dimension.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.GaussianCFResponse">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.gaussian.</span></span><span class="sig-name descname"><span class="pre">GaussianCFResponse</span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/gaussian.html#GaussianCFResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.gaussian.GaussianCFResponse" title="Link to this definition">¶</a></dt>
+<dd><p>Gaussian connective field response model.</p>
+<p>Predicts a response to a stimulus distance matrix.
+The model has two parameters: <cite>center_index</cite> is the index of the row in the stimulus distance matrix that is the
+center of the Gaussian; <cite>sigma</cite> for the width of the Gaussian.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.GaussianCFResponse.parameter_names">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#prfmodel.models.gaussian.GaussianCFResponse.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p><cite>center_index</cite>, <cite>sigma</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Names of parameters used by the model</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.GaussianCFResponse.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../stimuli/cf/index.html#prfmodel.stimuli.cf.CFStimulus" title="prfmodel.stimuli.cf.CFStimulus"><span class="pre">prfmodel.stimuli.cf.CFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/gaussian.html#GaussianCFResponse.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.gaussian.GaussianCFResponse.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Predict the model response for a stimulus with a distance matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stimulus</strong> (<a class="reference internal" href="../../stimuli/cf/index.html#prfmodel.stimuli.cf.CFStimulus" title="prfmodel.stimuli.cf.CFStimulus"><em>CFStimulus</em></a>) – Connective field stimulus object with a distance matrix.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns containing different model parameters and rows containing parameter values
+for different voxels. Must contain the columns <cite>center_index</cite> and <cite>sigma</cite>.</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <cite>None</cite> (the default), uses the dtype from
+<a class="reference internal" href="../../utils/index.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model predictions of shape <cite>(num_voxels, num_rows)</cite> and dtype <cite>dtype</cite>.
+<cite>num_voxels</cite> is the number of rows in <cite>parameters</cite> and <cite>num_rows</cite> is the number of rows in the stimulus
+distance matrix.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.Gaussian2DPRFModel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.gaussian.</span></span><span class="sig-name descname"><span class="pre">Gaussian2DPRFModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">impulse_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><span class="pre">prfmodel.models.base.BaseImpulse</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><span class="pre">prfmodel.models.base.BaseImpulse</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DerivativeTwoGammaImpulse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">BaselineAmplitude</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/prfmodel/models/gaussian.html#Gaussian2DPRFModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.gaussian.Gaussian2DPRFModel" title="Link to this definition">¶</a></dt>
+<dd><p>Two-dimensional isotropic Gaussian population receptive field model.</p>
+<p>This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
+and temporal model response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>impulse_model</strong> (<a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><em>BaseImpulse</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em> or </em><em>None</em><em>, </em><em>default=ShiftedDerivativeGammaImpulse</em><em>, </em><em>optional</em>) – An impulse response model class or instance. Reponse model classes will be instantiated during object
+initialization. The default creates a <code class="xref py py-class docutils literal notranslate"><span class="pre">ShiftedDerivativeGammaImpulse</span></code>
+instance with default values.</p></li>
+<li><p><strong>temporal_model</strong> (<a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><em>BaseTemporal</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em> or </em><em>None</em><em>, </em><em>default=BaselineAmplitude</em><em>, </em><em>optional</em>) – A temporal model class or instance. Temporal model instances will be instantiated during initialization.
+The default creates a <cite>BaselineAmplitude</cite> instance.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The simple composite model follows five steps:</p>
+<ol class="arabic simple">
+<li><p>The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.</p></li>
+<li><p>The response is encoded with the stimulus design.</p></li>
+<li><p>A impulse response model generates an impulse response.</p></li>
+<li><p>The encoded response is convolved with the impulse response.</p></li>
+<li><p>The temporal model modifies the convolved response.</p></li>
+</ol>
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.Gaussian2DPRFModel.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../stimuli/prf/index.html#prfmodel.stimuli.prf.PRFStimulus" title="prfmodel.stimuli.prf.PRFStimulus"><span class="pre">prfmodel.stimuli.prf.PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="headerlink" href="#prfmodel.models.gaussian.Gaussian2DPRFModel.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Predict a simple population receptive field model response to a stimulus.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stimulus</strong> (<a class="reference internal" href="../../index.html#prfmodel.PRFStimulus" title="prfmodel.PRFStimulus"><em>PRFStimulus</em></a>) – Population receptive field stimulus object.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+for different voxels.</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <cite>None</cite> (the default), uses the dtype from
+<a class="reference internal" href="../../utils/index.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model predictions of shape (num_voxels, num_frames) and dtype <cite>dtype</cite>. The number of voxels is the
+number of rows in <cite>parameters</cite>. The number of frames is the number of frames in the stimulus design.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.Gaussian2DPRFModel.parameter_names">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#prfmodel.models.gaussian.Gaussian2DPRFModel.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p>A list with names of unique parameters that are used by the submodels.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.GaussianCFModel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.gaussian.</span></span><span class="sig-name descname"><span class="pre">GaussianCFModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temporal_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">BaselineAmplitude</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/prfmodel/models/gaussian.html#GaussianCFModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.gaussian.GaussianCFModel" title="Link to this definition">¶</a></dt>
+<dd><p>Gaussian connective field model.</p>
+<p>This is a generic class that combines a Gaussian connective field and temporal model response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>temporal_model</strong> (<a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><em>BaseTemporal</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em> or </em><em>None</em><em>, </em><em>default=BaselineAmplitude</em><em>, </em><em>optional</em>) – A temporal model class or instance. Temporal model instances will be instantiated during initialization.
+The default creates a <cite>BaselineAmplitude</cite> instance.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The simple composite model follows three steps:</p>
+<ol class="arabic simple">
+<li><p>The Gaussian connective field response model makes a prediction for the stimulus distance matrix.</p></li>
+<li><p>The connective field response is encoded with the source response.</p></li>
+<li><p>The temporal model modifies the encoded response.</p></li>
+</ol>
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.GaussianCFModel.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../stimuli/cf/index.html#prfmodel.stimuli.cf.CFStimulus" title="prfmodel.stimuli.cf.CFStimulus"><span class="pre">prfmodel.stimuli.cf.CFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="headerlink" href="#prfmodel.models.gaussian.GaussianCFModel.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Predict a simple connective field model response to a stimulus.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stimulus</strong> (<a class="reference internal" href="../../stimuli/cf/index.html#prfmodel.stimuli.cf.CFStimulus" title="prfmodel.stimuli.cf.CFStimulus"><em>CFStimulus</em></a>) – Connective field stimulus object.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+for different voxels.</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <cite>None</cite> (the default), uses the dtype from
+<a class="reference internal" href="../../utils/index.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model predictions of shape (num_voxels, num_frames) and dtype <cite>dtype</cite>. The number of voxels is the
+number of rows in <cite>parameters</cite>. The number of frames is the number of frames in the stimulus source
+response.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.models.gaussian.GaussianCFModel.parameter_names">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#prfmodel.models.gaussian.GaussianCFModel.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p>A list with names of unique parameters that are used by the submodels.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../impulse/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">prfmodel.models.impulse</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../encoding/index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">prfmodel.models.encoding</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">prfmodel.models.gaussian</a><ul>
+<li><a class="reference internal" href="#exceptions">Exceptions</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.GridMuDimensionsError"><code class="docutils literal notranslate"><span class="pre">GridMuDimensionsError</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.predict_gaussian_response"><code class="docutils literal notranslate"><span class="pre">predict_gaussian_response()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.Gaussian2DPRFResponse"><code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFResponse</span></code></a><ul>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.Gaussian2DPRFResponse.parameter_names"><code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFResponse.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.Gaussian2DPRFResponse.__call__"><code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFResponse.__call__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.GaussianCFResponse"><code class="docutils literal notranslate"><span class="pre">GaussianCFResponse</span></code></a><ul>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.GaussianCFResponse.parameter_names"><code class="docutils literal notranslate"><span class="pre">GaussianCFResponse.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.GaussianCFResponse.__call__"><code class="docutils literal notranslate"><span class="pre">GaussianCFResponse.__call__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.Gaussian2DPRFModel"><code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code></a><ul>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.Gaussian2DPRFModel.__call__"><code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel.__call__()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.Gaussian2DPRFModel.parameter_names"><code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel.parameter_names</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.GaussianCFModel"><code class="docutils literal notranslate"><span class="pre">GaussianCFModel</span></code></a><ul>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.GaussianCFModel.__call__"><code class="docutils literal notranslate"><span class="pre">GaussianCFModel.__call__()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.gaussian.GaussianCFModel.parameter_names"><code class="docutils literal notranslate"><span class="pre">GaussianCFModel.parameter_names</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
