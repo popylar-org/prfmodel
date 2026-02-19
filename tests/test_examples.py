@@ -3,7 +3,7 @@
 import tempfile
 import numpy as np
 import pytest
-from prfmodel.examples import download_surface
+from prfmodel.examples import download_surface_mesh
 from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.examples import load_brain_atlas
 from prfmodel.examples import load_single_subject_fmri_data
@@ -30,7 +30,7 @@ def test_download_surface():
     cortex = pytest.importorskip("cortex")
     subject = "hcp_999999"
 
-    download_surface(subject)
+    download_surface_mesh(subject)
 
     vertex = cortex.db.get_surfinfo(subject)
 
@@ -43,7 +43,7 @@ def test_download_surface_value_error():
     _ = pytest.importorskip("cortex")
 
     with pytest.raises(ValueError):
-        download_surface("test")
+        download_surface_mesh("test")
 
 
 @pytest_skip_examples

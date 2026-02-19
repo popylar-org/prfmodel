@@ -8,7 +8,7 @@ from collections.abc import Sequence
 from importlib.resources import files
 from pathlib import Path
 import numpy as np
-from nilearn.surface import load_surf_data
+from nilearn.surface import load_surf_data, PolyMesh
 from scipy.io import loadmat
 from scipy.ndimage import gaussian_filter
 from prfmodel.stimuli.prf import PRFStimulus
@@ -54,34 +54,87 @@ def load_2d_prf_bar_stimulus() -> PRFStimulus:
     )
 
 
-def download_surface(subject: str = "hcp_999999") -> None:
-    """
-    Download a standardized cortical surface and store it in the local pycortex database.
+# def download_surface(subject: str = "hcp_999999") -> None:
+#     """
+#     Download a standardized cortical surface and store it in the local pycortex database.
 
-    Currently only the surface for the subject identifier `"hcp_999999"` can be downloaded. This surface is based on
-    the one used in the Human Connectome Project (see this `link <https://doi.org/10.6084/m9.figshare.13372958>`_).
+#     Currently only the surface for the subject identifier `"hcp_999999"` can be downloaded. This surface is based on
+#     the one used in the Human Connectome Project (see this `link <https://doi.org/10.6084/m9.figshare.13372958>`_).
+
+#     Parameters
+#     ----------
+#     subject : str, default="hcp_999999"
+#         Identifier of the subject for which to download and store the surface.
+
+#     """
+#     import cortex as cx  # noqa: PLC0415 (import should be at top level)
+
+#     if subject == "hcp_999999":
+#         if subject not in cx.db.subjects:
+#             with urllib.request.urlopen("https://ndownloader.figshare.com/files/25768841") as response:
+#                 zip_bytes = response.read()
+#                 with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as archive:
+#                     for file in archive.namelist():
+#                         if file.startswith(subject):
+#                             archive.extract(file, cx.database.default_filestore)
+
+#             cx.db.reload_subjects()
+#     else:
+#         msg = f"Surface for subject '{subject}' not found"
+#         raise ValueError(msg)
+
+
+def download_surface_mesh(
+    dest_dir: str | os.PathLike,
+    subject: str = "hcp_999999",
+    type: str = "flat",
+) -> dict[str, tuple[np.ndarray, np.ndarray]]:
+    """
+    Download a standardized cortical surface mesh and return vertex coordinates and faces.
+
+    Downloads the surface mesh for the given subject from Fig Share and extracts the inflated surface meshes for the
+    left and right hemispheres.
 
     Parameters
     ----------
+    dest_dir : str or os.PathLike
+        Directory where the surface files should be stored.
     subject : str, default="hcp_999999"
-        Identifier of the subject for which to download and store the surface.
+        Identifier of the subject for which to download the surface. Currently only ``"hcp_999999"`` is supported.
+
+    Returns
+    -------
+    dict[str, tuple[numpy.ndarray, numpy.ndarray]]
+        A dictionary with keys ``"lh"`` and ``"rh"``, each mapping to a tuple of ``(coordinates, faces)`` where
+        ``coordinates`` has shape ``(n_vertices, 3)`` and ``faces`` has shape ``(n_faces, 3)``.
 
     """
-    import cortex as cx  # noqa: PLC0415 (import should be at top level)
-
-    if subject == "hcp_999999":
-        if subject not in cx.db.subjects:
-            with urllib.request.urlopen("https://ndownloader.figshare.com/files/25768841") as response:
-                zip_bytes = response.read()
-                with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as archive:
-                    for file in archive.namelist():
-                        if file.startswith(subject):
-                            archive.extract(file, cx.database.default_filestore)
-
-            cx.db.reload_subjects()
-    else:
+    if subject != "hcp_999999":
         msg = f"Surface for subject '{subject}' not found"
         raise ValueError(msg)
+
+    dest_path = Path(dest_dir)
+    surface_dir = dest_path / subject / "surfaces"
+
+    if not surface_dir.exists():
+        dest_path.mkdir(parents=True, exist_ok=True)
+        url = "https://ndownloader.figshare.com/files/25768841"
+
+        if not url.startswith(("http:", "https:")):
+            msg = "File URL must start with http: or https:"
+            raise ValueError(msg)
+
+        with urllib.request.urlopen(url) as response:  # noqa: S310 (Audit URL open for permitted schemes)
+            zip_bytes = response.read()
+            with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as archive:
+                for file in archive.namelist():
+                    if file.startswith(subject):
+                        archive.extract(file, dest_path)
+
+    return PolyMesh(
+        surface_dir / f"{type}_lh.gii",
+        surface_dir / f"{type}_rh.gii",
+    )
 
 
 def _load_single_subject_fmri_stimulus(dest_path: str | os.PathLike) -> PRFStimulus:
@@ -143,7 +196,6 @@ def _download_archive(file_url: str, dest_path: str | os.PathLike) -> None:
 def load_single_subject_fmri_data(
     dest_dir: str | os.PathLike,
     hemisphere: str = "both",
-    unit: str = "psc",
 ) -> tuple[np.ndarray, PRFStimulus]:
     """
     Load example functional magnetic resonance imaging (fMRI) data for a single subject.
@@ -159,9 +211,6 @@ def load_single_subject_fmri_data(
     hemisphere : str, default="both"
         Hemisphere(s) for which the BOLD response data should be loaded. Must be either 'left', 'right', or 'both'.
         For 'both', the data of both hemispheres are concatenated (left is first).
-    unit : str, default="psc"
-        Unit to which the BOLD response data should be converted. Must be either 'raw', 'psc' (percent signal change),
-        or 'z_score' (subtracts mean from signal and divides by standard deviation).
 
     Returns
     -------
@@ -193,22 +242,22 @@ def load_single_subject_fmri_data(
 
     response_combined = np.concatenate(response_hemishperes)
 
-    match unit:
-        case "psc":
-            response_combined = ((response_combined.T / response_combined.mean(axis=1)).T - 1.0) * 100.0
-        case "z_score":
-            response_combined = (
-                (response_combined.T - response_combined.mean(axis=1)) / response_combined.std(axis=1)
-            ).T
-        case "raw":
-            pass
-        case other:
-            msg = f"Argument 'unit' must be 'psc', 'z_score', or 'raw' but was '{other}'"
-            raise ValueError(msg)
+    # match unit:
+    #     case "psc":
+    #         response_combined = ((response_combined.T / response_combined.mean(axis=1)).T - 1.0) * 100.0
+    #     case "z_score":
+    #         response_combined = (
+    #             (response_combined.T - response_combined.mean(axis=1)) / response_combined.std(axis=1)
+    #         ).T
+    #     case "raw":
+    #         pass
+    #     case other:
+    #         msg = f"Argument 'unit' must be 'psc', 'z_score', or 'raw' but was '{other}'"
+    #         raise ValueError(msg)
 
-    stimulus = _load_single_subject_fmri_stimulus(dest_dir)
+    # stimulus = _load_single_subject_fmri_stimulus(dest_dir)
 
-    return response_combined, stimulus
+    return response_combined  # , stimulus
 
 
 def load_brain_atlas(dest_path: str | os.PathLike, hemisphere: str = "both") -> np.ndarray:
