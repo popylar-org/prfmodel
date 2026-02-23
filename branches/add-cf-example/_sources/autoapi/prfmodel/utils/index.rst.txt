@@ -1,0 +1,210 @@
+prfmodel.utils
+==============
+
+.. py:module:: prfmodel.utils
+
+.. autoapi-nested-parse::
+
+   Utility functions.
+
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   prfmodel.utils.DTYPES
+
+
+Exceptions
+----------
+
+.. autoapisummary::
+
+   prfmodel.utils.UndefinedResponseWarning
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.utils.ParamsDict
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   prfmodel.utils.convert_parameters_to_tensor
+   prfmodel.utils.get_dtype
+   prfmodel.utils.batched
+   prfmodel.utils.normalize_response
+
+
+Module Contents
+---------------
+
+.. py:data:: DTYPES
+
+   Accepted dtypes for `prfmodel.typing.Tensor` objects.
+
+   Accepted dtypes are: `"bfloat16"`, `"float16"`, `"float32"`, and `"float64"`.
+
+.. py:exception:: UndefinedResponseWarning
+
+
+
+   Warning for when a response is undefined and contains NaNs.
+
+
+.. py:function:: convert_parameters_to_tensor(parameters: pandas.DataFrame, dtype: str) -> prfmodel.typing.Tensor
+
+   Convert model parameters in a dataframe into a tensor.
+
+   :param parameters: Dataframe with columns containing different model parameters and rows containing
+                      parameter values for different voxels.
+   :type parameters: pandas.DataFrame
+
+   :returns: Tensor with the first axis corresponding to voxels and the second axis corresponding to different parameters.
+   :rtype: Tensor
+
+   .. rubric:: Examples
+
+   Single parameters:
+
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   >>>     "param_1": [0.0, 1.0, 2.0],
+   >>> })
+   >>> x = convert_parameters_to_tensor(params)
+   >>> print(x.shape)
+   (3, 1)
+
+   Multiple parameters:
+
+   >>> params = pd.DataFrame({
+   >>>     "param_1": [0.0, 1.0, 2.0],
+   >>>     "param_2": [0.0, -1.0, -2.0],
+   >>> })
+   >>> x = covert_parameters_to_tensor(params)
+   >>> print(x.shape)
+   (3, 2)
+
+
+.. py:function:: get_dtype(dtype: str | None) -> str
+
+   Get the (default) dtype.
+
+   Utility function to pass through a dtype or get the default dtype set by `keras.config.floatx()`.
+
+   :param dtype: The dtype to pass through. If `None`, returns `keras.config.floatx()`.
+   :type dtype: str or None
+
+   :returns: The dtype.
+   :rtype: str
+
+   :raises ValueError: When `dtype` is not of the values defined in `DTYPES`.
+
+
+.. py:function:: batched(fn: collections.abc.Callable) -> collections.abc.Callable
+
+   Decorate a model prediction function to make batched predictions.
+
+   Splits the `parameters` argument (a :class:`pandas.DataFrame`) along the row (voxel) dimension into
+   chunks of size `batch_size`, calls `fn` for each chunk, and concatenates the results along the first axis.
+
+   The wrapped function gains a ``batch_size`` keyword argument. When ``batch_size`` is ``None`` (the default),
+   all voxels are processed in a single call.
+
+   :param fn: A model prediction function with signature ``fn(stimulus, parameters, **kwargs)``.
+   :type fn: callable
+
+   :returns: Wrapped function with signature ``fn(stimulus, parameters, *, batch_size=None, **kwargs)``.
+   :rtype: callable
+
+   .. rubric:: Examples
+
+   >>> from prfmodel.utils import batched
+   >>> batched_predict = batched(model)
+   >>> result = batched_predict(stimulus, parameters, batch_size=128)
+
+   As a decorator:
+
+   >>> @batched
+   ... def predict(stimulus, parameters, *, dtype=None):
+   ...     ...
+   >>> result = predict(stimulus, parameters, batch_size=64)
+
+
+.. py:function:: normalize_response(response: prfmodel.typing.Tensor, norm: str | None = 'sum') -> prfmodel.typing.Tensor
+
+   Normalize a response.
+
+   Divides a response by a normalization (e.g., its sum) computed over the second dimension.
+
+   :param response: Response with shape (num_voxels, num_frames).
+   :type response: Tensor
+   :param norm: Normalization to apply.
+   :type norm: str, optional, default="sum"
+
+   :returns: The normalized response with shape (num_voxels, num_frames).
+   :rtype: Tensor
+
+   .. rubric:: Notes
+
+   A warning is raised when the normalization is zero which leads to an undefined normalized response.
+
+
+.. py:class:: ParamsDict(data: dict, dtype: str | None = None)
+
+   A dictionary-like object that supports dataframe-style column selection but returns Keras tensors.
+
+   Serves as an adapter during fitting to supply parameters to models while avoiding converting tensors into
+   actual dataframes.
+
+   :param data: Dictionary of parameter tensors to perform column style selection on.
+   :type data: dict
+   :param dtype: The dtype that parameter tensors are converted to. If `None` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+
+   .. py:property:: columns
+      :type: list[str]
+
+
+      Names of parameter columns.
+
+
+   .. py:property:: shape
+      :type: tuple[int, int]
+
+
+      Shape of the parameters (rows, columns).
+
+
+   .. py:property:: dtype
+      :type: str
+
+
+      The dtype of the parameters.
+
+      If `None`, uses `keras.config.floatx()` which defaults
+      to `float32`.
+
+
+   .. py:method:: copy() -> ParamsDict
+
+      Create a copy of the object.
+
+
+
+   .. py:method:: to_dataframe() -> pandas.DataFrame
+
+      Convert the object into a dataframe.
+
+
+

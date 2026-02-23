@@ -1,0 +1,1951 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.fitters.grid" href="grid/index.html"><link rel="prev" title="prfmodel.examples" href="../examples/index.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>prfmodel.fitters - prfmodel 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/simple_prf_empirical_fmri.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">prfmodel</a><input aria-label="Toggle navigation of prfmodel" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../adapter/index.html">prfmodel.adapter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../backend/index.html">prfmodel.backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/index.html">prfmodel.examples</a></li>
+<li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">prfmodel.fitters</a><input aria-label="Toggle navigation of prfmodel.fitters" checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="grid/index.html">prfmodel.fitters.grid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="linear/index.html">prfmodel.fitters.linear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="sgd/index.html">prfmodel.fitters.sgd</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../models/base/index.html">prfmodel.models.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/encoding/index.html">prfmodel.models.encoding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/gaussian/index.html">prfmodel.models.gaussian</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../models/impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/convolve/index.html">prfmodel.models.impulse.convolve</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/density/index.html">prfmodel.models.impulse.density</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/shifted_gamma/index.html">prfmodel.models.impulse.shifted_gamma</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/two_gamma/index.html">prfmodel.models.impulse.two_gamma</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/two_gamma_deriv/index.html">prfmodel.models.impulse.two_gamma_deriv</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../models/temporal/index.html">prfmodel.models.temporal</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../stimuli/index.html">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../stimuli/base/index.html">prfmodel.stimuli.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stimuli/cf/index.html">prfmodel.stimuli.cf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stimuli/prf/index.html">prfmodel.stimuli.prf</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../typing/index.html">prfmodel.typing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/index.html">prfmodel.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../../../_sources/autoapi/prfmodel/fitters/index.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="module-prfmodel.fitters">
+<span id="prfmodel-fitters"></span><h1>prfmodel.fitters<a class="headerlink" href="#module-prfmodel.fitters" title="Link to this heading">¶</a></h1>
+<p>Model fitters.</p>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="grid/index.html">prfmodel.fitters.grid</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linear/index.html">prfmodel.fitters.linear</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sgd/index.html">prfmodel.fitters.sgd</a></li>
+</ul>
+</div>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.fitters.SGDFitter" title="prfmodel.fitters.SGDFitter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SGDFitter</span></code></a></p></td>
+<td><p>Fit population receptive field models with stochastic gradient descent (SGD).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="package-contents">
+<h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.fitters.</span></span><span class="sig-name descname"><span class="pre">SGDFitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../models/base/index.html#prfmodel.models.base.BaseComposite" title="prfmodel.models.base.BaseComposite"><span class="pre">prfmodel.models.base.BaseComposite</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../stimuli/base/index.html#prfmodel.stimuli.base.Stimulus" title="prfmodel.stimuli.base.Stimulus"><span class="pre">prfmodel.stimuli.base.Stimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">adapter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../adapter/index.html#prfmodel.adapter.Adapter" title="prfmodel.adapter.Adapter"><span class="pre">prfmodel.adapter.Adapter</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">keras.optimizers.Optimizer</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">keras.losses.Loss</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.14)"><span class="pre">collections.abc.Callable</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/prfmodel/fitters/sgd.html#SGDFitter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.fitters.SGDFitter" title="Link to this definition">¶</a></dt>
+<dd><p>Fit population receptive field models with stochastic gradient descent (SGD).</p>
+<p>Estimates model parameters iteratively through SGD by minimizing the loss between model predictions and target
+data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="../models/base/index.html#prfmodel.models.base.BaseModel" title="prfmodel.models.base.BaseModel"><em>BaseModel</em></a>) – Population receptive field model instance that can be fit to data.
+The model must implement <cite>__call__</cite> to make predictions that can be compared to data.</p></li>
+<li><p><strong>stimulus</strong> (<a class="reference internal" href="../stimuli/base/index.html#prfmodel.stimuli.base.Stimulus" title="prfmodel.stimuli.base.Stimulus"><em>Stimulus</em></a>) – Stimulus object used to make model predictions.</p></li>
+<li><p><strong>adapter</strong> (<a class="reference internal" href="../adapter/index.html#prfmodel.adapter.Adapter" title="prfmodel.adapter.Adapter"><em>Adapter</em></a><em>, </em><em>optional</em>) – Adapter object to apply transformations to parameters during fitting.</p></li>
+<li><p><strong>optimizer</strong> (<em>keras.optimizers.Optimizer</em><em>, </em><em>optional</em>) – Optimizer instance. Default is <cite>None</cite> where a <cite>keras.optimizers.Adam</cite> optimizer is used.</p></li>
+<li><p><strong>loss</strong> (<em>keras.optimizers.Loss</em><em> or </em><em>Callable</em><em>, </em><em>optional</em>) – Loss instance or function with the signatur <cite>f(y, y_pred)</cite>, where <cite>y</cite> are the target data and <cite>y_pred</cite> are the
+model predicitons. Default is <cite>None</cite> where a <cite>keras.optimizers.MeanSquaredError</cite> loss is used.</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype used for fitting. If <cite>None</cite> (the default), uses the dtype from
+<a class="reference internal" href="../utils/index.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>At each step during the fitting, the <cite>model</cite> makes a prediction for each batch in the target data
+given the <cite>stimulus</cite> and the current parameter values. The predictions are then compared to the target data and
+the parameter values are updated given the <cite>optimizer</cite> schedule.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.dtype">
+<span class="sig-name descname"><span class="pre">dtype</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.dtype" title="Link to this definition">¶</a></dt>
+<dd><p>The dtype that is used during fitting.</p>
+<p>If <cite>None</cite>, uses <cite>keras.config.floatx()</cite> which defaults
+to <cite>float32</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">fixed_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">collections.abc.Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_steps</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="sgd/index.html#prfmodel.fitters.sgd.SGDHistory" title="prfmodel.fitters.sgd.SGDHistory"><span class="pre">SGDHistory</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/prfmodel/fitters/sgd.html#SGDFitter.fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.fitters.SGDFitter.fit" title="Link to this definition">¶</a></dt>
+<dd><p>Fit a population receptive field model to target data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<a class="reference internal" href="../index.html#prfmodel.Tensor" title="prfmodel.Tensor"><em>Tensor</em></a>) – Target data to fit the model to. Must have shape (num_batches, num_frames), where <cite>num_batches</cite> is the
+number of batches for which parameters are estimated and <cite>num_frames</cite> is the number of time steps.</p></li>
+<li><p><strong>init_parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – Dataframe with initial model parameters. Columns must contain different model parameters and
+rows parameter values for each batch in <cite>data</cite>.</p></li>
+<li><p><strong>fixed_parameters</strong> (<em>Sequence</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Names of model parameters that are fixed to their starting values, i.e., their values are not optimized
+during the fitting. If <cite>None</cite> (the default), all parameters are optimized during fitting.</p></li>
+<li><p><strong>num_steps</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>default=1000</em>) – Number of optimization steps.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>SGDHistory</em> – A history object that contains loss and metric values for each optimization step.</p></li>
+<li><p><em>pandas.DataFrame</em> – A dataframe with final model parameters.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.get_layer">
+<span class="sig-name descname"><span class="pre">get_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.get_layer" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves a layer based on either its name (unique) or index.</p>
+<p>If <cite>name</cite> and <cite>index</cite> are both provided, <cite>index</cite> will take precedence.
+Indices are based on order of horizontal graph traversal (bottom-up).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – String, name of layer.</p></li>
+<li><p><strong>index</strong> – Integer, index of layer.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A layer instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.summary">
+<span class="sig-name descname"><span class="pre">summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">line_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">positions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expand_nested</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_trainable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.summary" title="Link to this definition">¶</a></dt>
+<dd><p>Prints a string summary of the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>line_length</strong> – Total length of printed lines
+(e.g. set this to adapt the display to different
+terminal window sizes).</p></li>
+<li><p><strong>positions</strong> – Relative or absolute positions of log elements
+in each line. If not provided, becomes
+<cite>[0.3, 0.6, 0.70, 1.]</cite>. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>print_fn</strong> – Print function to use. By default, prints to <cite>stdout</cite>.
+If <cite>stdout</cite> doesn’t work in your environment, change to <cite>print</cite>.
+It will be called on each line of the summary.
+You can set it to a custom function
+in order to capture the string summary.</p></li>
+<li><p><strong>expand_nested</strong> – Whether to expand the nested models.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>show_trainable</strong> – Whether to show if a layer is trainable.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>layer_range</strong> – a list or tuple of 2 strings,
+which is the starting layer name and ending layer name
+(both inclusive) indicating the range of layers to be printed
+in summary. It also accepts regex patterns instead of exact
+names. In this case, the start predicate will be
+the first element that matches <cite>layer_range[0]</cite>
+and the end predicate will be the last element
+that matches <cite>layer_range[1]</cite>.
+By default <cite>None</cite> considers all layers of the model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – if <cite>summary()</cite> is called before the model is built.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zipped</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.save" title="Link to this definition">¶</a></dt>
+<dd><p>Saves a model as a <cite>.keras</cite> file.</p>
+<p>Note that <cite>model.save()</cite> is an alias for <cite>keras.saving.save_model()</cite>.</p>
+<p>The saved <cite>.keras</cite> file contains:</p>
+<ul class="simple">
+<li><p>The model’s configuration (architecture)</p></li>
+<li><p>The model’s weights</p></li>
+<li><p>The model’s optimizer’s state (if any)</p></li>
+</ul>
+<p>Thus models can be reinstantiated in the exact same state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> – <cite>str</cite> or <cite>pathlib.Path</cite> object.
+The path where to save the model. Must end in <cite>.keras</cite>
+(unless saving the model as an unzipped directory
+via <cite>zipped=False</cite>).</p></li>
+<li><p><strong>overwrite</strong> – Whether we should overwrite any existing model at
+the target location, or instead ask the user via
+an interactive prompt.</p></li>
+<li><p><strong>zipped</strong> – Whether to save the model as a zipped <cite>.keras</cite>
+archive (default when saving locally), or as an
+unzipped directory (default when saving on the
+Hugging Face Hub).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
+model = keras.Sequential(</p>
+<blockquote>
+<div><dl class="simple">
+<dt>[</dt><dd><p>keras.layers.Dense(5, input_shape=(3,)),
+keras.layers.Softmax(),</p>
+</dd>
+</dl>
+<p>],</p>
+</div></blockquote>
+<p>)
+model.save(“model.keras”)
+loaded_model = keras.saving.load_model(“model.keras”)
+x = keras.random.uniform((10, 3))
+assert np.allclose(model.predict(x), loaded_model.predict(x))
+<a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.save_weights">
+<span class="sig-name descname"><span class="pre">save_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_shard_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.save_weights" title="Link to this definition">¶</a></dt>
+<dd><p>Saves all weights to a single file or sharded files.</p>
+<p>By default, the weights will be saved in a single <cite>.weights.h5</cite> file.
+If sharding is enabled (<cite>max_shard_size</cite> is not <cite>None</cite>), the weights
+will be saved in multiple files, each with a size at most
+<cite>max_shard_size</cite> (in GB). Additionally, a configuration file
+<cite>.weights.json</cite> will contain the metadata for the sharded files.</p>
+<p>The saved sharded files contain:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><cite>*.weights.json</cite>: The configuration file containing ‘metadata’ and</dt><dd><p>‘weight_map’.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>*_xxxxxx.weights.h5</cite>: The sharded files containing only the</dt><dd><p>weights.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> – <cite>str</cite> or <cite>pathlib.Path</cite> object. Path where the weights
+will be saved.  When sharding, the filepath must end in
+<cite>.weights.json</cite>. If <cite>.weights.h5</cite> is provided, it will be
+overridden.</p></li>
+<li><p><strong>overwrite</strong> – Whether to overwrite any existing weights at the target
+location or instead ask the user via an interactive prompt.</p></li>
+<li><p><strong>max_shard_size</strong> – <cite>int</cite> or <cite>float</cite>. Maximum size in GB for each
+sharded file. If <cite>None</cite>, no sharding will be done. Defaults to
+<cite>None</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<p><a href="#id9"><span class="problematic" id="id10">``</span></a><a href="#id11"><span class="problematic" id="id12">`</span></a>python
+# Instantiate a EfficientNetV2L model with about 454MB of weights.
+model = keras.applications.EfficientNetV2L(weights=None)</p>
+<p># Save the weights in a single file.
+model.save_weights(“model.weights.h5”)</p>
+<p># Save the weights in sharded files. Use <cite>max_shard_size=0.25</cite> means
+# each sharded file will be at most ~250MB.
+model.save_weights(“model.weights.json”, max_shard_size=0.25)</p>
+<p># Load the weights in a new model with the same architecture.
+loaded_model = keras.applications.EfficientNetV2L(weights=None)
+loaded_model.load_weights(“model.weights.h5”)
+x = keras.random.uniform((1, 480, 480, 3))
+assert np.allclose(model.predict(x), loaded_model.predict(x))</p>
+<p># Load the sharded weights in a new model with the same architecture.
+loaded_model = keras.applications.EfficientNetV2L(weights=None)
+loaded_model.load_weights(“model.weights.json”)
+x = keras.random.uniform((1, 480, 480, 3))
+assert np.allclose(model.predict(x), loaded_model.predict(x))
+<a href="#id13"><span class="problematic" id="id14">``</span></a><a href="#id15"><span class="problematic" id="id16">`</span></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.load_weights">
+<span class="sig-name descname"><span class="pre">load_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_mismatch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.load_weights" title="Link to this definition">¶</a></dt>
+<dd><p>Load the weights from a single file or sharded files.</p>
+<p>Weights are loaded based on the network’s topology. This means the
+architecture should be the same as when the weights were saved. Note
+that layers that don’t have weights are not taken into account in the
+topological ordering, so adding or removing layers is fine as long as
+they don’t have weights.</p>
+<p><strong>Partial weight loading</strong></p>
+<p>If you have modified your model, for instance by adding a new layer
+(with weights) or by changing the shape of the weights of a layer, you
+can choose to ignore errors and continue loading by setting
+<cite>skip_mismatch=True</cite>. In this case any layer with mismatching weights
+will be skipped. A warning will be displayed for each skipped layer.</p>
+<p><strong>Sharding</strong></p>
+<p>When loading sharded weights, it is important to specify <cite>filepath</cite> that
+ends with <cite>*.weights.json</cite> which is used as the configuration file.
+Additionally, the sharded files <cite>*_xxxxx.weights.h5</cite> must be in the same
+directory as the configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> – <cite>str</cite> or <cite>pathlib.Path</cite> object. Path where the weights
+will be saved.  When sharding, the filepath must end in
+<cite>.weights.json</cite>.</p></li>
+<li><p><strong>skip_mismatch</strong> – Boolean, whether to skip loading of layers where
+there is a mismatch in the number of weights, or a mismatch in
+the shape of the weights.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<p><a href="#id17"><span class="problematic" id="id18">``</span></a><a href="#id19"><span class="problematic" id="id20">`</span></a>python
+# Load the weights in a single file.
+model.load_weights(“model.weights.h5”)</p>
+<p># Load the weights in sharded files.
+model.load_weights(“model.weights.json”)
+<a href="#id21"><span class="problematic" id="id22">``</span></a><a href="#id23"><span class="problematic" id="id24">`</span></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.get_quantization_layer_structure">
+<span class="sig-name descname"><span class="pre">get_quantization_layer_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.get_quantization_layer_structure" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the quantization structure for the model.</p>
+<p>This method is intended to be overridden by model authors to provide
+topology information required for structure-aware quantization modes
+like ‘gptq’.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mode</strong> – The quantization mode.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><cite>{‘pre_block_layers’: [list], ‘sequential_blocks’: [list]}</cite>
+or <cite>None</cite> if the mode does not require structure or is not
+supported. <cite>‘pre_block_layers’</cite> is a list of layers that
+the inputs should be passed through, before being passed to
+the sequential blocks. For example, inputs to an LLM must
+first be passed through an embedding layer, followed by
+the transformer.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary describing the topology, e.g.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.quantize">
+<span class="sig-name descname"><span class="pre">quantize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.quantize" title="Link to this definition">¶</a></dt>
+<dd><p>Quantize the weights of the model.</p>
+<p>Note that the model must be built first before calling this method.
+<cite>quantize</cite> will recursively call <cite>quantize(…)</cite> in all layers and
+will be skipped if the layer doesn’t implement the function.</p>
+<p>This method can be called by passing a <cite>mode</cite> string, which uses the
+default configuration for that mode. Alternatively, a <cite>config</cite> object
+can be passed to customize the behavior of the quantization (e.g. to
+use specific quantizers for weights or activations).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> – The mode of the quantization. Supported modes are:
+<cite>“int8”</cite>, <cite>“int4”</cite>, <cite>“float8”</cite>, <cite>“gptq”</cite>. This is
+optional if <cite>config</cite> is provided.</p></li>
+<li><p><strong>config</strong> – The configuration object specifying additional
+quantization options. This argument allows to configure
+the weight and activation quantizers. be an instance of
+<cite>keras.quantizers.QuantizationConfig</cite>.</p></li>
+<li><p><strong>filters</strong> – Optional filters to apply to the quantization. Can be a
+regex string, a list of regex strings, or a callable. Only the
+layers which match the filter conditions will be quantized.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Example:</p>
+<p>Quantize a model to int8 with default configuration:</p>
+<p><a href="#id25"><span class="problematic" id="id26">``</span></a><a href="#id27"><span class="problematic" id="id28">`</span></a>python
+# Build the model
+model = keras.Sequential([</p>
+<blockquote>
+<div><p>keras.Input(shape=(10,)),
+keras.layers.Dense(10),</p>
+</div></blockquote>
+<p>])
+model.build((None, 10))</p>
+<p># Quantize with default int8 config
+model.quantize(“int8”)
+<a href="#id29"><span class="problematic" id="id30">``</span></a><a href="#id31"><span class="problematic" id="id32">`</span></a></p>
+<p>Quantize a model to int8 with a custom configuration:</p>
+<p><a href="#id33"><span class="problematic" id="id34">``</span></a><a href="#id35"><span class="problematic" id="id36">`</span></a>python
+from keras.quantizers import Int8QuantizationConfig
+from keras.quantizers import AbsMaxQuantizer</p>
+<p># Build the model
+model = keras.Sequential([</p>
+<blockquote>
+<div><p>keras.Input(shape=(10,)),
+keras.layers.Dense(10),</p>
+</div></blockquote>
+<p>])
+model.build((None, 10))</p>
+<p># Create a custom config
+config = Int8QuantizationConfig(</p>
+<blockquote>
+<div><dl class="simple">
+<dt>weight_quantizer=AbsMaxQuantizer(</dt><dd><p>axis=0,
+value_range=(-127, 127)</p>
+</dd>
+</dl>
+<p>),
+activation_quantizer=AbsMaxQuantizer(</p>
+<blockquote>
+<div><p>axis=-1,
+value_range=(-127, 127)</p>
+</div></blockquote>
+<p>),</p>
+</div></blockquote>
+<p>)</p>
+<p># Quantize with custom config
+model.quantize(config=config)
+<a href="#id37"><span class="problematic" id="id38">``</span></a><a href="#id39"><span class="problematic" id="id40">`</span></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.build_from_config">
+<span class="sig-name descname"><span class="pre">build_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.build_from_config" title="Link to this definition">¶</a></dt>
+<dd><p>Builds the layer’s states with the supplied config dict.</p>
+<p>By default, this method calls the <cite>build(config[“input_shape”])</cite> method,
+which creates weights based on the layer’s input shape in the supplied
+config. If your config contains other information needed to load the
+layer’s state, you should override this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Dict containing the input shape associated with this layer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.to_json" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a JSON string containing the network configuration.</p>
+<p>To load a network from a JSON save file, use
+<cite>keras.models.model_from_json(json_string, custom_objects={…})</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – Additional keyword arguments to be passed to
+<cite>json.dumps()</cite>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON string.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.export">
+<span class="sig-name descname"><span class="pre">export</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'tf_saved_model'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_signature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.export" title="Link to this definition">¶</a></dt>
+<dd><p>Export the model as an artifact for inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filepath</strong> – <cite>str</cite> or <cite>pathlib.Path</cite> object. The path to save the
+artifact.</p></li>
+<li><p><strong>format</strong> – <cite>str</cite>. The export format. Supported values:
+<cite>“tf_saved_model”</cite>, <cite>“onnx”</cite>, <cite>“openvino”</cite>, and <cite>“litert”</cite>.
+Defaults to <cite>“tf_saved_model”</cite>.</p></li>
+<li><p><strong>verbose</strong> – <cite>bool</cite>. Whether to print a message during export. Defaults
+to <cite>None</cite>, which uses the default value set by different
+backends and formats.</p></li>
+<li><p><strong>input_signature</strong> – Optional. Specifies the shape and dtype of the
+model inputs. Can be a structure of <cite>keras.InputSpec</cite>,
+<cite>tf.TensorSpec</cite>, <cite>backend.KerasTensor</cite>, or backend tensor. If
+not provided, it will be automatically computed. Defaults to
+<cite>None</cite>.</p></li>
+<li><p><strong>**kwargs</strong> – <p>Additional keyword arguments.
+- <cite>is_static</cite>: Optional <cite>bool</cite>. Specific to the JAX backend and</p>
+<blockquote>
+<div><p><cite>format=”tf_saved_model”</cite>. Indicates whether <cite>fn</cite> is static.
+Set to <cite>False</cite> if <cite>fn</cite> involves state updates (e.g., RNG
+seeds and counters).</p>
+</div></blockquote>
+<ul>
+<li><dl>
+<dt><cite>jax2tf_kwargs</cite>: Optional <cite>dict</cite>. Specific to the JAX backend</dt><dd><p>and <cite>format=”tf_saved_model”</cite>. Arguments for
+<cite>jax2tf.convert</cite>. See the documentation for
+[<cite>jax2tf.convert</cite>](</p>
+<blockquote>
+<div><p><a class="reference external" href="https://github.com/google/jax/blob/main/jax/experimental/jax2tf/README.md">https://github.com/google/jax/blob/main/jax/experimental/jax2tf/README.md</a>).</p>
+</div></blockquote>
+<p>If <cite>native_serialization</cite> and <cite>polymorphic_shapes</cite> are not
+provided, they will be automatically computed.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><cite>opset_version</cite>: Optional <cite>int</cite>. Specific to <cite>format=”onnx”</cite>.</dt><dd><p>An integer value that specifies the ONNX opset version.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>LiteRT-specific options: Optional keyword arguments specific</dt><dd><p>to <cite>format=”litert”</cite>. These are passed directly to the
+TensorFlow Lite converter and include options like
+<cite>optimizations</cite>, <cite>representative_dataset</cite>,
+<cite>experimental_new_quantizer</cite>, <cite>allow_custom_ops</cite>,
+<cite>enable_select_tf_ops</cite>, etc. See TensorFlow Lite
+documentation for all available options.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p></li>
+</ul>
+</dd>
+</dl>
+<p><strong>Note:</strong> This feature is currently supported only with TensorFlow, JAX
+and Torch backends.</p>
+<p><strong>Note:</strong> Be aware that the exported artifact may contain information
+from the local file system when using <cite>format=”onnx”</cite>, <cite>verbose=True</cite>
+and Torch backend.</p>
+<p>Examples:</p>
+<p>Here’s how to export a TensorFlow SavedModel for inference.</p>
+<p><a href="#id41"><span class="problematic" id="id42">``</span></a><a href="#id43"><span class="problematic" id="id44">`</span></a>python
+# Export the model as a TensorFlow SavedModel artifact
+model.export(“path/to/location”, format=”tf_saved_model”)</p>
+<p># Load the artifact in a different process/environment
+reloaded_artifact = tf.saved_model.load(“path/to/location”)
+predictions = reloaded_artifact.serve(input_data)
+<a href="#id45"><span class="problematic" id="id46">``</span></a><a href="#id47"><span class="problematic" id="id48">`</span></a></p>
+<p>Here’s how to export an ONNX for inference.</p>
+<p><a href="#id49"><span class="problematic" id="id50">``</span></a><a href="#id51"><span class="problematic" id="id52">`</span></a>python
+# Export the model as a ONNX artifact
+model.export(“path/to/location”, format=”onnx”)</p>
+<p># Load the artifact in a different process/environment
+ort_session = onnxruntime.InferenceSession(“path/to/location”)
+ort_inputs = {</p>
+<blockquote>
+<div><p>k.name: v for k, v in zip(ort_session.get_inputs(), input_data)</p>
+</div></blockquote>
+<p>}
+predictions = ort_session.run(None, ort_inputs)
+<a href="#id53"><span class="problematic" id="id54">``</span></a><a href="#id55"><span class="problematic" id="id56">`</span></a></p>
+<p>Here’s how to export a LiteRT (TFLite) for inference.</p>
+<p><a href="#id57"><span class="problematic" id="id58">``</span></a><a href="#id59"><span class="problematic" id="id60">`</span></a>python
+# Export the model as a LiteRT artifact
+model.export(“path/to/location”, format=”litert”)</p>
+<p># Load the artifact in a different process/environment
+interpreter = tf.lite.Interpreter(model_path=”path/to/location”)
+interpreter.allocate_tensors()
+interpreter.set_tensor(</p>
+<blockquote>
+<div><p>interpreter.get_input_details()[0][‘index’], input_data</p>
+</div></blockquote>
+<p>)
+interpreter.invoke()
+output_data = interpreter.get_tensor(</p>
+<blockquote>
+<div><p>interpreter.get_output_details()[0][‘index’]</p>
+</div></blockquote>
+<section id="id61">
+<h3>)<a class="headerlink" href="#id61" title="Link to this heading">¶</a></h3>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.from_config">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_objects</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.from_config" title="Link to this definition">¶</a></dt>
+<dd><p>Creates an operation from its config.</p>
+<p>This method is the reverse of <cite>get_config</cite>, capable of instantiating the
+same operation from the config dictionary.</p>
+<p>Note: If you override this method, you might receive a serialized dtype
+config, which is a <cite>dict</cite>. You can deserialize it as follows:</p>
+<p><a href="#id62"><span class="problematic" id="id63">``</span></a><a href="#id64"><span class="problematic" id="id65">`</span></a>python
+if “dtype” in config and isinstance(config[“dtype”], dict):</p>
+<blockquote>
+<div><p>policy = dtype_policies.deserialize(config[“dtype”])</p>
+</div></blockquote>
+<p><a href="#id66"><span class="problematic" id="id67">``</span></a><a href="#id68"><span class="problematic" id="id69">`</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – A Python dictionary, typically the output of <cite>get_config</cite>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An operation instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.get_state_tree">
+<span class="sig-name descname"><span class="pre">get_state_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'backend_tensor'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.get_state_tree" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves tree-like structure of model variables.</p>
+<p>This method allows retrieval of different model variables (trainable,
+non-trainable, optimizer, and metrics). The variables are returned in a
+nested dictionary format, where the keys correspond to the variable
+names and the values are the nested representations of the variables.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>A dictionary containing the nested representations of the</dt><dd><p>requested variables. The keys are the variable names, and the
+values are the corresponding nested dictionaries.</p>
+</dd>
+<dt>value_format: One of <cite>“backend_tensor”</cite>, <cite>“numpy_array”</cite>.</dt><dd><dl class="simple">
+<dt>The kind of array to return as the leaves of the nested</dt><dd><p>state tree.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+<p>Example:</p>
+<p><a href="#id70"><span class="problematic" id="id71">``</span></a><a href="#id72"><span class="problematic" id="id73">`</span></a>python
+model = keras.Sequential([</p>
+<blockquote>
+<div><p>keras.Input(shape=(1,), name=”my_input”),
+keras.layers.Dense(1, activation=”sigmoid”, name=”my_dense”),</p>
+</div></blockquote>
+<p>], name=”my_sequential”)
+model.compile(optimizer=”adam”, loss=”mse”, metrics=[“mae”])
+model.fit(np.array([[1.0]]), np.array([[1.0]]))
+state_tree = model.get_state_tree()
+<a href="#id74"><span class="problematic" id="id75">``</span></a><a href="#id76"><span class="problematic" id="id77">`</span></a></p>
+<p>The <cite>state_tree</cite> dictionary returned looks like:</p>
+<p><a href="#id78"><span class="problematic" id="id79">``</span></a>`
+{</p>
+<blockquote>
+<div><dl>
+<dt>‘metrics_variables’: {</dt><dd><dl class="simple">
+<dt>‘loss’: {</dt><dd><p>‘count’: …,
+‘total’: …,</p>
+</dd>
+</dl>
+<p>},
+‘mean_absolute_error’: {</p>
+<blockquote>
+<div><p>‘count’: …,
+‘total’: …,</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<p>},
+‘trainable_variables’: {</p>
+<blockquote>
+<div><dl>
+<dt>‘my_sequential’: {</dt><dd><dl class="simple">
+<dt>‘my_dense’: {</dt><dd><p>‘bias’: …,
+‘kernel’: …,</p>
+</dd>
+</dl>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>},
+‘non_trainable_variables’: {},
+‘optimizer_variables’: {</p>
+<blockquote>
+<div><dl>
+<dt>‘adam’: {</dt><dd><blockquote>
+<div><p>‘iteration’: …,
+‘learning_rate’: …,
+‘my_sequential_my_dense_bias_momentum’: …,
+‘my_sequential_my_dense_bias_velocity’: …,
+‘my_sequential_my_dense_kernel_momentum’: …,
+‘my_sequential_my_dense_kernel_velocity’: …,</p>
+</div></blockquote>
+<p>}</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<section id="id80">
+<h3>}<a class="headerlink" href="#id80" title="Link to this heading">¶</a></h3>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.set_state_tree">
+<span class="sig-name descname"><span class="pre">set_state_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_tree</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.set_state_tree" title="Link to this definition">¶</a></dt>
+<dd><p>Assigns values to variables of the model.</p>
+<p>This method takes a dictionary of nested variable values, which
+represents the state tree of the model, and assigns them to the
+corresponding variables of the model. The dictionary keys represent the
+variable names (e.g., <cite>‘trainable_variables’</cite>, <cite>‘optimizer_variables’</cite>),
+and the values are nested dictionaries containing the variable
+paths and their corresponding values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>state_tree</strong> – A dictionary representing the state tree of the model.
+The keys are the variable names, and the values are nested
+dictionaries representing the variable paths and their values.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.evaluate">
+<span class="sig-name descname"><span class="pre">evaluate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.evaluate" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the loss value &amp; metrics values for the model in test mode.</p>
+<p>Computation is done in batches (see the <cite>batch_size</cite> arg.)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Input data. It can be:
+- A NumPy array (or array-like), or a list of arrays
+(in case the model has multiple inputs).
+- A backend-native tensor, or a list of tensors
+(in case the model has multiple inputs).
+- A dict mapping input names to the corresponding array/tensors,
+if the model has named inputs.
+- A <cite>keras.utils.PyDataset</cite> returning <cite>(inputs, targets)</cite> or
+<cite>(inputs, targets, sample_weights)</cite>.
+- A <cite>tf.data.Dataset</cite> yielding <cite>(inputs, targets)</cite> or
+<cite>(inputs, targets, sample_weights)</cite>.
+- A <cite>torch.utils.data.DataLoader</cite> yielding <cite>(inputs, targets)</cite>
+or <cite>(inputs, targets, sample_weights)</cite>.
+- A Python generator function yielding <cite>(inputs, targets)</cite> or
+<cite>(inputs, targets, sample_weights)</cite>.</p></li>
+<li><p><strong>y</strong> – Target data. Like the input data <cite>x</cite>, it can be either NumPy
+array(s) or backend-native tensor(s). If <cite>x</cite> is a
+<cite>keras.utils.PyDataset</cite>, <cite>tf.data.Dataset</cite>,
+<cite>torch.utils.data.DataLoader</cite> or a Python generator function,
+<cite>y</cite> should not be specified since targets will be obtained from
+<cite>x</cite>.</p></li>
+<li><p><strong>batch_size</strong> – Integer or <cite>None</cite>.
+Number of samples per batch of computation.
+If unspecified, <cite>batch_size</cite> will default to 32.
+Do not specify the <cite>batch_size</cite> if your input data <cite>x</cite> is a
+<cite>keras.utils.PyDataset</cite>, <cite>tf.data.Dataset</cite>,
+<cite>torch.utils.data.DataLoader</cite> or Python generator function
+since they generate batches.</p></li>
+<li><p><strong>verbose</strong> – <cite>“auto”</cite>, 0, 1, or 2. Verbosity mode.
+0 = silent, 1 = progress bar, 2 = single line.
+<cite>“auto”</cite> becomes 1 for most cases.
+Note that the progress bar is not
+particularly useful when logged to a file, so <cite>verbose=2</cite> is
+recommended when not running interactively
+(e.g. in a production environment). Defaults to <cite>“auto”</cite>.</p></li>
+<li><p><strong>sample_weight</strong> – Optional NumPy array or tensor of weights for
+the training samples, used for weighting the loss function
+(during training only). You can either pass a flat (1D)
+NumPy array or tensor with the same length as the input samples
+(1:1 mapping between weights and samples), or in the case of
+temporal data, you can pass a 2D NumPy array or tensor with
+shape <cite>(samples, sequence_length)</cite> to apply a different weight
+to every timestep of every sample.
+This argument is not supported when <cite>x</cite> is a
+<cite>keras.utils.PyDataset</cite>, <cite>tf.data.Dataset</cite>,
+<cite>torch.utils.data.DataLoader</cite> or Python generator function.
+Instead, provide <cite>sample_weights</cite> as the third element of <cite>x</cite>.
+Note that sample weighting does not apply to metrics specified
+via the <cite>metrics</cite> argument in <cite>compile()</cite>. To apply sample
+weighting to your metrics, you can specify them via the
+<cite>weighted_metrics</cite> in <cite>compile()</cite> instead.</p></li>
+<li><p><strong>steps</strong> – Integer or <cite>None</cite>.
+Total number of steps (batches of samples) to draw before
+declaring the evaluation round finished. If <cite>steps</cite> is <cite>None</cite>,
+it will run until <cite>x</cite> is exhausted. In the case of an infinitely
+repeating dataset, it will run indefinitely.</p></li>
+<li><p><strong>callbacks</strong> – List of <cite>keras.callbacks.Callback</cite> instances.
+List of callbacks to apply during evaluation.</p></li>
+<li><p><strong>return_dict</strong> – If <cite>True</cite>, loss and metric results are returned as a
+dict, with each key being the name of the metric.
+If <cite>False</cite>, they are returned as a list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Scalar test loss (if the model has a single output and no metrics)
+or list of scalars (if the model has multiple outputs
+and/or metrics).</p>
+</dd>
+</dl>
+<p>Note: When using compiled metrics, <cite>evaluate()</cite> may return multiple
+submetric values, while <cite>model.metrics_names</cite> often lists only
+top-level names (e.g., ‘loss’, ‘compile_metrics’), leading to a
+length mismatch. The order of the <cite>evaluate()</cite> output corresponds
+to the order of metrics specified during <cite>model.compile()</cite>. You can
+use this order to map the <cite>evaluate()</cite> results to the intended
+metric. <cite>model.metrics_names</cite> itself will still return only the
+top-level names.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.predict" title="Link to this definition">¶</a></dt>
+<dd><p>Generates output predictions for the input samples.</p>
+<p>Computation is done in batches. This method is designed for batch
+processing of large numbers of inputs. It is not intended for use inside
+of loops that iterate over your data and process small numbers of inputs
+at a time.</p>
+<p>For small numbers of inputs that fit in one batch,
+directly use <cite>__call__()</cite> for faster execution, e.g.,
+<cite>model(x)</cite>, or <cite>model(x, training=False)</cite> if you have layers such as
+<cite>BatchNormalization</cite> that behave differently during
+inference.</p>
+<p>Note: See [this FAQ entry](
+<a class="reference external" href="https://keras.io/getting_started/faq/#whats-the-difference-between-model-methods-predict-and-call">https://keras.io/getting_started/faq/#whats-the-difference-between-model-methods-predict-and-call</a>)
+for more details about the difference between <cite>Model</cite> methods
+<cite>predict()</cite> and <cite>__call__()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Input data. It can be:
+- A NumPy array (or array-like), or a list of arrays
+(in case the model has multiple inputs).
+- A backend-native tensor, or a list of tensors
+(in case the model has multiple inputs).
+- A dict mapping input names to the corresponding array/tensors,
+if the model has named inputs.
+- A <cite>keras.utils.PyDataset</cite>.
+- A <cite>tf.data.Dataset</cite>.
+- A <cite>torch.utils.data.DataLoader</cite>.
+- A Python generator function.</p></li>
+<li><p><strong>batch_size</strong> – Integer or <cite>None</cite>.
+Number of samples per batch of computation.
+If unspecified, <cite>batch_size</cite> will default to 32.
+Do not specify the <cite>batch_size</cite> if your input data <cite>x</cite> is a
+<cite>keras.utils.PyDataset</cite>, <cite>tf.data.Dataset</cite>,
+<cite>torch.utils.data.DataLoader</cite> or Python generator function
+since they generate batches.</p></li>
+<li><p><strong>verbose</strong> – <cite>“auto”</cite>, 0, 1, or 2. Verbosity mode.
+0 = silent, 1 = progress bar, 2 = single line.
+<cite>“auto”</cite> becomes 1 for most cases. Note that the progress bar
+is not particularly useful when logged to a file,
+so <cite>verbose=2</cite> is recommended when not running interactively
+(e.g. in a production environment). Defaults to <cite>“auto”</cite>.</p></li>
+<li><p><strong>steps</strong> – Total number of steps (batches of samples) to draw before
+declaring the prediction round finished. If <cite>steps</cite> is <cite>None</cite>,
+it will run until <cite>x</cite> is exhausted. In the case of an infinitely
+repeating dataset, it will run indefinitely.</p></li>
+<li><p><strong>callbacks</strong> – List of <cite>keras.callbacks.Callback</cite> instances.
+List of callbacks to apply during prediction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>NumPy array(s) of predictions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.train_on_batch">
+<span class="sig-name descname"><span class="pre">train_on_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.train_on_batch" title="Link to this definition">¶</a></dt>
+<dd><p>Runs a single gradient update on a single batch of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Input data. Must be array-like.</p></li>
+<li><p><strong>y</strong> – Target data. Must be array-like.</p></li>
+<li><p><strong>sample_weight</strong> – Optional array of the same length as x, containing
+weights to apply to the model’s loss for each sample.
+In the case of temporal data, you can pass a 2D array
+with shape <cite>(samples, sequence_length)</cite>, to apply a different
+weight to every timestep of every sample.</p></li>
+<li><p><strong>class_weight</strong> – Optional dictionary mapping class indices (integers)
+to a weight (float) to apply to the model’s loss for the samples
+from this class during training. This can be useful to tell the
+model to “pay more attention” to samples from an
+under-represented class. When <cite>class_weight</cite> is specified
+and targets have a rank of 2 or greater, either <cite>y</cite> must
+be one-hot encoded, or an explicit final dimension of 1
+must be included for sparse class labels.</p></li>
+<li><p><strong>return_dict</strong> – If <cite>True</cite>, loss and metric results are returned as a
+dict, with each key being the name of the metric. If <cite>False</cite>,
+they are returned as a list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A scalar loss value (when no metrics and <cite>return_dict=False</cite>),
+a list of loss and metric values
+(if there are metrics and <cite>return_dict=False</cite>), or a dict of
+metric and loss values (if <cite>return_dict=True</cite>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.test_on_batch">
+<span class="sig-name descname"><span class="pre">test_on_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.test_on_batch" title="Link to this definition">¶</a></dt>
+<dd><p>Test the model on a single batch of samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Input data. Must be array-like.</p></li>
+<li><p><strong>y</strong> – Target data. Must be array-like.</p></li>
+<li><p><strong>sample_weight</strong> – Optional array of the same length as x, containing
+weights to apply to the model’s loss for each sample.
+In the case of temporal data, you can pass a 2D array
+with shape <cite>(samples, sequence_length)</cite>, to apply a different
+weight to every timestep of every sample.</p></li>
+<li><p><strong>return_dict</strong> – If <cite>True</cite>, loss and metric results are returned as a
+dict, with each key being the name of the metric. If <cite>False</cite>,
+they are returned as a list.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A scalar loss value (when no metrics and <cite>return_dict=False</cite>),
+a list of loss and metric values
+(if there are metrics and <cite>return_dict=False</cite>), or a dict of
+metric and loss values (if <cite>return_dict=True</cite>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.predict_on_batch">
+<span class="sig-name descname"><span class="pre">predict_on_batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.predict_on_batch" title="Link to this definition">¶</a></dt>
+<dd><p>Returns predictions for a single batch of samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> – Input data. It must be array-like.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>NumPy array(s) of predictions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.compile">
+<span class="sig-name descname"><span class="pre">compile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rmsprop'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss_weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weighted_metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_eagerly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps_per_execution</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jit_compile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_scale_loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.compile" title="Link to this definition">¶</a></dt>
+<dd><p>Configures the model for training.</p>
+<p>Example:</p>
+<p><a href="#id81"><span class="problematic" id="id82">``</span></a><a href="#id83"><span class="problematic" id="id84">`</span></a>python
+model.compile(</p>
+<blockquote>
+<div><p>optimizer=keras.optimizers.Adam(learning_rate=1e-3),
+loss=keras.losses.BinaryCrossentropy(),
+metrics=[</p>
+<blockquote>
+<div><p>keras.metrics.BinaryAccuracy(),
+keras.metrics.FalseNegatives(),</p>
+</div></blockquote>
+<p>],</p>
+</div></blockquote>
+<section id="id85">
+<h3>)<a class="headerlink" href="#id85" title="Link to this heading">¶</a></h3>
+<dl class="field-list simple">
+<dt class="field-odd">param optimizer<span class="colon">:</span></dt>
+<dd class="field-odd"><p>String (name of optimizer) or optimizer instance. See
+<cite>keras.optimizers</cite>.</p>
+</dd>
+<dt class="field-even">param loss<span class="colon">:</span></dt>
+<dd class="field-even"><p>Loss function. May be a string (name of loss function), or
+a <cite>keras.losses.Loss</cite> instance. See <cite>keras.losses</cite>. A
+loss function is any callable with the signature
+<cite>loss = fn(y_true, y_pred)</cite>, where <cite>y_true</cite> are the ground truth
+values, and <cite>y_pred</cite> are the model’s predictions.
+<cite>y_true</cite> should have shape <cite>(batch_size, d0, .. dN)</cite>
+(except in the case of sparse loss functions such as
+sparse categorical crossentropy which expects integer arrays of
+shape <cite>(batch_size, d0, .. dN-1)</cite>).
+<cite>y_pred</cite> should have shape <cite>(batch_size, d0, .. dN)</cite>.
+The loss function should return a float tensor.</p>
+</dd>
+<dt class="field-odd">param loss_weights<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional list or dictionary specifying scalar
+coefficients (Python floats) to weight the loss contributions of
+different model outputs. The loss value that will be minimized
+by the model will then be the <em>weighted sum</em> of all individual
+losses, weighted by the <cite>loss_weights</cite> coefficients.  If a list,
+it is expected to have a 1:1 mapping to the model’s outputs. If
+a dict, it is expected to map output names (strings) to scalar
+coefficients.</p>
+</dd>
+<dt class="field-even">param metrics<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of metrics to be evaluated by the model during
+training and testing. Each of this can be a string (name of a
+built-in function), function or a <cite>keras.metrics.Metric</cite>
+instance. See <cite>keras.metrics</cite>. Typically you will use
+<cite>metrics=[‘accuracy’]</cite>. A function is any callable with the
+signature <cite>result = fn(y_true, _pred)</cite>. To specify different
+metrics for different outputs of a multi-output model, you could
+also pass a dictionary, such as
+<cite>metrics={‘a’:’accuracy’, ‘b’:[‘accuracy’, ‘mse’]}</cite>.
+You can also pass a list to specify a metric or a list of
+metrics for each output, such as
+<cite>metrics=[[‘accuracy’], [‘accuracy’, ‘mse’]]</cite>
+or <cite>metrics=[‘accuracy’, [‘accuracy’, ‘mse’]]</cite>. When you pass
+the strings ‘accuracy’ or ‘acc’, we convert this to one of
+<cite>keras.metrics.BinaryAccuracy</cite>,
+<cite>keras.metrics.CategoricalAccuracy</cite>,
+<cite>keras.metrics.SparseCategoricalAccuracy</cite> based on the
+shapes of the targets and of the model output. A similar
+conversion is done for the strings <cite>“crossentropy”</cite>
+and <cite>“ce”</cite> as well.
+The metrics passed here are evaluated without sample weighting;
+if you would like sample weighting to apply, you can specify
+your metrics via the <cite>weighted_metrics</cite> argument instead.</p>
+</dd>
+<dt class="field-odd">param weighted_metrics<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of metrics to be evaluated and weighted by
+<cite>sample_weight</cite> or <cite>class_weight</cite> during training and testing.</p>
+</dd>
+<dt class="field-even">param run_eagerly<span class="colon">:</span></dt>
+<dd class="field-even"><p>Bool. If <cite>True</cite>, this model’s forward pass
+will never be compiled. It is recommended to leave this
+as <cite>False</cite> when training (for best performance),
+and to set it to <cite>True</cite> when debugging.</p>
+</dd>
+<dt class="field-odd">param steps_per_execution<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Int. The number of batches to run
+during each a single compiled function call. Running multiple
+batches inside a single compiled function call can
+greatly improve performance on TPUs or small models with a large
+Python overhead. At most, one full epoch will be run each
+execution. If a number larger than the size of the epoch is
+passed, the execution will be truncated to the size of the
+epoch. Note that if <cite>steps_per_execution</cite> is set to <cite>N</cite>,
+<cite>Callback.on_batch_begin</cite> and <cite>Callback.on_batch_end</cite> methods
+will only be called every <cite>N</cite> batches (i.e. before/after
+each compiled function execution).
+Not supported with the PyTorch backend.</p>
+</dd>
+<dt class="field-even">param jit_compile<span class="colon">:</span></dt>
+<dd class="field-even"><p>Bool or <cite>“auto”</cite>. Whether to use XLA compilation when
+compiling a model. For <cite>jax</cite> and <cite>tensorflow</cite> backends,
+<cite>jit_compile=”auto”</cite> enables XLA compilation if the model
+supports it, and disabled otherwise.
+For <cite>torch</cite> backend, <cite>“auto”</cite> will default to eager
+execution and <cite>jit_compile=True</cite> will run with <cite>torch.compile</cite>
+with the <cite>“inductor”</cite> backend.</p>
+</dd>
+<dt class="field-odd">param auto_scale_loss<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Bool. If <cite>True</cite> and the model dtype policy is
+<cite>“mixed_float16”</cite>, the passed optimizer will be automatically
+wrapped in a <cite>LossScaleOptimizer</cite>, which will dynamically
+scale the loss to prevent underflow.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.metrics">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">metrics</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.metrics" title="Link to this definition">¶</a></dt>
+<dd><p>List of all metrics.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.compute_loss">
+<span class="sig-name descname"><span class="pre">compute_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.compute_loss" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the total loss, validate it, and return it.</p>
+<p>Subclasses can optionally override this method to provide custom loss
+computation logic.</p>
+<p>Example:</p>
+<p><a href="#id86"><span class="problematic" id="id87">``</span></a><a href="#id88"><span class="problematic" id="id89">`</span></a>python
+class MyModel(Model):</p>
+<blockquote>
+<div><dl class="simple">
+<dt>def __init__(self, <a href="#id90"><span class="problematic" id="id91">*</span></a>args, <a href="#id92"><span class="problematic" id="id93">**</span></a>kwargs):</dt><dd><p>super().__init__(<a href="#id94"><span class="problematic" id="id95">*</span></a>args, <a href="#id96"><span class="problematic" id="id97">**</span></a>kwargs)
+self.loss_tracker = metrics.Mean(name=’loss’)</p>
+</dd>
+<dt>def compute_loss(self, x, y, y_pred, sample_weight, training=True):</dt><dd><p>loss = ops.mean((y_pred - y) ** 2)
+loss += ops.sum(self.losses)
+self.loss_tracker.update_state(loss)
+return loss</p>
+</dd>
+<dt>def reset_metrics(self):</dt><dd><p>self.loss_tracker.reset_state()</p>
+</dd>
+</dl>
+<p>&#64;property
+def metrics(self):</p>
+<blockquote>
+<div><p>return [self.loss_tracker]</p>
+</div></blockquote>
+</div></blockquote>
+<p>inputs = layers.Input(shape=(10,), name=’my_input’)
+outputs = layers.Dense(10)(inputs)
+model = MyModel(inputs, outputs)
+model.add_loss(ops.sum(outputs))</p>
+<p>optimizer = SGD()
+model.compile(optimizer, loss=’mse’, steps_per_execution=10)
+dataset = …
+model.fit(dataset, epochs=2, steps_per_epoch=10)
+print(f”Custom loss: {model.loss_tracker.result()}”)
+<a href="#id98"><span class="problematic" id="id99">``</span></a><a href="#id100"><span class="problematic" id="id101">`</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Input data.</p></li>
+<li><p><strong>y</strong> – Target data.</p></li>
+<li><p><strong>y_pred</strong> – Predictions returned by the model (output of <cite>model(x)</cite>)</p></li>
+<li><p><strong>sample_weight</strong> – Sample weights for weighting the loss function.</p></li>
+<li><p><strong>training</strong> – Whether we are training or evaluating the model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The total loss as a scalar tensor, or <cite>None</cite> if no loss results
+(which is the case when called by <cite>Model.test_step</cite>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.compute_metrics">
+<span class="sig-name descname"><span class="pre">compute_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.compute_metrics" title="Link to this definition">¶</a></dt>
+<dd><p>Update metric states and collect all metrics to be returned.</p>
+<p>Subclasses can optionally override this method to provide custom metric
+updating and collection logic. Custom metrics are not passed in
+<cite>compile()</cite>, they can be created in <cite>__init__</cite> or <cite>build</cite>. They are
+automatically tracked and returned by <cite>self.metrics</cite>.</p>
+<p>Example:</p>
+<p><a href="#id102"><span class="problematic" id="id103">``</span></a><a href="#id104"><span class="problematic" id="id105">`</span></a>python
+class MyModel(Sequential):</p>
+<blockquote>
+<div><dl>
+<dt>def __init__(self, <a href="#id106"><span class="problematic" id="id107">*</span></a>args, <a href="#id108"><span class="problematic" id="id109">**</span></a>kwargs):</dt><dd><p>super().__init__(<a href="#id110"><span class="problematic" id="id111">*</span></a>args, <a href="#id112"><span class="problematic" id="id113">**</span></a>kwargs)
+self.custom_metric = MyMetric(name=”custom_metric”)</p>
+</dd>
+<dt>def compute_metrics(self, x, y, y_pred, sample_weight):</dt><dd><p># This super call updates metrics from <cite>compile</cite> and returns
+# results for all metrics listed in <cite>self.metrics</cite>.
+metric_results = super().compute_metrics(</p>
+<blockquote>
+<div><p>x, y, y_pred, sample_weight)</p>
+</div></blockquote>
+<p># <cite>metric_results</cite> contains the previous result for
+# <cite>custom_metric</cite>, this is where we update it.
+self.custom_metric.update_state(x, y, y_pred, sample_weight)
+metric_results[‘custom_metric’] = self.custom_metric.result()
+return metric_results</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><a href="#id114"><span class="problematic" id="id115">``</span></a><a href="#id116"><span class="problematic" id="id117">`</span></a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Input data.</p></li>
+<li><p><strong>y</strong> – Target data.</p></li>
+<li><p><strong>y_pred</strong> – Predictions returned by the model output of <cite>model.call(x)</cite>.</p></li>
+<li><p><strong>sample_weight</strong> – Sample weights for weighting the loss function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <cite>dict</cite> containing values that will be passed to
+<cite>keras.callbacks.CallbackList.on_train_batch_end()</cite>. Typically,
+the values of the metrics listed in <cite>self.metrics</cite> are returned.
+Example: <cite>{‘loss’: 0.2, ‘accuracy’: 0.7}</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.get_metrics_result">
+<span class="sig-name descname"><span class="pre">get_metrics_result</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.get_metrics_result" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the model’s metrics values as a dict.</p>
+<p>If any of the metric result is a dict (containing multiple metrics),
+each of them gets added to the top level returned dict of this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <cite>dict</cite> containing values of the metrics listed in <cite>self.metrics</cite>.
+Example: <cite>{‘loss’: 0.2, ‘accuracy’: 0.7}</cite>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.get_compile_config">
+<span class="sig-name descname"><span class="pre">get_compile_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.get_compile_config" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a serialized config with information for compiling the model.</p>
+<p>This method returns a config dictionary containing all the information
+(optimizer, loss, metrics, etc.) with which the model was compiled.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dict containing information for compiling the model.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.compile_from_config">
+<span class="sig-name descname"><span class="pre">compile_from_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.compile_from_config" title="Link to this definition">¶</a></dt>
+<dd><p>Compiles the model with the information given in config.</p>
+<p>This method uses the information in the config (optimizer, loss,
+metrics, etc.) to compile the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Dict containing information for compiling the model.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.compute_loss_and_updates">
+<span class="sig-name descname"><span class="pre">compute_loss_and_updates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trainable_variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_trainable_variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics_variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">training</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_variables</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.compute_loss_and_updates" title="Link to this definition">¶</a></dt>
+<dd><p>This method is stateless and is intended for use with jax.grad.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.path">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">path</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.path" title="Link to this definition">¶</a></dt>
+<dd><p>The path of the layer.</p>
+<p>If the layer has not been built yet, it will be <cite>None</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.get_build_config">
+<span class="sig-name descname"><span class="pre">get_build_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.get_build_config" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a dictionary with the layer’s input shape.</p>
+<p>This method returns a config dict that can be used by
+<cite>build_from_config(config)</cite> to create all states (e.g. Variables and
+Lookup tables) needed by the layer.</p>
+<p>By default, the config only contains the input shape that the layer
+was built with. If you’re writing a custom layer that creates state in
+an unusual way, you should override this method to make sure this state
+is already created when Keras attempts to load its value upon model
+loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dict containing the input shape associated with the layer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.add_variable">
+<span class="sig-name descname"><span class="pre">add_variable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autocast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.add_variable" title="Link to this definition">¶</a></dt>
+<dd><p>Add a weight variable to the layer.</p>
+<p>Alias of <cite>add_weight()</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.add_weight">
+<span class="sig-name descname"><span class="pre">add_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initializer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">autocast</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constraint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_with_gradient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.add_weight" title="Link to this definition">¶</a></dt>
+<dd><p>Add a weight variable to the layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> – Shape tuple for the variable. Must be fully-defined
+(no <cite>None</cite> entries). Defaults to <cite>()</cite> (scalar) if unspecified.</p></li>
+<li><p><strong>initializer</strong> – Initializer object to use to populate the initial
+variable value, or string name of a built-in initializer
+(e.g. <cite>“random_normal”</cite>). If unspecified, defaults to
+<cite>“glorot_uniform”</cite> for floating-point variables and to <cite>“zeros”</cite>
+for all other types (e.g. int, bool).</p></li>
+<li><p><strong>dtype</strong> – Dtype of the variable to create, e.g. <cite>“float32”</cite>. If
+unspecified, defaults to the layer’s variable dtype
+(which itself defaults to <cite>“float32”</cite> if unspecified).</p></li>
+<li><p><strong>trainable</strong> – Boolean, whether the variable should be trainable via
+backprop or whether its updates are managed manually. Defaults
+to <cite>True</cite>.</p></li>
+<li><p><strong>autocast</strong> – Boolean, whether to autocast layers variables when
+accessing them. Defaults to <cite>True</cite>.</p></li>
+<li><p><strong>regularizer</strong> – Regularizer object to call to apply penalty on the
+weight. These penalties are summed into the loss function
+during optimization. Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>constraint</strong> – Contrainst object to call on the variable after any
+optimizer update, or string name of a built-in constraint.
+Defaults to <cite>None</cite>.</p></li>
+<li><p><strong>aggregation</strong> – Optional string, one of <cite>None</cite>, <cite>“none”</cite>, <cite>“mean”</cite>,
+<cite>“sum”</cite> or <cite>“only_first_replica”</cite>. Annotates the variable with
+the type of multi-replica aggregation to be used for this
+variable when writing custom data parallel training loops.
+Defaults to <cite>“none”</cite>.</p></li>
+<li><p><strong>overwrite_with_gradient</strong> – Boolean, whether to overwrite the variable
+with the computed gradient. This is useful for float8 training.
+Defaults to <cite>False</cite>.</p></li>
+<li><p><strong>name</strong> – String name of the variable. Useful for debugging purposes.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.trainable">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">trainable</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.trainable" title="Link to this definition">¶</a></dt>
+<dd><p>Settable boolean, whether this layer should be trainable or not.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.variables">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">variables</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.variables" title="Link to this definition">¶</a></dt>
+<dd><p>List of all layer state, including random seeds.</p>
+<p>This extends <cite>layer.weights</cite> to include all state used by the layer
+including <a href="#id118"><span class="problematic" id="id119">`</span></a>SeedGenerator`s.</p>
+<p>Note that metrics variables are not included here, use
+<cite>metrics_variables</cite> to visit all the metric variables.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.trainable_variables">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">trainable_variables</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.trainable_variables" title="Link to this definition">¶</a></dt>
+<dd><p>List of all trainable layer state.</p>
+<p>This is equivalent to <cite>layer.trainable_weights</cite>.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.non_trainable_variables">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">non_trainable_variables</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.non_trainable_variables" title="Link to this definition">¶</a></dt>
+<dd><p>List of all non-trainable layer state.</p>
+<p>This extends <cite>layer.non_trainable_weights</cite> to include all state used by
+the layer including state for metrics and <a href="#id120"><span class="problematic" id="id121">`</span></a>SeedGenerator`s.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.weights">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">weights</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.weights" title="Link to this definition">¶</a></dt>
+<dd><p>List of all weight variables of the layer.</p>
+<p>Unlike, <cite>layer.variables</cite> this excludes metric state and random seeds.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.trainable_weights">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">trainable_weights</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.trainable_weights" title="Link to this definition">¶</a></dt>
+<dd><p>List of all trainable weight variables of the layer.</p>
+<p>These are the weights that get updated by the optimizer during training.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.non_trainable_weights">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">non_trainable_weights</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.non_trainable_weights" title="Link to this definition">¶</a></dt>
+<dd><p>List of all non-trainable weight variables of the layer.</p>
+<p>These are the weights that should not be updated by the optimizer during
+training. Unlike, <cite>layer.non_trainable_variables</cite> this excludes metric
+state and random seeds.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.metrics_variables">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">metrics_variables</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.metrics_variables" title="Link to this definition">¶</a></dt>
+<dd><p>List of all metric variables.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.get_weights">
+<span class="sig-name descname"><span class="pre">get_weights</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.get_weights" title="Link to this definition">¶</a></dt>
+<dd><p>Return the values of <cite>layer.weights</cite> as a list of NumPy arrays.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.set_weights">
+<span class="sig-name descname"><span class="pre">set_weights</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.set_weights" title="Link to this definition">¶</a></dt>
+<dd><p>Sets the values of <cite>layer.weights</cite> from a list of NumPy arrays.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.compute_dtype">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">compute_dtype</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.compute_dtype" title="Link to this definition">¶</a></dt>
+<dd><p>The dtype of the computations performed by the layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.variable_dtype">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">variable_dtype</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.variable_dtype" title="Link to this definition">¶</a></dt>
+<dd><p>The dtype of the state (weights) of the layer.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.quantization_mode">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">quantization_mode</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.quantization_mode" title="Link to this definition">¶</a></dt>
+<dd><p>The quantization mode of this layer, <cite>None</cite> if not quantized.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.input_dtype">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">input_dtype</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.input_dtype" title="Link to this definition">¶</a></dt>
+<dd><p>The dtype layer inputs should be converted to.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.supports_masking">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">supports_masking</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.supports_masking" title="Link to this definition">¶</a></dt>
+<dd><p>Whether this layer supports computing a mask using <cite>compute_mask</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.stateless_call">
+<span class="sig-name descname"><span class="pre">stateless_call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trainable_variables</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">non_trainable_variables</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_losses</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.stateless_call" title="Link to this definition">¶</a></dt>
+<dd><p>Call the layer without any side effects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trainable_variables</strong> – List of trainable variables of the model.</p></li>
+<li><p><strong>non_trainable_variables</strong> – List of non-trainable variables of the
+model.</p></li>
+<li><p><strong>*args</strong> – Positional arguments to be passed to <cite>call()</cite>.</p></li>
+<li><p><strong>return_losses</strong> – If <cite>True</cite>, <cite>stateless_call()</cite> will return the list of
+losses created during <cite>call()</cite> as part of its return values.</p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments to be passed to <cite>call()</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple. By default, returns <cite>(outputs, non_trainable_variables)</cite>.</dt><dd><p>If <cite>return_losses = True</cite>, then returns
+<cite>(outputs, non_trainable_variables, losses)</cite>.</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+<p>Note: <cite>non_trainable_variables</cite> include not only non-trainable weights
+such as <cite>BatchNormalization</cite> statistics, but also RNG seed state
+(if there are any random operations part of the layer, such as dropout),
+and <cite>Metric</cite> state (if there are any metrics attached to the layer).
+These are all elements of state of the layer.</p>
+<p>Example:</p>
+<p><a href="#id122"><span class="problematic" id="id123">``</span></a><a href="#id124"><span class="problematic" id="id125">`</span></a>python
+model = …
+data = …
+trainable_variables = model.trainable_variables
+non_trainable_variables = model.non_trainable_variables
+# Call the model with zero side effects
+outputs, non_trainable_variables = model.stateless_call(</p>
+<blockquote>
+<div><p>trainable_variables,
+non_trainable_variables,
+data,</p>
+</div></blockquote>
+<p>)
+# Attach the updated state to the model
+# (until you do this, the model is still in its pre-call state).
+for ref_var, value in zip(</p>
+<blockquote>
+<div><p>model.non_trainable_variables, non_trainable_variables</p>
+</div></blockquote>
+<dl class="simple">
+<dt>):</dt><dd><p>ref_var.assign(value)</p>
+</dd>
+</dl>
+<p><a href="#id126"><span class="problematic" id="id127">``</span></a><a href="#id128"><span class="problematic" id="id129">`</span></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.add_loss">
+<span class="sig-name descname"><span class="pre">add_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.add_loss" title="Link to this definition">¶</a></dt>
+<dd><p>Can be called inside of the <cite>call()</cite> method to add a scalar loss.</p>
+<p>Example:</p>
+<p><a href="#id130"><span class="problematic" id="id131">``</span></a><a href="#id132"><span class="problematic" id="id133">`</span></a>python
+class MyLayer(Layer):</p>
+<blockquote>
+<div><p>…
+def call(self, x):</p>
+<blockquote>
+<div><p>self.add_loss(ops.sum(x))
+return x</p>
+</div></blockquote>
+</div></blockquote>
+<p><a href="#id134"><span class="problematic" id="id135">``</span></a><a href="#id136"><span class="problematic" id="id137">`</span></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.losses">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">losses</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.losses" title="Link to this definition">¶</a></dt>
+<dd><p>List of scalar losses from <cite>add_loss</cite>, regularizers and sublayers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.save_own_variables">
+<span class="sig-name descname"><span class="pre">save_own_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.save_own_variables" title="Link to this definition">¶</a></dt>
+<dd><p>Saves the state of the layer.</p>
+<p>You can override this method to take full control of how the state of
+the layer is saved upon calling <cite>model.save()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>store</strong> – Dict where the state of the model will be saved.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.load_own_variables">
+<span class="sig-name descname"><span class="pre">load_own_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.load_own_variables" title="Link to this definition">¶</a></dt>
+<dd><p>Loads the state of the layer.</p>
+<p>You can override this method to take full control of how the state of
+the layer is loaded upon calling <cite>keras.models.load_model()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>store</strong> – Dict from which the state of the model will be loaded.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.count_params">
+<span class="sig-name descname"><span class="pre">count_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.count_params" title="Link to this definition">¶</a></dt>
+<dd><p>Count the total number of scalars composing the weights.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An integer count.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.__setattr__">
+<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.__setattr__" title="Link to this definition">¶</a></dt>
+<dd><p>Support self.foo = trackable syntax.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.get_config">
+<span class="sig-name descname"><span class="pre">get_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.get_config" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the config of the object.</p>
+<p>An object config is a Python dictionary (serializable)
+containing the information needed to re-instantiate it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.rematerialized_call">
+<span class="sig-name descname"><span class="pre">rematerialized_call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_call</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.rematerialized_call" title="Link to this definition">¶</a></dt>
+<dd><p>Enable rematerialization dynamically for layer’s call method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>layer_call</strong> – The original <cite>call</cite> method of a layer.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Rematerialized layer’s <cite>call</cite> method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.input">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">input</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.input" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the input tensor(s) of a symbolic operation.</p>
+<p>Only returns the tensor(s) corresponding to the <em>first time</em>
+the operation was called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Input tensor or list of input tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.output">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">output</span></span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.output" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the output tensor(s) of a layer.</p>
+<p>Only returns the tensor(s) corresponding to the <em>first time</em>
+the operation was called.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Output tensor or list of output tensors.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.fitters.SGDFitter.__reduce__">
+<span class="sig-name descname"><span class="pre">__reduce__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.fitters.SGDFitter.__reduce__" title="Link to this definition">¶</a></dt>
+<dd><p>__reduce__ is used to customize the behavior of <cite>pickle.pickle()</cite>.</p>
+<p>The method returns a tuple of two elements: a function, and a list of
+arguments to pass to that function.  In this case we just leverage the
+keras saving library.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="grid/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">prfmodel.fitters.grid</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../examples/index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">prfmodel.examples</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">prfmodel.fitters</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter"><code class="docutils literal notranslate"><span class="pre">SGDFitter</span></code></a><ul>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.dtype"><code class="docutils literal notranslate"><span class="pre">SGDFitter.dtype</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.fit"><code class="docutils literal notranslate"><span class="pre">SGDFitter.fit()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.get_layer"><code class="docutils literal notranslate"><span class="pre">SGDFitter.get_layer()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.summary"><code class="docutils literal notranslate"><span class="pre">SGDFitter.summary()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.save"><code class="docutils literal notranslate"><span class="pre">SGDFitter.save()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.save_weights"><code class="docutils literal notranslate"><span class="pre">SGDFitter.save_weights()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.load_weights"><code class="docutils literal notranslate"><span class="pre">SGDFitter.load_weights()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.get_quantization_layer_structure"><code class="docutils literal notranslate"><span class="pre">SGDFitter.get_quantization_layer_structure()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.quantize"><code class="docutils literal notranslate"><span class="pre">SGDFitter.quantize()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.build_from_config"><code class="docutils literal notranslate"><span class="pre">SGDFitter.build_from_config()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.to_json"><code class="docutils literal notranslate"><span class="pre">SGDFitter.to_json()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.export"><code class="docutils literal notranslate"><span class="pre">SGDFitter.export()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.from_config"><code class="docutils literal notranslate"><span class="pre">SGDFitter.from_config()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.get_state_tree"><code class="docutils literal notranslate"><span class="pre">SGDFitter.get_state_tree()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.set_state_tree"><code class="docutils literal notranslate"><span class="pre">SGDFitter.set_state_tree()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.evaluate"><code class="docutils literal notranslate"><span class="pre">SGDFitter.evaluate()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.predict"><code class="docutils literal notranslate"><span class="pre">SGDFitter.predict()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.train_on_batch"><code class="docutils literal notranslate"><span class="pre">SGDFitter.train_on_batch()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.test_on_batch"><code class="docutils literal notranslate"><span class="pre">SGDFitter.test_on_batch()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.predict_on_batch"><code class="docutils literal notranslate"><span class="pre">SGDFitter.predict_on_batch()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.compile"><code class="docutils literal notranslate"><span class="pre">SGDFitter.compile()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.metrics"><code class="docutils literal notranslate"><span class="pre">SGDFitter.metrics</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.compute_loss"><code class="docutils literal notranslate"><span class="pre">SGDFitter.compute_loss()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.compute_metrics"><code class="docutils literal notranslate"><span class="pre">SGDFitter.compute_metrics()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.get_metrics_result"><code class="docutils literal notranslate"><span class="pre">SGDFitter.get_metrics_result()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.get_compile_config"><code class="docutils literal notranslate"><span class="pre">SGDFitter.get_compile_config()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.compile_from_config"><code class="docutils literal notranslate"><span class="pre">SGDFitter.compile_from_config()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.compute_loss_and_updates"><code class="docutils literal notranslate"><span class="pre">SGDFitter.compute_loss_and_updates()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.path"><code class="docutils literal notranslate"><span class="pre">SGDFitter.path</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.get_build_config"><code class="docutils literal notranslate"><span class="pre">SGDFitter.get_build_config()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.add_variable"><code class="docutils literal notranslate"><span class="pre">SGDFitter.add_variable()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.add_weight"><code class="docutils literal notranslate"><span class="pre">SGDFitter.add_weight()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.trainable"><code class="docutils literal notranslate"><span class="pre">SGDFitter.trainable</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.variables"><code class="docutils literal notranslate"><span class="pre">SGDFitter.variables</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.trainable_variables"><code class="docutils literal notranslate"><span class="pre">SGDFitter.trainable_variables</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.non_trainable_variables"><code class="docutils literal notranslate"><span class="pre">SGDFitter.non_trainable_variables</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.weights"><code class="docutils literal notranslate"><span class="pre">SGDFitter.weights</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.trainable_weights"><code class="docutils literal notranslate"><span class="pre">SGDFitter.trainable_weights</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.non_trainable_weights"><code class="docutils literal notranslate"><span class="pre">SGDFitter.non_trainable_weights</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.metrics_variables"><code class="docutils literal notranslate"><span class="pre">SGDFitter.metrics_variables</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.get_weights"><code class="docutils literal notranslate"><span class="pre">SGDFitter.get_weights()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.set_weights"><code class="docutils literal notranslate"><span class="pre">SGDFitter.set_weights()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.compute_dtype"><code class="docutils literal notranslate"><span class="pre">SGDFitter.compute_dtype</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.variable_dtype"><code class="docutils literal notranslate"><span class="pre">SGDFitter.variable_dtype</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.quantization_mode"><code class="docutils literal notranslate"><span class="pre">SGDFitter.quantization_mode</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.input_dtype"><code class="docutils literal notranslate"><span class="pre">SGDFitter.input_dtype</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.supports_masking"><code class="docutils literal notranslate"><span class="pre">SGDFitter.supports_masking</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.stateless_call"><code class="docutils literal notranslate"><span class="pre">SGDFitter.stateless_call()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.add_loss"><code class="docutils literal notranslate"><span class="pre">SGDFitter.add_loss()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.losses"><code class="docutils literal notranslate"><span class="pre">SGDFitter.losses</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.save_own_variables"><code class="docutils literal notranslate"><span class="pre">SGDFitter.save_own_variables()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.load_own_variables"><code class="docutils literal notranslate"><span class="pre">SGDFitter.load_own_variables()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.count_params"><code class="docutils literal notranslate"><span class="pre">SGDFitter.count_params()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.__setattr__"><code class="docutils literal notranslate"><span class="pre">SGDFitter.__setattr__()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.get_config"><code class="docutils literal notranslate"><span class="pre">SGDFitter.get_config()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.rematerialized_call"><code class="docutils literal notranslate"><span class="pre">SGDFitter.rematerialized_call()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.input"><code class="docutils literal notranslate"><span class="pre">SGDFitter.input</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.output"><code class="docutils literal notranslate"><span class="pre">SGDFitter.output</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.fitters.SGDFitter.__reduce__"><code class="docutils literal notranslate"><span class="pre">SGDFitter.__reduce__()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

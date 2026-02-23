@@ -1,0 +1,122 @@
+prfmodel.models.impulse.two_gamma
+=================================
+
+.. py:module:: prfmodel.models.impulse.two_gamma
+
+.. autoapi-nested-parse::
+
+   Weighted difference of two gamma distribution impulse response.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.models.impulse.two_gamma.TwoGammaImpulse
+
+
+Module Contents
+---------------
+
+.. py:class:: TwoGammaImpulse(duration: float = 32.0, offset: float = 0.0001, resolution: float = 1.0, norm: str | None = 'sum', default_parameters: dict[str, float] | None = None)
+
+
+
+   Weighted difference of two gamma distributions impulse response model.
+
+   Predicts an impulse response that is the weighted difference of two gamma distributions.
+   The model has five parameters: `delay` and `undershoot` refer to the positive and negative peaks of the response
+   while `dispersion` and `u_dispersion` refer to the rate parameters of the two gamma distributions. The `ratio`
+   parameter indicates the weight of the second gamma distribution.
+
+   :param duration: The duration of the impulse response (in seconds).
+   :type duration: float, default=32.0
+   :param offset: The offset of the impulse response (in seconds). By default a very small offset is added to prevent infinite
+                  response values at t = 0.
+   :type offset: float, default=0.0001
+   :param resolution: The time resultion of the impulse response (in seconds), that is the number of points per second at which the
+                      impulse response function is evaluated.
+   :type resolution: float, default=1.0
+   :param norm: The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
+                no normalization is performed.
+   :type norm: str, optional, default="sum"
+   :param default_parameters: Dictionary with scalar default parameter values. Keys must be valid parameter names.
+   :type default_parameters: dict of float, optional
+
+   .. rubric:: Notes
+
+   The predicted impulse response at time :math:`t` with :math:`\alpha_1 = delay / dispersion`,
+   :math:`\lambda_1 = dispersion`, :math:`\alpha_2  = undershoot / u\_dispersion`, :math:`\lambda_2 = u\_dispersion`,
+   and :math:`\omega = ratio` is:
+
+   .. math::
+
+       f(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega f_{\text{gamma}}(t; \alpha_2, \lambda_2)
+
+   .. seealso::
+
+      :py:obj:`gamma_density`
+          Density of the gamma distribution.
+
+   .. rubric:: Examples
+
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   >>>     "delay": [2.0, 1.0, 1.5],
+   >>>     "dispersion": [1.0, 1.0, 1.0],
+   >>>     "undershoot": [1.5, 2.0, 1.0],
+   >>>     "u_dispersion": [1.0, 1.0, 1.0],
+   >>>     "ratio": [0.7, 0.2, 0.5],
+   >>> })
+   >>> impulse_model = TwoGammaImpulse(
+   >>>     duration=100.0 # 100 seconds
+   >>> )
+   >>> resp = impulse_model(params)
+   >>> print(resp.shape) # (num_rows, duration)
+   (3, 100)
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      Names of parameters used by the model.
+
+      Parameter names are: `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`.
+
+
+   .. py:method:: __call__(parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the impulse response.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different batches. Must contain the columns `delay`, `dispersion`, `undershoot`, `u_dispersion`,
+                         and `ratio`.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted impulse response with shape `(num_batches, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: num_frames
+      :type: int
+
+
+      The total number of time frames at which the impulse response function is evaluated.
+
+
+   .. py:property:: frames
+      :type: prfmodel.typing.Tensor
+
+
+      The time frames at which the impulse response function is evaluated.
+
+      Time frames are linearly interpolated between `offset` and `duration` and have shape (1, `num_frames`).
+
+

@@ -1,0 +1,335 @@
+prfmodel.models.base
+====================
+
+.. py:module:: prfmodel.models.base
+
+.. autoapi-nested-parse::
+
+   Model base classes.
+
+
+
+Exceptions
+----------
+
+.. autoapisummary::
+
+   prfmodel.models.base.BatchDimensionError
+   prfmodel.models.base.ShapeError
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.models.base.BaseModel
+   prfmodel.models.base.BasePRFResponse
+   prfmodel.models.base.BaseCFResponse
+   prfmodel.models.base.BaseImpulse
+   prfmodel.models.base.BaseTemporal
+   prfmodel.models.base.BaseComposite
+
+
+Module Contents
+---------------
+
+.. py:exception:: BatchDimensionError(arg_names: collections.abc.Sequence[str], arg_shapes: collections.abc.Sequence[tuple[int, Ellipsis]])
+
+
+
+   Exception raised when arguments have different sizes in the batch (first) dimension.
+
+   :param arg_names: Names of arguments that have different sizes in batch dimension.
+   :type arg_names: Sequence[str]
+   :param arg_shapes: Shapes of arguments that have different sizes in batch dimension.
+   :type arg_shapes: Sequence[tuple of int]
+
+
+.. py:exception:: ShapeError(arg_name: str, arg_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when an argument has less than two dimensions.
+
+   :param arg_name: Argument name.
+   :type arg_name: str
+   :param arg_shape: Argument shape.
+   :type arg_shape: tuple of int
+
+
+.. py:class:: BaseModel
+
+
+
+   Abstract base class for models.
+
+   Cannot be instantiated on its own.
+   Can only be used as a parent class to create custom model classes.
+   Subclasses must override the abstract `parameter_names` property.
+
+   .. attribute:: parameter_names
+
+
+
+   .. rubric:: Examples
+
+   Create a custom model class that inherits from the base class:
+
+   >>> class CustomModel(BaseModel):
+   >>>     @property
+   >>>     def parameter_names(self):
+   >>>         return ["a", "b"]
+   >>> model = CustomModel()
+   >>> print(model.parameter_names)
+   ["a", "b"]
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
+
+
+.. py:class:: BasePRFResponse
+
+
+
+   Abstract base class for population receptive field response models.
+
+   Cannot be instantiated on its own.
+   Can only be used as a parent class to create custom population receptive field models.
+   Subclasses must override the abstract `__call__` method.
+
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+      :abstractmethod:
+
+
+      Predict the model response for a stimulus.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape `(num_voxels, ...)` and dtype `dtype`. The number of voxels is the
+                number of rows in `parameters`. The number and size of other axes depends on the stimulus.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
+
+
+.. py:class:: BaseCFResponse
+
+
+
+   Abstract base class for connective field response models.
+
+   Cannot be instantiated on its own.
+   Can only be used as a parent class to create custom connective field models.
+   Subclasses must override the abstract `__call__` method.
+
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.cf.CFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+      :abstractmethod:
+
+
+      Predict the model response for a stimulus.
+
+      :param stimulus: Connective field stimulus object.
+      :type stimulus: CFStimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape `(num_voxels, ...)` and dtype `dtype`. The number of voxels is the
+                number of rows in `parameters`. The number and size of other axes depends on the stimulus.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
+
+
+.. py:class:: BaseImpulse(duration: float = 32.0, offset: float = 0.0001, resolution: float = 1.0, norm: str | None = 'sum', default_parameters: dict[str, float] | None = None)
+
+
+
+   Abstract base class for impulse response models.
+
+   Cannot be instantiated on its own.
+   Can only be used as a parent class to create custom impulse response models.
+   Subclasses must override the abstract `__call__` method.
+
+   :param duration: The duration of the impulse response (in seconds).
+   :type duration: float, default=32.0
+   :param offset: The offset of the impulse response (in seconds). By default a very small offset is added to prevent infinite
+                  response values at t = 0.
+   :type offset: float, default=0.0001
+   :param resolution: The time resultion of the impulse response (in seconds), that is the number of points per second at which the
+                      impulse response function is evaluated.
+   :type resolution: float, default=1.0
+   :param norm: The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`.
+                If `None`, no normalization is performed.
+   :type norm: str, optional, default="sum"
+   :param default_parameters: Dictionary with scalar default parameter values. Keys must be valid parameter names.
+   :type default_parameters: dict of float, optional
+
+
+   .. py:property:: num_frames
+      :type: int
+
+
+      The total number of time frames at which the impulse response function is evaluated.
+
+
+   .. py:property:: frames
+      :type: prfmodel.typing.Tensor
+
+
+      The time frames at which the impulse response function is evaluated.
+
+      Time frames are linearly interpolated between `offset` and `duration` and have shape (1, `num_frames`).
+
+
+   .. py:method:: __call__(parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+      :abstractmethod:
+
+
+      Compute the impulse response.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape `(num_voxels, num_frames)` and dtype `dtype`. The number of voxels is the
+                number of rows in `parameters`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
+
+
+.. py:class:: BaseTemporal
+
+
+
+   Abstract base class for temporal models.
+
+   Cannot be instantiated on its own.
+   Can only be used as a parent class to create custom temporal models.
+   Subclasses must override the abstract `__call__` method.
+
+
+
+   .. py:method:: __call__(inputs: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+      :abstractmethod:
+
+
+      Make predictions with the temporal model.
+
+      :param inputs: Input tensor with temporal response and shape (num_batches, num_frames).
+      :type inputs: Tensor
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different batches.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape `(num_voxels, num_frames)` and dtype `dtype`. The number of voxels is the
+                number of rows in `parameters`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
+
+
+.. py:class:: BaseComposite(**models: BaseModel | None)
+
+
+
+   Base class for creating composite models.
+
+   Cannot be instantiated on its own. Can only be used as a parent class to create custom composite models.
+   Subclasses must override the abstract `__call__` method.
+   This class is intended for combining multiple submodels into a composite model with a custom `__call__`
+   method that defines how the submodels interact to make a composite prediction.
+
+   :param \*\*models: Submodels to be combined into the composite model. All submodel classes must inherit from `BaseModel`.
+
+   :raises TypeError: If submodel classes do not inherit from `BaseModel`.
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters that are used by the submodels.
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.base.Stimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+      :abstractmethod:
+
+
+      Predict a composite model response to a stimulus.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus.
+      :param parameters: Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Composite model predictions of shape `(num_voxels, num_frames)` and dtype `dtype`. The number of voxels is
+                the number of rows in `parameters`.
+      :rtype: Tensor
+
+
+

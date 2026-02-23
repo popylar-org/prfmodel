@@ -1,0 +1,1777 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>tensorflow.python.framework.tensor - prfmodel 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
+  
+  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tutorials/simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../tutorials/simple_prf_empirical_fmri.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../autoapi/prfmodel/index.html">prfmodel</a><input aria-label="Toggle navigation of prfmodel" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../autoapi/prfmodel/adapter/index.html">prfmodel.adapter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../autoapi/prfmodel/backend/index.html">prfmodel.backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../autoapi/prfmodel/examples/index.html">prfmodel.examples</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../autoapi/prfmodel/fitters/index.html">prfmodel.fitters</a><input aria-label="Toggle navigation of prfmodel.fitters" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/prfmodel/fitters/grid/index.html">prfmodel.fitters.grid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/prfmodel/fitters/linear/index.html">prfmodel.fitters.linear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/prfmodel/fitters/sgd/index.html">prfmodel.fitters.sgd</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../autoapi/prfmodel/models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/prfmodel/models/base/index.html">prfmodel.models.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/prfmodel/models/composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/prfmodel/models/encoding/index.html">prfmodel.models.encoding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/prfmodel/models/gaussian/index.html">prfmodel.models.gaussian</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../../autoapi/prfmodel/models/impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../../autoapi/prfmodel/models/impulse/convolve/index.html">prfmodel.models.impulse.convolve</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../autoapi/prfmodel/models/impulse/density/index.html">prfmodel.models.impulse.density</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../autoapi/prfmodel/models/impulse/shifted_gamma/index.html">prfmodel.models.impulse.shifted_gamma</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../autoapi/prfmodel/models/impulse/two_gamma/index.html">prfmodel.models.impulse.two_gamma</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../autoapi/prfmodel/models/impulse/two_gamma_deriv/index.html">prfmodel.models.impulse.two_gamma_deriv</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/prfmodel/models/temporal/index.html">prfmodel.models.temporal</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../autoapi/prfmodel/stimuli/index.html">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/prfmodel/stimuli/base/index.html">prfmodel.stimuli.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/prfmodel/stimuli/cf/index.html">prfmodel.stimuli.cf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../autoapi/prfmodel/stimuli/prf/index.html">prfmodel.stimuli.prf</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../autoapi/prfmodel/typing/index.html">prfmodel.typing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../autoapi/prfmodel/utils/index.html">prfmodel.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for tensorflow.python.framework.tensor</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright 2023 The TensorFlow Authors. All Rights Reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="c1"># you may not use this file except in compliance with the License.</span>
+<span class="c1"># You may obtain a copy of the License at</span>
+<span class="c1">#</span>
+<span class="c1">#     http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="c1">#</span>
+<span class="c1"># Unless required by applicable law or agreed to in writing, software</span>
+<span class="c1"># distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="c1"># WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="c1"># See the License for the specific language governing permissions and</span>
+<span class="c1"># limitations under the License.</span>
+<span class="c1"># ==============================================================================</span>
+<span class="sd">&quot;&quot;&quot;Tensor and TensorSpec classes.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.core.framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">attr_value_pb2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.core.function</span><span class="w"> </span><span class="kn">import</span> <span class="n">trace_type</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.core.protobuf</span><span class="w"> </span><span class="kn">import</span> <span class="n">struct_pb2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python</span><span class="w"> </span><span class="kn">import</span> <span class="n">tf2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.eager</span><span class="w"> </span><span class="kn">import</span> <span class="n">context</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.eager</span><span class="w"> </span><span class="kn">import</span> <span class="n">monitoring</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.eager</span><span class="w"> </span><span class="kn">import</span> <span class="n">record</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">common_shapes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">dtypes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">errors</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">op_callbacks</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">stack</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">tensor_conversion_registry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">tensor_shape</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">tensor_util</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">type_spec</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">type_spec_registry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.ops</span><span class="w"> </span><span class="kn">import</span> <span class="n">handle_data_util</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.platform</span><span class="w"> </span><span class="kn">import</span> <span class="n">tf_logging</span> <span class="k">as</span> <span class="n">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.saved_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">nested_structure_coder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">core</span> <span class="k">as</span> <span class="n">core_tf_types</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">internal</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">compat</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">deprecation</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">object_identity</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tensorflow.python.util.tf_export</span><span class="w"> </span><span class="kn">import</span> <span class="n">tf_export</span>
+
+
+<span class="n">_tensor_equality_api_usage_gauge</span> <span class="o">=</span> <span class="n">monitoring</span><span class="o">.</span><span class="n">BoolGauge</span><span class="p">(</span>
+    <span class="s2">&quot;/tensorflow/api/enable_tensor_equality&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Whether ops.enable_tensor_equality() is called.&quot;</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_override_helper</span><span class="p">(</span><span class="n">clazz_object</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Overrides (string) operator on Tensors to call func.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    clazz_object: the class to override for; either Tensor or SparseTensor.</span>
+<span class="sd">    operator: the string name of the operator to override.</span>
+<span class="sd">    func: the function that replaces the overridden operator.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: If operator is not allowed to be overwritten.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">operator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Tensor</span><span class="o">.</span><span class="n">OVERLOADABLE_OPERATORS</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Overriding </span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s2"> is disallowed. &quot;</span>
+                     <span class="sa">f</span><span class="s2">&quot;Allowed operators are </span><span class="si">{</span><span class="n">Tensor</span><span class="o">.</span><span class="n">OVERLOADABLE_OPERATORS</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+  <span class="nb">setattr</span><span class="p">(</span><span class="n">clazz_object</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_eval_using_default_session</span><span class="p">(</span><span class="n">tensors</span><span class="p">,</span> <span class="n">feed_dict</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Uses the default session to evaluate one or more tensors.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    tensors: A single Tensor, or a list of Tensor objects.</span>
+<span class="sd">    feed_dict: A dictionary that maps Tensor objects (or tensor names) to lists,</span>
+<span class="sd">      numpy ndarrays, TensorProtos, or strings.</span>
+<span class="sd">    graph: The graph in which the tensors are defined.</span>
+<span class="sd">    session: (Optional) A different session to use to evaluate &quot;tensors&quot;.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    Either a single numpy ndarray if &quot;tensors&quot; is a single tensor; or a list</span>
+<span class="sd">    of numpy ndarrays that each correspond to the respective element in</span>
+<span class="sd">    &quot;tensors&quot;.</span>
+
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: If no default session is available; the default session</span>
+<span class="sd">      does not have &quot;graph&quot; as its graph; or if &quot;session&quot; is specified,</span>
+<span class="sd">      and it does not have &quot;graph&quot; as its graph.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">session</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">get_default_session</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">session</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot evaluate tensor using `eval()`: No default &quot;</span>
+                       <span class="s2">&quot;session is registered. Use `with &quot;</span>
+                       <span class="s2">&quot;sess.as_default()` or pass an explicit session to &quot;</span>
+                       <span class="s2">&quot;`eval(session=sess)`&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">graph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">graph</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot use the default session to evaluate tensor: &quot;</span>
+                       <span class="s2">&quot;the tensor&#39;s graph is different from the session&#39;s &quot;</span>
+                       <span class="s2">&quot;graph. Pass an explicit session to &quot;</span>
+                       <span class="s2">&quot;`eval(session=sess)`.&quot;</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">session</span><span class="o">.</span><span class="n">graph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">graph</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot use the given session to evaluate tensor: &quot;</span>
+                       <span class="s2">&quot;the tensor&#39;s graph is different from the session&#39;s &quot;</span>
+                       <span class="s2">&quot;graph.&quot;</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">session</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">tensors</span><span class="p">,</span> <span class="n">feed_dict</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_error_prefix</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">msg</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_TensorIterator</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Iterates over the leading dim of a Tensor. Performs no error checks.&quot;&quot;&quot;</span>
+
+  <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_tensor&quot;</span><span class="p">,</span> <span class="s2">&quot;_index&quot;</span><span class="p">,</span> <span class="s2">&quot;_limit&quot;</span><span class="p">]</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">dim0</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span> <span class="o">=</span> <span class="n">tensor</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span> <span class="o">=</span> <span class="n">dim0</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">StopIteration</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tensor</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+  <span class="nb">next</span> <span class="o">=</span> <span class="fm">__next__</span>  <span class="c1"># python2.x compatibility.</span>
+
+
+<div class="viewcode-block" id="Tensor">
+<a class="viewcode-back" href="../../../../autoapi/prfmodel/typing/index.html#prfmodel.Tensor">[docs]</a>
+<span class="nd">@tf_export</span><span class="p">(</span><span class="s2">&quot;Tensor&quot;</span><span class="p">,</span> <span class="s2">&quot;experimental.numpy.ndarray&quot;</span><span class="p">,</span> <span class="n">v1</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Tensor&quot;</span><span class="p">])</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Tensor</span><span class="p">(</span><span class="n">internal</span><span class="o">.</span><span class="n">NativeObject</span><span class="p">,</span> <span class="n">core_tf_types</span><span class="o">.</span><span class="n">Symbol</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;A `tf.Tensor` represents a multidimensional array of elements.</span>
+
+<span class="sd">  All elements are of a single known data type.</span>
+
+<span class="sd">  When writing a TensorFlow program, the main object that is</span>
+<span class="sd">  manipulated and passed around is the `tf.Tensor`.</span>
+
+<span class="sd">  A `tf.Tensor` has the following properties:</span>
+
+<span class="sd">  * a single data type (float32, int32, or string, for example)</span>
+<span class="sd">  * a shape</span>
+
+<span class="sd">  TensorFlow supports eager execution and graph execution.  In eager</span>
+<span class="sd">  execution, operations are evaluated immediately.  In graph</span>
+<span class="sd">  execution, a computational graph is constructed for later</span>
+<span class="sd">  evaluation.</span>
+
+<span class="sd">  TensorFlow defaults to eager execution.  In the example below, the</span>
+<span class="sd">  matrix multiplication results are calculated immediately.</span>
+
+<span class="sd">  &gt;&gt;&gt; # Compute some values using a Tensor</span>
+<span class="sd">  &gt;&gt;&gt; c = tf.constant([[1.0, 2.0], [3.0, 4.0]])</span>
+<span class="sd">  &gt;&gt;&gt; d = tf.constant([[1.0, 1.0], [0.0, 1.0]])</span>
+<span class="sd">  &gt;&gt;&gt; e = tf.matmul(c, d)</span>
+<span class="sd">  &gt;&gt;&gt; print(e)</span>
+<span class="sd">  tf.Tensor(</span>
+<span class="sd">  [[1. 3.]</span>
+<span class="sd">   [3. 7.]], shape=(2, 2), dtype=float32)</span>
+
+<span class="sd">  Note that during eager execution, you may discover your `Tensors` are actually</span>
+<span class="sd">  of type `EagerTensor`.  This is an internal detail, but it does give you</span>
+<span class="sd">  access to a useful function, `numpy`:</span>
+
+<span class="sd">  &gt;&gt;&gt; type(e)</span>
+<span class="sd">  &lt;class &#39;...ops.EagerTensor&#39;&gt;</span>
+<span class="sd">  &gt;&gt;&gt; print(e.numpy())</span>
+<span class="sd">    [[1. 3.]</span>
+<span class="sd">     [3. 7.]]</span>
+
+<span class="sd">  In TensorFlow, `tf.function`s are a common way to define graph execution.</span>
+
+<span class="sd">  A Tensor&#39;s shape (that is, the rank of the Tensor and the size of</span>
+<span class="sd">  each dimension) may not always be fully known.  In `tf.function`</span>
+<span class="sd">  definitions, the shape may only be partially known.</span>
+
+<span class="sd">  Most operations produce tensors of fully-known shapes if the shapes of their</span>
+<span class="sd">  inputs are also fully known, but in some cases it&#39;s only possible to find the</span>
+<span class="sd">  shape of a tensor at execution time.</span>
+
+<span class="sd">  A number of specialized tensors are available: see `tf.Variable`,</span>
+<span class="sd">  `tf.constant`, `tf.placeholder`, `tf.sparse.SparseTensor`, and</span>
+<span class="sd">  `tf.RaggedTensor`.</span>
+
+<span class="sd">  Caution: when constructing a tensor from a numpy array or pandas dataframe</span>
+<span class="sd">  the underlying buffer may be re-used:</span>
+
+<span class="sd">  ```python</span>
+<span class="sd">  a = np.array([1, 2, 3])</span>
+<span class="sd">  b = tf.constant(a)</span>
+<span class="sd">  a[0] = 4</span>
+<span class="sd">  print(b)  # tf.Tensor([4 2 3], shape=(3,), dtype=int64)</span>
+<span class="sd">  ```</span>
+
+<span class="sd">  Note: this is an implementation detail that is subject to change and users</span>
+<span class="sd">  should not rely on this behaviour.</span>
+
+<span class="sd">  For more on Tensors, see the [guide](https://tensorflow.org/guide/tensor).</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="c1"># List of Python operators that we allow to override.</span>
+  <span class="n">OVERLOADABLE_OPERATORS</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="c1"># Binary.</span>
+      <span class="s2">&quot;__add__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__radd__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__sub__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__rsub__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__mul__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__rmul__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__div__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__rdiv__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__truediv__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__rtruediv__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__floordiv__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__rfloordiv__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__mod__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__rmod__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__lt__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__le__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__gt__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__ge__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__ne__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__eq__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__and__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__rand__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__or__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__ror__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__xor__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__rxor__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__getitem__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__pow__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__rpow__&quot;</span><span class="p">,</span>
+      <span class="c1"># Unary.</span>
+      <span class="s2">&quot;__invert__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__neg__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__abs__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__matmul__&quot;</span><span class="p">,</span>
+      <span class="s2">&quot;__rmatmul__&quot;</span>
+  <span class="p">}</span>
+
+  <span class="c1"># Whether to allow hashing or numpy-style equality</span>
+  <span class="n">_USE_EQUALITY</span> <span class="o">=</span> <span class="n">tf2</span><span class="o">.</span><span class="n">enabled</span><span class="p">()</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="s2">&quot;astype&quot;</span><span class="p">,</span> <span class="s2">&quot;ravel&quot;</span><span class="p">,</span> <span class="s2">&quot;transpose&quot;</span><span class="p">,</span> <span class="s2">&quot;reshape&quot;</span><span class="p">,</span> <span class="s2">&quot;clip&quot;</span><span class="p">,</span> <span class="s2">&quot;size&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;tolist&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">}:</span>
+      <span class="c1"># TODO(wangpeng): Export the enable_numpy_behavior knob</span>
+      <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+          <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> object has no attribute &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;. &quot;</span> <span class="o">+</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">        If you are looking for numpy-related methods, please run the following:</span>
+<span class="s2">        tf.experimental.numpy.experimental_enable_numpy_behavior()</span>
+<span class="s2">      &quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="fm">__getattribute__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The `DType` of elements in this tensor.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a `tf.TensorShape` that represents the shape of this tensor.</span>
+
+<span class="sd">    &gt;&gt;&gt; t = tf.constant([1,2,3,4,5])</span>
+<span class="sd">    &gt;&gt;&gt; t.shape</span>
+<span class="sd">    TensorShape([5])</span>
+
+<span class="sd">    `tf.Tensor.shape` is equivalent to `tf.Tensor.get_shape()`.</span>
+
+<span class="sd">    In a `tf.function` or when building a model using</span>
+<span class="sd">    `tf.keras.Input`, they return the build-time shape of the</span>
+<span class="sd">    tensor, which may be partially unknown.</span>
+
+<span class="sd">    A `tf.TensorShape` is not a tensor. Use `tf.shape(t)` to get a tensor</span>
+<span class="sd">    containing the shape, calculated at runtime.</span>
+
+<span class="sd">    See `tf.Tensor.get_shape()`, and `tf.TensorShape` for details and examples.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_val</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">dims</span><span class="p">,</span> <span class="n">unknown_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span>
+      <span class="k">if</span> <span class="n">unknown_shape</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shape_val</span> <span class="o">=</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">unknown_shape</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shape_val</span> <span class="o">=</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_val</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">rank</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_disallow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="n">errors</span><span class="o">.</span><span class="n">OperatorNotAllowedInGraphError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">task</span><span class="si">}</span><span class="s2"> is not allowed.&quot;</span>
+        <span class="s2">&quot; You can attempt the following resolutions to the problem:&quot;</span>
+        <span class="s2">&quot; If you are running in Graph mode, use Eager execution mode&quot;</span>
+        <span class="s2">&quot; or decorate this function with @tf.function.&quot;</span>
+        <span class="s2">&quot; If you are using AutoGraph, you can try decorating this function&quot;</span>
+        <span class="s2">&quot; with @tf.function. If that does not work, then you may be using&quot;</span>
+        <span class="s2">&quot; an unsupported feature or your source code may not be visible&quot;</span>
+        <span class="s2">&quot; to AutoGraph. See&quot;</span>
+        <span class="s2">&quot; https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/autograph/g3doc/reference/limitations.md#access-to-source-code&quot;</span>
+        <span class="s2">&quot; for more information.&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_disallow_bool_casting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_disallow</span><span class="p">(</span><span class="s2">&quot;Using a symbolic `tf.Tensor` as a Python `bool`&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_disallow_iteration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_disallow</span><span class="p">(</span><span class="s2">&quot;Iterating over a symbolic `tf.Tensor`&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">context</span><span class="o">.</span><span class="n">executing_eagerly</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_disallow_iteration</span><span class="p">()</span>
+
+    <span class="n">first_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_first_dim</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">_TensorIterator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">first_dim</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_get_first_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_tuple</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot iterate over a tensor with unknown shape.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">shape</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot iterate over a scalar tensor.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+          <span class="s2">&quot;Cannot iterate over a tensor with unknown first dimension.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_shape_as_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">ndims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">[</span><span class="n">dim</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">dims</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_shape_tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape_as_list</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_record_tape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">capture</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Connect this graph tensor with capture for gradients calculation.&quot;&quot;&quot;</span>
+    <span class="n">record</span><span class="o">.</span><span class="n">record_operation</span><span class="p">(</span>
+        <span class="s2">&quot;captured_value&quot;</span><span class="p">,</span>
+        <span class="p">[</span><span class="bp">self</span><span class="p">],</span> <span class="p">[</span><span class="n">capture</span><span class="p">],</span>
+        <span class="n">backward_function</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="p">],</span>
+        <span class="n">forward_function</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="p">])</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">get_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a `tf.TensorShape` that represents the shape of this tensor.</span>
+
+<span class="sd">    In eager execution the shape is always fully-known.</span>
+
+<span class="sd">    &gt;&gt;&gt; a = tf.constant([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])</span>
+<span class="sd">    &gt;&gt;&gt; print(a.shape)</span>
+<span class="sd">    (2, 3)</span>
+
+<span class="sd">    `tf.Tensor.get_shape()` is equivalent to `tf.Tensor.shape`.</span>
+
+
+<span class="sd">    When executing in a `tf.function` or building a model using</span>
+<span class="sd">    `tf.keras.Input`, `Tensor.shape` may return a partial shape (including</span>
+<span class="sd">    `None` for unknown dimensions). See `tf.TensorShape` for more details.</span>
+
+<span class="sd">    &gt;&gt;&gt; inputs = tf.keras.Input(shape = [10])</span>
+<span class="sd">    &gt;&gt;&gt; # Unknown batch size</span>
+<span class="sd">    &gt;&gt;&gt; print(inputs.shape)</span>
+<span class="sd">    (None, 10)</span>
+
+<span class="sd">    The shape is computed using shape inference functions that are</span>
+<span class="sd">    registered for each `tf.Operation`.</span>
+
+<span class="sd">    The returned `tf.TensorShape` is determined at *build* time, without</span>
+<span class="sd">    executing the underlying kernel. It is not a `tf.Tensor`. If you need a</span>
+<span class="sd">    shape *tensor*, either convert the `tf.TensorShape` to a `tf.constant`, or</span>
+<span class="sd">    use the `tf.shape(tensor)` function, which returns the tensor&#39;s shape at</span>
+<span class="sd">    *execution* time.</span>
+
+<span class="sd">    This is useful for debugging and providing early errors. For</span>
+<span class="sd">    example, when tracing a `tf.function`, no ops are being executed, shapes</span>
+<span class="sd">    may be unknown (See the [Concrete Functions</span>
+<span class="sd">    Guide](https://www.tensorflow.org/guide/concrete_function) for details).</span>
+
+<span class="sd">    &gt;&gt;&gt; @tf.function</span>
+<span class="sd">    ... def my_matmul(a, b):</span>
+<span class="sd">    ...   result = a@b</span>
+<span class="sd">    ...   # the `print` executes during tracing.</span>
+<span class="sd">    ...   print(&quot;Result shape: &quot;, result.shape)</span>
+<span class="sd">    ...   return result</span>
+
+<span class="sd">    The shape inference functions propagate shapes to the extent possible:</span>
+
+<span class="sd">    &gt;&gt;&gt; f = my_matmul.get_concrete_function(</span>
+<span class="sd">    ...   tf.TensorSpec([None,3]),</span>
+<span class="sd">    ...   tf.TensorSpec([3,5]))</span>
+<span class="sd">    Result shape: (None, 5)</span>
+
+<span class="sd">    Tracing may fail if a shape mismatch can be detected:</span>
+
+<span class="sd">    &gt;&gt;&gt; cf = my_matmul.get_concrete_function(</span>
+<span class="sd">    ...   tf.TensorSpec([None,3]),</span>
+<span class="sd">    ...   tf.TensorSpec([4,5]))</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    ValueError: Dimensions must be equal, but are 3 and 4 for &#39;matmul&#39; (op:</span>
+<span class="sd">    &#39;MatMul&#39;) with input shapes: [?,3], [4,5].</span>
+
+<span class="sd">    In some cases, the inferred shape may have unknown dimensions. If</span>
+<span class="sd">    the caller has additional information about the values of these</span>
+<span class="sd">    dimensions, `tf.ensure_shape` or `Tensor.set_shape()` can be used to augment</span>
+<span class="sd">    the inferred shape.</span>
+
+<span class="sd">    &gt;&gt;&gt; @tf.function</span>
+<span class="sd">    ... def my_fun(a):</span>
+<span class="sd">    ...   a = tf.ensure_shape(a, [5, 5])</span>
+<span class="sd">    ...   # the `print` executes during tracing.</span>
+<span class="sd">    ...   print(&quot;Result shape: &quot;, a.shape)</span>
+<span class="sd">    ...   return a</span>
+
+<span class="sd">    &gt;&gt;&gt; cf = my_fun.get_concrete_function(</span>
+<span class="sd">    ...   tf.TensorSpec([None, None]))</span>
+<span class="sd">    Result shape: (5, 5)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A `tf.TensorShape` representing the shape of this tensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">set_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Updates the shape of this tensor.</span>
+
+<span class="sd">    Note: It is recommended to use `tf.ensure_shape` instead of</span>
+<span class="sd">    `Tensor.set_shape`, because `tf.ensure_shape` provides better checking for</span>
+<span class="sd">    programming errors and can create guarantees for compiler</span>
+<span class="sd">    optimization.</span>
+
+<span class="sd">    With eager execution this operates as a shape assertion.</span>
+<span class="sd">    Here the shapes match:</span>
+
+<span class="sd">    &gt;&gt;&gt; t = tf.constant([[1,2,3]])</span>
+<span class="sd">    &gt;&gt;&gt; t.set_shape([1, 3])</span>
+
+<span class="sd">    Passing a `None` in the new shape allows any value for that axis:</span>
+
+<span class="sd">    &gt;&gt;&gt; t.set_shape([1,None])</span>
+
+<span class="sd">    An error is raised if an incompatible shape is passed.</span>
+
+<span class="sd">    &gt;&gt;&gt; t.set_shape([1,5])</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    ValueError: Tensor&#39;s shape (1, 3) is not compatible with supplied</span>
+<span class="sd">    shape [1, 5]</span>
+
+<span class="sd">    When executing in a `tf.function`, or building a model using</span>
+<span class="sd">    `tf.keras.Input`, `Tensor.set_shape` will *merge* the given `shape` with</span>
+<span class="sd">    the current shape of this tensor, and set the tensor&#39;s shape to the</span>
+<span class="sd">    merged value (see `tf.TensorShape.merge_with` for details):</span>
+
+<span class="sd">    &gt;&gt;&gt; t = tf.keras.Input(shape=[None, None, 3])</span>
+<span class="sd">    &gt;&gt;&gt; print(t.shape)</span>
+<span class="sd">    (None, None, None, 3)</span>
+
+<span class="sd">    Dimensions set to `None` are not updated:</span>
+
+<span class="sd">    &gt;&gt;&gt; t.set_shape([None, 224, 224, None])</span>
+<span class="sd">    &gt;&gt;&gt; print(t.shape)</span>
+<span class="sd">    (None, 224, 224, 3)</span>
+
+<span class="sd">    The main use case for this is to provide additional shape information</span>
+<span class="sd">    that cannot be inferred from the graph alone.</span>
+
+<span class="sd">    For example if you know all the images in a dataset have shape [28,28,3] you</span>
+<span class="sd">    can set it with `tf.set_shape`:</span>
+
+<span class="sd">    &gt;&gt;&gt; @tf.function</span>
+<span class="sd">    ... def load_image(filename):</span>
+<span class="sd">    ...   raw = tf.io.read_file(filename)</span>
+<span class="sd">    ...   image = tf.image.decode_png(raw, channels=3)</span>
+<span class="sd">    ...   # the `print` executes during tracing.</span>
+<span class="sd">    ...   print(&quot;Initial shape: &quot;, image.shape)</span>
+<span class="sd">    ...   image.set_shape([28, 28, 3])</span>
+<span class="sd">    ...   print(&quot;Final shape: &quot;, image.shape)</span>
+<span class="sd">    ...   return image</span>
+
+<span class="sd">    Trace the function, see the [Concrete Functions</span>
+<span class="sd">    Guide](https://www.tensorflow.org/guide/concrete_function) for details.</span>
+
+<span class="sd">    &gt;&gt;&gt; cf = load_image.get_concrete_function(</span>
+<span class="sd">    ...     tf.TensorSpec([], dtype=tf.string))</span>
+<span class="sd">    Initial shape:  (None, None, 3)</span>
+<span class="sd">    Final shape: (28, 28, 3)</span>
+
+<span class="sd">    Similarly the `tf.io.parse_tensor` function could return a tensor with</span>
+<span class="sd">    any shape, even the `tf.rank` is unknown. If you know that all your</span>
+<span class="sd">    serialized tensors will be 2d, set it with `set_shape`:</span>
+
+<span class="sd">    &gt;&gt;&gt; @tf.function</span>
+<span class="sd">    ... def my_parse(string_tensor):</span>
+<span class="sd">    ...   result = tf.io.parse_tensor(string_tensor, out_type=tf.float32)</span>
+<span class="sd">    ...   # the `print` executes during tracing.</span>
+<span class="sd">    ...   print(&quot;Initial shape: &quot;, result.shape)</span>
+<span class="sd">    ...   result.set_shape([None, None])</span>
+<span class="sd">    ...   print(&quot;Final shape: &quot;, result.shape)</span>
+<span class="sd">    ...   return result</span>
+
+<span class="sd">    Trace the function</span>
+
+<span class="sd">    &gt;&gt;&gt; concrete_parse = my_parse.get_concrete_function(</span>
+<span class="sd">    ...     tf.TensorSpec([], dtype=tf.string))</span>
+<span class="sd">    Initial shape:  &lt;unknown&gt;</span>
+<span class="sd">    Final shape:  (None, None)</span>
+
+<span class="sd">    Make sure it works:</span>
+
+<span class="sd">    &gt;&gt;&gt; t = tf.ones([5,3], dtype=tf.float32)</span>
+<span class="sd">    &gt;&gt;&gt; serialized = tf.io.serialize_tensor(t)</span>
+<span class="sd">    &gt;&gt;&gt; print(serialized.dtype)</span>
+<span class="sd">    &lt;dtype: &#39;string&#39;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; print(serialized.shape)</span>
+<span class="sd">    ()</span>
+<span class="sd">    &gt;&gt;&gt; t2 = concrete_parse(serialized)</span>
+<span class="sd">    &gt;&gt;&gt; print(t2.shape)</span>
+<span class="sd">    (5, 3)</span>
+
+<span class="sd">    Caution: `set_shape` ensures that the applied shape is compatible with</span>
+<span class="sd">    the existing shape, but it does not check at runtime. Setting</span>
+<span class="sd">    incorrect shapes can result in inconsistencies between the</span>
+<span class="sd">    statically-known graph and the runtime value of tensors. For runtime</span>
+<span class="sd">    validation of the shape, use `tf.ensure_shape` instead. It also modifies</span>
+<span class="sd">    the `shape` of the tensor.</span>
+
+<span class="sd">    &gt;&gt;&gt; # Serialize a rank-3 tensor</span>
+<span class="sd">    &gt;&gt;&gt; t = tf.ones([5,5,5], dtype=tf.float32)</span>
+<span class="sd">    &gt;&gt;&gt; serialized = tf.io.serialize_tensor(t)</span>
+<span class="sd">    &gt;&gt;&gt; # The function still runs, even though it `set_shape([None,None])`</span>
+<span class="sd">    &gt;&gt;&gt; t2 = concrete_parse(serialized)</span>
+<span class="sd">    &gt;&gt;&gt; print(t2.shape)</span>
+<span class="sd">    (5, 5, 5)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      shape: A `TensorShape` representing the shape of this tensor, a</span>
+<span class="sd">        `TensorShapeProto`, a list, a tuple, or None.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: If `shape` is not compatible with the current shape of</span>
+<span class="sd">        this tensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Reset cached shape.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_shape_val</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># We want set_shape to be reflected in the C API graph for when we run it.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">):</span>
+      <span class="n">shape</span> <span class="o">=</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">dim_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">shape</span><span class="o">.</span><span class="n">dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">unknown_shape</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">unknown_shape</span> <span class="o">=</span> <span class="kc">False</span>
+      <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">shape</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dim</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+          <span class="n">dim_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">dim_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dim</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_set_shape</span><span class="p">(</span><span class="n">dim_list</span><span class="p">,</span> <span class="n">unknown_shape</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_as_node_def_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a value to use for the NodeDef &quot;input&quot; attribute.</span>
+
+<span class="sd">    The returned string can be used in a NodeDef &quot;input&quot; attribute</span>
+<span class="sd">    to indicate that the NodeDef uses this Tensor as input.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: if this Tensor&#39;s Operation does not have a name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      a string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">:</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_index</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;Tensor(</span><span class="se">\&quot;</span><span class="si">%s</span><span class="se">\&quot;</span><span class="si">%s%s%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">&quot;, shape=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">get_shape</span><span class="p">())</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span><span class="o">.</span><span class="n">ndims</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">&quot;, dtype=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="s2">&quot;, device=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;&lt;tf.Tensor &#39;</span><span class="si">%s</span><span class="s2">&#39; shape=</span><span class="si">%s</span><span class="s2"> dtype=</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;graph&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">Tensor</span><span class="o">.</span><span class="n">_USE_EQUALITY</span> <span class="ow">and</span> <span class="p">(</span><span class="n">g</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">g</span><span class="o">.</span><span class="n">building_function</span><span class="p">)):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Tensor is unhashable. &quot;</span>
+                      <span class="s2">&quot;Instead, use tensor.ref() as the key.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+  <span class="c1"># NOTE(mrry): This enables the Tensor&#39;s overloaded &quot;right&quot; binary</span>
+  <span class="c1"># operators to run when the left operand is an ndarray, because it</span>
+  <span class="c1"># accords the Tensor class higher priority than an ndarray, or a</span>
+  <span class="c1"># numpy matrix.</span>
+  <span class="c1"># TODO(mrry): Convert this to using numpy&#39;s __numpy_ufunc__</span>
+  <span class="c1"># mechanism, which allows more control over how Tensors interact</span>
+  <span class="c1"># with ndarrays.</span>
+  <span class="n">__array_priority__</span> <span class="o">=</span> <span class="mi">100</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">__array__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">del</span> <span class="n">dtype</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Cannot convert a symbolic tf.Tensor (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">) to a numpy array.&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot; This error may indicate that you&#39;re trying to pass a Tensor to&quot;</span>
+        <span class="sa">f</span><span class="s2">&quot; a NumPy call, which is not supported.&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;len is not well defined for a symbolic Tensor &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">). Please call `x.shape` rather than &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;`len(x)` for shape information.&quot;</span><span class="p">)</span>
+
+  <span class="c1"># TODO(mdan): This convoluted machinery is hard to maintain. Clean up.</span>
+  <span class="nd">@staticmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_override_operator</span><span class="p">(</span><span class="n">operator</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+    <span class="n">_override_helper</span><span class="p">(</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># pylint: disable=invalid-bool-returned</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dummy method to prevent a tensor from being used as a Python `bool`.</span>
+
+<span class="sd">    This overload raises a `TypeError` when the user inadvertently</span>
+<span class="sd">    treats a `Tensor` as a boolean (most commonly in an `if` or `while`</span>
+<span class="sd">    statement), in code that was not converted by AutoGraph. For example:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    if tf.constant(True):  # Will raise.</span>
+<span class="sd">      # ...</span>
+
+<span class="sd">    if tf.constant(5) &lt; tf.constant(7):  # Will raise.</span>
+<span class="sd">      # ...</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      `TypeError`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_disallow_bool_casting</span><span class="p">()</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">__nonzero__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Dummy method to prevent a tensor from being used as a Python `bool`.</span>
+
+<span class="sd">    This is the Python 2.x counterpart to `__bool__()` above.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      `TypeError`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_disallow_bool_casting</span><span class="p">()</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feed_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">session</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Evaluates this tensor in a `Session`.</span>
+
+<span class="sd">    Note: If you are not using `compat.v1` libraries, you should not need this,</span>
+<span class="sd">    (or `feed_dict` or `Session`).  In eager execution (or within `tf.function`)</span>
+<span class="sd">    you do not need to call `eval`.</span>
+
+<span class="sd">    Calling this method will execute all preceding operations that</span>
+<span class="sd">    produce the inputs needed for the operation that produces this</span>
+<span class="sd">    tensor.</span>
+
+<span class="sd">    *N.B.* Before invoking `Tensor.eval()`, its graph must have been</span>
+<span class="sd">    launched in a session, and either a default session must be</span>
+<span class="sd">    available, or `session` must be specified explicitly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      feed_dict: A dictionary that maps `Tensor` objects to feed values. See</span>
+<span class="sd">        `tf.Session.run` for a description of the valid feed values.</span>
+<span class="sd">      session: (Optional.) The `Session` to be used to evaluate this tensor. If</span>
+<span class="sd">        none, the default session will be used.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A numpy array corresponding to the value of this tensor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_eval_using_default_session</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feed_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+
+  <span class="nd">@deprecation</span><span class="o">.</span><span class="n">deprecated</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Use ref() instead.&quot;</span><span class="p">)</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">experimental_ref</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ref</span><span class="p">()</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">ref</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># tf.Variable also has the same ref() API.  If you update the</span>
+    <span class="c1"># documentation here, please update tf.Variable.ref() as well.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a hashable reference object to this Tensor.</span>
+
+<span class="sd">    The primary use case for this API is to put tensors in a set/dictionary.</span>
+<span class="sd">    We can&#39;t put tensors in a set/dictionary as `tensor.__hash__()` is no longer</span>
+<span class="sd">    available starting Tensorflow 2.0.</span>
+
+<span class="sd">    The following will raise an exception starting 2.0</span>
+
+<span class="sd">    &gt;&gt;&gt; x = tf.constant(5)</span>
+<span class="sd">    &gt;&gt;&gt; y = tf.constant(10)</span>
+<span class="sd">    &gt;&gt;&gt; z = tf.constant(10)</span>
+<span class="sd">    &gt;&gt;&gt; tensor_set = {x, y, z}</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">      ...</span>
+<span class="sd">    TypeError: Tensor is unhashable. Instead, use tensor.ref() as the key.</span>
+<span class="sd">    &gt;&gt;&gt; tensor_dict = {x: &#39;five&#39;, y: &#39;ten&#39;}</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">      ...</span>
+<span class="sd">    TypeError: Tensor is unhashable. Instead, use tensor.ref() as the key.</span>
+
+<span class="sd">    Instead, we can use `tensor.ref()`.</span>
+
+<span class="sd">    &gt;&gt;&gt; tensor_set = {x.ref(), y.ref(), z.ref()}</span>
+<span class="sd">    &gt;&gt;&gt; x.ref() in tensor_set</span>
+<span class="sd">    True</span>
+<span class="sd">    &gt;&gt;&gt; tensor_dict = {x.ref(): &#39;five&#39;, y.ref(): &#39;ten&#39;, z.ref(): &#39;ten&#39;}</span>
+<span class="sd">    &gt;&gt;&gt; tensor_dict[y.ref()]</span>
+<span class="sd">    &#39;ten&#39;</span>
+
+<span class="sd">    Also, the reference object provides `.deref()` function that returns the</span>
+<span class="sd">    original Tensor.</span>
+
+<span class="sd">    &gt;&gt;&gt; x = tf.constant(5)</span>
+<span class="sd">    &gt;&gt;&gt; x.ref().deref()</span>
+<span class="sd">    &lt;tf.Tensor: shape=(), dtype=int32, numpy=5&gt;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">object_identity</span><span class="o">.</span><span class="n">Reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">__tf_tracing_type__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signature_context</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">resource</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">variant</span><span class="p">:</span>
+      <span class="n">shape_inference_handle_data</span> <span class="o">=</span> <span class="n">handle_data_util</span><span class="o">.</span><span class="n">get_handle_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+      <span class="n">handle_data</span> <span class="o">=</span> <span class="p">(</span>
+          <span class="n">dtypes</span><span class="o">.</span><span class="n">HandleData</span><span class="p">(</span><span class="n">shape_inference_handle_data</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">shape_inference_handle_data</span>
+          <span class="k">else</span> <span class="kc">None</span>
+      <span class="p">)</span>
+      <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">DType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">_type_enum</span><span class="p">,</span> <span class="n">handle_data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">TensorSpec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">spec</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">__tf_tensor__</span><span class="p">(</span>
+      <span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">dtypes</span><span class="o">.</span><span class="n">DType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+      <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Tensor&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dtype</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="n">_add_error_prefix</span><span class="p">(</span>
+              <span class="sa">f</span><span class="s2">&quot;Tensor conversion requested dtype </span><span class="si">{</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &quot;</span>
+              <span class="sa">f</span><span class="s2">&quot;for Tensor with dtype </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">,</span>
+              <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+    <span class="k">return</span> <span class="bp">self</span></div>
+
+
+
+<span class="nd">@tf_export</span><span class="p">(</span><span class="n">v1</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;enable_tensor_equality&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">enable_tensor_equality</span><span class="p">():</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Compare Tensors with element-wise comparison and thus be unhashable.</span>
+
+<span class="sd">  Comparing tensors with element-wise allows comparisons such as</span>
+<span class="sd">  tf.Variable(1.0) == 1.0. Element-wise equality implies that tensors are</span>
+<span class="sd">  unhashable. Thus tensors can no longer be directly used in sets or as a key in</span>
+<span class="sd">  a dictionary.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">logging</span><span class="o">.</span><span class="n">vlog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Enabling tensor equality&quot;</span><span class="p">)</span>
+  <span class="n">_tensor_equality_api_usage_gauge</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+  <span class="n">Tensor</span><span class="o">.</span><span class="n">_USE_EQUALITY</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># pylint: disable=protected-access</span>
+
+
+<span class="nd">@tf_export</span><span class="p">(</span><span class="n">v1</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;disable_tensor_equality&quot;</span><span class="p">])</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">disable_tensor_equality</span><span class="p">():</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Compare Tensors by their id and be hashable.</span>
+
+<span class="sd">  This is a legacy behaviour of TensorFlow and is highly discouraged.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">logging</span><span class="o">.</span><span class="n">vlog</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Disabling tensor equality&quot;</span><span class="p">)</span>
+  <span class="n">_tensor_equality_api_usage_gauge</span><span class="o">.</span><span class="n">get_cell</span><span class="p">()</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+  <span class="n">Tensor</span><span class="o">.</span><span class="n">_USE_EQUALITY</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># pylint: disable=protected-access</span>
+
+
+<span class="c1"># TODO(b/249802365): Sanitize all TensorSpec names.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">sanitize_spec_name</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Sanitizes Spec names. Matches Graph Node and Python naming conventions.</span>
+
+<span class="sd">  Without sanitization, names that are not legal Python parameter names can be</span>
+<span class="sd">  set which makes it challenging to represent callables supporting the named</span>
+<span class="sd">  calling capability.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    name: The name to sanitize.</span>
+
+<span class="sd">  Returns:</span>
+<span class="sd">    A string that meets Python parameter conventions.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+    <span class="k">return</span> <span class="s2">&quot;unknown&quot;</span>
+
+  <span class="c1"># Lower case and replace non-alphanumeric chars with &#39;_&#39;</span>
+  <span class="n">swapped</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">c</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;_&quot;</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()])</span>
+
+  <span class="k">if</span> <span class="n">swapped</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">swapped</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="s2">&quot;tensor_&quot;</span> <span class="o">+</span> <span class="n">swapped</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_op_name</span><span class="p">(</span><span class="n">tensor_name</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Extract the Op name from a Tensor name.</span>
+
+<span class="sd">  The Op name is everything before a colon, if present,</span>
+<span class="sd">  not including any ^ prefix denoting a control dependency.</span>
+
+<span class="sd">  Args:</span>
+<span class="sd">    tensor_name: the full name of a Tensor in the graph.</span>
+<span class="sd">  Returns:</span>
+<span class="sd">    The name of the Op of which the given Tensor is an output.</span>
+<span class="sd">  Raises:</span>
+<span class="sd">    ValueError: if tensor_name is None or empty.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">tensor_name</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Tensor name cannot be empty or None. Received: </span><span class="si">{</span><span class="n">tensor_name</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+  <span class="c1"># Control dependency inputs start with ^.</span>
+  <span class="k">if</span> <span class="n">tensor_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;^&quot;</span><span class="p">):</span>
+    <span class="n">tensor_name</span> <span class="o">=</span> <span class="n">tensor_name</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+  <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">tensor_name</span><span class="p">:</span>
+    <span class="n">op_name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tensor_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">op_name</span>
+  <span class="k">return</span> <span class="n">tensor_name</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">DenseSpec</span><span class="p">(</span><span class="n">type_spec</span><span class="o">.</span><span class="n">TypeSpec</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Describes a dense object with shape, dtype, and name.&quot;&quot;&quot;</span>
+
+  <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;_shape&quot;</span><span class="p">,</span> <span class="s2">&quot;_dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;_name&quot;</span><span class="p">]</span>
+
+  <span class="n">_component_specs</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">self</span><span class="p">:</span> <span class="bp">self</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Creates a TensorSpec.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      shape: Value convertible to `tf.TensorShape`. The shape of the tensor.</span>
+<span class="sd">      dtype: Value convertible to `tf.DType`. The type of the tensor values.</span>
+<span class="sd">      name: Optional name for the Tensor.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      TypeError: If shape is not convertible to a `tf.TensorShape`, or dtype is</span>
+<span class="sd">        not convertible to a `tf.DType`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span> <span class="o">=</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="o">=</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">as_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the `TensorShape` that represents the shape of the tensor.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the `dtype` of elements in the tensor.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the (optionally provided) name of the described tensor.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">is_compatible_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_or_value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">spec_or_value</span><span class="p">,</span> <span class="p">(</span><span class="n">DenseSpec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_type</span><span class="p">))</span> <span class="ow">and</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">spec_or_value</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">spec_or_value</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(shape=</span><span class="si">{}</span><span class="s2">, dtype=</span><span class="si">{}</span><span class="s2">, name=</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="c1"># pylint: disable=protected-access</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_shape</span> <span class="ow">and</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_dtype</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">other</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_to_legacy_output_types</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_to_legacy_output_shapes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_to_legacy_output_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_type</span>
+
+
+<span class="nd">@tf_export</span><span class="p">(</span><span class="s2">&quot;TensorSpec&quot;</span><span class="p">)</span>
+<span class="nd">@type_spec_registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;tf.TensorSpec&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TensorSpec</span><span class="p">(</span><span class="n">DenseSpec</span><span class="p">,</span> <span class="n">type_spec</span><span class="o">.</span><span class="n">BatchableTypeSpec</span><span class="p">,</span>
+                 <span class="n">trace_type</span><span class="o">.</span><span class="n">Serializable</span><span class="p">,</span> <span class="n">internal</span><span class="o">.</span><span class="n">TensorSpec</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Describes the type of a tf.Tensor.</span>
+
+<span class="sd">  &gt;&gt;&gt; t = tf.constant([[1,2,3],[4,5,6]])</span>
+<span class="sd">  &gt;&gt;&gt; tf.TensorSpec.from_tensor(t)</span>
+<span class="sd">  TensorSpec(shape=(2, 3), dtype=tf.int32, name=None)</span>
+
+<span class="sd">  Contains metadata for describing the nature of `tf.Tensor` objects</span>
+<span class="sd">  accepted or returned by some TensorFlow APIs.</span>
+
+<span class="sd">  For example, it can be used to constrain the type of inputs accepted by</span>
+<span class="sd">  a tf.function:</span>
+
+<span class="sd">  &gt;&gt;&gt; @tf.function(input_signature=[tf.TensorSpec([1, None])])</span>
+<span class="sd">  ... def constrained_foo(t):</span>
+<span class="sd">  ...   print(&quot;tracing...&quot;)</span>
+<span class="sd">  ...   return t</span>
+
+<span class="sd">  Now the `tf.function` is able to assume that `t` is always of the type</span>
+<span class="sd">  `tf.TensorSpec([1, None])` which will avoid retracing as well as enforce the</span>
+<span class="sd">  type restriction on inputs.</span>
+
+<span class="sd">  As a result, the following call with tensor of type `tf.TensorSpec([1, 2])`</span>
+<span class="sd">  triggers a trace and succeeds:</span>
+<span class="sd">  &gt;&gt;&gt; constrained_foo(tf.constant([[1., 2]])).numpy()</span>
+<span class="sd">  tracing...</span>
+<span class="sd">  array([[1., 2.]], dtype=float32)</span>
+
+<span class="sd">  The following subsequent call with tensor of type `tf.TensorSpec([1, 4])`</span>
+<span class="sd">  does not trigger a trace and succeeds:</span>
+<span class="sd">  &gt;&gt;&gt; constrained_foo(tf.constant([[1., 2, 3, 4]])).numpy()</span>
+<span class="sd">  array([[1., 2., 3., 4.], dtype=float32)</span>
+
+<span class="sd">  But the following call with tensor of type `tf.TensorSpec([2, 2])` fails:</span>
+<span class="sd">  &gt;&gt;&gt; constrained_foo(tf.constant([[1., 2], [3, 4]])).numpy()</span>
+<span class="sd">  Traceback (most recent call last):</span>
+<span class="sd">  ...</span>
+<span class="sd">  TypeError: Binding inputs to tf.function `constrained_foo` failed ...</span>
+
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">experimental_type_proto</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">struct_pb2</span><span class="o">.</span><span class="n">TensorSpecProto</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the type of proto associated with TensorSpec serialization.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">struct_pb2</span><span class="o">.</span><span class="n">TensorSpecProto</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">experimental_from_proto</span><span class="p">(</span>
+      <span class="bp">cls</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="n">struct_pb2</span><span class="o">.</span><span class="n">TensorSpecProto</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TensorSpec&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a TensorSpec instance based on the serialized proto.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">TensorSpec</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="o">.</span><span class="n">experimental_from_proto</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">proto</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">proto</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">experimental_as_proto</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">struct_pb2</span><span class="o">.</span><span class="n">TensorSpecProto</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a proto representation of the TensorSpec instance.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">struct_pb2</span><span class="o">.</span><span class="n">TensorSpecProto</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">experimental_as_proto</span><span class="p">(),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">experimental_as_proto</span><span class="p">()</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">is_compatible_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_or_tensor</span><span class="p">):</span>  <span class="c1"># pylint:disable=useless-super-delegation,arguments-renamed</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns True if spec_or_tensor is compatible with this TensorSpec.</span>
+
+<span class="sd">    Two tensors are considered compatible if they have the same dtype</span>
+<span class="sd">    and their shapes are compatible (see `tf.TensorShape.is_compatible_with`).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      spec_or_tensor: A tf.TensorSpec or a tf.Tensor</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      True if spec_or_tensor is compatible with self.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">TensorSpec</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">is_compatible_with</span><span class="p">(</span><span class="n">spec_or_tensor</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">is_subtype_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">TensorSpec</span><span class="p">):</span>
+      <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">is_subtype_of</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">is_subtype_of</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">placeholder_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">placeholder_context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generates a graph placeholder with the given TensorSpec information.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">placeholder_context</span><span class="o">.</span><span class="n">unnest_only</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="n">placeholder_context</span><span class="o">.</span><span class="n">naming_scope</span>
+    <span class="n">context_graph</span> <span class="o">=</span> <span class="n">placeholder_context</span><span class="o">.</span><span class="n">context_graph</span>
+    <span class="k">if</span> <span class="n">placeholder_context</span><span class="o">.</span><span class="n">with_none_control_dependencies</span><span class="p">:</span>
+      <span class="c1"># Note: setting ops.control_dependencies(None) ensures we always put</span>
+      <span class="c1"># capturing placeholders outside of any control flow context.</span>
+      <span class="k">with</span> <span class="n">context_graph</span><span class="o">.</span><span class="n">control_dependencies</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">placeholder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_placeholder</span><span class="p">(</span><span class="n">context_graph</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">placeholder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graph_placeholder</span><span class="p">(</span><span class="n">context_graph</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="c1"># Record the requested/user-specified name in case it&#39;s different than</span>
+      <span class="c1"># the uniquified name, for validation when exporting signatures.</span>
+      <span class="n">placeholder</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">_set_attr</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+          <span class="s2">&quot;_user_specified_name&quot;</span><span class="p">,</span>
+          <span class="n">attr_value_pb2</span><span class="o">.</span><span class="n">AttrValue</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="n">compat</span><span class="o">.</span><span class="n">as_bytes</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+
+    <span class="n">handle_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">_handle_data</span>  <span class="c1"># pylint: disable=protected-access</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">handle_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="ow">and</span> <span class="n">handle_data</span><span class="o">.</span><span class="n">shape_inference</span><span class="o">.</span><span class="n">is_set</span>
+        <span class="ow">and</span> <span class="n">handle_data</span><span class="o">.</span><span class="n">shape_inference</span><span class="o">.</span><span class="n">shape_and_type</span>
+    <span class="p">):</span>
+      <span class="n">handle_data_util</span><span class="o">.</span><span class="n">set_handle_data</span><span class="p">(</span><span class="n">placeholder</span><span class="p">,</span> <span class="n">handle_data</span><span class="o">.</span><span class="n">shape_inference</span><span class="p">)</span>
+
+    <span class="c1"># Record the composite device as an attribute to the placeholder.</span>
+    <span class="c1"># This attribute would be propagated into the arg_attr of the FunctionDef.</span>
+    <span class="c1"># Currently, a packed eager tensor is always placed on a CompositeDevice.</span>
+    <span class="k">if</span> <span class="n">placeholder_context</span><span class="o">.</span><span class="n">composite_device_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="n">placeholder</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">_set_attr</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+          <span class="s2">&quot;_composite_device&quot;</span><span class="p">,</span>
+          <span class="n">attr_value_pb2</span><span class="o">.</span><span class="n">AttrValue</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="n">compat</span><span class="o">.</span><span class="n">as_bytes</span><span class="p">(</span>
+              <span class="n">placeholder_context</span><span class="o">.</span><span class="n">composite_device_name</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">placeholder</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_graph_placeholder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Graph-only version of tf.compat.v1.placeholder(), for internal use only.&quot;&quot;&quot;</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">base_dtype</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">dtype_value</span> <span class="o">=</span> <span class="n">attr_value_pb2</span><span class="o">.</span><span class="n">AttrValue</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">dtype</span><span class="o">.</span><span class="n">as_datatype_enum</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+      <span class="n">shape</span> <span class="o">=</span> <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">attr_value_pb2</span><span class="o">.</span><span class="n">AttrValue</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="o">.</span><span class="n">as_proto</span><span class="p">())</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;dtype&quot;</span><span class="p">:</span> <span class="n">dtype_value</span><span class="p">,</span> <span class="s2">&quot;shape&quot;</span><span class="p">:</span> <span class="n">shape</span><span class="p">}</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">op</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">_create_op_internal</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+          <span class="s2">&quot;Placeholder&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="n">dtype</span><span class="p">],</span> <span class="n">input_types</span><span class="o">=</span><span class="p">[],</span>
+          <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+      <span class="c1"># TODO(b/262413656) Sometimes parameter names are not valid op names, in</span>
+      <span class="c1"># which case an unnamed placeholder is created instead. Update this logic</span>
+      <span class="c1"># to sanitize the name instead of falling back on unnamed placeholders.</span>
+      <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+      <span class="n">op</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">_create_op_internal</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
+          <span class="s2">&quot;Placeholder&quot;</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[</span><span class="n">dtype</span><span class="p">],</span> <span class="n">input_types</span><span class="o">=</span><span class="p">[],</span> <span class="n">attrs</span><span class="o">=</span><span class="n">attrs</span><span class="p">)</span>
+    <span class="p">(</span><span class="n">result</span><span class="p">,)</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">outputs</span>
+    <span class="k">if</span> <span class="n">op_callbacks</span><span class="o">.</span><span class="n">should_invoke_op_callbacks</span><span class="p">():</span>
+      <span class="c1"># TODO(b/147670703): Once the special-op creation code paths</span>
+      <span class="c1"># are unified. Remove this `if` block.</span>
+      <span class="n">callback_outputs</span> <span class="o">=</span> <span class="n">op_callbacks</span><span class="o">.</span><span class="n">invoke_op_callbacks</span><span class="p">(</span>
+          <span class="s2">&quot;Placeholder&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(),</span> <span class="n">attrs</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">outputs</span><span class="p">),</span>
+          <span class="n">op_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">callback_outputs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">result</span><span class="p">,)</span> <span class="o">=</span> <span class="n">callback_outputs</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">to_tensors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">trace_type</span><span class="o">.</span><span class="n">InternalCastContext</span><span class="p">())</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">is_subtype_of</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+          <span class="sa">f</span><span class="s2">&quot;Received tensor of shape </span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> instead of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+      <span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">from_tensors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensors</span><span class="p">):</span>
+    <span class="n">tensor</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">tensors</span><span class="p">)</span>
+    <span class="n">handle_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">_handle_data</span>  <span class="c1"># pylint: disable=protected-access</span>
+    <span class="k">if</span> <span class="n">handle_data</span><span class="p">:</span>
+      <span class="n">handle_data_util</span><span class="o">.</span><span class="n">set_handle_data</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">handle_data</span><span class="o">.</span><span class="n">shape_inference</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tensor</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">cast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">casting_context</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Cast value to a tensor that is a subtype of this TensorSpec.&quot;&quot;&quot;</span>
+    <span class="c1"># This method is mainly used to cast Python primitives to tensor.</span>
+    <span class="c1"># Currently, cast tensor to tensor with different types are not supported.</span>
+    <span class="c1"># For example, casting int32 to float32 would raise a ValueError.</span>
+    <span class="k">if</span> <span class="n">casting_context</span><span class="o">.</span><span class="n">allow_specs</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">TensorSpec</span><span class="p">):</span>
+      <span class="k">assert</span> <span class="n">value</span><span class="o">.</span><span class="n">is_subtype_of</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Can not cast </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2"> to </span><span class="si">{</span><span class="bp">self</span><span class="si">!r}</span><span class="s2">&quot;</span>
+      <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Tensor</span><span class="p">):</span>
+      <span class="n">value</span> <span class="o">=</span> <span class="n">tensor_conversion_registry</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">value_spec</span> <span class="o">=</span> <span class="n">TensorSpec</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value_spec</span><span class="o">.</span><span class="n">is_subtype_of</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_subtype_of</span><span class="p">(</span><span class="n">value_spec</span><span class="p">):</span>
+        <span class="n">value</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Can not cast </span><span class="si">{</span><span class="n">value_spec</span><span class="si">!r}</span><span class="s2"> to </span><span class="si">{</span><span class="bp">self</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">value</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_alias_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns an id specifying identical tensors to avoid duplication.&quot;&quot;&quot;</span>
+    <span class="n">alias_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">_handle_data</span><span class="p">:</span>  <span class="c1"># pylint: disable=protected-access</span>
+      <span class="n">alias_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">_handle_data</span><span class="o">.</span><span class="n">alias_id</span>  <span class="c1"># pylint: disable=protected-access</span>
+    <span class="k">return</span> <span class="n">alias_id</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">from_spec</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spec</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a `TensorSpec` with the same shape and dtype as `spec`.</span>
+
+<span class="sd">    &gt;&gt;&gt; spec = tf.TensorSpec(shape=[8, 3], dtype=tf.int32, name=&quot;OriginalName&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; tf.TensorSpec.from_spec(spec, &quot;NewName&quot;)</span>
+<span class="sd">    TensorSpec(shape=(8, 3), dtype=tf.int32, name=&#39;NewName&#39;)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      spec: The `TypeSpec` used to create the new `TensorSpec`.</span>
+<span class="sd">      name: The name for the new `TensorSpec`.  Defaults to `spec.name`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">from_tensor</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">tensor</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a `TensorSpec` that describes `tensor`.</span>
+
+<span class="sd">    &gt;&gt;&gt; tf.TensorSpec.from_tensor(tf.constant([1, 2, 3]))</span>
+<span class="sd">    TensorSpec(shape=(3,), dtype=tf.int32, name=None)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      tensor: The `tf.Tensor` that should be described.</span>
+<span class="sd">      name: A name for the `TensorSpec`.  Defaults to `tensor.op.name`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">      A `TensorSpec` that describes `tensor`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">core_tf_types</span><span class="o">.</span><span class="n">Value</span><span class="p">):</span>
+      <span class="k">return</span> <span class="n">TensorSpec</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">tensor</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tensor</span><span class="p">,</span> <span class="n">core_tf_types</span><span class="o">.</span><span class="n">Symbol</span><span class="p">):</span>
+      <span class="c1"># TODO(b/249802365): Return a sanitized version of op name or no name.</span>
+      <span class="k">return</span> <span class="n">TensorSpec</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">tensor</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">tensor</span><span class="o">.</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="sa">f</span><span class="s2">&quot;`tensor` should be a tf.Tensor, but got type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">tensor</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">value_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The Python type for values that are compatible with this TypeSpec.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Tensor</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_to_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">core_tf_types</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_from_components</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">components</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">components</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_from_compatible_tensor_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_list</span><span class="p">):</span>
+    <span class="c1"># TODO(b/112266545): It would be cleaner to create a new `ensure_shape()`</span>
+    <span class="c1"># op here and return that, instead of mutating the input&#39;s shape using</span>
+    <span class="c1"># `Tensor.set_shape()`. However, that would add extra ops, which could</span>
+    <span class="c1"># impact performance. When this bug is resolved, we should be able to add</span>
+    <span class="c1"># the `ensure_shape()` ops and optimize them away using contextual shape</span>
+    <span class="c1"># information.</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">tensor_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="n">tensor_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_shape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tensor_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_to_batchable_tensor_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">batched</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">batched</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="o">.</span><span class="n">merge_with</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">ndims</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unbatching a tensor is only supported for rank &gt;= 1&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_components</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_batch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">TensorSpec</span><span class="p">(</span>
+        <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">([</span><span class="n">batch_size</span><span class="p">])</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_unbatch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="o">.</span><span class="n">ndims</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unbatching a tensor is only supported for rank &gt;= 1&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">TensorSpec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_flat_tensor_specs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_to_tensor_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_to_components</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_to_batched_tensor_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_tensor_list</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="c1"># TODO(b/206014848): Helper function to support logic that does not consider</span>
+  <span class="c1"># Tensor name. Will be removed once load-bearing usages of Tensor name are</span>
+  <span class="c1"># fixed.</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">_without_tensor_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TensorSpec&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a version of `TensorSpec` with the name removed.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">TensorSpec</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+<span class="n">trace_type</span><span class="o">.</span><span class="n">register_serializable</span><span class="p">(</span><span class="n">TensorSpec</span><span class="p">)</span>
+<span class="n">trace_type</span><span class="o">.</span><span class="n">register_tensor_type</span><span class="p">(</span><span class="n">TensorSpec</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_TensorSpecCodec</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Codec for `TensorSpec`.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">can_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pyobj</span><span class="p">):</span>
+    <span class="c1"># BoundedTensorSpec has its own decoder.</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">pyobj</span><span class="p">,</span> <span class="n">TensorSpec</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pyobj</span><span class="p">,</span> <span class="n">BoundedTensorSpec</span><span class="p">))</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">do_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tensor_spec_value</span><span class="p">,</span> <span class="n">encode_fn</span><span class="p">):</span>
+    <span class="n">encoded_tensor_spec</span> <span class="o">=</span> <span class="n">struct_pb2</span><span class="o">.</span><span class="n">StructuredValue</span><span class="p">()</span>
+    <span class="n">encoded_tensor_spec</span><span class="o">.</span><span class="n">tensor_spec_value</span><span class="o">.</span><span class="n">CopyFrom</span><span class="p">(</span>
+        <span class="n">struct_pb2</span><span class="o">.</span><span class="n">TensorSpecProto</span><span class="p">(</span>
+            <span class="n">shape</span><span class="o">=</span><span class="n">encode_fn</span><span class="p">(</span><span class="n">tensor_spec_value</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">tensor_shape_value</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">encode_fn</span><span class="p">(</span><span class="n">tensor_spec_value</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">tensor_dtype_value</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">tensor_spec_value</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">encoded_tensor_spec</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">can_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">HasField</span><span class="p">(</span><span class="s2">&quot;tensor_spec_value&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">do_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">decode_fn</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">tensor_spec_value</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">return</span> <span class="n">TensorSpec</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">decode_fn</span><span class="p">(</span>
+            <span class="n">struct_pb2</span><span class="o">.</span><span class="n">StructuredValue</span><span class="p">(</span>
+                <span class="n">tensor_shape_value</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">tensor_spec_value</span><span class="o">.</span><span class="n">shape</span><span class="p">)),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">decode_fn</span><span class="p">(</span>
+            <span class="n">struct_pb2</span><span class="o">.</span><span class="n">StructuredValue</span><span class="p">(</span>
+                <span class="n">tensor_dtype_value</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">tensor_spec_value</span><span class="o">.</span><span class="n">dtype</span><span class="p">)),</span>
+        <span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))</span>
+
+
+<span class="n">nested_structure_coder</span><span class="o">.</span><span class="n">register_codec</span><span class="p">(</span><span class="n">_TensorSpecCodec</span><span class="p">())</span>
+
+
+<span class="c1"># TODO(b/133606651): Should is_compatible_with should check min/max bounds?</span>
+<span class="nd">@type_spec_registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="s2">&quot;tf.BoundedTensorSpec&quot;</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BoundedTensorSpec</span><span class="p">(</span><span class="n">TensorSpec</span><span class="p">,</span> <span class="n">trace_type</span><span class="o">.</span><span class="n">Serializable</span><span class="p">):</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;A `TensorSpec` that specifies minimum and maximum values.</span>
+
+<span class="sd">  Example usage:</span>
+<span class="sd">  ```python</span>
+<span class="sd">  spec = tensor_spec.BoundedTensorSpec((1, 2, 3), tf.float32, 0, (5, 5, 5))</span>
+<span class="sd">  tf_minimum = tf.convert_to_tensor(spec.minimum, dtype=spec.dtype)</span>
+<span class="sd">  tf_maximum = tf.convert_to_tensor(spec.maximum, dtype=spec.dtype)</span>
+<span class="sd">  ```</span>
+
+<span class="sd">  Bounds are meant to be inclusive. This is especially important for</span>
+<span class="sd">  integer types. The following spec will be satisfied by tensors</span>
+<span class="sd">  with values in the set {0, 1, 2}:</span>
+<span class="sd">  ```python</span>
+<span class="sd">  spec = tensor_spec.BoundedTensorSpec((3, 5), tf.int32, 0, 2)</span>
+<span class="sd">  ```</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;_minimum&quot;</span><span class="p">,</span> <span class="s2">&quot;_maximum&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">minimum</span><span class="p">,</span> <span class="n">maximum</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initializes a new `BoundedTensorSpec`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      shape: Value convertible to `tf.TensorShape`. The shape of the tensor.</span>
+<span class="sd">      dtype: Value convertible to `tf.DType`. The type of the tensor values.</span>
+<span class="sd">      minimum: Number or sequence specifying the minimum element bounds</span>
+<span class="sd">        (inclusive). Must be broadcastable to `shape`.</span>
+<span class="sd">      maximum: Number or sequence specifying the maximum element bounds</span>
+<span class="sd">        (inclusive). Must be broadcastable to `shape`.</span>
+<span class="sd">      name: Optional string containing a semantic name for the corresponding</span>
+<span class="sd">        array. Defaults to `None`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">      ValueError: If `minimum` or `maximum` are not provided or not</span>
+<span class="sd">        broadcastable to `shape`.</span>
+<span class="sd">      TypeError: If the shape is not an iterable or if the `dtype` is an invalid</span>
+<span class="sd">        numpy dtype.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BoundedTensorSpec</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">minimum</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`minimum` can not be None.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">maximum</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`maximum` can not be None.&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">minimum_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">minimum</span><span class="p">)</span>
+      <span class="n">common_shapes</span><span class="o">.</span><span class="n">broadcast_shape</span><span class="p">(</span>
+          <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="n">minimum_shape</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="sa">f</span><span class="s2">&quot;`minimum` </span><span class="si">{</span><span class="n">minimum</span><span class="si">}</span><span class="s2"> is not compatible with shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span>
+      <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exception</span>
+
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">maximum_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">maximum</span><span class="p">)</span>
+      <span class="n">common_shapes</span><span class="o">.</span><span class="n">broadcast_shape</span><span class="p">(</span>
+          <span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="p">(</span><span class="n">maximum_shape</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+          <span class="sa">f</span><span class="s2">&quot;`maximum` </span><span class="si">{</span><span class="n">maximum</span><span class="si">}</span><span class="s2"> is not compatible with shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">.&quot;</span>
+      <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exception</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_minimum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">minimum</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">as_numpy_dtype</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_minimum</span><span class="o">.</span><span class="n">setflags</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_maximum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">maximum</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">as_numpy_dtype</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_maximum</span><span class="o">.</span><span class="n">setflags</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">experimental_type_proto</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">struct_pb2</span><span class="o">.</span><span class="n">BoundedTensorSpecProto</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the type of proto associated with BoundedTensorSpec serialization.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">struct_pb2</span><span class="o">.</span><span class="n">BoundedTensorSpecProto</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">experimental_from_proto</span><span class="p">(</span>
+      <span class="bp">cls</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="n">struct_pb2</span><span class="o">.</span><span class="n">BoundedTensorSpecProto</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;BoundedTensorSpec&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a BoundedTensorSpec instance based on the serialized proto.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">BoundedTensorSpec</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">tensor_shape</span><span class="o">.</span><span class="n">TensorShape</span><span class="o">.</span><span class="n">experimental_from_proto</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">proto</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="n">minimum</span><span class="o">=</span><span class="n">tensor_util</span><span class="o">.</span><span class="n">MakeNdarray</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">minimum</span><span class="p">),</span>
+        <span class="n">maximum</span><span class="o">=</span><span class="n">tensor_util</span><span class="o">.</span><span class="n">MakeNdarray</span><span class="p">(</span><span class="n">proto</span><span class="o">.</span><span class="n">maximum</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">proto</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">experimental_as_proto</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">struct_pb2</span><span class="o">.</span><span class="n">BoundedTensorSpecProto</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a proto representation of the BoundedTensorSpec instance.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">struct_pb2</span><span class="o">.</span><span class="n">BoundedTensorSpecProto</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="o">.</span><span class="n">experimental_as_proto</span><span class="p">(),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">experimental_as_proto</span><span class="p">()</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span>
+        <span class="n">minimum</span><span class="o">=</span><span class="n">tensor_util</span><span class="o">.</span><span class="n">make_tensor_proto</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_minimum</span><span class="p">),</span>
+        <span class="n">maximum</span><span class="o">=</span><span class="n">tensor_util</span><span class="o">.</span><span class="n">make_tensor_proto</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_maximum</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">from_spec</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a `TensorSpec` with the same shape and dtype as `spec`.</span>
+
+<span class="sd">    If `spec` is a `BoundedTensorSpec`, then the new spec&#39;s bounds are set to</span>
+<span class="sd">    `spec.minimum` and `spec.maximum`; otherwise, the bounds are set to</span>
+<span class="sd">    `spec.dtype.min` and `spec.dtype.max`.</span>
+
+<span class="sd">    &gt;&gt;&gt; spec = tf.TensorSpec(shape=[8, 3], dtype=tf.int32, name=&quot;x&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; BoundedTensorSpec.from_spec(spec)</span>
+<span class="sd">    BoundedTensorSpec(shape=(8, 3), dtype=tf.int32, name=&#39;x&#39;,</span>
+<span class="sd">        minimum=array(-2147483648, dtype=int32),</span>
+<span class="sd">        maximum=array(2147483647, dtype=int32))</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      spec: The `TypeSpec` used to create the new `BoundedTensorSpec`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">dtypes</span><span class="o">.</span><span class="n">as_dtype</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">minimum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="s2">&quot;minimum&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
+    <span class="n">maximum</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="s2">&quot;maximum&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">BoundedTensorSpec</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">minimum</span><span class="p">,</span> <span class="n">maximum</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">minimum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a NumPy array specifying the minimum bounds (inclusive).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimum</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a NumPy array specifying the maximum bounds (inclusive).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maximum</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">cast</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">casting_context</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">casting_context</span><span class="o">.</span><span class="n">allow_specs</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">BoundedTensorSpec</span><span class="p">):</span>
+      <span class="k">assert</span> <span class="n">value</span><span class="o">.</span><span class="n">is_subtype_of</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Can not cast </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s2"> to </span><span class="si">{</span><span class="bp">self</span><span class="si">!r}</span><span class="s2">&quot;</span>
+      <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="n">actual_spec</span> <span class="o">=</span> <span class="n">TensorSpec</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">actual_spec</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">casting_context</span><span class="p">)</span>  <span class="c1"># pylint: disable=protected-access</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;BoundedTensorSpec(shape=</span><span class="si">{}</span><span class="s2">, dtype=</span><span class="si">{}</span><span class="s2">, name=</span><span class="si">{}</span><span class="s2">, minimum=</span><span class="si">{}</span><span class="s2">, maximum=</span><span class="si">{}</span><span class="s2">)&quot;</span>
+    <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+                    <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minimum</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="p">))</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="n">tensor_spec_eq</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">BoundedTensorSpec</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">tensor_spec_eq</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">minimum</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">minimum</span><span class="p">)</span> <span class="ow">and</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">maximum</span><span class="p">))</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">BoundedTensorSpec</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimum</span><span class="p">,</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">_maximum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">_serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_minimum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maximum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">_BoundedTensorSpecCodec</span><span class="p">:</span>
+<span class="w">  </span><span class="sd">&quot;&quot;&quot;Codec for `BoundedTensorSpec`.&quot;&quot;&quot;</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">can_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pyobj</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pyobj</span><span class="p">,</span> <span class="n">BoundedTensorSpec</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">do_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounded_tensor_spec_value</span><span class="p">,</span> <span class="n">encode_fn</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns an encoded proto for the given `tf.BoundedTensorSpec`.&quot;&quot;&quot;</span>
+    <span class="n">encoded_bounded_tensor_spec</span> <span class="o">=</span> <span class="n">struct_pb2</span><span class="o">.</span><span class="n">StructuredValue</span><span class="p">()</span>
+    <span class="n">encoded_bounded_tensor_spec</span><span class="o">.</span><span class="n">bounded_tensor_spec_value</span><span class="o">.</span><span class="n">CopyFrom</span><span class="p">(</span>
+        <span class="n">struct_pb2</span><span class="o">.</span><span class="n">BoundedTensorSpecProto</span><span class="p">(</span>
+            <span class="n">shape</span><span class="o">=</span><span class="n">encode_fn</span><span class="p">(</span><span class="n">bounded_tensor_spec_value</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">tensor_shape_value</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">encode_fn</span><span class="p">(</span><span class="n">bounded_tensor_spec_value</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">tensor_dtype_value</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">bounded_tensor_spec_value</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">minimum</span><span class="o">=</span><span class="n">tensor_util</span><span class="o">.</span><span class="n">make_tensor_proto</span><span class="p">(</span>
+                <span class="n">bounded_tensor_spec_value</span><span class="o">.</span><span class="n">minimum</span><span class="p">),</span>
+            <span class="n">maximum</span><span class="o">=</span><span class="n">tensor_util</span><span class="o">.</span><span class="n">make_tensor_proto</span><span class="p">(</span>
+                <span class="n">bounded_tensor_spec_value</span><span class="o">.</span><span class="n">maximum</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">encoded_bounded_tensor_spec</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">can_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">HasField</span><span class="p">(</span><span class="s2">&quot;bounded_tensor_spec_value&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span><span class="w"> </span><span class="nf">do_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">decode_fn</span><span class="p">):</span>
+    <span class="n">btsv</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">bounded_tensor_spec_value</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">btsv</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">return</span> <span class="n">BoundedTensorSpec</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">decode_fn</span><span class="p">(</span>
+            <span class="n">struct_pb2</span><span class="o">.</span><span class="n">StructuredValue</span><span class="p">(</span><span class="n">tensor_shape_value</span><span class="o">=</span><span class="n">btsv</span><span class="o">.</span><span class="n">shape</span><span class="p">)),</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">decode_fn</span><span class="p">(</span>
+            <span class="n">struct_pb2</span><span class="o">.</span><span class="n">StructuredValue</span><span class="p">(</span><span class="n">tensor_dtype_value</span><span class="o">=</span><span class="n">btsv</span><span class="o">.</span><span class="n">dtype</span><span class="p">)),</span>
+        <span class="n">minimum</span><span class="o">=</span><span class="n">tensor_util</span><span class="o">.</span><span class="n">MakeNdarray</span><span class="p">(</span><span class="n">btsv</span><span class="o">.</span><span class="n">minimum</span><span class="p">),</span>
+        <span class="n">maximum</span><span class="o">=</span><span class="n">tensor_util</span><span class="o">.</span><span class="n">MakeNdarray</span><span class="p">(</span><span class="n">btsv</span><span class="o">.</span><span class="n">maximum</span><span class="p">),</span>
+        <span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))</span>
+
+
+<span class="n">nested_structure_coder</span><span class="o">.</span><span class="n">register_codec</span><span class="p">(</span><span class="n">_BoundedTensorSpecCodec</span><span class="p">())</span>
+
+<span class="n">trace_type</span><span class="o">.</span><span class="n">register_serializable</span><span class="p">(</span><span class="n">BoundedTensorSpec</span><span class="p">)</span>
+
+<span class="c1"># Note: we do not include Tensor names when constructing TypeSpecs.</span>
+<span class="n">type_spec</span><span class="o">.</span><span class="n">register_type_spec_from_value_converter</span><span class="p">(</span>
+    <span class="n">Tensor</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">tensor</span><span class="p">:</span> <span class="n">TensorSpec</span><span class="p">(</span><span class="n">tensor</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">tensor</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+
+<span class="n">type_spec</span><span class="o">.</span><span class="n">register_type_spec_from_value_converter</span><span class="p">(</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">array</span><span class="p">:</span> <span class="n">TensorSpec</span><span class="p">(</span><span class="n">array</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>
