@@ -64,7 +64,8 @@ dev = [
     "pandas-stubs",
     "jupyter",
     "types-tqdm",
-    "ipykernel"
+    "ipykernel",
+    "plotly",
 ]
 publishing = [
     "build",
