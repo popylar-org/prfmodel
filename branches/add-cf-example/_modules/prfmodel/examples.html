@@ -195,9 +195,10 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../tutorials/simple_prf_empirical_fmri.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorials/cf_fmri_visual.html">Fitting a connective field model to fMRI data from a visual experiment</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -282,9 +283,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">nilearn.surface</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_surf_data</span><span class="p">,</span> <span class="n">PolyMesh</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">loadmat</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.ndimage</span><span class="w"> </span><span class="kn">import</span> <span class="n">gaussian_filter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nilearn.surface</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolyMesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">nilearn.surface</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_surf_data</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimuli.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">PRFStimulus</span>
 
 
@@ -331,66 +331,49 @@
 
 
 
-<span class="c1"># def download_surface(subject: str = &quot;hcp_999999&quot;) -&gt; None:</span>
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#     Download a standardized cortical surface and store it in the local pycortex database.</span>
-
-<span class="c1">#     Currently only the surface for the subject identifier `&quot;hcp_999999&quot;` can be downloaded. This surface is based on</span>
-<span class="c1">#     the one used in the Human Connectome Project (see this `link &lt;https://doi.org/10.6084/m9.figshare.13372958&gt;`_).</span>
-
-<span class="c1">#     Parameters</span>
-<span class="c1">#     ----------</span>
-<span class="c1">#     subject : str, default=&quot;hcp_999999&quot;</span>
-<span class="c1">#         Identifier of the subject for which to download and store the surface.</span>
-
-<span class="c1">#     &quot;&quot;&quot;</span>
-<span class="c1">#     import cortex as cx  # noqa: PLC0415 (import should be at top level)</span>
-
-<span class="c1">#     if subject == &quot;hcp_999999&quot;:</span>
-<span class="c1">#         if subject not in cx.db.subjects:</span>
-<span class="c1">#             with urllib.request.urlopen(&quot;https://ndownloader.figshare.com/files/25768841&quot;) as response:</span>
-<span class="c1">#                 zip_bytes = response.read()</span>
-<span class="c1">#                 with zipfile.ZipFile(io.BytesIO(zip_bytes), &quot;r&quot;) as archive:</span>
-<span class="c1">#                     for file in archive.namelist():</span>
-<span class="c1">#                         if file.startswith(subject):</span>
-<span class="c1">#                             archive.extract(file, cx.database.default_filestore)</span>
-
-<span class="c1">#             cx.db.reload_subjects()</span>
-<span class="c1">#     else:</span>
-<span class="c1">#         msg = f&quot;Surface for subject &#39;{subject}&#39; not found&quot;</span>
-<span class="c1">#         raise ValueError(msg)</span>
-
-
-<div class="viewcode-block" id="download_surface_mesh">
-<a class="viewcode-back" href="../../autoapi/prfmodel/examples/index.html#prfmodel.examples.download_surface_mesh">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">download_surface_mesh</span><span class="p">(</span>
+<div class="viewcode-block" id="load_surface_mesh">
+<a class="viewcode-back" href="../../autoapi/prfmodel/examples/index.html#prfmodel.examples.load_surface_mesh">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_surface_mesh</span><span class="p">(</span>
     <span class="n">dest_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span>
-    <span class="n">subject</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;hcp_999999&quot;</span><span class="p">,</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;flat&quot;</span><span class="p">,</span>
+    <span class="n">surface_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;flat&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Download a standardized cortical surface mesh and return vertex coordinates and faces.</span>
+<span class="sd">    Download and load a standardized cortical surface mesh.</span>
 
-<span class="sd">    Downloads the surface mesh for the given subject from Fig Share and extracts the inflated surface meshes for the</span>
-<span class="sd">    left and right hemispheres.</span>
+<span class="sd">    Downloads a surface mesh based on the Human Connectome Project[1]_ from Fig Share and extracts the surface</span>
+<span class="sd">    meshes for the left and right hemispheres.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    dest_dir : str or os.PathLike</span>
 <span class="sd">        Directory where the surface files should be stored.</span>
-<span class="sd">    subject : str, default=&quot;hcp_999999&quot;</span>
-<span class="sd">        Identifier of the subject for which to download the surface. Currently only ``&quot;hcp_999999&quot;`` is supported.</span>
+<span class="sd">    type : str, default=&quot;flat&quot;</span>
+<span class="sd">        The surface type. Must be either `&quot;flat&quot;` (the default), `&quot;inflated&quot;`, `&quot;pial&quot;`, or `&quot;wm&quot;`</span>
+<span class="sd">        (for white matter).</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    dict[str, tuple[numpy.ndarray, numpy.ndarray]]</span>
-<span class="sd">        A dictionary with keys ``&quot;lh&quot;`` and ``&quot;rh&quot;``, each mapping to a tuple of ``(coordinates, faces)`` where</span>
-<span class="sd">        ``coordinates`` has shape ``(n_vertices, 3)`` and ``faces`` has shape ``(n_faces, 3)``.</span>
+<span class="sd">    nilearn.surface.PolyMesh</span>
+<span class="sd">        The surface mesh.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    .. [1] Van Essen, D. C., Ugurbil, K., Auerbach, E., Barch, D., Behrens, T. E. J., Bucholz, R., Chang, A., Chen, L.,</span>
+<span class="sd">        Corbetta, M., Curtiss, S. W., Della Penna, S., Feinberg, D., Glasser, M. F., Harel, N., Heath, A. C.,</span>
+<span class="sd">        Larson-Prior, L., Marcus, D., Michalareas, G., Moeller, S., … WU-Minn HCP Consortium. (2012).</span>
+<span class="sd">        The Human Connectome Project: A data acquisition perspective. *NeuroImage, 62*(4), 2222-2231.</span>
+<span class="sd">        https://doi.org/10.1016/j.neuroimage.2012.02.018</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">subject</span> <span class="o">!=</span> <span class="s2">&quot;hcp_999999&quot;</span><span class="p">:</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Surface for subject &#39;</span><span class="si">{</span><span class="n">subject</span><span class="si">}</span><span class="s2">&#39; not found&quot;</span>
+    <span class="n">surface_type</span> <span class="o">=</span> <span class="s2">&quot;pia&quot;</span> <span class="k">if</span> <span class="n">surface_type</span> <span class="o">==</span> <span class="s2">&quot;pial&quot;</span> <span class="k">else</span> <span class="n">surface_type</span>
+
+    <span class="n">valid_types</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;flat&quot;</span><span class="p">,</span> <span class="s2">&quot;inflated&quot;</span><span class="p">,</span> <span class="s2">&quot;pia&quot;</span><span class="p">,</span> <span class="s2">&quot;wm&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">surface_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_types</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Surface type must be one of </span><span class="si">{</span><span class="n">valid_types</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">subject</span> <span class="o">=</span> <span class="s2">&quot;hcp_999999&quot;</span>
 
     <span class="n">dest_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest_dir</span><span class="p">)</span>
     <span class="n">surface_dir</span> <span class="o">=</span> <span class="n">dest_path</span> <span class="o">/</span> <span class="n">subject</span> <span class="o">/</span> <span class="s2">&quot;surfaces&quot;</span>
@@ -411,38 +394,10 @@
                         <span class="n">archive</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">PolyMesh</span><span class="p">(</span>
-        <span class="n">surface_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s2">_lh.gii&quot;</span><span class="p">,</span>
-        <span class="n">surface_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s2">_rh.gii&quot;</span><span class="p">,</span>
+        <span class="n">surface_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">surface_type</span><span class="si">}</span><span class="s2">_lh.gii&quot;</span><span class="p">,</span>
+        <span class="n">surface_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">surface_type</span><span class="si">}</span><span class="s2">_rh.gii&quot;</span><span class="p">,</span>
     <span class="p">)</span></div>
 
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_load_single_subject_fmri_stimulus</span><span class="p">(</span><span class="n">dest_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PRFStimulus</span><span class="p">:</span>
-    <span class="n">design_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest_path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;vis_design.mat&quot;</span>
-    <span class="n">design</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">loadmat</span><span class="p">(</span><span class="n">design_path</span><span class="p">)[</span><span class="s2">&quot;stim&quot;</span><span class="p">])</span>
-
-    <span class="n">pixel_offset</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">new_design</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-
-    <span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
-        <span class="n">square_screen</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">new_design</span><span class="p">[</span><span class="n">frame</span><span class="p">])</span>
-        <span class="n">square_screen</span><span class="p">[:,</span> <span class="n">pixel_offset</span> <span class="p">:</span> <span class="p">(</span><span class="n">pixel_offset</span> <span class="o">+</span> <span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span> <span class="o">=</span> <span class="p">(</span><span class="n">design</span><span class="p">[</span><span class="n">frame</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-        <span class="n">new_design</span><span class="p">[</span><span class="n">frame</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">gaussian_filter</span><span class="p">(</span><span class="n">square_screen</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
-
-    <span class="n">new_design</span> <span class="o">=</span> <span class="n">new_design</span><span class="p">[:,</span> <span class="p">::</span><span class="mi">5</span><span class="p">,</span> <span class="p">::</span><span class="mi">5</span><span class="p">]</span>
-
-    <span class="n">num_grid_points</span> <span class="o">=</span> <span class="mi">100</span>
-    <span class="n">x_min</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">10.0</span>
-
-    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">num_grid_points</span><span class="p">),</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">,</span> <span class="n">num_grid_points</span><span class="p">),</span>
-        <span class="p">),</span>
-        <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">PRFStimulus</span><span class="p">(</span><span class="n">new_design</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">])</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_get_hemisphere</span><span class="p">(</span><span class="n">hemisphere</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -522,86 +477,7 @@
         <span class="k">for</span> <span class="n">hemi</span> <span class="ow">in</span> <span class="n">_hemisphere</span>
     <span class="p">]</span>
 
-    <span class="n">response_combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">response_hemishperes</span><span class="p">)</span>
-
-    <span class="c1"># match unit:</span>
-    <span class="c1">#     case &quot;psc&quot;:</span>
-    <span class="c1">#         response_combined = ((response_combined.T / response_combined.mean(axis=1)).T - 1.0) * 100.0</span>
-    <span class="c1">#     case &quot;z_score&quot;:</span>
-    <span class="c1">#         response_combined = (</span>
-    <span class="c1">#             (response_combined.T - response_combined.mean(axis=1)) / response_combined.std(axis=1)</span>
-    <span class="c1">#         ).T</span>
-    <span class="c1">#     case &quot;raw&quot;:</span>
-    <span class="c1">#         pass</span>
-    <span class="c1">#     case other:</span>
-    <span class="c1">#         msg = f&quot;Argument &#39;unit&#39; must be &#39;psc&#39;, &#39;z_score&#39;, or &#39;raw&#39; but was &#39;{other}&#39;&quot;</span>
-    <span class="c1">#         raise ValueError(msg)</span>
-
-    <span class="c1"># stimulus = _load_single_subject_fmri_stimulus(dest_dir)</span>
-
-    <span class="k">return</span> <span class="n">response_combined</span>  <span class="c1"># , stimulus</span></div>
-
-
-
-<div class="viewcode-block" id="load_brain_atlas">
-<a class="viewcode-back" href="../../autoapi/prfmodel/examples/index.html#prfmodel.examples.load_brain_atlas">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">load_brain_atlas</span><span class="p">(</span><span class="n">dest_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span> <span class="n">hemisphere</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;both&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a standardized brain atlas.</span>
-
-<span class="sd">    Loads a brain atlas based on multimodal parcellation from the Human Connectome Project</span>
-<span class="sd">    (see Glasser et al., 2016)[1]_. The atlas contains indices for different regions of interest. It is subsampled to</span>
-<span class="sd">    match the cortical surface of subject `&#39;hcp_999999&#39;` that can be downloaded with</span>
-<span class="sd">    :func:`prfmodel.examples.download_surface`.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    dest_dir : str or os.PathLike</span>
-<span class="sd">        Directory where the data should be stored. If the directory does not contain all required files the data is</span>
-<span class="sd">        downloaded from Fig Share.</span>
-<span class="sd">    hemisphere : str, default=&quot;both&quot;</span>
-<span class="sd">        Hemisphere(s) for which the atlas should be loaded. Must be either &#39;left&#39;, &#39;right&#39;, or &#39;both&#39;.</span>
-<span class="sd">        For &#39;both&#39;, the data of both hemispheres are concatenated (left is first).</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    numpy.ndarray</span>
-<span class="sd">        The region of interest index of each vertex in the subsampled surface.</span>
-
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    For details, see this `link &lt;https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209&gt;`_.</span>
-
-<span class="sd">    References</span>
-<span class="sd">    ----------</span>
-<span class="sd">    .. [1] Glasser, M. F., Coalson, T. S., Robinson, E. C., Hacker, C. D., Harwell, J., Yacoub, E., Ugurbil, K.,</span>
-<span class="sd">    Andersson, J., Beckmann, C. F., Jenkinson, M., Smith, S. M., &amp; Van Essen, D. C. (2016). A multi-modal parcellation</span>
-<span class="sd">    of human cerebral cortex. *Nature, 536*(7615), 171-178. https://doi.org/10.1038/nature18933</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_hemisphere</span> <span class="o">=</span> <span class="n">_get_hemisphere</span><span class="p">(</span><span class="n">hemisphere</span><span class="p">)</span>
-
-    <span class="n">file_url</span> <span class="o">=</span> <span class="s2">&quot;https://ndownloader.figshare.com/files/26587088&quot;</span>
-
-    <span class="n">_download_archive</span><span class="p">(</span><span class="n">file_url</span><span class="p">,</span> <span class="n">dest_path</span><span class="p">)</span>
-
-    <span class="n">atlas_hemishperes</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span>
-            <span class="n">load_surf_data</span><span class="p">(</span>
-                <span class="n">Path</span><span class="p">(</span><span class="n">dest_path</span><span class="p">)</span>
-                <span class="o">/</span> <span class="s2">&quot;atlas&quot;</span>
-                <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;Q1-Q6_RelatedParcellation210.CorticalAreas_dil_Colors.59k_fs_LR.dlabel.</span><span class="si">{</span><span class="n">hemi</span><span class="si">}</span><span class="s2">.gii&quot;</span><span class="p">,</span>
-            <span class="p">),</span>
-            <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">for</span> <span class="n">hemi</span> <span class="ow">in</span> <span class="n">_hemisphere</span>
-    <span class="p">]</span>
-
-    <span class="n">atlas_combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">atlas_hemishperes</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">hemisphere</span> <span class="o">==</span> <span class="s2">&quot;both&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">atlas_combined</span><span class="p">,</span> <span class="mi">180</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">atlas_combined</span></div>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">response_hemishperes</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

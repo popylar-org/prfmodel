@@ -196,9 +196,10 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/simple_prf_empirical_fmri.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/cf_fmri_visual.html">Fitting a connective field model to fMRI data from a visual experiment</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
@@ -289,14 +290,11 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.examples.load_2d_prf_bar_stimulus" title="prfmodel.examples.load_2d_prf_bar_stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_2d_prf_bar_stimulus</span></code></a>(...)</p></td>
 <td><p>Load a two-dimensional population receptive field bar stimulus.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.examples.download_surface_mesh" title="prfmodel.examples.download_surface_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">download_surface_mesh</span></code></a>(→ dict[str, tuple[numpy.ndarray, ...)</p></td>
-<td><p>Download a standardized cortical surface mesh and return vertex coordinates and faces.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.examples.load_surface_mesh" title="prfmodel.examples.load_surface_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_surface_mesh</span></code></a>(→ dict[str, tuple[numpy.ndarray, ...)</p></td>
+<td><p>Download and load a standardized cortical surface mesh.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.examples.load_single_subject_fmri_data" title="prfmodel.examples.load_single_subject_fmri_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_single_subject_fmri_data</span></code></a>(→ tuple[numpy.ndarray, ...)</p></td>
 <td><p>Load example functional magnetic resonance imaging (fMRI) data for a single subject.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.examples.load_brain_atlas" title="prfmodel.examples.load_brain_atlas"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_brain_atlas</span></code></a>(→ numpy.ndarray)</p></td>
-<td><p>Load a standardized brain atlas.</p></td>
 </tr>
 </tbody>
 </table>
@@ -341,26 +339,37 @@ e1007924. <a class="reference external" href="https://doi.org/10.1371/journal.pc
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="prfmodel.examples.download_surface_mesh">
-<span class="sig-prename descclassname"><span class="pre">prfmodel.examples.</span></span><span class="sig-name descname"><span class="pre">download_surface_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.14)"><span class="pre">os.PathLike</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'hcp_999999'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'flat'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/prfmodel/examples.html#download_surface_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.examples.download_surface_mesh" title="Link to this definition">¶</a></dt>
-<dd><p>Download a standardized cortical surface mesh and return vertex coordinates and faces.</p>
-<p>Downloads the surface mesh for the given subject from Fig Share and extracts the inflated surface meshes for the
-left and right hemispheres.</p>
+<dt class="sig sig-object py" id="prfmodel.examples.load_surface_mesh">
+<span class="sig-prename descclassname"><span class="pre">prfmodel.examples.</span></span><span class="sig-name descname"><span class="pre">load_surface_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.14)"><span class="pre">os.PathLike</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">surface_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'flat'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/prfmodel/examples.html#load_surface_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.examples.load_surface_mesh" title="Link to this definition">¶</a></dt>
+<dd><p>Download and load a standardized cortical surface mesh.</p>
+<p>Downloads a surface mesh based on the Human Connectome Project[1]_ from Fig Share and extracts the surface
+meshes for the left and right hemispheres.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dest_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.14)"><em>os.PathLike</em></a>) – Directory where the surface files should be stored.</p></li>
-<li><p><strong>subject</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default=&quot;hcp_999999&quot;</em>) – Identifier of the subject for which to download the surface. Currently only <code class="docutils literal notranslate"><span class="pre">&quot;hcp_999999&quot;</span></code> is supported.</p></li>
+<li><p><strong>type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default=&quot;flat&quot;</em>) – The surface type. Must be either <cite>“flat”</cite> (the default), <cite>“inflated”</cite>, <cite>“pial”</cite>, or <cite>“wm”</cite>
+(for white matter).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A dictionary with keys <code class="docutils literal notranslate"><span class="pre">&quot;lh&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;rh&quot;</span></code>, each mapping to a tuple of <code class="docutils literal notranslate"><span class="pre">(coordinates,</span> <span class="pre">faces)</span></code> where
-<code class="docutils literal notranslate"><span class="pre">coordinates</span></code> has shape <code class="docutils literal notranslate"><span class="pre">(n_vertices,</span> <span class="pre">3)</span></code> and <code class="docutils literal notranslate"><span class="pre">faces</span></code> has shape <code class="docutils literal notranslate"><span class="pre">(n_faces,</span> <span class="pre">3)</span></code>.</p>
+<dd class="field-even"><p>The surface mesh.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a>, <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a>]]</p>
+<dd class="field-odd"><p>nilearn.surface.PolyMesh</p>
 </dd>
 </dl>
+<p class="rubric">References</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>Van Essen, D. C., Ugurbil, K., Auerbach, E., Barch, D., Behrens, T. E. J., Bucholz, R., Chang, A., Chen, L.,
+Corbetta, M., Curtiss, S. W., Della Penna, S., Feinberg, D., Glasser, M. F., Harel, N., Heath, A. C.,
+Larson-Prior, L., Marcus, D., Michalareas, G., Moeller, S., … WU-Minn HCP Consortium. (2012).
+The Human Connectome Project: A data acquisition perspective. <a href="#id5"><span class="problematic" id="id6">*</span></a>NeuroImage, 62*(4), 2222-2231.
+<a class="reference external" href="https://doi.org/10.1016/j.neuroimage.2012.02.018">https://doi.org/10.1016/j.neuroimage.2012.02.018</a></p>
+</aside>
+</aside>
 </dd></dl>
 
 <dl class="py function">
@@ -390,43 +399,6 @@ For ‘both’, the data of both hemispheres are concatenated (left is first).</
 <p>The data have been obtained by averaging 43 runs across 4 sessions from a single subject in a 7T fMRI scanner
 using a repitition time of 1.5 (see this
 <a class="reference external" href="https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209">link</a> for further details).</p>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="prfmodel.examples.load_brain_atlas">
-<span class="sig-prename descclassname"><span class="pre">prfmodel.examples.</span></span><span class="sig-name descname"><span class="pre">load_brain_atlas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.14)"><span class="pre">os.PathLike</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">hemisphere</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'both'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">numpy.ndarray</span></a></span></span><a class="reference internal" href="../../../_modules/prfmodel/examples.html#load_brain_atlas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.examples.load_brain_atlas" title="Link to this definition">¶</a></dt>
-<dd><p>Load a standardized brain atlas.</p>
-<p>Loads a brain atlas based on multimodal parcellation from the Human Connectome Project
-(see Glasser et al., 2016)[1]_. The atlas contains indices for different regions of interest. It is subsampled to
-match the cortical surface of subject <cite>‘hcp_999999’</cite> that can be downloaded with
-<code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.examples.download_surface()</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dest_dir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.14)"><em>os.PathLike</em></a>) – Directory where the data should be stored. If the directory does not contain all required files the data is
-downloaded from Fig Share.</p></li>
-<li><p><strong>hemisphere</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default=&quot;both&quot;</em>) – Hemisphere(s) for which the atlas should be loaded. Must be either ‘left’, ‘right’, or ‘both’.
-For ‘both’, the data of both hemispheres are concatenated (left is first).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The region of interest index of each vertex in the subsampled surface.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)">numpy.ndarray</a></p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>For details, see this <a class="reference external" href="https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209">link</a>.</p>
-<p class="rubric">References</p>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id5" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p>Glasser, M. F., Coalson, T. S., Robinson, E. C., Hacker, C. D., Harwell, J., Yacoub, E., Ugurbil, K.,</p>
-</aside>
-</aside>
-<p>Andersson, J., Beckmann, C. F., Jenkinson, M., Smith, S. M., &amp; Van Essen, D. C. (2016). A multi-modal parcellation
-of human cerebral cortex. <a href="#id6"><span class="problematic" id="id7">*</span></a>Nature, 536*(7615), 171-178. <a class="reference external" href="https://doi.org/10.1038/nature18933">https://doi.org/10.1038/nature18933</a></p>
 </dd></dl>
 
 </section>
@@ -491,9 +463,8 @@ of human cerebral cortex. <a href="#id6"><span class="problematic" id="id7">*</s
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
 <li><a class="reference internal" href="#prfmodel.examples.load_2d_prf_bar_stimulus"><code class="docutils literal notranslate"><span class="pre">load_2d_prf_bar_stimulus()</span></code></a></li>
-<li><a class="reference internal" href="#prfmodel.examples.download_surface_mesh"><code class="docutils literal notranslate"><span class="pre">download_surface_mesh()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.examples.load_surface_mesh"><code class="docutils literal notranslate"><span class="pre">load_surface_mesh()</span></code></a></li>
 <li><a class="reference internal" href="#prfmodel.examples.load_single_subject_fmri_data"><code class="docutils literal notranslate"><span class="pre">load_single_subject_fmri_data()</span></code></a></li>
-<li><a class="reference internal" href="#prfmodel.examples.load_brain_atlas"><code class="docutils literal notranslate"><span class="pre">load_brain_atlas()</span></code></a></li>
 </ul>
 </li>
 </ul>
