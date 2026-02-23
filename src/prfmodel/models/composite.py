@@ -16,6 +16,7 @@ from .encoding import encode_prf_response
 from .impulse import DerivativeTwoGammaImpulse
 from .impulse import convolve_prf_impulse_response
 from .temporal import BaselineAmplitude
+from .temporal import DoGAmplitude
 
 
 class SimplePRFModel(BaseComposite):
@@ -110,6 +111,155 @@ class SimplePRFModel(BaseComposite):
             response = temporal_model(response, parameters, dtype=dtype)
 
         return response
+
+
+class DoGPRFModel(BaseComposite):
+    """
+    Difference of Gaussians composite population receptive field model.
+
+    This is a generic class that runs two Gaussian pipelines through encode and convolve
+    independently, then combines them via a temporal model:
+    y(t) = p1(t) * amplitude_1 + p2(t) * amplitude_2 + baseline
+
+    Parameters
+    ----------
+    prf_model : BasePRFResponse
+        A population receptive field response model instance.
+    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
+        An impulse response model class or instance.
+    temporal_model : BaseTemporal or type or None, default=DoGAmplitude
+        A temporal model class or instance.
+
+    Notes
+    -----
+    The DoG composite model follows these steps:
+
+    1. Two population receptive field response predictions are computed using `sigma_1` and `sigma_2`.
+    2. Each response is encoded with the stimulus design.
+    3. Each encoded response is optionally convolved with an impulse response.
+    4. The two responses are stacked and combined by the temporal model.
+
+    """
+
+    def __init__(
+        self,
+        prf_model: BasePRFResponse,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
+        temporal_model: BaseTemporal | type[BaseTemporal] | None = DoGAmplitude,
+    ):
+        if impulse_model is not None and isinstance(impulse_model, type):
+            impulse_model = impulse_model()
+
+        if temporal_model is not None and isinstance(temporal_model, type):
+            temporal_model = temporal_model()
+
+        if "sigma" not in prf_model.parameter_names:
+            msg = "DoGPRFModel requires a Gaussian prf_model with a 'sigma' parameter"
+            raise ValueError(msg)
+
+        super().__init__(
+            prf_model=prf_model,
+            impulse_model=impulse_model,
+            temporal_model=temporal_model,
+        )
+
+    @property
+    def parameter_names(self) -> list[str]:
+        """A list with names of unique parameters used by the model."""
+        prf_model = cast("BasePRFResponse", self.models["prf_model"])
+        prf_params = prf_model.parameter_names.copy()
+
+        # Replace "sigma" with "sigma_1" and "sigma_2" for the two pipelines
+        idx = prf_params.index("sigma")
+        prf_params[idx : idx + 1] = ["sigma_1", "sigma_2"]
+
+        param_names = prf_params
+
+        for key, model in self.models.items():
+            if key != "prf_model" and model is not None:
+                param_names.extend(model.parameter_names)
+
+        return list(dict.fromkeys(param_names))
+
+    def _predict_single_response(
+        self,
+        stimulus: PRFStimulus,
+        parameters: pd.DataFrame,
+        sigma_col: str,
+        dtype: str,
+    ) -> Tensor:
+        """Run one Gaussian through encode + convolve."""
+        params_single = parameters.copy()
+        params_single["sigma"] = parameters[sigma_col]
+
+        prf_model = cast("BasePRFResponse", self.models["prf_model"])
+        response = prf_model(stimulus, params_single, dtype=dtype)
+        design = ops.convert_to_tensor(stimulus.design, dtype=dtype)
+        response = encode_prf_response(response, design, dtype=dtype)
+
+        if self.models["impulse_model"] is not None:
+            impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+            impulse_response = impulse_model(parameters, dtype=dtype)
+            response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
+
+        return response
+
+    def predict_responses(
+        self,
+        stimulus: PRFStimulus,
+        parameters: pd.DataFrame,
+        dtype: str | None = None,
+    ) -> Tensor:
+        """
+        Predict the two pipeline responses before applying betas.
+
+        Returns
+        -------
+        Tensor
+            Stacked predictions of shape (num_voxels, 2, num_frames).
+
+        """
+        dtype = get_dtype(dtype)
+        p1 = self._predict_single_response(stimulus, parameters, "sigma_1", dtype)
+        p2 = self._predict_single_response(stimulus, parameters, "sigma_2", dtype)
+
+        return ops.stack([p1, p2], axis=1)
+
+    def __call__(
+        self,
+        stimulus: PRFStimulus,  # type: ignore[override]
+        parameters: pd.DataFrame,
+        dtype: str | None = None,
+    ) -> Tensor:
+        """
+        Predict the DoG composite model response.
+
+        Parameters
+        ----------
+        stimulus : PRFStimulus
+            Population receptive field stimulus object.
+        parameters : pandas.DataFrame
+            Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+            for different voxels.
+        dtype : str, optional
+            The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        Tensor
+            Model predictions of shape (num_voxels, num_frames).
+
+        """
+        dtype = get_dtype(dtype)
+        stacked = self.predict_responses(stimulus, parameters, dtype=dtype)
+
+        if self.models["temporal_model"] is not None:
+            temporal_model = cast("BaseTemporal", self.models["temporal_model"])
+            return temporal_model(stacked, parameters, dtype=dtype)
+
+        # When temporal_model=None, return a simple subtraction (resp1 - resp2)
+        return stacked[:, 0] - stacked[:, 1]
 
 
 class SimpleCFModel(BaseComposite):

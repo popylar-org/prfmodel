@@ -83,8 +83,8 @@ class DoGAmplitude(BaseTemporal):
     """
     Linear amplitude model for difference of Gaussians.
 
-    Combines two temporal responses with independent beta weights and a baseline:
-    y(t) = inputs[:, 0] * beta_1 + inputs[:, 1] * beta_2 + baseline
+    Combines two temporal responses with independent amplitudes and a baseline:
+    y(t) = inputs[:, 0] * amplitude_1 + inputs[:, 1] * amplitude_2 + baseline
 
     """
 
@@ -93,10 +93,10 @@ class DoGAmplitude(BaseTemporal):
         """
         Names of parameters used by the model.
 
-        Parameter names are: ``beta_1``, ``beta_2``, and ``baseline``.
+        Parameter names are: ``amplitude_1``, ``amplitude_2``, and ``baseline``.
 
         """
-        return ["beta_1", "beta_2", "baseline"]
+        return ["amplitude_1", "amplitude_2", "baseline"]
 
     def __call__(self, inputs: Tensor, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -108,7 +108,7 @@ class DoGAmplitude(BaseTemporal):
             Input tensor with two temporal responses stacked along axis 1,
             shape (num_batches, 2, num_frames).
         parameters : pandas.DataFrame
-            Dataframe with columns ``beta_1``, ``beta_2``, and ``baseline``.
+            Dataframe with columns ``amplitude_1``, ``amplitude_2``, and ``baseline``.
         dtype : str, optional
             The dtype of the prediction result. If ``None`` (the default), uses the dtype from
             :func:`prfmodel.utils.get_dtype`.
@@ -128,8 +128,8 @@ class DoGAmplitude(BaseTemporal):
                 arg_shape=inputs.shape,
             )
 
-        beta_1 = convert_parameters_to_tensor(parameters[["beta_1"]], dtype=dtype)
-        beta_2 = convert_parameters_to_tensor(parameters[["beta_2"]], dtype=dtype)
+        amplitude_1 = convert_parameters_to_tensor(parameters[["amplitude_1"]], dtype=dtype)
+        amplitude_2 = convert_parameters_to_tensor(parameters[["amplitude_2"]], dtype=dtype)
         baseline = convert_parameters_to_tensor(parameters[["baseline"]], dtype=dtype)
 
-        return inputs[:, 0] * beta_1 + inputs[:, 1] * beta_2 + baseline
+        return inputs[:, 0] * amplitude_1 + inputs[:, 1] * amplitude_2 + baseline

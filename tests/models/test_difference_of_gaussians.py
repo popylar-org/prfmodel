@@ -7,11 +7,11 @@ from prfmodel.models.base import BaseTemporal
 from prfmodel.models.difference_of_gaussians import DoG2DPRFModel
 from prfmodel.models.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.temporal import DoGAmplitude
-from prfmodel.stimulus import Stimulus
-from tests.conftest import StimulusSetup
+from prfmodel.stimuli.prf import PRFStimulus
+from tests.conftest import PRFStimulusSetup
 
 
-class TestDoG2DPRFModel(StimulusSetup):
+class TestDoG2DPRFModel(PRFStimulusSetup):
     """Tests for the DoG2DPRFModel class."""
 
     @pytest.fixture
@@ -36,16 +36,16 @@ class TestDoG2DPRFModel(StimulusSetup):
             {
                 "mu_x": [0.0, 1.0, 0.0],
                 "mu_y": [1.0, 0.0, 0.0],
-                "sigma1": [1.0, 1.5, 2.0],
-                "sigma2": [2.0, 3.0, 4.0],
+                "sigma_1": [1.0, 1.5, 2.0],
+                "sigma_2": [2.0, 3.0, 4.0],
                 "delay": [6.0, 7.0, 5.0],
                 "dispersion": [0.9, 1.0, 0.8],
                 "undershoot": [12.0, 11.0, 13.0],
                 "u_dispersion": [0.9, 1.0, 0.8],
                 "ratio": [0.48, 0.48, 0.48],
                 "weight_deriv": [0.5, 0.5, 0.5],
-                "beta_1": [1.1, 1.0, 0.9],
-                "beta_2": [-0.5, -0.3, -0.1],
+                "amplitude_1": [1.1, 1.0, 0.9],
+                "amplitude_2": [-0.5, -0.3, -0.1],
                 "baseline": [0.0, 0.1, 0.2],
             },
         )
@@ -57,7 +57,7 @@ class TestDoG2DPRFModel(StimulusSetup):
         temporal_model: DoGAmplitude,
     ):
         """Test that parameter names of composite model match parameter names of submodels."""
-        expected = ["mu_y", "mu_x", "sigma1", "sigma2"]
+        expected = ["mu_y", "mu_x", "sigma_1", "sigma_2"]
         expected.extend(impulse_model.parameter_names)
         expected.extend(temporal_model.parameter_names)
 
@@ -79,7 +79,7 @@ class TestDoG2DPRFModel(StimulusSetup):
         self,
         impulse_model: BaseImpulse,
         temporal_model: BaseTemporal,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction returns correct shape."""
@@ -95,7 +95,7 @@ class TestDoG2DPRFModel(StimulusSetup):
     def test_predict_responses(
         self,
         prf_model: DoG2DPRFModel,
-        stimulus: Stimulus,
+        stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
         """Test that predict_responses returns stacked tensor with correct shape."""
