@@ -9,6 +9,11 @@
 
 A modern Python implementation for population receptive field model fitting.
 
+## Getting started
+
+See our online documentation on how to [get started](https://popylar-org.github.io/prfmodel/getting_started.html)
+with prfmodel.
+
 ## Installation
 
 **Requirements**: prfmodel requires Python version >= 3.10 and <= 3.12.

@@ -7,10 +7,14 @@ more tutorials and examples are in the making.
 
 You want to contribute a tutorial or example? Make a `pull request <https://github.com/popylar-org/prfmodel/pulls>`_!
 
+.. _tutorials:
+
 Tutorials
 ---------
 
 There are no tutorials available yet. Please stay tuned!
+
+.. _examples:
 
 Examples
 --------
