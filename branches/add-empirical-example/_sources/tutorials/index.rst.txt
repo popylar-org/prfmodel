@@ -1,30 +1,38 @@
 Tutorials
 =========
 
-Here you can find tutorials that explain how to use prfmodel. Stay tuned because more tutorials are in the making.
+Here you can find tutorials and examples that explain how to use prfmodel. Tutorials are shorter and explain specific
+features of prfmodel while examples are longer and contain end-to-end applications of the package. Stay tuned because
+more tutorials and examples are in the making.
 
-**Important**: Some of the tutorials require pycortex for visualizing surface data. pycortex can only be installed on
-Linux or MacOS. See :ref:`installing-pycortex` for details.
+You want to contribute a tutorial or example? Make a `pull request <https://github.com/popylar-org/prfmodel/pulls>`_!
 
-You want to contribute a tutorial? Make a `pull request <https://github.com/popylar-org/prfmodel/pulls>`_!
+.. _tutorials:
 
-List of tutorials:
+Tutorials
+---------
+
+There are no tutorials available yet. Please stay tuned!
+
+.. _examples:
+
+Examples
+--------
 
 .. toctree::
    :maxdepth: 0
    :titlesonly:
    :glob:
 
-   simple_prf_simulated.md
-   simple_prf_empirical_fmri.md
+   prf_2d_fmri_visual.md
 
-Tutorial development
---------------------
+Development
+-----------
 
-Tutorials are stored in the `MyST Markdown <https://myst-parser.readthedocs.io/en/latest/>`_ format. They are
-automatically rendered by Sphinx in the local and online documentation. However, for development purposes, it can be
-useful to locally convert the MyST Markdown files into Jupyter notebooks (and vice versa). The conversion can be done
-with `jupytext <https://jupytext.readthedocs.io/en/latest/index.html>`_.
+Tutorials and examples are stored in the `MyST Markdown <https://myst-parser.readthedocs.io/en/latest/>`_ format.
+They are automatically rendered by Sphinx in the local and online documentation. However, for development purposes,
+it can be useful to locally convert the MyST Markdown files into Jupyter notebooks (and vice versa). The conversion
+can be done with `jupytext <https://jupytext.readthedocs.io/en/latest/index.html>`_.
 
 To locally convert MyST Markdown files into Jupyter notebooks:
 

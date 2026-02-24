@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="How to fit a population receptive field model to simulated data" href="simple_prf_simulated.html"><link rel="prev" title="Installation" href="../installation.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Fitting a 2D population receptive field model to fMRI data from a visual experiment" href="prf_2d_fmri_visual.html"><link rel="prev" title="Getting started" href="../getting_started.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>Tutorials - prfmodel 0.0.1 documentation</title>
@@ -196,9 +196,9 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
 <li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Tutorials</a><input aria-label="Toggle navigation of Tutorials" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="simple_prf_empirical_fmri.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -280,23 +280,28 @@
         <article role="main" id="furo-main-content">
           <section id="tutorials">
 <h1>Tutorials<a class="headerlink" href="#tutorials" title="Link to this heading">¶</a></h1>
-<p>Here you can find tutorials that explain how to use prfmodel. Stay tuned because more tutorials are in the making.</p>
-<p><strong>Important</strong>: Some of the tutorials require pycortex for visualizing surface data. pycortex can only be installed on
-Linux or MacOS. See <a class="reference internal" href="../installation.html#installing-pycortex"><span class="std std-ref">Installing pycortex</span></a> for details.</p>
-<p>You want to contribute a tutorial? Make a <a class="reference external" href="https://github.com/popylar-org/prfmodel/pulls">pull request</a>!</p>
-<p>List of tutorials:</p>
+<p>Here you can find tutorials and examples that explain how to use prfmodel. Tutorials are shorter and explain specific
+features of prfmodel while examples are longer and contain end-to-end applications of the package. Stay tuned because
+more tutorials and examples are in the making.</p>
+<p>You want to contribute a tutorial or example? Make a <a class="reference external" href="https://github.com/popylar-org/prfmodel/pulls">pull request</a>!</p>
+<section id="id1">
+<span id="id2"></span><h2>Tutorials<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h2>
+<p>There are no tutorials available yet. Please stay tuned!</p>
+</section>
+<section id="examples">
+<span id="id3"></span><h2>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="simple_prf_empirical_fmri.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
 </ul>
 </div>
-<section id="tutorial-development">
-<h2>Tutorial development<a class="headerlink" href="#tutorial-development" title="Link to this heading">¶</a></h2>
-<p>Tutorials are stored in the <a class="reference external" href="https://myst-parser.readthedocs.io/en/latest/">MyST Markdown</a> format. They are
-automatically rendered by Sphinx in the local and online documentation. However, for development purposes, it can be
-useful to locally convert the MyST Markdown files into Jupyter notebooks (and vice versa). The conversion can be done
-with <a class="reference external" href="https://jupytext.readthedocs.io/en/latest/index.html">jupytext</a>.</p>
+</section>
+<section id="development">
+<h2>Development<a class="headerlink" href="#development" title="Link to this heading">¶</a></h2>
+<p>Tutorials and examples are stored in the <a class="reference external" href="https://myst-parser.readthedocs.io/en/latest/">MyST Markdown</a> format.
+They are automatically rendered by Sphinx in the local and online documentation. However, for development purposes,
+it can be useful to locally convert the MyST Markdown files into Jupyter notebooks (and vice versa). The conversion
+can be done with <a class="reference external" href="https://jupytext.readthedocs.io/en/latest/index.html">jupytext</a>.</p>
 <p>To locally convert MyST Markdown files into Jupyter notebooks:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>jupytext<span class="w"> </span>docs/tutorials/tutorial.md<span class="w"> </span>--to<span class="w"> </span>ipynb
 </pre></div>
@@ -313,23 +318,23 @@ with <a class="reference external" href="https://jupytext.readthedocs.io/en/late
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="simple_prf_simulated.html">
+          <a class="next-page" href="prf_2d_fmri_visual.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">How to fit a population receptive field model to simulated data</div>
+                <div class="title">Fitting a 2D population receptive field model to fMRI data from a visual experiment</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../installation.html">
+          <a class="prev-page" href="../getting_started.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Installation</div>
+                <div class="title">Getting started</div>
                 
               </div>
             </a>
@@ -364,7 +369,9 @@ with <a class="reference external" href="https://jupytext.readthedocs.io/en/late
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Tutorials</a><ul>
-<li><a class="reference internal" href="#tutorial-development">Tutorial development</a></li>
+<li><a class="reference internal" href="#id1">Tutorials</a></li>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+<li><a class="reference internal" href="#development">Development</a></li>
 </ul>
 </li>
 </ul>
