@@ -263,6 +263,7 @@ Before we model the BOLD response, we look at the timecourses and inspect the qu
 import plotly.io as pio
 import plotly.express as px
 
+pio.renderers.default = "notebook_connected"  # Requires internet connection to work
 pio.templates.default = "simple_white"
 
 fig = px.line(
