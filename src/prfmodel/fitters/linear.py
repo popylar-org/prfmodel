@@ -45,8 +45,10 @@ class LeastSquaresFitter:
 
     Notes
     -----
-    This fitter only optmizes one or two model parameters by estimating a general linear model with an intercept and a
-    slope between model predictions and data. Typically, these are baseline and amplitude parameters.
+    This fitter optimizes one or more slope parameters (and optionally an intercept) by estimating a general linear
+    model between model predictions and data. Typically, these are baseline and amplitude parameters. When multiple
+    slope names are given, each basis function is isolated by setting that slope to 1.0 and all others to 0.0, and
+    the resulting design matrix is solved with least squares in one shot.
 
     Internally, the fitter applies `keras.ops.lstsq` to each data batch.
 
@@ -75,7 +77,7 @@ class LeastSquaresFitter:
         self,
         data: Tensor,
         parameters: pd.DataFrame,
-        slope_name: str,
+        slope_name: str | list[str],
         intercept_name: str | None = None,
         batch_size: int | None = None,
     ) -> tuple[LeastSquaresHistory, pd.DataFrame]:
@@ -90,8 +92,9 @@ class LeastSquaresFitter:
         parameters : pandas.DataFrame
             Dataframe with model parameters. Columns must contain different model parameters and
             rows parameter values for each batch in `data`.
-        slope_name : str
-            The name of the parameter that will be the estimated slope. Must refer to a column within `parameters`.
+        slope_name : str or list of str
+            The name(s) of the parameter(s) that will be the estimated slope(s). Must refer to column(s) within
+            `parameters`.
         intercept_name : str, optional
             The name of the parameter that will be the estimated intercept. Must refer to a column within `parameters`.
             If `None`, no intercept is estimated.
@@ -107,9 +110,12 @@ class LeastSquaresFitter:
             A dataframe with final model parameters.
 
         """
-        if slope_name not in parameters.columns:
-            msg = "Argument 'slope_name' must be a column in 'parameters'"
-            raise ValueError(msg)
+        slope_names = [slope_name] if not isinstance(slope_name, list) else slope_name
+
+        for name in slope_names:
+            if name not in parameters.columns:
+                msg = f"Slope name '{name}' must be a column in 'parameters'"
+                raise ValueError(msg)
 
         if intercept_name is not None and intercept_name not in parameters.columns:
             msg = "Argument 'intercept_name' must be a column in 'parameters'"
@@ -128,7 +134,7 @@ class LeastSquaresFitter:
             batch_residuals, batch_params = self._fit_batch(
                 data[start:end],
                 new_parameters.iloc[start:end],
-                slope_name,
+                slope_names,
                 intercept_name,
             )
             new_parameters.iloc[start:end] = batch_params
@@ -140,7 +146,7 @@ class LeastSquaresFitter:
         self,
         data_batch: Tensor,
         parameter_batch: pd.DataFrame,
-        slope_name: str,
+        slope_names: list[str],
         intercept_name: str | None,
     ) -> tuple[np.ndarray, pd.DataFrame]:
         """Fit a single data batch and return updated parameters."""
@@ -148,22 +154,24 @@ class LeastSquaresFitter:
 
         parameter_batch = parameter_batch.copy()
 
-        # Reset intercept and slope so that we can replace them with estimates
-        # In order to estimate the correct intercepts and slopes, we first need to set them to zero and one,
-        # respectively, so that model predictions are not modified by their current values; we replace them later
-        # with the estimated values
+        # Reset intercept and all slopes so that we can replace them with estimates
         if intercept_name is not None:
             parameter_batch[intercept_name] = 0.0
 
-        parameter_batch[slope_name] = 1.0
+        for name in slope_names:
+            parameter_batch[name] = 0.0
 
-        predictions = self.model(self.stimulus, parameter_batch, self.dtype)
+        # Build design matrix by isolating each basis function
+        x_list = []
+
+        for name in slope_names:
+            parameter_batch[name] = 1.0
+            predictions = self.model(self.stimulus, parameter_batch, self.dtype)
+            x_list.append(predictions)
+            parameter_batch[name] = 0.0
 
         if intercept_name is not None:
-            intercept = ops.ones_like(predictions, dtype=self.dtype)
-            x_list = [intercept, predictions]
-        else:
-            x_list = [predictions]
+            x_list.insert(0, ops.ones_like(x_list[0], dtype=self.dtype))
 
         x_matrix = ops.stack(x_list, axis=-1)
 
@@ -175,10 +183,14 @@ class LeastSquaresFitter:
 
         best_params = ops.convert_to_numpy(best_params[..., 0])
 
+        # Assign coefficients back to parameters
+        col_idx = 0
         if intercept_name is not None:
-            parameter_batch[intercept_name] = best_params[..., 0]
-            parameter_batch[slope_name] = best_params[..., 1]
-        else:
-            parameter_batch[slope_name] = best_params[..., 0]
+            parameter_batch[intercept_name] = best_params[..., col_idx]
+            col_idx += 1
+
+        for name in slope_names:
+            parameter_batch[name] = best_params[..., col_idx]
+            col_idx += 1
 
         return residual_sum, parameter_batch
