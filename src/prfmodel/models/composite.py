@@ -113,13 +113,16 @@ class SimplePRFModel(BaseComposite):
         return response
 
 
-class DoGPRFModel(BaseComposite):
+class CenterSurroundPRFModel(BaseComposite):
     """
-    Difference of Gaussians composite population receptive field model.
+    Center-surround composite population receptive field model.
 
-    This is a generic class that runs two Gaussian pipelines through encode and convolve
+    This is a generic class that runs two PRF responses through stimulus encoding and impulse response convolution
     independently, then combines them via a temporal model:
-    y(t) = p1(t) * amplitude_1 + p2(t) * amplitude_2 + baseline
+    y(t) = p1(t) * amplitude_center + p2(t) * amplitude_sorround + baseline
+
+    The two responses differ in the values of ``change_params``. Each parameter
+    ``p`` in that list is split into ``{p}_center`` and ``{p}_sorround``.
 
     Parameters
     ----------
@@ -129,12 +132,16 @@ class DoGPRFModel(BaseComposite):
         An impulse response model class or instance.
     temporal_model : BaseTemporal or type or None, default=DoGAmplitude
         A temporal model class or instance.
+    change_params : list[str], default=["sigma"]
+        Names of the parameters that differ between the center and surround responses.
+        All entries must be present in ``prf_model.parameter_names``.
 
     Notes
     -----
-    The DoG composite model follows these steps:
+    The center-surround composite model follows these steps:
 
-    1. Two population receptive field response predictions are computed using `sigma_1` and `sigma_2`.
+    1. Two PRF response predictions are computed, one using ``{p}_center`` and one
+       using ``{p}_sorround`` for each ``p`` in ``change_params``.
     2. Each response is encoded with the stimulus design.
     3. Each encoded response is optionally convolved with an impulse response.
     4. The two responses are stacked and combined by the temporal model.
@@ -146,6 +153,7 @@ class DoGPRFModel(BaseComposite):
         prf_model: BasePRFResponse,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         temporal_model: BaseTemporal | type[BaseTemporal] | None = DoGAmplitude,
+        change_params: list[str] | None = None,
     ):
         if impulse_model is not None and isinstance(impulse_model, type):
             impulse_model = impulse_model()
@@ -153,9 +161,18 @@ class DoGPRFModel(BaseComposite):
         if temporal_model is not None and isinstance(temporal_model, type):
             temporal_model = temporal_model()
 
-        if "sigma" not in prf_model.parameter_names:
-            msg = "DoGPRFModel requires a Gaussian prf_model with a 'sigma' parameter"
+        if change_params is None:
+            change_params = ["sigma"]
+
+        invalid = [p for p in change_params if p not in prf_model.parameter_names]
+        if invalid:
+            msg = (
+                f"CenterSurroundPRFModel: parameter(s) {invalid} not found in "
+                f"prf_model.parameter_names {prf_model.parameter_names}"
+            )
             raise ValueError(msg)
+
+        self._change_params = change_params
 
         super().__init__(
             prf_model=prf_model,
@@ -169,9 +186,10 @@ class DoGPRFModel(BaseComposite):
         prf_model = cast("BasePRFResponse", self.models["prf_model"])
         prf_params = prf_model.parameter_names.copy()
 
-        # Replace "sigma" with "sigma_1" and "sigma_2" for the two pipelines
-        idx = prf_params.index("sigma")
-        prf_params[idx : idx + 1] = ["sigma_1", "sigma_2"]
+        # Replace each change_param with its center/sorround variants in-place
+        for param in self._change_params:
+            idx = prf_params.index(param)
+            prf_params[idx : idx + 1] = [f"{param}_center", f"{param}_sorround"]
 
         param_names = prf_params
 
@@ -185,12 +203,13 @@ class DoGPRFModel(BaseComposite):
         self,
         stimulus: PRFStimulus,
         parameters: pd.DataFrame,
-        sigma_col: str,
+        suffix: str,
         dtype: str,
     ) -> Tensor:
-        """Run one Gaussian through encode + convolve."""
+        """Run one PRF response (stimulus encoding + optional impulse convolution)."""
         params_single = parameters.copy()
-        params_single["sigma"] = parameters[sigma_col]
+        for param in self._change_params:
+            params_single[param] = parameters[f"{param}_{suffix}"]
 
         prf_model = cast("BasePRFResponse", self.models["prf_model"])
         response = prf_model(stimulus, params_single, dtype=dtype)
@@ -211,7 +230,7 @@ class DoGPRFModel(BaseComposite):
         dtype: str | None = None,
     ) -> Tensor:
         """
-        Predict the two pipeline responses before applying betas.
+        Predict the each of the two responses before applying betas.
 
         Returns
         -------
@@ -220,8 +239,8 @@ class DoGPRFModel(BaseComposite):
 
         """
         dtype = get_dtype(dtype)
-        p1 = self._predict_single_response(stimulus, parameters, "sigma_1", dtype)
-        p2 = self._predict_single_response(stimulus, parameters, "sigma_2", dtype)
+        p1 = self._predict_single_response(stimulus, parameters, "center", dtype)
+        p2 = self._predict_single_response(stimulus, parameters, "sorround", dtype)
 
         return ops.stack([p1, p2], axis=1)
 
@@ -232,7 +251,10 @@ class DoGPRFModel(BaseComposite):
         dtype: str | None = None,
     ) -> Tensor:
         """
-        Predict the DoG composite model response.
+        Predict the composite model response (considering Center and Sorround responses).
+
+        Applies the temporal model to the stacked responses from predict_responses.
+        When temporal_model=None, returns a simple subtraction (response_center - response_sorround)
 
         Parameters
         ----------
