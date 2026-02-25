@@ -25,7 +25,7 @@ Examples
    :glob:
 
    prf_2d_fmri_visual.md
-   cf_fmri_visual
+   cf_fmri_visual.md
 
 Development
 -----------

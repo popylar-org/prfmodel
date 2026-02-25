@@ -27,9 +27,6 @@ Because prfmodel uses Keras for model fitting, we need to make sure that a backe
 In this example, we use the TensorFlow backend.
 
 ```{code-cell} ipython3
-%load_ext autoreload
-%autoreload 2
-
 import os
 from importlib.util import find_spec
 
@@ -49,10 +46,10 @@ Before we start modelling, we need to make sure that we have all the requirement
 surface of the Human Connectome Project (see https://doi.org/10.6084/m9.figshare.13372958). For visualization, we use the nilearn package. We download the surface and load the flat meshes for both hemispheres.
 
 ```{code-cell} ipython3
-from prfmodel.examples import download_surface_mesh
+from prfmodel.examples import load_surface_mesh
 
 # Download surface mesh and load as nilearn.surface.PolyMesh object
-mesh = download_surface_mesh(dest_dir="data", type="flat")
+mesh = load_surface_mesh(dest_dir="data", surface_type="flat")
 ```
 
 ## Loading the BOLD response
@@ -60,7 +57,7 @@ mesh = download_surface_mesh(dest_dir="data", type="flat")
 Now that we have the flat surface, we load the raw BOLD response data from a single subject that can be represented on the surface mesh. We load data from both hemispheres of the subject by setting `hemisphere="both"`.
 
 ```{code-cell} ipython3
-%matplotlib widget
+%matplotlib inline
 import matplotlib.pyplot as plt
 from prfmodel.examples import load_single_subject_fmri_data
 
@@ -92,7 +89,7 @@ def plot_surf_stat_map_helper(
         title: str | None = None,
     ) -> tuple[plt.Figure, plt.Axes]:
     """Helper function to plot a surface with a stat map."""
-    fig, ax = plt.subplots(subplot_kw={"projection": "3d"}, figsize=(12, 6))
+    fig, ax = plt.subplots(subplot_kw={"projection": "3d"}, figsize=(8, 6))
 
     plot_surf_stat_map(
         mesh,
@@ -130,7 +127,11 @@ at the timecourses of our source region V1. We select the vertices that have bee
 parcellation (MMP) atlas based on Glasser et al. (2016).
 
 ```{code-cell} ipython3
-import numpy as np
+import plotly.io as pio
+import plotly.express as px
+
+pio.renderers.default = "notebook_connected"  # Requires internet connection to work
+pio.templates.default = "simple_white"
 
 # The atlas comes with the surface mesh
 atlas = np.load("data/hcp_999999/surface-info/mmp_atlas.npz")
@@ -149,20 +150,22 @@ We then plot the BOLD response for each vertex in V1 over time. Note that the un
 1.5 seconds for this dataset.
 
 ```{code-cell} ipython3
-import ipywidgets as widgets
-
 response_psc_v1 = response_psc[is_v1]
 
-fig, ax = plt.subplots(figsize=(12, 6))
-
-@widgets.interact(vertex_idx=(0, response_psc_v1.shape[0] - 1, 1))
-def update(vertex_idx: int):
-    [l.remove() for l in ax.lines]
-    ax.plot(response_psc_v1[vertex_idx])
-    ax.set_title(f"Time course for vertex {vertex_idx} in V1")
-
-ax.set_xlabel("Time frame (in TR)")
-ax.set_ylabel("BOLD response (in PSC)");
+fig = px.line(
+    response_psc_v1[::10].T,
+    animation_frame="variable",
+    range_x=(0, 120),
+    range_y=(-5, 5),
+    labels={
+        "index": "Time frame (in TR)",
+        "value": "BOLD response (in PSC)",
+        "variable": "V1 vertex",
+    },
+    title="V1 vertex time courses",
+)
+fig.update_layout(showlegend=False, height=500)
+fig.show()
 ```
 
 While the timecourses are quite noisy, we can see that, for some vertices, there four regular peaks in the signal. These peaks originate from the visual stimulus that was shown during the fMRI recording. The visual stimulus contained four correspond
@@ -173,7 +176,7 @@ We can get an overview of all all vertices by plotting all timecourses at once i
 ```{code-cell} ipython3
 aspect_ratio = response_psc.shape[1] / response_psc.shape[0]
 
-fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+fig, ax = plt.subplots(1, 1, figsize=(8, 6))
 
 im = ax.imshow(
     response_psc,
@@ -253,7 +256,7 @@ dist_matrix.shape
 We can plot the final distance matrix.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(1, 1, figsize=(12, 6))
+fig, ax = plt.subplots(1, 1, figsize=(8, 6))
 
 im = ax.imshow(
     dist_matrix,
@@ -300,29 +303,33 @@ The `GaussianCFModel` class requires two core parameters: `center_index` indicat
 source region. With the current CF implementation in prfmodel, this must be a vertex index in the distance matrix/source
 region. This means, that the center of a CF must be a vertex on the surface mesh (i.e., it cannot be in between vertices).
 
-We select a set of starting parameters for the CF model and make a combined prediction.
+We generate predictions for a range of `center_index` values to visualize how the predicted response changes across different CF locations.
 
 ```{code-cell} ipython3
-# Combine CF starting parameters with impulse response default parameters
-start_params = pd.DataFrame({
-    "center_index": [0.0],
-    "sigma": [1.0],
-    "baseline": [0.0],
-    "amplitude": [10.0],
+# Generate predictions for a subset of center_index values
+preview_center_indices = np.arange(0, response_psc_v1.shape[0], 10)
+preview_params = pd.DataFrame({
+    "center_index": preview_center_indices.astype(float),
+    "sigma": 1.0,
+    "baseline": 0.0,
+    "amplitude": 1.0,
 })
+preview_predictions = np.asarray(cf_model(stimulus, preview_params))
 
-fig, ax = plt.subplots(figsize=(12, 6))
-
-@widgets.interact(center_idx=(0, response_psc_v1.shape[0] - 1, 1))
-def update(center_idx: int):
-    [l.remove() for l in ax.lines]
-    start_params["center_index"] = center_idx
-    response_vertex = np.asarray(cf_model(stimulus, start_params))
-    ax.plot(response_vertex.T)
-    ax.set_title(f"Predicted response for CF center at V1 vertex {center_idx}")
-
-ax.set_xlabel("Time frame (in TR)")
-ax.set_ylabel("BOLD response (in PSC)");
+fig = px.line(
+    preview_predictions.T,
+    animation_frame="variable",
+    range_x=(0, 120),
+    range_y=(-2, 2),
+    labels={
+        "index": "Time frame (in TR)",
+        "value": "BOLD response (in PSC)",
+        "variable": "Center index",
+    },
+    title="Predicted CF response for different center indices",
+)
+fig.update_layout(showlegend=False, height=500)
+fig.show()
 ```
 
 ## Fitting the CF model
@@ -419,7 +426,7 @@ We can see that the amplitudes are substantially lower compared to the starting 
 
 Now that the core CF parameters and the auxiliary baseline and amplitude parameters are optimized, we can
 compare the model predictions against the observed responses. Because we want to make predictions for all vertices in
-the brain, we wrap our `prf_model` in the `batched` modifier function. The modifier changes the behavior of the model
+the brain, we wrap our `cf_model` in the `batched` modifier function. The modifier changes the behavior of the model
 to make predictions for batches of vertices sequentially. This saves us a lot of memory at the expense of minimal runtime
 overhead.
 
@@ -446,11 +453,12 @@ r_squared.shape
 We can look at the distribution of R-squared values across vertices.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(figsize=(12, 6))
-
-ax.hist(r_squared)
-ax.set_xlabel("R-squared")
-ax.set_ylabel("Frequency");
+fig = px.histogram(
+    x=r_squared,
+    nbins=15,
+    labels={"x": "R-squared"},
+).update_layout(yaxis_title="Frequency", height=400)
+fig.show()
 ```
 
 We can see that many vertices have a score above zero meaning that the response of the CF model matches the observed response.
@@ -458,31 +466,70 @@ A substantial amount of vertices also have higher scores, suggesting that the CF
 brain regions to the source region V1. Note that some vertices have a perfect score of $\approx 1$. These are the
 vertices in V1 which are perfectly mapped onto themselves.
 
-Let's plot the predicted and the observed timecourses for the vertices with the closest match.
+Let's plot the predicted and the observed timecourses for a subsample of vertices.
 
 ```{code-cell} ipython3
+import plotly.graph_objects as go
+
+each_k = 500
+
 # Sort vertices that are not in V1 according to R-squared
-best_vertices = np.flip(np.argsort(r_squared[~is_v1_valid]))
+best_vertices = np.flip(np.argsort(r_squared[~is_v1_valid]))[::each_k]
 
 response_valid_best_vertices = response_valid[~is_v1_valid][best_vertices]
 pred_response_best_vertices = pred_response[~is_v1_valid][best_vertices]
 r_squared_valid_best_vertices = r_squared[~is_v1_valid][best_vertices]
+sigma_best_vertices = ls_params["sigma"].values[~is_v1_valid][best_vertices]
 
-fig, ax = plt.subplots(figsize=(6, 6))
+df_valid = pd.DataFrame(response_valid_best_vertices.T)
+df_pred = pd.DataFrame(pred_response_best_vertices.T)
 
-ax.set_xlabel("Time frame (in TR)")
-ax.set_ylabel("BOLD response (in PSC)")
-ax.set_ylim((-5, 5))
+df_valid["source"] = "Observed"
+df_pred["source"] = "Predicted"
 
-@widgets.interact(vertex_idx=(0, response_valid_best_vertices.shape[0] - 1, 1))
-def update(vertex_idx):
-    [l.remove() for l in ax.lines]
-    [t.remove() for t in ax.texts]
-    ax.plot(response_valid_best_vertices[vertex_idx], "--", label="Observed")
-    ax.plot(pred_response_best_vertices[vertex_idx], label="Predicted")
-    ax.text(0.9, 4.0, f"R-squared = {r_squared_valid_best_vertices[vertex_idx]:.2f}")
-    ax.set_title(f"Observed and predicted responses for vertex {vertex_idx}")
-    ax.legend()
+df = pd.concat([df_valid, df_pred], axis=0)
+df["time"] = np.tile(np.arange(df_valid.shape[0]), 2)
+
+df_melted = df.melt(id_vars=["source", "time"], var_name="vertex", value_name="response")
+
+fig = px.line(
+    df_melted,
+    x="time",
+    y="response",
+    color="source",
+    animation_frame="vertex",
+    range_y=[-5, 5],
+    labels={
+        "time": "Time frame (in TR)",
+        "response": "BOLD response (in PSC)",
+        "vertex": "Vertex",
+        "source": "",
+    },
+    title=f"Observed and predicted vertex responses (subsampled vertices)",
+)
+
+# Add a text trace to display per-vertex stats; this will be updated in each animation frame
+fig.add_trace(go.Scatter(
+    x=[60],
+    y=[4.7],
+    mode="text",
+    text=[f"R-squared = {r_squared_valid_best_vertices[0]:.3f}, sigma = {sigma_best_vertices[0]:.3f}"],
+    showlegend=False,
+    hoverinfo="skip",
+    textfont=dict(size=13),
+))
+stats_trace_idx = len(fig.data) - 1
+
+# Append a stats text update to each animation frame's trace data
+for i, frame in enumerate(fig.frames):
+    r2 = r_squared_valid_best_vertices[i]
+    sigma = sigma_best_vertices[i]
+    frame.data = list(frame.data) + [go.Scatter(
+        text=[f"R-squared = {r2:.3f}, sigma = {sigma:.3f}"],
+    )]
+
+fig.update_layout(showlegend=True, height=500)
+fig.show()
 ```
 
 We can see that the model predicts the observed timecourses for these vertices very well.
