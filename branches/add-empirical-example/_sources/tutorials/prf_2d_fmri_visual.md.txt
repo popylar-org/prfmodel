@@ -6,9 +6,9 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.18.1
 kernelspec:
-  display_name: Python 3.12
+  display_name: venv
   language: python
-  name: python312
+  name: python3
 ---
 
 # Fitting a 2D population receptive field model to fMRI data from a visual experiment
@@ -294,6 +294,7 @@ aspect_ratio = response_psc.shape[1] / response_psc.shape[0]
 
 fig, ax = plt.subplots(1, 1, figsize=(6, 6))
 
+# We use matplotlib because plotly cannot handle this many vertices
 im = ax.imshow(
     response_psc,
     aspect=aspect_ratio,
@@ -356,12 +357,16 @@ impulse_default_params = pd.DataFrame({
 # Predict impulse response with default parameters
 impulse_response = np.asarray(impulse_model(impulse_default_params))
 
-fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-
-ax.plot(impulse_response.T)
-
-ax.set_xlabel("Time frame (in TR)")
-ax.set_ylabel("Impulse response");
+fig = px.line(
+    pd.DataFrame({
+        "Time frame (in TR)": np.arange(impulse_response.shape[1]),
+        "Impulse response": impulse_response[0]
+    }),
+    x="Time frame (in TR)",
+    y="Impulse response",
+    title="Predicted impulse response",
+)
+fig.show()
 ```
 
 We insert the impulse model into the `Gaussian2DPRFModel` that makes combined model predictions.
@@ -387,16 +392,31 @@ start_params = pd.concat([pd.DataFrame(
     },
 ), impulse_default_params], axis=1)
 
-fig, ax = plt.subplots(figsize=(6, 6))
-
 # Make prediction with pRF model
 simulated_response = np.asarray(prf_model(stimulus, start_params))
 
-ax.plot(simulated_response.T)
-ax.set_title(f"Predicted timecourse")
+fig = px.line(
+    pd.DataFrame({
+        "Time frame (in TR)": np.arange(simulated_response.shape[1]),
+        "BOLD response (in PSC)": simulated_response[0]
+    }),
+    x="Time frame (in TR)",
+    y="BOLD response (in PSC)",
+    title="Predicted timecourse",
+)
+fig.show()
+```
 
-ax.set_xlabel("Time frame (in TR)")
-ax.set_ylabel("BOLD response (in PSC)");
+```{code-cell} ipython3
+fig = px.line(
+    simulated_response.T,
+    labels={
+        "index": "Time frame (in TR)",
+        "value": "BOLD response (in PSC)",
+    },
+    title="Predicted timecourse",
+)
+fig.show()
 ```
 
 Some vertices do not have valid timecourses, that is, they contain `NaN` values. We filter out all vertices that have
@@ -460,7 +480,11 @@ grid_history, grid_params = grid_fitter.fit(
     parameter_values=param_ranges,
     batch_size=20,
 )
+```
 
+We can print the parameters estimated by the grid search.
+
+```{code-cell} ipython3
 grid_params
 ```
 
@@ -485,7 +509,9 @@ ls_history, ls_params = ls_fitter.fit(
     intercept_name="baseline",
     batch_size=200,
 )
+```
 
+```{code-cell} ipython3
 ls_params
 ```
 
@@ -520,30 +546,34 @@ r_squared.shape
 We can look at the distribution of R-squared values across vertices.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(figsize=(6, 6))
-
-ax.hist(r_squared)
-ax.set_xlabel("R-squared")
-ax.set_ylabel("Frequency");
+fig = px.histogram(
+    x=r_squared,
+    nbins=15,
+    labels={"x": "R-squared"},
+).update_layout(yaxis_title="Frequency")
+fig.show()
 ```
 
 We can see that many vertices have a score close to zero meaning that the pRF model does not predict the observed response well. This is expected since not the entire brain responds to our relatively simple visual stimulus.
 However, a substantial amount of vertices also have higher scores, suggesting that some brain areas do respond to it.
 
-Let's plot the predicted and the observed timecourses for the vertices with the closest match.
+Let's plot the predicted and the observed timecourses for a subsample of vertices.
 
 ```{code-cell} ipython3
+import plotly.graph_objects as go
+
+each_k = 500
+
 # Sort vertices that are not in V1 according to R-squared
-best_vertices = np.flip(np.argsort(r_squared))
+best_vertices = np.flip(np.argsort(r_squared))[::each_k]
 
 response_valid_best_vertices = response_valid[best_vertices]
 pred_response_best_vertices = pred_response[best_vertices]
 r_squared_valid_best_vertices = r_squared[best_vertices]
+sigma_best_vertices = ls_params["sigma"].values[best_vertices]
 
-top_k = 500
-
-df_valid = pd.DataFrame(response_valid_best_vertices[:top_k].T)
-df_pred = pd.DataFrame(pred_response_best_vertices[:top_k].T)
+df_valid = pd.DataFrame(response_valid_best_vertices.T)
+df_pred = pd.DataFrame(pred_response_best_vertices.T)
 
 df_valid["source"] = "Observed"
 df_pred["source"] = "Predicted"
@@ -566,8 +596,28 @@ fig = px.line(
         "vertex": "Vertex",
         "source": "",
     },
-    title=f"Observed and predicted vertex responses (best {top_k} vertices)"
+    title=f"Observed and predicted vertex responses (subsampled vertices)",
 )
+
+# Add a text trace to display per-vertex stats; this will be updated in each animation frame
+fig.add_trace(go.Scatter(
+    x=[60],
+    y=[4.7],
+    mode="text",
+    text=[f"R-squared = {r_squared_valid_best_vertices[0]:.3f}, sigma = {sigma_best_vertices[0]:.3f}"],
+    showlegend=False,
+    hoverinfo="skip",
+    textfont=dict(size=13),
+))
+stats_trace_idx = len(fig.data) - 1
+
+# Append a stats text update to each animation frame's trace data
+for i, frame in enumerate(fig.frames):
+    r2 = r_squared_valid_best_vertices[i]
+    sigma = sigma_best_vertices[i]
+    frame.data = list(frame.data) + [go.Scatter(
+        text=[f"R-squared = {r2:.3f}, sigma = {sigma:.3f}"],
+    )]
 
 fig.update_layout(showlegend=True)
 fig.show()

@@ -335,7 +335,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">load_surface_mesh</span><span class="p">(</span>
     <span class="n">dest_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span>
     <span class="n">surface_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;flat&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PolyMesh</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Download and load a standardized cortical surface mesh.</span>
 
@@ -432,7 +432,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">load_single_subject_fmri_data</span><span class="p">(</span>
     <span class="n">dest_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span>
     <span class="n">hemisphere</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;both&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">PRFStimulus</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Load example functional magnetic resonance imaging (fMRI) data for a single subject.</span>
 
@@ -452,8 +452,6 @@
 <span class="sd">    -------</span>
 <span class="sd">    response : numpy.ndarray</span>
 <span class="sd">        The BOLD response in the requested unit.</span>
-<span class="sd">    stimulus : prfmodel.stimulus.Stimulus</span>
-<span class="sd">        The experimental stimulus.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>

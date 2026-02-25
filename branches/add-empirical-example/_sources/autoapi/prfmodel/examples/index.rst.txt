@@ -50,7 +50,7 @@ Module Contents
        e1007924. https://doi.org/10.1371/journal.pcbi.1007924
 
 
-.. py:function:: load_surface_mesh(dest_dir: str | os.PathLike, surface_type: str = 'flat') -> dict[str, tuple[numpy.ndarray, numpy.ndarray]]
+.. py:function:: load_surface_mesh(dest_dir: str | os.PathLike, surface_type: str = 'flat') -> nilearn.surface.PolyMesh
 
    Download and load a standardized cortical surface mesh.
 
@@ -75,7 +75,7 @@ Module Contents
        https://doi.org/10.1016/j.neuroimage.2012.02.018
 
 
-.. py:function:: load_single_subject_fmri_data(dest_dir: str | os.PathLike, hemisphere: str = 'both') -> tuple[numpy.ndarray, prfmodel.stimuli.prf.PRFStimulus]
+.. py:function:: load_single_subject_fmri_data(dest_dir: str | os.PathLike, hemisphere: str = 'both') -> numpy.ndarray
 
    Load example functional magnetic resonance imaging (fMRI) data for a single subject.
 
@@ -89,8 +89,8 @@ Module Contents
                       For 'both', the data of both hemispheres are concatenated (left is first).
    :type hemisphere: str, default="both"
 
-   :returns: * **response** (*numpy.ndarray*) -- The BOLD response in the requested unit.
-             * **stimulus** (*prfmodel.stimulus.Stimulus*) -- The experimental stimulus.
+   :returns: **response** -- The BOLD response in the requested unit.
+   :rtype: numpy.ndarray
 
    .. rubric:: Notes
 
