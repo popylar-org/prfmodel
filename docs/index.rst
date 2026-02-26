@@ -9,8 +9,7 @@ prfmodel -- A modern Python package for population receptive field modelling
 Welcome to prfmodel's documentation. For a conceptual introduction to the package, check out the
 :doc:`Introduction <introduction>`. For details on the package installation, take a look at
 :doc:`Installation <installation>`. To get started with prfmodel, check out our
-:doc:`Getting started <getting_started>` page or take a look at our :ref:`tutorials`
-and :ref:`examples`.
+:doc:`Getting started <getting_started>` page or take a look at our :ref:`tutorials`.
 
 .. toctree::
   :maxdepth: 2

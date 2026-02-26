@@ -1,5 +1,7 @@
-Tutorials
-=========
+.. _tutorials:
+
+Tutorials & Examples
+====================
 
 Here you can find tutorials and examples that explain how to use prfmodel. Tutorials are shorter and explain specific
 features of prfmodel while examples are longer and contain end-to-end applications of the package. Stay tuned because
@@ -7,24 +9,12 @@ more tutorials and examples are in the making.
 
 You want to contribute a tutorial or example? Make a `pull request <https://github.com/popylar-org/prfmodel/pulls>`_!
 
-.. _tutorials:
-
-Tutorials
----------
-
-There are no tutorials available yet. Please stay tuned!
-
-.. _examples:
-
-Examples
---------
-
 .. toctree::
-   :maxdepth: 0
+   :maxdepth: 2
    :titlesonly:
    :glob:
 
-   prf_2d_fmri_visual.md
+   examples/index
 
 Development
 -----------
