@@ -164,12 +164,12 @@ fig = px.line(
     },
     title="V1 vertex time courses",
 )
-fig.update_layout(showlegend=False, height=500)
+fig.update_layout(showlegend=False, height=400)
 fig.show()
 ```
 
 While the timecourses are quite noisy, we can see that, for some vertices, there four regular peaks in the signal. These peaks originate from the visual stimulus that was shown during the fMRI recording. The visual stimulus contained four correspond
-bars moving through the visual field in different directions (see LINK). The goal of our CF model is to map these responses to the responses from other vertices in the brain.
+bars moving through the visual field in different directions (see [](prf_2d_fmri_visual.md)). The goal of our CF model is to map these responses to the responses from other vertices in the brain.
 
 We can get an overview of all all vertices by plotting all timecourses at once in a heatmap.
 
@@ -328,7 +328,7 @@ fig = px.line(
     },
     title="Predicted CF response for different center indices",
 )
-fig.update_layout(showlegend=False, height=500)
+fig.update_layout(showlegend=False, height=400)
 fig.show()
 ```
 
@@ -528,7 +528,7 @@ for i, frame in enumerate(fig.frames):
         text=[f"R-squared = {r2:.3f}, sigma = {sigma:.3f}"],
     )]
 
-fig.update_layout(showlegend=True, height=500)
+fig.update_layout(showlegend=True, height=400)
 fig.show()
 ```
 

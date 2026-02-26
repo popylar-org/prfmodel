@@ -278,7 +278,7 @@ fig = px.line(
     },
     title="Vertex time courses",
 )
-fig.update_layout(showlegend=False, height=500)
+fig.update_layout(showlegend=False, height=400)
 fig.show()
 ```
 
@@ -366,7 +366,7 @@ fig = px.line(
     y="Impulse response",
     title="Predicted impulse response",
 )
-fig.show(height=500)
+fig.show(height=400)
 ```
 
 We insert the impulse model into the `Gaussian2DPRFModel` that makes combined model predictions.
@@ -404,7 +404,7 @@ fig = px.line(
     y="BOLD response (in PSC)",
     title="Predicted timecourse",
 )
-fig.show(height=500)
+fig.show(height=400)
 ```
 
 Some vertices do not have valid timecourses, that is, they contain `NaN` values. We filter out all vertices that have
@@ -607,7 +607,7 @@ for i, frame in enumerate(fig.frames):
         text=[f"R-squared = {r2:.3f}, sigma = {sigma:.3f}"],
     )]
 
-fig.update_layout(showlegend=True, height=500)
+fig.update_layout(showlegend=True, height=400)
 fig.show()
 ```
 
