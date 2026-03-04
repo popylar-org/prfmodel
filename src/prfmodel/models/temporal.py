@@ -77,3 +77,59 @@ class BaselineAmplitude(BaseTemporal):
         amplitude = convert_parameters_to_tensor(parameters[["amplitude"]], dtype=dtype)
 
         return inputs * amplitude + baseline
+
+
+class DoGAmplitude(BaseTemporal):
+    """
+    Linear amplitude model for difference of Gaussians.
+
+    Combines two temporal responses with independent amplitudes and a baseline:
+    y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_sorround + baseline
+
+    """
+
+    @property
+    def parameter_names(self) -> list[str]:
+        """
+        Names of parameters used by the model.
+
+        Parameter names are: ``amplitude_center``, ``amplitude_sorround``, and ``baseline``.
+
+        """
+        return ["amplitude_center", "amplitude_sorround", "baseline"]
+
+    def __call__(self, inputs: Tensor, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+        """
+        Predict the model response.
+
+        Parameters
+        ----------
+        inputs : Tensor
+            Input tensor with two temporal responses stacked along axis 1,
+            shape (num_batches, 2, num_frames).
+        parameters : pandas.DataFrame
+            Dataframe with columns ``amplitude_center``, ``amplitude_sorround``, and ``baseline``.
+        dtype : str, optional
+            The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        Tensor
+            Model predictions with shape (num_batches, num_frames) and dtype ``dtype``.
+
+        """
+        dtype = get_dtype(dtype)
+        inputs = ops.convert_to_tensor(inputs, dtype=dtype)
+
+        if len(inputs.shape) < _EXPECTED_NDIM:
+            raise ShapeError(
+                arg_name="inputs",
+                arg_shape=inputs.shape,
+            )
+
+        amplitude_center = convert_parameters_to_tensor(parameters[["amplitude_center"]], dtype=dtype)
+        amplitude_sorround = convert_parameters_to_tensor(parameters[["amplitude_sorround"]], dtype=dtype)
+        baseline = convert_parameters_to_tensor(parameters[["baseline"]], dtype=dtype)
+
+        return inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_sorround + baseline
