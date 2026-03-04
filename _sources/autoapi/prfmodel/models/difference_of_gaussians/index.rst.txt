@@ -1,0 +1,117 @@
+prfmodel.models.difference_of_gaussians
+=======================================
+
+.. py:module:: prfmodel.models.difference_of_gaussians
+
+.. autoapi-nested-parse::
+
+   Difference of Gaussians population receptive field models.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.models.difference_of_gaussians.DoG2DPRFModel
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   prfmodel.models.difference_of_gaussians.init_dog_from_gaussian
+
+
+Module Contents
+---------------
+
+.. py:class:: DoG2DPRFModel(impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = DoGAmplitude)
+
+
+
+   Two-dimensional difference of Gaussians population receptive field model.
+
+   Runs two Gaussian 2D PRF responses (center and surround) through stimulus encoding and impulse response convolution
+   independently, then combines them as a linear model:
+
+   y(t) = p1(t) * amplitude_center + p2(t) * amplitude_sorround + baseline
+
+   :param impulse_model: An impulse response model class or instance.
+   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
+   :param temporal_model: A temporal model class or instance.
+   :type temporal_model: BaseTemporal or type or None, default=DoGAmplitude
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters used by the model.
+
+
+   .. py:method:: predict_responses(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the each of the two responses before applying betas.
+
+      :returns: Stacked predictions of shape (num_voxels, 2, num_frames).
+      :rtype: Tensor
+
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the composite model response (considering Center and Sorround responses).
+
+      Applies the temporal model to the stacked responses from predict_responses.
+      When temporal_model=None, returns a simple subtraction (response_center - response_sorround)
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape (num_voxels, num_frames).
+      :rtype: Tensor
+
+
+
+.. py:function:: init_dog_from_gaussian(gaussian_params: pandas.DataFrame, sigma_ratio: float = 5.0, sigma_sorround: float | None = None) -> pandas.DataFrame
+
+   Initialize DoG model parameters from fitted Gaussian model parameters.
+
+   Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
+   into starting parameters for a :class:`DoG2DPRFModel`, suitable for subsequent SGD.
+
+   :param gaussian_params: DataFrame of fitted parameters from a ``Gaussian2DPRFModel``.
+                           Must contain columns: ``sigma`` and ``amplitude`` (plus all shared columns).
+   :type gaussian_params: pandas.DataFrame
+   :param sigma_ratio: Ratio used to set the surround size: ``sigma_sorround = sigma_center * sigma_ratio``.
+                       Ignored when ``sigma_sorround`` is provided.
+   :type sigma_ratio: float, default=5.0
+   :param sigma_sorround: Fixed surround size applied to all rows. Must be >= ``sigma`` for every row in
+                          ``gaussian_params``. When provided, overrides ``sigma_ratio``.
+   :type sigma_sorround: float, optional
+
+   :returns: DataFrame of DoG initial parameters with columns:
+             ``sigma_center`` (= ``sigma``), ``sigma_sorround``,
+             ``amplitude_center`` (= ``amplitude``), ``amplitude_sorround`` (= 0.0),
+             plus all shared columns unchanged.
+   :rtype: pandas.DataFrame
+
+   :raises ValueError: If ``sigma_sorround`` is smaller than ``sigma`` for any row in ``gaussian_params``.
+
+   .. rubric:: Notes
+
+   ``amplitude_sorround`` is initialized to ``0.0``, which is the boundary of the constraint
+   ``amplitude_sorround < 0`` enforced by a :class:`~prfmodel.adapter.ParameterConstraint`
+   with ``upper=0.0``. The constraint transform maps ``amplitude_sorround=0`` to optimizer
+   variable ``raw=-1.0`` (no NaN), so SGD starts cleanly near zero and moves negative.
+
+

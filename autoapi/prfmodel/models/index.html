@@ -10,7 +10,7 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -214,6 +214,7 @@
 <li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="base/index.html">prfmodel.models.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
 <li class="toctree-l4"><a class="reference internal" href="encoding/index.html">prfmodel.models.encoding</a></li>
 <li class="toctree-l4"><a class="reference internal" href="gaussian/index.html">prfmodel.models.gaussian</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -286,6 +287,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="base/index.html">prfmodel.models.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
 <li class="toctree-l1"><a class="reference internal" href="encoding/index.html">prfmodel.models.encoding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gaussian/index.html">prfmodel.models.gaussian</a></li>
 <li class="toctree-l1"><a class="reference internal" href="impulse/index.html">prfmodel.models.impulse</a></li>
@@ -313,10 +315,13 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.BaseTemporal" title="prfmodel.models.BaseTemporal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaseTemporal</span></code></a></p></td>
 <td><p>Abstract base class for temporal models.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.models.Gaussian2DPRFModel" title="prfmodel.models.Gaussian2DPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.models.DoG2DPRFModel" title="prfmodel.models.DoG2DPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DoG2DPRFModel</span></code></a></p></td>
+<td><p>Two-dimensional difference of Gaussians population receptive field model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.Gaussian2DPRFModel" title="prfmodel.models.Gaussian2DPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code></a></p></td>
 <td><p>Two-dimensional isotropic Gaussian population receptive field model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.GaussianCFModel" title="prfmodel.models.GaussianCFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GaussianCFModel</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.models.GaussianCFModel" title="prfmodel.models.GaussianCFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GaussianCFModel</span></code></a></p></td>
 <td><p>Gaussian connective field model.</p></td>
 </tr>
 </tbody>
@@ -328,7 +333,10 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.encode_prf_response" title="prfmodel.models.encode_prf_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">encode_prf_response</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.init_dog_from_gaussian" title="prfmodel.models.init_dog_from_gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_dog_from_gaussian</span></code></a>(→ pandas.DataFrame)</p></td>
+<td><p>Initialize DoG model parameters from fitted Gaussian model parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.models.encode_prf_response" title="prfmodel.models.encode_prf_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">encode_prf_response</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
 <td><p>Encode a population receptive field model response with a stimulus design.</p></td>
 </tr>
 </tbody>
@@ -547,6 +555,105 @@ number of rows in <cite>parameters</cite>.</p>
 <p>A list with names of parameters that are used by the model.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="prfmodel.models.DoG2DPRFModel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.</span></span><span class="sig-name descname"><span class="pre">DoG2DPRFModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">impulse_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><span class="pre">prfmodel.models.base.BaseImpulse</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><span class="pre">prfmodel.models.base.BaseImpulse</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DerivativeTwoGammaImpulse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DoGAmplitude</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/prfmodel/models/difference_of_gaussians.html#DoG2DPRFModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.DoG2DPRFModel" title="Link to this definition">¶</a></dt>
+<dd><p>Two-dimensional difference of Gaussians population receptive field model.</p>
+<p>Runs two Gaussian 2D PRF responses (center and surround) through stimulus encoding and impulse response convolution
+independently, then combines them as a linear model:</p>
+<p>y(t) = p1(t) * amplitude_center + p2(t) * amplitude_sorround + baseline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>impulse_model</strong> (<a class="reference internal" href="base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><em>BaseImpulse</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em> or </em><em>None</em><em>, </em><em>default=DerivativeTwoGammaImpulse</em>) – An impulse response model class or instance.</p></li>
+<li><p><strong>temporal_model</strong> (<a class="reference internal" href="#prfmodel.models.BaseTemporal" title="prfmodel.models.BaseTemporal"><em>BaseTemporal</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em> or </em><em>None</em><em>, </em><em>default=DoGAmplitude</em>) – A temporal model class or instance.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.models.DoG2DPRFModel.parameter_names">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#prfmodel.models.DoG2DPRFModel.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p>A list with names of unique parameters used by the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.models.DoG2DPRFModel.predict_responses">
+<span class="sig-name descname"><span class="pre">predict_responses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../stimuli/prf/index.html#prfmodel.stimuli.prf.PRFStimulus" title="prfmodel.stimuli.prf.PRFStimulus"><span class="pre">prfmodel.stimuli.prf.PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="headerlink" href="#prfmodel.models.DoG2DPRFModel.predict_responses" title="Link to this definition">¶</a></dt>
+<dd><p>Predict the each of the two responses before applying betas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Stacked predictions of shape (num_voxels, 2, num_frames).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.models.DoG2DPRFModel.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../stimuli/prf/index.html#prfmodel.stimuli.prf.PRFStimulus" title="prfmodel.stimuli.prf.PRFStimulus"><span class="pre">prfmodel.stimuli.prf.PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="headerlink" href="#prfmodel.models.DoG2DPRFModel.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Predict the composite model response (considering Center and Sorround responses).</p>
+<p>Applies the temporal model to the stacked responses from predict_responses.
+When temporal_model=None, returns a simple subtraction (response_center - response_sorround)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stimulus</strong> (<a class="reference internal" href="../index.html#prfmodel.PRFStimulus" title="prfmodel.PRFStimulus"><em>PRFStimulus</em></a>) – Population receptive field stimulus object.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+for different voxels.</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), uses the dtype from
+<a class="reference internal" href="../utils/index.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model predictions of shape (num_voxels, num_frames).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="prfmodel.models.init_dog_from_gaussian">
+<span class="sig-prename descclassname"><span class="pre">prfmodel.models.</span></span><span class="sig-name descname"><span class="pre">init_dog_from_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gaussian_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_sorround</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/prfmodel/models/difference_of_gaussians.html#init_dog_from_gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.init_dog_from_gaussian" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize DoG model parameters from fitted Gaussian model parameters.</p>
+<p>Converts the output of a fitted <a class="reference internal" href="gaussian/index.html#prfmodel.models.gaussian.Gaussian2DPRFModel" title="prfmodel.models.gaussian.Gaussian2DPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code></a>
+into starting parameters for a <a class="reference internal" href="#prfmodel.models.DoG2DPRFModel" title="prfmodel.models.DoG2DPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DoG2DPRFModel</span></code></a>, suitable for subsequent SGD.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gaussian_params</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – DataFrame of fitted parameters from a <code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code>.
+Must contain columns: <code class="docutils literal notranslate"><span class="pre">sigma</span></code> and <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> (plus all shared columns).</p></li>
+<li><p><strong>sigma_ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=5.0</em>) – Ratio used to set the surround size: <code class="docutils literal notranslate"><span class="pre">sigma_sorround</span> <span class="pre">=</span> <span class="pre">sigma_center</span> <span class="pre">*</span> <span class="pre">sigma_ratio</span></code>.
+Ignored when <code class="docutils literal notranslate"><span class="pre">sigma_sorround</span></code> is provided.</p></li>
+<li><p><strong>sigma_sorround</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Fixed surround size applied to all rows. Must be &gt;= <code class="docutils literal notranslate"><span class="pre">sigma</span></code> for every row in
+<code class="docutils literal notranslate"><span class="pre">gaussian_params</span></code>. When provided, overrides <code class="docutils literal notranslate"><span class="pre">sigma_ratio</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame of DoG initial parameters with columns:
+<code class="docutils literal notranslate"><span class="pre">sigma_center</span></code> (= <code class="docutils literal notranslate"><span class="pre">sigma</span></code>), <code class="docutils literal notranslate"><span class="pre">sigma_sorround</span></code>,
+<code class="docutils literal notranslate"><span class="pre">amplitude_center</span></code> (= <code class="docutils literal notranslate"><span class="pre">amplitude</span></code>), <code class="docutils literal notranslate"><span class="pre">amplitude_sorround</span></code> (= 0.0),
+plus all shared columns unchanged.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)">pandas.DataFrame</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">sigma_sorround</span></code> is smaller than <code class="docutils literal notranslate"><span class="pre">sigma</span></code> for any row in <code class="docutils literal notranslate"><span class="pre">gaussian_params</span></code>.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p><code class="docutils literal notranslate"><span class="pre">amplitude_sorround</span></code> is initialized to <code class="docutils literal notranslate"><span class="pre">0.0</span></code>, which is the boundary of the constraint
+<code class="docutils literal notranslate"><span class="pre">amplitude_sorround</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> enforced by a <a class="reference internal" href="../adapter/index.html#prfmodel.adapter.ParameterConstraint" title="prfmodel.adapter.ParameterConstraint"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterConstraint</span></code></a>
+with <code class="docutils literal notranslate"><span class="pre">upper=0.0</span></code>. The constraint transform maps <code class="docutils literal notranslate"><span class="pre">amplitude_sorround=0</span></code> to optimizer
+variable <code class="docutils literal notranslate"><span class="pre">raw=-1.0</span></code> (no NaN), so SGD starts cleanly near zero and moves negative.</p>
 </dd></dl>
 
 <dl class="py function">
@@ -806,6 +913,13 @@ response.</p>
 <li><a class="reference internal" href="#prfmodel.models.BaseTemporal.parameter_names"><code class="docutils literal notranslate"><span class="pre">BaseTemporal.parameter_names</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#prfmodel.models.DoG2DPRFModel"><code class="docutils literal notranslate"><span class="pre">DoG2DPRFModel</span></code></a><ul>
+<li><a class="reference internal" href="#prfmodel.models.DoG2DPRFModel.parameter_names"><code class="docutils literal notranslate"><span class="pre">DoG2DPRFModel.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.DoG2DPRFModel.predict_responses"><code class="docutils literal notranslate"><span class="pre">DoG2DPRFModel.predict_responses()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.DoG2DPRFModel.__call__"><code class="docutils literal notranslate"><span class="pre">DoG2DPRFModel.__call__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#prfmodel.models.init_dog_from_gaussian"><code class="docutils literal notranslate"><span class="pre">init_dog_from_gaussian()</span></code></a></li>
 <li><a class="reference internal" href="#prfmodel.models.encode_prf_response"><code class="docutils literal notranslate"><span class="pre">encode_prf_response()</span></code></a></li>
 <li><a class="reference internal" href="#prfmodel.models.Gaussian2DPRFModel"><code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code></a><ul>
 <li><a class="reference internal" href="#prfmodel.models.Gaussian2DPRFModel.__call__"><code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel.__call__()</span></code></a></li>

@@ -10,7 +10,7 @@
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -214,6 +214,7 @@
 <li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../base/index.html">prfmodel.models.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../encoding/index.html">prfmodel.models.encoding</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../gaussian/index.html">prfmodel.models.gaussian</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -288,6 +289,9 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.temporal.BaselineAmplitude" title="prfmodel.models.temporal.BaselineAmplitude"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BaselineAmplitude</span></code></a></p></td>
 <td><p>Linear baseline and amplitude model.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.models.temporal.DoGAmplitude" title="prfmodel.models.temporal.DoGAmplitude"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DoGAmplitude</span></code></a></p></td>
+<td><p>Linear amplitude model for difference of Gaussians.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -337,6 +341,44 @@ for different voxels. Must contain the columns <cite>baseline</cite> and <cite>a
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Model predictions with the same shape as <cite>inputs</cite> and dtype <cite>dtype</cite>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="prfmodel.models.temporal.DoGAmplitude">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.temporal.</span></span><span class="sig-name descname"><span class="pre">DoGAmplitude</span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/temporal.html#DoGAmplitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.temporal.DoGAmplitude" title="Link to this definition">¶</a></dt>
+<dd><p>Linear amplitude model for difference of Gaussians.</p>
+<p>Combines two temporal responses with independent amplitudes and a baseline:
+y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_sorround + baseline</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.models.temporal.DoGAmplitude.parameter_names">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#prfmodel.models.temporal.DoGAmplitude.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p>Names of parameters used by the model.</p>
+<p>Parameter names are: <code class="docutils literal notranslate"><span class="pre">amplitude_center</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude_sorround</span></code>, and <code class="docutils literal notranslate"><span class="pre">baseline</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.models.temporal.DoGAmplitude.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/temporal.html#DoGAmplitude.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.temporal.DoGAmplitude.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Predict the model response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>inputs</strong> (<a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor"><em>Tensor</em></a>) – Input tensor with two temporal responses stacked along axis 1,
+shape (num_batches, 2, num_frames).</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns <code class="docutils literal notranslate"><span class="pre">amplitude_center</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude_sorround</span></code>, and <code class="docutils literal notranslate"><span class="pre">baseline</span></code>.</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), uses the dtype from
+<a class="reference internal" href="../../utils/index.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model predictions with shape (num_batches, num_frames) and dtype <code class="docutils literal notranslate"><span class="pre">dtype</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
@@ -410,6 +452,11 @@ for different voxels. Must contain the columns <cite>baseline</cite> and <cite>a
 <li><a class="reference internal" href="#prfmodel.models.temporal.BaselineAmplitude"><code class="docutils literal notranslate"><span class="pre">BaselineAmplitude</span></code></a><ul>
 <li><a class="reference internal" href="#prfmodel.models.temporal.BaselineAmplitude.parameter_names"><code class="docutils literal notranslate"><span class="pre">BaselineAmplitude.parameter_names</span></code></a></li>
 <li><a class="reference internal" href="#prfmodel.models.temporal.BaselineAmplitude.__call__"><code class="docutils literal notranslate"><span class="pre">BaselineAmplitude.__call__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#prfmodel.models.temporal.DoGAmplitude"><code class="docutils literal notranslate"><span class="pre">DoGAmplitude</span></code></a><ul>
+<li><a class="reference internal" href="#prfmodel.models.temporal.DoGAmplitude.parameter_names"><code class="docutils literal notranslate"><span class="pre">DoGAmplitude.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.temporal.DoGAmplitude.__call__"><code class="docutils literal notranslate"><span class="pre">DoGAmplitude.__call__()</span></code></a></li>
 </ul>
 </li>
 </ul>

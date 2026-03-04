@@ -51,8 +51,10 @@ Module Contents
 
    .. rubric:: Notes
 
-   This fitter only optmizes one or two model parameters by estimating a general linear model with an intercept and a
-   slope between model predictions and data. Typically, these are baseline and amplitude parameters.
+   This fitter optimizes one or more slope parameters (and optionally an intercept) by estimating a general linear
+   model between model predictions and data. Typically, these are baseline and amplitude parameters. When multiple
+   slope names are given, each basis function is isolated by setting that slope to 1.0 and all others to 0.0, and
+   the resulting design matrix is solved with least squares in one shot.
 
    Internally, the fitter applies `keras.ops.lstsq` to each data batch.
 
@@ -64,7 +66,7 @@ Module Contents
       The dtype that is used during fitting.
 
 
-   .. py:method:: fit(data: prfmodel.typing.Tensor, parameters: pandas.DataFrame, slope_name: str, intercept_name: str | None = None, batch_size: int | None = None) -> tuple[LeastSquaresHistory, pandas.DataFrame]
+   .. py:method:: fit(data: prfmodel.typing.Tensor, parameters: pandas.DataFrame, slope_name: str | list[str], intercept_name: str | None = None, batch_size: int | None = None) -> tuple[LeastSquaresHistory, pandas.DataFrame]
 
       Fit a population receptive field model to target data.
 
@@ -74,8 +76,9 @@ Module Contents
       :param parameters: Dataframe with model parameters. Columns must contain different model parameters and
                          rows parameter values for each batch in `data`.
       :type parameters: pandas.DataFrame
-      :param slope_name: The name of the parameter that will be the estimated slope. Must refer to a column within `parameters`.
-      :type slope_name: str
+      :param slope_name: The name(s) of the parameter(s) that will be the estimated slope(s). Must refer to column(s) within
+                         `parameters`.
+      :type slope_name: str or list of str
       :param intercept_name: The name of the parameter that will be the estimated intercept. Must refer to a column within `parameters`.
                              If `None`, no intercept is estimated.
       :type intercept_name: str, optional

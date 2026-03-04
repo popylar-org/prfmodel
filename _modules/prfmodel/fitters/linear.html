@@ -9,7 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -213,6 +213,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../autoapi/prfmodel/models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/base/index.html">prfmodel.models.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/encoding/index.html">prfmodel.models.encoding</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/gaussian/index.html">prfmodel.models.gaussian</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../../../autoapi/prfmodel/models/impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -323,8 +324,10 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    This fitter only optmizes one or two model parameters by estimating a general linear model with an intercept and a</span>
-<span class="sd">    slope between model predictions and data. Typically, these are baseline and amplitude parameters.</span>
+<span class="sd">    This fitter optimizes one or more slope parameters (and optionally an intercept) by estimating a general linear</span>
+<span class="sd">    model between model predictions and data. Typically, these are baseline and amplitude parameters. When multiple</span>
+<span class="sd">    slope names are given, each basis function is isolated by setting that slope to 1.0 and all others to 0.0, and</span>
+<span class="sd">    the resulting design matrix is solved with least squares in one shot.</span>
 
 <span class="sd">    Internally, the fitter applies `keras.ops.lstsq` to each data batch.</span>
 
@@ -355,7 +358,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-        <span class="n">slope_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">slope_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">intercept_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">LeastSquaresHistory</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
@@ -370,8 +373,9 @@
 <span class="sd">        parameters : pandas.DataFrame</span>
 <span class="sd">            Dataframe with model parameters. Columns must contain different model parameters and</span>
 <span class="sd">            rows parameter values for each batch in `data`.</span>
-<span class="sd">        slope_name : str</span>
-<span class="sd">            The name of the parameter that will be the estimated slope. Must refer to a column within `parameters`.</span>
+<span class="sd">        slope_name : str or list of str</span>
+<span class="sd">            The name(s) of the parameter(s) that will be the estimated slope(s). Must refer to column(s) within</span>
+<span class="sd">            `parameters`.</span>
 <span class="sd">        intercept_name : str, optional</span>
 <span class="sd">            The name of the parameter that will be the estimated intercept. Must refer to a column within `parameters`.</span>
 <span class="sd">            If `None`, no intercept is estimated.</span>
@@ -387,9 +391,12 @@
 <span class="sd">            A dataframe with final model parameters.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">slope_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Argument &#39;slope_name&#39; must be a column in &#39;parameters&#39;&quot;</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">slope_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">slope_name</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">slope_name</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">slope_name</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">slope_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Slope name &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39; must be a column in &#39;parameters&#39;&quot;</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">intercept_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">intercept_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Argument &#39;intercept_name&#39; must be a column in &#39;parameters&#39;&quot;</span>
@@ -408,7 +415,7 @@
             <span class="n">batch_residuals</span><span class="p">,</span> <span class="n">batch_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_batch</span><span class="p">(</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span>
                 <span class="n">new_parameters</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">],</span>
-                <span class="n">slope_name</span><span class="p">,</span>
+                <span class="n">slope_names</span><span class="p">,</span>
                 <span class="n">intercept_name</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">new_parameters</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="n">batch_params</span>
@@ -421,7 +428,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data_batch</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
         <span class="n">parameter_batch</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-        <span class="n">slope_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">slope_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">intercept_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fit a single data batch and return updated parameters.&quot;&quot;&quot;</span>
@@ -429,22 +436,24 @@
 
         <span class="n">parameter_batch</span> <span class="o">=</span> <span class="n">parameter_batch</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-        <span class="c1"># Reset intercept and slope so that we can replace them with estimates</span>
-        <span class="c1"># In order to estimate the correct intercepts and slopes, we first need to set them to zero and one,</span>
-        <span class="c1"># respectively, so that model predictions are not modified by their current values; we replace them later</span>
-        <span class="c1"># with the estimated values</span>
+        <span class="c1"># Reset intercept and all slopes so that we can replace them with estimates</span>
         <span class="k">if</span> <span class="n">intercept_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">parameter_batch</span><span class="p">[</span><span class="n">intercept_name</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="n">parameter_batch</span><span class="p">[</span><span class="n">slope_name</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">slope_names</span><span class="p">:</span>
+            <span class="n">parameter_batch</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">parameter_batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="c1"># Build design matrix by isolating each basis function</span>
+        <span class="n">x_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">slope_names</span><span class="p">:</span>
+            <span class="n">parameter_batch</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">parameter_batch</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">x_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
+            <span class="n">parameter_batch</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
         <span class="k">if</span> <span class="n">intercept_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">intercept</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
-            <span class="n">x_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">intercept</span><span class="p">,</span> <span class="n">predictions</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">x_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">predictions</span><span class="p">]</span>
+            <span class="n">x_list</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ops</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">x_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
 
         <span class="n">x_matrix</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">x_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 
@@ -456,11 +465,15 @@
 
         <span class="n">best_params</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_numpy</span><span class="p">(</span><span class="n">best_params</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
 
+        <span class="c1"># Assign coefficients back to parameters</span>
+        <span class="n">col_idx</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">intercept_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">parameter_batch</span><span class="p">[</span><span class="n">intercept_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_params</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-            <span class="n">parameter_batch</span><span class="p">[</span><span class="n">slope_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_params</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">parameter_batch</span><span class="p">[</span><span class="n">slope_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_params</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">parameter_batch</span><span class="p">[</span><span class="n">intercept_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_params</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">col_idx</span><span class="p">]</span>
+            <span class="n">col_idx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">slope_names</span><span class="p">:</span>
+            <span class="n">parameter_batch</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_params</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">col_idx</span><span class="p">]</span>
+            <span class="n">col_idx</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="k">return</span> <span class="n">residual_sum</span><span class="p">,</span> <span class="n">parameter_batch</span></div>
 

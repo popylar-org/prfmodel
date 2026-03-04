@@ -9,7 +9,7 @@
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -213,6 +213,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../autoapi/prfmodel/models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/base/index.html">prfmodel.models.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/encoding/index.html">prfmodel.models.encoding</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/gaussian/index.html">prfmodel.models.gaussian</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../../../autoapi/prfmodel/models/impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -354,6 +355,68 @@
         <span class="n">amplitude</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;amplitude&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">inputs</span> <span class="o">*</span> <span class="n">amplitude</span> <span class="o">+</span> <span class="n">baseline</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DoGAmplitude">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/temporal/index.html#prfmodel.models.temporal.DoGAmplitude">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DoGAmplitude</span><span class="p">(</span><span class="n">BaseTemporal</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Linear amplitude model for difference of Gaussians.</span>
+
+<span class="sd">    Combines two temporal responses with independent amplitudes and a baseline:</span>
+<span class="sd">    y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_sorround + baseline</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameter_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Names of parameters used by the model.</span>
+
+<span class="sd">        Parameter names are: ``amplitude_center``, ``amplitude_sorround``, and ``baseline``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;amplitude_center&quot;</span><span class="p">,</span> <span class="s2">&quot;amplitude_sorround&quot;</span><span class="p">,</span> <span class="s2">&quot;baseline&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="DoGAmplitude.__call__">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/temporal/index.html#prfmodel.models.temporal.DoGAmplitude.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Predict the model response.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        inputs : Tensor</span>
+<span class="sd">            Input tensor with two temporal responses stacked along axis 1,</span>
+<span class="sd">            shape (num_batches, 2, num_frames).</span>
+<span class="sd">        parameters : pandas.DataFrame</span>
+<span class="sd">            Dataframe with columns ``amplitude_center``, ``amplitude_sorround``, and ``baseline``.</span>
+<span class="sd">        dtype : str, optional</span>
+<span class="sd">            The dtype of the prediction result. If ``None`` (the default), uses the dtype from</span>
+<span class="sd">            :func:`prfmodel.utils.get_dtype`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            Model predictions with shape (num_batches, num_frames) and dtype ``dtype``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">get_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">_EXPECTED_NDIM</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ShapeError</span><span class="p">(</span>
+                <span class="n">arg_name</span><span class="o">=</span><span class="s2">&quot;inputs&quot;</span><span class="p">,</span>
+                <span class="n">arg_shape</span><span class="o">=</span><span class="n">inputs</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">amplitude_center</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;amplitude_center&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">amplitude_sorround</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;amplitude_sorround&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">baseline</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;baseline&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">inputs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">amplitude_center</span> <span class="o">+</span> <span class="n">inputs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">amplitude_sorround</span> <span class="o">+</span> <span class="n">baseline</span></div>
 </div>
 
 </pre></div>

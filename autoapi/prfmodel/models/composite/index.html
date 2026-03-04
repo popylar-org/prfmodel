@@ -3,14 +3,14 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.encoding" href="../encoding/index.html"><link rel="prev" title="prfmodel.models.base" href="../base/index.html">
+<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.difference_of_gaussians" href="../difference_of_gaussians/index.html"><link rel="prev" title="prfmodel.models.base" href="../base/index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>prfmodel.models.composite - prfmodel 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     
     
@@ -214,6 +214,7 @@
 <li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../base/index.html">prfmodel.models.base</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../encoding/index.html">prfmodel.models.encoding</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../gaussian/index.html">prfmodel.models.gaussian</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -288,7 +289,10 @@
 <tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.composite.SimplePRFModel" title="prfmodel.models.composite.SimplePRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SimplePRFModel</span></code></a></p></td>
 <td><p>Simple composite population receptive field model.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.models.composite.SimpleCFModel" title="prfmodel.models.composite.SimpleCFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SimpleCFModel</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.models.composite.CenterSurroundPRFModel" title="prfmodel.models.composite.CenterSurroundPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CenterSurroundPRFModel</span></code></a></p></td>
+<td><p>Center-surround composite population receptive field model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.composite.SimpleCFModel" title="prfmodel.models.composite.SimpleCFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SimpleCFModel</span></code></a></p></td>
 <td><p>Simple composite connective field model.</p></td>
 </tr>
 </tbody>
@@ -356,6 +360,82 @@ number of rows in <cite>parameters</cite>. The number of frames is the number of
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="prfmodel.models.composite.CenterSurroundPRFModel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.composite.</span></span><span class="sig-name descname"><span class="pre">CenterSurroundPRFModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prf_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BasePRFResponse" title="prfmodel.models.base.BasePRFResponse"><span class="pre">prfmodel.models.base.BasePRFResponse</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">impulse_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><span class="pre">prfmodel.models.base.BaseImpulse</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><span class="pre">prfmodel.models.base.BaseImpulse</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DerivativeTwoGammaImpulse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DoGAmplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">change_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/prfmodel/models/composite.html#CenterSurroundPRFModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.composite.CenterSurroundPRFModel" title="Link to this definition">¶</a></dt>
+<dd><p>Center-surround composite population receptive field model.</p>
+<p>This is a generic class that runs two PRF responses through stimulus encoding and impulse response convolution
+independently, then combines them via a temporal model:
+y(t) = p1(t) * amplitude_center + p2(t) * amplitude_sorround + baseline</p>
+<p>The two responses differ in the values of <code class="docutils literal notranslate"><span class="pre">change_params</span></code>. Each parameter
+<code class="docutils literal notranslate"><span class="pre">p</span></code> in that list is split into <code class="docutils literal notranslate"><span class="pre">{p}_center</span></code> and <code class="docutils literal notranslate"><span class="pre">{p}_sorround</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prf_model</strong> (<a class="reference internal" href="../base/index.html#prfmodel.models.base.BasePRFResponse" title="prfmodel.models.base.BasePRFResponse"><em>BasePRFResponse</em></a>) – A population receptive field response model instance.</p></li>
+<li><p><strong>impulse_model</strong> (<a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><em>BaseImpulse</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em> or </em><em>None</em><em>, </em><em>default=DerivativeTwoGammaImpulse</em>) – An impulse response model class or instance.</p></li>
+<li><p><strong>temporal_model</strong> (<a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><em>BaseTemporal</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em> or </em><em>None</em><em>, </em><em>default=DoGAmplitude</em>) – A temporal model class or instance.</p></li>
+<li><p><strong>change_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em><em>, </em><em>default=</em><em>[</em><em>&quot;sigma&quot;</em><em>]</em>) – Names of the parameters that differ between the center and surround responses.
+All entries must be present in <code class="docutils literal notranslate"><span class="pre">prf_model.parameter_names</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The center-surround composite model follows these steps:</p>
+<ol class="arabic simple">
+<li><p>Two PRF response predictions are computed, one using <code class="docutils literal notranslate"><span class="pre">{p}_center</span></code> and one
+using <code class="docutils literal notranslate"><span class="pre">{p}_sorround</span></code> for each <code class="docutils literal notranslate"><span class="pre">p</span></code> in <code class="docutils literal notranslate"><span class="pre">change_params</span></code>.</p></li>
+<li><p>Each response is encoded with the stimulus design.</p></li>
+<li><p>Each encoded response is optionally convolved with an impulse response.</p></li>
+<li><p>The two responses are stacked and combined by the temporal model.</p></li>
+</ol>
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.models.composite.CenterSurroundPRFModel.parameter_names">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#prfmodel.models.composite.CenterSurroundPRFModel.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p>A list with names of unique parameters used by the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.models.composite.CenterSurroundPRFModel.predict_responses">
+<span class="sig-name descname"><span class="pre">predict_responses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../stimuli/prf/index.html#prfmodel.stimuli.prf.PRFStimulus" title="prfmodel.stimuli.prf.PRFStimulus"><span class="pre">prfmodel.stimuli.prf.PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/composite.html#CenterSurroundPRFModel.predict_responses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.composite.CenterSurroundPRFModel.predict_responses" title="Link to this definition">¶</a></dt>
+<dd><p>Predict the each of the two responses before applying betas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Stacked predictions of shape (num_voxels, 2, num_frames).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="prfmodel.models.composite.CenterSurroundPRFModel.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../stimuli/prf/index.html#prfmodel.stimuli.prf.PRFStimulus" title="prfmodel.stimuli.prf.PRFStimulus"><span class="pre">prfmodel.stimuli.prf.PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/composite.html#CenterSurroundPRFModel.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.composite.CenterSurroundPRFModel.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Predict the composite model response (considering Center and Sorround responses).</p>
+<p>Applies the temporal model to the stacked responses from predict_responses.
+When temporal_model=None, returns a simple subtraction (response_center - response_sorround)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>stimulus</strong> (<a class="reference internal" href="../../index.html#prfmodel.PRFStimulus" title="prfmodel.PRFStimulus"><em>PRFStimulus</em></a>) – Population receptive field stimulus object.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+for different voxels.</p></li>
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), uses the dtype from
+<a class="reference internal" href="../../utils/index.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Model predictions of shape (num_voxels, num_frames).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="prfmodel.models.composite.SimpleCFModel">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.composite.</span></span><span class="sig-name descname"><span class="pre">SimpleCFModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cf_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseCFResponse" title="prfmodel.models.base.BaseCFResponse"><span class="pre">prfmodel.models.base.BaseCFResponse</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">BaselineAmplitude</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/prfmodel/models/composite.html#SimpleCFModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.composite.SimpleCFModel" title="Link to this definition">¶</a></dt>
 <dd><p>Simple composite connective field model.</p>
@@ -417,12 +497,12 @@ response.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../encoding/index.html">
+          <a class="next-page" href="../difference_of_gaussians/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">prfmodel.models.encoding</div>
+                <div class="title">prfmodel.models.difference_of_gaussians</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -473,6 +553,12 @@ response.</p>
 <li><a class="reference internal" href="#prfmodel.models.composite.SimplePRFModel"><code class="docutils literal notranslate"><span class="pre">SimplePRFModel</span></code></a><ul>
 <li><a class="reference internal" href="#prfmodel.models.composite.SimplePRFModel.__call__"><code class="docutils literal notranslate"><span class="pre">SimplePRFModel.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#prfmodel.models.composite.SimplePRFModel.parameter_names"><code class="docutils literal notranslate"><span class="pre">SimplePRFModel.parameter_names</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#prfmodel.models.composite.CenterSurroundPRFModel"><code class="docutils literal notranslate"><span class="pre">CenterSurroundPRFModel</span></code></a><ul>
+<li><a class="reference internal" href="#prfmodel.models.composite.CenterSurroundPRFModel.parameter_names"><code class="docutils literal notranslate"><span class="pre">CenterSurroundPRFModel.parameter_names</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.composite.CenterSurroundPRFModel.predict_responses"><code class="docutils literal notranslate"><span class="pre">CenterSurroundPRFModel.predict_responses()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.composite.CenterSurroundPRFModel.__call__"><code class="docutils literal notranslate"><span class="pre">CenterSurroundPRFModel.__call__()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#prfmodel.models.composite.SimpleCFModel"><code class="docutils literal notranslate"><span class="pre">SimpleCFModel</span></code></a><ul>

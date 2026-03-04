@@ -15,6 +15,7 @@ Classes
 .. autoapisummary::
 
    prfmodel.models.composite.SimplePRFModel
+   prfmodel.models.composite.CenterSurroundPRFModel
    prfmodel.models.composite.SimpleCFModel
 
 
@@ -74,6 +75,77 @@ Module Contents
 
 
       A list with names of unique parameters that are used by the submodels.
+
+
+.. py:class:: CenterSurroundPRFModel(prf_model: prfmodel.models.base.BasePRFResponse, impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = DoGAmplitude, change_params: list[str] | None = None)
+
+
+
+   Center-surround composite population receptive field model.
+
+   This is a generic class that runs two PRF responses through stimulus encoding and impulse response convolution
+   independently, then combines them via a temporal model:
+   y(t) = p1(t) * amplitude_center + p2(t) * amplitude_sorround + baseline
+
+   The two responses differ in the values of ``change_params``. Each parameter
+   ``p`` in that list is split into ``{p}_center`` and ``{p}_sorround``.
+
+   :param prf_model: A population receptive field response model instance.
+   :type prf_model: BasePRFResponse
+   :param impulse_model: An impulse response model class or instance.
+   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
+   :param temporal_model: A temporal model class or instance.
+   :type temporal_model: BaseTemporal or type or None, default=DoGAmplitude
+   :param change_params: Names of the parameters that differ between the center and surround responses.
+                         All entries must be present in ``prf_model.parameter_names``.
+   :type change_params: list[str], default=["sigma"]
+
+   .. rubric:: Notes
+
+   The center-surround composite model follows these steps:
+
+   1. Two PRF response predictions are computed, one using ``{p}_center`` and one
+      using ``{p}_sorround`` for each ``p`` in ``change_params``.
+   2. Each response is encoded with the stimulus design.
+   3. Each encoded response is optionally convolved with an impulse response.
+   4. The two responses are stacked and combined by the temporal model.
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters used by the model.
+
+
+   .. py:method:: predict_responses(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the each of the two responses before applying betas.
+
+      :returns: Stacked predictions of shape (num_voxels, 2, num_frames).
+      :rtype: Tensor
+
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the composite model response (considering Center and Sorround responses).
+
+      Applies the temporal model to the stacked responses from predict_responses.
+      When temporal_model=None, returns a simple subtraction (response_center - response_sorround)
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape (num_voxels, num_frames).
+      :rtype: Tensor
+
 
 
 .. py:class:: SimpleCFModel(cf_model: prfmodel.models.base.BaseCFResponse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = BaselineAmplitude)
