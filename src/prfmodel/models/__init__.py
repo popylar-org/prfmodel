@@ -2,6 +2,7 @@
 
 from .base import BaseCFResponse
 from .base import BaseComposite
+from .base import BaseEncoder
 from .base import BaseModel
 from .base import BasePRFResponse
 from .base import BaseTemporal
@@ -14,6 +15,7 @@ from .gaussian import GaussianCFModel
 __all__ = [
     "BaseCFResponse",
     "BaseComposite",
+    "BaseEncoder",
     "BaseModel",
     "BasePRFResponse",
     "BaseTemporal",

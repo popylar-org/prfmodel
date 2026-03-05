@@ -3,6 +3,8 @@
 from abc import ABC
 from abc import abstractmethod
 from collections.abc import Sequence
+from typing import Generic
+from typing import TypeVar
 import pandas as pd
 from keras import ops
 from prfmodel.stimuli.base import Stimulus
@@ -10,6 +12,8 @@ from prfmodel.stimuli.cf import CFStimulus
 from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _get_norm_fun
+
+S = TypeVar("S", bound=Stimulus)
 
 
 class BatchDimensionError(Exception):
@@ -149,6 +153,50 @@ class BaseCFResponse(BaseModel):
         Tensor
             Model predictions of shape `(num_voxels, ...)` and dtype `dtype`. The number of voxels is the
             number of rows in `parameters`. The number and size of other axes depends on the stimulus.
+
+        """
+
+
+class BaseEncoder(BaseModel, Generic[S]):
+    """
+    Generic abstract base class for encoding model responses.
+
+    Cannot be instantiated on its own.
+    Can only be used as a parent class to create custom encoding models.
+    Subclasses must override the abstract `parameter_names` property and `__call__` method and must be defined
+    with a specific stimulus type.
+
+    """
+
+    @abstractmethod
+    def __call__(
+        self,
+        stimulus: S,
+        response: Tensor,
+        parameters: pd.DataFrame,
+        dtype: str | None = None,
+    ):
+        """Encode a model response with a stimulus.
+
+        Parameters
+        ----------
+        stimulus : Stimulus
+            Stimulus object.
+        response : Tensor
+            Model response.
+        parameters : pandas.DataFrame
+            Dataframe with columns containing different model parameters and rows containing parameter values
+            for different voxels.
+        dtype : str, optional
+            The dtype of the encoded response. If `None` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        Tensor
+            The stimulus encoded model response with shape `(num_voxels, ...)` dtype `dtype`. The number of voxels is
+            the number of rows in `parameters`. The number and size of other axes depends on the stimulus and the
+            response.
 
         """
 
