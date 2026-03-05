@@ -11,10 +11,9 @@ from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
-from .base import BaseCFResponse
 from .base import BaseEncoder
 from .base import BaseImpulse
-from .base import BasePRFResponse
+from .base import BaseResponse
 from .base import BaseTemporal
 from .base import BatchDimensionError
 from .base import ShapeError
@@ -171,7 +170,7 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     return ops.exp(-resp) / volume
 
 
-class Gaussian2DPRFResponse(BasePRFResponse):
+class Gaussian2DPRFResponse(BaseResponse[PRFStimulus]):
     """
     Two-dimensional isotropic Gaussian population receptive field response model.
 
@@ -248,7 +247,7 @@ class Gaussian2DPRFResponse(BasePRFResponse):
         return predict_gaussian_response(grid, mu, sigma)
 
 
-class GaussianCFResponse(BaseCFResponse):
+class GaussianCFResponse(BaseResponse[CFStimulus]):
     """
     Gaussian connective field response model.
 
