@@ -1,12 +1,11 @@
 """Test model base classes."""
 
 import pytest
-from prfmodel.models.base import BaseCFResponse
 from prfmodel.models.base import BaseComposite
 from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseModel
-from prfmodel.models.base import BasePRFResponse
+from prfmodel.models.base import BaseResponse
 from prfmodel.models.base import BaseTemporal
 from prfmodel.models.base import BatchDimensionError
 from prfmodel.models.base import ShapeError
@@ -49,16 +48,10 @@ class TestBaseModel:
 
 
 # Inherit all checks from TestBaseModel
-class TestBasePRFResponse(TestBaseModel):
-    """Tests for BasePRFResponse class."""
+class TestBaseResponse(TestBaseModel):
+    """Tests for BaseResponse class."""
 
-    model_class = BasePRFResponse
-
-
-class TestBaseCFResponse(TestBaseModel):
-    """Tests for BaseCFResponse class."""
-
-    model_class = BaseCFResponse
+    model_class = BaseResponse
 
 
 class TestBaseEncoder(TestBaseModel):

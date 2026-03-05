@@ -1,10 +1,9 @@
 """Population receptive and connective field models."""
 
-from .base import BaseCFResponse
 from .base import BaseComposite
 from .base import BaseEncoder
 from .base import BaseModel
-from .base import BasePRFResponse
+from .base import BaseResponse
 from .base import BaseTemporal
 from .difference_of_gaussians import DoG2DPRFModel
 from .difference_of_gaussians import init_dog_from_gaussian
@@ -16,11 +15,10 @@ from .gaussian import Gaussian2DPRFModel
 from .gaussian import GaussianCFModel
 
 __all__ = [
-    "BaseCFResponse",
     "BaseComposite",
     "BaseEncoder",
     "BaseModel",
-    "BasePRFResponse",
+    "BaseResponse",
     "BaseTemporal",
     "CFStimulusEncoder",
     "CompressiveEncoder",
