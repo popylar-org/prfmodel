@@ -32,4 +32,4 @@ runs:
       shell: bash
       run: |
         python -m pip install --upgrade pip setuptools
-        python -m pip install .[${{ inputs.extras }}]
+        python -m pip install --ignore-installed .[${{ inputs.extras }}]
