@@ -3,6 +3,7 @@
 import pytest
 from prfmodel.models.base import BaseCFResponse
 from prfmodel.models.base import BaseComposite
+from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseModel
 from prfmodel.models.base import BasePRFResponse
@@ -58,6 +59,12 @@ class TestBaseCFResponse(TestBaseModel):
     """Tests for BaseCFResponse class."""
 
     model_class = BaseCFResponse
+
+
+class TestBaseEncoder(TestBaseModel):
+    """Tests for BaseEncoder class."""
+
+    model_class = BaseEncoder
 
 
 class TestBaseImpulse(TestBaseModel):
