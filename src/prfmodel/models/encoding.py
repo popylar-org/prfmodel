@@ -1,6 +1,10 @@
 """Stimulus encoding classes."""
 
+import pandas as pd
 from keras import ops
+from prfmodel.models.base import BaseEncoder
+from prfmodel.stimuli.cf import CFStimulus
+from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 
@@ -98,3 +102,113 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
     axes = tuple(ops.arange(2, len(design.shape)))
     # tensordot is much more memory efficient that standard multiplication
     return ops.squeeze(ops.tensordot(response, design, axes=[axes, axes]), axis=(1, 2))
+
+
+class PRFStimulusEncoder(BaseEncoder[PRFStimulus]):
+    """
+    Encoding model for population receptive field stimuli.
+
+    Multiplies a stimulus design with a population receptive field model response along the
+    stimulus dimensions and sums over them.
+
+    See Also
+    --------
+    encode_prf_response
+
+    """
+
+    @property
+    def parameter_names(self) -> list:
+        """Does not have any parameters. Returns an empty list."""
+        return []
+
+    def __call__(
+        self,
+        stimulus: PRFStimulus,
+        response: Tensor,
+        parameters: pd.DataFrame,  # noqa: ARG002 (unused method argument)
+        dtype: str | None = None,
+    ) -> Tensor:
+        """Encode a population receptive field model response with a stimulus design.
+
+        Parameters
+        ----------
+        stimulus : PRFStimulus
+            Population receptive field stimulus object.
+        response : Tensor
+            Population receptive field response.
+        parameters : pandas.DataFrame
+            Dataframe with columns containing different model parameters and rows containing parameter values
+            for different voxels.
+        dtype : str, optional
+            The dtype of the encoded response. If `None` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        Tensor
+            The stimulus encoded model response with shape `(num_voxels, num_frames)` dtype `dtype`.
+            The number of voxels is the number of rows in `parameters`. The number of frames is the number of time
+            frames in the stimulus design.
+
+        """
+        dtype = get_dtype(dtype)
+        design = ops.convert_to_tensor(stimulus.design, dtype=dtype)
+        return encode_prf_response(response, design, dtype=dtype)
+
+
+class CFStimulusEncoder(BaseEncoder[CFStimulus]):
+    """
+    Encoding model for connective field stimuli.
+
+    Multiplies a source response with a connective model response and sums over the vertices in the source response.
+
+    """
+
+    @property
+    def parameter_names(self) -> list:
+        """Does not have any parameters. Returns an empty list."""
+        return []
+
+    def __call__(
+        self,
+        stimulus: CFStimulus,
+        response: Tensor,
+        parameters: pd.DataFrame,  # noqa: ARG002 (unused method argument)
+        dtype: str | None = None,
+    ) -> Tensor:
+        """Encode a Connective field model response with a source response.
+
+        Parameters
+        ----------
+        stimulus : CFStimulus
+            Connective field stimulus object.
+        response : Tensor
+            Connective field response.
+        parameters : pandas.DataFrame
+            Dataframe with columns containing different model parameters and rows containing parameter values
+            for different voxels.
+        dtype : str, optional
+            The dtype of the encoded response. If `None` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        Tensor
+            The stimulus encoded model response with shape `(num_voxels, num_frames)` dtype `dtype`.
+            The number of voxels is the number of rows in `parameters`. The number of frames is the number of time
+            frames in the stimulus design.
+
+        """
+        dtype = get_dtype(dtype)
+        response = ops.convert_to_tensor(response, dtype=dtype)
+        source_response = ops.convert_to_tensor(stimulus.source_response, dtype=dtype)
+
+        if response.shape[1] != source_response.shape[0]:
+            msg = (
+                f"Second dimension of connective field response {response.shape[1]} does not match first dimension "
+                f"of source response {source_response.shape[0]}"
+            )
+            raise ValueError(msg)
+
+        return ops.tensordot(response, source_response, axes=[[1], [0]])

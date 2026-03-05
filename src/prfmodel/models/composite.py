@@ -9,9 +9,12 @@ from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from .base import BaseCFResponse
 from .base import BaseComposite
+from .base import BaseEncoder
 from .base import BaseImpulse
 from .base import BasePRFResponse
 from .base import BaseTemporal
+from .encoding import CFStimulusEncoder
+from .encoding import PRFStimulusEncoder
 from .encoding import encode_prf_response
 from .impulse import DerivativeTwoGammaImpulse
 from .impulse import convolve_prf_impulse_response
@@ -29,20 +32,23 @@ class SimplePRFModel(BaseComposite):
     ----------
     prf_model : BasePRFResponse
         A population receptive field response model instance.
-    impulse_model : BaseImpulse or type or None, default=ShiftedDerivativeGammaImpulse, optional
-        An impulse response model class or instance. Reponse model classes will be instantiated during object
-        initialization. The default creates a `ShiftedDerivativeGammaImpulse` instance with default values.
-        values.
+    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
+        An encoding model class or instance. Model classes will be instantiated during initialization. The
+        default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
+    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
+        An impulse response model class or instance. Model classes will be instantiated during
+        initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
+        instance with default values.
     temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
-        A temporal model class or instance. Temporal model instances will be instantiated during initialization.
-        The default creates a `BaselineAmplitude` instance.
+        A temporal model class or instance. Model classes will be instantiated during initialization.
+        The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
 
     Notes
     -----
     The simple composite model follows five steps:
 
     1. The population receptive field response model makes a prediction for the stimulus grid.
-    2. The response is encoded with the stimulus design.
+    2. The encoding model encodes the response with the stimulus design.
     3. The impulse response model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
     5. The temporal model modifies the convolved response.
@@ -52,9 +58,13 @@ class SimplePRFModel(BaseComposite):
     def __init__(
         self,
         prf_model: BasePRFResponse,
+        encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
     ):
+        if encoding_model is not None and isinstance(encoding_model, type):
+            encoding_model = encoding_model()
+
         if impulse_model is not None and isinstance(impulse_model, type):
             impulse_model = impulse_model()
 
@@ -63,6 +73,7 @@ class SimplePRFModel(BaseComposite):
 
         super().__init__(
             prf_model=prf_model,
+            encoding_model=encoding_model,
             impulse_model=impulse_model,
             temporal_model=temporal_model,
         )
@@ -98,8 +109,8 @@ class SimplePRFModel(BaseComposite):
         dtype = get_dtype(dtype)
         prf_model = cast("BasePRFResponse", self.models["prf_model"])
         response = prf_model(stimulus, parameters, dtype=dtype)
-        design = ops.convert_to_tensor(stimulus.design, dtype=dtype)
-        response = encode_prf_response(response, design, dtype=dtype)
+        encoding_model = cast("BaseEncoder", self.models["encoding_model"])
+        response = encoding_model(stimulus, response, parameters, dtype=dtype)
 
         if self.models["impulse_model"] is not None:
             impulse_model = cast("BaseImpulse", self.models["impulse_model"])
@@ -311,13 +322,18 @@ class SimpleCFModel(BaseComposite):
     def __init__(
         self,
         cf_model: BaseCFResponse,
+        encoding_model: BaseEncoder | type[BaseEncoder] = CFStimulusEncoder,
         temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
     ):
+        if encoding_model is not None and isinstance(encoding_model, type):
+            encoding_model = encoding_model()
+
         if temporal_model is not None and isinstance(temporal_model, type):
             temporal_model = temporal_model()
 
         super().__init__(
             cf_model=cf_model,
+            encoding_model=encoding_model,
             temporal_model=temporal_model,
         )
 
@@ -352,11 +368,8 @@ class SimpleCFModel(BaseComposite):
         dtype = get_dtype(dtype)
         cf_model = cast("BaseCFResponse", self.models["cf_model"])
         response = cf_model(stimulus, parameters, dtype=dtype)
-        response = ops.expand_dims(response, -1)
-        source_response = ops.convert_to_tensor(stimulus.source_response, dtype=dtype)
-        source_response = ops.expand_dims(source_response, 0)
-        response *= source_response
-        response = ops.sum(response, axis=1)
+        encoding_model = cast("BaseEncoder", self.models["encoding_model"])
+        response = encoding_model(stimulus, response, parameters, dtype=dtype)
 
         if self.models["temporal_model"] is not None:
             temporal_model = cast("BaseTemporal", self.models["temporal_model"])
