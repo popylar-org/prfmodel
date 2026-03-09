@@ -13,6 +13,7 @@ List of tutorials:
    :glob:
 
    simple_prf_simulated.md
+   diff_gaussians_prf_simulated.md
 
 Tutorial development
 --------------------
