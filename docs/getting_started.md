@@ -11,45 +11,17 @@ kernelspec:
   name: python312
 ---
 
-# How to fit a population receptive field model to simulated data
+# Getting started
 
-+++
-
-**Author**: Malte Lüken (m.luken@esciencecenter.nl)
-
-**Difficulty**: Beginner
-
-+++
-
-This tutorial explains how to fit a population receptive field (pRF) model to simulated data.
+This page gives a brief overview on how to fit a population receptive field (pRF) model to simulated data.
 
 A pRF model maps neural activity in a region of interest in the brain (e.g., V1 in the human visual cortex)
 to an experimental stimulus (e.g., a bar moving through the visual field). Here, we use the visual domain as an example,
 where the part of the visual field that stimulates activity in the region of interest is the pRF.
 
-+++
-
-Because prfmodel uses Keras for model fitting, we need to make sure that a backend is installed before we begin.
-In this tutorial, we use the TensorFlow backend.
-
-```{code-cell} ipython3
-import os
-from importlib.util import find_spec
-
-# Set keras backend to 'tensorflow' (this is normally the default)
-os.environ["KERAS_BACKEND"] = "tensorflow"
-# Hide tensorflow info messages
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
-
-if find_spec("tensorflow") is None:
-    msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
-    raise ImportError(msg)
-```
-
 ## Defining the stimulus
 
-Let's start with the first step: Defining the stimulus. In practice, we recommend that users save the stimulus they use in an experiment to a file and load it to avoid mismatches between experiment and analysis.
-Because we use simulated data in this tutorial, we load an example stimulus that is included in the package.
+Let's start with the first step: Defining the stimulus. We load an example stimulus that is included in the package.
 The stimulus simulates a bar moving in different directions through a two-dimensional visual field.
 
 ```{code-cell} ipython3
@@ -62,29 +34,14 @@ print(stimulus)
 ```
 
 When printing the `stimulus` object, we can see that it has three attributes. The `design` attribute defines how
-the visual field changes over time. It has shape `(num_frames, width, height)`, where width and hight define the number of pixels at which the visual field is recorded. The `grid` attribute maps each pixel to its xy-coordinate in the visual field (i.e., the degree of visual angle).
-
-+++
-
-We can visualize the stimulus using `animate_2d_stimulus`.
-
-```{code-cell} ipython3
-from IPython.display import HTML
-from prfmodel.stimuli import animate_2d_prf_stimulus
-
-ani = animate_2d_prf_stimulus(stimulus, interval=25)  # Pause 25 ms between time frames
-
-HTML(ani.to_html5_video())
-```
+the visual field changes over time. It has shape `(num_frames, width, height)`, where width and hight define the number of pixels at which the visual field is recorded.
+The `grid` attribute maps each pixel to its xy-coordinate in the visual field (i.e., the degree of visual angle).
 
 ## Defining the pRF model
 
 Now that we defined our stimulus, we can create a pRF model to predict a neural response to this stimulus in our
 (hypothetical) region of interest (e.g., V1). We use the most popular pRF model that is based on the seminal paper
-by Dumoulin and Wandell (2008): It assumes that the stimulus (our moving bar) elicits a response that follows a
-Gaussian shape in two-dimensional visual space. This response is then summed and convolved with an impulse response
-that follows the shape of the hemodynamic response in the brain. Finally, a baseline and amplitude parameter shift and scale
-our predicted response to the simulated (or observed) neural response.
+by Dumoulin and Wandell (2008).
 
 The `Gaussian2DPRFModel` class performs all these steps to make a combined prediction.
 
@@ -102,7 +59,11 @@ The list of parameters that need to be set to make model predictions can be obta
 prf_model.parameter_names
 ```
 
-The parameters `mu_x`, `mu_y`, and `sigma` define the location and size of the predicted Gaussian pRF and are of primary interest. We simulate a pRF with its center at (-2.1, 1.45) and a size of 1.35. The parameters `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the impulse response that is convolved with our pRF response. The parameters `baseline` and `amplitude` shift and scale our convolved response, respectively. We store the parameter values in a `pandas.DataFrame` object.
+The parameters `mu_x`, `mu_y`, and `sigma` define the location and size of the predicted Gaussian pRF and are of primary interest.
+We simulate a pRF with its center at (-2.1, 1.45) and a size of 1.35. The parameters
+`delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the impulse response that is
+convolved with our pRF response. The parameters `baseline` and `amplitude` shift and scale our convolved
+response, respectively. We store the parameter values in a `pandas.DataFrame` object.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -287,21 +248,6 @@ ax.plot(sgd_pred_response[0], "--", label="Predicted (SGD)")
 
 fig.legend();
 ```
-
-## Conclusion
-
-In this tutorial, we showed how to setup a standard Gaussian pRF model for a two-dimensional stimulus. We demonstrated
-how to fit the model to simulated data (without noise) using a multi-stage workflow: First, we used a grid search to
-find good starting values, then, we estimated baseline and amplitude using least squares, and finally we finetuned the
-model fit using stochastic gradient descent. At each stage, we compared the predicted model response against the
-original simulated response to check how well the model fit the data.
-
-## Stay Tuned
-
-More tutorials on fitting models to empirical data and creating custom models are in the making.
-
-For questions and issues, please make an issue on [GitHub](https://github.com/popylar-org/prfmodel/issues) or
-contact Malte Lüken (m.luken@esciencecenter.nl).
 
 +++
 

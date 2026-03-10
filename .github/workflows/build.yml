@@ -24,7 +24,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras: dev,publishing,tensorflow
-      - name: Run unit tests
+      - name: Run unit tests with examples
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        run: python -m pytest -v --examples
+        env:
+          KERAS_BACKEND: tensorflow
+      - name: Run unit tests without examples
+        if: matrix.os != 'ubuntu-latest' || matrix.python-version != '3.12'
         run: python -m pytest -v
         env:
           KERAS_BACKEND: tensorflow

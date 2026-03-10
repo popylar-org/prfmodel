@@ -1,26 +1,28 @@
-Tutorials
-=========
+.. _tutorials:
 
-Here you can find tutorials that explain how to use prfmodel. Stay tuned because more tutorials are in the making.
+Tutorials & Examples
+====================
 
-You want to contribute a tutorial? Make a `pull request <https://github.com/popylar-org/prfmodel/pulls>`_!
+Here you can find tutorials and examples that explain how to use prfmodel. Tutorials are shorter and explain specific
+features of prfmodel while examples are longer and contain end-to-end applications of the package. Stay tuned because
+more tutorials and examples are in the making.
 
-List of tutorials:
+You want to contribute a tutorial or example? Make a `pull request <https://github.com/popylar-org/prfmodel/pulls>`_!
 
 .. toctree::
-   :maxdepth: 0
+   :maxdepth: 2
    :titlesonly:
    :glob:
 
-   simple_prf_simulated.md
+   examples/index
 
-Tutorial development
---------------------
+Development
+-----------
 
-Tutorials are stored in the `MyST Markdown <https://myst-parser.readthedocs.io/en/latest/>`_ format. They are
-automatically rendered by Sphinx in the local and online documentation. However, for development purposes, it can be
-useful to locally convert the MyST Markdown files into Jupyter notebooks (and vice versa). The conversion can be done
-with `jupytext <https://jupytext.readthedocs.io/en/latest/index.html>`_.
+Tutorials and examples are stored in the `MyST Markdown <https://myst-parser.readthedocs.io/en/latest/>`_ format.
+They are automatically rendered by Sphinx in the local and online documentation. However, for development purposes,
+it can be useful to locally convert the MyST Markdown files into Jupyter notebooks (and vice versa). The conversion
+can be done with `jupytext <https://jupytext.readthedocs.io/en/latest/index.html>`_.
 
 To locally convert MyST Markdown files into Jupyter notebooks:
 
