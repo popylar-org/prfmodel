@@ -27,8 +27,10 @@ classifiers = [
 ]
 dependencies = [
     "keras",
+    "ipympl",
     "matplotlib",
     "more-itertools",
+    "nilearn",
     "numpy<2.0.0",
     "pandas",
     "scipy",
@@ -63,7 +65,8 @@ dev = [
     "pandas-stubs",
     "jupyter",
     "types-tqdm",
-    "ipykernel"
+    "ipykernel",
+    "plotly",
 ]
 publishing = [
     "build",
@@ -154,5 +157,5 @@ filename = "src/prfmodel/__init__.py"
 filename = "pyproject.toml"
 
 [[tool.mypy.overrides]]
-module = ["keras.*"]
+module = ["keras.*", "nilearn.*"]
 ignore_missing_imports = true
