@@ -15,7 +15,7 @@ kernelspec:
 
 **Author**: Malte Lüken (m.luken@esciencecenter.nl)
 
-This examples shows how to fit a population receptive field (pRF) model to blood oxygnenation level-dependent (BOLD) functional magnetic resonance imaging
+This examples shows how to fit a population receptive field (pRF) model to blood oxygenation level-dependent (BOLD) functional magnetic resonance imaging
 (fMRI) data.
 
 A pRF model maps neural activity in a brain region of interest (ROI; e.g., V1 in the human visual cortex)
@@ -89,7 +89,7 @@ The BOLD response time courses have 120 time frames. We convert the raw BOLD res
 response_psc = ((response_raw.T / response_raw.mean(axis=1)).T - 1.0) * 100.0
 ```
 
-The `response` object contains the BOLD response timecourse for each voxel on the surface mesh. It has shape `(num_vertices, num_frames)` where `num_vertices` is the number of vertices on the surface mesh and `num_frames` the number of time frames of the recording. The timecourses from the left and right hemishperes are concatenated (left is first). Because the data has been converted to PSC, each timecourse should have a mean of zero.
+The `response` object contains the BOLD response timecourse for each voxel on the surface mesh. It has shape `(num_vertices, num_frames)` where `num_vertices` is the number of vertices on the surface mesh and `num_frames` the number of time frames of the recording. The timecourses from the left and right hemispheres are concatenated (left is first). Because the data has been converted to PSC, each timecourse should have a mean of zero.
 
 First, we define a helper function to plot a statistic on the surface.
 
@@ -120,6 +120,13 @@ def plot_surf_stat_map_helper(
         title=title,
     )
 
+    # Expand the 3D axes to fill the space to the left of the colorbar
+    surf_axes = [a for a in fig.axes if a.name == "3d"]
+    cbar_axes = [a for a in fig.axes if a.name != "3d"]
+    cbar_x0 = min(a.get_position().x0 for a in cbar_axes)
+    for a in surf_axes:
+        a.set_position([0.0, 0.0, cbar_x0 - 0.01, 0.97])
+
     return fig, ax
 ```
 
@@ -142,6 +149,10 @@ We can see that there is high variation in the signal in the visual areas (e.g.,
 
 For pRF modeling, we also need the experimental stimulus that the subject has seen during the fMRI recording. The
 stimulus was created using MATLAB so, we first load the raw design matrix that is located in the `data` directory.
+
+> **Note - stimulus preprocessing:** In this tutorial, we preprocess the raw design matrix before applying the pRF model to it.
+> However, while we use one possible preprocessing approach, we want to mention that there are alternative approaches
+> resting on different assumptions that can lead to similar modelling results.
 
 ```{code-cell} ipython3
 from scipy.io import loadmat
@@ -180,7 +191,7 @@ design_square.min(), design_square.max()
 ```
 
 We can see that the design still holds raw pixel color intensity values ranging from 0 to 255. For pRF modelling,
-we first clip them to 0 (stimulus absent) to 1 (stimulus present). Then, we apply a Gaussian filter to smooth the
+we first binarize them to 0 (stimulus absent) and 1 (color intensity > 0; stimulus present). Then, we apply a Gaussian filter to smooth the
 transitions between stimulus absence and presence. Note that we also swap the x- and y-dimension to match the order
 that prfmodel expects.
 
@@ -227,7 +238,7 @@ coordinates.shape
 ```
 
 The `coordinates` object contains the x- and y-coordinate for every screen pixel in the visual field. We combine the
-final design and the coordinates in a `PRFStimulus` container that we will later use as input for our pRF model.
+final design and the coordinates in a {py:class}`prfmodel.stimuli.PRFStimulus` container that we will later use as input for our pRF model.
 
 ```{code-cell} ipython3
 from prfmodel.stimuli import PRFStimulus
@@ -239,7 +250,7 @@ print(stimulus)
 
 When printing the `stimulus` object, we can see the shapes of its attributes.
 
-We can visualize the stimulus using `animate_2d_stimulus`.
+We can visualize the stimulus using {py:func}`prfmodel.stimuli.animate_2d_prf_stimulus`.
 
 ```{code-cell} ipython3
 from IPython.display import HTML
@@ -256,7 +267,7 @@ We can see that the stimulus consists of four rectangular bars that move vertica
 
 ## Inspecting the data
 
-Before we model the BOLD response, we look at the timecourses and inspect the quality of the data. To do this we draw a sample of random vertices and plot their BOLD response over time. Note that the unit of time frames is repetition time (TR) which is
+Before we model the BOLD response, we look at the timecourses and inspect the quality of the data. To do this we select a subset of vertices and plot their BOLD response over time. Note that the unit of time frames is repetition time (TR) which is
 1.5 seconds for this dataset.
 
 ```{code-cell} ipython3
@@ -282,10 +293,9 @@ fig.update_layout(showlegend=False, height=450)
 fig.show()
 ```
 
-While the timecourses are quite noisy, we can see that, for some vertices, there four regular peaks in the signal. These peaks correspond
+While the timecourses are quite noisy, we can see that, for some vertices, there are four regular peaks in the signal. These peaks correspond
 to the bars moving through the visual field. The goal of our pRF model is to predict these peaks as closely as possible.
-By comparing how similar the pRF model predictions are to the observed timecourses, we can identify vertices and areas of the brain that respond
-to our visual stimulus. This allows us to create a stimulus-specific pRF map of the brain.
+By comparing how similar the pRF model predictions are to the observed timecourses, we can identify vertices and areas of the brain that respond to our visual stimulus. This allows us to create a stimulus-specific pRF map of the brain.
 
 We can get an even better overview by plotting all timecourses at once in a heatmap.
 
@@ -321,7 +331,7 @@ Gaussian shape in two-dimensional visual space. This response is convolved with 
 that follows the shape of the hemodynamic response in the brain. Finally, a baseline and amplitude parameter shift and scale
 our predicted response to match the observed BOLD response.
 
-The `Gaussian2DPRFModel` class performs all these steps to make a combined prediction. However, we need to add a custom impulse
+The {py:class}`prfmodel.models.gaussian.Gaussian2DPRFModel` class performs all these steps to make a combined prediction. However, we need to add a custom impulse
 response model to account for the fact that each time frame is one TR (1.5 seconds; the default in prfmodel is 1.0 seconds). Thus, we set the resolution
 of our predicted impulse response to the TR.
 
@@ -366,10 +376,11 @@ fig = px.line(
     y="Impulse response",
     title="Predicted impulse response",
 )
-fig.show(height=400)
+fig.update_layout(height=450)
+fig.show()
 ```
 
-We insert the impulse model into the `Gaussian2DPRFModel` that makes combined model predictions.
+We insert the impulse model into the {py:class}`prfmodel.models.gaussian.Gaussian2DPRFModel` that makes combined model predictions.
 
 ```{code-cell} ipython3
 # Define pRF model with custom impulse response submodel
@@ -404,7 +415,8 @@ fig = px.line(
     y="BOLD response (in PSC)",
     title="Predicted timecourse",
 )
-fig.show(height=400)
+fig.update_layout(height=450)
+fig.show()
 ```
 
 Some vertices do not have valid timecourses, that is, they contain `NaN` values. We filter out all vertices that have
@@ -420,7 +432,7 @@ response_valid = response_psc[response_is_valid]
 We will fit the pRF model to our BOLD response data using two stages. We begin with a grid search to find good values for our parameters of interest (`mu_x`, `mu_y`, and `sigma`). Then, we use least squares to estimate the `baseline` and `amplitude` of
 our model.
 
-**Note**: Typically, we would also use stochastic gradient descent (SGD) to finetune our model fits after the least-squares stage. To keep the example computationally simple, we omit this step here but encourage readers to explore this approach at the end.
+> **Note**: Typically, we would also use stochastic gradient descent (SGD) to finetune our model fits after the least-squares stage. To keep the example computationally simple, we omit this step here but encourage readers to explore this approach at the end.
 
 +++
 
@@ -448,7 +460,7 @@ For all three parameters, we defined ranges of 20 values that will be used to co
 grid search will evaluate all possible combinations of these values and return the combination that fits the simulated
 data best. This will result in a grid containing $20 ^ 3 = 8000$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
 
-Let's construct the `GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the `GridFitter`
+Let's construct the {py:class}`prfmodel.fitters.grid.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.grid.GridFitter`
 evaluate 20 parameter combinations at the same time (which saves us some memory). As the `loss` (i.e., the metric to minimize between model predictions and data), we use cosine similarity which ignores differences in scale between model predictions and observed data.
 
 ```{code-cell} ipython3
@@ -478,7 +490,8 @@ grid_params
 
 We can see that the estimates for `mu_x`, `mu_y`, and `sigma` are one combination in our grid. In the second step,
 we also optimize the `amplitude` of the pRF model together with the `baseline` using least squares. This adjusts the
-scale of our model predictions to scale the observed data.
+scale of our model predictions to scale the observed data. We set `batch_size=200` to estimate least-squares fits
+for batches of vertices sequentially and save memory.
 
 ```{code-cell} ipython3
 from prfmodel.fitters.linear import LeastSquaresFitter
@@ -507,7 +520,7 @@ We can see that the amplitudes are substantially lower compared to the starting 
 
 Now that the core pRF parameters and the auxiliary baseline and amplitude parameters are optimized, we can
 compare the model predictions against the observed responses. Because we want to make predictions for all vertices in
-the brain, we wrap our `prf_model` in the `batched` modifier function. The modifier changes the behavior of the model
+the brain, we wrap our `prf_model` in the {py:func}`prfmodel.utils.batched` modifier function. The modifier changes the behavior of the model
 to make predictions for batches of vertices sequentially. This saves us a lot of memory at the expense of minimal runtime
 overhead.
 
@@ -669,7 +682,7 @@ angle[response_is_valid] = np.where(is_above_threshold, angle_valid, np.nan)
 plot_surf_stat_map_helper(angle, vmin=-np.pi, vmax=np.pi, title="pRF center polar angle");
 ```
 
-The surface plot shows that vertices in the left hemisphere have a positive pRF angle, meaning that their pRF center is on the right side of the screen. In contrast, vertices in the right hemishpere have negative pRF angle, thus, their pRF center is located on the left side of the screen.
+The surface plot shows that vertices in the left hemisphere have a positive pRF angle, meaning that their pRF center is on the right side of the screen. In contrast, vertices in the right hemisphere have negative pRF angle, thus, their pRF center is located on the left side of the screen.
 
 We can also look at the eccentricity, that is, the distance of the pRF center from the center of the screen.
 
@@ -692,14 +705,14 @@ For eccentricity, we can see segments with gradual transitions in both hemispher
 
 ## Conclusion
 
-This example showed how to fit a two-dimensional Gausian pRF model to empirical fMRI data collected from an experiment in the visual domain. First, we plotted the raw BOLD response data on the cortical surface. Second, we created the experimental stimulus. Then, we defined a pRF model and optimized its parameters using a grid search followed by least-squares to adjust for baseline and amplitude differences. Finally, we visualized model fit, the estimated parameters, and derived measures on the cortical surface.
+This example showed how to fit a two-dimensional Gaussian pRF model to empirical fMRI data collected from an experiment in the visual domain. First, we plotted the raw BOLD response data on the cortical surface. Second, we created the experimental stimulus. Then, we defined a pRF model and optimized its parameters using a grid search followed by least-squares to adjust for baseline and amplitude differences. Finally, we visualized model fit, the estimated parameters, and derived measures on the cortical surface.
 
 ## Next steps
 
 The predictions by our pRF model can potentially be improved. We suggest different directions for improving the pRF model fit:
 
 - Increasing the number of points in the parameter grid for the grid search
-- Finetuning the pRF model parameters with stochastic gradient descent with `prfmodel.fitters.SGDFitter`
+- Finetuning the pRF model parameters with stochastic gradient descent with {py:class}`prfmodel.fitters.sgd.SGDFitter`
 - Applying preprocessing steps before fitting the pRF model (e.g., high-pass filtering)
 - Optimizing the impulse response model parameters in the grid search
 - Building a more complex pRF model (e.g., compressive spatial summation, see Kay et al., 2013)

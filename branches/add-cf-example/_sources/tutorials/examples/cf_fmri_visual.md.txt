@@ -15,7 +15,7 @@ kernelspec:
 
 **Author**: Malte Lüken (m.luken@esciencecenter.nl)
 
-This examples shows how to fit a connective field (CF) model to blood oxygnenation level-dependent (BOLD) functional magnetic resonance imaging
+This example shows how to fit a connective field (CF) model to blood oxygenation level-dependent (BOLD) functional magnetic resonance imaging
 (fMRI) data.
 
 A CF model maps neural activity in one brain region of interest (ROI; e.g., V2 in the human visual cortex)
@@ -71,7 +71,7 @@ The BOLD response time courses have 120 time frames. We convert the raw BOLD res
 response_psc = ((response_raw.T / response_raw.mean(axis=1)).T - 1.0) * 100.0
 ```
 
-The `response` object contains the BOLD response timecourse for each voxel on the surface mesh. It has shape `(num_vertices, num_frames)` where `num_vertices` is the number of vertices on the surface mesh and `num_frames` the number of time frames of the recording. The timecourses from the left and right hemishperes are concatenated (left is first). Because the data has been converted to PSC, each timecourse should have a mean of zero.
+The `response_psc` object contains the BOLD response timecourse for each voxel on the surface mesh. It has shape `(num_vertices, num_frames)` where `num_vertices` is the number of vertices on the surface mesh and `num_frames` the number of time frames of the recording. The timecourses from the left and right hemispheres are concatenated (left is first). Because the data has been converted to PSC, each timecourse should have a mean of zero.
 
 First, we define a helper function to plot a statistic on the surface.
 
@@ -103,6 +103,13 @@ def plot_surf_stat_map_helper(
         figure=fig,
         title=title,
     )
+
+    # Expand the 3D axes to fill the space to the left of the colorbar
+    surf_axes = [a for a in fig.axes if a.name == "3d"]
+    cbar_axes = [a for a in fig.axes if a.name != "3d"]
+    cbar_x0 = min(a.get_position().x0 for a in cbar_axes)
+    for a in surf_axes:
+        a.set_position([0.0, 0.0, cbar_x0 - 0.01, 0.97])
 
     return fig, ax
 ```
@@ -136,7 +143,7 @@ pio.templates.default = "simple_white"
 # The atlas comes with the surface mesh
 atlas = np.load("data/hcp_999999/surface-info/mmp_atlas.npz")
 
-# V1 is has label 1
+# V1 has label 1
 label_v1 = 1
 
 # Concatenate labels from both hemispheres (left is first)
@@ -168,10 +175,10 @@ fig.update_layout(showlegend=False, height=450)
 fig.show()
 ```
 
-While the timecourses are quite noisy, we can see that, for some vertices, there four regular peaks in the signal. These peaks originate from the visual stimulus that was shown during the fMRI recording. The visual stimulus contained four correspond
+While the timecourses are quite noisy, we can see that, for some vertices, there are four regular peaks in the signal. These peaks originate from the visual stimulus that was shown during the fMRI recording. The visual stimulus contained four corresponding
 bars moving through the visual field in different directions (see [](prf_2d_fmri_visual.md)). The goal of our CF model is to map these responses to the responses from other vertices in the brain.
 
-We can get an overview of all all vertices by plotting all timecourses at once in a heatmap.
+We can get an overview of all vertices by plotting all timecourses at once in a heatmap.
 
 ```{code-cell} ipython3
 aspect_ratio = response_psc.shape[1] / response_psc.shape[0]
@@ -197,6 +204,9 @@ The input for CF models is the response in the source region (which we have alre
 between vertices in that region. To compute this distance matrix we define a helper function that loads a white matter
 surface from a GIFTI file, transforms the surface into a sparse graph, and applies Dijkstra's algorithm to find the
 weighted shortest paths between all vertices in our source region.
+
+> **Note - distance matrix construction:** There are alternative ways of constructing a distance matrix on the cortical
+> surface. For example, the [Heat method](https://www.cs.cmu.edu/~kmcrane/Projects/HeatMethod/) computes the geodesic distance between vertices on the surface.
 
 ```{code-cell} ipython3
 from collections.abc import Sequence
@@ -271,7 +281,7 @@ fig.colorbar(im, ax=ax, label="Distance (in mm)");
 We can see that the distances vary across vertices according to a regular pattern. This is due to the regular position of
 vertices on the surface mesh.
 
-We combine the distance matrix and the response in the source region in a stimulus object that we use as input for our
+We combine the distance matrix and the response in the source region in a {py:class}`prfmodel.stimuli.CFStimulus` object that we use as input for our
 CF model.
 
 ```{code-cell} ipython3
@@ -290,7 +300,7 @@ It assumes that the stimulus (a vertex in the distance matrix) elicits a respons
 Gaussian shape in two-dimensional cortical space. A baseline and amplitude parameter shift and scale
 the predicted response to match the observed BOLD response.
 
-The `GaussianCFModel` class performs these steps to make a combined prediction.
+The {py:class}`prfmodel.models.gaussian.GaussianCFModel` class performs these steps to make a combined prediction.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -299,9 +309,9 @@ from prfmodel.models.gaussian import GaussianCFModel
 cf_model = GaussianCFModel()
 ```
 
-The `GaussianCFModel` class requires two core parameters: `center_index` indicates the location of the CF in the
+The {py:class}`prfmodel.models.gaussian.GaussianCFModel` class requires two core parameters: `center_index` indicates the location of the CF in the
 source region. With the current CF implementation in prfmodel, this must be a vertex index in the distance matrix/source
-region. This means, that the center of a CF must be a vertex on the surface mesh (i.e., it cannot be in between vertices).
+region. This means that the center of a CF must be a vertex on the surface mesh (i.e., it cannot be in between vertices).
 
 We generate predictions for a range of `center_index` values to visualize how the predicted response changes across different CF locations.
 
@@ -344,12 +354,11 @@ response_valid = response_psc[response_is_valid]
 is_v1_valid = is_v1[response_is_valid]
 ```
 
-We will fit the CF model to our BOLD response data using two stages. We begin with a grid search to find good values for our parameters of interest (`center_index`, and `sigma`). Then, we use least squares to estimate the `baseline` and `amplitude` of
+We will fit the CF model to our BOLD response data using two stages. We begin with a grid search using {py:class}`prfmodel.fitters.grid.GridFitter` to find good values for our parameters of interest (`center_index`, and `sigma`). Then, we use {py:class}`prfmodel.fitters.linear.LeastSquaresFitter` to estimate the `baseline` and `amplitude` of
 our model.
 
-**Note**: Typically, we would also use stochastic gradient descent (SGD) to finetune our model fits after the least-squares stage.
-To keep the example computationally simple, we omit this step here but encourage readers to explore this approach at the end.
-Importantly, we can only optimize continuous parameters with SGD, so `center_index` must be a fixed value.
+> **Note**: Typically, we would also use stochastic gradient descent (SGD) to finetune our model fits after the least-squares stage. To keep the example computationally simple, we omit this step here but encourage readers to explore this approach at the end.
+> Importantly, we can only optimize continuous parameters with SGD, so `center_index` must be a fixed value.
 
 +++
 
@@ -366,10 +375,10 @@ param_ranges = {
 }
 ```
 
-The grid search will evaluate all possible combinations of with the defined ranges and return the combination that fits the simulated
+The grid search will evaluate all possible combinations of the defined ranges and return the combination that fits the simulated
 data best. Note that this is still a relatively small grid and we recommend specifying finer grids in practice.
 
-Let's construct the `GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the `GridFitter`
+Let's construct the {py:class}`prfmodel.fitters.grid.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.grid.GridFitter`
 evaluate 20 parameter combinations at the same time (which saves us some memory). As the `loss` (i.e., the metric to minimize between model predictions and data), we use cosine similarity which ignores differences in scale between model predictions and observed data.
 
 ```{code-cell} ipython3
@@ -426,7 +435,7 @@ We can see that the amplitudes are substantially lower compared to the starting 
 
 Now that the core CF parameters and the auxiliary baseline and amplitude parameters are optimized, we can
 compare the model predictions against the observed responses. Because we want to make predictions for all vertices in
-the brain, we wrap our `cf_model` in the `batched` modifier function. The modifier changes the behavior of the model
+the brain, we wrap our `cf_model` in the {py:func}`prfmodel.utils.batched` modifier function. The modifier changes the behavior of the model
 to make predictions for batches of vertices sequentially. This saves us a lot of memory at the expense of minimal runtime
 overhead.
 
@@ -505,7 +514,7 @@ fig = px.line(
         "vertex": "Vertex",
         "source": "",
     },
-    title=f"Observed and predicted vertex responses (subsampled vertices)",
+    title="Observed and predicted vertex responses (subsampled vertices)",
 )
 
 # Add a text trace to display per-vertex stats; this will be updated in each animation frame
@@ -583,7 +592,7 @@ This example showed how to fit a Gaussian CF model to empirical fMRI data collec
 The predictions by our CF model can potentially be improved. We suggest different directions for improving the pRF model fit:
 
 - Increasing the number of points in the parameter grid for the grid search
-- Finetuning `sigma` with stochastic gradient descent with `prfmodel.fitters.SGDFitter`
+- Finetuning `sigma` with stochastic gradient descent with {py:class}`prfmodel.fitters.sgd.SGDFitter`
 - Applying preprocessing steps before fitting the pRF model (e.g., high-pass filtering)
 - Building a more complex CF model (e.g., difference of Gaussian, see Zuiderbaan et al., 2012)
 

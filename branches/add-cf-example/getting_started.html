@@ -10,8 +10,9 @@
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=ad54fe46" />
     
     
 
@@ -292,7 +293,7 @@ where the part of the visual field that stimulates activity in the region of int
 <h2>Defining the stimulus<a class="headerlink" href="#defining-the-stimulus" title="Link to this heading">¶</a></h2>
 <p>Let’s start with the first step: Defining the stimulus. We load an example stimulus that is included in the package.
 The stimulus simulates a bar moving in different directions through a two-dimensional visual field.</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.examples</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_2d_prf_bar_stimulus</span>
 
@@ -327,7 +328,7 @@ The <code class="docutils literal notranslate"><span class="pre">grid</span></co
 (hypothetical) region of interest (e.g., V1). We use the most popular pRF model that is based on the seminal paper
 by Dumoulin and Wandell (2008).</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code> class performs all these steps to make a combined prediction.</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.gaussian</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian2DPRFModel</span>
 
@@ -338,7 +339,7 @@ by Dumoulin and Wandell (2008).</p>
 </div>
 <p>To simulate a neural response to our stimulus with our Gaussian 2D pRF model, we need to define a set of parameters.</p>
 <p>The list of parameters that need to be set to make model predictions can be obtained from the <code class="docutils literal notranslate"><span class="pre">parameter_names</span></code> property.</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prf_model</span><span class="o">.</span><span class="n">parameter_names</span>
 </pre></div>
@@ -365,7 +366,7 @@ We simulate a pRF with its center at (-2.1, 1.45) and a size of 1.35. The parame
 <code class="docutils literal notranslate"><span class="pre">delay</span></code>, <code class="docutils literal notranslate"><span class="pre">dispersion</span></code>, <code class="docutils literal notranslate"><span class="pre">undershoot</span></code>, <code class="docutils literal notranslate"><span class="pre">u_dispersion</span></code>, <code class="docutils literal notranslate"><span class="pre">ratio</span></code>, and <code class="docutils literal notranslate"><span class="pre">weight_deriv</span></code> determine the impulse response that is
 convolved with our pRF response. The parameters <code class="docutils literal notranslate"><span class="pre">baseline</span></code> and <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> shift and scale our convolved
 response, respectively. We store the parameter values in a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> object.</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 
@@ -389,7 +390,7 @@ response, respectively. We store the parameter values in a <code class="docutils
 </div>
 </div>
 <p>Using the “true” parameters, we simulate a response to our stimulus by making a prediction with our pRF model.</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
@@ -416,7 +417,7 @@ our model. Finally, we use stochastic gradient descent (SGD) to finetune our mod
 <p>Let’s start with the grid search by defining ranges of <code class="docutils literal notranslate"><span class="pre">mu_x</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>, and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> that we want to construct a grid
 of parameter values from. For all other parameters, we only provide a single value so that they will stay constant
 across the entire grid.</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -442,7 +443,7 @@ grid search will evaluate all possible combinations of these values and return t
 data best. This will result in a grid containing <span class="math notranslate nohighlight">\(10 \times 10 \times 10 = 1000\)</span> parameter combinations.</p>
 <p>Let’s construct the <code class="docutils literal notranslate"><span class="pre">GridFitter</span></code> and perform the grid search. Note that we set <code class="docutils literal notranslate"><span class="pre">chunk_size=20</span></code> to let the <code class="docutils literal notranslate"><span class="pre">GridFitter</span></code>
 evaluate 20 parameter combinations at the same time (which saves us some memory).</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.fitters.grid</span><span class="w"> </span><span class="kn">import</span> <span class="n">GridFitter</span>
 
@@ -530,7 +531,7 @@ Processing parameter grid: 100%|██████████| 50/50 [00:01&lt;
 </div>
 </div>
 </div>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid_params</span>
 </pre></div>
@@ -592,7 +593,7 @@ grid did not contain the “true” parameters we used to simulate the original 
 “true” parameters.</p>
 <p>Using the parameter estimates resulting from the grid search we can make model predictions and compare them against
 the original simulated response.</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid_pred_response</span> <span class="o">=</span> <span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">grid_params</span><span class="p">)</span>
 
@@ -612,7 +613,7 @@ the original simulated response.</p>
 <p>We can see that the predicted response follows the shape of the original (true) response but still shows some deviation
 in the amplitude of the activation peaks and the baseline activation.</p>
 <p>Using least squares, we can estimate the baseline and amplitude parameters of our model.</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.fitters.linear</span><span class="w"> </span><span class="kn">import</span> <span class="n">LeastSquaresFitter</span>
 
@@ -689,7 +690,7 @@ Processing data batches: 100%|██████████| 1/1 [00:00&lt;00:0
 </div>
 <p>Looking at the parameters, we can see that the model compensates the deviation in the peaks by adjusting the
 <code class="docutils literal notranslate"><span class="pre">baseline</span></code> and <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> parameters. We can also plot the predicted response.</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ls_pred_response</span> <span class="o">=</span> <span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">ls_params</span><span class="p">)</span>
 
@@ -710,7 +711,7 @@ Processing data batches: 100%|██████████| 1/1 [00:00&lt;00:0
 that is computed between data and model predictions. The default loss function in prfmodel is the means squared error.
 As initial parameters, we use the result from the grid search and least squares fit. We fix the parameters related to
 the impulse response to their initial values (which are the “true” values).</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.fitters.sgd</span><span class="w"> </span><span class="kn">import</span> <span class="n">SGDFitter</span>
 
@@ -2234,7 +2235,7 @@ the impulse response to their initial values (which are the “true” values).<
 </div>
 </div>
 </div>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sgd_params</span>
 </pre></div>
@@ -2292,7 +2293,7 @@ the impulse response to their initial values (which are the “true” values).<
 </div></div></div>
 </div>
 <p>We can plot the predicted model response and see that it matches the original simulated response almost perfectly.</p>
-<div class="cell config_scroll_outputs docutils container">
+<div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sgd_pred_response</span> <span class="o">=</span> <span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">sgd_params</span><span class="p">)</span>
 
