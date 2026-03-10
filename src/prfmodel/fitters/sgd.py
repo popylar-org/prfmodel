@@ -5,7 +5,7 @@ from collections.abc import Sequence
 import keras
 import pandas as pd
 from keras import ops
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from prfmodel.adapter import Adapter
 from prfmodel.models.base import BaseComposite
 from prfmodel.stimuli.base import Stimulus

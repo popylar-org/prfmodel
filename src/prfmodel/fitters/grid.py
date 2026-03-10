@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from keras import ops
 from more_itertools import chunked
-from tqdm import tqdm
+from tqdm.auto import tqdm
 from prfmodel.models.base import BaseComposite
 from prfmodel.stimuli.base import Stimulus
 from prfmodel.typing import Tensor
