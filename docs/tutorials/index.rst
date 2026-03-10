@@ -13,6 +13,7 @@ List of tutorials:
    :glob:
 
    simple_prf_simulated.md
+   css_prf_simulated.md
 
 Tutorial development
 --------------------

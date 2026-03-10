@@ -11,14 +11,16 @@ from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
-from .base import BaseCFResponse
+from .base import BaseEncoder
 from .base import BaseImpulse
-from .base import BasePRFResponse
+from .base import BaseResponse
 from .base import BaseTemporal
 from .base import BatchDimensionError
 from .base import ShapeError
 from .composite import SimpleCFModel
 from .composite import SimplePRFModel
+from .encoding import CFStimulusEncoder
+from .encoding import PRFStimulusEncoder
 from .impulse import DerivativeTwoGammaImpulse
 from .temporal import BaselineAmplitude
 
@@ -168,7 +170,7 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     return ops.exp(-resp) / volume
 
 
-class Gaussian2DPRFResponse(BasePRFResponse):
+class Gaussian2DPRFResponse(BaseResponse[PRFStimulus]):
     """
     Two-dimensional isotropic Gaussian population receptive field response model.
 
@@ -245,7 +247,7 @@ class Gaussian2DPRFResponse(BasePRFResponse):
         return predict_gaussian_response(grid, mu, sigma)
 
 
-class GaussianCFResponse(BaseCFResponse):
+class GaussianCFResponse(BaseResponse[CFStimulus]):
     """
     Gaussian connective field response model.
 
@@ -311,20 +313,23 @@ class Gaussian2DPRFModel(SimplePRFModel):
 
     Parameters
     ----------
-    impulse_model : BaseImpulse or type or None, default=ShiftedDerivativeGammaImpulse, optional
-        An impulse response model class or instance. Reponse model classes will be instantiated during object
-        initialization. The default creates a :class:`~prfmodel.models.impulse.ShiftedDerivativeGammaImpulse`
+    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
+        An encoding model class or instance. Model classes will be instantiated during initialization. The
+        default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
+    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
+        An impulse response model class or instance. Model classes will be instantiated during
+        initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
         instance with default values.
     temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
-        A temporal model class or instance. Temporal model instances will be instantiated during initialization.
-        The default creates a `BaselineAmplitude` instance.
+        A temporal model class or instance. Model classes will be instantiated during initialization.
+        The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
 
     Notes
     -----
     The simple composite model follows five steps:
 
     1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
-    2. The response is encoded with the stimulus design.
+    2. The encoding model encodes the response with the stimulus design.
     3. A impulse response model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
     5. The temporal model modifies the convolved response.
@@ -333,11 +338,13 @@ class Gaussian2DPRFModel(SimplePRFModel):
 
     def __init__(
         self,
+        encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
     ):
         super().__init__(
             prf_model=Gaussian2DPRFResponse(),
+            encoding_model=encoding_model,
             impulse_model=impulse_model,
             temporal_model=temporal_model,
         )
@@ -351,6 +358,9 @@ class GaussianCFModel(SimpleCFModel):
 
     Parameters
     ----------
+    encoding_model : BaseEncoder or type, default=CFStimulusEncoder
+        An encoding model class or instance. Model classes will be instantiated during initialization. The
+        default creates a :class:`~prfmodel.models.encoding.CFStimulusEncoder` instance.
     temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
         A temporal model class or instance. Temporal model instances will be instantiated during initialization.
         The default creates a `BaselineAmplitude` instance.
@@ -360,16 +370,18 @@ class GaussianCFModel(SimpleCFModel):
     The simple composite model follows three steps:
 
     1. The Gaussian connective field response model makes a prediction for the stimulus distance matrix.
-    2. The connective field response is encoded with the source response.
+    2. The encoding model encodes the connective field response with the source response.
     3. The temporal model modifies the encoded response.
 
     """
 
     def __init__(
         self,
+        encoding_model: BaseEncoder | type[BaseEncoder] = CFStimulusEncoder,
         temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
     ):
         super().__init__(
             cf_model=GaussianCFResponse(),
+            encoding_model=encoding_model,
             temporal_model=temporal_model,
         )
