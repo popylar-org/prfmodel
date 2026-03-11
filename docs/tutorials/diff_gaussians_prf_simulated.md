@@ -145,7 +145,7 @@ The predicted response contains increased activation followed by decreased activ
 
 +++
 
-# Fitting the pRF model
+## Fitting the pRF model
 
 We will fit the DoG pRF model using a two-step approach. 
 - In **Step 1**, we fit a vanilla Gaussian model to locate the pRF center (`mu_x`, `mu_y`) and size (`sigma`) using a grid search and least squares to determine the `amplitude`. 
