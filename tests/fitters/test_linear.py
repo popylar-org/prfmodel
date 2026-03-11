@@ -136,7 +136,7 @@ class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
                 "mu_x": [0.0, 1.0, 0.0],
                 "mu_y": [1.0, 0.0, 0.0],
                 "sigma_center": [0.5, 0.5, 0.5],
-                "sigma_sorround": [8.0, 8.0, 8.0],
+                "sigma_surround": [8.0, 8.0, 8.0],
                 "delay": [6.0, 6.0, 6.0],
                 "dispersion": [0.9, 0.9, 0.9],
                 "undershoot": [12.0, 12.0, 12.0],
@@ -144,7 +144,7 @@ class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
                 "ratio": [0.48, 0.48, 0.48],
                 "weight_deriv": [0.5, 0.5, 0.5],
                 "amplitude_center": [1.1, 1.0, 0.9],
-                "amplitude_sorround": [-0.5, -0.3, -0.1],
+                "amplitude_surround": [-0.5, -0.3, -0.1],
                 "baseline": [0.0, 0.1, 0.2],
             },
         )
@@ -170,7 +170,7 @@ class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
         history, ls_params = fitter.fit(
             observed,
             dog_params,
-            slope_name=["amplitude_center", "amplitude_sorround"],
+            slope_name=["amplitude_center", "amplitude_surround"],
             intercept_name=intercept_name,
         )
 
@@ -201,13 +201,13 @@ class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
         history_full, params_full = fitter.fit(
             observed,
             dog_params,
-            slope_name=["amplitude_center", "amplitude_sorround"],
+            slope_name=["amplitude_center", "amplitude_surround"],
             intercept_name=intercept_name,
         )
         history_batched, params_batched = fitter.fit(
             observed,
             dog_params,
-            slope_name=["amplitude_center", "amplitude_sorround"],
+            slope_name=["amplitude_center", "amplitude_surround"],
             intercept_name=intercept_name,
             batch_size=1,
         )

@@ -66,14 +66,14 @@ class TestDoGAmplitude:
         return pd.DataFrame(
             {
                 "amplitude_center": [2.0, -1.0, 1.0],
-                "amplitude_sorround": [0.5, 0.3, -0.5],
+                "amplitude_surround": [0.5, 0.3, -0.5],
                 "baseline": [5.0, 10.0, -3.0],
             },
         )
 
     def test_parameter_names(self, model: DoGAmplitude):
         """Test that correct parameter names are returned."""
-        assert model.parameter_names == ["amplitude_center", "amplitude_sorround", "baseline"]
+        assert model.parameter_names == ["amplitude_center", "amplitude_surround", "baseline"]
 
     @parametrize_dtype
     def test_call(self, model: DoGAmplitude, params: pd.DataFrame, dtype: str):
@@ -88,7 +88,7 @@ class TestDoGAmplitude:
         assert resp.shape == (num_voxels, self.num_frames)
         expected = (
             p1 * np.expand_dims(params["amplitude_center"], 1)
-            + p2 * np.expand_dims(params["amplitude_sorround"], 1)
+            + p2 * np.expand_dims(params["amplitude_surround"], 1)
             + np.expand_dims(params["baseline"], 1)
         )
         assert np.allclose(resp, expected)
