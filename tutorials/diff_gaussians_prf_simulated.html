@@ -199,7 +199,6 @@
 <li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">How to fit a Difference of Gaussians population receptive field model to simulated data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fitting-the-prf-model">Fitting the pRF model</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1818,16 +1817,15 @@ center and surround Gaussians (a hard requirement is that <code class="docutils 
 </div>
 <p>The predicted response contains increased activation followed by decreased activation compared to the baseline activity for each moving bar in our stimulus.</p>
 </section>
-</section>
-<section class="tex2jax_ignore mathjax_ignore" id="fitting-the-prf-model">
-<h1>Fitting the pRF model<a class="headerlink" href="#fitting-the-prf-model" title="Link to this heading">¶</a></h1>
+<section id="fitting-the-prf-model">
+<h2>Fitting the pRF model<a class="headerlink" href="#fitting-the-prf-model" title="Link to this heading">¶</a></h2>
 <p>We will fit the DoG pRF model using a two-step approach.</p>
 <ul class="simple">
 <li><p>In <strong>Step 1</strong>, we fit a vanilla Gaussian model to locate the pRF center (<code class="docutils literal notranslate"><span class="pre">mu_x</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>) and size (<code class="docutils literal notranslate"><span class="pre">sigma</span></code>) using a grid search and least squares to determine the <code class="docutils literal notranslate"><span class="pre">amplitude</span></code>.</p></li>
 <li><p>In <strong>Step 2</strong>, we initialize the DoG model parameters from the Gaussian fit in the following way: <code class="docutils literal notranslate"><span class="pre">mu_x</span></code> and <code class="docutils literal notranslate"><span class="pre">mu_y</span></code> stay the same; <code class="docutils literal notranslate"><span class="pre">sigma</span></code> becomes <code class="docutils literal notranslate"><span class="pre">sigma_center</span></code> and <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> becomes <code class="docutils literal notranslate"><span class="pre">amplitude_center</span></code>, we determine that <code class="docutils literal notranslate"><span class="pre">sigma_sorround</span></code> should be larger that <code class="docutils literal notranslate"><span class="pre">sigma_center</span></code>. We then fine-tune the whole model it with SGD, constraining <code class="docutils literal notranslate"><span class="pre">amplitude_sorround</span> <span class="pre">&lt;</span> <span class="pre">0</span></code>.</p></li>
 </ul>
 <section id="step-1-fit-the-center-gaussian-model">
-<h2>Step 1: Fit the center Gaussian model<a class="headerlink" href="#step-1-fit-the-center-gaussian-model" title="Link to this heading">¶</a></h2>
+<h3>Step 1: Fit the center Gaussian model<a class="headerlink" href="#step-1-fit-the-center-gaussian-model" title="Link to this heading">¶</a></h3>
 <p>Let’s start with a grid search over <code class="docutils literal notranslate"><span class="pre">mu_x</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>, and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> using a plain
 <code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code>. This is much faster than searching over both <code class="docutils literal notranslate"><span class="pre">sigma_center</span></code> and <code class="docutils literal notranslate"><span class="pre">sigma_sorround</span></code>
 simultaneously, and gives us a good initialisation point for the DoG model.</p>
@@ -2113,7 +2111,7 @@ Processing data batches: 100%|██████████| 1/1 [00:00&lt;00:0
 </div>
 </section>
 <section id="step-2-fit-the-dog-model-include-sorround-gaussian">
-<h2>Step 2: Fit the DoG model (include sorround gaussian)<a class="headerlink" href="#step-2-fit-the-dog-model-include-sorround-gaussian" title="Link to this heading">¶</a></h2>
+<h3>Step 2: Fit the DoG model (include sorround gaussian)<a class="headerlink" href="#step-2-fit-the-dog-model-include-sorround-gaussian" title="Link to this heading">¶</a></h3>
 <p>We now initialize a DoG model from the fitted Gaussian parameters.
 <code class="docutils literal notranslate"><span class="pre">init_dog_from_gaussian</span></code> sets:</p>
 <ul class="simple">
@@ -3811,6 +3809,7 @@ E0000 00:00:1773220330.183902    3946 util.cc:131] oneDNN supports DT_INT32 only
 </div>
 </div>
 </section>
+</section>
 <section id="conclusion">
 <h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading">¶</a></h2>
 <p>In this tutorial, we showed how to fit a Difference of Gaussians (DoG) pRF model to simulated data using a
@@ -3883,11 +3882,11 @@ two-step workflow.</p>
 <li><a class="reference internal" href="#">How to fit a Difference of Gaussians population receptive field model to simulated data</a><ul>
 <li><a class="reference internal" href="#defining-the-stimulus">Defining the stimulus</a></li>
 <li><a class="reference internal" href="#defining-the-dog-prf-model">Defining the DoG pRF model</a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#fitting-the-prf-model">Fitting the pRF model</a><ul>
 <li><a class="reference internal" href="#step-1-fit-the-center-gaussian-model">Step 1: Fit the center Gaussian model</a></li>
 <li><a class="reference internal" href="#step-2-fit-the-dog-model-include-sorround-gaussian">Step 2: Fit the DoG model (include sorround gaussian)</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#conclusion">Conclusion</a></li>
 <li><a class="reference internal" href="#references">References</a></li>
 </ul>
