@@ -1,5 +1,9 @@
 """Global test configurations."""
 
+import matplotlib as mpl
+
+mpl.use("Agg")
+
 import pandas as pd
 import pytest
 from prfmodel.examples import load_2d_prf_bar_stimulus
