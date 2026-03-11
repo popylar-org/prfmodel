@@ -145,7 +145,7 @@ The predicted response contains increased activation followed by decreased activ
 
 +++
 
-## Fitting the pRF model
+# Fitting the pRF model
 
 We will fit the DoG pRF model using a two-step approach. 
 - In **Step 1**, we fit a vanilla Gaussian model to locate the pRF center (`mu_x`, `mu_y`) and size (`sigma`) using a grid search and least squares to determine the `amplitude`. 
@@ -153,7 +153,7 @@ We will fit the DoG pRF model using a two-step approach.
 
 +++
 
-## Step 1: Fit a Gaussian model
+### Step 1: Fit the center Gaussian model
 
 Let's start with a grid search over `mu_x`, `mu_y`, and `sigma` using a plain
 `Gaussian2DPRFModel`. This is much faster than searching over both `sigma_center` and `sigma_sorround`
@@ -164,7 +164,7 @@ from prfmodel.models import Gaussian2DPRFModel
 import numpy as np
 
 # Step 1: fit a plain Gaussian model to locate the center and size of the pRF
-gaussian_model = Gaussian2DPRFModel()
+gaussian_center_model = Gaussian2DPRFModel()
 
 param_ranges_gaussian = {
     "mu_x": np.linspace(-3.0, 3.0, 10),
@@ -187,7 +187,7 @@ parameter combinations to evaluate. Let's construct the `GridFitter` and run the
 ```{code-cell} ipython3
 from prfmodel.fitters.grid import GridFitter
 
-grid_fitter = GridFitter(model=gaussian_model, stimulus=stimulus)
+grid_fitter = GridFitter(model=gaussian_center_model, stimulus=stimulus)
 
 grid_history, grid_params = grid_fitter.fit(
     data=simulated_response,
@@ -204,7 +204,7 @@ The grid search returns the best-matching combination. The estimates for `mu_x`,
 `sigma` are close to the true values but constrained to the grid.
 
 ```{code-cell} ipython3
-gaussian_pred_response = gaussian_model(stimulus, grid_params)
+gaussian_pred_response = gaussian_center_model(stimulus, grid_params)
 
 fig, ax = plt.subplots()
 
@@ -225,21 +225,21 @@ Gaussian model, which will seed the DoG initialisation.
 ```{code-cell} ipython3
 from prfmodel.fitters.linear import LeastSquaresFitter
 
-ls_fitter = LeastSquaresFitter(model=gaussian_model, stimulus=stimulus)
+ls_fitter = LeastSquaresFitter(model=gaussian_center_model, stimulus=stimulus)
 
-ls_history, gaussian_params = ls_fitter.fit(
+ls_history, gaussian_center_params = ls_fitter.fit(
     data=simulated_response,
     parameters=grid_params,
     slope_name="amplitude",
     intercept_name="baseline",
 )
-gaussian_params
+gaussian_center_params
 ```
 
 The Gaussian least-squares fit adjusts the scale and baseline to match the simulated response.
 
 ```{code-cell} ipython3
-gaussian_pred_response = gaussian_model(stimulus, gaussian_params)
+gaussian_pred_response = gaussian_center_model(stimulus, gaussian_center_params)
 
 fig, ax = plt.subplots()
 
@@ -249,7 +249,7 @@ ax.plot(gaussian_pred_response[0], label="Predicted (Gaussian, least-squares)")
 fig.legend();
 ```
 
-## Step 2: Fit the DoG model
+### Step 2: Fit the DoG model (include sorround gaussian)
 
 We now initialize a DoG model from the fitted Gaussian parameters.
 `init_dog_from_gaussian` sets: 
@@ -274,11 +274,7 @@ from prfmodel.models import init_dog_from_gaussian
 from prfmodel.fitters.sgd import SGDFitter
 
 # Convert Gaussian fit to DoG starting parameters
-# sigma_center = sigma, 
-# sigma_sorround = sigma * sigma_ratio, 
-# amplitude_center = amplitude, 
-# amplitude_sorround = 0
-dog_init_params = init_dog_from_gaussian(gaussian_params, sigma_ratio=5.0)
+dog_init_params = init_dog_from_gaussian(gaussian_center_params, sigma_ratio=5.0)
 dog_init_params
 ```
 
