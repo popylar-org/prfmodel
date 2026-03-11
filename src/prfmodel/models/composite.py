@@ -119,10 +119,10 @@ class CenterSurroundPRFModel(BaseComposite):
 
     This is a generic class that runs two PRF responses through stimulus encoding and impulse response convolution
     independently, then combines them via a temporal model:
-    y(t) = p1(t) * amplitude_center + p2(t) * amplitude_sorround + baseline
+    y(t) = p1(t) * amplitude_center + p2(t) * amplitude_surround + baseline
 
     The two responses differ in the values of ``change_params``. Each parameter
-    ``p`` in that list is split into ``{p}_center`` and ``{p}_sorround``.
+    ``p`` in that list is split into ``{p}_center`` and ``{p}_surround``.
 
     Parameters
     ----------
@@ -141,7 +141,7 @@ class CenterSurroundPRFModel(BaseComposite):
     The center-surround composite model follows these steps:
 
     1. Two PRF response predictions are computed, one using ``{p}_center`` and one
-       using ``{p}_sorround`` for each ``p`` in ``change_params``.
+       using ``{p}_surround`` for each ``p`` in ``change_params``.
     2. Each response is encoded with the stimulus design.
     3. Each encoded response is optionally convolved with an impulse response.
     4. The two responses are stacked and combined by the temporal model.
@@ -186,10 +186,10 @@ class CenterSurroundPRFModel(BaseComposite):
         prf_model = cast("BasePRFResponse", self.models["prf_model"])
         prf_params = prf_model.parameter_names.copy()
 
-        # Replace each change_param with its center/sorround variants in-place
+        # Replace each change_param with its center/surround variants in-place
         for param in self._change_params:
             idx = prf_params.index(param)
-            prf_params[idx : idx + 1] = [f"{param}_center", f"{param}_sorround"]
+            prf_params[idx : idx + 1] = [f"{param}_center", f"{param}_surround"]
 
         param_names = prf_params
 
@@ -240,7 +240,7 @@ class CenterSurroundPRFModel(BaseComposite):
         """
         dtype = get_dtype(dtype)
         p1 = self._predict_single_response(stimulus, parameters, "center", dtype)
-        p2 = self._predict_single_response(stimulus, parameters, "sorround", dtype)
+        p2 = self._predict_single_response(stimulus, parameters, "surround", dtype)
 
         return ops.stack([p1, p2], axis=1)
 
@@ -251,10 +251,10 @@ class CenterSurroundPRFModel(BaseComposite):
         dtype: str | None = None,
     ) -> Tensor:
         """
-        Predict the composite model response (considering Center and Sorround responses).
+        Predict the composite model response (considering Center and Surround responses).
 
         Applies the temporal model to the stacked responses from predict_responses.
-        When temporal_model=None, returns a simple subtraction (response_center - response_sorround)
+        When temporal_model=None, returns a simple subtraction (response_center - response_surround)
 
         Parameters
         ----------

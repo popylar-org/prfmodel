@@ -84,7 +84,7 @@ class DoGAmplitude(BaseTemporal):
     Linear amplitude model for difference of Gaussians.
 
     Combines two temporal responses with independent amplitudes and a baseline:
-    y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_sorround + baseline
+    y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_surround + baseline
 
     """
 
@@ -93,10 +93,10 @@ class DoGAmplitude(BaseTemporal):
         """
         Names of parameters used by the model.
 
-        Parameter names are: ``amplitude_center``, ``amplitude_sorround``, and ``baseline``.
+        Parameter names are: ``amplitude_center``, ``amplitude_surround``, and ``baseline``.
 
         """
-        return ["amplitude_center", "amplitude_sorround", "baseline"]
+        return ["amplitude_center", "amplitude_surround", "baseline"]
 
     def __call__(self, inputs: Tensor, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -108,7 +108,7 @@ class DoGAmplitude(BaseTemporal):
             Input tensor with two temporal responses stacked along axis 1,
             shape (num_batches, 2, num_frames).
         parameters : pandas.DataFrame
-            Dataframe with columns ``amplitude_center``, ``amplitude_sorround``, and ``baseline``.
+            Dataframe with columns ``amplitude_center``, ``amplitude_surround``, and ``baseline``.
         dtype : str, optional
             The dtype of the prediction result. If ``None`` (the default), uses the dtype from
             :func:`prfmodel.utils.get_dtype`.
@@ -129,7 +129,7 @@ class DoGAmplitude(BaseTemporal):
             )
 
         amplitude_center = convert_parameters_to_tensor(parameters[["amplitude_center"]], dtype=dtype)
-        amplitude_sorround = convert_parameters_to_tensor(parameters[["amplitude_sorround"]], dtype=dtype)
+        amplitude_surround = convert_parameters_to_tensor(parameters[["amplitude_surround"]], dtype=dtype)
         baseline = convert_parameters_to_tensor(parameters[["baseline"]], dtype=dtype)
 
-        return inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_sorround + baseline
+        return inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_surround + baseline
