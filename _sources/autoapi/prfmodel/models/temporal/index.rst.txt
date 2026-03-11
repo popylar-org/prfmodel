@@ -79,7 +79,7 @@ Module Contents
    Linear amplitude model for difference of Gaussians.
 
    Combines two temporal responses with independent amplitudes and a baseline:
-   y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_sorround + baseline
+   y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_surround + baseline
 
 
 
@@ -89,7 +89,7 @@ Module Contents
 
       Names of parameters used by the model.
 
-      Parameter names are: ``amplitude_center``, ``amplitude_sorround``, and ``baseline``.
+      Parameter names are: ``amplitude_center``, ``amplitude_surround``, and ``baseline``.
 
 
    .. py:method:: __call__(inputs: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
@@ -99,7 +99,7 @@ Module Contents
       :param inputs: Input tensor with two temporal responses stacked along axis 1,
                      shape (num_batches, 2, num_frames).
       :type inputs: Tensor
-      :param parameters: Dataframe with columns ``amplitude_center``, ``amplitude_sorround``, and ``baseline``.
+      :param parameters: Dataframe with columns ``amplitude_center``, ``amplitude_surround``, and ``baseline``.
       :type parameters: pandas.DataFrame
       :param dtype: The dtype of the prediction result. If ``None`` (the default), uses the dtype from
                     :func:`prfmodel.utils.get_dtype`.

@@ -367,7 +367,7 @@
 <span class="sd">    Linear amplitude model for difference of Gaussians.</span>
 
 <span class="sd">    Combines two temporal responses with independent amplitudes and a baseline:</span>
-<span class="sd">    y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_sorround + baseline</span>
+<span class="sd">    y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_surround + baseline</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -376,10 +376,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Names of parameters used by the model.</span>
 
-<span class="sd">        Parameter names are: ``amplitude_center``, ``amplitude_sorround``, and ``baseline``.</span>
+<span class="sd">        Parameter names are: ``amplitude_center``, ``amplitude_surround``, and ``baseline``.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;amplitude_center&quot;</span><span class="p">,</span> <span class="s2">&quot;amplitude_sorround&quot;</span><span class="p">,</span> <span class="s2">&quot;baseline&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;amplitude_center&quot;</span><span class="p">,</span> <span class="s2">&quot;amplitude_surround&quot;</span><span class="p">,</span> <span class="s2">&quot;baseline&quot;</span><span class="p">]</span>
 
 <div class="viewcode-block" id="DoGAmplitude.__call__">
 <a class="viewcode-back" href="../../../autoapi/prfmodel/models/temporal/index.html#prfmodel.models.temporal.DoGAmplitude.__call__">[docs]</a>
@@ -393,7 +393,7 @@
 <span class="sd">            Input tensor with two temporal responses stacked along axis 1,</span>
 <span class="sd">            shape (num_batches, 2, num_frames).</span>
 <span class="sd">        parameters : pandas.DataFrame</span>
-<span class="sd">            Dataframe with columns ``amplitude_center``, ``amplitude_sorround``, and ``baseline``.</span>
+<span class="sd">            Dataframe with columns ``amplitude_center``, ``amplitude_surround``, and ``baseline``.</span>
 <span class="sd">        dtype : str, optional</span>
 <span class="sd">            The dtype of the prediction result. If ``None`` (the default), uses the dtype from</span>
 <span class="sd">            :func:`prfmodel.utils.get_dtype`.</span>
@@ -414,10 +414,10 @@
             <span class="p">)</span>
 
         <span class="n">amplitude_center</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;amplitude_center&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">amplitude_sorround</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;amplitude_sorround&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">amplitude_surround</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;amplitude_surround&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">baseline</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;baseline&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">inputs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">amplitude_center</span> <span class="o">+</span> <span class="n">inputs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">amplitude_sorround</span> <span class="o">+</span> <span class="n">baseline</span></div>
+        <span class="k">return</span> <span class="n">inputs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">amplitude_center</span> <span class="o">+</span> <span class="n">inputs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">amplitude_surround</span> <span class="o">+</span> <span class="n">baseline</span></div>
 </div>
 
 </pre></div>

@@ -402,10 +402,10 @@
 
 <span class="sd">    This is a generic class that runs two PRF responses through stimulus encoding and impulse response convolution</span>
 <span class="sd">    independently, then combines them via a temporal model:</span>
-<span class="sd">    y(t) = p1(t) * amplitude_center + p2(t) * amplitude_sorround + baseline</span>
+<span class="sd">    y(t) = p1(t) * amplitude_center + p2(t) * amplitude_surround + baseline</span>
 
 <span class="sd">    The two responses differ in the values of ``change_params``. Each parameter</span>
-<span class="sd">    ``p`` in that list is split into ``{p}_center`` and ``{p}_sorround``.</span>
+<span class="sd">    ``p`` in that list is split into ``{p}_center`` and ``{p}_surround``.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -424,7 +424,7 @@
 <span class="sd">    The center-surround composite model follows these steps:</span>
 
 <span class="sd">    1. Two PRF response predictions are computed, one using ``{p}_center`` and one</span>
-<span class="sd">       using ``{p}_sorround`` for each ``p`` in ``change_params``.</span>
+<span class="sd">       using ``{p}_surround`` for each ``p`` in ``change_params``.</span>
 <span class="sd">    2. Each response is encoded with the stimulus design.</span>
 <span class="sd">    3. Each encoded response is optionally convolved with an impulse response.</span>
 <span class="sd">    4. The two responses are stacked and combined by the temporal model.</span>
@@ -469,10 +469,10 @@
         <span class="n">prf_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BasePRFResponse&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;prf_model&quot;</span><span class="p">])</span>
         <span class="n">prf_params</span> <span class="o">=</span> <span class="n">prf_model</span><span class="o">.</span><span class="n">parameter_names</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
-        <span class="c1"># Replace each change_param with its center/sorround variants in-place</span>
+        <span class="c1"># Replace each change_param with its center/surround variants in-place</span>
         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_change_params</span><span class="p">:</span>
             <span class="n">idx</span> <span class="o">=</span> <span class="n">prf_params</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
-            <span class="n">prf_params</span><span class="p">[</span><span class="n">idx</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">_center&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">_sorround&quot;</span><span class="p">]</span>
+            <span class="n">prf_params</span><span class="p">[</span><span class="n">idx</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">_center&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">_surround&quot;</span><span class="p">]</span>
 
         <span class="n">param_names</span> <span class="o">=</span> <span class="n">prf_params</span>
 
@@ -525,7 +525,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dtype</span> <span class="o">=</span> <span class="n">get_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
         <span class="n">p1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_single_response</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="s2">&quot;center&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
-        <span class="n">p2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_single_response</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="s2">&quot;sorround&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_single_response</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="s2">&quot;surround&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ops</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
 
@@ -539,10 +539,10 @@
         <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Predict the composite model response (considering Center and Sorround responses).</span>
+<span class="sd">        Predict the composite model response (considering Center and Surround responses).</span>
 
 <span class="sd">        Applies the temporal model to the stacked responses from predict_responses.</span>
-<span class="sd">        When temporal_model=None, returns a simple subtraction (response_center - response_sorround)</span>
+<span class="sd">        When temporal_model=None, returns a simple subtraction (response_center - response_surround)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>

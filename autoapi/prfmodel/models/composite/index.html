@@ -366,9 +366,9 @@ number of rows in <cite>parameters</cite>. The number of frames is the number of
 <dd><p>Center-surround composite population receptive field model.</p>
 <p>This is a generic class that runs two PRF responses through stimulus encoding and impulse response convolution
 independently, then combines them via a temporal model:
-y(t) = p1(t) * amplitude_center + p2(t) * amplitude_sorround + baseline</p>
+y(t) = p1(t) * amplitude_center + p2(t) * amplitude_surround + baseline</p>
 <p>The two responses differ in the values of <code class="docutils literal notranslate"><span class="pre">change_params</span></code>. Each parameter
-<code class="docutils literal notranslate"><span class="pre">p</span></code> in that list is split into <code class="docutils literal notranslate"><span class="pre">{p}_center</span></code> and <code class="docutils literal notranslate"><span class="pre">{p}_sorround</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">p</span></code> in that list is split into <code class="docutils literal notranslate"><span class="pre">{p}_center</span></code> and <code class="docutils literal notranslate"><span class="pre">{p}_surround</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -384,7 +384,7 @@ All entries must be present in <code class="docutils literal notranslate"><span 
 <p>The center-surround composite model follows these steps:</p>
 <ol class="arabic simple">
 <li><p>Two PRF response predictions are computed, one using <code class="docutils literal notranslate"><span class="pre">{p}_center</span></code> and one
-using <code class="docutils literal notranslate"><span class="pre">{p}_sorround</span></code> for each <code class="docutils literal notranslate"><span class="pre">p</span></code> in <code class="docutils literal notranslate"><span class="pre">change_params</span></code>.</p></li>
+using <code class="docutils literal notranslate"><span class="pre">{p}_surround</span></code> for each <code class="docutils literal notranslate"><span class="pre">p</span></code> in <code class="docutils literal notranslate"><span class="pre">change_params</span></code>.</p></li>
 <li><p>Each response is encoded with the stimulus design.</p></li>
 <li><p>Each encoded response is optionally convolved with an impulse response.</p></li>
 <li><p>The two responses are stacked and combined by the temporal model.</p></li>
@@ -412,9 +412,9 @@ using <code class="docutils literal notranslate"><span class="pre">{p}_sorround<
 <dl class="py method">
 <dt class="sig sig-object py" id="prfmodel.models.composite.CenterSurroundPRFModel.__call__">
 <span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../stimuli/prf/index.html#prfmodel.stimuli.prf.PRFStimulus" title="prfmodel.stimuli.prf.PRFStimulus"><span class="pre">prfmodel.stimuli.prf.PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/composite.html#CenterSurroundPRFModel.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.composite.CenterSurroundPRFModel.__call__" title="Link to this definition">¶</a></dt>
-<dd><p>Predict the composite model response (considering Center and Sorround responses).</p>
+<dd><p>Predict the composite model response (considering Center and Surround responses).</p>
 <p>Applies the temporal model to the stacked responses from predict_responses.
-When temporal_model=None, returns a simple subtraction (response_center - response_sorround)</p>
+When temporal_model=None, returns a simple subtraction (response_center - response_surround)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

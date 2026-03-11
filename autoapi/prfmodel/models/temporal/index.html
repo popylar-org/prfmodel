@@ -356,12 +356,12 @@ for different voxels. Must contain the columns <cite>baseline</cite> and <cite>a
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.temporal.</span></span><span class="sig-name descname"><span class="pre">DoGAmplitude</span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/temporal.html#DoGAmplitude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.temporal.DoGAmplitude" title="Link to this definition">¶</a></dt>
 <dd><p>Linear amplitude model for difference of Gaussians.</p>
 <p>Combines two temporal responses with independent amplitudes and a baseline:
-y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_sorround + baseline</p>
+y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_surround + baseline</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="prfmodel.models.temporal.DoGAmplitude.parameter_names">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#prfmodel.models.temporal.DoGAmplitude.parameter_names" title="Link to this definition">¶</a></dt>
 <dd><p>Names of parameters used by the model.</p>
-<p>Parameter names are: <code class="docutils literal notranslate"><span class="pre">amplitude_center</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude_sorround</span></code>, and <code class="docutils literal notranslate"><span class="pre">baseline</span></code>.</p>
+<p>Parameter names are: <code class="docutils literal notranslate"><span class="pre">amplitude_center</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude_surround</span></code>, and <code class="docutils literal notranslate"><span class="pre">baseline</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -373,7 +373,7 @@ y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_sorround + bas
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>inputs</strong> (<a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor"><em>Tensor</em></a>) – Input tensor with two temporal responses stacked along axis 1,
 shape (num_batches, 2, num_frames).</p></li>
-<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns <code class="docutils literal notranslate"><span class="pre">amplitude_center</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude_sorround</span></code>, and <code class="docutils literal notranslate"><span class="pre">baseline</span></code>.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns <code class="docutils literal notranslate"><span class="pre">amplitude_center</span></code>, <code class="docutils literal notranslate"><span class="pre">amplitude_surround</span></code>, and <code class="docutils literal notranslate"><span class="pre">baseline</span></code>.</p></li>
 <li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), uses the dtype from
 <a class="reference internal" href="../../utils/index.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
 </ul>

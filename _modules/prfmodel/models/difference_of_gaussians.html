@@ -293,7 +293,7 @@
 <span class="sd">    Runs two Gaussian 2D PRF responses (center and surround) through stimulus encoding and impulse response convolution</span>
 <span class="sd">    independently, then combines them as a linear model:</span>
 
-<span class="sd">    y(t) = p1(t) * amplitude_center + p2(t) * amplitude_sorround + baseline</span>
+<span class="sd">    y(t) = p1(t) * amplitude_center + p2(t) * amplitude_surround + baseline</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -323,7 +323,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">init_dog_from_gaussian</span><span class="p">(</span>
     <span class="n">gaussian_params</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">sigma_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">5.0</span><span class="p">,</span>
-    <span class="n">sigma_sorround</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sigma_surround</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize DoG model parameters from fitted Gaussian model parameters.</span>
@@ -337,9 +337,9 @@
 <span class="sd">        DataFrame of fitted parameters from a ``Gaussian2DPRFModel``.</span>
 <span class="sd">        Must contain columns: ``sigma`` and ``amplitude`` (plus all shared columns).</span>
 <span class="sd">    sigma_ratio : float, default=5.0</span>
-<span class="sd">        Ratio used to set the surround size: ``sigma_sorround = sigma_center * sigma_ratio``.</span>
-<span class="sd">        Ignored when ``sigma_sorround`` is provided.</span>
-<span class="sd">    sigma_sorround : float, optional</span>
+<span class="sd">        Ratio used to set the surround size: ``sigma_surround = sigma_center * sigma_ratio``.</span>
+<span class="sd">        Ignored when ``sigma_surround`` is provided.</span>
+<span class="sd">    sigma_surround : float, optional</span>
 <span class="sd">        Fixed surround size applied to all rows. Must be &gt;= ``sigma`` for every row in</span>
 <span class="sd">        ``gaussian_params``. When provided, overrides ``sigma_ratio``.</span>
 
@@ -347,40 +347,40 @@
 <span class="sd">    -------</span>
 <span class="sd">    pandas.DataFrame</span>
 <span class="sd">        DataFrame of DoG initial parameters with columns:</span>
-<span class="sd">        ``sigma_center`` (= ``sigma``), ``sigma_sorround``,</span>
-<span class="sd">        ``amplitude_center`` (= ``amplitude``), ``amplitude_sorround`` (= 0.0),</span>
+<span class="sd">        ``sigma_center`` (= ``sigma``), ``sigma_surround``,</span>
+<span class="sd">        ``amplitude_center`` (= ``amplitude``), ``amplitude_surround`` (= 0.0),</span>
 <span class="sd">        plus all shared columns unchanged.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
 <span class="sd">    ValueError</span>
-<span class="sd">        If ``sigma_sorround`` is smaller than ``sigma`` for any row in ``gaussian_params``.</span>
+<span class="sd">        If ``sigma_surround`` is smaller than ``sigma`` for any row in ``gaussian_params``.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    ``amplitude_sorround`` is initialized to ``0.0``, which is the boundary of the constraint</span>
-<span class="sd">    ``amplitude_sorround &lt; 0`` enforced by a :class:`~prfmodel.adapter.ParameterConstraint`</span>
-<span class="sd">    with ``upper=0.0``. The constraint transform maps ``amplitude_sorround=0`` to optimizer</span>
+<span class="sd">    ``amplitude_surround`` is initialized to ``0.0``, which is the boundary of the constraint</span>
+<span class="sd">    ``amplitude_surround &lt; 0`` enforced by a :class:`~prfmodel.adapter.ParameterConstraint`</span>
+<span class="sd">    with ``upper=0.0``. The constraint transform maps ``amplitude_surround=0`` to optimizer</span>
 <span class="sd">    variable ``raw=-1.0`` (no NaN), so SGD starts cleanly near zero and moves negative.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">dog_params</span> <span class="o">=</span> <span class="n">gaussian_params</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;sigma_center&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">sigma_sorround</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">gaussian_params</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">sigma_sorround</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">sigma_surround</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">gaussian_params</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">sigma_surround</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="n">min_sigma_center</span> <span class="o">=</span> <span class="n">gaussian_params</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;sigma_sorround (</span><span class="si">{</span><span class="n">sigma_sorround</span><span class="si">}</span><span class="s2">) must be &gt;= sigma_center for all rows, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;sigma_surround (</span><span class="si">{</span><span class="n">sigma_surround</span><span class="si">}</span><span class="s2">) must be &gt;= sigma_center for all rows, &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;but max sigma_center is </span><span class="si">{</span><span class="n">min_sigma_center</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-        <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;sigma_sorround&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma_sorround</span>
+        <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;sigma_surround&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma_surround</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;sigma_sorround&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">sigma_ratio</span>
+        <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;sigma_surround&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">sigma_ratio</span>
 
     <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;amplitude_center&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;amplitude&quot;</span><span class="p">]</span>
-    <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;amplitude_sorround&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">dog_params</span><span class="p">[</span><span class="s2">&quot;amplitude_surround&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="k">return</span> <span class="n">dog_params</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">,</span> <span class="s2">&quot;amplitude&quot;</span><span class="p">])</span></div>
 
 </pre></div>

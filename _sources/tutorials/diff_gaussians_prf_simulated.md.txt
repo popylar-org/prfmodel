@@ -80,13 +80,13 @@ HTML(ani.to_html5_video())
 
 Now that we defined our stimulus, we can create a DoG pRF model to predict a neural response to this stimulus.
 The `DoG2DPRFModel` runs two independent Gaussian pipelines sharing the same center (`mu_x`, `mu_y`) but with
-different widths (`sigma_center` for the center, `sigma_sorround` for the surround). Each pipeline is encoded with the stimulus,
+different widths (`sigma_center` for the center, `sigma_surround` for the surround). Each pipeline is encoded with the stimulus,
 convolved with a haemodynamic impulse response, and then combined linearly:
 
-$$y(t) = p_1(t) \cdot \text{amplitude\_center} + p_2(t) \cdot \text{amplitude\_sorround} + \text{baseline}$$
+$$y(t) = p_1(t) \cdot \text{amplitude\_center} + p_2(t) \cdot \text{amplitude\_surround} + \text{baseline}$$
 
-For a surround-suppression model, `amplitude_center > 0` (excitatory center) and `amplitude_sorround < 0` (inhibitory surround),
-with `|amplitude_sorround| < amplitude_center` so the center response dominates.
+For a surround-suppression model, `amplitude_center > 0` (excitatory center) and `amplitude_surround < 0` (inhibitory surround),
+with `|amplitude_surround| < amplitude_center` so the center response dominates.
 
 ```{code-cell} ipython3
 from prfmodel.models.difference_of_gaussians import DoG2DPRFModel
@@ -102,11 +102,11 @@ The list of parameters that need to be set to make model predictions can be obta
 prf_model.parameter_names
 ```
 
-The parameters `mu_x` and `mu_y` define the center of the pRF. `sigma_center` and `sigma_sorround` set the widths of the
-center and surround Gaussians (a hard requirement is that `sigma_sorround` must be larger than `sigma_center`). The parameters `delay`, `dispersion`,
+The parameters `mu_x` and `mu_y` define the center of the pRF. `sigma_center` and `sigma_surround` set the widths of the
+center and surround Gaussians (a hard requirement is that `sigma_surround` must be larger than `sigma_center`). The parameters `delay`, `dispersion`,
 `undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the haemodynamic impulse response.
-`amplitude_center` scales the center response (positive), `amplitude_sorround` scales the surround (negative, with
-`|amplitude_sorround| < amplitude_center`), and `baseline` shifts the whole response. We store the parameter values in a
+`amplitude_center` scales the center response (positive), `amplitude_surround` scales the surround (negative, with
+`|amplitude_surround| < amplitude_center`), and `baseline` shifts the whole response. We store the parameter values in a
 `pandas.DataFrame`.
 
 ```{code-cell} ipython3
@@ -117,7 +117,7 @@ true_params = pd.DataFrame(
         "mu_x": [-2.1],
         "mu_y": [1.45],
         "sigma_center": [1.35],
-        "sigma_sorround": [5.1], # sigma_sorround should be larger than or equal to sigma_center
+        "sigma_surround": [5.1], # sigma_surround should be larger than or equal to sigma_center
         "delay": [6.0],
         "dispersion": [0.9],
         "undershoot": [12.0],
@@ -126,7 +126,7 @@ true_params = pd.DataFrame(
         "weight_deriv": [-0.5],
         "baseline": [10.0],
         "amplitude_center": [1.2],
-        "amplitude_sorround": [-0.5], # amplitude_sorround should be negative with absolute value less than amplitude_center
+        "amplitude_surround": [-0.5], # amplitude_surround should be negative with absolute value less than amplitude_center
     },
 )
 ```
@@ -149,14 +149,14 @@ The predicted response contains increased activation followed by decreased activ
 
 We will fit the DoG pRF model using a two-step approach. 
 - In **Step 1**, we fit a vanilla Gaussian model to locate the pRF center (`mu_x`, `mu_y`) and size (`sigma`) using a grid search and least squares to determine the `amplitude`. 
-- In **Step 2**, we initialize the DoG model parameters from the Gaussian fit in the following way: `mu_x` and `mu_y` stay the same; `sigma` becomes `sigma_center` and `amplitude` becomes `amplitude_center`, we determine that `sigma_sorround` should be larger that `sigma_center`. We then fine-tune the whole model it with SGD, constraining `amplitude_sorround < 0`.
+- In **Step 2**, we initialize the DoG model parameters from the Gaussian fit in the following way: `mu_x` and `mu_y` stay the same; `sigma` becomes `sigma_center` and `amplitude` becomes `amplitude_center`, we determine that `sigma_surround` should be larger that `sigma_center`. We then fine-tune the whole model it with SGD, constraining `amplitude_surround < 0`.
 
 +++
 
 ### Step 1: Fit the center Gaussian model
 
 Let's start with a grid search over `mu_x`, `mu_y`, and `sigma` using a plain
-`Gaussian2DPRFModel`. This is much faster than searching over both `sigma_center` and `sigma_sorround`
+`Gaussian2DPRFModel`. This is much faster than searching over both `sigma_center` and `sigma_surround`
 simultaneously, and gives us a good initialisation point for the DoG model.
 
 ```{code-cell} ipython3
@@ -249,24 +249,24 @@ ax.plot(gaussian_pred_response[0], label="Predicted (Gaussian, least-squares)")
 fig.legend();
 ```
 
-### Step 2: Fit the DoG model (include sorround gaussian)
+### Step 2: Fit the DoG model (include surround gaussian)
 
 We now initialize a DoG model from the fitted Gaussian parameters.
 `init_dog_from_gaussian` sets: 
 - `sigma_center = sigma`
-- `sigma_sorround = 5 × sigma_center`
+- `sigma_surround = 5 × sigma_center`
 - `amplitude_center = amplitude`
-- `amplitude_sorround = 0`
+- `amplitude_surround = 0`
 
 We then run SGD directly on the DoG model. To enforce the constraint that
-`amplitude_sorround` must be negative we pass a `ParameterConstraint(upper=0.0)` adapter. 
-Starting `amplitude_sorround` near zero and with a large positive `amplitude_center` from the Gaussian fit
-also ensures `|amplitude_sorround| < amplitude_center` at initialization.
+`amplitude_surround` must be negative we pass a `ParameterConstraint(upper=0.0)` adapter. 
+Starting `amplitude_surround` near zero and with a large positive `amplitude_center` from the Gaussian fit
+also ensures `|amplitude_surround| < amplitude_center` at initialization.
 
 > **Note — one-shot alternative:** It would be possible to skip the Gaussian
-> pre-fit and run a joint grid search over `sigma_center` and `sigma_sorround` followed
+> pre-fit and run a joint grid search over `sigma_center` and `sigma_surround` followed
 > by LeastSquares for both amplitudes, and then SGD. This one-shot approach
-> works but is slower, the `amplitude_sorround < 0` constraint is not
+> works but is slower, the `amplitude_surround < 0` constraint is not
 > automatically enforced, and could lead to non-interpretable amplitudes.
 
 ```{code-cell} ipython3
@@ -281,10 +281,10 @@ dog_init_params
 ```{code-cell} ipython3
 from prfmodel.adapter import Adapter, ParameterConstraint
 
-# Constrain amplitude_sorround < 0 during SGD
-# (|amplitude_sorround| < amplitude_center is satisfied by initializing amplitude_sorround near 0)
+# Constrain amplitude_surround < 0 during SGD
+# (|amplitude_surround| < amplitude_center is satisfied by initializing amplitude_surround near 0)
 dog_adapter = Adapter(transforms=[
-    ParameterConstraint(["amplitude_sorround"], upper=0.0),
+    ParameterConstraint(["amplitude_surround"], upper=0.0),
 ])
 
 sgd_fitter = SGDFitter(
@@ -324,9 +324,9 @@ two-step workflow.
 
 In **Step 1**, we fitted a plain Gaussian model with a grid search and least squares to efficiently locate the pRF center and size. 
 
-In **Step 2**, we used `init_dog_from_gaussian` to seed the DoG model from the Gaussian fit. We set the surround size to five times the center size and initialized `amplitude_sorround = 0`. 
+In **Step 2**, we used `init_dog_from_gaussian` to seed the DoG model from the Gaussian fit. We set the surround size to five times the center size and initialized `amplitude_surround = 0`. 
 
-We then ran SGD with a `ParameterConstraint` that enforced `amplitude_sorround < 0` throughout optimisation. At each stage, we compared the predicted model response against the original simulated response to check the quality of the fit.
+We then ran SGD with a `ParameterConstraint` that enforced `amplitude_surround < 0` throughout optimisation. At each stage, we compared the predicted model response against the original simulated response to check the quality of the fit.
 
 +++
 
