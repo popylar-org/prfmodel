@@ -79,6 +79,89 @@ class BaselineAmplitude(BaseTemporal):
         return inputs * amplitude + baseline
 
 
+class DivNormAmplitude(BaseTemporal):
+    """
+    Divisive normalization amplitude model.
+
+    Combines two temporal responses using the divisive normalization formula:
+
+    p_DN(t) = (a * inputs[:, 0] + b) / (c * inputs[:, 1] + d) - b/d
+
+    where ``a`` and ``b`` are the activation amplitude and constant (b = ``activation_constant``),
+    and ``c`` and ``d`` are the normalization amplitude and constant (d = ``normalization_constant``).
+    ``activation_constant`` and ``normalization_constant`` together modulate suppression and
+    compression in the model.
+
+    The ``- b/d`` term ensures a zero predicted response in the absence of a stimulus, which is
+    appropriate for fMRI. For non-fMRI data you can set ``subtract_baseline=False`` to remove this correction.
+
+    Parameters
+    ----------
+    subtract_baseline : bool, default=True
+        If ``True`` (default), subtracts ``b/d`` from the output.
+    """
+
+    def __init__(self, subtract_baseline: bool = True):
+        self._subtract_baseline = subtract_baseline
+
+    @property
+    def parameter_names(self) -> list[str]:
+        """
+        Names of parameters used by the model.
+
+        Parameter names are: ``amplitude_activation``, ``activation_constant`` (b in the DN formula),
+            ``amplitude_normalization``, and ``normalization_constant`` (d in the DN formula).
+
+        """
+        return ["amplitude_activation", "activation_constant", "amplitude_normalization", "normalization_constant"]
+
+    def __call__(self, inputs: Tensor, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+        """
+        Predict the model response.
+
+        Parameters
+        ----------
+        inputs : Tensor
+            Input tensor with two temporal responses stacked along axis 1,
+            shape (num_batches, 2, num_frames). Axis 1 index 0 is the activation response
+            (G1·S) and index 1 is the normalization response (G2·S).
+        parameters : pandas.DataFrame
+            Dataframe with columns ``amplitude_activation``, ``activation_constant`` (b),
+            ``amplitude_normalization``, and ``normalization_constant`` (d).
+        dtype : str, optional
+            The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        Tensor
+            Model predictions with shape (num_batches, num_frames) and dtype ``dtype``.
+
+        """
+        dtype = get_dtype(dtype)
+        inputs = ops.convert_to_tensor(inputs, dtype=dtype)
+
+        if len(inputs.shape) < _EXPECTED_NDIM:
+            raise ShapeError(
+                arg_name="inputs",
+                arg_shape=inputs.shape,
+            )
+
+        amplitude_activation = convert_parameters_to_tensor(parameters[["amplitude_activation"]], dtype=dtype)
+        b = convert_parameters_to_tensor(parameters[["activation_constant"]], dtype=dtype)
+        amplitude_normalization = convert_parameters_to_tensor(parameters[["amplitude_normalization"]], dtype=dtype)
+        d = convert_parameters_to_tensor(parameters[["normalization_constant"]], dtype=dtype)
+
+        numerator = amplitude_activation * inputs[:, 0] + b
+        denominator = amplitude_normalization * inputs[:, 1] + d
+        result = numerator / denominator
+
+        if self._subtract_baseline:
+            result = result - b / d
+
+        return result
+
+
 class DoGAmplitude(BaseTemporal):
     """
     Linear amplitude model for difference of Gaussians.
