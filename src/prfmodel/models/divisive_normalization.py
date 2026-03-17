@@ -98,7 +98,7 @@ class DivNormPRFModel(CenterSurroundPRFModel):
         return ops.stack([p1, p2], axis=1)
 
 
-def init_dn_from_gaussian(
+def init_dn_from_gaussian(  # noqa: PLR0913
     gaussian_params: pd.DataFrame,
     sigma_ratio: float = 2.0,
     sigma_normalization: float | None = None,
