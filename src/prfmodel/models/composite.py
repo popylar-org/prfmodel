@@ -4,6 +4,7 @@ from typing import cast
 import pandas as pd
 from keras import ops
 from prfmodel.stimuli.cf import CFStimulus
+from prfmodel.stimuli.csf import CSFStimulus
 from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
@@ -375,6 +376,110 @@ class SimpleCFModel(BaseComposite[CFStimulus]):
         response = cf_model(stimulus, parameters, dtype=dtype)
         encoding_model = cast("BaseEncoder", self.models["encoding_model"])
         response = encoding_model(stimulus, response, parameters, dtype=dtype)
+
+        if self.models["temporal_model"] is not None:
+            temporal_model = cast("BaseTemporal", self.models["temporal_model"])
+            response = temporal_model(response, parameters, dtype=dtype)
+
+        return response
+
+
+class SimpleCSFModel(BaseComposite[CSFStimulus]):
+    """
+    Simple composite contrast sensitivity function model.
+
+    This is a generic class that combines a contrast sensitivity function response, impulse, and
+    temporal model response.
+
+    Parameters
+    ----------
+    csf_model : BaseResponse
+        A contrast sensitivity function response model instance.
+    encoding_model : BaseEncoder or type or None, default=None, optional
+        An encoding model class or instance. The default is ``None`` (no encoding).
+    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
+        An impulse response model class or instance. Model classes will be instantiated during
+        initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
+        instance with default values.
+    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
+        A temporal model class or instance. Model classes will be instantiated during initialization.
+        The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
+
+    Notes
+    -----
+    The simple composite CSF model follows five steps:
+
+    1. The CSF response model predicts the temporal response from per-frame spatial frequency and contrast.
+    2. The encoding model enocdes the CSF response.
+    3. The impulse response model generates an impulse response.
+    4. The encoded response is convolved with the impulse response.
+    5. The temporal model modifies the convolved response.
+
+    """
+
+    def __init__(
+        self,
+        csf_model: BaseResponse,
+        encoding_model: BaseEncoder | type[BaseEncoder] | None = None,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
+        temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
+    ):
+        if encoding_model is not None and isinstance(encoding_model, type):
+            encoding_model = encoding_model()
+
+        if impulse_model is not None and isinstance(impulse_model, type):
+            impulse_model = impulse_model()
+
+        if temporal_model is not None and isinstance(temporal_model, type):
+            temporal_model = temporal_model()
+
+        super().__init__(
+            csf_model=csf_model,
+            encoding_model=encoding_model,
+            impulse_model=impulse_model,
+            temporal_model=temporal_model,
+        )
+
+    def __call__(
+        self,
+        stimulus: CSFStimulus,
+        parameters: pd.DataFrame,
+        dtype: str | None = None,
+    ) -> Tensor:
+        """
+        Predict a simple contrast sensitivity function model response to a stimulus.
+
+        Parameters
+        ----------
+        stimulus : CSFStimulus
+            Contrast sensitivity function stimulus object.
+        parameters : pandas.DataFrame
+            Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+            for different voxels.
+        dtype : str, optional
+            The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        Tensor
+            Model predictions of shape ``(num_voxels, num_frames)`` and dtype ``dtype``. The number of voxels is the
+            number of rows in ``parameters``. The number of frames is the length of the stimulus sf and contrast
+            arrays.
+
+        """
+        dtype = get_dtype(dtype)
+        csf_model = cast("BaseResponse", self.models["csf_model"])
+        response = csf_model(stimulus, parameters, dtype=dtype)
+
+        if self.models["encoding_model"] is not None:
+            encoding_model = cast("BaseEncoder", self.models["encoding_model"])
+            response = encoding_model(stimulus, response, parameters, dtype=dtype)
+
+        if self.models["impulse_model"] is not None:
+            impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+            impulse_response = impulse_model(parameters, dtype=dtype)
+            response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
 
         if self.models["temporal_model"] is not None:
             temporal_model = cast("BaseTemporal", self.models["temporal_model"])

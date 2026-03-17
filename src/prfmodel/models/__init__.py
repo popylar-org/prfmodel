@@ -5,6 +5,8 @@ from .base import BaseEncoder
 from .base import BaseModel
 from .base import BaseResponse
 from .base import BaseTemporal
+from .csf import CSFModel
+from .csf import CSFResponse
 from .difference_of_gaussians import DoG2DPRFModel
 from .difference_of_gaussians import init_dog_from_gaussian
 from .encoding import CFStimulusEncoder
@@ -19,9 +21,10 @@ __all__ = [
     "BaseEncoder",
     "BaseModel",
     "BaseResponse",
-    "BaseResponse",
     "BaseTemporal",
     "CFStimulusEncoder",
+    "CSFModel",
+    "CSFResponse",
     "CompressiveEncoder",
     "DoG2DPRFModel",
     "Gaussian2DPRFModel",
