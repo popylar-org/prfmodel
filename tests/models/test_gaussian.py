@@ -5,10 +5,14 @@ import pandas as pd
 import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
 from scipy import stats
+from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseTemporal
 from prfmodel.models.base import BatchDimensionError
 from prfmodel.models.base import ShapeError
+from prfmodel.models.encoding import CFStimulusEncoder
+from prfmodel.models.encoding import CompressiveEncoder
+from prfmodel.models.encoding import PRFStimulusEncoder
 from prfmodel.models.gaussian import Gaussian2DPRFModel
 from prfmodel.models.gaussian import Gaussian2DPRFResponse
 from prfmodel.models.gaussian import GaussianCFModel
@@ -23,6 +27,7 @@ from prfmodel.stimuli.cf import CFStimulus
 from prfmodel.stimuli.prf import GridDimensionsError
 from prfmodel.stimuli.prf import PRFStimulus
 from tests.conftest import PRFStimulusSetup
+from .conftest import PRFStimulusGridSetup
 from .conftest import parametrize_dtype
 
 
@@ -68,61 +73,17 @@ class TestCheckGaussianArgs:
             _check_gaussian_args(grid, mu, sigma)
 
 
-class TestSetup:
+class TestSetup(PRFStimulusGridSetup):
     """Setup parameters and objects for testing."""
 
-    width: int = 5
-    height: int = 4
-    depth: int = 3
-
     @pytest.fixture
-    def grid_1d(self):
-        """1D stimulus grid."""
-        return np.expand_dims(np.linspace(-2, 2, num=self.height), axis=1)  # (height, 1)
-
-    @pytest.fixture
-    def grid_2d(self):
-        """2D stimulus grid."""
-        y = np.linspace(-2, 2, num=self.height)
-        x = np.linspace(-2, 2, num=self.width)
-        xv, yv = np.meshgrid(x, y)
-        return np.stack((xv, yv), axis=-1)  # (height, width, 2)
-
-    @pytest.fixture
-    def grid_3d(self):
-        """3D stimulus grid."""
-        y = np.linspace(-2, 2, num=self.height)
-        x = np.linspace(-2, 2, num=self.width)
-        z = np.linspace(-2, 2, num=self.depth)
-        xv, yv, zv = np.meshgrid(x, y, z)
-        return np.stack((xv, yv, zv), axis=-1)  # (height, width, depth, 3)
-
-    @pytest.fixture
-    def mu_1d(self):
-        """1D Gaussian mu parameters."""
-        return np.expand_dims(np.array([0.0, 1.0, 2.0]), axis=1)  # (num_voxels, 1)
-
-    @pytest.fixture
-    def mu_2d(self):
-        """2D Gaussian mu parameters."""
-        return np.array(
-            [  # (num_voxels, 2)
-                [0.0, 1.0],
-                [1.0, 0.0],
-                [0.0, 0.0],
-            ],
-        )
-
-    @pytest.fixture
-    def mu_3d(self):
-        """3D Gaussian mu parameters."""
-        return np.array(
-            [  # (num_voxels, 3)
-                [0.0, 1.0, 0.0],
-                [1.0, 0.0, 1.0],
-                [0.0, 0.0, 0.0],
-            ],
-        )
+    def mu(self, dim: str):
+        """Gaussian mu parameters for 1D, 2D, and 3D cases."""
+        if dim == "1d":
+            return np.expand_dims(np.array([0.0, 1.0, 2.0]), axis=1)
+        if dim == "2d":
+            return np.array([[0.0, 1.0], [1.0, 0.0], [0.0, 0.0]])
+        return np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 1.0], [0.0, 0.0, 0.0]])
 
     @pytest.fixture
     def sigma(self):
@@ -132,7 +93,7 @@ class TestSetup:
     @pytest.fixture
     def distance_matrix(self):
         """Distance matrix."""
-        return np.ones((self.width, self.width))
+        return np.ones((self.num_width, self.num_width))
 
     @pytest.fixture
     def source_response(self):
@@ -149,21 +110,9 @@ class TestExpandGaussianArgs(TestSetup):
         assert len(mu.shape) - 1 == len(sigma.shape)
         assert grid.shape[-1] == mu.shape[-1]
 
-    def test_expand_gaussian_args_1d(self, grid_1d: np.ndarray, mu_1d: np.ndarray, sigma: np.ndarray):
-        """Test that 1D args are correctly expanded."""
-        grid, mu, sigma = _expand_gaussian_args(grid_1d, mu_1d, sigma)
-
-        self._check_shapes(grid, mu, sigma)
-
-    def test_expand_gaussian_args_2d(self, grid_2d: np.ndarray, mu_2d: np.ndarray, sigma: np.ndarray):
-        """Test that 2D args are correctly expanded."""
-        grid, mu, sigma = _expand_gaussian_args(grid_2d, mu_2d, sigma)
-
-        self._check_shapes(grid, mu, sigma)
-
-    def test_expand_gaussian_args_3d(self, grid_3d: np.ndarray, mu_3d: np.ndarray, sigma: np.ndarray):
-        """Test that 3D args are correctly expanded."""
-        grid, mu, sigma = _expand_gaussian_args(grid_3d, mu_3d, sigma)
+    def test_expand_gaussian_args(self, grid: np.ndarray, mu: np.ndarray, sigma: np.ndarray):
+        """Test that args are correctly expanded for 1D, 2D, and 3D cases."""
+        grid, mu, sigma = _expand_gaussian_args(grid, mu, sigma)
 
         self._check_shapes(grid, mu, sigma)
 
@@ -187,26 +136,12 @@ class TestPredictGaussianResponse(TestSetup):
         )
         assert np.allclose(predictions, expected)
 
-    def test_predict_gaussian_response_1d(self, grid_1d: np.ndarray, mu_1d: np.ndarray, sigma: np.ndarray):
-        """Test that 1D response prediction returns correct result."""
-        preds = np.asarray(predict_gaussian_response(grid_1d, mu_1d, sigma))
+    def test_predict_gaussian_response(self, grid: np.ndarray, mu: np.ndarray, sigma: np.ndarray):
+        """Test that response prediction returns correct result for 1D, 2D, and 3D cases."""
+        preds = np.asarray(predict_gaussian_response(grid, mu, sigma))
 
-        assert preds.shape == (3, self.height)
-        self._validate_gaussian(preds, grid_1d, mu_1d, sigma)
-
-    def test_predict_gaussian_response_2d(self, grid_2d: np.ndarray, mu_2d: np.ndarray, sigma: np.ndarray):
-        """Test that 2D response prediction returns correct result."""
-        preds = np.asarray(predict_gaussian_response(grid_2d, mu_2d, sigma))
-
-        assert preds.shape == (3, self.height, self.width)
-        self._validate_gaussian(preds, grid_2d, mu_2d, sigma)
-
-    def test_predict_gaussian_response_3d(self, grid_3d: np.ndarray, mu_3d: np.ndarray, sigma: np.ndarray):
-        """Test that 3D response prediction returns correct result."""
-        preds = np.asarray(predict_gaussian_response(grid_3d, mu_3d, sigma))
-
-        assert preds.shape == (3, self.height, self.width, self.depth)
-        self._validate_gaussian(preds, grid_3d, mu_3d, sigma)
+        assert preds.shape == (mu.shape[0], *grid.shape[:-1])
+        self._validate_gaussian(preds, grid, mu, sigma)
 
 
 class TestGaussian2DPRFResponse(PRFStimulusSetup):
@@ -275,7 +210,7 @@ class TestGaussianCFResponse(TestSetup):
         preds = np.asarray(response_model(stimulus, params, dtype))
 
         # Check result shape
-        assert preds.shape == (params.shape[0], self.width)  # (num_voxels, distance_matrix.shape[0])
+        assert preds.shape == (params.shape[0], self.num_width)  # (num_voxels, distance_matrix.shape[0])
 
 
 class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
@@ -338,19 +273,17 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
         assert prf_model.parameter_names == list(dict.fromkeys(param_names))
 
     @pytest.mark.parametrize(
-        ("impulse_model", "temporal_model"),
-        [
-            (DerivativeTwoGammaImpulse(), BaselineAmplitude()),  # Test with class instances
-            (DerivativeTwoGammaImpulse, BaselineAmplitude),  # Test with classes
-            (DerivativeTwoGammaImpulse(), None),
-            (DerivativeTwoGammaImpulse, None),
-            (None, BaselineAmplitude()),
-            (None, BaselineAmplitude),
-            (None, None),
-        ],
+        "temporal_model",
+        [None, BaselineAmplitude, BaselineAmplitude()],
     )
+    @pytest.mark.parametrize(
+        "impulse_model",
+        [None, DerivativeTwoGammaImpulse, DerivativeTwoGammaImpulse()],
+    )
+    @pytest.mark.parametrize("encoding_model", [PRFStimulusEncoder, PRFStimulusEncoder()])
     def test_predict(
         self,
+        encoding_model: BaseEncoder,
         impulse_model: BaseImpulse,
         temporal_model: BaseTemporal,
         stimulus: PRFStimulus,
@@ -364,6 +297,7 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
 
         """
         prf_model = Gaussian2DPRFModel(
+            encoding_model=encoding_model,
             impulse_model=impulse_model,
             temporal_model=temporal_model,
         )
@@ -373,13 +307,12 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
         assert resp.shape == (params.shape[0], stimulus.design.shape[0])
 
     @pytest.mark.parametrize(
-        ("impulse_model", "temporal_model"),
-        [
-            (DerivativeTwoGammaImpulse(), BaselineAmplitude()),  # Test with class instances
-            (DerivativeTwoGammaImpulse(), None),
-            (None, BaselineAmplitude()),
-            (None, None),
-        ],
+        "temporal_model",
+        [None, BaselineAmplitude()],
+    )
+    @pytest.mark.parametrize(
+        "impulse_model",
+        [None, DerivativeTwoGammaImpulse()],
     )
     def test_predict_regression(
         self,
@@ -395,6 +328,64 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
             temporal_model=temporal_model,
         )
 
+        resp = prf_model(stimulus, params)
+
+        num_regression.check(
+            {f"response_{i}": x for i, x in enumerate(resp)},
+            default_tolerance={"atol": 1e-4},
+        )
+
+
+class TestCompressiveGaussian2DPRFModel(TestGaussian2DPRFResponse):
+    """Tests for compressive spatial summation 2D Gaussian PRF model."""
+
+    @pytest.fixture
+    def prf_model(self):
+        """PRF model object."""
+        return Gaussian2DPRFModel(
+            encoding_model=CompressiveEncoder(PRFStimulusEncoder()),
+        )
+
+    @pytest.fixture
+    def params(self):
+        """Dataframe with parameters."""
+        return pd.DataFrame(
+            {
+                "mu_x": [0.0, 1.0, 0.0],
+                "mu_y": [1.0, 0.0, 0.0],
+                "sigma": [1.0, 2.0, 3.0],
+                "delay": [6.0, 7.0, 5.0],
+                "dispersion": [0.9, 1.0, 0.8],
+                "undershoot": [12.0, 11.0, 13.0],
+                "u_dispersion": [0.9, 1.0, 0.8],
+                "ratio": [0.48, 0.48, 0.48],
+                "weight_deriv": [0.5, 0.5, 0.5],
+                "baseline": [0.0, 0.1, 0.2],
+                "amplitude": [1.1, 1.0, 0.9],
+                "gain": [0.1, 0.2, 0.3],
+                "n": [0.9, 1.1, 0.1],
+            },
+        )
+
+    def test_predict(
+        self,
+        prf_model: Gaussian2DPRFModel,
+        stimulus: PRFStimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that model prediction returns correct shape."""
+        resp = prf_model(stimulus, params)
+
+        assert resp.shape == (params.shape[0], stimulus.design.shape[0])
+
+    def test_predict_regression_css(
+        self,
+        num_regression: NumericRegressionFixture,
+        prf_model: Gaussian2DPRFModel,
+        stimulus: PRFStimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that model prediction matches reference file."""
         resp = prf_model(stimulus, params)
 
         num_regression.check(
@@ -453,20 +444,26 @@ class TestGaussianCFModel(TestGaussianCFResponse):
             None,
         ],
     )
+    @pytest.mark.parametrize(
+        "encoding_model",
+        [CFStimulusEncoder, CFStimulusEncoder()],
+    )
     def test_predict(
         self,
+        encoding_model: BaseEncoder,
         temporal_model: BaseTemporal,
         stimulus: CFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction returns correct shape."""
         cf_model = GaussianCFModel(
+            encoding_model=encoding_model,
             temporal_model=temporal_model,
         )
 
         resp = cf_model(stimulus, params)
 
-        assert resp.shape == (params.shape[0], 1)
+        assert resp.shape == (params.shape[0], stimulus.source_response.shape[-1])
 
     def test_predict_regression_cf(
         self,
@@ -477,6 +474,57 @@ class TestGaussianCFModel(TestGaussianCFResponse):
         """Test that model prediction matches reference file."""
         cf_model = GaussianCFModel()
 
+        resp = cf_model(stimulus, params)
+
+        num_regression.check(
+            {f"response_{i}": x for i, x in enumerate(resp)},
+            default_tolerance={"atol": 1e-4},
+        )
+
+
+class TestCompressiveGaussianCFModel(TestGaussianCFResponse):
+    """Tests for compressive spatial summation Gaussian CF model."""
+
+    @pytest.fixture
+    def cf_model(self):
+        """CF model object."""
+        return GaussianCFModel(
+            encoding_model=CompressiveEncoder(CFStimulusEncoder()),
+        )
+
+    @pytest.fixture
+    def params(self):
+        """Dataframe with parameters."""
+        return pd.DataFrame(
+            {
+                "center_index": [0, 2, 1],
+                "sigma": [1.0, 2.0, 3.0],
+                "baseline": [0.5, -0.1, 0.2],
+                "amplitude": [-1.1, 0.5, 2.0],
+                "gain": [0.1, 0.2, 0.3],
+                "n": [0.9, 1.1, 0.1],
+            },
+        )
+
+    def test_predict(
+        self,
+        cf_model: GaussianCFModel,
+        stimulus: CFStimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that model prediction returns correct shape."""
+        resp = cf_model(stimulus, params)
+
+        assert resp.shape == (params.shape[0], stimulus.source_response.shape[-1])
+
+    def test_predict_regression_cf_css(
+        self,
+        cf_model: GaussianCFModel,
+        num_regression: NumericRegressionFixture,
+        stimulus: CFStimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that model prediction matches reference file."""
         resp = cf_model(stimulus, params)
 
         num_regression.check(
