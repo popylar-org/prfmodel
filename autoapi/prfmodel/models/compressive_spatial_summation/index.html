@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.encoding" href="../encoding/index.html"><link rel="prev" title="prfmodel.models.compressive_spatial_summation" href="../compressive_spatial_summation/index.html">
+<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.difference_of_gaussians" href="../difference_of_gaussians/index.html"><link rel="prev" title="prfmodel.models.composite" href="../composite/index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>prfmodel.models.difference_of_gaussians - prfmodel 0.0.1 documentation</title>
+        <title>prfmodel.models.compressive_spatial_summation - prfmodel 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -216,8 +216,8 @@
 <li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="../base/index.html">prfmodel.models.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../composite/index.html">prfmodel.models.composite</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../compressive_spatial_summation/index.html">prfmodel.models.compressive_spatial_summation</a></li>
-<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">prfmodel.models.difference_of_gaussians</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">prfmodel.models.compressive_spatial_summation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../encoding/index.html">prfmodel.models.encoding</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../gaussian/index.html">prfmodel.models.gaussian</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -263,7 +263,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../../../_sources/autoapi/prfmodel/models/difference_of_gaussians/index.rst.txt" title="View this page">
+  <a class="muted-link" href="../../../../_sources/autoapi/prfmodel/models/compressive_spatial_summation/index.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -281,16 +281,16 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-prfmodel.models.difference_of_gaussians">
-<span id="prfmodel-models-difference-of-gaussians"></span><h1>prfmodel.models.difference_of_gaussians<a class="headerlink" href="#module-prfmodel.models.difference_of_gaussians" title="Link to this heading">¶</a></h1>
-<p>Difference of Gaussians population receptive field models.</p>
+          <section id="module-prfmodel.models.compressive_spatial_summation">
+<span id="prfmodel-models-compressive-spatial-summation"></span><h1>prfmodel.models.compressive_spatial_summation<a class="headerlink" href="#module-prfmodel.models.compressive_spatial_summation" title="Link to this heading">¶</a></h1>
+<p>Compressive spatial summation (CSS) population receptive field models.</p>
 <section id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.difference_of_gaussians.DoG2DPRFModel" title="prfmodel.models.difference_of_gaussians.DoG2DPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DoG2DPRFModel</span></code></a></p></td>
-<td><p>Two-dimensional difference of Gaussians population receptive field model.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel" title="prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gaussian2DCSSPRFModel</span></code></a></p></td>
+<td><p>Two-dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS).</p></td>
 </tr>
 </tbody>
 </table>
@@ -301,8 +301,8 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.difference_of_gaussians.init_dog_from_gaussian" title="prfmodel.models.difference_of_gaussians.init_dog_from_gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_dog_from_gaussian</span></code></a>(→ pandas.DataFrame)</p></td>
-<td><p>Initialize DoG model parameters from fitted Gaussian model parameters.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.models.compressive_spatial_summation.init_css_from_gaussian" title="prfmodel.models.compressive_spatial_summation.init_css_from_gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_css_from_gaussian</span></code></a>(→ pandas.DataFrame)</p></td>
+<td><p>Initialize compressive spatial summation parameters from fitted Gaussian parameters.</p></td>
 </tr>
 </tbody>
 </table>
@@ -311,62 +311,50 @@
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="prfmodel.models.difference_of_gaussians.DoG2DPRFModel">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.difference_of_gaussians.</span></span><span class="sig-name descname"><span class="pre">DoG2DPRFModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseEncoder" title="prfmodel.models.base.BaseEncoder"><span class="pre">prfmodel.models.base.BaseEncoder</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseEncoder" title="prfmodel.models.base.BaseEncoder"><span class="pre">prfmodel.models.base.BaseEncoder</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">PRFStimulusEncoder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impulse_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><span class="pre">prfmodel.models.base.BaseImpulse</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><span class="pre">prfmodel.models.base.BaseImpulse</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DerivativeTwoGammaImpulse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DoGAmplitude</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/prfmodel/models/difference_of_gaussians.html#DoG2DPRFModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.difference_of_gaussians.DoG2DPRFModel" title="Link to this definition">¶</a></dt>
-<dd><p>Two-dimensional difference of Gaussians population receptive field model.</p>
-<p>Runs two Gaussian 2D PRF responses (center and surround) through stimulus encoding and impulse response convolution
-independently, then combines them as a linear model:</p>
-<p>y(t) = p1(t) * amplitude_center + p2(t) * amplitude_surround + baseline</p>
+<dt class="sig sig-object py" id="prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.compressive_spatial_summation.</span></span><span class="sig-name descname"><span class="pre">Gaussian2DCSSPRFModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">impulse_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><span class="pre">prfmodel.models.base.BaseImpulse</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><span class="pre">prfmodel.models.base.BaseImpulse</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DerivativeTwoGammaImpulse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temporal_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><span class="pre">prfmodel.models.base.BaseTemporal</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">BaselineAmplitude</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/prfmodel/models/compressive_spatial_summation.html#Gaussian2DCSSPRFModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel" title="Link to this definition">¶</a></dt>
+<dd><p>Two-dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS).</p>
+<p>This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
+and temporal model response. In contrast to <a class="reference internal" href="../gaussian/index.html#prfmodel.models.gaussian.Gaussian2DPRFModel" title="prfmodel.models.gaussian.Gaussian2DPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code></a>, it
+encodes the stimulus response using compressive spatial summation (see
+<a class="reference internal" href="../encoding/index.html#prfmodel.models.encoding.CompressiveEncoder" title="prfmodel.models.encoding.CompressiveEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompressiveEncoder</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>encoding_model</strong> (<a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseEncoder" title="prfmodel.models.base.BaseEncoder"><em>BaseEncoder</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em>, </em><em>default=PRFStimulusEncoder</em>) – An encoding model class or instance. Model classes will be instantiated during initialization. The
-default creates a <a class="reference internal" href="../encoding/index.html#prfmodel.models.encoding.PRFStimulusEncoder" title="prfmodel.models.encoding.PRFStimulusEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PRFStimulusEncoder</span></code></a> instance.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>impulse_model</strong> (<a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseImpulse" title="prfmodel.models.base.BaseImpulse"><em>BaseImpulse</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em> or </em><em>None</em><em>, </em><em>default=DerivativeTwoGammaImpulse</em><em>, </em><em>optional</em>) – An impulse response model class or instance. Model classes will be instantiated during
+initialization. The default creates a <a class="reference internal" href="../impulse/index.html#prfmodel.models.impulse.DerivativeTwoGammaImpulse" title="prfmodel.models.impulse.DerivativeTwoGammaImpulse"><code class="xref py py-class docutils literal notranslate"><span class="pre">DerivativeTwoGammaImpulse</span></code></a>
+instance with default values.</p></li>
+<li><p><strong>temporal_model</strong> (<a class="reference internal" href="../base/index.html#prfmodel.models.base.BaseTemporal" title="prfmodel.models.base.BaseTemporal"><em>BaseTemporal</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><em>type</em></a><em> or </em><em>None</em><em>, </em><em>default=BaselineAmplitude</em><em>, </em><em>optional</em>) – A temporal model class or instance. Model classes will be instantiated during initialization.
+The default creates a <a class="reference internal" href="../temporal/index.html#prfmodel.models.temporal.BaselineAmplitude" title="prfmodel.models.temporal.BaselineAmplitude"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaselineAmplitude</span></code></a> instance.</p></li>
+</ul>
 </dd>
 </dl>
-<dl class="simple">
-<dt>impulse_model<span class="classifier">BaseImpulse or type or None, default=DerivativeTwoGammaImpulse</span></dt><dd><p>An impulse response model class or instance.</p>
-</dd>
-<dt>temporal_model<span class="classifier">BaseTemporal or type or None, default=DoGAmplitude</span></dt><dd><p>A temporal model class or instance.</p>
-</dd>
-</dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="prfmodel.models.difference_of_gaussians.DoG2DPRFModel.parameter_names">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#prfmodel.models.difference_of_gaussians.DoG2DPRFModel.parameter_names" title="Link to this definition">¶</a></dt>
-<dd><p>A list with names of unique parameters used by the model.</p>
-</dd></dl>
-
+<p class="rubric">Notes</p>
+<p>The simple composite model follows five steps:</p>
+<ol class="arabic simple">
+<li><p>The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.</p></li>
+<li><p>The encoding model encodes the response with the stimulus design and applies compressive spatial summation.</p></li>
+<li><p>A impulse response model generates an impulse response.</p></li>
+<li><p>The encoded response is convolved with the impulse response.</p></li>
+<li><p>The temporal model modifies the convolved response.</p></li>
+</ol>
 <dl class="py method">
-<dt class="sig sig-object py" id="prfmodel.models.difference_of_gaussians.DoG2DPRFModel.predict_responses">
-<span class="sig-name descname"><span class="pre">predict_responses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../stimuli/prf/index.html#prfmodel.stimuli.prf.PRFStimulus" title="prfmodel.stimuli.prf.PRFStimulus"><span class="pre">prfmodel.stimuli.prf.PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="headerlink" href="#prfmodel.models.difference_of_gaussians.DoG2DPRFModel.predict_responses" title="Link to this definition">¶</a></dt>
-<dd><p>Predict the each of the two responses before applying betas.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Stacked predictions of shape (num_voxels, 2, num_frames).</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="prfmodel.models.difference_of_gaussians.DoG2DPRFModel.__call__">
-<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../stimuli/prf/index.html#prfmodel.stimuli.prf.PRFStimulus" title="prfmodel.stimuli.prf.PRFStimulus"><span class="pre">prfmodel.stimuli.prf.PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="headerlink" href="#prfmodel.models.difference_of_gaussians.DoG2DPRFModel.__call__" title="Link to this definition">¶</a></dt>
-<dd><p>Predict the composite model response (considering Center and Surround responses).</p>
-<p>Applies the temporal model to the stacked responses from predict_responses.
-When temporal_model=None, returns a simple subtraction (response_center - response_surround)</p>
+<dt class="sig sig-object py" id="prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../stimuli/prf/index.html#prfmodel.stimuli.prf.PRFStimulus" title="prfmodel.stimuli.prf.PRFStimulus"><span class="pre">prfmodel.stimuli.prf.PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="headerlink" href="#prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel.__call__" title="Link to this definition">¶</a></dt>
+<dd><p>Predict a simple population receptive field model response to a stimulus.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>stimulus</strong> (<a class="reference internal" href="../../index.html#prfmodel.PRFStimulus" title="prfmodel.PRFStimulus"><em>PRFStimulus</em></a>) – Population receptive field stimulus object.</p></li>
 <li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
 for different voxels.</p></li>
-<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), uses the dtype from
+<li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <cite>None</cite> (the default), uses the dtype from
 <a class="reference internal" href="../../utils/index.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Model predictions of shape (num_voxels, num_frames).</p>
+<dd class="field-even"><p>Model predictions of shape (num_voxels, num_frames) and dtype <cite>dtype</cite>. The number of voxels is the
+number of rows in <cite>parameters</cite>. The number of frames is the number of frames in the stimulus design.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../index.html#prfmodel.Tensor" title="prfmodel.Tensor">Tensor</a></p>
@@ -374,43 +362,38 @@ for different voxels.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel.parameter_names">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">parameter_names</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel.parameter_names" title="Link to this definition">¶</a></dt>
+<dd><p>A list with names of unique parameters that are used by the submodels.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="prfmodel.models.difference_of_gaussians.init_dog_from_gaussian">
-<span class="sig-prename descclassname"><span class="pre">prfmodel.models.difference_of_gaussians.</span></span><span class="sig-name descname"><span class="pre">init_dog_from_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gaussian_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_surround</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/difference_of_gaussians.html#init_dog_from_gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.difference_of_gaussians.init_dog_from_gaussian" title="Link to this definition">¶</a></dt>
-<dd><p>Initialize DoG model parameters from fitted Gaussian model parameters.</p>
+<dt class="sig sig-object py" id="prfmodel.models.compressive_spatial_summation.init_css_from_gaussian">
+<span class="sig-prename descclassname"><span class="pre">prfmodel.models.compressive_spatial_summation.</span></span><span class="sig-name descname"><span class="pre">init_css_from_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gaussian_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><span class="pre">pandas.DataFrame</span></a></span></span><a class="reference internal" href="../../../../_modules/prfmodel/models/compressive_spatial_summation.html#init_css_from_gaussian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.models.compressive_spatial_summation.init_css_from_gaussian" title="Link to this definition">¶</a></dt>
+<dd><p>Initialize compressive spatial summation parameters from fitted Gaussian parameters.</p>
 <p>Converts the output of a fitted <a class="reference internal" href="../gaussian/index.html#prfmodel.models.gaussian.Gaussian2DPRFModel" title="prfmodel.models.gaussian.Gaussian2DPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code></a>
-into starting parameters for a <a class="reference internal" href="#prfmodel.models.difference_of_gaussians.DoG2DPRFModel" title="prfmodel.models.difference_of_gaussians.DoG2DPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DoG2DPRFModel</span></code></a>, suitable for subsequent SGD.</p>
+into starting parameters for a <a class="reference internal" href="#prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel" title="prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DCSSPRFModel</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>gaussian_params</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – DataFrame of fitted parameters from a <code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code>.
-Must contain columns: <code class="docutils literal notranslate"><span class="pre">sigma</span></code> and <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> (plus all shared columns).</p></li>
-<li><p><strong>sigma_ratio</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=5.0</em>) – Ratio used to set the surround size: <code class="docutils literal notranslate"><span class="pre">sigma_surround</span> <span class="pre">=</span> <span class="pre">sigma_center</span> <span class="pre">*</span> <span class="pre">sigma_ratio</span></code>.
-Ignored when <code class="docutils literal notranslate"><span class="pre">sigma_surround</span></code> is provided.</p></li>
-<li><p><strong>sigma_surround</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Fixed surround size applied to all rows. Must be &gt;= <code class="docutils literal notranslate"><span class="pre">sigma</span></code> for every row in
-<code class="docutils literal notranslate"><span class="pre">gaussian_params</span></code>. When provided, overrides <code class="docutils literal notranslate"><span class="pre">sigma_ratio</span></code>.</p></li>
+<li><p><strong>gaussian_params</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)"><em>pandas.DataFrame</em></a>) – DataFrame of fitted parameters from a <code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code>.</p></li>
+<li><p><strong>gain</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=1.0</em>) – Amplification parameter for the <a class="reference internal" href="../encoding/index.html#prfmodel.models.encoding.CompressiveEncoder" title="prfmodel.models.encoding.CompressiveEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompressiveEncoder</span></code></a>.</p></li>
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=0.5</em>) – Compression exponent parameter for the <a class="reference internal" href="../encoding/index.html#prfmodel.models.encoding.CompressiveEncoder" title="prfmodel.models.encoding.CompressiveEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompressiveEncoder</span></code></a>. Must be &gt; 0.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataFrame of DoG initial parameters with columns:
-<code class="docutils literal notranslate"><span class="pre">sigma_center</span></code> (= <code class="docutils literal notranslate"><span class="pre">sigma</span></code>), <code class="docutils literal notranslate"><span class="pre">sigma_surround</span></code>,
-<code class="docutils literal notranslate"><span class="pre">amplitude_center</span></code> (= <code class="docutils literal notranslate"><span class="pre">amplitude</span></code>), <code class="docutils literal notranslate"><span class="pre">amplitude_surround</span></code> (= 0.0),
-plus all shared columns unchanged.</p>
+<dd class="field-even"><p>DataFrame with two additional columns: <code class="docutils literal notranslate"><span class="pre">gain</span></code> and <code class="docutils literal notranslate"><span class="pre">m</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.1)">pandas.DataFrame</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">sigma_surround</span></code> is smaller than <code class="docutils literal notranslate"><span class="pre">sigma</span></code> for any row in <code class="docutils literal notranslate"><span class="pre">gaussian_params</span></code>.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">n</span></code> &lt;= 0 or if <code class="docutils literal notranslate"><span class="pre">n</span></code> or <code class="docutils literal notranslate"><span class="pre">gain</span></code> are not finite.</p>
 </dd>
 </dl>
-<p class="rubric">Notes</p>
-<p><code class="docutils literal notranslate"><span class="pre">amplitude_surround</span></code> is initialized to <code class="docutils literal notranslate"><span class="pre">0.0</span></code>, which is the boundary of the constraint
-<code class="docutils literal notranslate"><span class="pre">amplitude_surround</span> <span class="pre">&lt;</span> <span class="pre">0</span></code> enforced by a <a class="reference internal" href="../../adapter/index.html#prfmodel.adapter.ParameterConstraint" title="prfmodel.adapter.ParameterConstraint"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParameterConstraint</span></code></a>
-with <code class="docutils literal notranslate"><span class="pre">upper=0.0</span></code>. The constraint transform maps <code class="docutils literal notranslate"><span class="pre">amplitude_surround=0</span></code> to optimizer
-variable <code class="docutils literal notranslate"><span class="pre">raw=-1.0</span></code> (no NaN), so SGD starts cleanly near zero and moves negative.</p>
 </dd></dl>
 
 </section>
@@ -421,23 +404,23 @@ variable <code class="docutils literal notranslate"><span class="pre">raw=-1.0</
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../encoding/index.html">
+          <a class="next-page" href="../difference_of_gaussians/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">prfmodel.models.encoding</div>
+                <div class="title">prfmodel.models.difference_of_gaussians</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../compressive_spatial_summation/index.html">
+          <a class="prev-page" href="../composite/index.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">prfmodel.models.compressive_spatial_summation</div>
+                <div class="title">prfmodel.models.composite</div>
                 
               </div>
             </a>
@@ -471,17 +454,16 @@ variable <code class="docutils literal notranslate"><span class="pre">raw=-1.0</
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">prfmodel.models.difference_of_gaussians</a><ul>
+<li><a class="reference internal" href="#">prfmodel.models.compressive_spatial_summation</a><ul>
 <li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#prfmodel.models.difference_of_gaussians.DoG2DPRFModel"><code class="docutils literal notranslate"><span class="pre">DoG2DPRFModel</span></code></a><ul>
-<li><a class="reference internal" href="#prfmodel.models.difference_of_gaussians.DoG2DPRFModel.parameter_names"><code class="docutils literal notranslate"><span class="pre">DoG2DPRFModel.parameter_names</span></code></a></li>
-<li><a class="reference internal" href="#prfmodel.models.difference_of_gaussians.DoG2DPRFModel.predict_responses"><code class="docutils literal notranslate"><span class="pre">DoG2DPRFModel.predict_responses()</span></code></a></li>
-<li><a class="reference internal" href="#prfmodel.models.difference_of_gaussians.DoG2DPRFModel.__call__"><code class="docutils literal notranslate"><span class="pre">DoG2DPRFModel.__call__()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel"><code class="docutils literal notranslate"><span class="pre">Gaussian2DCSSPRFModel</span></code></a><ul>
+<li><a class="reference internal" href="#prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel.__call__"><code class="docutils literal notranslate"><span class="pre">Gaussian2DCSSPRFModel.__call__()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel.parameter_names"><code class="docutils literal notranslate"><span class="pre">Gaussian2DCSSPRFModel.parameter_names</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#prfmodel.models.difference_of_gaussians.init_dog_from_gaussian"><code class="docutils literal notranslate"><span class="pre">init_dog_from_gaussian()</span></code></a></li>
+<li><a class="reference internal" href="#prfmodel.models.compressive_spatial_summation.init_css_from_gaussian"><code class="docutils literal notranslate"><span class="pre">init_css_from_gaussian()</span></code></a></li>
 </ul>
 </li>
 </ul>

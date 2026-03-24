@@ -17,6 +17,16 @@ Exceptions
    prfmodel.models.encoding.ResponseDesignShapeError
 
 
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.models.encoding.PRFStimulusEncoder
+   prfmodel.models.encoding.CFStimulusEncoder
+   prfmodel.models.encoding.CompressiveEncoder
+
+
 Functions
 ---------
 
@@ -95,5 +105,142 @@ Module Contents
    >>> resp_encoded = encode_prf_response(resp, design)
    >>> print(resp_encoded.shape) (num_batches, num_frames)
    (3, 10)
+
+
+.. py:class:: PRFStimulusEncoder
+
+
+
+   Encoding model for population receptive field stimuli.
+
+   Multiplies a stimulus design with a population receptive field model response along the
+   stimulus dimensions and sums over them.
+
+   .. seealso:: :py:obj:`encode_prf_response`
+
+
+   .. py:property:: parameter_names
+      :type: list
+
+
+      Does not have any parameters. Returns an empty list.
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.prf.PRFStimulus, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Encode a population receptive field model response with a stimulus design.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param response: Population receptive field response.
+      :type response: Tensor
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the encoded response. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The stimulus encoded model response with shape `(num_voxels, num_frames)` dtype `dtype`.
+                The number of voxels is the number of rows in `parameters`. The number of frames is the number of time
+                frames in the stimulus design.
+      :rtype: Tensor
+
+
+
+.. py:class:: CFStimulusEncoder
+
+
+
+   Encoding model for connective field stimuli.
+
+   Multiplies a source response with a connective model response and sums over the vertices in the source response.
+
+
+
+   .. py:property:: parameter_names
+      :type: list
+
+
+      Does not have any parameters. Returns an empty list.
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.cf.CFStimulus, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Encode a Connective field model response with a source response.
+
+      :param stimulus: Connective field stimulus object.
+      :type stimulus: CFStimulus
+      :param response: Connective field response.
+      :type response: Tensor
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the encoded response. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The stimulus encoded model response with shape `(num_voxels, num_frames)` dtype `dtype`.
+                The number of voxels is the number of rows in `parameters`. The number of frames is the number of time
+                frames in the stimulus design.
+      :rtype: Tensor
+
+
+
+.. py:class:: CompressiveEncoder(encoding_model: prfmodel.models.base.BaseEncoder, min_response: float = 1e-10)
+
+
+
+   Compressive encoding model.
+
+   Amplifies and compresses an encoded stimulus response.
+   The model has two parameters: `gain` (amplification amplitude) and `n` (compression exponent).
+
+   :param encoding_model: A encoding model instance.
+   :type encoding_model: BasePRFEncoder
+   :param min_response: Minimum encoded response (:math:`\epsilon`). A small value ensures numerical stability of gradients when
+                        :math:`n < 1`.
+   :type min_response: float, default=1e-10
+
+   .. rubric:: Notes
+
+   Compressive encoding with `gain` :math:`g` and :math:`n` is done according to the equation:
+
+   .. math::
+
+       p(x) = g \times \text{max}(f(x), \epsilon)^n
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      `gain` and `n`.
+
+      :type: Names of parameters used by the model
+
+
+   .. py:method:: __call__(stimulus: prfmodel.models.base.S, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Compress and encode a model response with a stimulus.
+
+      Encodes the model response, then compresses and amplifies the encoded response.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param response: Model response.
+      :type response: Tensor
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the encoded response. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The compressed and stimulus encoded model response with shape `(num_voxels, ...)` dtype `dtype`.
+                The number of voxels is the number of rows in `parameters`. The number and size of other axes depends on
+                the stimulus and the response.
+      :rtype: Tensor
+
 
 

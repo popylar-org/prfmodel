@@ -1,0 +1,106 @@
+prfmodel.models.compressive_spatial_summation
+=============================================
+
+.. py:module:: prfmodel.models.compressive_spatial_summation
+
+.. autoapi-nested-parse::
+
+   Compressive spatial summation (CSS) population receptive field models.
+
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   prfmodel.models.compressive_spatial_summation.init_css_from_gaussian
+
+
+Module Contents
+---------------
+
+.. py:class:: Gaussian2DCSSPRFModel(impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = BaselineAmplitude)
+
+
+
+   Two-dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS).
+
+   This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
+   and temporal model response. In contrast to :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`, it
+   encodes the stimulus response using compressive spatial summation (see
+   :class:`~prfmodel.models.encoding.CompressiveEncoder`).
+
+   :param impulse_model: An impulse response model class or instance. Model classes will be instantiated during
+                         initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
+                         instance with default values.
+   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
+   :param temporal_model: A temporal model class or instance. Model classes will be instantiated during initialization.
+                          The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
+   :type temporal_model: BaseTemporal or type or None, default=BaselineAmplitude, optional
+
+   .. rubric:: Notes
+
+   The simple composite model follows five steps:
+
+   1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
+   2. The encoding model encodes the response with the stimulus design and applies compressive spatial summation.
+   3. A impulse response model generates an impulse response.
+   4. The encoded response is convolved with the impulse response.
+   5. The temporal model modifies the convolved response.
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict a simple population receptive field model response to a stimulus.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape (num_voxels, num_frames) and dtype `dtype`. The number of voxels is the
+                number of rows in `parameters`. The number of frames is the number of frames in the stimulus design.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters that are used by the submodels.
+
+
+.. py:function:: init_css_from_gaussian(gaussian_params: pandas.DataFrame, gain: float = 1.0, n: float = 0.5) -> pandas.DataFrame
+
+   Initialize compressive spatial summation parameters from fitted Gaussian parameters.
+
+   Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
+   into starting parameters for a :class:`Gaussian2DCSSPRFModel`.
+
+   :param gaussian_params: DataFrame of fitted parameters from a ``Gaussian2DPRFModel``.
+   :type gaussian_params: pandas.DataFrame
+   :param gain: Amplification parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`.
+   :type gain: float, default=1.0
+   :param n: Compression exponent parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`. Must be > 0.
+   :type n: float, default=0.5
+
+   :returns: DataFrame with two additional columns: ``gain`` and ``m``.
+   :rtype: pandas.DataFrame
+
+   :raises ValueError: If ``n`` <= 0 or if ``n`` or ``gain`` are not finite.
+
+

@@ -197,6 +197,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tutorials/simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/css_prf_simulated.html">How to fit a compressive spatial summation population receptive field model to simulated data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../tutorials/diff_gaussians_prf_simulated.html">How to fit a Difference of Gaussians population receptive field model to simulated data</a></li>
 </ul>
 </li>
@@ -214,6 +215,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../autoapi/prfmodel/models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/base/index.html">prfmodel.models.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/compressive_spatial_summation/index.html">prfmodel.models.compressive_spatial_summation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/encoding/index.html">prfmodel.models.encoding</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/gaussian/index.html">prfmodel.models.gaussian</a></li>
@@ -282,12 +284,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimuli.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">PRFStimulus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_dtype</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseCFResponse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseComposite</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEncoder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseImpulse</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasePRFResponse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseResponse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseTemporal</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.encoding</span><span class="w"> </span><span class="kn">import</span> <span class="n">encode_prf_response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.encoding</span><span class="w"> </span><span class="kn">import</span> <span class="n">CFStimulusEncoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.encoding</span><span class="w"> </span><span class="kn">import</span> <span class="n">PRFStimulusEncoder</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.impulse</span><span class="w"> </span><span class="kn">import</span> <span class="n">DerivativeTwoGammaImpulse</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.impulse</span><span class="w"> </span><span class="kn">import</span> <span class="n">convolve_prf_impulse_response</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.temporal</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaselineAmplitude</span>
@@ -296,7 +299,7 @@
 
 <div class="viewcode-block" id="SimplePRFModel">
 <a class="viewcode-back" href="../../../autoapi/prfmodel/models/composite/index.html#prfmodel.models.composite.SimplePRFModel">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SimplePRFModel</span><span class="p">(</span><span class="n">BaseComposite</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimplePRFModel</span><span class="p">(</span><span class="n">BaseComposite</span><span class="p">[</span><span class="n">PRFStimulus</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple composite population receptive field model.</span>
 
@@ -306,20 +309,23 @@
 <span class="sd">    ----------</span>
 <span class="sd">    prf_model : BasePRFResponse</span>
 <span class="sd">        A population receptive field response model instance.</span>
-<span class="sd">    impulse_model : BaseImpulse or type or None, default=ShiftedDerivativeGammaImpulse, optional</span>
-<span class="sd">        An impulse response model class or instance. Reponse model classes will be instantiated during object</span>
-<span class="sd">        initialization. The default creates a `ShiftedDerivativeGammaImpulse` instance with default values.</span>
-<span class="sd">        values.</span>
+<span class="sd">    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder</span>
+<span class="sd">        An encoding model class or instance. Model classes will be instantiated during initialization. The</span>
+<span class="sd">        default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.</span>
+<span class="sd">    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional</span>
+<span class="sd">        An impulse response model class or instance. Model classes will be instantiated during</span>
+<span class="sd">        initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`</span>
+<span class="sd">        instance with default values.</span>
 <span class="sd">    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional</span>
-<span class="sd">        A temporal model class or instance. Temporal model instances will be instantiated during initialization.</span>
-<span class="sd">        The default creates a `BaselineAmplitude` instance.</span>
+<span class="sd">        A temporal model class or instance. Model classes will be instantiated during initialization.</span>
+<span class="sd">        The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
 <span class="sd">    The simple composite model follows five steps:</span>
 
 <span class="sd">    1. The population receptive field response model makes a prediction for the stimulus grid.</span>
-<span class="sd">    2. The response is encoded with the stimulus design.</span>
+<span class="sd">    2. The encoding model encodes the response with the stimulus design.</span>
 <span class="sd">    3. The impulse response model generates an impulse response.</span>
 <span class="sd">    4. The encoded response is convolved with the impulse response.</span>
 <span class="sd">    5. The temporal model modifies the convolved response.</span>
@@ -328,10 +334,14 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">prf_model</span><span class="p">:</span> <span class="n">BasePRFResponse</span><span class="p">,</span>
+        <span class="n">prf_model</span><span class="p">:</span> <span class="n">BaseResponse</span><span class="p">,</span>
+        <span class="n">encoding_model</span><span class="p">:</span> <span class="n">BaseEncoder</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseEncoder</span><span class="p">]</span> <span class="o">=</span> <span class="n">PRFStimulusEncoder</span><span class="p">,</span>
         <span class="n">impulse_model</span><span class="p">:</span> <span class="n">BaseImpulse</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseImpulse</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">DerivativeTwoGammaImpulse</span><span class="p">,</span>
         <span class="n">temporal_model</span><span class="p">:</span> <span class="n">BaseTemporal</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseTemporal</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">BaselineAmplitude</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="k">if</span> <span class="n">encoding_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">encoding_model</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="n">encoding_model</span> <span class="o">=</span> <span class="n">encoding_model</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="n">impulse_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">impulse_model</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="n">impulse_model</span> <span class="o">=</span> <span class="n">impulse_model</span><span class="p">()</span>
 
@@ -340,6 +350,7 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">prf_model</span><span class="o">=</span><span class="n">prf_model</span><span class="p">,</span>
+            <span class="n">encoding_model</span><span class="o">=</span><span class="n">encoding_model</span><span class="p">,</span>
             <span class="n">impulse_model</span><span class="o">=</span><span class="n">impulse_model</span><span class="p">,</span>
             <span class="n">temporal_model</span><span class="o">=</span><span class="n">temporal_model</span><span class="p">,</span>
         <span class="p">)</span>
@@ -348,8 +359,7 @@
 <a class="viewcode-back" href="../../../autoapi/prfmodel/models/composite/index.html#prfmodel.models.composite.SimplePRFModel.__call__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="c1"># We can safely override the type check here</span>
-        <span class="n">stimulus</span><span class="p">:</span> <span class="n">PRFStimulus</span><span class="p">,</span>  <span class="c1"># type: ignore[override]</span>
+        <span class="n">stimulus</span><span class="p">:</span> <span class="n">PRFStimulus</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
@@ -375,10 +385,10 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dtype</span> <span class="o">=</span> <span class="n">get_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">prf_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BasePRFResponse&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;prf_model&quot;</span><span class="p">])</span>
+        <span class="n">prf_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BaseResponse&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;prf_model&quot;</span><span class="p">])</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">design</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">stimulus</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="n">encode_prf_response</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">encoding_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BaseEncoder&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;encoding_model&quot;</span><span class="p">])</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">encoding_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;impulse_model&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">impulse_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BaseImpulse&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;impulse_model&quot;</span><span class="p">])</span>
@@ -396,7 +406,7 @@
 
 <div class="viewcode-block" id="CenterSurroundPRFModel">
 <a class="viewcode-back" href="../../../autoapi/prfmodel/models/composite/index.html#prfmodel.models.composite.CenterSurroundPRFModel">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">CenterSurroundPRFModel</span><span class="p">(</span><span class="n">BaseComposite</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CenterSurroundPRFModel</span><span class="p">(</span><span class="n">BaseComposite</span><span class="p">[</span><span class="n">PRFStimulus</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Center-surround composite population receptive field model.</span>
 
@@ -409,8 +419,11 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    prf_model : BasePRFResponse</span>
+<span class="sd">    prf_model : BaseResponse</span>
 <span class="sd">        A population receptive field response model instance.</span>
+<span class="sd">    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder</span>
+<span class="sd">        An encoding model class or instance. Model classes will be instantiated during initialization. The</span>
+<span class="sd">        default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.</span>
 <span class="sd">    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse</span>
 <span class="sd">        An impulse response model class or instance.</span>
 <span class="sd">    temporal_model : BaseTemporal or type or None, default=DoGAmplitude</span>
@@ -424,8 +437,8 @@
 <span class="sd">    The center-surround composite model follows these steps:</span>
 
 <span class="sd">    1. Two PRF response predictions are computed, one using ``{p}_center`` and one</span>
-<span class="sd">       using ``{p}_surround`` for each ``p`` in ``change_params``.</span>
-<span class="sd">    2. Each response is encoded with the stimulus design.</span>
+<span class="sd">       using ``{p}_sorround`` for each ``p`` in ``change_params``.</span>
+<span class="sd">    2. The encoding model encodes each response with the stimulus design.</span>
 <span class="sd">    3. Each encoded response is optionally convolved with an impulse response.</span>
 <span class="sd">    4. The two responses are stacked and combined by the temporal model.</span>
 
@@ -433,11 +446,15 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">prf_model</span><span class="p">:</span> <span class="n">BasePRFResponse</span><span class="p">,</span>
+        <span class="n">prf_model</span><span class="p">:</span> <span class="n">BaseResponse</span><span class="p">,</span>
+        <span class="n">encoding_model</span><span class="p">:</span> <span class="n">BaseEncoder</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseEncoder</span><span class="p">]</span> <span class="o">=</span> <span class="n">PRFStimulusEncoder</span><span class="p">,</span>
         <span class="n">impulse_model</span><span class="p">:</span> <span class="n">BaseImpulse</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseImpulse</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">DerivativeTwoGammaImpulse</span><span class="p">,</span>
         <span class="n">temporal_model</span><span class="p">:</span> <span class="n">BaseTemporal</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseTemporal</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">DoGAmplitude</span><span class="p">,</span>
         <span class="n">change_params</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="k">if</span> <span class="n">encoding_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">encoding_model</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="n">encoding_model</span> <span class="o">=</span> <span class="n">encoding_model</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="n">impulse_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">impulse_model</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="n">impulse_model</span> <span class="o">=</span> <span class="n">impulse_model</span><span class="p">()</span>
 
@@ -459,6 +476,7 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">prf_model</span><span class="o">=</span><span class="n">prf_model</span><span class="p">,</span>
+            <span class="n">encoding_model</span><span class="o">=</span><span class="n">encoding_model</span><span class="p">,</span>
             <span class="n">impulse_model</span><span class="o">=</span><span class="n">impulse_model</span><span class="p">,</span>
             <span class="n">temporal_model</span><span class="o">=</span><span class="n">temporal_model</span><span class="p">,</span>
         <span class="p">)</span>
@@ -466,7 +484,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">parameter_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A list with names of unique parameters used by the model.&quot;&quot;&quot;</span>
-        <span class="n">prf_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BasePRFResponse&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;prf_model&quot;</span><span class="p">])</span>
+        <span class="n">prf_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BaseResponse&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;prf_model&quot;</span><span class="p">])</span>
         <span class="n">prf_params</span> <span class="o">=</span> <span class="n">prf_model</span><span class="o">.</span><span class="n">parameter_names</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
         <span class="c1"># Replace each change_param with its center/surround variants in-place</span>
@@ -494,10 +512,10 @@
         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_change_params</span><span class="p">:</span>
             <span class="n">params_single</span><span class="p">[</span><span class="n">param</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
 
-        <span class="n">prf_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BasePRFResponse&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;prf_model&quot;</span><span class="p">])</span>
+        <span class="n">prf_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BaseResponse&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;prf_model&quot;</span><span class="p">])</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">params_single</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">design</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">stimulus</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="n">encode_prf_response</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">encoding_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BaseEncoder&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;encoding_model&quot;</span><span class="p">])</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">encoding_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;impulse_model&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">impulse_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BaseImpulse&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;impulse_model&quot;</span><span class="p">])</span>
@@ -534,7 +552,7 @@
 <a class="viewcode-back" href="../../../autoapi/prfmodel/models/composite/index.html#prfmodel.models.composite.CenterSurroundPRFModel.__call__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">stimulus</span><span class="p">:</span> <span class="n">PRFStimulus</span><span class="p">,</span>  <span class="c1"># type: ignore[override]</span>
+        <span class="n">stimulus</span><span class="p">:</span> <span class="n">PRFStimulus</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
@@ -576,7 +594,7 @@
 
 <div class="viewcode-block" id="SimpleCFModel">
 <a class="viewcode-back" href="../../../autoapi/prfmodel/models/composite/index.html#prfmodel.models.composite.SimpleCFModel">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">SimpleCFModel</span><span class="p">(</span><span class="n">BaseComposite</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SimpleCFModel</span><span class="p">(</span><span class="n">BaseComposite</span><span class="p">[</span><span class="n">CFStimulus</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple composite connective field model.</span>
 
@@ -584,7 +602,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    cf_model : BaseCFResponse</span>
+<span class="sd">    cf_model : BaseResponse</span>
 <span class="sd">        A connective field response model instance.</span>
 <span class="sd">    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional</span>
 <span class="sd">        A temporal model class or instance. Temporal model instances will be instantiated during initialization.</span>
@@ -602,14 +620,19 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">cf_model</span><span class="p">:</span> <span class="n">BaseCFResponse</span><span class="p">,</span>
+        <span class="n">cf_model</span><span class="p">:</span> <span class="n">BaseResponse</span><span class="p">,</span>
+        <span class="n">encoding_model</span><span class="p">:</span> <span class="n">BaseEncoder</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseEncoder</span><span class="p">]</span> <span class="o">=</span> <span class="n">CFStimulusEncoder</span><span class="p">,</span>
         <span class="n">temporal_model</span><span class="p">:</span> <span class="n">BaseTemporal</span> <span class="o">|</span> <span class="nb">type</span><span class="p">[</span><span class="n">BaseTemporal</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">BaselineAmplitude</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="k">if</span> <span class="n">encoding_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">encoding_model</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="n">encoding_model</span> <span class="o">=</span> <span class="n">encoding_model</span><span class="p">()</span>
+
         <span class="k">if</span> <span class="n">temporal_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">temporal_model</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
             <span class="n">temporal_model</span> <span class="o">=</span> <span class="n">temporal_model</span><span class="p">()</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">cf_model</span><span class="o">=</span><span class="n">cf_model</span><span class="p">,</span>
+            <span class="n">encoding_model</span><span class="o">=</span><span class="n">encoding_model</span><span class="p">,</span>
             <span class="n">temporal_model</span><span class="o">=</span><span class="n">temporal_model</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -617,7 +640,7 @@
 <a class="viewcode-back" href="../../../autoapi/prfmodel/models/composite/index.html#prfmodel.models.composite.SimpleCFModel.__call__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">stimulus</span><span class="p">:</span> <span class="n">CFStimulus</span><span class="p">,</span>  <span class="c1"># type: ignore[override]</span>
+        <span class="n">stimulus</span><span class="p">:</span> <span class="n">CFStimulus</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
@@ -644,13 +667,10 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dtype</span> <span class="o">=</span> <span class="n">get_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">cf_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BaseCFResponse&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;cf_model&quot;</span><span class="p">])</span>
+        <span class="n">cf_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BaseResponse&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;cf_model&quot;</span><span class="p">])</span>
         <span class="n">response</span> <span class="o">=</span> <span class="n">cf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">source_response</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">stimulus</span><span class="o">.</span><span class="n">source_response</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">source_response</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">source_response</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">response</span> <span class="o">*=</span> <span class="n">source_response</span>
-        <span class="n">response</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">encoding_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BaseEncoder&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;encoding_model&quot;</span><span class="p">])</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">encoding_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;temporal_model&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">temporal_model</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s2">&quot;BaseTemporal&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">&quot;temporal_model&quot;</span><span class="p">])</span>

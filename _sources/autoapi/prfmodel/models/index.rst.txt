@@ -17,6 +17,7 @@ Submodules
 
    /autoapi/prfmodel/models/base/index
    /autoapi/prfmodel/models/composite/index
+   /autoapi/prfmodel/models/compressive_spatial_summation/index
    /autoapi/prfmodel/models/difference_of_gaussians/index
    /autoapi/prfmodel/models/encoding/index
    /autoapi/prfmodel/models/gaussian/index
@@ -29,12 +30,16 @@ Classes
 
 .. autoapisummary::
 
-   prfmodel.models.BaseCFResponse
    prfmodel.models.BaseComposite
+   prfmodel.models.BaseEncoder
    prfmodel.models.BaseModel
-   prfmodel.models.BasePRFResponse
+   prfmodel.models.BaseResponse
    prfmodel.models.BaseTemporal
+   prfmodel.models.Gaussian2DCSSPRFModel
    prfmodel.models.DoG2DPRFModel
+   prfmodel.models.CFStimulusEncoder
+   prfmodel.models.CompressiveEncoder
+   prfmodel.models.PRFStimulusEncoder
    prfmodel.models.Gaussian2DPRFModel
    prfmodel.models.GaussianCFModel
 
@@ -44,6 +49,7 @@ Functions
 
 .. autoapisummary::
 
+   prfmodel.models.init_css_from_gaussian
    prfmodel.models.init_dog_from_gaussian
    prfmodel.models.encode_prf_response
 
@@ -51,56 +57,15 @@ Functions
 Package Contents
 ----------------
 
-.. py:class:: BaseCFResponse
-
-
-
-   Abstract base class for connective field response models.
-
-   Cannot be instantiated on its own.
-   Can only be used as a parent class to create custom connective field models.
-   Subclasses must override the abstract `__call__` method.
-
-
-
-   .. py:method:: __call__(stimulus: prfmodel.stimuli.cf.CFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
-      :abstractmethod:
-
-
-      Predict the model response for a stimulus.
-
-      :param stimulus: Connective field stimulus object.
-      :type stimulus: CFStimulus
-      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
-                         for different voxels.
-      :type parameters: pandas.DataFrame
-      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
-                    :func:`prfmodel.utils.get_dtype`.
-      :type dtype: str, optional
-
-      :returns: Model predictions of shape `(num_voxels, ...)` and dtype `dtype`. The number of voxels is the
-                number of rows in `parameters`. The number and size of other axes depends on the stimulus.
-      :rtype: Tensor
-
-
-
-   .. py:property:: parameter_names
-      :type: list[str]
-
-      :abstractmethod:
-
-
-      A list with names of parameters that are used by the model.
-
-
 .. py:class:: BaseComposite(**models: BaseModel | None)
 
 
 
-   Base class for creating composite models.
+   Generic abstract base class for creating composite models.
 
    Cannot be instantiated on its own. Can only be used as a parent class to create custom composite models.
-   Subclasses must override the abstract `__call__` method.
+   Subclasses must override the abstract `__call__` method and must be defined
+   with a specific stimulus type.
    This class is intended for combining multiple submodels into a composite model with a custom `__call__`
    method that defines how the submodels interact to make a composite prediction.
 
@@ -116,7 +81,7 @@ Package Contents
       A list with names of unique parameters that are used by the submodels.
 
 
-   .. py:method:: __call__(stimulus: prfmodel.stimuli.base.Stimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+   .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
       :abstractmethod:
 
 
@@ -135,6 +100,52 @@ Package Contents
                 the number of rows in `parameters`.
       :rtype: Tensor
 
+
+
+.. py:class:: BaseEncoder
+
+
+
+   Generic abstract base class for encoding model responses.
+
+   Cannot be instantiated on its own.
+   Can only be used as a parent class to create custom encoding models.
+   Subclasses must override the abstract `parameter_names` property and `__call__` method and must be defined
+   with a specific stimulus type.
+
+
+
+   .. py:method:: __call__(stimulus: S, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None)
+      :abstractmethod:
+
+
+      Encode a model response with a stimulus.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param response: Model response.
+      :type response: Tensor
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the encoded response. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The stimulus encoded model response with shape `(num_voxels, ...)` dtype `dtype`. The number of voxels is
+                the number of rows in `parameters`. The number and size of other axes depends on the stimulus and the
+                response.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
 
 
 .. py:class:: BaseModel
@@ -173,26 +184,27 @@ Package Contents
       A list with names of parameters that are used by the model.
 
 
-.. py:class:: BasePRFResponse
+.. py:class:: BaseResponse
 
 
 
-   Abstract base class for population receptive field response models.
+   Generic abstract base class for response models.
 
    Cannot be instantiated on its own.
    Can only be used as a parent class to create custom population receptive field models.
-   Subclasses must override the abstract `__call__` method.
+   Subclasses must override the abstract `__call__` method and must be defined
+   with a specific stimulus type.
 
 
 
-   .. py:method:: __call__(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+   .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
       :abstractmethod:
 
 
       Predict the model response for a stimulus.
 
-      :param stimulus: Population receptive field stimulus object.
-      :type stimulus: PRFStimulus
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different voxels.
       :type parameters: pandas.DataFrame
@@ -257,7 +269,83 @@ Package Contents
       A list with names of parameters that are used by the model.
 
 
-.. py:class:: DoG2DPRFModel(impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = DoGAmplitude)
+.. py:class:: Gaussian2DCSSPRFModel(impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = BaselineAmplitude)
+
+
+
+   Two-dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS).
+
+   This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
+   and temporal model response. In contrast to :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`, it
+   encodes the stimulus response using compressive spatial summation (see
+   :class:`~prfmodel.models.encoding.CompressiveEncoder`).
+
+   :param impulse_model: An impulse response model class or instance. Model classes will be instantiated during
+                         initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
+                         instance with default values.
+   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
+   :param temporal_model: A temporal model class or instance. Model classes will be instantiated during initialization.
+                          The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
+   :type temporal_model: BaseTemporal or type or None, default=BaselineAmplitude, optional
+
+   .. rubric:: Notes
+
+   The simple composite model follows five steps:
+
+   1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
+   2. The encoding model encodes the response with the stimulus design and applies compressive spatial summation.
+   3. A impulse response model generates an impulse response.
+   4. The encoded response is convolved with the impulse response.
+   5. The temporal model modifies the convolved response.
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict a simple population receptive field model response to a stimulus.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape (num_voxels, num_frames) and dtype `dtype`. The number of voxels is the
+                number of rows in `parameters`. The number of frames is the number of frames in the stimulus design.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters that are used by the submodels.
+
+
+.. py:function:: init_css_from_gaussian(gaussian_params: pandas.DataFrame, gain: float = 1.0, n: float = 0.5) -> pandas.DataFrame
+
+   Initialize compressive spatial summation parameters from fitted Gaussian parameters.
+
+   Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
+   into starting parameters for a :class:`Gaussian2DCSSPRFModel`.
+
+   :param gaussian_params: DataFrame of fitted parameters from a ``Gaussian2DPRFModel``.
+   :type gaussian_params: pandas.DataFrame
+   :param gain: Amplification parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`.
+   :type gain: float, default=1.0
+   :param n: Compression exponent parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`. Must be > 0.
+   :type n: float, default=0.5
+
+   :returns: DataFrame with two additional columns: ``gain`` and ``m``.
+   :rtype: pandas.DataFrame
+
+   :raises ValueError: If ``n`` <= 0 or if ``n`` or ``gain`` are not finite.
+
+
+.. py:class:: DoG2DPRFModel(encoding_model: prfmodel.models.base.BaseEncoder | type[prfmodel.models.base.BaseEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = DoGAmplitude)
 
 
 
@@ -268,10 +356,15 @@ Package Contents
 
    y(t) = p1(t) * amplitude_center + p2(t) * amplitude_surround + baseline
 
-   :param impulse_model: An impulse response model class or instance.
-   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
-   :param temporal_model: A temporal model class or instance.
-   :type temporal_model: BaseTemporal or type or None, default=DoGAmplitude
+   :param encoding_model: An encoding model class or instance. Model classes will be instantiated during initialization. The
+                          default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
+   :type encoding_model: BaseEncoder or type, default=PRFStimulusEncoder
+
+   impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
+       An impulse response model class or instance.
+   temporal_model : BaseTemporal or type or None, default=DoGAmplitude
+       A temporal model class or instance.
+
 
 
    .. py:property:: parameter_names
@@ -344,6 +437,143 @@ Package Contents
    variable ``raw=-1.0`` (no NaN), so SGD starts cleanly near zero and moves negative.
 
 
+.. py:class:: CFStimulusEncoder
+
+
+
+   Encoding model for connective field stimuli.
+
+   Multiplies a source response with a connective model response and sums over the vertices in the source response.
+
+
+
+   .. py:property:: parameter_names
+      :type: list
+
+
+      Does not have any parameters. Returns an empty list.
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.cf.CFStimulus, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Encode a Connective field model response with a source response.
+
+      :param stimulus: Connective field stimulus object.
+      :type stimulus: CFStimulus
+      :param response: Connective field response.
+      :type response: Tensor
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the encoded response. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The stimulus encoded model response with shape `(num_voxels, num_frames)` dtype `dtype`.
+                The number of voxels is the number of rows in `parameters`. The number of frames is the number of time
+                frames in the stimulus design.
+      :rtype: Tensor
+
+
+
+.. py:class:: CompressiveEncoder(encoding_model: prfmodel.models.base.BaseEncoder, min_response: float = 1e-10)
+
+
+
+   Compressive encoding model.
+
+   Amplifies and compresses an encoded stimulus response.
+   The model has two parameters: `gain` (amplification amplitude) and `n` (compression exponent).
+
+   :param encoding_model: A encoding model instance.
+   :type encoding_model: BasePRFEncoder
+   :param min_response: Minimum encoded response (:math:`\epsilon`). A small value ensures numerical stability of gradients when
+                        :math:`n < 1`.
+   :type min_response: float, default=1e-10
+
+   .. rubric:: Notes
+
+   Compressive encoding with `gain` :math:`g` and :math:`n` is done according to the equation:
+
+   .. math::
+
+       p(x) = g \times \text{max}(f(x), \epsilon)^n
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      `gain` and `n`.
+
+      :type: Names of parameters used by the model
+
+
+   .. py:method:: __call__(stimulus: prfmodel.models.base.S, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Compress and encode a model response with a stimulus.
+
+      Encodes the model response, then compresses and amplifies the encoded response.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param response: Model response.
+      :type response: Tensor
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the encoded response. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The compressed and stimulus encoded model response with shape `(num_voxels, ...)` dtype `dtype`.
+                The number of voxels is the number of rows in `parameters`. The number and size of other axes depends on
+                the stimulus and the response.
+      :rtype: Tensor
+
+
+
+.. py:class:: PRFStimulusEncoder
+
+
+
+   Encoding model for population receptive field stimuli.
+
+   Multiplies a stimulus design with a population receptive field model response along the
+   stimulus dimensions and sums over them.
+
+   .. seealso:: :py:obj:`encode_prf_response`
+
+
+   .. py:property:: parameter_names
+      :type: list
+
+
+      Does not have any parameters. Returns an empty list.
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.prf.PRFStimulus, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Encode a population receptive field model response with a stimulus design.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param response: Population receptive field response.
+      :type response: Tensor
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the encoded response. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The stimulus encoded model response with shape `(num_voxels, num_frames)` dtype `dtype`.
+                The number of voxels is the number of rows in `parameters`. The number of frames is the number of time
+                frames in the stimulus design.
+      :rtype: Tensor
+
+
+
 .. py:function:: encode_prf_response(response: prfmodel.typing.Tensor, design: prfmodel.typing.Tensor, dtype: str | None = None) -> prfmodel.typing.Tensor
 
    Encode a population receptive field model response with a stimulus design.
@@ -399,7 +629,7 @@ Package Contents
    (3, 10)
 
 
-.. py:class:: Gaussian2DPRFModel(impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = BaselineAmplitude)
+.. py:class:: Gaussian2DPRFModel(encoding_model: prfmodel.models.base.BaseEncoder | type[prfmodel.models.base.BaseEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = BaselineAmplitude)
 
 
 
@@ -408,12 +638,15 @@ Package Contents
    This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
    and temporal model response.
 
-   :param impulse_model: An impulse response model class or instance. Reponse model classes will be instantiated during object
-                         initialization. The default creates a :class:`~prfmodel.models.impulse.ShiftedDerivativeGammaImpulse`
+   :param encoding_model: An encoding model class or instance. Model classes will be instantiated during initialization. The
+                          default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
+   :type encoding_model: BaseEncoder or type, default=PRFStimulusEncoder
+   :param impulse_model: An impulse response model class or instance. Model classes will be instantiated during
+                         initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
                          instance with default values.
-   :type impulse_model: BaseImpulse or type or None, default=ShiftedDerivativeGammaImpulse, optional
-   :param temporal_model: A temporal model class or instance. Temporal model instances will be instantiated during initialization.
-                          The default creates a `BaselineAmplitude` instance.
+   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
+   :param temporal_model: A temporal model class or instance. Model classes will be instantiated during initialization.
+                          The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
    :type temporal_model: BaseTemporal or type or None, default=BaselineAmplitude, optional
 
    .. rubric:: Notes
@@ -421,7 +654,7 @@ Package Contents
    The simple composite model follows five steps:
 
    1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
-   2. The response is encoded with the stimulus design.
+   2. The encoding model encodes the response with the stimulus design.
    3. A impulse response model generates an impulse response.
    4. The encoded response is convolved with the impulse response.
    5. The temporal model modifies the convolved response.
@@ -453,7 +686,7 @@ Package Contents
       A list with names of unique parameters that are used by the submodels.
 
 
-.. py:class:: GaussianCFModel(temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = BaselineAmplitude)
+.. py:class:: GaussianCFModel(encoding_model: prfmodel.models.base.BaseEncoder | type[prfmodel.models.base.BaseEncoder] = CFStimulusEncoder, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = BaselineAmplitude)
 
 
 
@@ -461,6 +694,9 @@ Package Contents
 
    This is a generic class that combines a Gaussian connective field and temporal model response.
 
+   :param encoding_model: An encoding model class or instance. Model classes will be instantiated during initialization. The
+                          default creates a :class:`~prfmodel.models.encoding.CFStimulusEncoder` instance.
+   :type encoding_model: BaseEncoder or type, default=CFStimulusEncoder
    :param temporal_model: A temporal model class or instance. Temporal model instances will be instantiated during initialization.
                           The default creates a `BaselineAmplitude` instance.
    :type temporal_model: BaseTemporal or type or None, default=BaselineAmplitude, optional
@@ -470,7 +706,7 @@ Package Contents
    The simple composite model follows three steps:
 
    1. The Gaussian connective field response model makes a prediction for the stimulus distance matrix.
-   2. The connective field response is encoded with the source response.
+   2. The encoding model encodes the connective field response with the source response.
    3. The temporal model modifies the encoded response.
 
 

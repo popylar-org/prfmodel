@@ -197,6 +197,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tutorials/simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/css_prf_simulated.html">How to fit a compressive spatial summation population receptive field model to simulated data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../tutorials/diff_gaussians_prf_simulated.html">How to fit a Difference of Gaussians population receptive field model to simulated data</a></li>
 </ul>
 </li>
@@ -214,6 +215,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../autoapi/prfmodel/models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/base/index.html">prfmodel.models.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/compressive_spatial_summation/index.html">prfmodel.models.compressive_spatial_summation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/encoding/index.html">prfmodel.models.encoding</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/gaussian/index.html">prfmodel.models.gaussian</a></li>
@@ -278,13 +280,15 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generic</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeVar</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">ops</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimuli.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">Stimulus</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimuli.cf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CFStimulus</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimuli.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">PRFStimulus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">_get_norm_fun</span>
+
+<span class="n">S</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Stimulus</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="BatchDimensionError">
@@ -367,29 +371,30 @@
 
 
 
-<div class="viewcode-block" id="BasePRFResponse">
-<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.base.BasePRFResponse">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">BasePRFResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseResponse">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.base.BaseResponse">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">S</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Abstract base class for population receptive field response models.</span>
+<span class="sd">    Generic abstract base class for response models.</span>
 
 <span class="sd">    Cannot be instantiated on its own.</span>
 <span class="sd">    Can only be used as a parent class to create custom population receptive field models.</span>
-<span class="sd">    Subclasses must override the abstract `__call__` method.</span>
+<span class="sd">    Subclasses must override the abstract `__call__` method and must be defined</span>
+<span class="sd">    with a specific stimulus type.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BasePRFResponse.__call__">
-<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.base.BasePRFResponse.__call__">[docs]</a>
+<div class="viewcode-block" id="BaseResponse.__call__">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.base.BaseResponse.__call__">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stimulus</span><span class="p">:</span> <span class="n">PRFStimulus</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stimulus</span><span class="p">:</span> <span class="n">S</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Predict the model response for a stimulus.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        stimulus : PRFStimulus</span>
-<span class="sd">            Population receptive field stimulus object.</span>
+<span class="sd">        stimulus : Stimulus</span>
+<span class="sd">            Stimulus object.</span>
 <span class="sd">        parameters : pandas.DataFrame</span>
 <span class="sd">            Dataframe with columns containing different model parameters and rows containing parameter values</span>
 <span class="sd">            for different voxels.</span>
@@ -408,41 +413,50 @@
 
 
 
-<div class="viewcode-block" id="BaseCFResponse">
-<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.base.BaseCFResponse">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">BaseCFResponse</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseEncoder">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.base.BaseEncoder">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseEncoder</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">S</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Abstract base class for connective field response models.</span>
+<span class="sd">    Generic abstract base class for encoding model responses.</span>
 
 <span class="sd">    Cannot be instantiated on its own.</span>
-<span class="sd">    Can only be used as a parent class to create custom connective field models.</span>
-<span class="sd">    Subclasses must override the abstract `__call__` method.</span>
+<span class="sd">    Can only be used as a parent class to create custom encoding models.</span>
+<span class="sd">    Subclasses must override the abstract `parameter_names` property and `__call__` method and must be defined</span>
+<span class="sd">    with a specific stimulus type.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BaseCFResponse.__call__">
-<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.base.BaseCFResponse.__call__">[docs]</a>
+<div class="viewcode-block" id="BaseEncoder.__call__">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.base.BaseEncoder.__call__">[docs]</a>
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stimulus</span><span class="p">:</span> <span class="n">CFStimulus</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Predict the model response for a stimulus.</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">stimulus</span><span class="p">:</span> <span class="n">S</span><span class="p">,</span>
+        <span class="n">response</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Encode a model response with a stimulus.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        stimulus : CFStimulus</span>
-<span class="sd">            Connective field stimulus object.</span>
+<span class="sd">        stimulus : Stimulus</span>
+<span class="sd">            Stimulus object.</span>
+<span class="sd">        response : Tensor</span>
+<span class="sd">            Model response.</span>
 <span class="sd">        parameters : pandas.DataFrame</span>
 <span class="sd">            Dataframe with columns containing different model parameters and rows containing parameter values</span>
 <span class="sd">            for different voxels.</span>
 <span class="sd">        dtype : str, optional</span>
-<span class="sd">            The dtype of the prediction result. If `None` (the default), uses the dtype from</span>
+<span class="sd">            The dtype of the encoded response. If `None` (the default), uses the dtype from</span>
 <span class="sd">            :func:`prfmodel.utils.get_dtype`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Tensor</span>
-<span class="sd">            Model predictions of shape `(num_voxels, ...)` and dtype `dtype`. The number of voxels is the</span>
-<span class="sd">            number of rows in `parameters`. The number and size of other axes depends on the stimulus.</span>
+<span class="sd">            The stimulus encoded model response with shape `(num_voxels, ...)` dtype `dtype`. The number of voxels is</span>
+<span class="sd">            the number of rows in `parameters`. The number and size of other axes depends on the stimulus and the</span>
+<span class="sd">            response.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span></div>
 </div>
@@ -607,12 +621,13 @@
 
 <div class="viewcode-block" id="BaseComposite">
 <a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.base.BaseComposite">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">BaseComposite</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseComposite</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">S</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Base class for creating composite models.</span>
+<span class="sd">    Generic abstract base class for creating composite models.</span>
 
 <span class="sd">    Cannot be instantiated on its own. Can only be used as a parent class to create custom composite models.</span>
-<span class="sd">    Subclasses must override the abstract `__call__` method.</span>
+<span class="sd">    Subclasses must override the abstract `__call__` method and must be defined</span>
+<span class="sd">    with a specific stimulus type.</span>
 <span class="sd">    This class is intended for combining multiple submodels into a composite model with a custom `__call__`</span>
 <span class="sd">    method that defines how the submodels interact to make a composite prediction.</span>
 
@@ -655,7 +670,7 @@
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">stimulus</span><span class="p">:</span> <span class="n">Stimulus</span><span class="p">,</span>
+        <span class="n">stimulus</span><span class="p">:</span> <span class="n">S</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>

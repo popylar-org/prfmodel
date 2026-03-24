@@ -197,6 +197,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../tutorials/simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorials/css_prf_simulated.html">How to fit a compressive spatial summation population receptive field model to simulated data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../tutorials/diff_gaussians_prf_simulated.html">How to fit a Difference of Gaussians population receptive field model to simulated data</a></li>
 </ul>
 </li>
@@ -214,6 +215,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../autoapi/prfmodel/models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/base/index.html">prfmodel.models.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/compressive_spatial_summation/index.html">prfmodel.models.compressive_spatial_summation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/encoding/index.html">prfmodel.models.encoding</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../autoapi/prfmodel/models/gaussian/index.html">prfmodel.models.gaussian</a></li>
@@ -275,8 +277,14 @@
           <h1>Source code for prfmodel.models.encoding</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Stimulus encoding classes.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">ops</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseEncoder</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">S</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimuli.cf</span><span class="w"> </span><span class="kn">import</span> <span class="n">CFStimulus</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimuli.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">PRFStimulus</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Tensor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_parameters_to_tensor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_dtype</span>
 
 
@@ -378,6 +386,212 @@
     <span class="n">axes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ops</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">)))</span>
     <span class="c1"># tensordot is much more memory efficient that standard multiplication</span>
     <span class="k">return</span> <span class="n">ops</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">ops</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="n">axes</span><span class="p">,</span> <span class="n">axes</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="PRFStimulusEncoder">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.encoding.PRFStimulusEncoder">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PRFStimulusEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">[</span><span class="n">PRFStimulus</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encoding model for population receptive field stimuli.</span>
+
+<span class="sd">    Multiplies a stimulus design with a population receptive field model response along the</span>
+<span class="sd">    stimulus dimensions and sums over them.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    encode_prf_response</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameter_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Does not have any parameters. Returns an empty list.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="PRFStimulusEncoder.__call__">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.encoding.PRFStimulusEncoder.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">stimulus</span><span class="p">:</span> <span class="n">PRFStimulus</span><span class="p">,</span>
+        <span class="n">response</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>  <span class="c1"># noqa: ARG002 (unused method argument)</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Encode a population receptive field model response with a stimulus design.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        stimulus : PRFStimulus</span>
+<span class="sd">            Population receptive field stimulus object.</span>
+<span class="sd">        response : Tensor</span>
+<span class="sd">            Population receptive field response.</span>
+<span class="sd">        parameters : pandas.DataFrame</span>
+<span class="sd">            Dataframe with columns containing different model parameters and rows containing parameter values</span>
+<span class="sd">            for different voxels.</span>
+<span class="sd">        dtype : str, optional</span>
+<span class="sd">            The dtype of the encoded response. If `None` (the default), uses the dtype from</span>
+<span class="sd">            :func:`prfmodel.utils.get_dtype`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            The stimulus encoded model response with shape `(num_voxels, num_frames)` dtype `dtype`.</span>
+<span class="sd">            The number of voxels is the number of rows in `parameters`. The number of frames is the number of time</span>
+<span class="sd">            frames in the stimulus design.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">get_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">design</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">stimulus</span><span class="o">.</span><span class="n">design</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">encode_prf_response</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CFStimulusEncoder">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.encoding.CFStimulusEncoder">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CFStimulusEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">[</span><span class="n">CFStimulus</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encoding model for connective field stimuli.</span>
+
+<span class="sd">    Multiplies a source response with a connective model response and sums over the vertices in the source response.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameter_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Does not have any parameters. Returns an empty list.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="CFStimulusEncoder.__call__">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.encoding.CFStimulusEncoder.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">stimulus</span><span class="p">:</span> <span class="n">CFStimulus</span><span class="p">,</span>
+        <span class="n">response</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>  <span class="c1"># noqa: ARG002 (unused method argument)</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Encode a Connective field model response with a source response.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        stimulus : CFStimulus</span>
+<span class="sd">            Connective field stimulus object.</span>
+<span class="sd">        response : Tensor</span>
+<span class="sd">            Connective field response.</span>
+<span class="sd">        parameters : pandas.DataFrame</span>
+<span class="sd">            Dataframe with columns containing different model parameters and rows containing parameter values</span>
+<span class="sd">            for different voxels.</span>
+<span class="sd">        dtype : str, optional</span>
+<span class="sd">            The dtype of the encoded response. If `None` (the default), uses the dtype from</span>
+<span class="sd">            :func:`prfmodel.utils.get_dtype`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            The stimulus encoded model response with shape `(num_voxels, num_frames)` dtype `dtype`.</span>
+<span class="sd">            The number of voxels is the number of rows in `parameters`. The number of frames is the number of time</span>
+<span class="sd">            frames in the stimulus design.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">get_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">source_response</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">stimulus</span><span class="o">.</span><span class="n">source_response</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">source_response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Second dimension of connective field response </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> does not match first dimension &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;of source response </span><span class="si">{</span><span class="n">source_response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ops</span><span class="o">.</span><span class="n">tensordot</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">source_response</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CompressiveEncoder">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.encoding.CompressiveEncoder">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CompressiveEncoder</span><span class="p">(</span><span class="n">BaseEncoder</span><span class="p">[</span><span class="n">S</span><span class="p">]):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compressive encoding model.</span>
+
+<span class="sd">    Amplifies and compresses an encoded stimulus response.</span>
+<span class="sd">    The model has two parameters: `gain` (amplification amplitude) and `n` (compression exponent).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    encoding_model : BasePRFEncoder</span>
+<span class="sd">        A encoding model instance.</span>
+<span class="sd">    min_response : float, default=1e-10</span>
+<span class="sd">        Minimum encoded response (:math:`\epsilon`). A small value ensures numerical stability of gradients when</span>
+<span class="sd">        :math:`n &lt; 1`.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Compressive encoding with `gain` :math:`g` and :math:`n` is done according to the equation:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        p(x) = g \times \text{max}(f(x), \epsilon)^n</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding_model</span><span class="p">:</span> <span class="n">BaseEncoder</span><span class="p">,</span> <span class="n">min_response</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoding_model</span> <span class="o">=</span> <span class="n">encoding_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_response</span> <span class="o">=</span> <span class="n">min_response</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameter_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Names of parameters used by the model: `gain` and `n`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;gain&quot;</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="CompressiveEncoder.__call__">
+<a class="viewcode-back" href="../../../autoapi/prfmodel/models/index.html#prfmodel.models.encoding.CompressiveEncoder.__call__">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">stimulus</span><span class="p">:</span> <span class="n">S</span><span class="p">,</span>
+        <span class="n">response</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compress and encode a model response with a stimulus.</span>
+
+<span class="sd">        Encodes the model response, then compresses and amplifies the encoded response.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        stimulus : Stimulus</span>
+<span class="sd">            Stimulus object.</span>
+<span class="sd">        response : Tensor</span>
+<span class="sd">            Model response.</span>
+<span class="sd">        parameters : pandas.DataFrame</span>
+<span class="sd">            Dataframe with columns containing different model parameters and rows containing parameter values</span>
+<span class="sd">            for different voxels.</span>
+<span class="sd">        dtype : str, optional</span>
+<span class="sd">            The dtype of the encoded response. If `None` (the default), uses the dtype from</span>
+<span class="sd">            :func:`prfmodel.utils.get_dtype`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            The compressed and stimulus encoded model response with shape `(num_voxels, ...)` dtype `dtype`.</span>
+<span class="sd">            The number of voxels is the number of rows in `parameters`. The number and size of other axes depends on</span>
+<span class="sd">            the stimulus and the response.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">get_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">gain</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;gain&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;n&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding_model</span><span class="p">(</span>
+            <span class="n">stimulus</span><span class="o">=</span><span class="n">stimulus</span><span class="p">,</span>
+            <span class="n">response</span><span class="o">=</span><span class="n">response</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">gain</span> <span class="o">*</span> <span class="n">ops</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">ops</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">min_response</span><span class="p">),</span> <span class="n">n</span><span class="p">)</span></div>
+</div>
 
 </pre></div>
         </article>

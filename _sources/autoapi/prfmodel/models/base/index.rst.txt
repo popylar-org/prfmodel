@@ -24,8 +24,8 @@ Classes
 .. autoapisummary::
 
    prfmodel.models.base.BaseModel
-   prfmodel.models.base.BasePRFResponse
-   prfmodel.models.base.BaseCFResponse
+   prfmodel.models.base.BaseResponse
+   prfmodel.models.base.BaseEncoder
    prfmodel.models.base.BaseImpulse
    prfmodel.models.base.BaseTemporal
    prfmodel.models.base.BaseComposite
@@ -94,26 +94,27 @@ Module Contents
       A list with names of parameters that are used by the model.
 
 
-.. py:class:: BasePRFResponse
+.. py:class:: BaseResponse
 
 
 
-   Abstract base class for population receptive field response models.
+   Generic abstract base class for response models.
 
    Cannot be instantiated on its own.
    Can only be used as a parent class to create custom population receptive field models.
-   Subclasses must override the abstract `__call__` method.
+   Subclasses must override the abstract `__call__` method and must be defined
+   with a specific stimulus type.
 
 
 
-   .. py:method:: __call__(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+   .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
       :abstractmethod:
 
 
       Predict the model response for a stimulus.
 
-      :param stimulus: Population receptive field stimulus object.
-      :type stimulus: PRFStimulus
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different voxels.
       :type parameters: pandas.DataFrame
@@ -136,35 +137,39 @@ Module Contents
       A list with names of parameters that are used by the model.
 
 
-.. py:class:: BaseCFResponse
+.. py:class:: BaseEncoder
 
 
 
-   Abstract base class for connective field response models.
+   Generic abstract base class for encoding model responses.
 
    Cannot be instantiated on its own.
-   Can only be used as a parent class to create custom connective field models.
-   Subclasses must override the abstract `__call__` method.
+   Can only be used as a parent class to create custom encoding models.
+   Subclasses must override the abstract `parameter_names` property and `__call__` method and must be defined
+   with a specific stimulus type.
 
 
 
-   .. py:method:: __call__(stimulus: prfmodel.stimuli.cf.CFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+   .. py:method:: __call__(stimulus: S, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None)
       :abstractmethod:
 
 
-      Predict the model response for a stimulus.
+      Encode a model response with a stimulus.
 
-      :param stimulus: Connective field stimulus object.
-      :type stimulus: CFStimulus
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param response: Model response.
+      :type response: Tensor
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different voxels.
       :type parameters: pandas.DataFrame
-      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+      :param dtype: The dtype of the encoded response. If `None` (the default), uses the dtype from
                     :func:`prfmodel.utils.get_dtype`.
       :type dtype: str, optional
 
-      :returns: Model predictions of shape `(num_voxels, ...)` and dtype `dtype`. The number of voxels is the
-                number of rows in `parameters`. The number and size of other axes depends on the stimulus.
+      :returns: The stimulus encoded model response with shape `(num_voxels, ...)` dtype `dtype`. The number of voxels is
+                the number of rows in `parameters`. The number and size of other axes depends on the stimulus and the
+                response.
       :rtype: Tensor
 
 
@@ -293,10 +298,11 @@ Module Contents
 
 
 
-   Base class for creating composite models.
+   Generic abstract base class for creating composite models.
 
    Cannot be instantiated on its own. Can only be used as a parent class to create custom composite models.
-   Subclasses must override the abstract `__call__` method.
+   Subclasses must override the abstract `__call__` method and must be defined
+   with a specific stimulus type.
    This class is intended for combining multiple submodels into a composite model with a custom `__call__`
    method that defines how the submodels interact to make a composite prediction.
 
@@ -312,7 +318,7 @@ Module Contents
       A list with names of unique parameters that are used by the submodels.
 
 
-   .. py:method:: __call__(stimulus: prfmodel.stimuli.base.Stimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+   .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
       :abstractmethod:
 
 

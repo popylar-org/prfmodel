@@ -196,6 +196,7 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/simple_prf_simulated.html">How to fit a population receptive field model to simulated data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/css_prf_simulated.html">How to fit a compressive spatial summation population receptive field model to simulated data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/diff_gaussians_prf_simulated.html">How to fit a Difference of Gaussians population receptive field model to simulated data</a></li>
 </ul>
 </li>
@@ -213,6 +214,7 @@
 <li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/prfmodel/models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/base/index.html">prfmodel.models.base</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/compressive_spatial_summation/index.html">prfmodel.models.compressive_spatial_summation</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/encoding/index.html">prfmodel.models.encoding</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/gaussian/index.html">prfmodel.models.gaussian</a></li>
@@ -280,24 +282,26 @@
   <h2>_</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseCFResponse.__call__">__call__() (prfmodel.models.base.BaseCFResponse method)</a>
+        <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseComposite.__call__">__call__() (prfmodel.models.base.BaseComposite method)</a>
 
         <ul>
-          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseComposite.__call__">(prfmodel.models.base.BaseComposite method)</a>
+          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseEncoder.__call__">(prfmodel.models.base.BaseEncoder method)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseImpulse.__call__">(prfmodel.models.base.BaseImpulse method)</a>
 </li>
-          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BasePRFResponse.__call__">(prfmodel.models.base.BasePRFResponse method)</a>
+          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseResponse.__call__">(prfmodel.models.base.BaseResponse method)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseTemporal.__call__">(prfmodel.models.base.BaseTemporal method)</a>
 </li>
-          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseCFResponse.__call__">(prfmodel.models.BaseCFResponse method)</a>
-</li>
           <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseComposite.__call__">(prfmodel.models.BaseComposite method)</a>
 </li>
-          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BasePRFResponse.__call__">(prfmodel.models.BasePRFResponse method)</a>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseEncoder.__call__">(prfmodel.models.BaseEncoder method)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseResponse.__call__">(prfmodel.models.BaseResponse method)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseTemporal.__call__">(prfmodel.models.BaseTemporal method)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.CFStimulusEncoder.__call__">(prfmodel.models.CFStimulusEncoder method)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/composite/index.html#prfmodel.models.composite.CenterSurroundPRFModel.__call__">(prfmodel.models.composite.CenterSurroundPRFModel method)</a>
 </li>
@@ -305,9 +309,19 @@
 </li>
           <li><a href="autoapi/prfmodel/models/composite/index.html#prfmodel.models.composite.SimplePRFModel.__call__">(prfmodel.models.composite.SimplePRFModel method)</a>
 </li>
+          <li><a href="autoapi/prfmodel/models/compressive_spatial_summation/index.html#prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel.__call__">(prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel method)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.CompressiveEncoder.__call__">(prfmodel.models.CompressiveEncoder method)</a>
+</li>
           <li><a href="autoapi/prfmodel/models/difference_of_gaussians/index.html#prfmodel.models.difference_of_gaussians.DoG2DPRFModel.__call__">(prfmodel.models.difference_of_gaussians.DoG2DPRFModel method)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.DoG2DPRFModel.__call__">(prfmodel.models.DoG2DPRFModel method)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/encoding/index.html#prfmodel.models.encoding.CFStimulusEncoder.__call__">(prfmodel.models.encoding.CFStimulusEncoder method)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/encoding/index.html#prfmodel.models.encoding.CompressiveEncoder.__call__">(prfmodel.models.encoding.CompressiveEncoder method)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/encoding/index.html#prfmodel.models.encoding.PRFStimulusEncoder.__call__">(prfmodel.models.encoding.PRFStimulusEncoder method)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/gaussian/index.html#prfmodel.models.gaussian.Gaussian2DPRFModel.__call__">(prfmodel.models.gaussian.Gaussian2DPRFModel method)</a>
 </li>
@@ -316,6 +330,8 @@
           <li><a href="autoapi/prfmodel/models/gaussian/index.html#prfmodel.models.gaussian.GaussianCFModel.__call__">(prfmodel.models.gaussian.GaussianCFModel method)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/gaussian/index.html#prfmodel.models.gaussian.GaussianCFResponse.__call__">(prfmodel.models.gaussian.GaussianCFResponse method)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.Gaussian2DCSSPRFModel.__call__">(prfmodel.models.Gaussian2DCSSPRFModel method)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.Gaussian2DPRFModel.__call__">(prfmodel.models.Gaussian2DPRFModel method)</a>
 </li>
@@ -332,6 +348,8 @@
           <li><a href="autoapi/prfmodel/models/impulse/two_gamma_deriv/index.html#prfmodel.models.impulse.two_gamma_deriv.DerivativeTwoGammaImpulse.__call__">(prfmodel.models.impulse.two_gamma_deriv.DerivativeTwoGammaImpulse method)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/impulse/index.html#prfmodel.models.impulse.TwoGammaImpulse.__call__">(prfmodel.models.impulse.TwoGammaImpulse method)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.PRFStimulusEncoder.__call__">(prfmodel.models.PRFStimulusEncoder method)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/temporal/index.html#prfmodel.models.temporal.BaselineAmplitude.__call__">(prfmodel.models.temporal.BaselineAmplitude method)</a>
 </li>
@@ -428,16 +446,16 @@
   <h2>B</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseCFResponse">BaseCFResponse (class in prfmodel.models)</a>
-
-        <ul>
-          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseCFResponse">(class in prfmodel.models.base)</a>
-</li>
-        </ul></li>
         <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseComposite">BaseComposite (class in prfmodel.models)</a>
 
         <ul>
           <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseComposite">(class in prfmodel.models.base)</a>
+</li>
+        </ul></li>
+        <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseEncoder">BaseEncoder (class in prfmodel.models)</a>
+
+        <ul>
+          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseEncoder">(class in prfmodel.models.base)</a>
 </li>
         </ul></li>
         <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseImpulse">BaseImpulse (class in prfmodel.models.base)</a>
@@ -452,10 +470,10 @@
         </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BasePRFResponse">BasePRFResponse (class in prfmodel.models)</a>
+        <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseResponse">BaseResponse (class in prfmodel.models)</a>
 
         <ul>
-          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BasePRFResponse">(class in prfmodel.models.base)</a>
+          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseResponse">(class in prfmodel.models.base)</a>
 </li>
         </ul></li>
         <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseTemporal">BaseTemporal (class in prfmodel.models)</a>
@@ -490,6 +508,12 @@
           <li><a href="autoapi/prfmodel/stimuli/cf/index.html#prfmodel.stimuli.cf.CFStimulus">(class in prfmodel.stimuli.cf)</a>
 </li>
         </ul></li>
+        <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.CFStimulusEncoder">CFStimulusEncoder (class in prfmodel.models)</a>
+
+        <ul>
+          <li><a href="autoapi/prfmodel/models/encoding/index.html#prfmodel.models.encoding.CFStimulusEncoder">(class in prfmodel.models.encoding)</a>
+</li>
+        </ul></li>
         <li><a href="autoapi/prfmodel/utils/index.html#prfmodel.utils.ParamsDict.columns">columns (prfmodel.utils.ParamsDict property)</a>
 </li>
         <li><a href="autoapi/prfmodel/fitters/sgd/index.html#prfmodel.fitters.sgd.SGDFitter.compile">compile() (prfmodel.fitters.sgd.SGDFitter method)</a>
@@ -504,6 +528,12 @@
           <li><a href="autoapi/prfmodel/fitters/index.html#prfmodel.fitters.SGDFitter.compile_from_config">(prfmodel.fitters.SGDFitter method)</a>
 </li>
         </ul></li>
+        <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.CompressiveEncoder">CompressiveEncoder (class in prfmodel.models)</a>
+
+        <ul>
+          <li><a href="autoapi/prfmodel/models/encoding/index.html#prfmodel.models.encoding.CompressiveEncoder">(class in prfmodel.models.encoding)</a>
+</li>
+        </ul></li>
         <li><a href="autoapi/prfmodel/fitters/sgd/index.html#prfmodel.fitters.sgd.SGDFitter.compute_dtype">compute_dtype (prfmodel.fitters.sgd.SGDFitter property)</a>
 
         <ul>
@@ -516,14 +546,14 @@
           <li><a href="autoapi/prfmodel/fitters/index.html#prfmodel.fitters.SGDFitter.compute_loss">(prfmodel.fitters.SGDFitter method)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/prfmodel/fitters/sgd/index.html#prfmodel.fitters.sgd.SGDFitter.compute_loss_and_updates">compute_loss_and_updates() (prfmodel.fitters.sgd.SGDFitter method)</a>
 
         <ul>
           <li><a href="autoapi/prfmodel/fitters/index.html#prfmodel.fitters.SGDFitter.compute_loss_and_updates">(prfmodel.fitters.SGDFitter method)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/prfmodel/fitters/sgd/index.html#prfmodel.fitters.sgd.SGDFitter.compute_metrics">compute_metrics() (prfmodel.fitters.sgd.SGDFitter method)</a>
 
         <ul>
@@ -692,6 +722,12 @@
           <li><a href="autoapi/prfmodel/models/impulse/density/index.html#prfmodel.models.impulse.density.gamma_density">(in module prfmodel.models.impulse.density)</a>
 </li>
         </ul></li>
+        <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.Gaussian2DCSSPRFModel">Gaussian2DCSSPRFModel (class in prfmodel.models)</a>
+
+        <ul>
+          <li><a href="autoapi/prfmodel/models/compressive_spatial_summation/index.html#prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel">(class in prfmodel.models.compressive_spatial_summation)</a>
+</li>
+        </ul></li>
         <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.Gaussian2DPRFModel">Gaussian2DPRFModel (class in prfmodel.models)</a>
 
         <ul>
@@ -726,10 +762,10 @@
           <li><a href="autoapi/prfmodel/fitters/index.html#prfmodel.fitters.SGDFitter.get_config">(prfmodel.fitters.SGDFitter method)</a>
 </li>
         </ul></li>
-        <li><a href="autoapi/prfmodel/utils/index.html#prfmodel.utils.get_dtype">get_dtype() (in module prfmodel.utils)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="autoapi/prfmodel/utils/index.html#prfmodel.utils.get_dtype">get_dtype() (in module prfmodel.utils)</a>
+</li>
         <li><a href="autoapi/prfmodel/fitters/sgd/index.html#prfmodel.fitters.sgd.SGDFitter.get_layer">get_layer() (prfmodel.fitters.sgd.SGDFitter method)</a>
 
         <ul>
@@ -796,6 +832,12 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/prfmodel/fitters/grid/index.html#prfmodel.fitters.grid.InfiniteLossWarning">InfiniteLossWarning</a>
 </li>
+        <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.init_css_from_gaussian">init_css_from_gaussian() (in module prfmodel.models)</a>
+
+        <ul>
+          <li><a href="autoapi/prfmodel/models/compressive_spatial_summation/index.html#prfmodel.models.compressive_spatial_summation.init_css_from_gaussian">(in module prfmodel.models.compressive_spatial_summation)</a>
+</li>
+        </ul></li>
         <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.init_dog_from_gaussian">init_dog_from_gaussian() (in module prfmodel.models)</a>
 
         <ul>
@@ -904,6 +946,8 @@
 </li>
           <li><a href="autoapi/prfmodel/models/composite/index.html#module-prfmodel.models.composite">prfmodel.models.composite</a>
 </li>
+          <li><a href="autoapi/prfmodel/models/compressive_spatial_summation/index.html#module-prfmodel.models.compressive_spatial_summation">prfmodel.models.compressive_spatial_summation</a>
+</li>
           <li><a href="autoapi/prfmodel/models/difference_of_gaussians/index.html#module-prfmodel.models.difference_of_gaussians">prfmodel.models.difference_of_gaussians</a>
 </li>
           <li><a href="autoapi/prfmodel/models/encoding/index.html#module-prfmodel.models.encoding">prfmodel.models.encoding</a>
@@ -1001,10 +1045,10 @@
   <h2>P</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseCFResponse.parameter_names">parameter_names (prfmodel.models.base.BaseCFResponse property)</a>
+        <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseComposite.parameter_names">parameter_names (prfmodel.models.base.BaseComposite property)</a>
 
         <ul>
-          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseComposite.parameter_names">(prfmodel.models.base.BaseComposite property)</a>
+          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseEncoder.parameter_names">(prfmodel.models.base.BaseEncoder property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseImpulse.parameter_names">(prfmodel.models.base.BaseImpulse property)</a>
 </li>
@@ -1012,21 +1056,23 @@
 </li>
           <li><a href="autoapi/prfmodel/models/base/index.html#id0">(prfmodel.models.base.BaseModel property)</a>
 </li>
-          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BasePRFResponse.parameter_names">(prfmodel.models.base.BasePRFResponse property)</a>
+          <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseResponse.parameter_names">(prfmodel.models.base.BaseResponse property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/base/index.html#prfmodel.models.base.BaseTemporal.parameter_names">(prfmodel.models.base.BaseTemporal property)</a>
 </li>
-          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseCFResponse.parameter_names">(prfmodel.models.BaseCFResponse property)</a>
-</li>
           <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseComposite.parameter_names">(prfmodel.models.BaseComposite property)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseEncoder.parameter_names">(prfmodel.models.BaseEncoder property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseModel.parameter_names">(prfmodel.models.BaseModel attribute)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/index.html#id0">(prfmodel.models.BaseModel property)</a>
 </li>
-          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BasePRFResponse.parameter_names">(prfmodel.models.BasePRFResponse property)</a>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseResponse.parameter_names">(prfmodel.models.BaseResponse property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.BaseTemporal.parameter_names">(prfmodel.models.BaseTemporal property)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.CFStimulusEncoder.parameter_names">(prfmodel.models.CFStimulusEncoder property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/composite/index.html#prfmodel.models.composite.CenterSurroundPRFModel.parameter_names">(prfmodel.models.composite.CenterSurroundPRFModel property)</a>
 </li>
@@ -1034,9 +1080,19 @@
 </li>
           <li><a href="autoapi/prfmodel/models/composite/index.html#prfmodel.models.composite.SimplePRFModel.parameter_names">(prfmodel.models.composite.SimplePRFModel property)</a>
 </li>
+          <li><a href="autoapi/prfmodel/models/compressive_spatial_summation/index.html#prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel.parameter_names">(prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel property)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.CompressiveEncoder.parameter_names">(prfmodel.models.CompressiveEncoder property)</a>
+</li>
           <li><a href="autoapi/prfmodel/models/difference_of_gaussians/index.html#prfmodel.models.difference_of_gaussians.DoG2DPRFModel.parameter_names">(prfmodel.models.difference_of_gaussians.DoG2DPRFModel property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.DoG2DPRFModel.parameter_names">(prfmodel.models.DoG2DPRFModel property)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/encoding/index.html#prfmodel.models.encoding.CFStimulusEncoder.parameter_names">(prfmodel.models.encoding.CFStimulusEncoder property)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/encoding/index.html#prfmodel.models.encoding.CompressiveEncoder.parameter_names">(prfmodel.models.encoding.CompressiveEncoder property)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/encoding/index.html#prfmodel.models.encoding.PRFStimulusEncoder.parameter_names">(prfmodel.models.encoding.PRFStimulusEncoder property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/gaussian/index.html#prfmodel.models.gaussian.Gaussian2DPRFModel.parameter_names">(prfmodel.models.gaussian.Gaussian2DPRFModel property)</a>
 </li>
@@ -1045,6 +1101,8 @@
           <li><a href="autoapi/prfmodel/models/gaussian/index.html#prfmodel.models.gaussian.GaussianCFModel.parameter_names">(prfmodel.models.gaussian.GaussianCFModel property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/gaussian/index.html#prfmodel.models.gaussian.GaussianCFResponse.parameter_names">(prfmodel.models.gaussian.GaussianCFResponse property)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.Gaussian2DCSSPRFModel.parameter_names">(prfmodel.models.Gaussian2DCSSPRFModel property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.Gaussian2DPRFModel.parameter_names">(prfmodel.models.Gaussian2DPRFModel property)</a>
 </li>
@@ -1061,6 +1119,8 @@
           <li><a href="autoapi/prfmodel/models/impulse/two_gamma_deriv/index.html#prfmodel.models.impulse.two_gamma_deriv.DerivativeTwoGammaImpulse.parameter_names">(prfmodel.models.impulse.two_gamma_deriv.DerivativeTwoGammaImpulse property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/impulse/index.html#prfmodel.models.impulse.TwoGammaImpulse.parameter_names">(prfmodel.models.impulse.TwoGammaImpulse property)</a>
+</li>
+          <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.PRFStimulusEncoder.parameter_names">(prfmodel.models.PRFStimulusEncoder property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/temporal/index.html#prfmodel.models.temporal.BaselineAmplitude.parameter_names">(prfmodel.models.temporal.BaselineAmplitude property)</a>
 </li>
@@ -1121,6 +1181,8 @@
           <li><a href="autoapi/prfmodel/adapter/index.html#module-prfmodel.adapter">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     prfmodel.backend
 
@@ -1128,8 +1190,6 @@
           <li><a href="autoapi/prfmodel/backend/index.html#module-prfmodel.backend">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     prfmodel.examples
 
@@ -1184,6 +1244,13 @@
 
         <ul>
           <li><a href="autoapi/prfmodel/models/composite/index.html#module-prfmodel.models.composite">module</a>
+</li>
+        </ul></li>
+        <li>
+    prfmodel.models.compressive_spatial_summation
+
+        <ul>
+          <li><a href="autoapi/prfmodel/models/compressive_spatial_summation/index.html#module-prfmodel.models.compressive_spatial_summation">module</a>
 </li>
         </ul></li>
         <li>
@@ -1304,6 +1371,12 @@
           <li><a href="autoapi/prfmodel/stimuli/index.html#prfmodel.stimuli.PRFStimulus">(class in prfmodel.stimuli)</a>
 </li>
           <li><a href="autoapi/prfmodel/stimuli/prf/index.html#prfmodel.stimuli.prf.PRFStimulus">(class in prfmodel.stimuli.prf)</a>
+</li>
+        </ul></li>
+        <li><a href="autoapi/prfmodel/models/index.html#prfmodel.models.PRFStimulusEncoder">PRFStimulusEncoder (class in prfmodel.models)</a>
+
+        <ul>
+          <li><a href="autoapi/prfmodel/models/encoding/index.html#prfmodel.models.encoding.PRFStimulusEncoder">(class in prfmodel.models.encoding)</a>
 </li>
         </ul></li>
     </ul></td>
