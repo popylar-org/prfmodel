@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+from prfmodel.stimuli.cf import CFStimulus
 
 parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32", "float64"])
 
@@ -65,3 +66,27 @@ class PRFStimulusGridSetup:
     def grid_3d(self):
         """3D stimulus grid of shape (height, width, depth, 3)."""
         return _make_grid("3d", self.num_height, self.num_width, self.num_depth, self.lower, self.upper)
+
+
+class CFSetup:
+    """Test setup for CF models."""
+
+    num_source: int = 5
+
+    @pytest.fixture
+    def distance_matrix(self):
+        """Distance matrix."""
+        return np.ones((self.num_source, self.num_source))
+
+    @pytest.fixture
+    def source_response(self):
+        """Source response."""
+        return np.array([[1.5, 2.0, 0.2, 3.1, 1.7]]).T  # (distance_matrix.shape[0], 1)
+
+    @pytest.fixture
+    def stimulus(self, distance_matrix: np.ndarray, source_response: np.ndarray):
+        """Stimulus object."""
+        return CFStimulus(
+            distance_matrix=distance_matrix,
+            source_response=source_response,
+        )
