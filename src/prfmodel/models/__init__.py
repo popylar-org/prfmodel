@@ -7,6 +7,8 @@ from .base import BaseResponse
 from .base import BaseTemporal
 from .compressive_spatial_summation import Gaussian2DCSSPRFModel
 from .compressive_spatial_summation import init_css_from_gaussian
+from .csf import CSFModel
+from .csf import CSFResponse
 from .difference_of_gaussians import DoG2DPRFModel
 from .difference_of_gaussians import init_dog_from_gaussian
 from .encoding import CFStimulusEncoder
@@ -23,6 +25,8 @@ __all__ = [
     "BaseResponse",
     "BaseTemporal",
     "CFStimulusEncoder",
+    "CSFModel",
+    "CSFResponse",
     "CompressiveEncoder",
     "DoG2DPRFModel",
     "Gaussian2DCSSPRFModel",
