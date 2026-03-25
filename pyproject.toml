@@ -58,6 +58,7 @@ dev = [
     "pre-commit",
     "sphinx",
     "sphinx-autoapi",
+    "sphinx-design",
     "furo",
     "mypy",
     "types-tensorflow",
