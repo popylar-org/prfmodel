@@ -14,8 +14,8 @@ You want to contribute a tutorial or example? Make a `pull request <https://gith
    :titlesonly:
    :glob:
 
-   examples/index
    tutorials/index
+   examples/index
 
 Development
 -----------
