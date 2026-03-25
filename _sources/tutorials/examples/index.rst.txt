@@ -9,3 +9,4 @@ Here you can find a list of examples:
    :glob:
 
    prf_2d_fmri_visual.md
+   cf_fmri_visual.md
