@@ -1,0 +1,2404 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Tutorials &amp; Examples" href="tutorials/index.html"><link rel="prev" title="Installation" href="installation.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>Getting started - prfmodel 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=ad54fe46" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Getting started</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="tutorials/index.html">Tutorials &amp; Examples</a><input aria-label="Toggle navigation of Tutorials &amp; Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="tutorials/examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/examples/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="tutorials/tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorials/css_prf_simulated.html">How to fit a compressive spatial summation population receptive field model to simulated data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorials/diff_gaussians_prf_simulated.html">How to fit a Difference of Gaussians population receptive field model to simulated data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/prfmodel/index.html">prfmodel</a><input aria-label="Toggle navigation of prfmodel" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/adapter/index.html">prfmodel.adapter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/backend/index.html">prfmodel.backend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/index.html">prfmodel.examples</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/prfmodel/fitters/index.html">prfmodel.fitters</a><input aria-label="Toggle navigation of prfmodel.fitters" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/fitters/grid/index.html">prfmodel.fitters.grid</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/fitters/linear/index.html">prfmodel.fitters.linear</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/fitters/sgd/index.html">prfmodel.fitters.sgd</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/prfmodel/models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/base/index.html">prfmodel.models.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/composite/index.html">prfmodel.models.composite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/compressive_spatial_summation/index.html">prfmodel.models.compressive_spatial_summation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/encoding/index.html">prfmodel.models.encoding</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/gaussian/index.html">prfmodel.models.gaussian</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/prfmodel/models/impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/impulse/convolve/index.html">prfmodel.models.impulse.convolve</a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/impulse/density/index.html">prfmodel.models.impulse.density</a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/impulse/shifted_gamma/index.html">prfmodel.models.impulse.shifted_gamma</a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/impulse/two_gamma/index.html">prfmodel.models.impulse.two_gamma</a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/impulse/two_gamma_deriv/index.html">prfmodel.models.impulse.two_gamma_deriv</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/temporal/index.html">prfmodel.models.temporal</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/prfmodel/stimuli/index.html">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/stimuli/base/index.html">prfmodel.stimuli.base</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/stimuli/cf/index.html">prfmodel.stimuli.cf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/stimuli/prf/index.html">prfmodel.stimuli.prf</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/typing/index.html">prfmodel.typing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/utils/index.html">prfmodel.utils</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/getting_started.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading">¶</a></h1>
+<p>This page gives a brief overview on how to fit a population receptive field (pRF) model to simulated data.</p>
+<p>A pRF model maps neural activity in a region of interest in the brain (e.g., V1 in the human visual cortex)
+to an experimental stimulus (e.g., a bar moving through the visual field). Here, we use the visual domain as an example,
+where the part of the visual field that stimulates activity in the region of interest is the pRF.</p>
+<section id="defining-the-stimulus">
+<h2>Defining the stimulus<a class="headerlink" href="#defining-the-stimulus" title="Link to this heading">¶</a></h2>
+<p>Let’s start with the first step: Defining the stimulus. We load an example stimulus that is included in the package.
+The stimulus simulates a bar moving in different directions through a two-dimensional visual field.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.examples</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_2d_prf_bar_stimulus</span>
+
+<span class="n">num_frames</span> <span class="o">=</span> <span class="mi">200</span>  <span class="c1"># Simulate 200 time frames</span>
+
+<span class="n">stimulus</span> <span class="o">=</span> <span class="n">load_2d_prf_bar_stimulus</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2026-02-23 16:28:30.763282: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+2026-02-23 16:28:30.806653: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+/opt/hostedtoolcache/Python/3.12.12/x64/lib/python3.12/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.6.3) or chardet (6.0.0.post1)/charset_normalizer (3.4.4) doesn&#39;t match a supported version!
+  warnings.warn(
+2026-02-23 16:28:32.100290: I external/local_xla/xla/tsl/cuda/cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+</pre></div>
+</div>
+</div>
+</div>
+<p>When printing the <code class="docutils literal notranslate"><span class="pre">stimulus</span></code> object, we can see that it has three attributes. The <code class="docutils literal notranslate"><span class="pre">design</span></code> attribute defines how
+the visual field changes over time. It has shape <code class="docutils literal notranslate"><span class="pre">(num_frames,</span> <span class="pre">width,</span> <span class="pre">height)</span></code>, where width and hight define the number of pixels at which the visual field is recorded.
+The <code class="docutils literal notranslate"><span class="pre">grid</span></code> attribute maps each pixel to its xy-coordinate in the visual field (i.e., the degree of visual angle).</p>
+</section>
+<section id="defining-the-prf-model">
+<h2>Defining the pRF model<a class="headerlink" href="#defining-the-prf-model" title="Link to this heading">¶</a></h2>
+<p>Now that we defined our stimulus, we can create a pRF model to predict a neural response to this stimulus in our
+(hypothetical) region of interest (e.g., V1). We use the most popular pRF model that is based on the seminal paper
+by Dumoulin and Wandell (2008).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code> class performs all these steps to make a combined prediction.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.gaussian</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian2DPRFModel</span>
+
+<span class="n">prf_model</span> <span class="o">=</span> <span class="n">Gaussian2DPRFModel</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>To simulate a neural response to our stimulus with our Gaussian 2D pRF model, we need to define a set of parameters.</p>
+<p>The list of parameters that need to be set to make model predictions can be obtained from the <code class="docutils literal notranslate"><span class="pre">parameter_names</span></code> property.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prf_model</span><span class="o">.</span><span class="n">parameter_names</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;mu_y&#39;,
+ &#39;mu_x&#39;,
+ &#39;sigma&#39;,
+ &#39;delay&#39;,
+ &#39;dispersion&#39;,
+ &#39;undershoot&#39;,
+ &#39;u_dispersion&#39;,
+ &#39;ratio&#39;,
+ &#39;weight_deriv&#39;,
+ &#39;baseline&#39;,
+ &#39;amplitude&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<p>The parameters <code class="docutils literal notranslate"><span class="pre">mu_x</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>, and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> define the location and size of the predicted Gaussian pRF and are of primary interest.
+We simulate a pRF with its center at (-2.1, 1.45) and a size of 1.35. The parameters
+<code class="docutils literal notranslate"><span class="pre">delay</span></code>, <code class="docutils literal notranslate"><span class="pre">dispersion</span></code>, <code class="docutils literal notranslate"><span class="pre">undershoot</span></code>, <code class="docutils literal notranslate"><span class="pre">u_dispersion</span></code>, <code class="docutils literal notranslate"><span class="pre">ratio</span></code>, and <code class="docutils literal notranslate"><span class="pre">weight_deriv</span></code> determine the impulse response that is
+convolved with our pRF response. The parameters <code class="docutils literal notranslate"><span class="pre">baseline</span></code> and <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> shift and scale our convolved
+response, respectively. We store the parameter values in a <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> object.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">true_params</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;mu_x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">2.1</span><span class="p">],</span>
+        <span class="s2">&quot;mu_y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.45</span><span class="p">],</span>
+        <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.35</span><span class="p">],</span>
+        <span class="s2">&quot;delay&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.0</span><span class="p">],</span>
+        <span class="s2">&quot;dispersion&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">],</span>
+        <span class="s2">&quot;undershoot&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">12.0</span><span class="p">],</span>
+        <span class="s2">&quot;u_dispersion&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">],</span>
+        <span class="s2">&quot;ratio&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.48</span><span class="p">],</span>
+        <span class="s2">&quot;weight_deriv&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">],</span>
+        <span class="s2">&quot;baseline&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">10.0</span><span class="p">],</span>
+        <span class="s2">&quot;amplitude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.2</span><span class="p">],</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Using the “true” parameters, we simulate a response to our stimulus by making a prediction with our pRF model.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">simulated_response</span> <span class="o">=</span> <span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">true_params</span><span class="p">)</span>
+
+<span class="n">_</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">simulated_response</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2026-02-23 16:28:33.315874: E external/local_xla/xla/stream_executor/cuda/cuda_platform.cc:51] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: UNKNOWN ERROR (303)
+</pre></div>
+</div>
+<img alt="_images/237446b8c795106a9cf235713c8aebebaf0dc39ef8e4b2b19de2b08050497218.png" src="_images/237446b8c795106a9cf235713c8aebebaf0dc39ef8e4b2b19de2b08050497218.png" />
+</div>
+</div>
+<p>The predicted response contains increased activation followed by decreased activation compared to the baseline activity for each moving bar in our stimulus.</p>
+</section>
+<section id="fitting-the-prf-model">
+<h2>Fitting the pRF model<a class="headerlink" href="#fitting-the-prf-model" title="Link to this heading">¶</a></h2>
+<p>We will fit the pRF model to our simulated data using multiple stages. We begin with a grid search to find good
+starting values for our parameters of interest (<code class="docutils literal notranslate"><span class="pre">mu_x</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>, and <code class="docutils literal notranslate"><span class="pre">sigma</span></code>). Then, we use least squares to estimate the <code class="docutils literal notranslate"><span class="pre">baseline</span></code> and <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> of
+our model. Finally, we use stochastic gradient descent (SGD) to finetune our model fits.</p>
+<p>Let’s start with the grid search by defining ranges of <code class="docutils literal notranslate"><span class="pre">mu_x</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>, and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> that we want to construct a grid
+of parameter values from. For all other parameters, we only provide a single value so that they will stay constant
+across the entire grid.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">param_ranges</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;mu_x&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="s2">&quot;mu_y&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+    <span class="s2">&quot;delay&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">6.0</span><span class="p">],</span>
+    <span class="s2">&quot;dispersion&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">],</span>
+    <span class="s2">&quot;undershoot&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">12.0</span><span class="p">],</span>
+    <span class="s2">&quot;u_dispersion&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">],</span>
+    <span class="s2">&quot;ratio&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.48</span><span class="p">],</span>
+    <span class="s2">&quot;weight_deriv&quot;</span><span class="p">:</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">],</span>
+    <span class="s2">&quot;baseline&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span>
+    <span class="s2">&quot;amplitude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>For all three parameters, we defined ranges of 10 values that will be used to construct the grid. That is, the
+grid search will evaluate all possible combinations of these values and return the combination that fits the simulated
+data best. This will result in a grid containing <span class="math notranslate nohighlight">\(10 \times 10 \times 10 = 1000\)</span> parameter combinations.</p>
+<p>Let’s construct the <code class="docutils literal notranslate"><span class="pre">GridFitter</span></code> and perform the grid search. Note that we set <code class="docutils literal notranslate"><span class="pre">chunk_size=20</span></code> to let the <code class="docutils literal notranslate"><span class="pre">GridFitter</span></code>
+evaluate 20 parameter combinations at the same time (which saves us some memory).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.fitters.grid</span><span class="w"> </span><span class="kn">import</span> <span class="n">GridFitter</span>
+
+<span class="n">grid_fitter</span> <span class="o">=</span> <span class="n">GridFitter</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">prf_model</span><span class="p">,</span>
+    <span class="n">stimulus</span><span class="o">=</span><span class="n">stimulus</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">grid_history</span><span class="p">,</span> <span class="n">grid_params</span> <span class="o">=</span> <span class="n">grid_fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">simulated_response</span><span class="p">,</span>
+    <span class="n">parameter_values</span><span class="o">=</span><span class="n">param_ranges</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing parameter grid:   0%|          | 0/50 [00:00&lt;?, ?it/s]
+Processing parameter grid:   0%|          | 0/50 [00:00&lt;?, ?it/s, loss=131]
+Processing parameter grid:   0%|          | 0/50 [00:00&lt;?, ?it/s, loss=121]
+Processing parameter grid:   0%|          | 0/50 [00:00&lt;?, ?it/s, loss=114]
+Processing parameter grid:   6%|▌         | 3/50 [00:00&lt;00:01, 24.89it/s, loss=114]
+Processing parameter grid:   6%|▌         | 3/50 [00:00&lt;00:01, 24.89it/s, loss=112]
+Processing parameter grid:   6%|▌         | 3/50 [00:00&lt;00:01, 24.89it/s, loss=112]
+Processing parameter grid:   6%|▌         | 3/50 [00:00&lt;00:01, 24.89it/s, loss=112]
+Processing parameter grid:   6%|▌         | 3/50 [00:00&lt;00:01, 24.89it/s, loss=112]
+Processing parameter grid:  14%|█▍        | 7/50 [00:00&lt;00:01, 28.14it/s, loss=112]
+Processing parameter grid:  14%|█▍        | 7/50 [00:00&lt;00:01, 28.14it/s, loss=112]
+Processing parameter grid:  14%|█▍        | 7/50 [00:00&lt;00:01, 28.14it/s, loss=110]
+Processing parameter grid:  14%|█▍        | 7/50 [00:00&lt;00:01, 28.14it/s, loss=110]
+Processing parameter grid:  14%|█▍        | 7/50 [00:00&lt;00:01, 28.14it/s, loss=110]
+Processing parameter grid:  22%|██▏       | 11/50 [00:00&lt;00:01, 29.12it/s, loss=110]
+Processing parameter grid:  22%|██▏       | 11/50 [00:00&lt;00:01, 29.12it/s, loss=110]
+Processing parameter grid:  22%|██▏       | 11/50 [00:00&lt;00:01, 29.12it/s, loss=110]
+Processing parameter grid:  22%|██▏       | 11/50 [00:00&lt;00:01, 29.12it/s, loss=110]
+Processing parameter grid:  28%|██▊       | 14/50 [00:00&lt;00:01, 28.72it/s, loss=110]
+Processing parameter grid:  28%|██▊       | 14/50 [00:00&lt;00:01, 28.72it/s, loss=110]
+Processing parameter grid:  28%|██▊       | 14/50 [00:00&lt;00:01, 28.72it/s, loss=110]
+Processing parameter grid:  28%|██▊       | 14/50 [00:00&lt;00:01, 28.72it/s, loss=110]
+Processing parameter grid:  28%|██▊       | 14/50 [00:00&lt;00:01, 28.72it/s, loss=110]
+Processing parameter grid:  36%|███▌      | 18/50 [00:00&lt;00:01, 29.37it/s, loss=110]
+Processing parameter grid:  36%|███▌      | 18/50 [00:00&lt;00:01, 29.37it/s, loss=110]
+Processing parameter grid:  36%|███▌      | 18/50 [00:00&lt;00:01, 29.37it/s, loss=110]
+Processing parameter grid:  36%|███▌      | 18/50 [00:00&lt;00:01, 29.37it/s, loss=110]
+Processing parameter grid:  36%|███▌      | 18/50 [00:00&lt;00:01, 29.37it/s, loss=110]
+Processing parameter grid:  44%|████▍     | 22/50 [00:00&lt;00:00, 29.69it/s, loss=110]
+Processing parameter grid:  44%|████▍     | 22/50 [00:00&lt;00:00, 29.69it/s, loss=110]
+Processing parameter grid:  44%|████▍     | 22/50 [00:00&lt;00:00, 29.69it/s, loss=110]
+Processing parameter grid:  44%|████▍     | 22/50 [00:00&lt;00:00, 29.69it/s, loss=110]
+Processing parameter grid:  44%|████▍     | 22/50 [00:00&lt;00:00, 29.69it/s, loss=110]
+Processing parameter grid:  52%|█████▏    | 26/50 [00:00&lt;00:00, 29.90it/s, loss=110]
+Processing parameter grid:  52%|█████▏    | 26/50 [00:00&lt;00:00, 29.90it/s, loss=110]
+Processing parameter grid:  52%|█████▏    | 26/50 [00:00&lt;00:00, 29.90it/s, loss=110]
+Processing parameter grid:  52%|█████▏    | 26/50 [00:00&lt;00:00, 29.90it/s, loss=110]
+Processing parameter grid:  58%|█████▊    | 29/50 [00:00&lt;00:00, 29.55it/s, loss=110]
+Processing parameter grid:  58%|█████▊    | 29/50 [00:01&lt;00:00, 29.55it/s, loss=110]
+Processing parameter grid:  58%|█████▊    | 29/50 [00:01&lt;00:00, 29.55it/s, loss=110]
+Processing parameter grid:  58%|█████▊    | 29/50 [00:01&lt;00:00, 29.55it/s, loss=110]
+Processing parameter grid:  64%|██████▍   | 32/50 [00:01&lt;00:00, 29.35it/s, loss=110]
+Processing parameter grid:  64%|██████▍   | 32/50 [00:01&lt;00:00, 29.35it/s, loss=110]
+Processing parameter grid:  64%|██████▍   | 32/50 [00:01&lt;00:00, 29.35it/s, loss=110]
+Processing parameter grid:  64%|██████▍   | 32/50 [00:01&lt;00:00, 29.35it/s, loss=110]
+Processing parameter grid:  70%|███████   | 35/50 [00:01&lt;00:00, 29.20it/s, loss=110]
+Processing parameter grid:  70%|███████   | 35/50 [00:01&lt;00:00, 29.20it/s, loss=110]
+Processing parameter grid:  70%|███████   | 35/50 [00:01&lt;00:00, 29.20it/s, loss=110]
+Processing parameter grid:  70%|███████   | 35/50 [00:01&lt;00:00, 29.20it/s, loss=110]
+Processing parameter grid:  76%|███████▌  | 38/50 [00:01&lt;00:00, 29.28it/s, loss=110]
+Processing parameter grid:  76%|███████▌  | 38/50 [00:01&lt;00:00, 29.28it/s, loss=110]
+Processing parameter grid:  76%|███████▌  | 38/50 [00:01&lt;00:00, 29.28it/s, loss=110]
+Processing parameter grid:  76%|███████▌  | 38/50 [00:01&lt;00:00, 29.28it/s, loss=110]
+Processing parameter grid:  82%|████████▏ | 41/50 [00:01&lt;00:00, 28.96it/s, loss=110]
+Processing parameter grid:  82%|████████▏ | 41/50 [00:01&lt;00:00, 28.96it/s, loss=110]
+Processing parameter grid:  82%|████████▏ | 41/50 [00:01&lt;00:00, 28.96it/s, loss=110]
+Processing parameter grid:  82%|████████▏ | 41/50 [00:01&lt;00:00, 28.96it/s, loss=110]
+Processing parameter grid:  88%|████████▊ | 44/50 [00:01&lt;00:00, 29.03it/s, loss=110]
+Processing parameter grid:  88%|████████▊ | 44/50 [00:01&lt;00:00, 29.03it/s, loss=110]
+Processing parameter grid:  88%|████████▊ | 44/50 [00:01&lt;00:00, 29.03it/s, loss=110]
+Processing parameter grid:  88%|████████▊ | 44/50 [00:01&lt;00:00, 29.03it/s, loss=110]
+Processing parameter grid:  88%|████████▊ | 44/50 [00:01&lt;00:00, 29.03it/s, loss=110]
+Processing parameter grid:  96%|█████████▌| 48/50 [00:01&lt;00:00, 29.44it/s, loss=110]
+Processing parameter grid:  96%|█████████▌| 48/50 [00:01&lt;00:00, 29.44it/s, loss=110]
+Processing parameter grid:  96%|█████████▌| 48/50 [00:01&lt;00:00, 29.44it/s, loss=110]
+Processing parameter grid: 100%|██████████| 50/50 [00:01&lt;00:00, 29.21it/s, loss=110]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid_params</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mu_x</th>
+      <th>mu_y</th>
+      <th>sigma</th>
+      <th>delay</th>
+      <th>dispersion</th>
+      <th>undershoot</th>
+      <th>u_dispersion</th>
+      <th>ratio</th>
+      <th>weight_deriv</th>
+      <th>baseline</th>
+      <th>amplitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-2.333333</td>
+      <td>1.666667</td>
+      <td>0.5</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>0.0</td>
+      <td>1.0</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>We can see that the estimates for <code class="docutils literal notranslate"><span class="pre">mu_x</span></code>, <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>, and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> are one combination in our grid. However, because the
+grid did not contain the “true” parameters we used to simulate the original response, the estimates differ from the
+“true” parameters.</p>
+<p>Using the parameter estimates resulting from the grid search we can make model predictions and compare them against
+the original simulated response.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">grid_pred_response</span> <span class="o">=</span> <span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">grid_params</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">simulated_response</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;True&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">grid_pred_response</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Predicted (grid)&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/b443f007c4a311b0612f6a40f4ba05f50f2abeb8b12fd6d71d2c0f8496d99417.png" src="_images/b443f007c4a311b0612f6a40f4ba05f50f2abeb8b12fd6d71d2c0f8496d99417.png" />
+</div>
+</div>
+<p>We can see that the predicted response follows the shape of the original (true) response but still shows some deviation
+in the amplitude of the activation peaks and the baseline activation.</p>
+<p>Using least squares, we can estimate the baseline and amplitude parameters of our model.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.fitters.linear</span><span class="w"> </span><span class="kn">import</span> <span class="n">LeastSquaresFitter</span>
+
+<span class="n">ls_fitter</span> <span class="o">=</span> <span class="n">LeastSquaresFitter</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">prf_model</span><span class="p">,</span>
+    <span class="n">stimulus</span><span class="o">=</span><span class="n">stimulus</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ls_history</span><span class="p">,</span> <span class="n">ls_params</span> <span class="o">=</span> <span class="n">ls_fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">simulated_response</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="n">grid_params</span><span class="p">,</span>
+    <span class="n">slope_name</span><span class="o">=</span><span class="s2">&quot;amplitude&quot;</span><span class="p">,</span>  <span class="c1"># Names of parameters to be optimized with least squares</span>
+    <span class="n">intercept_name</span><span class="o">=</span><span class="s2">&quot;baseline&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">ls_params</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Processing data batches:   0%|          | 0/1 [00:00&lt;?, ?it/s]
+Processing data batches: 100%|██████████| 1/1 [00:00&lt;00:00, 17.38it/s]
+</pre></div>
+</div>
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mu_x</th>
+      <th>mu_y</th>
+      <th>sigma</th>
+      <th>delay</th>
+      <th>dispersion</th>
+      <th>undershoot</th>
+      <th>u_dispersion</th>
+      <th>ratio</th>
+      <th>weight_deriv</th>
+      <th>baseline</th>
+      <th>amplitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-2.333333</td>
+      <td>1.666667</td>
+      <td>0.5</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>10.179467</td>
+      <td>1.120465</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>Looking at the parameters, we can see that the model compensates the deviation in the peaks by adjusting the
+<code class="docutils literal notranslate"><span class="pre">baseline</span></code> and <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> parameters. We can also plot the predicted response.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ls_pred_response</span> <span class="o">=</span> <span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">ls_params</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">simulated_response</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;True&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ls_pred_response</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Predicted (least-squares)&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/69d7f8c3ca9f37246e51742dbb412e27b248282473c42f796151a11c959e764d.png" src="_images/69d7f8c3ca9f37246e51742dbb412e27b248282473c42f796151a11c959e764d.png" />
+</div>
+</div>
+<p>To finetune our model fits, we use SGD to iteratively optimize model parameters using the gradient of a loss function
+that is computed between data and model predictions. The default loss function in prfmodel is the means squared error.
+As initial parameters, we use the result from the grid search and least squares fit. We fix the parameters related to
+the impulse response to their initial values (which are the “true” values).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.fitters.sgd</span><span class="w"> </span><span class="kn">import</span> <span class="n">SGDFitter</span>
+
+<span class="n">sgd_fitter</span> <span class="o">=</span> <span class="n">SGDFitter</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">prf_model</span><span class="p">,</span>
+    <span class="n">stimulus</span><span class="o">=</span><span class="n">stimulus</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">sgd_history</span><span class="p">,</span> <span class="n">sgd_params</span> <span class="o">=</span> <span class="n">sgd_fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">data</span><span class="o">=</span><span class="n">simulated_response</span><span class="p">,</span>
+    <span class="n">init_parameters</span><span class="o">=</span><span class="n">ls_params</span><span class="p">,</span>
+    <span class="n">fixed_parameters</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;delay&quot;</span><span class="p">,</span> <span class="s2">&quot;dispersion&quot;</span><span class="p">,</span> <span class="s2">&quot;undershoot&quot;</span><span class="p">,</span> <span class="s2">&quot;u_dispersion&quot;</span><span class="p">,</span> <span class="s2">&quot;ratio&quot;</span><span class="p">,</span> <span class="s2">&quot;weight_deriv&quot;</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>  0%|          | 0/1000 [00:00&lt;?, ?it/s]
+  0%|          | 0/1000 [00:00&lt;?, ?it/s, loss=0.395]
+  0%|          | 0/1000 [00:00&lt;?, ?it/s, loss=0.393]
+  0%|          | 2/1000 [00:00&lt;01:03, 15.77it/s, loss=0.393]
+  0%|          | 2/1000 [00:00&lt;01:03, 15.77it/s, loss=0.392]
+  0%|          | 2/1000 [00:00&lt;01:03, 15.77it/s, loss=0.391]
+  0%|          | 4/1000 [00:00&lt;00:59, 16.84it/s, loss=0.391]
+  0%|          | 4/1000 [00:00&lt;00:59, 16.84it/s, loss=0.39]
+  0%|          | 4/1000 [00:00&lt;00:59, 16.84it/s, loss=0.389]
+  1%|          | 6/1000 [00:00&lt;00:57, 17.16it/s, loss=0.389]
+  1%|          | 6/1000 [00:00&lt;00:57, 17.16it/s, loss=0.388]
+  1%|          | 6/1000 [00:00&lt;00:57, 17.16it/s, loss=0.387]
+  1%|          | 8/1000 [00:00&lt;00:57, 17.25it/s, loss=0.387]
+  1%|          | 8/1000 [00:00&lt;00:57, 17.25it/s, loss=0.386]
+  1%|          | 8/1000 [00:00&lt;00:57, 17.25it/s, loss=0.385]
+  1%|          | 10/1000 [00:00&lt;00:57, 17.37it/s, loss=0.385]
+  1%|          | 10/1000 [00:00&lt;00:57, 17.37it/s, loss=0.383]
+  1%|          | 10/1000 [00:00&lt;00:57, 17.37it/s, loss=0.382]
+  1%|          | 12/1000 [00:00&lt;00:56, 17.49it/s, loss=0.382]
+  1%|          | 12/1000 [00:00&lt;00:56, 17.49it/s, loss=0.381]
+  1%|          | 12/1000 [00:00&lt;00:56, 17.49it/s, loss=0.38]
+  1%|▏         | 14/1000 [00:00&lt;00:56, 17.50it/s, loss=0.38]
+  1%|▏         | 14/1000 [00:00&lt;00:56, 17.50it/s, loss=0.379]
+  1%|▏         | 14/1000 [00:00&lt;00:56, 17.50it/s, loss=0.378]
+  2%|▏         | 16/1000 [00:00&lt;00:55, 17.61it/s, loss=0.378]
+  2%|▏         | 16/1000 [00:00&lt;00:55, 17.61it/s, loss=0.377]
+  2%|▏         | 16/1000 [00:01&lt;00:55, 17.61it/s, loss=0.376]
+  2%|▏         | 18/1000 [00:01&lt;00:55, 17.63it/s, loss=0.376]
+  2%|▏         | 18/1000 [00:01&lt;00:55, 17.63it/s, loss=0.375]
+  2%|▏         | 18/1000 [00:01&lt;00:55, 17.63it/s, loss=0.374]
+  2%|▏         | 20/1000 [00:01&lt;00:55, 17.72it/s, loss=0.374]
+  2%|▏         | 20/1000 [00:01&lt;00:55, 17.72it/s, loss=0.373]
+  2%|▏         | 20/1000 [00:01&lt;00:55, 17.72it/s, loss=0.372]
+  2%|▏         | 22/1000 [00:01&lt;00:55, 17.77it/s, loss=0.372]
+  2%|▏         | 22/1000 [00:01&lt;00:55, 17.77it/s, loss=0.371]
+  2%|▏         | 22/1000 [00:01&lt;00:55, 17.77it/s, loss=0.37]
+  2%|▏         | 24/1000 [00:01&lt;00:54, 17.76it/s, loss=0.37]
+  2%|▏         | 24/1000 [00:01&lt;00:54, 17.76it/s, loss=0.369]
+  2%|▏         | 24/1000 [00:01&lt;00:54, 17.76it/s, loss=0.368]
+  3%|▎         | 26/1000 [00:01&lt;00:54, 17.77it/s, loss=0.368]
+  3%|▎         | 26/1000 [00:01&lt;00:54, 17.77it/s, loss=0.367]
+  3%|▎         | 26/1000 [00:01&lt;00:54, 17.77it/s, loss=0.366]
+  3%|▎         | 28/1000 [00:01&lt;00:54, 17.83it/s, loss=0.366]
+  3%|▎         | 28/1000 [00:01&lt;00:54, 17.83it/s, loss=0.365]
+  3%|▎         | 28/1000 [00:01&lt;00:54, 17.83it/s, loss=0.364]
+  3%|▎         | 30/1000 [00:01&lt;00:54, 17.81it/s, loss=0.364]
+  3%|▎         | 30/1000 [00:01&lt;00:54, 17.81it/s, loss=0.363]
+  3%|▎         | 30/1000 [00:01&lt;00:54, 17.81it/s, loss=0.362]
+  3%|▎         | 32/1000 [00:01&lt;00:54, 17.82it/s, loss=0.362]
+  3%|▎         | 32/1000 [00:01&lt;00:54, 17.82it/s, loss=0.361]
+  3%|▎         | 32/1000 [00:01&lt;00:54, 17.82it/s, loss=0.36]
+  3%|▎         | 34/1000 [00:01&lt;00:54, 17.70it/s, loss=0.36]
+  3%|▎         | 34/1000 [00:01&lt;00:54, 17.70it/s, loss=0.359]
+  3%|▎         | 34/1000 [00:02&lt;00:54, 17.70it/s, loss=0.358]
+  4%|▎         | 36/1000 [00:02&lt;00:54, 17.74it/s, loss=0.358]
+  4%|▎         | 36/1000 [00:02&lt;00:54, 17.74it/s, loss=0.357]
+  4%|▎         | 36/1000 [00:02&lt;00:54, 17.74it/s, loss=0.356]
+  4%|▍         | 38/1000 [00:02&lt;00:54, 17.79it/s, loss=0.356]
+  4%|▍         | 38/1000 [00:02&lt;00:54, 17.79it/s, loss=0.355]
+  4%|▍         | 38/1000 [00:02&lt;00:54, 17.79it/s, loss=0.354]
+  4%|▍         | 40/1000 [00:02&lt;00:53, 17.86it/s, loss=0.354]
+  4%|▍         | 40/1000 [00:02&lt;00:53, 17.86it/s, loss=0.353]
+  4%|▍         | 40/1000 [00:02&lt;00:53, 17.86it/s, loss=0.352]
+  4%|▍         | 42/1000 [00:02&lt;00:53, 17.80it/s, loss=0.352]
+  4%|▍         | 42/1000 [00:02&lt;00:53, 17.80it/s, loss=0.351]
+  4%|▍         | 42/1000 [00:02&lt;00:53, 17.80it/s, loss=0.35]
+  4%|▍         | 44/1000 [00:02&lt;00:53, 17.72it/s, loss=0.35]
+  4%|▍         | 44/1000 [00:02&lt;00:53, 17.72it/s, loss=0.349]
+  4%|▍         | 44/1000 [00:02&lt;00:53, 17.72it/s, loss=0.348]
+  5%|▍         | 46/1000 [00:02&lt;00:53, 17.79it/s, loss=0.348]
+  5%|▍         | 46/1000 [00:02&lt;00:53, 17.79it/s, loss=0.347]
+  5%|▍         | 46/1000 [00:02&lt;00:53, 17.79it/s, loss=0.346]
+  5%|▍         | 48/1000 [00:02&lt;00:53, 17.82it/s, loss=0.346]
+  5%|▍         | 48/1000 [00:02&lt;00:53, 17.82it/s, loss=0.345]
+  5%|▍         | 48/1000 [00:02&lt;00:53, 17.82it/s, loss=0.344]
+  5%|▌         | 50/1000 [00:02&lt;00:53, 17.78it/s, loss=0.344]
+  5%|▌         | 50/1000 [00:02&lt;00:53, 17.78it/s, loss=0.343]
+  5%|▌         | 50/1000 [00:02&lt;00:53, 17.78it/s, loss=0.342]
+  5%|▌         | 52/1000 [00:02&lt;00:53, 17.80it/s, loss=0.342]
+  5%|▌         | 52/1000 [00:03&lt;00:53, 17.80it/s, loss=0.341]
+  5%|▌         | 52/1000 [00:03&lt;00:53, 17.80it/s, loss=0.34]
+  5%|▌         | 54/1000 [00:03&lt;00:53, 17.71it/s, loss=0.34]
+  5%|▌         | 54/1000 [00:03&lt;00:53, 17.71it/s, loss=0.34]
+  5%|▌         | 54/1000 [00:03&lt;00:53, 17.71it/s, loss=0.339]
+  6%|▌         | 56/1000 [00:03&lt;00:53, 17.75it/s, loss=0.339]
+  6%|▌         | 56/1000 [00:03&lt;00:53, 17.75it/s, loss=0.338]
+  6%|▌         | 56/1000 [00:03&lt;00:53, 17.75it/s, loss=0.337]
+  6%|▌         | 58/1000 [00:03&lt;00:52, 17.80it/s, loss=0.337]
+  6%|▌         | 58/1000 [00:03&lt;00:52, 17.80it/s, loss=0.336]
+  6%|▌         | 58/1000 [00:03&lt;00:52, 17.80it/s, loss=0.335]
+  6%|▌         | 60/1000 [00:03&lt;00:55, 16.89it/s, loss=0.335]
+  6%|▌         | 60/1000 [00:03&lt;00:55, 16.89it/s, loss=0.334]
+  6%|▌         | 60/1000 [00:03&lt;00:55, 16.89it/s, loss=0.333]
+  6%|▌         | 62/1000 [00:03&lt;00:55, 16.97it/s, loss=0.333]
+  6%|▌         | 62/1000 [00:03&lt;00:55, 16.97it/s, loss=0.332]
+  6%|▌         | 62/1000 [00:03&lt;00:55, 16.97it/s, loss=0.331]
+  6%|▋         | 64/1000 [00:03&lt;00:54, 17.08it/s, loss=0.331]
+  6%|▋         | 64/1000 [00:03&lt;00:54, 17.08it/s, loss=0.331]
+  6%|▋         | 64/1000 [00:03&lt;00:54, 17.08it/s, loss=0.33]
+  7%|▋         | 66/1000 [00:03&lt;00:54, 17.16it/s, loss=0.33]
+  7%|▋         | 66/1000 [00:03&lt;00:54, 17.16it/s, loss=0.329]
+  7%|▋         | 66/1000 [00:03&lt;00:54, 17.16it/s, loss=0.328]
+  7%|▋         | 68/1000 [00:03&lt;00:54, 17.21it/s, loss=0.328]
+  7%|▋         | 68/1000 [00:03&lt;00:54, 17.21it/s, loss=0.327]
+  7%|▋         | 68/1000 [00:03&lt;00:54, 17.21it/s, loss=0.326]
+  7%|▋         | 70/1000 [00:03&lt;00:54, 17.16it/s, loss=0.326]
+  7%|▋         | 70/1000 [00:04&lt;00:54, 17.16it/s, loss=0.325]
+  7%|▋         | 70/1000 [00:04&lt;00:54, 17.16it/s, loss=0.325]
+  7%|▋         | 72/1000 [00:04&lt;00:53, 17.26it/s, loss=0.325]
+  7%|▋         | 72/1000 [00:04&lt;00:53, 17.26it/s, loss=0.324]
+  7%|▋         | 72/1000 [00:04&lt;00:53, 17.26it/s, loss=0.323]
+  7%|▋         | 74/1000 [00:04&lt;00:53, 17.32it/s, loss=0.323]
+  7%|▋         | 74/1000 [00:04&lt;00:53, 17.32it/s, loss=0.322]
+  7%|▋         | 74/1000 [00:04&lt;00:53, 17.32it/s, loss=0.321]
+  8%|▊         | 76/1000 [00:04&lt;00:53, 17.33it/s, loss=0.321]
+  8%|▊         | 76/1000 [00:04&lt;00:53, 17.33it/s, loss=0.32]
+  8%|▊         | 76/1000 [00:04&lt;00:53, 17.33it/s, loss=0.319]
+  8%|▊         | 78/1000 [00:04&lt;00:52, 17.42it/s, loss=0.319]
+  8%|▊         | 78/1000 [00:04&lt;00:52, 17.42it/s, loss=0.319]
+  8%|▊         | 78/1000 [00:04&lt;00:52, 17.42it/s, loss=0.318]
+  8%|▊         | 80/1000 [00:04&lt;00:52, 17.38it/s, loss=0.318]
+  8%|▊         | 80/1000 [00:04&lt;00:52, 17.38it/s, loss=0.317]
+  8%|▊         | 80/1000 [00:04&lt;00:52, 17.38it/s, loss=0.316]
+  8%|▊         | 82/1000 [00:04&lt;00:52, 17.42it/s, loss=0.316]
+  8%|▊         | 82/1000 [00:04&lt;00:52, 17.42it/s, loss=0.315]
+  8%|▊         | 82/1000 [00:04&lt;00:52, 17.42it/s, loss=0.315]
+  8%|▊         | 84/1000 [00:04&lt;00:52, 17.37it/s, loss=0.315]
+  8%|▊         | 84/1000 [00:04&lt;00:52, 17.37it/s, loss=0.314]
+  8%|▊         | 84/1000 [00:04&lt;00:52, 17.37it/s, loss=0.313]
+  9%|▊         | 86/1000 [00:04&lt;00:52, 17.40it/s, loss=0.313]
+  9%|▊         | 86/1000 [00:04&lt;00:52, 17.40it/s, loss=0.312]
+  9%|▊         | 86/1000 [00:05&lt;00:52, 17.40it/s, loss=0.311]
+  9%|▉         | 88/1000 [00:05&lt;00:52, 17.30it/s, loss=0.311]
+  9%|▉         | 88/1000 [00:05&lt;00:52, 17.30it/s, loss=0.311]
+  9%|▉         | 88/1000 [00:05&lt;00:52, 17.30it/s, loss=0.31]
+  9%|▉         | 90/1000 [00:05&lt;00:52, 17.30it/s, loss=0.31]
+  9%|▉         | 90/1000 [00:05&lt;00:52, 17.30it/s, loss=0.309]
+  9%|▉         | 90/1000 [00:05&lt;00:52, 17.30it/s, loss=0.308]
+  9%|▉         | 92/1000 [00:05&lt;00:52, 17.32it/s, loss=0.308]
+  9%|▉         | 92/1000 [00:05&lt;00:52, 17.32it/s, loss=0.307]
+  9%|▉         | 92/1000 [00:05&lt;00:52, 17.32it/s, loss=0.307]
+  9%|▉         | 94/1000 [00:05&lt;00:51, 17.44it/s, loss=0.307]
+  9%|▉         | 94/1000 [00:05&lt;00:51, 17.44it/s, loss=0.306]
+  9%|▉         | 94/1000 [00:05&lt;00:51, 17.44it/s, loss=0.305]
+ 10%|▉         | 96/1000 [00:05&lt;00:52, 17.16it/s, loss=0.305]
+ 10%|▉         | 96/1000 [00:05&lt;00:52, 17.16it/s, loss=0.304]
+ 10%|▉         | 96/1000 [00:05&lt;00:52, 17.16it/s, loss=0.304]
+ 10%|▉         | 98/1000 [00:05&lt;00:52, 17.32it/s, loss=0.304]
+ 10%|▉         | 98/1000 [00:05&lt;00:52, 17.32it/s, loss=0.303]
+ 10%|▉         | 98/1000 [00:05&lt;00:52, 17.32it/s, loss=0.302]
+ 10%|█         | 100/1000 [00:05&lt;00:51, 17.33it/s, loss=0.302]
+ 10%|█         | 100/1000 [00:05&lt;00:51, 17.33it/s, loss=0.301]
+ 10%|█         | 100/1000 [00:05&lt;00:51, 17.33it/s, loss=0.301]
+ 10%|█         | 102/1000 [00:05&lt;00:51, 17.44it/s, loss=0.301]
+ 10%|█         | 102/1000 [00:05&lt;00:51, 17.44it/s, loss=0.3]
+ 10%|█         | 102/1000 [00:05&lt;00:51, 17.44it/s, loss=0.299]
+ 10%|█         | 104/1000 [00:05&lt;00:51, 17.55it/s, loss=0.299]
+ 10%|█         | 104/1000 [00:06&lt;00:51, 17.55it/s, loss=0.298]
+ 10%|█         | 104/1000 [00:06&lt;00:51, 17.55it/s, loss=0.298]
+ 11%|█         | 106/1000 [00:06&lt;00:50, 17.56it/s, loss=0.298]
+ 11%|█         | 106/1000 [00:06&lt;00:50, 17.56it/s, loss=0.297]
+ 11%|█         | 106/1000 [00:06&lt;00:50, 17.56it/s, loss=0.296]
+ 11%|█         | 108/1000 [00:06&lt;00:50, 17.62it/s, loss=0.296]
+ 11%|█         | 108/1000 [00:06&lt;00:50, 17.62it/s, loss=0.295]
+ 11%|█         | 108/1000 [00:06&lt;00:50, 17.62it/s, loss=0.295]
+ 11%|█         | 110/1000 [00:06&lt;00:50, 17.71it/s, loss=0.295]
+ 11%|█         | 110/1000 [00:06&lt;00:50, 17.71it/s, loss=0.294]
+ 11%|█         | 110/1000 [00:06&lt;00:50, 17.71it/s, loss=0.293]
+ 11%|█         | 112/1000 [00:06&lt;00:50, 17.68it/s, loss=0.293]
+ 11%|█         | 112/1000 [00:06&lt;00:50, 17.68it/s, loss=0.292]
+ 11%|█         | 112/1000 [00:06&lt;00:50, 17.68it/s, loss=0.292]
+ 11%|█▏        | 114/1000 [00:06&lt;00:50, 17.71it/s, loss=0.292]
+ 11%|█▏        | 114/1000 [00:06&lt;00:50, 17.71it/s, loss=0.291]
+ 11%|█▏        | 114/1000 [00:06&lt;00:50, 17.71it/s, loss=0.29]
+ 12%|█▏        | 116/1000 [00:06&lt;00:49, 17.74it/s, loss=0.29]
+ 12%|█▏        | 116/1000 [00:06&lt;00:49, 17.74it/s, loss=0.29]
+ 12%|█▏        | 116/1000 [00:06&lt;00:49, 17.74it/s, loss=0.289]
+ 12%|█▏        | 118/1000 [00:06&lt;00:49, 17.71it/s, loss=0.289]
+ 12%|█▏        | 118/1000 [00:06&lt;00:49, 17.71it/s, loss=0.288]
+ 12%|█▏        | 118/1000 [00:06&lt;00:49, 17.71it/s, loss=0.288]
+ 12%|█▏        | 120/1000 [00:06&lt;00:49, 17.77it/s, loss=0.288]
+ 12%|█▏        | 120/1000 [00:06&lt;00:49, 17.77it/s, loss=0.287]
+ 12%|█▏        | 120/1000 [00:06&lt;00:49, 17.77it/s, loss=0.286]
+ 12%|█▏        | 122/1000 [00:06&lt;00:49, 17.78it/s, loss=0.286]
+ 12%|█▏        | 122/1000 [00:07&lt;00:49, 17.78it/s, loss=0.285]
+ 12%|█▏        | 122/1000 [00:07&lt;00:49, 17.78it/s, loss=0.285]
+ 12%|█▏        | 124/1000 [00:07&lt;00:49, 17.78it/s, loss=0.285]
+ 12%|█▏        | 124/1000 [00:07&lt;00:49, 17.78it/s, loss=0.284]
+ 12%|█▏        | 124/1000 [00:07&lt;00:49, 17.78it/s, loss=0.283]
+ 13%|█▎        | 126/1000 [00:07&lt;00:49, 17.75it/s, loss=0.283]
+ 13%|█▎        | 126/1000 [00:07&lt;00:49, 17.75it/s, loss=0.283]
+ 13%|█▎        | 126/1000 [00:07&lt;00:49, 17.75it/s, loss=0.282]
+ 13%|█▎        | 128/1000 [00:07&lt;00:49, 17.74it/s, loss=0.282]
+ 13%|█▎        | 128/1000 [00:07&lt;00:49, 17.74it/s, loss=0.281]
+ 13%|█▎        | 128/1000 [00:07&lt;00:49, 17.74it/s, loss=0.281]
+ 13%|█▎        | 130/1000 [00:07&lt;00:49, 17.68it/s, loss=0.281]
+ 13%|█▎        | 130/1000 [00:07&lt;00:49, 17.68it/s, loss=0.28]
+ 13%|█▎        | 130/1000 [00:07&lt;00:49, 17.68it/s, loss=0.279]
+ 13%|█▎        | 132/1000 [00:07&lt;00:49, 17.69it/s, loss=0.279]
+ 13%|█▎        | 132/1000 [00:07&lt;00:49, 17.69it/s, loss=0.279]
+ 13%|█▎        | 132/1000 [00:07&lt;00:49, 17.69it/s, loss=0.278]
+ 13%|█▎        | 134/1000 [00:07&lt;00:48, 17.69it/s, loss=0.278]
+ 13%|█▎        | 134/1000 [00:07&lt;00:48, 17.69it/s, loss=0.277]
+ 13%|█▎        | 134/1000 [00:07&lt;00:48, 17.69it/s, loss=0.277]
+ 14%|█▎        | 136/1000 [00:07&lt;00:48, 17.91it/s, loss=0.277]
+ 14%|█▎        | 136/1000 [00:07&lt;00:48, 17.91it/s, loss=0.276]
+ 14%|█▎        | 136/1000 [00:07&lt;00:48, 17.91it/s, loss=0.275]
+ 14%|█▍        | 138/1000 [00:07&lt;00:48, 17.86it/s, loss=0.275]
+ 14%|█▍        | 138/1000 [00:07&lt;00:48, 17.86it/s, loss=0.275]
+ 14%|█▍        | 138/1000 [00:07&lt;00:48, 17.86it/s, loss=0.274]
+ 14%|█▍        | 140/1000 [00:07&lt;00:48, 17.80it/s, loss=0.274]
+ 14%|█▍        | 140/1000 [00:08&lt;00:48, 17.80it/s, loss=0.274]
+ 14%|█▍        | 140/1000 [00:08&lt;00:48, 17.80it/s, loss=0.273]
+ 14%|█▍        | 142/1000 [00:08&lt;00:48, 17.66it/s, loss=0.273]
+ 14%|█▍        | 142/1000 [00:08&lt;00:48, 17.66it/s, loss=0.272]
+ 14%|█▍        | 142/1000 [00:08&lt;00:48, 17.66it/s, loss=0.272]
+ 14%|█▍        | 144/1000 [00:08&lt;00:48, 17.66it/s, loss=0.272]
+ 14%|█▍        | 144/1000 [00:08&lt;00:48, 17.66it/s, loss=0.271]
+ 14%|█▍        | 144/1000 [00:08&lt;00:48, 17.66it/s, loss=0.27]
+ 15%|█▍        | 146/1000 [00:08&lt;00:48, 17.71it/s, loss=0.27]
+ 15%|█▍        | 146/1000 [00:08&lt;00:48, 17.71it/s, loss=0.27]
+ 15%|█▍        | 146/1000 [00:08&lt;00:48, 17.71it/s, loss=0.269]
+ 15%|█▍        | 148/1000 [00:08&lt;00:48, 17.72it/s, loss=0.269]
+ 15%|█▍        | 148/1000 [00:08&lt;00:48, 17.72it/s, loss=0.268]
+ 15%|█▍        | 148/1000 [00:08&lt;00:48, 17.72it/s, loss=0.268]
+ 15%|█▌        | 150/1000 [00:08&lt;00:47, 17.74it/s, loss=0.268]
+ 15%|█▌        | 150/1000 [00:08&lt;00:47, 17.74it/s, loss=0.267]
+ 15%|█▌        | 150/1000 [00:08&lt;00:47, 17.74it/s, loss=0.267]
+ 15%|█▌        | 152/1000 [00:08&lt;00:47, 17.74it/s, loss=0.267]
+ 15%|█▌        | 152/1000 [00:08&lt;00:47, 17.74it/s, loss=0.266]
+ 15%|█▌        | 152/1000 [00:08&lt;00:47, 17.74it/s, loss=0.265]
+ 15%|█▌        | 154/1000 [00:08&lt;00:47, 17.76it/s, loss=0.265]
+ 15%|█▌        | 154/1000 [00:08&lt;00:47, 17.76it/s, loss=0.265]
+ 15%|█▌        | 154/1000 [00:08&lt;00:47, 17.76it/s, loss=0.264]
+ 16%|█▌        | 156/1000 [00:08&lt;00:47, 17.77it/s, loss=0.264]
+ 16%|█▌        | 156/1000 [00:08&lt;00:47, 17.77it/s, loss=0.264]
+ 16%|█▌        | 156/1000 [00:08&lt;00:47, 17.77it/s, loss=0.263]
+ 16%|█▌        | 158/1000 [00:08&lt;00:47, 17.73it/s, loss=0.263]
+ 16%|█▌        | 158/1000 [00:09&lt;00:47, 17.73it/s, loss=0.262]
+ 16%|█▌        | 158/1000 [00:09&lt;00:47, 17.73it/s, loss=0.262]
+ 16%|█▌        | 160/1000 [00:09&lt;00:47, 17.81it/s, loss=0.262]
+ 16%|█▌        | 160/1000 [00:09&lt;00:47, 17.81it/s, loss=0.261]
+ 16%|█▌        | 160/1000 [00:09&lt;00:47, 17.81it/s, loss=0.261]
+ 16%|█▌        | 162/1000 [00:09&lt;00:47, 17.80it/s, loss=0.261]
+ 16%|█▌        | 162/1000 [00:09&lt;00:47, 17.80it/s, loss=0.26]
+ 16%|█▌        | 162/1000 [00:09&lt;00:47, 17.80it/s, loss=0.26]
+ 16%|█▋        | 164/1000 [00:09&lt;00:46, 17.82it/s, loss=0.26]
+ 16%|█▋        | 164/1000 [00:09&lt;00:46, 17.82it/s, loss=0.259]
+ 16%|█▋        | 164/1000 [00:09&lt;00:46, 17.82it/s, loss=0.258]
+ 17%|█▋        | 166/1000 [00:09&lt;00:46, 17.84it/s, loss=0.258]
+ 17%|█▋        | 166/1000 [00:09&lt;00:46, 17.84it/s, loss=0.258]
+ 17%|█▋        | 166/1000 [00:09&lt;00:46, 17.84it/s, loss=0.257]
+ 17%|█▋        | 168/1000 [00:09&lt;00:46, 17.82it/s, loss=0.257]
+ 17%|█▋        | 168/1000 [00:09&lt;00:46, 17.82it/s, loss=0.257]
+ 17%|█▋        | 168/1000 [00:09&lt;00:46, 17.82it/s, loss=0.256]
+ 17%|█▋        | 170/1000 [00:09&lt;00:46, 17.68it/s, loss=0.256]
+ 17%|█▋        | 170/1000 [00:09&lt;00:46, 17.68it/s, loss=0.256]
+ 17%|█▋        | 170/1000 [00:09&lt;00:46, 17.68it/s, loss=0.255]
+ 17%|█▋        | 172/1000 [00:09&lt;00:46, 17.74it/s, loss=0.255]
+ 17%|█▋        | 172/1000 [00:09&lt;00:46, 17.74it/s, loss=0.254]
+ 17%|█▋        | 172/1000 [00:09&lt;00:46, 17.74it/s, loss=0.254]
+ 17%|█▋        | 174/1000 [00:09&lt;00:46, 17.78it/s, loss=0.254]
+ 17%|█▋        | 174/1000 [00:09&lt;00:46, 17.78it/s, loss=0.253]
+ 17%|█▋        | 174/1000 [00:10&lt;00:46, 17.78it/s, loss=0.253]
+ 18%|█▊        | 176/1000 [00:10&lt;00:46, 17.76it/s, loss=0.253]
+ 18%|█▊        | 176/1000 [00:10&lt;00:46, 17.76it/s, loss=0.252]
+ 18%|█▊        | 176/1000 [00:10&lt;00:46, 17.76it/s, loss=0.252]
+ 18%|█▊        | 178/1000 [00:10&lt;00:46, 17.68it/s, loss=0.252]
+ 18%|█▊        | 178/1000 [00:10&lt;00:46, 17.68it/s, loss=0.251]
+ 18%|█▊        | 178/1000 [00:10&lt;00:46, 17.68it/s, loss=0.251]
+ 18%|█▊        | 180/1000 [00:10&lt;00:46, 17.72it/s, loss=0.251]
+ 18%|█▊        | 180/1000 [00:10&lt;00:46, 17.72it/s, loss=0.25]
+ 18%|█▊        | 180/1000 [00:10&lt;00:46, 17.72it/s, loss=0.249]
+ 18%|█▊        | 182/1000 [00:10&lt;00:46, 17.76it/s, loss=0.249]
+ 18%|█▊        | 182/1000 [00:10&lt;00:46, 17.76it/s, loss=0.249]
+ 18%|█▊        | 182/1000 [00:10&lt;00:46, 17.76it/s, loss=0.248]
+ 18%|█▊        | 184/1000 [00:10&lt;00:45, 17.79it/s, loss=0.248]
+ 18%|█▊        | 184/1000 [00:10&lt;00:45, 17.79it/s, loss=0.248]
+ 18%|█▊        | 184/1000 [00:10&lt;00:45, 17.79it/s, loss=0.247]
+ 19%|█▊        | 186/1000 [00:10&lt;00:45, 17.76it/s, loss=0.247]
+ 19%|█▊        | 186/1000 [00:10&lt;00:45, 17.76it/s, loss=0.247]
+ 19%|█▊        | 186/1000 [00:10&lt;00:45, 17.76it/s, loss=0.246]
+ 19%|█▉        | 188/1000 [00:10&lt;00:45, 17.76it/s, loss=0.246]
+ 19%|█▉        | 188/1000 [00:10&lt;00:45, 17.76it/s, loss=0.246]
+ 19%|█▉        | 188/1000 [00:10&lt;00:45, 17.76it/s, loss=0.245]
+ 19%|█▉        | 190/1000 [00:10&lt;00:45, 17.76it/s, loss=0.245]
+ 19%|█▉        | 190/1000 [00:10&lt;00:45, 17.76it/s, loss=0.245]
+ 19%|█▉        | 190/1000 [00:10&lt;00:45, 17.76it/s, loss=0.244]
+ 19%|█▉        | 192/1000 [00:10&lt;00:45, 17.75it/s, loss=0.244]
+ 19%|█▉        | 192/1000 [00:10&lt;00:45, 17.75it/s, loss=0.244]
+ 19%|█▉        | 192/1000 [00:11&lt;00:45, 17.75it/s, loss=0.243]
+ 19%|█▉        | 194/1000 [00:11&lt;00:45, 17.75it/s, loss=0.243]
+ 19%|█▉        | 194/1000 [00:11&lt;00:45, 17.75it/s, loss=0.243]
+ 19%|█▉        | 194/1000 [00:11&lt;00:45, 17.75it/s, loss=0.242]
+ 20%|█▉        | 196/1000 [00:11&lt;00:45, 17.71it/s, loss=0.242]
+ 20%|█▉        | 196/1000 [00:11&lt;00:45, 17.71it/s, loss=0.242]
+ 20%|█▉        | 196/1000 [00:11&lt;00:45, 17.71it/s, loss=0.241]
+ 20%|█▉        | 198/1000 [00:11&lt;00:45, 17.74it/s, loss=0.241]
+ 20%|█▉        | 198/1000 [00:11&lt;00:45, 17.74it/s, loss=0.241]
+ 20%|█▉        | 198/1000 [00:11&lt;00:45, 17.74it/s, loss=0.24]
+ 20%|██        | 200/1000 [00:11&lt;00:45, 17.75it/s, loss=0.24]
+ 20%|██        | 200/1000 [00:11&lt;00:45, 17.75it/s, loss=0.24]
+ 20%|██        | 200/1000 [00:11&lt;00:45, 17.75it/s, loss=0.239]
+ 20%|██        | 202/1000 [00:11&lt;00:46, 17.31it/s, loss=0.239]
+ 20%|██        | 202/1000 [00:11&lt;00:46, 17.31it/s, loss=0.239]
+ 20%|██        | 202/1000 [00:11&lt;00:46, 17.31it/s, loss=0.238]
+ 20%|██        | 204/1000 [00:11&lt;00:45, 17.36it/s, loss=0.238]
+ 20%|██        | 204/1000 [00:11&lt;00:45, 17.36it/s, loss=0.238]
+ 20%|██        | 204/1000 [00:11&lt;00:45, 17.36it/s, loss=0.237]
+ 21%|██        | 206/1000 [00:11&lt;00:45, 17.50it/s, loss=0.237]
+ 21%|██        | 206/1000 [00:11&lt;00:45, 17.50it/s, loss=0.237]
+ 21%|██        | 206/1000 [00:11&lt;00:45, 17.50it/s, loss=0.236]
+ 21%|██        | 208/1000 [00:11&lt;00:44, 17.64it/s, loss=0.236]
+ 21%|██        | 208/1000 [00:11&lt;00:44, 17.64it/s, loss=0.236]
+ 21%|██        | 208/1000 [00:11&lt;00:44, 17.64it/s, loss=0.235]
+ 21%|██        | 210/1000 [00:11&lt;00:44, 17.69it/s, loss=0.235]
+ 21%|██        | 210/1000 [00:11&lt;00:44, 17.69it/s, loss=0.235]
+ 21%|██        | 210/1000 [00:12&lt;00:44, 17.69it/s, loss=0.234]
+ 21%|██        | 212/1000 [00:12&lt;00:44, 17.68it/s, loss=0.234]
+ 21%|██        | 212/1000 [00:12&lt;00:44, 17.68it/s, loss=0.234]
+ 21%|██        | 212/1000 [00:12&lt;00:44, 17.68it/s, loss=0.233]
+ 21%|██▏       | 214/1000 [00:12&lt;00:44, 17.65it/s, loss=0.233]
+ 21%|██▏       | 214/1000 [00:12&lt;00:44, 17.65it/s, loss=0.233]
+ 21%|██▏       | 214/1000 [00:12&lt;00:44, 17.65it/s, loss=0.232]
+ 22%|██▏       | 216/1000 [00:12&lt;00:44, 17.69it/s, loss=0.232]
+ 22%|██▏       | 216/1000 [00:12&lt;00:44, 17.69it/s, loss=0.232]
+ 22%|██▏       | 216/1000 [00:12&lt;00:44, 17.69it/s, loss=0.231]
+ 22%|██▏       | 218/1000 [00:12&lt;00:44, 17.69it/s, loss=0.231]
+ 22%|██▏       | 218/1000 [00:12&lt;00:44, 17.69it/s, loss=0.231]
+ 22%|██▏       | 218/1000 [00:12&lt;00:44, 17.69it/s, loss=0.23]
+ 22%|██▏       | 220/1000 [00:12&lt;00:44, 17.70it/s, loss=0.23]
+ 22%|██▏       | 220/1000 [00:12&lt;00:44, 17.70it/s, loss=0.23]
+ 22%|██▏       | 220/1000 [00:12&lt;00:44, 17.70it/s, loss=0.229]
+ 22%|██▏       | 222/1000 [00:12&lt;00:44, 17.67it/s, loss=0.229]
+ 22%|██▏       | 222/1000 [00:12&lt;00:44, 17.67it/s, loss=0.229]
+ 22%|██▏       | 222/1000 [00:12&lt;00:44, 17.67it/s, loss=0.229]
+ 22%|██▏       | 224/1000 [00:12&lt;00:44, 17.58it/s, loss=0.229]
+ 22%|██▏       | 224/1000 [00:12&lt;00:44, 17.58it/s, loss=0.228]
+ 22%|██▏       | 224/1000 [00:12&lt;00:44, 17.58it/s, loss=0.228]
+ 23%|██▎       | 226/1000 [00:12&lt;00:43, 17.66it/s, loss=0.228]
+ 23%|██▎       | 226/1000 [00:12&lt;00:43, 17.66it/s, loss=0.227]
+ 23%|██▎       | 226/1000 [00:12&lt;00:43, 17.66it/s, loss=0.227]
+ 23%|██▎       | 228/1000 [00:12&lt;00:43, 17.70it/s, loss=0.227]
+ 23%|██▎       | 228/1000 [00:13&lt;00:43, 17.70it/s, loss=0.226]
+ 23%|██▎       | 228/1000 [00:13&lt;00:43, 17.70it/s, loss=0.226]
+ 23%|██▎       | 230/1000 [00:13&lt;00:43, 17.62it/s, loss=0.226]
+ 23%|██▎       | 230/1000 [00:13&lt;00:43, 17.62it/s, loss=0.225]
+ 23%|██▎       | 230/1000 [00:13&lt;00:43, 17.62it/s, loss=0.225]
+ 23%|██▎       | 232/1000 [00:13&lt;00:43, 17.67it/s, loss=0.225]
+ 23%|██▎       | 232/1000 [00:13&lt;00:43, 17.67it/s, loss=0.225]
+ 23%|██▎       | 232/1000 [00:13&lt;00:43, 17.67it/s, loss=0.224]
+ 23%|██▎       | 234/1000 [00:13&lt;00:43, 17.63it/s, loss=0.224]
+ 23%|██▎       | 234/1000 [00:13&lt;00:43, 17.63it/s, loss=0.224]
+ 23%|██▎       | 234/1000 [00:13&lt;00:43, 17.63it/s, loss=0.223]
+ 24%|██▎       | 236/1000 [00:13&lt;00:43, 17.61it/s, loss=0.223]
+ 24%|██▎       | 236/1000 [00:13&lt;00:43, 17.61it/s, loss=0.223]
+ 24%|██▎       | 236/1000 [00:13&lt;00:43, 17.61it/s, loss=0.222]
+ 24%|██▍       | 238/1000 [00:13&lt;00:43, 17.61it/s, loss=0.222]
+ 24%|██▍       | 238/1000 [00:13&lt;00:43, 17.61it/s, loss=0.222]
+ 24%|██▍       | 238/1000 [00:13&lt;00:43, 17.61it/s, loss=0.221]
+ 24%|██▍       | 240/1000 [00:13&lt;00:43, 17.52it/s, loss=0.221]
+ 24%|██▍       | 240/1000 [00:13&lt;00:43, 17.52it/s, loss=0.221]
+ 24%|██▍       | 240/1000 [00:13&lt;00:43, 17.52it/s, loss=0.221]
+ 24%|██▍       | 242/1000 [00:13&lt;00:43, 17.55it/s, loss=0.221]
+ 24%|██▍       | 242/1000 [00:13&lt;00:43, 17.55it/s, loss=0.22]
+ 24%|██▍       | 242/1000 [00:13&lt;00:43, 17.55it/s, loss=0.22]
+ 24%|██▍       | 244/1000 [00:13&lt;00:44, 16.92it/s, loss=0.22]
+ 24%|██▍       | 244/1000 [00:13&lt;00:44, 16.92it/s, loss=0.219]
+ 24%|██▍       | 244/1000 [00:13&lt;00:44, 16.92it/s, loss=0.219]
+ 25%|██▍       | 246/1000 [00:13&lt;00:44, 16.81it/s, loss=0.219]
+ 25%|██▍       | 246/1000 [00:14&lt;00:44, 16.81it/s, loss=0.219]
+ 25%|██▍       | 246/1000 [00:14&lt;00:44, 16.81it/s, loss=0.218]
+ 25%|██▍       | 248/1000 [00:14&lt;00:46, 16.33it/s, loss=0.218]
+ 25%|██▍       | 248/1000 [00:14&lt;00:46, 16.33it/s, loss=0.218]
+ 25%|██▍       | 248/1000 [00:14&lt;00:46, 16.33it/s, loss=0.217]
+ 25%|██▌       | 250/1000 [00:14&lt;00:45, 16.66it/s, loss=0.217]
+ 25%|██▌       | 250/1000 [00:14&lt;00:45, 16.66it/s, loss=0.217]
+ 25%|██▌       | 250/1000 [00:14&lt;00:45, 16.66it/s, loss=0.216]
+ 25%|██▌       | 252/1000 [00:14&lt;00:44, 16.94it/s, loss=0.216]
+ 25%|██▌       | 252/1000 [00:14&lt;00:44, 16.94it/s, loss=0.216]
+ 25%|██▌       | 252/1000 [00:14&lt;00:44, 16.94it/s, loss=0.216]
+ 25%|██▌       | 254/1000 [00:14&lt;00:43, 17.14it/s, loss=0.216]
+ 25%|██▌       | 254/1000 [00:14&lt;00:43, 17.14it/s, loss=0.215]
+ 25%|██▌       | 254/1000 [00:14&lt;00:43, 17.14it/s, loss=0.215]
+ 26%|██▌       | 256/1000 [00:14&lt;00:43, 17.27it/s, loss=0.215]
+ 26%|██▌       | 256/1000 [00:14&lt;00:43, 17.27it/s, loss=0.214]
+ 26%|██▌       | 256/1000 [00:14&lt;00:43, 17.27it/s, loss=0.214]
+ 26%|██▌       | 258/1000 [00:14&lt;00:42, 17.32it/s, loss=0.214]
+ 26%|██▌       | 258/1000 [00:14&lt;00:42, 17.32it/s, loss=0.214]
+ 26%|██▌       | 258/1000 [00:14&lt;00:42, 17.32it/s, loss=0.213]
+ 26%|██▌       | 260/1000 [00:14&lt;00:42, 17.42it/s, loss=0.213]
+ 26%|██▌       | 260/1000 [00:14&lt;00:42, 17.42it/s, loss=0.213]
+ 26%|██▌       | 260/1000 [00:14&lt;00:42, 17.42it/s, loss=0.212]
+ 26%|██▌       | 262/1000 [00:14&lt;00:42, 17.43it/s, loss=0.212]
+ 26%|██▌       | 262/1000 [00:14&lt;00:42, 17.43it/s, loss=0.212]
+ 26%|██▌       | 262/1000 [00:15&lt;00:42, 17.43it/s, loss=0.212]
+ 26%|██▋       | 264/1000 [00:15&lt;00:41, 17.54it/s, loss=0.212]
+ 26%|██▋       | 264/1000 [00:15&lt;00:41, 17.54it/s, loss=0.211]
+ 26%|██▋       | 264/1000 [00:15&lt;00:41, 17.54it/s, loss=0.211]
+ 27%|██▋       | 266/1000 [00:15&lt;00:41, 17.51it/s, loss=0.211]
+ 27%|██▋       | 266/1000 [00:15&lt;00:41, 17.51it/s, loss=0.21]
+ 27%|██▋       | 266/1000 [00:15&lt;00:41, 17.51it/s, loss=0.21]
+ 27%|██▋       | 268/1000 [00:15&lt;00:41, 17.63it/s, loss=0.21]
+ 27%|██▋       | 268/1000 [00:15&lt;00:41, 17.63it/s, loss=0.21]
+ 27%|██▋       | 268/1000 [00:15&lt;00:41, 17.63it/s, loss=0.209]
+ 27%|██▋       | 270/1000 [00:15&lt;00:41, 17.63it/s, loss=0.209]
+ 27%|██▋       | 270/1000 [00:15&lt;00:41, 17.63it/s, loss=0.209]
+ 27%|██▋       | 270/1000 [00:15&lt;00:41, 17.63it/s, loss=0.209]
+ 27%|██▋       | 272/1000 [00:15&lt;00:41, 17.61it/s, loss=0.209]
+ 27%|██▋       | 272/1000 [00:15&lt;00:41, 17.61it/s, loss=0.208]
+ 27%|██▋       | 272/1000 [00:15&lt;00:41, 17.61it/s, loss=0.208]
+ 27%|██▋       | 274/1000 [00:15&lt;00:41, 17.64it/s, loss=0.208]
+ 27%|██▋       | 274/1000 [00:15&lt;00:41, 17.64it/s, loss=0.207]
+ 27%|██▋       | 274/1000 [00:15&lt;00:41, 17.64it/s, loss=0.207]
+ 28%|██▊       | 276/1000 [00:15&lt;00:41, 17.66it/s, loss=0.207]
+ 28%|██▊       | 276/1000 [00:15&lt;00:41, 17.66it/s, loss=0.207]
+ 28%|██▊       | 276/1000 [00:15&lt;00:41, 17.66it/s, loss=0.206]
+ 28%|██▊       | 278/1000 [00:15&lt;00:40, 17.70it/s, loss=0.206]
+ 28%|██▊       | 278/1000 [00:15&lt;00:40, 17.70it/s, loss=0.206]
+ 28%|██▊       | 278/1000 [00:15&lt;00:40, 17.70it/s, loss=0.206]
+ 28%|██▊       | 280/1000 [00:15&lt;00:40, 17.62it/s, loss=0.206]
+ 28%|██▊       | 280/1000 [00:15&lt;00:40, 17.62it/s, loss=0.205]
+ 28%|██▊       | 280/1000 [00:16&lt;00:40, 17.62it/s, loss=0.205]
+ 28%|██▊       | 282/1000 [00:16&lt;00:40, 17.55it/s, loss=0.205]
+ 28%|██▊       | 282/1000 [00:16&lt;00:40, 17.55it/s, loss=0.204]
+ 28%|██▊       | 282/1000 [00:16&lt;00:40, 17.55it/s, loss=0.204]
+ 28%|██▊       | 284/1000 [00:16&lt;00:40, 17.56it/s, loss=0.204]
+ 28%|██▊       | 284/1000 [00:16&lt;00:40, 17.56it/s, loss=0.204]
+ 28%|██▊       | 284/1000 [00:16&lt;00:40, 17.56it/s, loss=0.203]
+ 29%|██▊       | 286/1000 [00:16&lt;00:40, 17.57it/s, loss=0.203]
+ 29%|██▊       | 286/1000 [00:16&lt;00:40, 17.57it/s, loss=0.203]
+ 29%|██▊       | 286/1000 [00:16&lt;00:40, 17.57it/s, loss=0.203]
+ 29%|██▉       | 288/1000 [00:16&lt;00:40, 17.41it/s, loss=0.203]
+ 29%|██▉       | 288/1000 [00:16&lt;00:40, 17.41it/s, loss=0.202]
+ 29%|██▉       | 288/1000 [00:16&lt;00:40, 17.41it/s, loss=0.202]
+ 29%|██▉       | 290/1000 [00:16&lt;00:40, 17.54it/s, loss=0.202]
+ 29%|██▉       | 290/1000 [00:16&lt;00:40, 17.54it/s, loss=0.202]
+ 29%|██▉       | 290/1000 [00:16&lt;00:40, 17.54it/s, loss=0.201]
+ 29%|██▉       | 292/1000 [00:16&lt;00:40, 17.60it/s, loss=0.201]
+ 29%|██▉       | 292/1000 [00:16&lt;00:40, 17.60it/s, loss=0.201]
+ 29%|██▉       | 292/1000 [00:16&lt;00:40, 17.60it/s, loss=0.2]
+ 29%|██▉       | 294/1000 [00:16&lt;00:40, 17.63it/s, loss=0.2]
+ 29%|██▉       | 294/1000 [00:16&lt;00:40, 17.63it/s, loss=0.2]
+ 29%|██▉       | 294/1000 [00:16&lt;00:40, 17.63it/s, loss=0.2]
+ 30%|██▉       | 296/1000 [00:16&lt;00:39, 17.60it/s, loss=0.2]
+ 30%|██▉       | 296/1000 [00:16&lt;00:39, 17.60it/s, loss=0.199]
+ 30%|██▉       | 296/1000 [00:16&lt;00:39, 17.60it/s, loss=0.199]
+ 30%|██▉       | 298/1000 [00:16&lt;00:39, 17.58it/s, loss=0.199]
+ 30%|██▉       | 298/1000 [00:17&lt;00:39, 17.58it/s, loss=0.199]
+ 30%|██▉       | 298/1000 [00:17&lt;00:39, 17.58it/s, loss=0.198]
+ 30%|███       | 300/1000 [00:17&lt;00:40, 17.23it/s, loss=0.198]
+ 30%|███       | 300/1000 [00:17&lt;00:40, 17.23it/s, loss=0.198]
+ 30%|███       | 300/1000 [00:17&lt;00:40, 17.23it/s, loss=0.198]
+ 30%|███       | 302/1000 [00:17&lt;00:40, 17.16it/s, loss=0.198]
+ 30%|███       | 302/1000 [00:17&lt;00:40, 17.16it/s, loss=0.197]
+ 30%|███       | 302/1000 [00:17&lt;00:40, 17.16it/s, loss=0.197]
+ 30%|███       | 304/1000 [00:17&lt;00:40, 17.28it/s, loss=0.197]
+ 30%|███       | 304/1000 [00:17&lt;00:40, 17.28it/s, loss=0.197]
+ 30%|███       | 304/1000 [00:17&lt;00:40, 17.28it/s, loss=0.196]
+ 31%|███       | 306/1000 [00:17&lt;00:39, 17.44it/s, loss=0.196]
+ 31%|███       | 306/1000 [00:17&lt;00:39, 17.44it/s, loss=0.196]
+ 31%|███       | 306/1000 [00:17&lt;00:39, 17.44it/s, loss=0.196]
+ 31%|███       | 308/1000 [00:17&lt;00:39, 17.44it/s, loss=0.196]
+ 31%|███       | 308/1000 [00:17&lt;00:39, 17.44it/s, loss=0.195]
+ 31%|███       | 308/1000 [00:17&lt;00:39, 17.44it/s, loss=0.195]
+ 31%|███       | 310/1000 [00:17&lt;00:39, 17.44it/s, loss=0.195]
+ 31%|███       | 310/1000 [00:17&lt;00:39, 17.44it/s, loss=0.195]
+ 31%|███       | 310/1000 [00:17&lt;00:39, 17.44it/s, loss=0.194]
+ 31%|███       | 312/1000 [00:17&lt;00:39, 17.44it/s, loss=0.194]
+ 31%|███       | 312/1000 [00:17&lt;00:39, 17.44it/s, loss=0.194]
+ 31%|███       | 312/1000 [00:17&lt;00:39, 17.44it/s, loss=0.194]
+ 31%|███▏      | 314/1000 [00:17&lt;00:39, 17.41it/s, loss=0.194]
+ 31%|███▏      | 314/1000 [00:17&lt;00:39, 17.41it/s, loss=0.193]
+ 31%|███▏      | 314/1000 [00:18&lt;00:39, 17.41it/s, loss=0.193]
+ 32%|███▏      | 316/1000 [00:18&lt;00:39, 17.43it/s, loss=0.193]
+ 32%|███▏      | 316/1000 [00:18&lt;00:39, 17.43it/s, loss=0.193]
+ 32%|███▏      | 316/1000 [00:18&lt;00:39, 17.43it/s, loss=0.192]
+ 32%|███▏      | 318/1000 [00:18&lt;00:39, 17.46it/s, loss=0.192]
+ 32%|███▏      | 318/1000 [00:18&lt;00:39, 17.46it/s, loss=0.192]
+ 32%|███▏      | 318/1000 [00:18&lt;00:39, 17.46it/s, loss=0.192]
+ 32%|███▏      | 320/1000 [00:18&lt;00:38, 17.53it/s, loss=0.192]
+ 32%|███▏      | 320/1000 [00:18&lt;00:38, 17.53it/s, loss=0.191]
+ 32%|███▏      | 320/1000 [00:18&lt;00:38, 17.53it/s, loss=0.191]
+ 32%|███▏      | 322/1000 [00:18&lt;00:38, 17.60it/s, loss=0.191]
+ 32%|███▏      | 322/1000 [00:18&lt;00:38, 17.60it/s, loss=0.191]
+ 32%|███▏      | 322/1000 [00:18&lt;00:38, 17.60it/s, loss=0.19]
+ 32%|███▏      | 324/1000 [00:18&lt;00:38, 17.58it/s, loss=0.19]
+ 32%|███▏      | 324/1000 [00:18&lt;00:38, 17.58it/s, loss=0.19]
+ 32%|███▏      | 324/1000 [00:18&lt;00:38, 17.58it/s, loss=0.19]
+ 33%|███▎      | 326/1000 [00:18&lt;00:38, 17.63it/s, loss=0.19]
+ 33%|███▎      | 326/1000 [00:18&lt;00:38, 17.63it/s, loss=0.189]
+ 33%|███▎      | 326/1000 [00:18&lt;00:38, 17.63it/s, loss=0.189]
+ 33%|███▎      | 328/1000 [00:18&lt;00:38, 17.65it/s, loss=0.189]
+ 33%|███▎      | 328/1000 [00:18&lt;00:38, 17.65it/s, loss=0.189]
+ 33%|███▎      | 328/1000 [00:18&lt;00:38, 17.65it/s, loss=0.188]
+ 33%|███▎      | 330/1000 [00:18&lt;00:37, 17.70it/s, loss=0.188]
+ 33%|███▎      | 330/1000 [00:18&lt;00:37, 17.70it/s, loss=0.188]
+ 33%|███▎      | 330/1000 [00:18&lt;00:37, 17.70it/s, loss=0.188]
+ 33%|███▎      | 332/1000 [00:18&lt;00:37, 17.66it/s, loss=0.188]
+ 33%|███▎      | 332/1000 [00:18&lt;00:37, 17.66it/s, loss=0.188]
+ 33%|███▎      | 332/1000 [00:19&lt;00:37, 17.66it/s, loss=0.187]
+ 33%|███▎      | 334/1000 [00:19&lt;00:37, 17.63it/s, loss=0.187]
+ 33%|███▎      | 334/1000 [00:19&lt;00:37, 17.63it/s, loss=0.187]
+ 33%|███▎      | 334/1000 [00:19&lt;00:37, 17.63it/s, loss=0.187]
+ 34%|███▎      | 336/1000 [00:19&lt;00:37, 17.65it/s, loss=0.187]
+ 34%|███▎      | 336/1000 [00:19&lt;00:37, 17.65it/s, loss=0.186]
+ 34%|███▎      | 336/1000 [00:19&lt;00:37, 17.65it/s, loss=0.186]
+ 34%|███▍      | 338/1000 [00:19&lt;00:37, 17.64it/s, loss=0.186]
+ 34%|███▍      | 338/1000 [00:19&lt;00:37, 17.64it/s, loss=0.186]
+ 34%|███▍      | 338/1000 [00:19&lt;00:37, 17.64it/s, loss=0.185]
+ 34%|███▍      | 340/1000 [00:19&lt;00:37, 17.63it/s, loss=0.185]
+ 34%|███▍      | 340/1000 [00:19&lt;00:37, 17.63it/s, loss=0.185]
+ 34%|███▍      | 340/1000 [00:19&lt;00:37, 17.63it/s, loss=0.185]
+ 34%|███▍      | 342/1000 [00:19&lt;00:37, 17.67it/s, loss=0.185]
+ 34%|███▍      | 342/1000 [00:19&lt;00:37, 17.67it/s, loss=0.184]
+ 34%|███▍      | 342/1000 [00:19&lt;00:37, 17.67it/s, loss=0.184]
+ 34%|███▍      | 344/1000 [00:19&lt;00:37, 17.69it/s, loss=0.184]
+ 34%|███▍      | 344/1000 [00:19&lt;00:37, 17.69it/s, loss=0.184]
+ 34%|███▍      | 344/1000 [00:19&lt;00:37, 17.69it/s, loss=0.184]
+ 35%|███▍      | 346/1000 [00:19&lt;00:36, 17.72it/s, loss=0.184]
+ 35%|███▍      | 346/1000 [00:19&lt;00:36, 17.72it/s, loss=0.183]
+ 35%|███▍      | 346/1000 [00:19&lt;00:36, 17.72it/s, loss=0.183]
+ 35%|███▍      | 348/1000 [00:19&lt;00:36, 17.75it/s, loss=0.183]
+ 35%|███▍      | 348/1000 [00:19&lt;00:36, 17.75it/s, loss=0.183]
+ 35%|███▍      | 348/1000 [00:19&lt;00:36, 17.75it/s, loss=0.182]
+ 35%|███▌      | 350/1000 [00:19&lt;00:36, 17.76it/s, loss=0.182]
+ 35%|███▌      | 350/1000 [00:19&lt;00:36, 17.76it/s, loss=0.182]
+ 35%|███▌      | 350/1000 [00:20&lt;00:36, 17.76it/s, loss=0.182]
+ 35%|███▌      | 352/1000 [00:20&lt;00:36, 17.74it/s, loss=0.182]
+ 35%|███▌      | 352/1000 [00:20&lt;00:36, 17.74it/s, loss=0.181]
+ 35%|███▌      | 352/1000 [00:20&lt;00:36, 17.74it/s, loss=0.181]
+ 35%|███▌      | 354/1000 [00:20&lt;00:36, 17.70it/s, loss=0.181]
+ 35%|███▌      | 354/1000 [00:20&lt;00:36, 17.70it/s, loss=0.181]
+ 35%|███▌      | 354/1000 [00:20&lt;00:36, 17.70it/s, loss=0.181]
+ 36%|███▌      | 356/1000 [00:20&lt;00:36, 17.67it/s, loss=0.181]
+ 36%|███▌      | 356/1000 [00:20&lt;00:36, 17.67it/s, loss=0.18]
+ 36%|███▌      | 356/1000 [00:20&lt;00:36, 17.67it/s, loss=0.18]
+ 36%|███▌      | 358/1000 [00:20&lt;00:36, 17.68it/s, loss=0.18]
+ 36%|███▌      | 358/1000 [00:20&lt;00:36, 17.68it/s, loss=0.18]
+ 36%|███▌      | 358/1000 [00:20&lt;00:36, 17.68it/s, loss=0.179]
+ 36%|███▌      | 360/1000 [00:20&lt;00:36, 17.65it/s, loss=0.179]
+ 36%|███▌      | 360/1000 [00:20&lt;00:36, 17.65it/s, loss=0.179]
+ 36%|███▌      | 360/1000 [00:20&lt;00:36, 17.65it/s, loss=0.179]
+ 36%|███▌      | 362/1000 [00:20&lt;00:36, 17.66it/s, loss=0.179]
+ 36%|███▌      | 362/1000 [00:20&lt;00:36, 17.66it/s, loss=0.179]
+ 36%|███▌      | 362/1000 [00:20&lt;00:36, 17.66it/s, loss=0.178]
+ 36%|███▋      | 364/1000 [00:20&lt;00:36, 17.65it/s, loss=0.178]
+ 36%|███▋      | 364/1000 [00:20&lt;00:36, 17.65it/s, loss=0.178]
+ 36%|███▋      | 364/1000 [00:20&lt;00:36, 17.65it/s, loss=0.178]
+ 37%|███▋      | 366/1000 [00:20&lt;00:36, 17.60it/s, loss=0.178]
+ 37%|███▋      | 366/1000 [00:20&lt;00:36, 17.60it/s, loss=0.177]
+ 37%|███▋      | 366/1000 [00:20&lt;00:36, 17.60it/s, loss=0.177]
+ 37%|███▋      | 368/1000 [00:20&lt;00:35, 17.64it/s, loss=0.177]
+ 37%|███▋      | 368/1000 [00:21&lt;00:35, 17.64it/s, loss=0.177]
+ 37%|███▋      | 368/1000 [00:21&lt;00:35, 17.64it/s, loss=0.177]
+ 37%|███▋      | 370/1000 [00:21&lt;00:35, 17.68it/s, loss=0.177]
+ 37%|███▋      | 370/1000 [00:21&lt;00:35, 17.68it/s, loss=0.176]
+ 37%|███▋      | 370/1000 [00:21&lt;00:35, 17.68it/s, loss=0.176]
+ 37%|███▋      | 372/1000 [00:21&lt;00:35, 17.47it/s, loss=0.176]
+ 37%|███▋      | 372/1000 [00:21&lt;00:35, 17.47it/s, loss=0.176]
+ 37%|███▋      | 372/1000 [00:21&lt;00:35, 17.47it/s, loss=0.176]
+ 37%|███▋      | 374/1000 [00:21&lt;00:36, 17.33it/s, loss=0.176]
+ 37%|███▋      | 374/1000 [00:21&lt;00:36, 17.33it/s, loss=0.175]
+ 37%|███▋      | 374/1000 [00:21&lt;00:36, 17.33it/s, loss=0.175]
+ 38%|███▊      | 376/1000 [00:21&lt;00:35, 17.37it/s, loss=0.175]
+ 38%|███▊      | 376/1000 [00:21&lt;00:35, 17.37it/s, loss=0.175]
+ 38%|███▊      | 376/1000 [00:21&lt;00:35, 17.37it/s, loss=0.174]
+ 38%|███▊      | 378/1000 [00:21&lt;00:35, 17.29it/s, loss=0.174]
+ 38%|███▊      | 378/1000 [00:21&lt;00:35, 17.29it/s, loss=0.174]
+ 38%|███▊      | 378/1000 [00:21&lt;00:35, 17.29it/s, loss=0.174]
+ 38%|███▊      | 380/1000 [00:21&lt;00:35, 17.46it/s, loss=0.174]
+ 38%|███▊      | 380/1000 [00:21&lt;00:35, 17.46it/s, loss=0.174]
+ 38%|███▊      | 380/1000 [00:21&lt;00:35, 17.46it/s, loss=0.173]
+ 38%|███▊      | 382/1000 [00:21&lt;00:35, 17.56it/s, loss=0.173]
+ 38%|███▊      | 382/1000 [00:21&lt;00:35, 17.56it/s, loss=0.173]
+ 38%|███▊      | 382/1000 [00:21&lt;00:35, 17.56it/s, loss=0.173]
+ 38%|███▊      | 384/1000 [00:21&lt;00:34, 17.65it/s, loss=0.173]
+ 38%|███▊      | 384/1000 [00:21&lt;00:34, 17.65it/s, loss=0.173]
+ 38%|███▊      | 384/1000 [00:21&lt;00:34, 17.65it/s, loss=0.172]
+ 39%|███▊      | 386/1000 [00:21&lt;00:34, 17.75it/s, loss=0.172]
+ 39%|███▊      | 386/1000 [00:22&lt;00:34, 17.75it/s, loss=0.172]
+ 39%|███▊      | 386/1000 [00:22&lt;00:34, 17.75it/s, loss=0.172]
+ 39%|███▉      | 388/1000 [00:22&lt;00:34, 17.71it/s, loss=0.172]
+ 39%|███▉      | 388/1000 [00:22&lt;00:34, 17.71it/s, loss=0.171]
+ 39%|███▉      | 388/1000 [00:22&lt;00:34, 17.71it/s, loss=0.171]
+ 39%|███▉      | 390/1000 [00:22&lt;00:34, 17.68it/s, loss=0.171]
+ 39%|███▉      | 390/1000 [00:22&lt;00:34, 17.68it/s, loss=0.171]
+ 39%|███▉      | 390/1000 [00:22&lt;00:34, 17.68it/s, loss=0.171]
+ 39%|███▉      | 392/1000 [00:22&lt;00:34, 17.71it/s, loss=0.171]
+ 39%|███▉      | 392/1000 [00:22&lt;00:34, 17.71it/s, loss=0.17]
+ 39%|███▉      | 392/1000 [00:22&lt;00:34, 17.71it/s, loss=0.17]
+ 39%|███▉      | 394/1000 [00:22&lt;00:34, 17.72it/s, loss=0.17]
+ 39%|███▉      | 394/1000 [00:22&lt;00:34, 17.72it/s, loss=0.17]
+ 39%|███▉      | 394/1000 [00:22&lt;00:34, 17.72it/s, loss=0.17]
+ 40%|███▉      | 396/1000 [00:22&lt;00:34, 17.71it/s, loss=0.17]
+ 40%|███▉      | 396/1000 [00:22&lt;00:34, 17.71it/s, loss=0.169]
+ 40%|███▉      | 396/1000 [00:22&lt;00:34, 17.71it/s, loss=0.169]
+ 40%|███▉      | 398/1000 [00:22&lt;00:34, 17.63it/s, loss=0.169]
+ 40%|███▉      | 398/1000 [00:22&lt;00:34, 17.63it/s, loss=0.169]
+ 40%|███▉      | 398/1000 [00:22&lt;00:34, 17.63it/s, loss=0.169]
+ 40%|████      | 400/1000 [00:22&lt;00:34, 17.60it/s, loss=0.169]
+ 40%|████      | 400/1000 [00:22&lt;00:34, 17.60it/s, loss=0.168]
+ 40%|████      | 400/1000 [00:22&lt;00:34, 17.60it/s, loss=0.168]
+ 40%|████      | 402/1000 [00:22&lt;00:34, 17.57it/s, loss=0.168]
+ 40%|████      | 402/1000 [00:22&lt;00:34, 17.57it/s, loss=0.168]
+ 40%|████      | 402/1000 [00:22&lt;00:34, 17.57it/s, loss=0.168]
+ 40%|████      | 404/1000 [00:22&lt;00:33, 17.55it/s, loss=0.168]
+ 40%|████      | 404/1000 [00:23&lt;00:33, 17.55it/s, loss=0.167]
+ 40%|████      | 404/1000 [00:23&lt;00:33, 17.55it/s, loss=0.167]
+ 41%|████      | 406/1000 [00:23&lt;00:33, 17.50it/s, loss=0.167]
+ 41%|████      | 406/1000 [00:23&lt;00:33, 17.50it/s, loss=0.167]
+ 41%|████      | 406/1000 [00:23&lt;00:33, 17.50it/s, loss=0.167]
+ 41%|████      | 408/1000 [00:23&lt;00:34, 17.34it/s, loss=0.167]
+ 41%|████      | 408/1000 [00:23&lt;00:34, 17.34it/s, loss=0.166]
+ 41%|████      | 408/1000 [00:23&lt;00:34, 17.34it/s, loss=0.166]
+ 41%|████      | 410/1000 [00:23&lt;00:34, 17.27it/s, loss=0.166]
+ 41%|████      | 410/1000 [00:23&lt;00:34, 17.27it/s, loss=0.166]
+ 41%|████      | 410/1000 [00:23&lt;00:34, 17.27it/s, loss=0.166]
+ 41%|████      | 412/1000 [00:23&lt;00:33, 17.38it/s, loss=0.166]
+ 41%|████      | 412/1000 [00:23&lt;00:33, 17.38it/s, loss=0.165]
+ 41%|████      | 412/1000 [00:23&lt;00:33, 17.38it/s, loss=0.165]
+ 41%|████▏     | 414/1000 [00:23&lt;00:33, 17.44it/s, loss=0.165]
+ 41%|████▏     | 414/1000 [00:23&lt;00:33, 17.44it/s, loss=0.165]
+ 41%|████▏     | 414/1000 [00:23&lt;00:33, 17.44it/s, loss=0.165]
+ 42%|████▏     | 416/1000 [00:23&lt;00:33, 17.50it/s, loss=0.165]
+ 42%|████▏     | 416/1000 [00:23&lt;00:33, 17.50it/s, loss=0.164]
+ 42%|████▏     | 416/1000 [00:23&lt;00:33, 17.50it/s, loss=0.164]
+ 42%|████▏     | 418/1000 [00:23&lt;00:33, 17.54it/s, loss=0.164]
+ 42%|████▏     | 418/1000 [00:23&lt;00:33, 17.54it/s, loss=0.164]
+ 42%|████▏     | 418/1000 [00:23&lt;00:33, 17.54it/s, loss=0.164]
+ 42%|████▏     | 420/1000 [00:23&lt;00:33, 17.55it/s, loss=0.164]
+ 42%|████▏     | 420/1000 [00:23&lt;00:33, 17.55it/s, loss=0.163]
+ 42%|████▏     | 420/1000 [00:24&lt;00:33, 17.55it/s, loss=0.163]
+ 42%|████▏     | 422/1000 [00:24&lt;00:32, 17.54it/s, loss=0.163]
+ 42%|████▏     | 422/1000 [00:24&lt;00:32, 17.54it/s, loss=0.163]
+ 42%|████▏     | 422/1000 [00:24&lt;00:32, 17.54it/s, loss=0.163]
+ 42%|████▏     | 424/1000 [00:24&lt;00:32, 17.50it/s, loss=0.163]
+ 42%|████▏     | 424/1000 [00:24&lt;00:32, 17.50it/s, loss=0.162]
+ 42%|████▏     | 424/1000 [00:24&lt;00:32, 17.50it/s, loss=0.162]
+ 43%|████▎     | 426/1000 [00:24&lt;00:32, 17.56it/s, loss=0.162]
+ 43%|████▎     | 426/1000 [00:24&lt;00:32, 17.56it/s, loss=0.162]
+ 43%|████▎     | 426/1000 [00:24&lt;00:32, 17.56it/s, loss=0.162]
+ 43%|████▎     | 428/1000 [00:24&lt;00:32, 17.54it/s, loss=0.162]
+ 43%|████▎     | 428/1000 [00:24&lt;00:32, 17.54it/s, loss=0.161]
+ 43%|████▎     | 428/1000 [00:24&lt;00:32, 17.54it/s, loss=0.161]
+ 43%|████▎     | 430/1000 [00:24&lt;00:32, 17.55it/s, loss=0.161]
+ 43%|████▎     | 430/1000 [00:24&lt;00:32, 17.55it/s, loss=0.161]
+ 43%|████▎     | 430/1000 [00:24&lt;00:32, 17.55it/s, loss=0.161]
+ 43%|████▎     | 432/1000 [00:24&lt;00:32, 17.53it/s, loss=0.161]
+ 43%|████▎     | 432/1000 [00:24&lt;00:32, 17.53it/s, loss=0.161]
+ 43%|████▎     | 432/1000 [00:24&lt;00:32, 17.53it/s, loss=0.16]
+ 43%|████▎     | 434/1000 [00:24&lt;00:32, 17.49it/s, loss=0.16]
+ 43%|████▎     | 434/1000 [00:24&lt;00:32, 17.49it/s, loss=0.16]
+ 43%|████▎     | 434/1000 [00:24&lt;00:32, 17.49it/s, loss=0.16]
+ 44%|████▎     | 436/1000 [00:24&lt;00:32, 17.44it/s, loss=0.16]
+ 44%|████▎     | 436/1000 [00:24&lt;00:32, 17.44it/s, loss=0.16]
+ 44%|████▎     | 436/1000 [00:24&lt;00:32, 17.44it/s, loss=0.159]
+ 44%|████▍     | 438/1000 [00:24&lt;00:32, 17.48it/s, loss=0.159]
+ 44%|████▍     | 438/1000 [00:24&lt;00:32, 17.48it/s, loss=0.159]
+ 44%|████▍     | 438/1000 [00:25&lt;00:32, 17.48it/s, loss=0.159]
+ 44%|████▍     | 440/1000 [00:25&lt;00:31, 17.57it/s, loss=0.159]
+ 44%|████▍     | 440/1000 [00:25&lt;00:31, 17.57it/s, loss=0.159]
+ 44%|████▍     | 440/1000 [00:25&lt;00:31, 17.57it/s, loss=0.158]
+ 44%|████▍     | 442/1000 [00:25&lt;00:31, 17.54it/s, loss=0.158]
+ 44%|████▍     | 442/1000 [00:25&lt;00:31, 17.54it/s, loss=0.158]
+ 44%|████▍     | 442/1000 [00:25&lt;00:31, 17.54it/s, loss=0.158]
+ 44%|████▍     | 444/1000 [00:25&lt;00:31, 17.59it/s, loss=0.158]
+ 44%|████▍     | 444/1000 [00:25&lt;00:31, 17.59it/s, loss=0.158]
+ 44%|████▍     | 444/1000 [00:25&lt;00:31, 17.59it/s, loss=0.158]
+ 45%|████▍     | 446/1000 [00:25&lt;00:31, 17.60it/s, loss=0.158]
+ 45%|████▍     | 446/1000 [00:25&lt;00:31, 17.60it/s, loss=0.157]
+ 45%|████▍     | 446/1000 [00:25&lt;00:31, 17.60it/s, loss=0.157]
+ 45%|████▍     | 448/1000 [00:25&lt;00:31, 17.60it/s, loss=0.157]
+ 45%|████▍     | 448/1000 [00:25&lt;00:31, 17.60it/s, loss=0.157]
+ 45%|████▍     | 448/1000 [00:25&lt;00:31, 17.60it/s, loss=0.157]
+ 45%|████▌     | 450/1000 [00:25&lt;00:31, 17.58it/s, loss=0.157]
+ 45%|████▌     | 450/1000 [00:25&lt;00:31, 17.58it/s, loss=0.156]
+ 45%|████▌     | 450/1000 [00:25&lt;00:31, 17.58it/s, loss=0.156]
+ 45%|████▌     | 452/1000 [00:25&lt;00:31, 17.62it/s, loss=0.156]
+ 45%|████▌     | 452/1000 [00:25&lt;00:31, 17.62it/s, loss=0.156]
+ 45%|████▌     | 452/1000 [00:25&lt;00:31, 17.62it/s, loss=0.156]
+ 45%|████▌     | 454/1000 [00:25&lt;00:30, 17.66it/s, loss=0.156]
+ 45%|████▌     | 454/1000 [00:25&lt;00:30, 17.66it/s, loss=0.155]
+ 45%|████▌     | 454/1000 [00:25&lt;00:30, 17.66it/s, loss=0.155]
+ 46%|████▌     | 456/1000 [00:25&lt;00:30, 17.65it/s, loss=0.155]
+ 46%|████▌     | 456/1000 [00:26&lt;00:30, 17.65it/s, loss=0.155]
+ 46%|████▌     | 456/1000 [00:26&lt;00:30, 17.65it/s, loss=0.155]
+ 46%|████▌     | 458/1000 [00:26&lt;00:30, 17.49it/s, loss=0.155]
+ 46%|████▌     | 458/1000 [00:26&lt;00:30, 17.49it/s, loss=0.155]
+ 46%|████▌     | 458/1000 [00:26&lt;00:30, 17.49it/s, loss=0.154]
+ 46%|████▌     | 460/1000 [00:26&lt;00:30, 17.56it/s, loss=0.154]
+ 46%|████▌     | 460/1000 [00:26&lt;00:30, 17.56it/s, loss=0.154]
+ 46%|████▌     | 460/1000 [00:26&lt;00:30, 17.56it/s, loss=0.154]
+ 46%|████▌     | 462/1000 [00:26&lt;00:30, 17.53it/s, loss=0.154]
+ 46%|████▌     | 462/1000 [00:26&lt;00:30, 17.53it/s, loss=0.154]
+ 46%|████▌     | 462/1000 [00:26&lt;00:30, 17.53it/s, loss=0.153]
+ 46%|████▋     | 464/1000 [00:26&lt;00:30, 17.55it/s, loss=0.153]
+ 46%|████▋     | 464/1000 [00:26&lt;00:30, 17.55it/s, loss=0.153]
+ 46%|████▋     | 464/1000 [00:26&lt;00:30, 17.55it/s, loss=0.153]
+ 47%|████▋     | 466/1000 [00:26&lt;00:30, 17.57it/s, loss=0.153]
+ 47%|████▋     | 466/1000 [00:26&lt;00:30, 17.57it/s, loss=0.153]
+ 47%|████▋     | 466/1000 [00:26&lt;00:30, 17.57it/s, loss=0.153]
+ 47%|████▋     | 468/1000 [00:26&lt;00:30, 17.61it/s, loss=0.153]
+ 47%|████▋     | 468/1000 [00:26&lt;00:30, 17.61it/s, loss=0.152]
+ 47%|████▋     | 468/1000 [00:26&lt;00:30, 17.61it/s, loss=0.152]
+ 47%|████▋     | 470/1000 [00:26&lt;00:30, 17.59it/s, loss=0.152]
+ 47%|████▋     | 470/1000 [00:26&lt;00:30, 17.59it/s, loss=0.152]
+ 47%|████▋     | 470/1000 [00:26&lt;00:30, 17.59it/s, loss=0.152]
+ 47%|████▋     | 472/1000 [00:26&lt;00:30, 17.52it/s, loss=0.152]
+ 47%|████▋     | 472/1000 [00:26&lt;00:30, 17.52it/s, loss=0.152]
+ 47%|████▋     | 472/1000 [00:26&lt;00:30, 17.52it/s, loss=0.151]
+ 47%|████▋     | 474/1000 [00:26&lt;00:29, 17.57it/s, loss=0.151]
+ 47%|████▋     | 474/1000 [00:27&lt;00:29, 17.57it/s, loss=0.151]
+ 47%|████▋     | 474/1000 [00:27&lt;00:29, 17.57it/s, loss=0.151]
+ 48%|████▊     | 476/1000 [00:27&lt;00:29, 17.63it/s, loss=0.151]
+ 48%|████▊     | 476/1000 [00:27&lt;00:29, 17.63it/s, loss=0.151]
+ 48%|████▊     | 476/1000 [00:27&lt;00:29, 17.63it/s, loss=0.15]
+ 48%|████▊     | 478/1000 [00:27&lt;00:29, 17.57it/s, loss=0.15]
+ 48%|████▊     | 478/1000 [00:27&lt;00:29, 17.57it/s, loss=0.15]
+ 48%|████▊     | 478/1000 [00:27&lt;00:29, 17.57it/s, loss=0.15]
+ 48%|████▊     | 480/1000 [00:27&lt;00:29, 17.57it/s, loss=0.15]
+ 48%|████▊     | 480/1000 [00:27&lt;00:29, 17.57it/s, loss=0.15]
+ 48%|████▊     | 480/1000 [00:27&lt;00:29, 17.57it/s, loss=0.15]
+ 48%|████▊     | 482/1000 [00:27&lt;00:29, 17.58it/s, loss=0.15]
+ 48%|████▊     | 482/1000 [00:27&lt;00:29, 17.58it/s, loss=0.149]
+ 48%|████▊     | 482/1000 [00:27&lt;00:29, 17.58it/s, loss=0.149]
+ 48%|████▊     | 484/1000 [00:27&lt;00:29, 17.60it/s, loss=0.149]
+ 48%|████▊     | 484/1000 [00:27&lt;00:29, 17.60it/s, loss=0.149]
+ 48%|████▊     | 484/1000 [00:27&lt;00:29, 17.60it/s, loss=0.149]
+ 49%|████▊     | 486/1000 [00:27&lt;00:29, 17.62it/s, loss=0.149]
+ 49%|████▊     | 486/1000 [00:27&lt;00:29, 17.62it/s, loss=0.149]
+ 49%|████▊     | 486/1000 [00:27&lt;00:29, 17.62it/s, loss=0.148]
+ 49%|████▉     | 488/1000 [00:27&lt;00:29, 17.54it/s, loss=0.148]
+ 49%|████▉     | 488/1000 [00:27&lt;00:29, 17.54it/s, loss=0.148]
+ 49%|████▉     | 488/1000 [00:27&lt;00:29, 17.54it/s, loss=0.148]
+ 49%|████▉     | 490/1000 [00:27&lt;00:29, 17.55it/s, loss=0.148]
+ 49%|████▉     | 490/1000 [00:27&lt;00:29, 17.55it/s, loss=0.148]
+ 49%|████▉     | 490/1000 [00:28&lt;00:29, 17.55it/s, loss=0.148]
+ 49%|████▉     | 492/1000 [00:28&lt;00:28, 17.61it/s, loss=0.148]
+ 49%|████▉     | 492/1000 [00:28&lt;00:28, 17.61it/s, loss=0.147]
+ 49%|████▉     | 492/1000 [00:28&lt;00:28, 17.61it/s, loss=0.147]
+ 49%|████▉     | 494/1000 [00:28&lt;00:29, 17.44it/s, loss=0.147]
+ 49%|████▉     | 494/1000 [00:28&lt;00:29, 17.44it/s, loss=0.147]
+ 49%|████▉     | 494/1000 [00:28&lt;00:29, 17.44it/s, loss=0.147]
+ 50%|████▉     | 496/1000 [00:28&lt;00:28, 17.47it/s, loss=0.147]
+ 50%|████▉     | 496/1000 [00:28&lt;00:28, 17.47it/s, loss=0.147]
+ 50%|████▉     | 496/1000 [00:28&lt;00:28, 17.47it/s, loss=0.146]
+ 50%|████▉     | 498/1000 [00:28&lt;00:28, 17.44it/s, loss=0.146]
+ 50%|████▉     | 498/1000 [00:28&lt;00:28, 17.44it/s, loss=0.146]
+ 50%|████▉     | 498/1000 [00:28&lt;00:28, 17.44it/s, loss=0.146]
+ 50%|█████     | 500/1000 [00:28&lt;00:28, 17.40it/s, loss=0.146]
+ 50%|█████     | 500/1000 [00:28&lt;00:28, 17.40it/s, loss=0.146]
+ 50%|█████     | 500/1000 [00:28&lt;00:28, 17.40it/s, loss=0.146]
+ 50%|█████     | 502/1000 [00:28&lt;00:28, 17.43it/s, loss=0.146]
+ 50%|█████     | 502/1000 [00:28&lt;00:28, 17.43it/s, loss=0.145]
+ 50%|█████     | 502/1000 [00:28&lt;00:28, 17.43it/s, loss=0.145]
+ 50%|█████     | 504/1000 [00:28&lt;00:28, 17.47it/s, loss=0.145]
+ 50%|█████     | 504/1000 [00:28&lt;00:28, 17.47it/s, loss=0.145]
+ 50%|█████     | 504/1000 [00:28&lt;00:28, 17.47it/s, loss=0.145]
+ 51%|█████     | 506/1000 [00:28&lt;00:28, 17.45it/s, loss=0.145]
+ 51%|█████     | 506/1000 [00:28&lt;00:28, 17.45it/s, loss=0.145]
+ 51%|█████     | 506/1000 [00:28&lt;00:28, 17.45it/s, loss=0.144]
+ 51%|█████     | 508/1000 [00:28&lt;00:28, 17.10it/s, loss=0.144]
+ 51%|█████     | 508/1000 [00:29&lt;00:28, 17.10it/s, loss=0.144]
+ 51%|█████     | 508/1000 [00:29&lt;00:28, 17.10it/s, loss=0.144]
+ 51%|█████     | 510/1000 [00:29&lt;00:28, 16.93it/s, loss=0.144]
+ 51%|█████     | 510/1000 [00:29&lt;00:28, 16.93it/s, loss=0.144]
+ 51%|█████     | 510/1000 [00:29&lt;00:28, 16.93it/s, loss=0.144]
+ 51%|█████     | 512/1000 [00:29&lt;00:28, 16.85it/s, loss=0.144]
+ 51%|█████     | 512/1000 [00:29&lt;00:28, 16.85it/s, loss=0.143]
+ 51%|█████     | 512/1000 [00:29&lt;00:28, 16.85it/s, loss=0.143]
+ 51%|█████▏    | 514/1000 [00:29&lt;00:29, 16.72it/s, loss=0.143]
+ 51%|█████▏    | 514/1000 [00:29&lt;00:29, 16.72it/s, loss=0.143]
+ 51%|█████▏    | 514/1000 [00:29&lt;00:29, 16.72it/s, loss=0.143]
+ 52%|█████▏    | 516/1000 [00:29&lt;00:29, 16.40it/s, loss=0.143]
+ 52%|█████▏    | 516/1000 [00:29&lt;00:29, 16.40it/s, loss=0.143]
+ 52%|█████▏    | 516/1000 [00:29&lt;00:29, 16.40it/s, loss=0.142]
+ 52%|█████▏    | 518/1000 [00:29&lt;00:29, 16.48it/s, loss=0.142]
+ 52%|█████▏    | 518/1000 [00:29&lt;00:29, 16.48it/s, loss=0.142]
+ 52%|█████▏    | 518/1000 [00:29&lt;00:29, 16.48it/s, loss=0.142]
+ 52%|█████▏    | 520/1000 [00:29&lt;00:28, 16.70it/s, loss=0.142]
+ 52%|█████▏    | 520/1000 [00:29&lt;00:28, 16.70it/s, loss=0.142]
+ 52%|█████▏    | 520/1000 [00:29&lt;00:28, 16.70it/s, loss=0.142]
+ 52%|█████▏    | 522/1000 [00:29&lt;00:28, 16.92it/s, loss=0.142]
+ 52%|█████▏    | 522/1000 [00:29&lt;00:28, 16.92it/s, loss=0.141]
+ 52%|█████▏    | 522/1000 [00:29&lt;00:28, 16.92it/s, loss=0.141]
+ 52%|█████▏    | 524/1000 [00:29&lt;00:27, 17.03it/s, loss=0.141]
+ 52%|█████▏    | 524/1000 [00:29&lt;00:27, 17.03it/s, loss=0.141]
+ 52%|█████▏    | 524/1000 [00:30&lt;00:27, 17.03it/s, loss=0.141]
+ 53%|█████▎    | 526/1000 [00:30&lt;00:27, 17.12it/s, loss=0.141]
+ 53%|█████▎    | 526/1000 [00:30&lt;00:27, 17.12it/s, loss=0.141]
+ 53%|█████▎    | 526/1000 [00:30&lt;00:27, 17.12it/s, loss=0.14]
+ 53%|█████▎    | 528/1000 [00:30&lt;00:27, 17.09it/s, loss=0.14]
+ 53%|█████▎    | 528/1000 [00:30&lt;00:27, 17.09it/s, loss=0.14]
+ 53%|█████▎    | 528/1000 [00:30&lt;00:27, 17.09it/s, loss=0.14]
+ 53%|█████▎    | 530/1000 [00:30&lt;00:27, 17.16it/s, loss=0.14]
+ 53%|█████▎    | 530/1000 [00:30&lt;00:27, 17.16it/s, loss=0.14]
+ 53%|█████▎    | 530/1000 [00:30&lt;00:27, 17.16it/s, loss=0.14]
+ 53%|█████▎    | 532/1000 [00:30&lt;00:27, 17.22it/s, loss=0.14]
+ 53%|█████▎    | 532/1000 [00:30&lt;00:27, 17.22it/s, loss=0.14]
+ 53%|█████▎    | 532/1000 [00:30&lt;00:27, 17.22it/s, loss=0.139]
+ 53%|█████▎    | 534/1000 [00:30&lt;00:26, 17.29it/s, loss=0.139]
+ 53%|█████▎    | 534/1000 [00:30&lt;00:26, 17.29it/s, loss=0.139]
+ 53%|█████▎    | 534/1000 [00:30&lt;00:26, 17.29it/s, loss=0.139]
+ 54%|█████▎    | 536/1000 [00:30&lt;00:26, 17.34it/s, loss=0.139]
+ 54%|█████▎    | 536/1000 [00:30&lt;00:26, 17.34it/s, loss=0.139]
+ 54%|█████▎    | 536/1000 [00:30&lt;00:26, 17.34it/s, loss=0.139]
+ 54%|█████▍    | 538/1000 [00:30&lt;00:26, 17.35it/s, loss=0.139]
+ 54%|█████▍    | 538/1000 [00:30&lt;00:26, 17.35it/s, loss=0.138]
+ 54%|█████▍    | 538/1000 [00:30&lt;00:26, 17.35it/s, loss=0.138]
+ 54%|█████▍    | 540/1000 [00:30&lt;00:26, 17.39it/s, loss=0.138]
+ 54%|█████▍    | 540/1000 [00:30&lt;00:26, 17.39it/s, loss=0.138]
+ 54%|█████▍    | 540/1000 [00:30&lt;00:26, 17.39it/s, loss=0.138]
+ 54%|█████▍    | 542/1000 [00:30&lt;00:26, 17.45it/s, loss=0.138]
+ 54%|█████▍    | 542/1000 [00:30&lt;00:26, 17.45it/s, loss=0.138]
+ 54%|█████▍    | 542/1000 [00:31&lt;00:26, 17.45it/s, loss=0.137]
+ 54%|█████▍    | 544/1000 [00:31&lt;00:26, 17.47it/s, loss=0.137]
+ 54%|█████▍    | 544/1000 [00:31&lt;00:26, 17.47it/s, loss=0.137]
+ 54%|█████▍    | 544/1000 [00:31&lt;00:26, 17.47it/s, loss=0.137]
+ 55%|█████▍    | 546/1000 [00:31&lt;00:26, 17.36it/s, loss=0.137]
+ 55%|█████▍    | 546/1000 [00:31&lt;00:26, 17.36it/s, loss=0.137]
+ 55%|█████▍    | 546/1000 [00:31&lt;00:26, 17.36it/s, loss=0.137]
+ 55%|█████▍    | 548/1000 [00:31&lt;00:26, 17.35it/s, loss=0.137]
+ 55%|█████▍    | 548/1000 [00:31&lt;00:26, 17.35it/s, loss=0.137]
+ 55%|█████▍    | 548/1000 [00:31&lt;00:26, 17.35it/s, loss=0.136]
+ 55%|█████▌    | 550/1000 [00:31&lt;00:26, 17.29it/s, loss=0.136]
+ 55%|█████▌    | 550/1000 [00:31&lt;00:26, 17.29it/s, loss=0.136]
+ 55%|█████▌    | 550/1000 [00:31&lt;00:26, 17.29it/s, loss=0.136]
+ 55%|█████▌    | 552/1000 [00:31&lt;00:25, 17.32it/s, loss=0.136]
+ 55%|█████▌    | 552/1000 [00:31&lt;00:25, 17.32it/s, loss=0.136]
+ 55%|█████▌    | 552/1000 [00:31&lt;00:25, 17.32it/s, loss=0.136]
+ 55%|█████▌    | 554/1000 [00:31&lt;00:25, 17.40it/s, loss=0.136]
+ 55%|█████▌    | 554/1000 [00:31&lt;00:25, 17.40it/s, loss=0.135]
+ 55%|█████▌    | 554/1000 [00:31&lt;00:25, 17.40it/s, loss=0.135]
+ 56%|█████▌    | 556/1000 [00:31&lt;00:25, 17.36it/s, loss=0.135]
+ 56%|█████▌    | 556/1000 [00:31&lt;00:25, 17.36it/s, loss=0.135]
+ 56%|█████▌    | 556/1000 [00:31&lt;00:25, 17.36it/s, loss=0.135]
+ 56%|█████▌    | 558/1000 [00:31&lt;00:25, 17.40it/s, loss=0.135]
+ 56%|█████▌    | 558/1000 [00:31&lt;00:25, 17.40it/s, loss=0.135]
+ 56%|█████▌    | 558/1000 [00:31&lt;00:25, 17.40it/s, loss=0.135]
+ 56%|█████▌    | 560/1000 [00:31&lt;00:25, 17.31it/s, loss=0.135]
+ 56%|█████▌    | 560/1000 [00:32&lt;00:25, 17.31it/s, loss=0.134]
+ 56%|█████▌    | 560/1000 [00:32&lt;00:25, 17.31it/s, loss=0.134]
+ 56%|█████▌    | 562/1000 [00:32&lt;00:25, 17.25it/s, loss=0.134]
+ 56%|█████▌    | 562/1000 [00:32&lt;00:25, 17.25it/s, loss=0.134]
+ 56%|█████▌    | 562/1000 [00:32&lt;00:25, 17.25it/s, loss=0.134]
+ 56%|█████▋    | 564/1000 [00:32&lt;00:25, 17.33it/s, loss=0.134]
+ 56%|█████▋    | 564/1000 [00:32&lt;00:25, 17.33it/s, loss=0.134]
+ 56%|█████▋    | 564/1000 [00:32&lt;00:25, 17.33it/s, loss=0.134]
+ 57%|█████▋    | 566/1000 [00:32&lt;00:25, 17.29it/s, loss=0.134]
+ 57%|█████▋    | 566/1000 [00:32&lt;00:25, 17.29it/s, loss=0.133]
+ 57%|█████▋    | 566/1000 [00:32&lt;00:25, 17.29it/s, loss=0.133]
+ 57%|█████▋    | 568/1000 [00:32&lt;00:24, 17.32it/s, loss=0.133]
+ 57%|█████▋    | 568/1000 [00:32&lt;00:24, 17.32it/s, loss=0.133]
+ 57%|█████▋    | 568/1000 [00:32&lt;00:24, 17.32it/s, loss=0.133]
+ 57%|█████▋    | 570/1000 [00:32&lt;00:24, 17.41it/s, loss=0.133]
+ 57%|█████▋    | 570/1000 [00:32&lt;00:24, 17.41it/s, loss=0.133]
+ 57%|█████▋    | 570/1000 [00:32&lt;00:24, 17.41it/s, loss=0.132]
+ 57%|█████▋    | 572/1000 [00:32&lt;00:24, 17.45it/s, loss=0.132]
+ 57%|█████▋    | 572/1000 [00:32&lt;00:24, 17.45it/s, loss=0.132]
+ 57%|█████▋    | 572/1000 [00:32&lt;00:24, 17.45it/s, loss=0.132]
+ 57%|█████▋    | 574/1000 [00:32&lt;00:24, 17.36it/s, loss=0.132]
+ 57%|█████▋    | 574/1000 [00:32&lt;00:24, 17.36it/s, loss=0.132]
+ 57%|█████▋    | 574/1000 [00:32&lt;00:24, 17.36it/s, loss=0.132]
+ 58%|█████▊    | 576/1000 [00:32&lt;00:24, 17.43it/s, loss=0.132]
+ 58%|█████▊    | 576/1000 [00:32&lt;00:24, 17.43it/s, loss=0.132]
+ 58%|█████▊    | 576/1000 [00:33&lt;00:24, 17.43it/s, loss=0.131]
+ 58%|█████▊    | 578/1000 [00:33&lt;00:24, 17.35it/s, loss=0.131]
+ 58%|█████▊    | 578/1000 [00:33&lt;00:24, 17.35it/s, loss=0.131]
+ 58%|█████▊    | 578/1000 [00:33&lt;00:24, 17.35it/s, loss=0.131]
+ 58%|█████▊    | 580/1000 [00:33&lt;00:24, 17.29it/s, loss=0.131]
+ 58%|█████▊    | 580/1000 [00:33&lt;00:24, 17.29it/s, loss=0.131]
+ 58%|█████▊    | 580/1000 [00:33&lt;00:24, 17.29it/s, loss=0.131]
+ 58%|█████▊    | 582/1000 [00:33&lt;00:24, 17.29it/s, loss=0.131]
+ 58%|█████▊    | 582/1000 [00:33&lt;00:24, 17.29it/s, loss=0.131]
+ 58%|█████▊    | 582/1000 [00:33&lt;00:24, 17.29it/s, loss=0.13]
+ 58%|█████▊    | 584/1000 [00:33&lt;00:24, 17.27it/s, loss=0.13]
+ 58%|█████▊    | 584/1000 [00:33&lt;00:24, 17.27it/s, loss=0.13]
+ 58%|█████▊    | 584/1000 [00:33&lt;00:24, 17.27it/s, loss=0.13]
+ 59%|█████▊    | 586/1000 [00:33&lt;00:23, 17.35it/s, loss=0.13]
+ 59%|█████▊    | 586/1000 [00:33&lt;00:23, 17.35it/s, loss=0.13]
+ 59%|█████▊    | 586/1000 [00:33&lt;00:23, 17.35it/s, loss=0.13]
+ 59%|█████▉    | 588/1000 [00:33&lt;00:23, 17.34it/s, loss=0.13]
+ 59%|█████▉    | 588/1000 [00:33&lt;00:23, 17.34it/s, loss=0.13]
+ 59%|█████▉    | 588/1000 [00:33&lt;00:23, 17.34it/s, loss=0.129]
+ 59%|█████▉    | 590/1000 [00:33&lt;00:23, 17.36it/s, loss=0.129]
+ 59%|█████▉    | 590/1000 [00:33&lt;00:23, 17.36it/s, loss=0.129]
+ 59%|█████▉    | 590/1000 [00:33&lt;00:23, 17.36it/s, loss=0.129]
+ 59%|█████▉    | 592/1000 [00:33&lt;00:23, 17.27it/s, loss=0.129]
+ 59%|█████▉    | 592/1000 [00:33&lt;00:23, 17.27it/s, loss=0.129]
+ 59%|█████▉    | 592/1000 [00:33&lt;00:23, 17.27it/s, loss=0.129]
+ 59%|█████▉    | 594/1000 [00:33&lt;00:23, 17.32it/s, loss=0.129]
+ 59%|█████▉    | 594/1000 [00:33&lt;00:23, 17.32it/s, loss=0.129]
+ 59%|█████▉    | 594/1000 [00:34&lt;00:23, 17.32it/s, loss=0.128]
+ 60%|█████▉    | 596/1000 [00:34&lt;00:23, 17.28it/s, loss=0.128]
+ 60%|█████▉    | 596/1000 [00:34&lt;00:23, 17.28it/s, loss=0.128]
+ 60%|█████▉    | 596/1000 [00:34&lt;00:23, 17.28it/s, loss=0.128]
+ 60%|█████▉    | 598/1000 [00:34&lt;00:23, 17.34it/s, loss=0.128]
+ 60%|█████▉    | 598/1000 [00:34&lt;00:23, 17.34it/s, loss=0.128]
+ 60%|█████▉    | 598/1000 [00:34&lt;00:23, 17.34it/s, loss=0.128]
+ 60%|██████    | 600/1000 [00:34&lt;00:23, 17.33it/s, loss=0.128]
+ 60%|██████    | 600/1000 [00:34&lt;00:23, 17.33it/s, loss=0.128]
+ 60%|██████    | 600/1000 [00:34&lt;00:23, 17.33it/s, loss=0.127]
+ 60%|██████    | 602/1000 [00:34&lt;00:22, 17.32it/s, loss=0.127]
+ 60%|██████    | 602/1000 [00:34&lt;00:22, 17.32it/s, loss=0.127]
+ 60%|██████    | 602/1000 [00:34&lt;00:22, 17.32it/s, loss=0.127]
+ 60%|██████    | 604/1000 [00:34&lt;00:22, 17.32it/s, loss=0.127]
+ 60%|██████    | 604/1000 [00:34&lt;00:22, 17.32it/s, loss=0.127]
+ 60%|██████    | 604/1000 [00:34&lt;00:22, 17.32it/s, loss=0.127]
+ 61%|██████    | 606/1000 [00:34&lt;00:22, 17.17it/s, loss=0.127]
+ 61%|██████    | 606/1000 [00:34&lt;00:22, 17.17it/s, loss=0.127]
+ 61%|██████    | 606/1000 [00:34&lt;00:22, 17.17it/s, loss=0.126]
+ 61%|██████    | 608/1000 [00:34&lt;00:23, 16.66it/s, loss=0.126]
+ 61%|██████    | 608/1000 [00:34&lt;00:23, 16.66it/s, loss=0.126]
+ 61%|██████    | 608/1000 [00:34&lt;00:23, 16.66it/s, loss=0.126]
+ 61%|██████    | 610/1000 [00:34&lt;00:23, 16.71it/s, loss=0.126]
+ 61%|██████    | 610/1000 [00:34&lt;00:23, 16.71it/s, loss=0.126]
+ 61%|██████    | 610/1000 [00:34&lt;00:23, 16.71it/s, loss=0.126]
+ 61%|██████    | 612/1000 [00:34&lt;00:22, 16.92it/s, loss=0.126]
+ 61%|██████    | 612/1000 [00:35&lt;00:22, 16.92it/s, loss=0.126]
+ 61%|██████    | 612/1000 [00:35&lt;00:22, 16.92it/s, loss=0.125]
+ 61%|██████▏   | 614/1000 [00:35&lt;00:22, 17.11it/s, loss=0.125]
+ 61%|██████▏   | 614/1000 [00:35&lt;00:22, 17.11it/s, loss=0.125]
+ 61%|██████▏   | 614/1000 [00:35&lt;00:22, 17.11it/s, loss=0.125]
+ 62%|██████▏   | 616/1000 [00:35&lt;00:22, 17.13it/s, loss=0.125]
+ 62%|██████▏   | 616/1000 [00:35&lt;00:22, 17.13it/s, loss=0.125]
+ 62%|██████▏   | 616/1000 [00:35&lt;00:22, 17.13it/s, loss=0.125]
+ 62%|██████▏   | 618/1000 [00:35&lt;00:22, 17.09it/s, loss=0.125]
+ 62%|██████▏   | 618/1000 [00:35&lt;00:22, 17.09it/s, loss=0.125]
+ 62%|██████▏   | 618/1000 [00:35&lt;00:22, 17.09it/s, loss=0.125]
+ 62%|██████▏   | 620/1000 [00:35&lt;00:22, 17.04it/s, loss=0.125]
+ 62%|██████▏   | 620/1000 [00:35&lt;00:22, 17.04it/s, loss=0.124]
+ 62%|██████▏   | 620/1000 [00:35&lt;00:22, 17.04it/s, loss=0.124]
+ 62%|██████▏   | 622/1000 [00:35&lt;00:22, 17.00it/s, loss=0.124]
+ 62%|██████▏   | 622/1000 [00:35&lt;00:22, 17.00it/s, loss=0.124]
+ 62%|██████▏   | 622/1000 [00:35&lt;00:22, 17.00it/s, loss=0.124]
+ 62%|██████▏   | 624/1000 [00:35&lt;00:21, 17.10it/s, loss=0.124]
+ 62%|██████▏   | 624/1000 [00:35&lt;00:21, 17.10it/s, loss=0.124]
+ 62%|██████▏   | 624/1000 [00:35&lt;00:21, 17.10it/s, loss=0.124]
+ 63%|██████▎   | 626/1000 [00:35&lt;00:21, 17.25it/s, loss=0.124]
+ 63%|██████▎   | 626/1000 [00:35&lt;00:21, 17.25it/s, loss=0.123]
+ 63%|██████▎   | 626/1000 [00:35&lt;00:21, 17.25it/s, loss=0.123]
+ 63%|██████▎   | 628/1000 [00:35&lt;00:21, 17.37it/s, loss=0.123]
+ 63%|██████▎   | 628/1000 [00:35&lt;00:21, 17.37it/s, loss=0.123]
+ 63%|██████▎   | 628/1000 [00:36&lt;00:21, 17.37it/s, loss=0.123]
+ 63%|██████▎   | 630/1000 [00:36&lt;00:21, 17.38it/s, loss=0.123]
+ 63%|██████▎   | 630/1000 [00:36&lt;00:21, 17.38it/s, loss=0.123]
+ 63%|██████▎   | 630/1000 [00:36&lt;00:21, 17.38it/s, loss=0.123]
+ 63%|██████▎   | 632/1000 [00:36&lt;00:21, 17.35it/s, loss=0.123]
+ 63%|██████▎   | 632/1000 [00:36&lt;00:21, 17.35it/s, loss=0.122]
+ 63%|██████▎   | 632/1000 [00:36&lt;00:21, 17.35it/s, loss=0.122]
+ 63%|██████▎   | 634/1000 [00:36&lt;00:21, 17.34it/s, loss=0.122]
+ 63%|██████▎   | 634/1000 [00:36&lt;00:21, 17.34it/s, loss=0.122]
+ 63%|██████▎   | 634/1000 [00:36&lt;00:21, 17.34it/s, loss=0.122]
+ 64%|██████▎   | 636/1000 [00:36&lt;00:20, 17.34it/s, loss=0.122]
+ 64%|██████▎   | 636/1000 [00:36&lt;00:20, 17.34it/s, loss=0.122]
+ 64%|██████▎   | 636/1000 [00:36&lt;00:20, 17.34it/s, loss=0.122]
+ 64%|██████▍   | 638/1000 [00:36&lt;00:20, 17.38it/s, loss=0.122]
+ 64%|██████▍   | 638/1000 [00:36&lt;00:20, 17.38it/s, loss=0.122]
+ 64%|██████▍   | 638/1000 [00:36&lt;00:20, 17.38it/s, loss=0.121]
+ 64%|██████▍   | 640/1000 [00:36&lt;00:20, 17.38it/s, loss=0.121]
+ 64%|██████▍   | 640/1000 [00:36&lt;00:20, 17.38it/s, loss=0.121]
+ 64%|██████▍   | 640/1000 [00:36&lt;00:20, 17.38it/s, loss=0.121]
+ 64%|██████▍   | 642/1000 [00:36&lt;00:20, 17.46it/s, loss=0.121]
+ 64%|██████▍   | 642/1000 [00:36&lt;00:20, 17.46it/s, loss=0.121]
+ 64%|██████▍   | 642/1000 [00:36&lt;00:20, 17.46it/s, loss=0.121]
+ 64%|██████▍   | 644/1000 [00:36&lt;00:20, 17.50it/s, loss=0.121]
+ 64%|██████▍   | 644/1000 [00:36&lt;00:20, 17.50it/s, loss=0.121]
+ 64%|██████▍   | 644/1000 [00:36&lt;00:20, 17.50it/s, loss=0.121]
+ 65%|██████▍   | 646/1000 [00:36&lt;00:20, 17.48it/s, loss=0.121]
+ 65%|██████▍   | 646/1000 [00:37&lt;00:20, 17.48it/s, loss=0.12]
+ 65%|██████▍   | 646/1000 [00:37&lt;00:20, 17.48it/s, loss=0.12]
+ 65%|██████▍   | 648/1000 [00:37&lt;00:20, 17.43it/s, loss=0.12]
+ 65%|██████▍   | 648/1000 [00:37&lt;00:20, 17.43it/s, loss=0.12]
+ 65%|██████▍   | 648/1000 [00:37&lt;00:20, 17.43it/s, loss=0.12]
+ 65%|██████▌   | 650/1000 [00:37&lt;00:20, 17.31it/s, loss=0.12]
+ 65%|██████▌   | 650/1000 [00:37&lt;00:20, 17.31it/s, loss=0.12]
+ 65%|██████▌   | 650/1000 [00:37&lt;00:20, 17.31it/s, loss=0.12]
+ 65%|██████▌   | 652/1000 [00:37&lt;00:20, 17.03it/s, loss=0.12]
+ 65%|██████▌   | 652/1000 [00:37&lt;00:20, 17.03it/s, loss=0.119]
+ 65%|██████▌   | 652/1000 [00:37&lt;00:20, 17.03it/s, loss=0.119]
+ 65%|██████▌   | 654/1000 [00:37&lt;00:20, 16.98it/s, loss=0.119]
+ 65%|██████▌   | 654/1000 [00:37&lt;00:20, 16.98it/s, loss=0.119]
+ 65%|██████▌   | 654/1000 [00:37&lt;00:20, 16.98it/s, loss=0.119]
+ 66%|██████▌   | 656/1000 [00:37&lt;00:20, 16.79it/s, loss=0.119]
+ 66%|██████▌   | 656/1000 [00:37&lt;00:20, 16.79it/s, loss=0.119]
+ 66%|██████▌   | 656/1000 [00:37&lt;00:20, 16.79it/s, loss=0.119]
+ 66%|██████▌   | 658/1000 [00:37&lt;00:20, 16.64it/s, loss=0.119]
+ 66%|██████▌   | 658/1000 [00:37&lt;00:20, 16.64it/s, loss=0.119]
+ 66%|██████▌   | 658/1000 [00:37&lt;00:20, 16.64it/s, loss=0.118]
+ 66%|██████▌   | 660/1000 [00:37&lt;00:20, 16.61it/s, loss=0.118]
+ 66%|██████▌   | 660/1000 [00:37&lt;00:20, 16.61it/s, loss=0.118]
+ 66%|██████▌   | 660/1000 [00:37&lt;00:20, 16.61it/s, loss=0.118]
+ 66%|██████▌   | 662/1000 [00:37&lt;00:20, 16.89it/s, loss=0.118]
+ 66%|██████▌   | 662/1000 [00:37&lt;00:20, 16.89it/s, loss=0.118]
+ 66%|██████▌   | 662/1000 [00:38&lt;00:20, 16.89it/s, loss=0.118]
+ 66%|██████▋   | 664/1000 [00:38&lt;00:19, 17.12it/s, loss=0.118]
+ 66%|██████▋   | 664/1000 [00:38&lt;00:19, 17.12it/s, loss=0.118]
+ 66%|██████▋   | 664/1000 [00:38&lt;00:19, 17.12it/s, loss=0.118]
+ 67%|██████▋   | 666/1000 [00:38&lt;00:19, 17.06it/s, loss=0.118]
+ 67%|██████▋   | 666/1000 [00:38&lt;00:19, 17.06it/s, loss=0.117]
+ 67%|██████▋   | 666/1000 [00:38&lt;00:19, 17.06it/s, loss=0.117]
+ 67%|██████▋   | 668/1000 [00:38&lt;00:19, 17.23it/s, loss=0.117]
+ 67%|██████▋   | 668/1000 [00:38&lt;00:19, 17.23it/s, loss=0.117]
+ 67%|██████▋   | 668/1000 [00:38&lt;00:19, 17.23it/s, loss=0.117]
+ 67%|██████▋   | 670/1000 [00:38&lt;00:19, 17.27it/s, loss=0.117]
+ 67%|██████▋   | 670/1000 [00:38&lt;00:19, 17.27it/s, loss=0.117]
+ 67%|██████▋   | 670/1000 [00:38&lt;00:19, 17.27it/s, loss=0.117]
+ 67%|██████▋   | 672/1000 [00:38&lt;00:18, 17.41it/s, loss=0.117]
+ 67%|██████▋   | 672/1000 [00:38&lt;00:18, 17.41it/s, loss=0.117]
+ 67%|██████▋   | 672/1000 [00:38&lt;00:18, 17.41it/s, loss=0.116]
+ 67%|██████▋   | 674/1000 [00:38&lt;00:18, 17.49it/s, loss=0.116]
+ 67%|██████▋   | 674/1000 [00:38&lt;00:18, 17.49it/s, loss=0.116]
+ 67%|██████▋   | 674/1000 [00:38&lt;00:18, 17.49it/s, loss=0.116]
+ 68%|██████▊   | 676/1000 [00:38&lt;00:18, 17.53it/s, loss=0.116]
+ 68%|██████▊   | 676/1000 [00:38&lt;00:18, 17.53it/s, loss=0.116]
+ 68%|██████▊   | 676/1000 [00:38&lt;00:18, 17.53it/s, loss=0.116]
+ 68%|██████▊   | 678/1000 [00:38&lt;00:18, 17.54it/s, loss=0.116]
+ 68%|██████▊   | 678/1000 [00:38&lt;00:18, 17.54it/s, loss=0.116]
+ 68%|██████▊   | 678/1000 [00:38&lt;00:18, 17.54it/s, loss=0.116]
+ 68%|██████▊   | 680/1000 [00:38&lt;00:18, 17.47it/s, loss=0.116]
+ 68%|██████▊   | 680/1000 [00:38&lt;00:18, 17.47it/s, loss=0.115]
+ 68%|██████▊   | 680/1000 [00:39&lt;00:18, 17.47it/s, loss=0.115]
+ 68%|██████▊   | 682/1000 [00:39&lt;00:18, 17.50it/s, loss=0.115]
+ 68%|██████▊   | 682/1000 [00:39&lt;00:18, 17.50it/s, loss=0.115]
+ 68%|██████▊   | 682/1000 [00:39&lt;00:18, 17.50it/s, loss=0.115]
+ 68%|██████▊   | 684/1000 [00:39&lt;00:18, 17.50it/s, loss=0.115]
+ 68%|██████▊   | 684/1000 [00:39&lt;00:18, 17.50it/s, loss=0.115]
+ 68%|██████▊   | 684/1000 [00:39&lt;00:18, 17.50it/s, loss=0.115]
+ 69%|██████▊   | 686/1000 [00:39&lt;00:17, 17.47it/s, loss=0.115]
+ 69%|██████▊   | 686/1000 [00:39&lt;00:17, 17.47it/s, loss=0.115]
+ 69%|██████▊   | 686/1000 [00:39&lt;00:17, 17.47it/s, loss=0.114]
+ 69%|██████▉   | 688/1000 [00:39&lt;00:17, 17.46it/s, loss=0.114]
+ 69%|██████▉   | 688/1000 [00:39&lt;00:17, 17.46it/s, loss=0.114]
+ 69%|██████▉   | 688/1000 [00:39&lt;00:17, 17.46it/s, loss=0.114]
+ 69%|██████▉   | 690/1000 [00:39&lt;00:17, 17.48it/s, loss=0.114]
+ 69%|██████▉   | 690/1000 [00:39&lt;00:17, 17.48it/s, loss=0.114]
+ 69%|██████▉   | 690/1000 [00:39&lt;00:17, 17.48it/s, loss=0.114]
+ 69%|██████▉   | 692/1000 [00:39&lt;00:17, 17.45it/s, loss=0.114]
+ 69%|██████▉   | 692/1000 [00:39&lt;00:17, 17.45it/s, loss=0.114]
+ 69%|██████▉   | 692/1000 [00:39&lt;00:17, 17.45it/s, loss=0.114]
+ 69%|██████▉   | 694/1000 [00:39&lt;00:17, 17.49it/s, loss=0.114]
+ 69%|██████▉   | 694/1000 [00:39&lt;00:17, 17.49it/s, loss=0.113]
+ 69%|██████▉   | 694/1000 [00:39&lt;00:17, 17.49it/s, loss=0.113]
+ 70%|██████▉   | 696/1000 [00:39&lt;00:17, 17.56it/s, loss=0.113]
+ 70%|██████▉   | 696/1000 [00:39&lt;00:17, 17.56it/s, loss=0.113]
+ 70%|██████▉   | 696/1000 [00:39&lt;00:17, 17.56it/s, loss=0.113]
+ 70%|██████▉   | 698/1000 [00:39&lt;00:17, 17.60it/s, loss=0.113]
+ 70%|██████▉   | 698/1000 [00:40&lt;00:17, 17.60it/s, loss=0.113]
+ 70%|██████▉   | 698/1000 [00:40&lt;00:17, 17.60it/s, loss=0.113]
+ 70%|███████   | 700/1000 [00:40&lt;00:17, 17.63it/s, loss=0.113]
+ 70%|███████   | 700/1000 [00:40&lt;00:17, 17.63it/s, loss=0.113]
+ 70%|███████   | 700/1000 [00:40&lt;00:17, 17.63it/s, loss=0.113]
+ 70%|███████   | 702/1000 [00:40&lt;00:16, 17.60it/s, loss=0.113]
+ 70%|███████   | 702/1000 [00:40&lt;00:16, 17.60it/s, loss=0.112]
+ 70%|███████   | 702/1000 [00:40&lt;00:16, 17.60it/s, loss=0.112]
+ 70%|███████   | 704/1000 [00:40&lt;00:16, 17.63it/s, loss=0.112]
+ 70%|███████   | 704/1000 [00:40&lt;00:16, 17.63it/s, loss=0.112]
+ 70%|███████   | 704/1000 [00:40&lt;00:16, 17.63it/s, loss=0.112]
+ 71%|███████   | 706/1000 [00:40&lt;00:16, 17.62it/s, loss=0.112]
+ 71%|███████   | 706/1000 [00:40&lt;00:16, 17.62it/s, loss=0.112]
+ 71%|███████   | 706/1000 [00:40&lt;00:16, 17.62it/s, loss=0.112]
+ 71%|███████   | 708/1000 [00:40&lt;00:16, 17.57it/s, loss=0.112]
+ 71%|███████   | 708/1000 [00:40&lt;00:16, 17.57it/s, loss=0.112]
+ 71%|███████   | 708/1000 [00:40&lt;00:16, 17.57it/s, loss=0.111]
+ 71%|███████   | 710/1000 [00:40&lt;00:16, 17.51it/s, loss=0.111]
+ 71%|███████   | 710/1000 [00:40&lt;00:16, 17.51it/s, loss=0.111]
+ 71%|███████   | 710/1000 [00:40&lt;00:16, 17.51it/s, loss=0.111]
+ 71%|███████   | 712/1000 [00:40&lt;00:16, 17.54it/s, loss=0.111]
+ 71%|███████   | 712/1000 [00:40&lt;00:16, 17.54it/s, loss=0.111]
+ 71%|███████   | 712/1000 [00:40&lt;00:16, 17.54it/s, loss=0.111]
+ 71%|███████▏  | 714/1000 [00:40&lt;00:16, 17.43it/s, loss=0.111]
+ 71%|███████▏  | 714/1000 [00:40&lt;00:16, 17.43it/s, loss=0.111]
+ 71%|███████▏  | 714/1000 [00:40&lt;00:16, 17.43it/s, loss=0.111]
+ 72%|███████▏  | 716/1000 [00:40&lt;00:16, 17.52it/s, loss=0.111]
+ 72%|███████▏  | 716/1000 [00:41&lt;00:16, 17.52it/s, loss=0.111]
+ 72%|███████▏  | 716/1000 [00:41&lt;00:16, 17.52it/s, loss=0.11]
+ 72%|███████▏  | 718/1000 [00:41&lt;00:16, 17.53it/s, loss=0.11]
+ 72%|███████▏  | 718/1000 [00:41&lt;00:16, 17.53it/s, loss=0.11]
+ 72%|███████▏  | 718/1000 [00:41&lt;00:16, 17.53it/s, loss=0.11]
+ 72%|███████▏  | 720/1000 [00:41&lt;00:15, 17.54it/s, loss=0.11]
+ 72%|███████▏  | 720/1000 [00:41&lt;00:15, 17.54it/s, loss=0.11]
+ 72%|███████▏  | 720/1000 [00:41&lt;00:15, 17.54it/s, loss=0.11]
+ 72%|███████▏  | 722/1000 [00:41&lt;00:15, 17.50it/s, loss=0.11]
+ 72%|███████▏  | 722/1000 [00:41&lt;00:15, 17.50it/s, loss=0.11]
+ 72%|███████▏  | 722/1000 [00:41&lt;00:15, 17.50it/s, loss=0.11]
+ 72%|███████▏  | 724/1000 [00:41&lt;00:15, 17.31it/s, loss=0.11]
+ 72%|███████▏  | 724/1000 [00:41&lt;00:15, 17.31it/s, loss=0.109]
+ 72%|███████▏  | 724/1000 [00:41&lt;00:15, 17.31it/s, loss=0.109]
+ 73%|███████▎  | 726/1000 [00:41&lt;00:15, 17.39it/s, loss=0.109]
+ 73%|███████▎  | 726/1000 [00:41&lt;00:15, 17.39it/s, loss=0.109]
+ 73%|███████▎  | 726/1000 [00:41&lt;00:15, 17.39it/s, loss=0.109]
+ 73%|███████▎  | 728/1000 [00:41&lt;00:15, 17.37it/s, loss=0.109]
+ 73%|███████▎  | 728/1000 [00:41&lt;00:15, 17.37it/s, loss=0.109]
+ 73%|███████▎  | 728/1000 [00:41&lt;00:15, 17.37it/s, loss=0.109]
+ 73%|███████▎  | 730/1000 [00:41&lt;00:15, 17.43it/s, loss=0.109]
+ 73%|███████▎  | 730/1000 [00:41&lt;00:15, 17.43it/s, loss=0.109]
+ 73%|███████▎  | 730/1000 [00:41&lt;00:15, 17.43it/s, loss=0.109]
+ 73%|███████▎  | 732/1000 [00:41&lt;00:15, 17.37it/s, loss=0.109]
+ 73%|███████▎  | 732/1000 [00:41&lt;00:15, 17.37it/s, loss=0.108]
+ 73%|███████▎  | 732/1000 [00:42&lt;00:15, 17.37it/s, loss=0.108]
+ 73%|███████▎  | 734/1000 [00:42&lt;00:15, 17.34it/s, loss=0.108]
+ 73%|███████▎  | 734/1000 [00:42&lt;00:15, 17.34it/s, loss=0.108]
+ 73%|███████▎  | 734/1000 [00:42&lt;00:15, 17.34it/s, loss=0.108]
+ 74%|███████▎  | 736/1000 [00:42&lt;00:15, 17.22it/s, loss=0.108]
+ 74%|███████▎  | 736/1000 [00:42&lt;00:15, 17.22it/s, loss=0.108]
+ 74%|███████▎  | 736/1000 [00:42&lt;00:15, 17.22it/s, loss=0.108]
+ 74%|███████▍  | 738/1000 [00:42&lt;00:15, 17.21it/s, loss=0.108]
+ 74%|███████▍  | 738/1000 [00:42&lt;00:15, 17.21it/s, loss=0.108]
+ 74%|███████▍  | 738/1000 [00:42&lt;00:15, 17.21it/s, loss=0.108]
+ 74%|███████▍  | 740/1000 [00:42&lt;00:15, 17.29it/s, loss=0.108]
+ 74%|███████▍  | 740/1000 [00:42&lt;00:15, 17.29it/s, loss=0.107]
+ 74%|███████▍  | 740/1000 [00:42&lt;00:15, 17.29it/s, loss=0.107]
+ 74%|███████▍  | 742/1000 [00:42&lt;00:14, 17.31it/s, loss=0.107]
+ 74%|███████▍  | 742/1000 [00:42&lt;00:14, 17.31it/s, loss=0.107]
+ 74%|███████▍  | 742/1000 [00:42&lt;00:14, 17.31it/s, loss=0.107]
+ 74%|███████▍  | 744/1000 [00:42&lt;00:14, 17.38it/s, loss=0.107]
+ 74%|███████▍  | 744/1000 [00:42&lt;00:14, 17.38it/s, loss=0.107]
+ 74%|███████▍  | 744/1000 [00:42&lt;00:14, 17.38it/s, loss=0.107]
+ 75%|███████▍  | 746/1000 [00:42&lt;00:14, 17.37it/s, loss=0.107]
+ 75%|███████▍  | 746/1000 [00:42&lt;00:14, 17.37it/s, loss=0.107]
+ 75%|███████▍  | 746/1000 [00:42&lt;00:14, 17.37it/s, loss=0.107]
+ 75%|███████▍  | 748/1000 [00:42&lt;00:14, 17.43it/s, loss=0.107]
+ 75%|███████▍  | 748/1000 [00:42&lt;00:14, 17.43it/s, loss=0.106]
+ 75%|███████▍  | 748/1000 [00:42&lt;00:14, 17.43it/s, loss=0.106]
+ 75%|███████▌  | 750/1000 [00:42&lt;00:14, 17.49it/s, loss=0.106]
+ 75%|███████▌  | 750/1000 [00:42&lt;00:14, 17.49it/s, loss=0.106]
+ 75%|███████▌  | 750/1000 [00:43&lt;00:14, 17.49it/s, loss=0.106]
+ 75%|███████▌  | 752/1000 [00:43&lt;00:14, 17.54it/s, loss=0.106]
+ 75%|███████▌  | 752/1000 [00:43&lt;00:14, 17.54it/s, loss=0.106]
+ 75%|███████▌  | 752/1000 [00:43&lt;00:14, 17.54it/s, loss=0.106]
+ 75%|███████▌  | 754/1000 [00:43&lt;00:14, 17.55it/s, loss=0.106]
+ 75%|███████▌  | 754/1000 [00:43&lt;00:14, 17.55it/s, loss=0.106]
+ 75%|███████▌  | 754/1000 [00:43&lt;00:14, 17.55it/s, loss=0.106]
+ 76%|███████▌  | 756/1000 [00:43&lt;00:13, 17.52it/s, loss=0.106]
+ 76%|███████▌  | 756/1000 [00:43&lt;00:13, 17.52it/s, loss=0.105]
+ 76%|███████▌  | 756/1000 [00:43&lt;00:13, 17.52it/s, loss=0.105]
+ 76%|███████▌  | 758/1000 [00:43&lt;00:13, 17.55it/s, loss=0.105]
+ 76%|███████▌  | 758/1000 [00:43&lt;00:13, 17.55it/s, loss=0.105]
+ 76%|███████▌  | 758/1000 [00:43&lt;00:13, 17.55it/s, loss=0.105]
+ 76%|███████▌  | 760/1000 [00:43&lt;00:13, 17.54it/s, loss=0.105]
+ 76%|███████▌  | 760/1000 [00:43&lt;00:13, 17.54it/s, loss=0.105]
+ 76%|███████▌  | 760/1000 [00:43&lt;00:13, 17.54it/s, loss=0.105]
+ 76%|███████▌  | 762/1000 [00:43&lt;00:13, 17.57it/s, loss=0.105]
+ 76%|███████▌  | 762/1000 [00:43&lt;00:13, 17.57it/s, loss=0.105]
+ 76%|███████▌  | 762/1000 [00:43&lt;00:13, 17.57it/s, loss=0.105]
+ 76%|███████▋  | 764/1000 [00:43&lt;00:13, 17.55it/s, loss=0.105]
+ 76%|███████▋  | 764/1000 [00:43&lt;00:13, 17.55it/s, loss=0.104]
+ 76%|███████▋  | 764/1000 [00:43&lt;00:13, 17.55it/s, loss=0.104]
+ 77%|███████▋  | 766/1000 [00:43&lt;00:13, 17.48it/s, loss=0.104]
+ 77%|███████▋  | 766/1000 [00:43&lt;00:13, 17.48it/s, loss=0.104]
+ 77%|███████▋  | 766/1000 [00:43&lt;00:13, 17.48it/s, loss=0.104]
+ 77%|███████▋  | 768/1000 [00:43&lt;00:13, 17.49it/s, loss=0.104]
+ 77%|███████▋  | 768/1000 [00:44&lt;00:13, 17.49it/s, loss=0.104]
+ 77%|███████▋  | 768/1000 [00:44&lt;00:13, 17.49it/s, loss=0.104]
+ 77%|███████▋  | 770/1000 [00:44&lt;00:13, 17.42it/s, loss=0.104]
+ 77%|███████▋  | 770/1000 [00:44&lt;00:13, 17.42it/s, loss=0.104]
+ 77%|███████▋  | 770/1000 [00:44&lt;00:13, 17.42it/s, loss=0.104]
+ 77%|███████▋  | 772/1000 [00:44&lt;00:13, 17.45it/s, loss=0.104]
+ 77%|███████▋  | 772/1000 [00:44&lt;00:13, 17.45it/s, loss=0.103]
+ 77%|███████▋  | 772/1000 [00:44&lt;00:13, 17.45it/s, loss=0.103]
+ 77%|███████▋  | 774/1000 [00:44&lt;00:12, 17.44it/s, loss=0.103]
+ 77%|███████▋  | 774/1000 [00:44&lt;00:12, 17.44it/s, loss=0.103]
+ 77%|███████▋  | 774/1000 [00:44&lt;00:12, 17.44it/s, loss=0.103]
+ 78%|███████▊  | 776/1000 [00:44&lt;00:12, 17.40it/s, loss=0.103]
+ 78%|███████▊  | 776/1000 [00:44&lt;00:12, 17.40it/s, loss=0.103]
+ 78%|███████▊  | 776/1000 [00:44&lt;00:12, 17.40it/s, loss=0.103]
+ 78%|███████▊  | 778/1000 [00:44&lt;00:12, 17.34it/s, loss=0.103]
+ 78%|███████▊  | 778/1000 [00:44&lt;00:12, 17.34it/s, loss=0.103]
+ 78%|███████▊  | 778/1000 [00:44&lt;00:12, 17.34it/s, loss=0.103]
+ 78%|███████▊  | 780/1000 [00:44&lt;00:12, 17.37it/s, loss=0.103]
+ 78%|███████▊  | 780/1000 [00:44&lt;00:12, 17.37it/s, loss=0.103]
+ 78%|███████▊  | 780/1000 [00:44&lt;00:12, 17.37it/s, loss=0.102]
+ 78%|███████▊  | 782/1000 [00:44&lt;00:12, 17.36it/s, loss=0.102]
+ 78%|███████▊  | 782/1000 [00:44&lt;00:12, 17.36it/s, loss=0.102]
+ 78%|███████▊  | 782/1000 [00:44&lt;00:12, 17.36it/s, loss=0.102]
+ 78%|███████▊  | 784/1000 [00:44&lt;00:12, 17.38it/s, loss=0.102]
+ 78%|███████▊  | 784/1000 [00:44&lt;00:12, 17.38it/s, loss=0.102]
+ 78%|███████▊  | 784/1000 [00:45&lt;00:12, 17.38it/s, loss=0.102]
+ 79%|███████▊  | 786/1000 [00:45&lt;00:12, 17.48it/s, loss=0.102]
+ 79%|███████▊  | 786/1000 [00:45&lt;00:12, 17.48it/s, loss=0.102]
+ 79%|███████▊  | 786/1000 [00:45&lt;00:12, 17.48it/s, loss=0.102]
+ 79%|███████▉  | 788/1000 [00:45&lt;00:12, 17.55it/s, loss=0.102]
+ 79%|███████▉  | 788/1000 [00:45&lt;00:12, 17.55it/s, loss=0.102]
+ 79%|███████▉  | 788/1000 [00:45&lt;00:12, 17.55it/s, loss=0.102]
+ 79%|███████▉  | 790/1000 [00:45&lt;00:11, 17.55it/s, loss=0.102]
+ 79%|███████▉  | 790/1000 [00:45&lt;00:11, 17.55it/s, loss=0.101]
+ 79%|███████▉  | 790/1000 [00:45&lt;00:11, 17.55it/s, loss=0.101]
+ 79%|███████▉  | 792/1000 [00:45&lt;00:11, 17.49it/s, loss=0.101]
+ 79%|███████▉  | 792/1000 [00:45&lt;00:11, 17.49it/s, loss=0.101]
+ 79%|███████▉  | 792/1000 [00:45&lt;00:11, 17.49it/s, loss=0.101]
+ 79%|███████▉  | 794/1000 [00:45&lt;00:11, 17.47it/s, loss=0.101]
+ 79%|███████▉  | 794/1000 [00:45&lt;00:11, 17.47it/s, loss=0.101]
+ 79%|███████▉  | 794/1000 [00:45&lt;00:11, 17.47it/s, loss=0.101]
+ 80%|███████▉  | 796/1000 [00:45&lt;00:11, 17.51it/s, loss=0.101]
+ 80%|███████▉  | 796/1000 [00:45&lt;00:11, 17.51it/s, loss=0.101]
+ 80%|███████▉  | 796/1000 [00:45&lt;00:11, 17.51it/s, loss=0.101]
+ 80%|███████▉  | 798/1000 [00:45&lt;00:11, 17.54it/s, loss=0.101]
+ 80%|███████▉  | 798/1000 [00:45&lt;00:11, 17.54it/s, loss=0.1]
+ 80%|███████▉  | 798/1000 [00:45&lt;00:11, 17.54it/s, loss=0.1]
+ 80%|████████  | 800/1000 [00:45&lt;00:11, 17.55it/s, loss=0.1]
+ 80%|████████  | 800/1000 [00:45&lt;00:11, 17.55it/s, loss=0.1]
+ 80%|████████  | 800/1000 [00:45&lt;00:11, 17.55it/s, loss=0.1]
+ 80%|████████  | 802/1000 [00:45&lt;00:11, 17.59it/s, loss=0.1]
+ 80%|████████  | 802/1000 [00:45&lt;00:11, 17.59it/s, loss=0.1]
+ 80%|████████  | 802/1000 [00:46&lt;00:11, 17.59it/s, loss=0.0999]
+ 80%|████████  | 804/1000 [00:46&lt;00:11, 17.62it/s, loss=0.0999]
+ 80%|████████  | 804/1000 [00:46&lt;00:11, 17.62it/s, loss=0.0998]
+ 80%|████████  | 804/1000 [00:46&lt;00:11, 17.62it/s, loss=0.0997]
+ 81%|████████  | 806/1000 [00:46&lt;00:11, 17.61it/s, loss=0.0997]
+ 81%|████████  | 806/1000 [00:46&lt;00:11, 17.61it/s, loss=0.0996]
+ 81%|████████  | 806/1000 [00:46&lt;00:11, 17.61it/s, loss=0.0995]
+ 81%|████████  | 808/1000 [00:46&lt;00:10, 17.55it/s, loss=0.0995]
+ 81%|████████  | 808/1000 [00:46&lt;00:10, 17.55it/s, loss=0.0994]
+ 81%|████████  | 808/1000 [00:46&lt;00:10, 17.55it/s, loss=0.0992]
+ 81%|████████  | 810/1000 [00:46&lt;00:10, 17.52it/s, loss=0.0992]
+ 81%|████████  | 810/1000 [00:46&lt;00:10, 17.52it/s, loss=0.0991]
+ 81%|████████  | 810/1000 [00:46&lt;00:10, 17.52it/s, loss=0.099]
+ 81%|████████  | 812/1000 [00:46&lt;00:10, 17.48it/s, loss=0.099]
+ 81%|████████  | 812/1000 [00:46&lt;00:10, 17.48it/s, loss=0.0989]
+ 81%|████████  | 812/1000 [00:46&lt;00:10, 17.48it/s, loss=0.0988]
+ 81%|████████▏ | 814/1000 [00:46&lt;00:10, 17.44it/s, loss=0.0988]
+ 81%|████████▏ | 814/1000 [00:46&lt;00:10, 17.44it/s, loss=0.0987]
+ 81%|████████▏ | 814/1000 [00:46&lt;00:10, 17.44it/s, loss=0.0986]
+ 82%|████████▏ | 816/1000 [00:46&lt;00:10, 17.42it/s, loss=0.0986]
+ 82%|████████▏ | 816/1000 [00:46&lt;00:10, 17.42it/s, loss=0.0985]
+ 82%|████████▏ | 816/1000 [00:46&lt;00:10, 17.42it/s, loss=0.0984]
+ 82%|████████▏ | 818/1000 [00:46&lt;00:10, 17.48it/s, loss=0.0984]
+ 82%|████████▏ | 818/1000 [00:46&lt;00:10, 17.48it/s, loss=0.0982]
+ 82%|████████▏ | 818/1000 [00:46&lt;00:10, 17.48it/s, loss=0.0981]
+ 82%|████████▏ | 820/1000 [00:46&lt;00:10, 17.50it/s, loss=0.0981]
+ 82%|████████▏ | 820/1000 [00:46&lt;00:10, 17.50it/s, loss=0.098]
+ 82%|████████▏ | 820/1000 [00:47&lt;00:10, 17.50it/s, loss=0.0979]
+ 82%|████████▏ | 822/1000 [00:47&lt;00:10, 17.56it/s, loss=0.0979]
+ 82%|████████▏ | 822/1000 [00:47&lt;00:10, 17.56it/s, loss=0.0978]
+ 82%|████████▏ | 822/1000 [00:47&lt;00:10, 17.56it/s, loss=0.0977]
+ 82%|████████▏ | 824/1000 [00:47&lt;00:10, 17.57it/s, loss=0.0977]
+ 82%|████████▏ | 824/1000 [00:47&lt;00:10, 17.57it/s, loss=0.0976]
+ 82%|████████▏ | 824/1000 [00:47&lt;00:10, 17.57it/s, loss=0.0975]
+ 83%|████████▎ | 826/1000 [00:47&lt;00:09, 17.50it/s, loss=0.0975]
+ 83%|████████▎ | 826/1000 [00:47&lt;00:09, 17.50it/s, loss=0.0974]
+ 83%|████████▎ | 826/1000 [00:47&lt;00:09, 17.50it/s, loss=0.0973]
+ 83%|████████▎ | 828/1000 [00:47&lt;00:09, 17.48it/s, loss=0.0973]
+ 83%|████████▎ | 828/1000 [00:47&lt;00:09, 17.48it/s, loss=0.0972]
+ 83%|████████▎ | 828/1000 [00:47&lt;00:09, 17.48it/s, loss=0.0971]
+ 83%|████████▎ | 830/1000 [00:47&lt;00:09, 17.43it/s, loss=0.0971]
+ 83%|████████▎ | 830/1000 [00:47&lt;00:09, 17.43it/s, loss=0.097]
+ 83%|████████▎ | 830/1000 [00:47&lt;00:09, 17.43it/s, loss=0.0968]
+ 83%|████████▎ | 832/1000 [00:47&lt;00:09, 17.47it/s, loss=0.0968]
+ 83%|████████▎ | 832/1000 [00:47&lt;00:09, 17.47it/s, loss=0.0967]
+ 83%|████████▎ | 832/1000 [00:47&lt;00:09, 17.47it/s, loss=0.0966]
+ 83%|████████▎ | 834/1000 [00:47&lt;00:09, 17.36it/s, loss=0.0966]
+ 83%|████████▎ | 834/1000 [00:47&lt;00:09, 17.36it/s, loss=0.0965]
+ 83%|████████▎ | 834/1000 [00:47&lt;00:09, 17.36it/s, loss=0.0964]
+ 84%|████████▎ | 836/1000 [00:47&lt;00:09, 17.42it/s, loss=0.0964]
+ 84%|████████▎ | 836/1000 [00:47&lt;00:09, 17.42it/s, loss=0.0963]
+ 84%|████████▎ | 836/1000 [00:47&lt;00:09, 17.42it/s, loss=0.0962]
+ 84%|████████▍ | 838/1000 [00:47&lt;00:09, 17.48it/s, loss=0.0962]
+ 84%|████████▍ | 838/1000 [00:48&lt;00:09, 17.48it/s, loss=0.0961]
+ 84%|████████▍ | 838/1000 [00:48&lt;00:09, 17.48it/s, loss=0.096]
+ 84%|████████▍ | 840/1000 [00:48&lt;00:09, 17.54it/s, loss=0.096]
+ 84%|████████▍ | 840/1000 [00:48&lt;00:09, 17.54it/s, loss=0.0959]
+ 84%|████████▍ | 840/1000 [00:48&lt;00:09, 17.54it/s, loss=0.0958]
+ 84%|████████▍ | 842/1000 [00:48&lt;00:09, 17.46it/s, loss=0.0958]
+ 84%|████████▍ | 842/1000 [00:48&lt;00:09, 17.46it/s, loss=0.0957]
+ 84%|████████▍ | 842/1000 [00:48&lt;00:09, 17.46it/s, loss=0.0956]
+ 84%|████████▍ | 844/1000 [00:48&lt;00:08, 17.50it/s, loss=0.0956]
+ 84%|████████▍ | 844/1000 [00:48&lt;00:08, 17.50it/s, loss=0.0955]
+ 84%|████████▍ | 844/1000 [00:48&lt;00:08, 17.50it/s, loss=0.0954]
+ 85%|████████▍ | 846/1000 [00:48&lt;00:08, 17.56it/s, loss=0.0954]
+ 85%|████████▍ | 846/1000 [00:48&lt;00:08, 17.56it/s, loss=0.0953]
+ 85%|████████▍ | 846/1000 [00:48&lt;00:08, 17.56it/s, loss=0.0952]
+ 85%|████████▍ | 848/1000 [00:48&lt;00:08, 17.55it/s, loss=0.0952]
+ 85%|████████▍ | 848/1000 [00:48&lt;00:08, 17.55it/s, loss=0.0951]
+ 85%|████████▍ | 848/1000 [00:48&lt;00:08, 17.55it/s, loss=0.095]
+ 85%|████████▌ | 850/1000 [00:48&lt;00:08, 17.55it/s, loss=0.095]
+ 85%|████████▌ | 850/1000 [00:48&lt;00:08, 17.55it/s, loss=0.0949]
+ 85%|████████▌ | 850/1000 [00:48&lt;00:08, 17.55it/s, loss=0.0947]
+ 85%|████████▌ | 852/1000 [00:48&lt;00:08, 17.59it/s, loss=0.0947]
+ 85%|████████▌ | 852/1000 [00:48&lt;00:08, 17.59it/s, loss=0.0946]
+ 85%|████████▌ | 852/1000 [00:48&lt;00:08, 17.59it/s, loss=0.0945]
+ 85%|████████▌ | 854/1000 [00:48&lt;00:08, 17.56it/s, loss=0.0945]
+ 85%|████████▌ | 854/1000 [00:48&lt;00:08, 17.56it/s, loss=0.0944]
+ 85%|████████▌ | 854/1000 [00:48&lt;00:08, 17.56it/s, loss=0.0943]
+ 86%|████████▌ | 856/1000 [00:48&lt;00:08, 17.59it/s, loss=0.0943]
+ 86%|████████▌ | 856/1000 [00:49&lt;00:08, 17.59it/s, loss=0.0942]
+ 86%|████████▌ | 856/1000 [00:49&lt;00:08, 17.59it/s, loss=0.0941]
+ 86%|████████▌ | 858/1000 [00:49&lt;00:08, 17.59it/s, loss=0.0941]
+ 86%|████████▌ | 858/1000 [00:49&lt;00:08, 17.59it/s, loss=0.094]
+ 86%|████████▌ | 858/1000 [00:49&lt;00:08, 17.59it/s, loss=0.0939]
+ 86%|████████▌ | 860/1000 [00:49&lt;00:07, 17.59it/s, loss=0.0939]
+ 86%|████████▌ | 860/1000 [00:49&lt;00:07, 17.59it/s, loss=0.0938]
+ 86%|████████▌ | 860/1000 [00:49&lt;00:07, 17.59it/s, loss=0.0937]
+ 86%|████████▌ | 862/1000 [00:49&lt;00:07, 17.34it/s, loss=0.0937]
+ 86%|████████▌ | 862/1000 [00:49&lt;00:07, 17.34it/s, loss=0.0936]
+ 86%|████████▌ | 862/1000 [00:49&lt;00:07, 17.34it/s, loss=0.0935]
+ 86%|████████▋ | 864/1000 [00:49&lt;00:07, 17.18it/s, loss=0.0935]
+ 86%|████████▋ | 864/1000 [00:49&lt;00:07, 17.18it/s, loss=0.0934]
+ 86%|████████▋ | 864/1000 [00:49&lt;00:07, 17.18it/s, loss=0.0933]
+ 87%|████████▋ | 866/1000 [00:49&lt;00:07, 17.09it/s, loss=0.0933]
+ 87%|████████▋ | 866/1000 [00:49&lt;00:07, 17.09it/s, loss=0.0932]
+ 87%|████████▋ | 866/1000 [00:49&lt;00:07, 17.09it/s, loss=0.0931]
+ 87%|████████▋ | 868/1000 [00:49&lt;00:07, 17.18it/s, loss=0.0931]
+ 87%|████████▋ | 868/1000 [00:49&lt;00:07, 17.18it/s, loss=0.093]
+ 87%|████████▋ | 868/1000 [00:49&lt;00:07, 17.18it/s, loss=0.0929]
+ 87%|████████▋ | 870/1000 [00:49&lt;00:07, 17.29it/s, loss=0.0929]
+ 87%|████████▋ | 870/1000 [00:49&lt;00:07, 17.29it/s, loss=0.0928]
+ 87%|████████▋ | 870/1000 [00:49&lt;00:07, 17.29it/s, loss=0.0927]
+ 87%|████████▋ | 872/1000 [00:49&lt;00:07, 17.32it/s, loss=0.0927]
+ 87%|████████▋ | 872/1000 [00:49&lt;00:07, 17.32it/s, loss=0.0926]
+ 87%|████████▋ | 872/1000 [00:50&lt;00:07, 17.32it/s, loss=0.0925]
+ 87%|████████▋ | 874/1000 [00:50&lt;00:07, 17.38it/s, loss=0.0925]
+ 87%|████████▋ | 874/1000 [00:50&lt;00:07, 17.38it/s, loss=0.0924]
+ 87%|████████▋ | 874/1000 [00:50&lt;00:07, 17.38it/s, loss=0.0923]
+ 88%|████████▊ | 876/1000 [00:50&lt;00:07, 17.34it/s, loss=0.0923]
+ 88%|████████▊ | 876/1000 [00:50&lt;00:07, 17.34it/s, loss=0.0922]
+ 88%|████████▊ | 876/1000 [00:50&lt;00:07, 17.34it/s, loss=0.0921]
+ 88%|████████▊ | 878/1000 [00:50&lt;00:06, 17.44it/s, loss=0.0921]
+ 88%|████████▊ | 878/1000 [00:50&lt;00:06, 17.44it/s, loss=0.092]
+ 88%|████████▊ | 878/1000 [00:50&lt;00:06, 17.44it/s, loss=0.0919]
+ 88%|████████▊ | 880/1000 [00:50&lt;00:06, 17.50it/s, loss=0.0919]
+ 88%|████████▊ | 880/1000 [00:50&lt;00:06, 17.50it/s, loss=0.0918]
+ 88%|████████▊ | 880/1000 [00:50&lt;00:06, 17.50it/s, loss=0.0917]
+ 88%|████████▊ | 882/1000 [00:50&lt;00:06, 17.49it/s, loss=0.0917]
+ 88%|████████▊ | 882/1000 [00:50&lt;00:06, 17.49it/s, loss=0.0916]
+ 88%|████████▊ | 882/1000 [00:50&lt;00:06, 17.49it/s, loss=0.0915]
+ 88%|████████▊ | 884/1000 [00:50&lt;00:06, 17.04it/s, loss=0.0915]
+ 88%|████████▊ | 884/1000 [00:50&lt;00:06, 17.04it/s, loss=0.0914]
+ 88%|████████▊ | 884/1000 [00:50&lt;00:06, 17.04it/s, loss=0.0914]
+ 89%|████████▊ | 886/1000 [00:50&lt;00:06, 16.81it/s, loss=0.0914]
+ 89%|████████▊ | 886/1000 [00:50&lt;00:06, 16.81it/s, loss=0.0913]
+ 89%|████████▊ | 886/1000 [00:50&lt;00:06, 16.81it/s, loss=0.0912]
+ 89%|████████▉ | 888/1000 [00:50&lt;00:06, 17.03it/s, loss=0.0912]
+ 89%|████████▉ | 888/1000 [00:50&lt;00:06, 17.03it/s, loss=0.0911]
+ 89%|████████▉ | 888/1000 [00:50&lt;00:06, 17.03it/s, loss=0.091]
+ 89%|████████▉ | 890/1000 [00:50&lt;00:06, 17.16it/s, loss=0.091]
+ 89%|████████▉ | 890/1000 [00:51&lt;00:06, 17.16it/s, loss=0.0909]
+ 89%|████████▉ | 890/1000 [00:51&lt;00:06, 17.16it/s, loss=0.0908]
+ 89%|████████▉ | 892/1000 [00:51&lt;00:06, 17.26it/s, loss=0.0908]
+ 89%|████████▉ | 892/1000 [00:51&lt;00:06, 17.26it/s, loss=0.0907]
+ 89%|████████▉ | 892/1000 [00:51&lt;00:06, 17.26it/s, loss=0.0906]
+ 89%|████████▉ | 894/1000 [00:51&lt;00:06, 17.33it/s, loss=0.0906]
+ 89%|████████▉ | 894/1000 [00:51&lt;00:06, 17.33it/s, loss=0.0905]
+ 89%|████████▉ | 894/1000 [00:51&lt;00:06, 17.33it/s, loss=0.0904]
+ 90%|████████▉ | 896/1000 [00:51&lt;00:05, 17.45it/s, loss=0.0904]
+ 90%|████████▉ | 896/1000 [00:51&lt;00:05, 17.45it/s, loss=0.0903]
+ 90%|████████▉ | 896/1000 [00:51&lt;00:05, 17.45it/s, loss=0.0902]
+ 90%|████████▉ | 898/1000 [00:51&lt;00:05, 17.42it/s, loss=0.0902]
+ 90%|████████▉ | 898/1000 [00:51&lt;00:05, 17.42it/s, loss=0.0901]
+ 90%|████████▉ | 898/1000 [00:51&lt;00:05, 17.42it/s, loss=0.09]
+ 90%|█████████ | 900/1000 [00:51&lt;00:05, 17.35it/s, loss=0.09]
+ 90%|█████████ | 900/1000 [00:51&lt;00:05, 17.35it/s, loss=0.0899]
+ 90%|█████████ | 900/1000 [00:51&lt;00:05, 17.35it/s, loss=0.0898]
+ 90%|█████████ | 902/1000 [00:51&lt;00:05, 17.39it/s, loss=0.0898]
+ 90%|█████████ | 902/1000 [00:51&lt;00:05, 17.39it/s, loss=0.0897]
+ 90%|█████████ | 902/1000 [00:51&lt;00:05, 17.39it/s, loss=0.0896]
+ 90%|█████████ | 904/1000 [00:51&lt;00:05, 17.39it/s, loss=0.0896]
+ 90%|█████████ | 904/1000 [00:51&lt;00:05, 17.39it/s, loss=0.0895]
+ 90%|█████████ | 904/1000 [00:51&lt;00:05, 17.39it/s, loss=0.0895]
+ 91%|█████████ | 906/1000 [00:51&lt;00:05, 17.43it/s, loss=0.0895]
+ 91%|█████████ | 906/1000 [00:51&lt;00:05, 17.43it/s, loss=0.0894]
+ 91%|█████████ | 906/1000 [00:52&lt;00:05, 17.43it/s, loss=0.0893]
+ 91%|█████████ | 908/1000 [00:52&lt;00:05, 17.47it/s, loss=0.0893]
+ 91%|█████████ | 908/1000 [00:52&lt;00:05, 17.47it/s, loss=0.0892]
+ 91%|█████████ | 908/1000 [00:52&lt;00:05, 17.47it/s, loss=0.0891]
+ 91%|█████████ | 910/1000 [00:52&lt;00:05, 17.36it/s, loss=0.0891]
+ 91%|█████████ | 910/1000 [00:52&lt;00:05, 17.36it/s, loss=0.089]
+ 91%|█████████ | 910/1000 [00:52&lt;00:05, 17.36it/s, loss=0.0889]
+ 91%|█████████ | 912/1000 [00:52&lt;00:05, 17.43it/s, loss=0.0889]
+ 91%|█████████ | 912/1000 [00:52&lt;00:05, 17.43it/s, loss=0.0888]
+ 91%|█████████ | 912/1000 [00:52&lt;00:05, 17.43it/s, loss=0.0887]
+ 91%|█████████▏| 914/1000 [00:52&lt;00:04, 17.47it/s, loss=0.0887]
+ 91%|█████████▏| 914/1000 [00:52&lt;00:04, 17.47it/s, loss=0.0886]
+ 91%|█████████▏| 914/1000 [00:52&lt;00:04, 17.47it/s, loss=0.0885]
+ 92%|█████████▏| 916/1000 [00:52&lt;00:04, 17.42it/s, loss=0.0885]
+ 92%|█████████▏| 916/1000 [00:52&lt;00:04, 17.42it/s, loss=0.0884]
+ 92%|█████████▏| 916/1000 [00:52&lt;00:04, 17.42it/s, loss=0.0883]
+ 92%|█████████▏| 918/1000 [00:52&lt;00:04, 17.39it/s, loss=0.0883]
+ 92%|█████████▏| 918/1000 [00:52&lt;00:04, 17.39it/s, loss=0.0883]
+ 92%|█████████▏| 918/1000 [00:52&lt;00:04, 17.39it/s, loss=0.0882]
+ 92%|█████████▏| 920/1000 [00:52&lt;00:04, 17.48it/s, loss=0.0882]
+ 92%|█████████▏| 920/1000 [00:52&lt;00:04, 17.48it/s, loss=0.0881]
+ 92%|█████████▏| 920/1000 [00:52&lt;00:04, 17.48it/s, loss=0.088]
+ 92%|█████████▏| 922/1000 [00:52&lt;00:04, 17.52it/s, loss=0.088]
+ 92%|█████████▏| 922/1000 [00:52&lt;00:04, 17.52it/s, loss=0.0879]
+ 92%|█████████▏| 922/1000 [00:52&lt;00:04, 17.52it/s, loss=0.0878]
+ 92%|█████████▏| 924/1000 [00:52&lt;00:04, 17.57it/s, loss=0.0878]
+ 92%|█████████▏| 924/1000 [00:52&lt;00:04, 17.57it/s, loss=0.0877]
+ 92%|█████████▏| 924/1000 [00:53&lt;00:04, 17.57it/s, loss=0.0876]
+ 93%|█████████▎| 926/1000 [00:53&lt;00:04, 17.65it/s, loss=0.0876]
+ 93%|█████████▎| 926/1000 [00:53&lt;00:04, 17.65it/s, loss=0.0875]
+ 93%|█████████▎| 926/1000 [00:53&lt;00:04, 17.65it/s, loss=0.0874]
+ 93%|█████████▎| 928/1000 [00:53&lt;00:04, 17.66it/s, loss=0.0874]
+ 93%|█████████▎| 928/1000 [00:53&lt;00:04, 17.66it/s, loss=0.0873]
+ 93%|█████████▎| 928/1000 [00:53&lt;00:04, 17.66it/s, loss=0.0873]
+ 93%|█████████▎| 930/1000 [00:53&lt;00:03, 17.64it/s, loss=0.0873]
+ 93%|█████████▎| 930/1000 [00:53&lt;00:03, 17.64it/s, loss=0.0872]
+ 93%|█████████▎| 930/1000 [00:53&lt;00:03, 17.64it/s, loss=0.0871]
+ 93%|█████████▎| 932/1000 [00:53&lt;00:03, 17.65it/s, loss=0.0871]
+ 93%|█████████▎| 932/1000 [00:53&lt;00:03, 17.65it/s, loss=0.087]
+ 93%|█████████▎| 932/1000 [00:53&lt;00:03, 17.65it/s, loss=0.0869]
+ 93%|█████████▎| 934/1000 [00:53&lt;00:03, 17.70it/s, loss=0.0869]
+ 93%|█████████▎| 934/1000 [00:53&lt;00:03, 17.70it/s, loss=0.0868]
+ 93%|█████████▎| 934/1000 [00:53&lt;00:03, 17.70it/s, loss=0.0867]
+ 94%|█████████▎| 936/1000 [00:53&lt;00:03, 17.70it/s, loss=0.0867]
+ 94%|█████████▎| 936/1000 [00:53&lt;00:03, 17.70it/s, loss=0.0866]
+ 94%|█████████▎| 936/1000 [00:53&lt;00:03, 17.70it/s, loss=0.0865]
+ 94%|█████████▍| 938/1000 [00:53&lt;00:03, 17.69it/s, loss=0.0865]
+ 94%|█████████▍| 938/1000 [00:53&lt;00:03, 17.69it/s, loss=0.0865]
+ 94%|█████████▍| 938/1000 [00:53&lt;00:03, 17.69it/s, loss=0.0864]
+ 94%|█████████▍| 940/1000 [00:53&lt;00:03, 17.75it/s, loss=0.0864]
+ 94%|█████████▍| 940/1000 [00:53&lt;00:03, 17.75it/s, loss=0.0863]
+ 94%|█████████▍| 940/1000 [00:53&lt;00:03, 17.75it/s, loss=0.0862]
+ 94%|█████████▍| 942/1000 [00:53&lt;00:03, 17.73it/s, loss=0.0862]
+ 94%|█████████▍| 942/1000 [00:53&lt;00:03, 17.73it/s, loss=0.0861]
+ 94%|█████████▍| 942/1000 [00:54&lt;00:03, 17.73it/s, loss=0.086]
+ 94%|█████████▍| 944/1000 [00:54&lt;00:03, 17.75it/s, loss=0.086]
+ 94%|█████████▍| 944/1000 [00:54&lt;00:03, 17.75it/s, loss=0.0859]
+ 94%|█████████▍| 944/1000 [00:54&lt;00:03, 17.75it/s, loss=0.0858]
+ 95%|█████████▍| 946/1000 [00:54&lt;00:03, 17.77it/s, loss=0.0858]
+ 95%|█████████▍| 946/1000 [00:54&lt;00:03, 17.77it/s, loss=0.0858]
+ 95%|█████████▍| 946/1000 [00:54&lt;00:03, 17.77it/s, loss=0.0857]
+ 95%|█████████▍| 948/1000 [00:54&lt;00:02, 17.67it/s, loss=0.0857]
+ 95%|█████████▍| 948/1000 [00:54&lt;00:02, 17.67it/s, loss=0.0856]
+ 95%|█████████▍| 948/1000 [00:54&lt;00:02, 17.67it/s, loss=0.0855]
+ 95%|█████████▌| 950/1000 [00:54&lt;00:02, 17.70it/s, loss=0.0855]
+ 95%|█████████▌| 950/1000 [00:54&lt;00:02, 17.70it/s, loss=0.0854]
+ 95%|█████████▌| 950/1000 [00:54&lt;00:02, 17.70it/s, loss=0.0853]
+ 95%|█████████▌| 952/1000 [00:54&lt;00:02, 17.65it/s, loss=0.0853]
+ 95%|█████████▌| 952/1000 [00:54&lt;00:02, 17.65it/s, loss=0.0852]
+ 95%|█████████▌| 952/1000 [00:54&lt;00:02, 17.65it/s, loss=0.0852]
+ 95%|█████████▌| 954/1000 [00:54&lt;00:02, 17.56it/s, loss=0.0852]
+ 95%|█████████▌| 954/1000 [00:54&lt;00:02, 17.56it/s, loss=0.0851]
+ 95%|█████████▌| 954/1000 [00:54&lt;00:02, 17.56it/s, loss=0.085]
+ 96%|█████████▌| 956/1000 [00:54&lt;00:02, 17.59it/s, loss=0.085]
+ 96%|█████████▌| 956/1000 [00:54&lt;00:02, 17.59it/s, loss=0.0849]
+ 96%|█████████▌| 956/1000 [00:54&lt;00:02, 17.59it/s, loss=0.0848]
+ 96%|█████████▌| 958/1000 [00:54&lt;00:02, 17.66it/s, loss=0.0848]
+ 96%|█████████▌| 958/1000 [00:54&lt;00:02, 17.66it/s, loss=0.0847]
+ 96%|█████████▌| 958/1000 [00:54&lt;00:02, 17.66it/s, loss=0.0846]
+ 96%|█████████▌| 960/1000 [00:54&lt;00:02, 17.72it/s, loss=0.0846]
+ 96%|█████████▌| 960/1000 [00:55&lt;00:02, 17.72it/s, loss=0.0846]
+ 96%|█████████▌| 960/1000 [00:55&lt;00:02, 17.72it/s, loss=0.0845]
+ 96%|█████████▌| 962/1000 [00:55&lt;00:02, 17.74it/s, loss=0.0845]
+ 96%|█████████▌| 962/1000 [00:55&lt;00:02, 17.74it/s, loss=0.0844]
+ 96%|█████████▌| 962/1000 [00:55&lt;00:02, 17.74it/s, loss=0.0843]
+ 96%|█████████▋| 964/1000 [00:55&lt;00:02, 17.76it/s, loss=0.0843]
+ 96%|█████████▋| 964/1000 [00:55&lt;00:02, 17.76it/s, loss=0.0842]
+ 96%|█████████▋| 964/1000 [00:55&lt;00:02, 17.76it/s, loss=0.0841]
+ 97%|█████████▋| 966/1000 [00:55&lt;00:01, 17.78it/s, loss=0.0841]
+ 97%|█████████▋| 966/1000 [00:55&lt;00:01, 17.78it/s, loss=0.0841]
+ 97%|█████████▋| 966/1000 [00:55&lt;00:01, 17.78it/s, loss=0.084]
+ 97%|█████████▋| 968/1000 [00:55&lt;00:01, 17.74it/s, loss=0.084]
+ 97%|█████████▋| 968/1000 [00:55&lt;00:01, 17.74it/s, loss=0.0839]
+ 97%|█████████▋| 968/1000 [00:55&lt;00:01, 17.74it/s, loss=0.0838]
+ 97%|█████████▋| 970/1000 [00:55&lt;00:01, 17.75it/s, loss=0.0838]
+ 97%|█████████▋| 970/1000 [00:55&lt;00:01, 17.75it/s, loss=0.0837]
+ 97%|█████████▋| 970/1000 [00:55&lt;00:01, 17.75it/s, loss=0.0836]
+ 97%|█████████▋| 972/1000 [00:55&lt;00:01, 17.67it/s, loss=0.0836]
+ 97%|█████████▋| 972/1000 [00:55&lt;00:01, 17.67it/s, loss=0.0836]
+ 97%|█████████▋| 972/1000 [00:55&lt;00:01, 17.67it/s, loss=0.0835]
+ 97%|█████████▋| 974/1000 [00:55&lt;00:01, 17.63it/s, loss=0.0835]
+ 97%|█████████▋| 974/1000 [00:55&lt;00:01, 17.63it/s, loss=0.0834]
+ 97%|█████████▋| 974/1000 [00:55&lt;00:01, 17.63it/s, loss=0.0833]
+ 98%|█████████▊| 976/1000 [00:55&lt;00:01, 17.64it/s, loss=0.0833]
+ 98%|█████████▊| 976/1000 [00:55&lt;00:01, 17.64it/s, loss=0.0832]
+ 98%|█████████▊| 976/1000 [00:55&lt;00:01, 17.64it/s, loss=0.0831]
+ 98%|█████████▊| 978/1000 [00:55&lt;00:01, 17.68it/s, loss=0.0831]
+ 98%|█████████▊| 978/1000 [00:56&lt;00:01, 17.68it/s, loss=0.0831]
+ 98%|█████████▊| 978/1000 [00:56&lt;00:01, 17.68it/s, loss=0.083]
+ 98%|█████████▊| 980/1000 [00:56&lt;00:01, 17.66it/s, loss=0.083]
+ 98%|█████████▊| 980/1000 [00:56&lt;00:01, 17.66it/s, loss=0.0829]
+ 98%|█████████▊| 980/1000 [00:56&lt;00:01, 17.66it/s, loss=0.0828]
+ 98%|█████████▊| 982/1000 [00:56&lt;00:01, 17.57it/s, loss=0.0828]
+ 98%|█████████▊| 982/1000 [00:56&lt;00:01, 17.57it/s, loss=0.0827]
+ 98%|█████████▊| 982/1000 [00:56&lt;00:01, 17.57it/s, loss=0.0827]
+ 98%|█████████▊| 984/1000 [00:56&lt;00:00, 17.58it/s, loss=0.0827]
+ 98%|█████████▊| 984/1000 [00:56&lt;00:00, 17.58it/s, loss=0.0826]
+ 98%|█████████▊| 984/1000 [00:56&lt;00:00, 17.58it/s, loss=0.0825]
+ 99%|█████████▊| 986/1000 [00:56&lt;00:00, 17.61it/s, loss=0.0825]
+ 99%|█████████▊| 986/1000 [00:56&lt;00:00, 17.61it/s, loss=0.0824]
+ 99%|█████████▊| 986/1000 [00:56&lt;00:00, 17.61it/s, loss=0.0823]
+ 99%|█████████▉| 988/1000 [00:56&lt;00:00, 17.63it/s, loss=0.0823]
+ 99%|█████████▉| 988/1000 [00:56&lt;00:00, 17.63it/s, loss=0.0822]
+ 99%|█████████▉| 988/1000 [00:56&lt;00:00, 17.63it/s, loss=0.0822]
+ 99%|█████████▉| 990/1000 [00:56&lt;00:00, 17.67it/s, loss=0.0822]
+ 99%|█████████▉| 990/1000 [00:56&lt;00:00, 17.67it/s, loss=0.0821]
+ 99%|█████████▉| 990/1000 [00:56&lt;00:00, 17.67it/s, loss=0.082]
+ 99%|█████████▉| 992/1000 [00:56&lt;00:00, 17.66it/s, loss=0.082]
+ 99%|█████████▉| 992/1000 [00:56&lt;00:00, 17.66it/s, loss=0.0819]
+ 99%|█████████▉| 992/1000 [00:56&lt;00:00, 17.66it/s, loss=0.0818]
+ 99%|█████████▉| 994/1000 [00:56&lt;00:00, 17.65it/s, loss=0.0818]
+ 99%|█████████▉| 994/1000 [00:56&lt;00:00, 17.65it/s, loss=0.0818]
+ 99%|█████████▉| 994/1000 [00:56&lt;00:00, 17.65it/s, loss=0.0817]
+100%|█████████▉| 996/1000 [00:56&lt;00:00, 17.67it/s, loss=0.0817]
+100%|█████████▉| 996/1000 [00:57&lt;00:00, 17.67it/s, loss=0.0816]
+100%|█████████▉| 996/1000 [00:57&lt;00:00, 17.67it/s, loss=0.0815]
+100%|█████████▉| 998/1000 [00:57&lt;00:00, 17.63it/s, loss=0.0815]
+100%|█████████▉| 998/1000 [00:57&lt;00:00, 17.63it/s, loss=0.0815]
+100%|█████████▉| 998/1000 [00:57&lt;00:00, 17.63it/s, loss=0.0814]
+100%|██████████| 1000/1000 [00:57&lt;00:00, 17.60it/s, loss=0.0814]
+100%|██████████| 1000/1000 [00:57&lt;00:00, 17.48it/s, loss=0.0814]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sgd_params</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mu_x</th>
+      <th>mu_y</th>
+      <th>sigma</th>
+      <th>delay</th>
+      <th>dispersion</th>
+      <th>undershoot</th>
+      <th>u_dispersion</th>
+      <th>ratio</th>
+      <th>weight_deriv</th>
+      <th>baseline</th>
+      <th>amplitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>-2.098601</td>
+      <td>1.448046</td>
+      <td>1.270513</td>
+      <td>6.0</td>
+      <td>0.9</td>
+      <td>12.0</td>
+      <td>0.9</td>
+      <td>0.48</td>
+      <td>-0.5</td>
+      <td>10.022607</td>
+      <td>1.189903</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>We can plot the predicted model response and see that it matches the original simulated response almost perfectly.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sgd_pred_response</span> <span class="o">=</span> <span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">sgd_params</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">simulated_response</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;True&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sgd_pred_response</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Predicted (SGD)&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="_images/4cc4639a8417602e00eeda75362b472deb58b467f99d4ca73e988e12d5296546.png" src="_images/4cc4639a8417602e00eeda75362b472deb58b467f99d4ca73e988e12d5296546.png" />
+</div>
+</div>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<p>Dumoulin, S. O., &amp; Wandell, B. A. (2008). Population receptive field estimates in human visual cortex. <em>NeuroImage, 39</em>(2), 647–660. https://doi.org/10.1016/j.neuroimage.2007.09.034</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="tutorials/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Tutorials &amp; Examples</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="installation.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Installation</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Getting started</a><ul>
+<li><a class="reference internal" href="#defining-the-stimulus">Defining the stimulus</a></li>
+<li><a class="reference internal" href="#defining-the-prf-model">Defining the pRF model</a></li>
+<li><a class="reference internal" href="#fitting-the-prf-model">Fitting the pRF model</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    </body>
+</html>
