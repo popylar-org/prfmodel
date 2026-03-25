@@ -51,7 +51,7 @@ extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+autoapi_template_dir = "_templates"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -64,10 +64,11 @@ todo_include_todos = False
 # -- Use autoapi.extension to run sphinx-apidoc -------
 
 autoapi_dirs = ["../src/prfmodel"]
+autoapi_member_order = "groupwise"
+autoapi_own_page_level = "function"
+
 autoapi_options = [
     "members",
-    "inherited-members",
-    "show-module-summary",
     "special-members",
     "imported-members",
 ]
