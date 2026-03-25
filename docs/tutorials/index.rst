@@ -15,6 +15,7 @@ List of tutorials:
    simple_prf_simulated.md
    css_prf_simulated.md
    diff_gaussians_prf_simulated.md
+   csf_simulated.md
 
 Tutorial development
 --------------------
