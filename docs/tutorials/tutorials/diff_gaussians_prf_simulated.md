@@ -147,8 +147,8 @@ The predicted response contains increased activation followed by decreased activ
 
 ## Fitting the pRF model
 
-We will fit the DoG pRF model using a two-step approach. 
-- In **Step 1**, we fit a vanilla Gaussian model to locate the pRF center (`mu_x`, `mu_y`) and size (`sigma`) using a grid search and least squares to determine the `amplitude`. 
+We will fit the DoG pRF model using a two-step approach.
+- In **Step 1**, we fit a vanilla Gaussian model to locate the pRF center (`mu_x`, `mu_y`) and size (`sigma`) using a grid search and least squares to determine the `amplitude`.
 - In **Step 2**, we initialize the DoG model parameters from the Gaussian fit in the following way: `mu_x` and `mu_y` stay the same; `sigma` becomes `sigma_center` and `amplitude` becomes `amplitude_center`, we determine that `sigma_surround` should be larger that `sigma_center`. We then fine-tune the whole model it with SGD, constraining `amplitude_surround < 0`.
 
 +++
@@ -252,14 +252,14 @@ fig.legend();
 ### Step 2: Fit the DoG model (include surround gaussian)
 
 We now initialize a DoG model from the fitted Gaussian parameters.
-`init_dog_from_gaussian` sets: 
+`init_dog_from_gaussian` sets:
 - `sigma_center = sigma`
 - `sigma_surround = 5 × sigma_center`
 - `amplitude_center = amplitude`
 - `amplitude_surround = 0`
 
 We then run SGD directly on the DoG model. To enforce the constraint that
-`amplitude_surround` must be negative we pass a `ParameterConstraint(upper=0.0)` adapter. 
+`amplitude_surround` must be negative we pass a `ParameterConstraint(upper=0.0)` adapter.
 Starting `amplitude_surround` near zero and with a large positive `amplitude_center` from the Gaussian fit
 also ensures `|amplitude_surround| < amplitude_center` at initialization.
 
@@ -320,11 +320,11 @@ fig.legend();
 ## Conclusion
 
 In this tutorial, we showed how to fit a Difference of Gaussians (DoG) pRF model to simulated data using a
-two-step workflow. 
+two-step workflow.
 
-In **Step 1**, we fitted a plain Gaussian model with a grid search and least squares to efficiently locate the pRF center and size. 
+In **Step 1**, we fitted a plain Gaussian model with a grid search and least squares to efficiently locate the pRF center and size.
 
-In **Step 2**, we used `init_dog_from_gaussian` to seed the DoG model from the Gaussian fit. We set the surround size to five times the center size and initialized `amplitude_surround = 0`. 
+In **Step 2**, we used `init_dog_from_gaussian` to seed the DoG model from the Gaussian fit. We set the surround size to five times the center size and initialized `amplitude_surround = 0`.
 
 We then ran SGD with a `ParameterConstraint` that enforced `amplitude_surround < 0` throughout optimisation. At each stage, we compared the predicted model response against the original simulated response to check the quality of the fit.
 

@@ -76,9 +76,9 @@ myst_enable_extensions = [
 
 nb_merge_streams = True
 nb_execution_mode = "cache"
-nb_execution_timeout = 120
+nb_execution_timeout = 500
 nb_execution_raise_on_error = True
-nb_scroll_outputs = True
+nb_scroll_outputs = False
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -86,6 +86,8 @@ nb_scroll_outputs = True
 # a list of builtin themes.
 #
 html_theme = "furo"
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
