@@ -1,6 +1,8 @@
 """Container for contrast sensitivity function stimulus."""
 
 from dataclasses import dataclass
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import numpy as np
 from .base import Stimulus
 
@@ -89,3 +91,99 @@ class CSFStimulus(Stimulus):
     def _check_shapes(self) -> None:
         if self.sf.shape != self.contrast.shape:
             raise CSFStimulusShapeError(self.sf.shape, self.contrast.shape)
+
+
+def plot_csf_stimulus_design(stimulus: CSFStimulus, **kwargs) -> tuple[mpl.figure.Figure, mpl.axes.Axes]:
+    """
+    Plot the design of a contrast sensitivity function (CSF) stimulus.
+
+    Plots the stimulus contrast over time with color indicating different spatial frequencies.
+
+    Parameters
+    ----------
+    stimulus : CSFStimulus
+        Stimulus object with contrast and spatial frequencies.
+    **kwargs:
+        Keyword arguments passed to :func:`~matplotlib.pyplot.subplots`.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        Figure object.
+    ax : matplotlib.axes.Axes
+        Axes object.
+
+    See Also
+    --------
+    plot_csf_stimulus_curve : Contrast sensitivity curve on top of the stimulus design.
+
+    """
+    sf_levels = np.unique(stimulus.sf)
+
+    fig, ax = plt.subplots(**kwargs)
+
+    for freq in sf_levels:
+        is_freq = stimulus.sf == freq
+        con = stimulus.contrast[is_freq]
+        frames = np.argmax(is_freq) + np.arange(con.shape[0])
+        ax.plot(frames, con, label=freq)
+
+    ax.set_xlabel("Time frame")
+    ax.set_ylabel("Contrast")
+
+    fig.legend(title="Spatial\nfrequency", bbox_to_anchor=(1.05, 1))
+
+    return fig, ax
+
+
+def plot_csf_stimulus_curve(
+    stimulus: CSFStimulus,
+    csf: np.ndarray,
+    **kwargs,
+) -> tuple[mpl.figure.Figure, mpl.axes.Axes]:
+    """
+    Plot a contrast sensitivity curve over a stimulus design.
+
+    Plots spatial frequency over contrast sensitivity (100/contrast) and draws a contrast sentitivity curve on top.
+
+    Parameters
+    ----------
+    stimulus : CSFStimulus
+        Stimulus object with contrast and spatial frequencies.
+    csf : numpy.ndarray
+        Contrast sensitivity curve. Must match the number of frames in ``stimulus``.
+    **kwargs:
+        Keyword arguments passed to :func:`~matplotlib.pyplot.subplots`.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        Figure object.
+    ax : matplotlib.axes.Axes
+        Axes object.
+
+    See Also
+    --------
+    plot_csf_stimulus_design : Stimulus contrast over time.
+
+    """
+    csf = np.atleast_2d(csf)
+
+    if csf.shape[1] != stimulus.contrast.shape[0]:
+        msg = f"'csf' must have the same number of frames as 'stimulus' but has only {csf.shape[1]} frames"
+        raise ValueError(msg)
+
+    sf_levels = np.unique(stimulus.sf)
+    fig, ax = plt.subplots(**kwargs)
+
+    for freq in sf_levels:
+        is_freq = stimulus.sf == freq
+        con = stimulus.contrast[is_freq]
+        ax.scatter(stimulus.sf[is_freq], 100.0 / con, label=freq)
+
+    ax.loglog(stimulus.sf, np.transpose(csf), color="black")
+
+    ax.set_xlabel("Spatial frequency")
+    ax.set_ylabel("Contrast sensitivity")
+
+    return fig, ax
