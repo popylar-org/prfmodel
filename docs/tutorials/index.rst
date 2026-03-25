@@ -15,6 +15,7 @@ You want to contribute a tutorial or example? Make a `pull request <https://gith
    :glob:
 
    examples/index
+   tutorials/index
 
 Development
 -----------
