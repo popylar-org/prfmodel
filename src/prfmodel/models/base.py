@@ -3,13 +3,15 @@
 from abc import ABC
 from abc import abstractmethod
 from collections.abc import Sequence
+from typing import Generic
+from typing import TypeVar
 import pandas as pd
 from keras import ops
 from prfmodel.stimuli.base import Stimulus
-from prfmodel.stimuli.cf import CFStimulus
-from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _get_norm_fun
+
+S = TypeVar("S", bound=Stimulus)
 
 
 class BatchDimensionError(Exception):
@@ -83,25 +85,26 @@ class BaseModel(ABC):
         """A list with names of parameters that are used by the model."""
 
 
-class BasePRFResponse(BaseModel):
+class BaseResponse(BaseModel, Generic[S]):
     """
-    Abstract base class for population receptive field response models.
+    Generic abstract base class for response models.
 
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom population receptive field models.
-    Subclasses must override the abstract `__call__` method.
+    Subclasses must override the abstract `__call__` method and must be defined
+    with a specific stimulus type.
 
     """
 
     @abstractmethod
-    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def __call__(self, stimulus: S, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the model response for a stimulus.
 
         Parameters
         ----------
-        stimulus : PRFStimulus
-            Population receptive field stimulus object.
+        stimulus : Stimulus
+            Stimulus object.
         parameters : pandas.DataFrame
             Dataframe with columns containing different model parameters and rows containing parameter values
             for different voxels.
@@ -118,37 +121,46 @@ class BasePRFResponse(BaseModel):
         """
 
 
-class BaseCFResponse(BaseModel):
+class BaseEncoder(BaseModel, Generic[S]):
     """
-    Abstract base class for connective field response models.
+    Generic abstract base class for encoding model responses.
 
     Cannot be instantiated on its own.
-    Can only be used as a parent class to create custom connective field models.
-    Subclasses must override the abstract `__call__` method.
+    Can only be used as a parent class to create custom encoding models.
+    Subclasses must override the abstract `parameter_names` property and `__call__` method and must be defined
+    with a specific stimulus type.
 
     """
 
     @abstractmethod
-    def __call__(self, stimulus: CFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
-        """
-        Predict the model response for a stimulus.
+    def __call__(
+        self,
+        stimulus: S,
+        response: Tensor,
+        parameters: pd.DataFrame,
+        dtype: str | None = None,
+    ):
+        """Encode a model response with a stimulus.
 
         Parameters
         ----------
-        stimulus : CFStimulus
-            Connective field stimulus object.
+        stimulus : Stimulus
+            Stimulus object.
+        response : Tensor
+            Model response.
         parameters : pandas.DataFrame
             Dataframe with columns containing different model parameters and rows containing parameter values
             for different voxels.
         dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
+            The dtype of the encoded response. If `None` (the default), uses the dtype from
             :func:`prfmodel.utils.get_dtype`.
 
         Returns
         -------
         Tensor
-            Model predictions of shape `(num_voxels, ...)` and dtype `dtype`. The number of voxels is the
-            number of rows in `parameters`. The number and size of other axes depends on the stimulus.
+            The stimulus encoded model response with shape `(num_voxels, ...)` dtype `dtype`. The number of voxels is
+            the number of rows in `parameters`. The number and size of other axes depends on the stimulus and the
+            response.
 
         """
 
@@ -297,12 +309,13 @@ class BaseTemporal(BaseModel):
         """
 
 
-class BaseComposite(BaseModel):
+class BaseComposite(BaseModel, Generic[S]):
     """
-    Base class for creating composite models.
+    Generic abstract base class for creating composite models.
 
     Cannot be instantiated on its own. Can only be used as a parent class to create custom composite models.
-    Subclasses must override the abstract `__call__` method.
+    Subclasses must override the abstract `__call__` method and must be defined
+    with a specific stimulus type.
     This class is intended for combining multiple submodels into a composite model with a custom `__call__`
     method that defines how the submodels interact to make a composite prediction.
 
@@ -343,7 +356,7 @@ class BaseComposite(BaseModel):
     @abstractmethod
     def __call__(
         self,
-        stimulus: Stimulus,
+        stimulus: S,
         parameters: pd.DataFrame,
         dtype: str | None = None,
     ) -> Tensor:
