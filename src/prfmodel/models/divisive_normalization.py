@@ -7,9 +7,10 @@ from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from .base import BaseImpulse
-from .base import BasePRFResponse
+from .base import BaseResponse
 from .base import BaseTemporal
 from .composite import CenterSurroundPRFModel
+from .encoding import PRFStimulusEncoder
 from .gaussian import Gaussian2DPRFResponse
 from .impulse import DerivativeTwoGammaImpulse
 from .temporal import DivNormAmplitude
@@ -48,6 +49,7 @@ class DivNormPRFModel(CenterSurroundPRFModel):
     ):
         super().__init__(
             prf_model=Gaussian2DPRFResponse(),
+            encoding_model=PRFStimulusEncoder(),
             impulse_model=impulse_model,
             temporal_model=temporal_model,
             change_params=["sigma"],
@@ -61,7 +63,7 @@ class DivNormPRFModel(CenterSurroundPRFModel):
         Overrides the parent to use ``activation``/``normalization`` suffixes.
 
         """
-        prf_model = cast("BasePRFResponse", self.models["prf_model"])
+        prf_model = cast("BaseResponse", self.models["prf_model"])
         prf_params = prf_model.parameter_names.copy()
 
         for param in self._change_params:
