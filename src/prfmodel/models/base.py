@@ -7,6 +7,7 @@ from typing import Generic
 from typing import TypeVar
 import pandas as pd
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.stimuli.base import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _get_norm_fun
@@ -96,6 +97,7 @@ class BaseResponse(BaseModel, Generic[S]):
 
     """
 
+    @doc
     @abstractmethod
     def __call__(self, stimulus: S, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -103,14 +105,9 @@ class BaseResponse(BaseModel, Generic[S]):
 
         Parameters
         ----------
-        stimulus : Stimulus
-            Stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus)s
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
@@ -132,6 +129,7 @@ class BaseEncoder(BaseModel, Generic[S]):
 
     """
 
+    @doc
     @abstractmethod
     def __call__(
         self,
@@ -144,16 +142,11 @@ class BaseEncoder(BaseModel, Generic[S]):
 
         Parameters
         ----------
-        stimulus : Stimulus
-            Stimulus object.
+        %(stimulus)s
         response : Tensor
             Model response.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the encoded response. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(parameters)s
+        %(dtype_encoded)s
 
         Returns
         -------
@@ -251,6 +244,7 @@ class BaseImpulse(BaseModel):
 
         return parameters
 
+    @doc
     @abstractmethod
     def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -258,18 +252,12 @@ class BaseImpulse(BaseModel):
 
         Parameters
         ----------
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Model predictions of shape `(num_voxels, num_frames)` and dtype `dtype`. The number of voxels is the
-            number of rows in `parameters`.
+        %(predicted_response_2d)s
 
         """
 
@@ -284,6 +272,7 @@ class BaseTemporal(BaseModel):
 
     """
 
+    @doc
     @abstractmethod
     def __call__(self, inputs: Tensor, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -293,18 +282,12 @@ class BaseTemporal(BaseModel):
         ----------
         inputs : Tensor
             Input tensor with temporal response and shape (num_batches, num_frames).
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different batches.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Model predictions of shape `(num_voxels, num_frames)` and dtype `dtype`. The number of voxels is the
-            number of rows in `parameters`.
+        %(predicted_response_2d)s
 
         """
 
@@ -353,6 +336,7 @@ class BaseComposite(BaseModel, Generic[S]):
         # Make sure no duplicates are returned (preserve insertion order)
         return list(dict.fromkeys(param_names))
 
+    @doc
     @abstractmethod
     def __call__(
         self,
@@ -365,19 +349,12 @@ class BaseComposite(BaseModel, Generic[S]):
 
         Parameters
         ----------
-        stimulus : Stimulus.
-            Stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus)s
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Composite model predictions of shape `(num_voxels, num_frames)` and dtype `dtype`. The number of voxels is
-            the number of rows in `parameters`.
+        %(predicted_response_2d)s
 
         """

@@ -2,6 +2,7 @@
 
 import pandas as pd
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.models.base import BaseImpulse
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
@@ -91,19 +92,15 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
         """
         return ["delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv"]
 
+    @doc
     def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the impulse response.
 
         Parameters
         ----------
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different batches. Must contain the columns `delay`, `dispersion`, `undershoot`, `u_dispersion`,
-            `ratio`, and `weight_deriv`.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------

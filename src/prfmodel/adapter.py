@@ -5,6 +5,7 @@ from collections.abc import Sequence
 from typing import TypeVar
 import pandas as pd
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 
@@ -71,15 +72,14 @@ class ParameterTransform:
         self.transform_fun = transform_fun
         self.inverse_fun = inverse_fun
 
+    @doc
     def transform(self, parameters: P) -> P:
         """
         Apply the transformation.
 
         Parameters
         ----------
-        parameters : pd.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
+        %(parameters)s
 
         Returns
         -------
@@ -94,15 +94,14 @@ class ParameterTransform:
 
         return parameters
 
+    @doc
     def inverse(self, parameters: P) -> P:
         """
         Apply the inverse transformation.
 
         Parameters
         ----------
-        parameters : pd.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
+        %(parameters)s
 
         Returns
         -------
@@ -260,6 +259,7 @@ class ParameterConstraint(ParameterTransform):
 
         return parameters
 
+    @doc
     def transform(self, parameters: P) -> P:
         """
         Apply the constraint transformation.
@@ -268,9 +268,7 @@ class ParameterConstraint(ParameterTransform):
 
         Parameters
         ----------
-        parameters : pd.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
+        %(parameters)s
 
         Returns
         -------
@@ -291,6 +289,7 @@ class ParameterConstraint(ParameterTransform):
 
         return param_dict
 
+    @doc
     def inverse(self, parameters: P) -> P:
         """
         Apply the inverse constraint transformation.
@@ -299,9 +298,7 @@ class ParameterConstraint(ParameterTransform):
 
         Parameters
         ----------
-        parameters : pd.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
+        %(parameters)s
 
         Returns
         -------
@@ -368,6 +365,7 @@ class Adapter:
 
         self.transforms = transforms
 
+    @doc
     def transform(self, parameters: P) -> P:
         """
         Apply the transformations sequentially.
@@ -376,9 +374,7 @@ class Adapter:
 
         Parameters
         ----------
-        parameters : pd.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
+        %(parameters)s
 
         Returns
         -------
@@ -391,6 +387,7 @@ class Adapter:
 
         return parameters
 
+    @doc
     def inverse(self, parameters: P) -> P:
         """
         Apply the inverse transformations sequentially.
@@ -399,9 +396,7 @@ class Adapter:
 
         Parameters
         ----------
-        parameters : pd.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
+        %(parameters)s
 
         Returns
         -------

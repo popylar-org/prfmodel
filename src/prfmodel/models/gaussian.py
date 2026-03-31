@@ -4,6 +4,7 @@ import math
 import numpy as np
 import pandas as pd
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.stimuli.cf import CFStimulus
 from prfmodel.stimuli.prf import GridDimensionsError
 from prfmodel.stimuli.prf import PRFStimulus
@@ -215,20 +216,16 @@ class Gaussian2DPRFResponse(BaseResponse[PRFStimulus]):
         """Names of parameters used by the model: `mu_y`, `mu_x`, `sigma`."""
         return ["mu_y", "mu_x", "sigma"]
 
+    @doc
     def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the model response for a stimulus with a 2D grid.
 
         Parameters
         ----------
-        stimulus : Stimulus
-            Stimulus object with a 2D stimulus grid.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels. Must contain the columns `mu_y`, `mu_x` and `sigma`.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus_prf)s
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
@@ -262,20 +259,16 @@ class GaussianCFResponse(BaseResponse[CFStimulus]):
         """Names of parameters used by the model: `center_index`, `sigma`."""
         return ["center_index", "sigma"]
 
+    @doc
     def __call__(self, stimulus: CFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the model response for a stimulus with a distance matrix.
 
         Parameters
         ----------
-        stimulus : CFStimulus
-            Connective field stimulus object with a distance matrix.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels. Must contain the columns `center_index` and `sigma`.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus_cf)s
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
