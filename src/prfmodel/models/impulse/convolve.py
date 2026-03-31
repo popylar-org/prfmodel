@@ -1,6 +1,7 @@
 """Convolution functions."""
 
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.models.base import BatchDimensionError
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
@@ -34,6 +35,7 @@ def _prepare_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
     return prf_response_transposed, impulse_response_transposed
 
 
+@doc
 def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor, dtype: str | None = None) -> Tensor:
     """
     Convolve the encoded response from a population receptive field model with an impulse response.
@@ -46,9 +48,7 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
         Encoded population receptive field model response. Must have shape (num_batches, num_response_frames).
     impulse_response : Tensor
         Impulse response. Must have shape (num_batches, num_impulse_frames).
-    dtype : str, optional
-        The dtype of the prediction result. If `None` (the default), uses the dtype from
-        :func:`prfmodel.utils.get_dtype`.
+    %(dtype)s
 
     Returns
     -------

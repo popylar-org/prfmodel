@@ -2,6 +2,7 @@
 
 import pandas as pd
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.models.base import BaseImpulse
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
@@ -76,18 +77,15 @@ class ShiftedGammaImpulse(BaseImpulse):
         """
         return ["delay", "dispersion", "shift"]
 
+    @doc
     def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the impulse response.
 
         Parameters
         ----------
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different batches. Must contain the columns `delay`, `dispersion`, and `shift`.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------

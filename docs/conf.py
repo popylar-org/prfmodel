@@ -7,13 +7,11 @@
 
 # -- Path setup --------------------------------------------------------------
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import pathlib
+import sys
+
+sys.path.insert(0, pathlib.Path("../src").resolve().as_posix())
+from prfmodel._docstring import _PARAMS
 
 # -- Project information -----------------------------------------------------
 
@@ -113,3 +111,31 @@ intersphinx_mapping = {
 # -- Options for myst-nb
 
 nb_kernel_rgx_aliases = {"python312": "python3"}
+
+
+# -- Docstring placeholder substitution --------------------------------------
+
+
+def _process_docstring(  # noqa: PLR0913
+    app: object,  # noqa: ARG001
+    what: str,  # noqa: ARG001
+    name: str,  # noqa: ARG001
+    obj: object,  # noqa: ARG001
+    options: dict | None,  # noqa: ARG001
+    lines: list[str],
+) -> None:
+    """Replace %(key)s placeholders in docstrings with shared snippets.
+
+    sphinx-autoapi does not automatically replace keys in the docstring when rendering the HTML documentation because
+    it does not import the package modules. This function adds performs the replacement when sphinx-autoapi is run.
+
+    """
+    joined = "\n".join(lines)
+    for key, value in _PARAMS.items():
+        joined = joined.replace(f"%({key})s", value)
+    lines[:] = joined.split("\n")
+
+
+def setup(app: object) -> None:
+    """Connect `_process_docstring` to autodoc event."""
+    app.connect("autodoc-process-docstring", _process_docstring, priority=100)
