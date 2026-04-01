@@ -103,8 +103,8 @@ class GridFitter:
         Parameters
         ----------
         data : Tensor
-            Target data to fit the model to. Must have shape (num_batches, num_frames), where `num_batches` is the
-            number of batches for which parameters are estimated and `num_frames` is the number of time steps.
+            Target data to fit the model to. Must have shape (num_units, num_frames), where `num_units` is the
+            number of units for which parameters are estimated and `num_frames` is the number of time steps.
         parameter_values : dict
             Dictionary with keys indicating model parameters and values indicating parameter values in the grid. The
             grid is constructed by taking all combinations of parameters values (i.e., the cartesian product).

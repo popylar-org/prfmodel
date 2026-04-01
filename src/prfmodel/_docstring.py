@@ -50,10 +50,10 @@ _PARAMS: dict[str, str] = {
     "parameters": (
         "parameters : pandas.DataFrame\n"
         "    Dataframe with columns containing different model parameters and rows containing parameter values\n"
-        "    for different voxels."
+        "    for different units."
     ),
     "predicted_response_2d": (
-        "Tensor\n    The predicted model response with shape `(num_batches, num_frames)` and dtype `dtype`."
+        "Tensor\n    The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`."
     ),
     "stimulus": ("stimulus : Stimulus\n    Stimulus object."),
     "stimulus_cf": ("stimulus : CFStimulus\n    Connective field stimulus object."),

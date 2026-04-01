@@ -87,11 +87,11 @@ class LeastSquaresFitter:
         Parameters
         ----------
         data : Tensor
-            Target data to fit the model to. Must have shape (num_batches, num_frames), where `num_batches` is the
-            number of batches for which parameters are estimated and `num_frames` is the number of time steps.
+            Target data to fit the model to. Must have shape (num_units, num_frames), where `num_units` is the
+            number of units for which parameters are estimated and `num_frames` is the number of time steps.
         parameters : pandas.DataFrame
             Dataframe with model parameters. Columns must contain different model parameters and
-            rows parameter values for each batch in `data`.
+            rows parameter values for each unit in `data`.
         slope_name : str or list of str
             The name(s) of the parameter(s) that will be the estimated slope(s). Must refer to column(s) within
             `parameters`.
@@ -121,16 +121,16 @@ class LeastSquaresFitter:
             msg = "Argument 'intercept_name' must be a column in 'parameters'"
             raise ValueError(msg)
 
-        num_batches = len(parameters)
+        num_units = len(parameters)
         if batch_size is None:
-            batch_size = num_batches
+            batch_size = num_units
 
         residual_sums = []
         new_parameters = parameters.copy()
 
-        batch_starts = range(0, num_batches, batch_size)
+        batch_starts = range(0, num_units, batch_size)
         for start in tqdm(batch_starts, desc="Processing data batches", total=len(batch_starts)):
-            end = min(start + batch_size, num_batches)
+            end = min(start + batch_size, num_units)
             batch_residuals, batch_params = self._fit_batch(
                 data[start:end],
                 new_parameters.iloc[start:end],

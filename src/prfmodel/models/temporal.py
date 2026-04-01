@@ -52,7 +52,7 @@ class BaselineAmplitude(BaseTemporal):
         Parameters
         ----------
         inputs : Tensor
-            Input tensor with temporal response and shape (num_batches, num_frames).
+            Input tensor with temporal response and shape (num_units, num_frames).
         %(parameters)s
         %(dtype)s
 
@@ -201,7 +201,7 @@ class DoGAmplitude(BaseTemporal):
         ----------
         inputs : Tensor
             Input tensor with two temporal responses stacked along axis 1,
-            shape (num_batches, 2, num_frames).
+            shape (num_units, 2, num_frames).
         %(parameters)s
         %(dtype)s
 

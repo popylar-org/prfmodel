@@ -92,7 +92,7 @@ class TwoGammaImpulse(BaseImpulse):
         Returns
         -------
         Tensor
-            The predicted impulse response with shape `(num_batches, num_frames)` and dtype `dtype`.
+            The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
 
         """
         parameters = self._join_default_parameters(parameters)

@@ -246,7 +246,7 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
         Returns
         -------
         Tensor
-            Stacked predictions of shape (num_voxels, 2, num_frames).
+            Stacked predictions of shape (num_units, 2, num_frames).
 
         """
         dtype = get_dtype(dtype)

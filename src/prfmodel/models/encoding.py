@@ -51,7 +51,7 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
     Returns
     -------
     Tensor
-        The stimulus encoded model response with shape (num_batches, num_frames) and dtype `dtype`.
+        The stimulus encoded model response with shape (num_units, num_frames) and dtype `dtype`.
 
     Raises
     ------
@@ -63,17 +63,17 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
     Encode a 1D model response:
 
     >>> import numpy as np
-    >>> num_batches = 3
+    >>> num_units = 3
     >>> num_frames = 10
     >>> height = 5
     >>> # Create a dummy stimulus design
     >>> design = np.ones((num_frames, height))
     >>> # Create a dummy model response that varies with the height of a stimulus grid
-    >>> resp = np.ones((num_batches, height)) * np.expand_dims(np.sin(np.arange(height)), 0)
-    >>> print(resp.shape) # (num_batches, height)
+    >>> resp = np.ones((num_units, height)) * np.expand_dims(np.sin(np.arange(height)), 0)
+    >>> print(resp.shape) # (num_units, height)
     (3, 5)
     >>> resp_encoded = encode_prf_response(resp, design)
-    >>> print(resp_encoded.shape) (num_batches, num_frames)
+    >>> print(resp_encoded.shape) (num_units, num_frames)
     (3, 10)
 
     Encode a 2D model response:
@@ -83,11 +83,11 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
     >>> # Create a dummy stimulus design
     >>> design = np.ones((num_frames, height, width))
     >>> # Create a dummy model response that varies with the width of a stimulus grid
-    >>> resp = np.ones((num_batches, height, width)) * np.expand_dims(np.sin(np.arange(width)), (0, 1))
-    >>> print(resp.shape) # (num_batches, height, width)
+    >>> resp = np.ones((num_units, height, width)) * np.expand_dims(np.sin(np.arange(width)), (0, 1))
+    >>> print(resp.shape) # (num_units, height, width)
     (3, 5, 4)
     >>> resp_encoded = encode_prf_response(resp, design)
-    >>> print(resp_encoded.shape) (num_batches, num_frames)
+    >>> print(resp_encoded.shape) (num_units, num_frames)
     (3, 10)
 
     """
@@ -100,7 +100,7 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
 
     design = ops.expand_dims(design, 0)
     response = ops.expand_dims(response, 1)
-    # Do not sum over the first two dimensions: num_batches, num_frames
+    # Do not sum over the first two dimensions: num_units, num_frames
     axes = tuple(ops.arange(2, len(design.shape)))
     # tensordot is much more memory efficient that standard multiplication
     return ops.squeeze(ops.tensordot(response, design, axes=[axes, axes]), axis=(1, 2))
@@ -259,8 +259,8 @@ class CompressiveEncoder(BaseEncoder[S]):
         Returns
         -------
         Tensor
-            The compressed and stimulus encoded model response with shape `(num_voxels, ...)` dtype `dtype`.
-            The number of voxels is the number of rows in `parameters`. The number and size of other axes depends on
+            The compressed and stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`.
+            The number of units is the number of rows in `parameters`. The number and size of other axes depends on
             the stimulus and the response.
 
         """

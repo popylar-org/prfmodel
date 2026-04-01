@@ -119,7 +119,7 @@ class TestBatched(TestSetup):
         params: pd.DataFrame,
         model: Gaussian2DPRFModel,
     ):
-        """Test that batch_size=None calls the function once with all voxels."""
+        """Test that batch_size=None calls the function once with all units."""
         result_unbatched = model(stimulus, params)
         result_batched = batched(model)(stimulus, params, batch_size=None)
 
@@ -143,18 +143,18 @@ class TestBatched(TestSetup):
         params: pd.DataFrame,
         model: Gaussian2DPRFModel,
     ):
-        """Test that the output shape is (num_voxels, num_frames)."""
+        """Test that the output shape is (num_units, num_frames)."""
         result = batched(model)(stimulus, params, batch_size=3)
 
         assert result.shape == (params.shape[0], stimulus.design.shape[0])
 
-    def test_batch_size_larger_than_num_voxels(
+    def test_batch_size_larger_than_num_units(
         self,
         stimulus: PRFStimulus,
         params: pd.DataFrame,
         model: Gaussian2DPRFModel,
     ):
-        """Test that a batch_size larger than the number of voxels works."""
+        """Test that a batch_size larger than the number of units works."""
         result = batched(model)(stimulus, params, batch_size=100)
         expected = model(stimulus, params)
 
@@ -166,7 +166,7 @@ class TestBatched(TestSetup):
         params: pd.DataFrame,
         model: Gaussian2DPRFModel,
     ):
-        """Test with a batch_size that evenly divides num_voxels."""
+        """Test with a batch_size that evenly divides num_units."""
         result = batched(model)(stimulus, params, batch_size=3)
         expected = model(stimulus, params)
 

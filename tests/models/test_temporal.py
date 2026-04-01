@@ -79,14 +79,14 @@ class TestDoGAmplitude:
     @parametrize_dtype
     def test_call(self, model: DoGAmplitude, params: pd.DataFrame, dtype: str):
         """Test that DoGAmplitude returns response with correct shape and values."""
-        num_voxels = params.shape[0]
-        p1 = np.ones((num_voxels, self.num_frames)) * 2.0
-        p2 = np.ones((num_voxels, self.num_frames)) * 3.0
-        inputs = np.stack([p1, p2], axis=1)  # (num_voxels, 2, num_frames)
+        num_units = params.shape[0]
+        p1 = np.ones((num_units, self.num_frames)) * 2.0
+        p2 = np.ones((num_units, self.num_frames)) * 3.0
+        inputs = np.stack([p1, p2], axis=1)  # (num_units, 2, num_frames)
 
         resp = np.asarray(model(inputs, params, dtype))
 
-        assert resp.shape == (num_voxels, self.num_frames)
+        assert resp.shape == (num_units, self.num_frames)
         expected = (
             p1 * np.expand_dims(params["amplitude_center"], 1)
             + p2 * np.expand_dims(params["amplitude_surround"], 1)
