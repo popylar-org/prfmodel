@@ -136,15 +136,15 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     >>> xv, yv = np.meshgrid(x, y)
     >>> grid = np.stack((xv, yv), axis=-1)  # shape (10, 10, 2)
     >>> # Define 2D centroids of Gaussian for 3 units
-    >>> mu = np.array([ # shape (3, 2), first column y, second column x
-    >>>     [0.0, 1.0],
-    >>>     [1.0, 0.0],
-    >>>     [0.0, 0.0],
-    >>> ])
+    >>> mu = np.array([  # shape (3, 2), first column y, second column x
+    ...     [0.0, 1.0],
+    ...     [1.0, 0.0],
+    ...     [0.0, 0.0],
+    ... ])
     >>> # Define size of Gaussian for 3 units
-    >>> sigma = np.array([[1.0], [1.5], [2.0]]) # shape (3, 1)
+    >>> sigma = np.array([[1.0], [1.5], [2.0]])  # shape (3, 1)
     >>> resp = predict_gaussian_response(grid, mu, sigma)
-    >>> print(resp.shape) # (num_units, num_y, num_x)
+    >>> print(resp.shape)  # (num_units, num_y, num_x)
     (3, 10, 10)
 
     """
@@ -182,33 +182,33 @@ class Gaussian2DPRFResponse(BaseResponse[PRFStimulus]):
     --------
     >>> import numpy as np
     >>> import pandas as pd
-    >>> import prfmodel as pm
+    >>> from prfmodel.stimuli.prf import PRFStimulus
     >>> # Define a 2D grid
     >>> num_x, num_y = 20, 10
     >>> x = np.linspace(-3, 3, num_x)
     >>> y = np.linspace(-4, 4, num_y)
     >>> xv, yv = np.meshgrid(x, y)
-    >>> grid = np.stack((xv, yv), axis=-1)  # shape (20, 10, 2)
+    >>> grid = np.stack((xv, yv), axis=-1)  # shape (num_y, num_x, 2)
     >>> # Define 2D centroids of Gaussian for 3 units
     >>> params = pd.DataFrame({
-    >>>     "mu_x": [0.0, 1.0, 0.0],
-    >>>     "mu_y": [1.0, 0.0, 0.0],
-    >>>     "sigma": [1.0, 1.5, 2.0],
-    >>> })
+    ...     "mu_x": [0.0, 1.0, 0.0],
+    ...     "mu_y": [1.0, 0.0, 0.0],
+    ...     "sigma": [1.0, 1.5, 2.0],
+    ... })
     >>> # Define dummy design for 10 frames
-    >>> design = np.ones(10, num_y, num_x)
+    >>> design = np.ones((10, num_y, num_x))
     >>> # Create stimulus object
-    >>> stimulus = pm.Stimulus(
-    >>>     design=design,
-    >>>     grid=grid,
-    >>>     dimension_labels=("y", "x"),
-    >>> )
+    >>> stimulus = PRFStimulus(
+    ...     design=design,
+    ...     grid=grid,
+    ...     dimension_labels=("y", "x"),
+    ... )
     >>> # Create model instance
-    >>> model = Gaussian2DResponse()
+    >>> model = Gaussian2DPRFResponse()
     >>> # Predict response to stimulus grid
     >>> resp = model(stimulus, params)
-    >>> print(resp.shape) # (num_units, num_y, num_x)
-    (3, 20, 10)
+    >>> print(resp.shape)  # (num_units, num_y, num_x)
+    (3, 10, 20)
     """
 
     @property

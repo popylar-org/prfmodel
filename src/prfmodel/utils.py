@@ -47,19 +47,19 @@ def convert_parameters_to_tensor(parameters: pd.DataFrame, dtype: str) -> Tensor
 
     >>> import pandas as pd
     >>> params = pd.DataFrame({
-    >>>     "param_1": [0.0, 1.0, 2.0],
-    >>> })
-    >>> x = convert_parameters_to_tensor(params)
+    ...     "param_1": [0.0, 1.0, 2.0],
+    ... })
+    >>> x = convert_parameters_to_tensor(params, dtype="float32")
     >>> print(x.shape)
     (3, 1)
 
     Multiple parameters:
 
     >>> params = pd.DataFrame({
-    >>>     "param_1": [0.0, 1.0, 2.0],
-    >>>     "param_2": [0.0, -1.0, -2.0],
-    >>> })
-    >>> x = covert_parameters_to_tensor(params)
+    ...     "param_1": [0.0, 1.0, 2.0],
+    ...     "param_2": [0.0, -1.0, -2.0],
+    ... })
+    >>> x = convert_parameters_to_tensor(params, dtype="float32")
     >>> print(x.shape)
     (3, 2)
 
@@ -116,15 +116,15 @@ def batched(fn: Callable) -> Callable:
     Examples
     --------
     >>> from prfmodel.utils import batched
-    >>> batched_predict = batched(model)
-    >>> result = batched_predict(stimulus, parameters, batch_size=128)
+    >>> batched_predict = batched(model)  # doctest: +SKIP
+    >>> result = batched_predict(stimulus, parameters, batch_size=128)  # doctest: +SKIP
 
     As a decorator:
 
     >>> @batched
     ... def predict(stimulus, parameters, *, dtype=None):
     ...     ...
-    >>> result = predict(stimulus, parameters, batch_size=64)
+    >>> result = predict(stimulus, parameters, batch_size=64)  # doctest: +SKIP
 
     """
 

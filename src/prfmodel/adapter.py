@@ -45,15 +45,15 @@ class ParameterTransform:
     >>> import numpy as np
     >>> import pandas as pd
     >>> params = pd.DataFrame({
-    >>>     "x": np.arange(1, 5)
-    >>> })
+    ...     "x": np.arange(1, 5)
+    ... })
     >>> transform = ParameterTransform(
-    >>>     parameter_names=["x"],
-    >>>     transform_fun=np.log,
-    >>>     inverse_fun=np.exp,
-    >>> )
+    ...     parameter_names=["x"],
+    ...     transform_fun=np.log,
+    ...     inverse_fun=np.exp,
+    ... )
     >>> params_transformed = transform.transform(params)
-    >>> print(params_transformed)
+    >>> print(params_transformed)  # doctest: +NORMALIZE_WHITESPACE
               x
     0  0.000000
     1  0.693147
@@ -144,34 +144,34 @@ class ParameterConstraint(ParameterTransform):
     >>> import numpy as np
     >>> import pandas as pd
     >>> params = pd.DataFrame({
-    >>>     "x": np.array([0.5, 1.0, 1.5]),
-    >>>     "lower_bound": np.array([0.1, 0.2, 0.3])
-    >>> })
-    >>> constraint = ParameterContraint(
-    >>>     parameter_names=["x"],
-    >>>     lower="lower_bound",
-    >>> )
+    ...     "x": np.array([0.5, 1.0, 1.5]),
+    ...     "lower_bound": np.array([0.1, 0.2, 0.3])
+    ... })
+    >>> constraint = ParameterConstraint(
+    ...     parameter_names=["x"],
+    ...     lower="lower_bound",
+    ... )
     >>> params_transformed = constraint.transform(params)
     >>> params_inverse = constraint.inverse(params_transformed)
     >>> assert np.allclose(params_inverse["x"], params["x"])
 
     Constrain a parameter to be greater than a fixed value.
 
-    >>> constraint = ParameterContraint(
-    >>>     parameter_names=["x"],
-    >>>     lower=1.0,
-    >>> )
+    >>> constraint = ParameterConstraint(
+    ...     parameter_names=["x"],
+    ...     lower=1.0,
+    ... )
     >>> params_transformed = constraint.transform(params)
     >>> params_inverse = constraint.inverse(params_transformed)
     >>> assert np.allclose(params_inverse["x"], params["x"])
 
     Constrain a parameter to be greater than the square of another parameter.
 
-    >>> constraint = ParameterContraint(
-    >>>     parameter_names=["x"],
-    >>>     lower="lower_bound",
-    >>>     bound_fun=lambda x: x**2
-    >>> )
+    >>> constraint = ParameterConstraint(
+    ...     parameter_names=["x"],
+    ...     lower="lower_bound",
+    ...     bound_fun=lambda x: x**2
+    ... )
     >>> params_transformed = constraint.transform(params)
     >>> params_inverse = constraint.inverse(params_transformed)
     >>> assert np.allclose(params_inverse["x"], params["x"])
@@ -339,19 +339,19 @@ class Adapter:
     >>> import numpy as np
     >>> import pandas as pd
     >>> params = pd.DataFrame({
-    >>>     "x": np.arange(1, 5),
-    >>>     "y": np.arange(2, 6)
-    >>> })
+    ...     "x": np.arange(1, 5),
+    ...     "y": np.arange(2, 6)
+    ... })
     >>> transform_x = ParameterTransform(
-    >>>     parameter_names=["x"],
-    >>>     transform_fun=np.log,
-    >>>     inverse_fun=np.exp,
-    >>> )
+    ...     parameter_names=["x"],
+    ...     transform_fun=np.log,
+    ...     inverse_fun=np.exp,
+    ... )
     >>> transform_y = ParameterTransform(
-    >>>     parameter_names=["y"],
-    >>>     transform_fun=np.sqrt,
-    >>>     inverse_fun=np.square,
-    >>> )
+    ...     parameter_names=["y"],
+    ...     transform_fun=np.sqrt,
+    ...     inverse_fun=np.square,
+    ... )
     >>> adapter = Adapter(transforms=[transform_x, transform_y])
     >>> params_transformed = adapter.transform(params)
     >>> params_inverse = adapter.inverse(params_transformed)
