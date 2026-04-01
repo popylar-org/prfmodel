@@ -66,6 +66,18 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
     BatchDimensionError
         If `prf_response` and `impulse_response` have unit (first) dimensions with different sizes.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from prfmodel.models.impulse.convolve import convolve_prf_impulse_response
+    >>> num_units, num_frames, hrf_len = 3, 20, 10
+    >>> prf_response = np.ones((num_units, num_frames))
+    >>> impulse_response = np.zeros((num_units, hrf_len))
+    >>> impulse_response[:, 0] = 1.0  # identity impulse
+    >>> result = convolve_prf_impulse_response(prf_response, impulse_response)
+    >>> print(result.shape)
+    (3, 20)
+
     """
     dtype = get_dtype(dtype)
     prf_response = ops.convert_to_tensor(prf_response, dtype=dtype)

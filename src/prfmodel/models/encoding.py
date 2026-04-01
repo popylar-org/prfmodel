@@ -225,6 +225,38 @@ class CompressiveEncoder(BaseEncoder[S]):
 
         p(x) = g \times \text{max}(f(x), \epsilon)^n
 
+    References
+    ----------
+    .. [1] Kay, K. N., Winawer, J., Mezer, A., & Wandell, B. A. (2013). Compressive spatial summation in human visual
+        cortex. *Journal of Neurophysiology*, 110(2), 481-494. https://doi.org/10.1152/jn.00105.2013
+
+    Examples
+    --------
+    Predict a model response for multiple units.
+
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> from prfmodel.models.encoding import CompressiveEncoder, PRFStimulusEncoder
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+    >>> # Create dummy response as input for encdoder
+    >>> prf_response = np.ones((3, 101, 101))  # Must have same number of frames as stimulus
+    >>> model = CompressiveEncoder(
+    ...     encoding_model=PRFStimulusEncoder(),
+    ... )
+    >>> # Define model parameters for 3 units
+    >>> params = pd.DataFrame({
+    ...     # Compressive parameters
+    ...     "gain": [0.5, 0.1, 1.2],
+    ...     "n": [0.4, 0.5, 0.9],
+    ... })
+    >>> # Predict model response
+    >>> resp = model(stimulus, prf_response, params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 200)
+
     """
 
     def __init__(self, encoding_model: BaseEncoder, min_response: float = 1e-10):

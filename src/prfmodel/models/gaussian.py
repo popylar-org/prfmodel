@@ -126,7 +126,7 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
 
     Examples
     --------
-    Predict a 2D Gaussian response:
+    Predict a 2D Gaussian response.
 
     >>> import numpy as np
     >>> # Define a 2D grid
@@ -180,35 +180,20 @@ class Gaussian2DPRFResponse(BaseResponse[PRFStimulus]):
 
     Examples
     --------
-    >>> import numpy as np
     >>> import pandas as pd
-    >>> from prfmodel.stimuli.prf import PRFStimulus
-    >>> # Define a 2D grid
-    >>> num_x, num_y = 20, 10
-    >>> x = np.linspace(-3, 3, num_x)
-    >>> y = np.linspace(-4, 4, num_y)
-    >>> xv, yv = np.meshgrid(x, y)
-    >>> grid = np.stack((xv, yv), axis=-1)  # shape (num_y, num_x, 2)
-    >>> # Define 2D centroids of Gaussian for 3 units
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> params = pd.DataFrame({
     ...     "mu_x": [0.0, 1.0, 0.0],
     ...     "mu_y": [1.0, 0.0, 0.0],
     ...     "sigma": [1.0, 1.5, 2.0],
     ... })
-    >>> # Define dummy design for 10 frames
-    >>> design = np.ones((10, num_y, num_x))
-    >>> # Create stimulus object
-    >>> stimulus = PRFStimulus(
-    ...     design=design,
-    ...     grid=grid,
-    ...     dimension_labels=("y", "x"),
-    ... )
-    >>> # Create model instance
     >>> model = Gaussian2DPRFResponse()
-    >>> # Predict response to stimulus grid
     >>> resp = model(stimulus, params)
     >>> print(resp.shape)  # (num_units, num_y, num_x)
-    (3, 10, 20)
+    (3, 101, 101)
     """
 
     @property
@@ -251,6 +236,31 @@ class GaussianCFResponse(BaseResponse[CFStimulus]):
     Predicts a response to a stimulus distance matrix.
     The model has two parameters: `center_index` is the index of the row in the stimulus distance matrix that is the
     center of the Gaussian; `sigma` for the width of the Gaussian.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from prfmodel.stimuli.cf import CFStimulus
+    >>> num_source_units, num_frames = 10, 20
+    >>> distances = np.abs(
+    ...     np.arange(num_source_units, dtype=float)[:, None]
+    ...     - np.arange(num_source_units, dtype=float)[None, :]
+    ... )
+    >>> source_response = np.ones((num_source_units, num_frames))
+    >>> stimulus = CFStimulus(
+    ...     distance_matrix=distances,
+    ...     source_response=source_response
+    ... )
+    >>> # Define parameters for 2 target units
+    >>> params = pd.DataFrame({
+    ...     "center_index": [0, 5],
+    ...     "sigma": [1.0, 2.0]
+    ... })
+    >>> model = GaussianCFResponse()
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_source_units)
+    (2, 10)
 
     """
 
@@ -327,6 +337,39 @@ class Gaussian2DPRFModel(SimplePRFModel):
     4. The encoded response is convolved with the impulse response.
     5. The temporal model modifies the convolved response.
 
+    Examples
+    --------
+    Predict a model response for multiple units.
+
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> from prfmodel.models.gaussian import Gaussian2DPRFModel
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+    >>> model = Gaussian2DPRFModel()
+    >>> # Define all model parameters for 3 units
+    >>> params = pd.DataFrame({
+    ...     # Gaussian parameters
+    ...     "mu_x": [0.0, 1.0, 0.0],
+    ...     "mu_y": [1.0, 0.0, 0.0],
+    ...     "sigma": [1.0, 1.5, 2.0],
+    ...     # Impulse model parameters
+    ...     "delay": [6.0, 6.0, 6.0],
+    ...     "dispersion": [0.9, 0.9, 0.9],
+    ...     "undershoot": [12.0, 12.0, 12.0],
+    ...     "u_dispersion": [0.9, 0.9, 0.9],
+    ...     "ratio": [0.48, 0.48, 0.48],
+    ...     "weight_deriv": [0.5, 0.5, 0.5],
+    ...     # Temporal model parameters
+    ...     "baseline": [0.1, -0.1, 0.5],
+    ...     "amplitude": [-2.0, 1.2, 0.1],
+    ... })
+    >>> # Predict model response
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 200)
+
     """
 
     def __init__(
@@ -365,6 +408,38 @@ class GaussianCFModel(SimpleCFModel):
     1. The Gaussian connective field response model makes a prediction for the stimulus distance matrix.
     2. The encoding model encodes the connective field response with the source response.
     3. The temporal model modifies the encoded response.
+
+    Examples
+    --------
+    Predict a model response for multiple units.
+
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from prfmodel.models.gaussian import GaussianCFModel
+    >>> from prfmodel.stimuli.cf import CFStimulus
+    >>> num_source_units, num_frames = 10, 20
+    >>> distances = np.abs(
+    ...     np.arange(num_source_units, dtype=float)[:, None]
+    ...     - np.arange(num_source_units, dtype=float)[None, :]
+    ... )
+    >>> source_response = np.ones((num_source_units, num_frames))
+    >>> stimulus = CFStimulus(
+    ...     distance_matrix=distances,
+    ...     source_response=source_response
+    ... )
+    >>> model = GaussianCFModel()
+    >>> # Define parameters for 2 target units
+    >>> params = pd.DataFrame({
+    ...     # Gaussian parameters
+    ...     "center_index": [0, 5],
+    ...     "sigma": [1.0, 2.0],
+    ...     # Temporal model parameters
+    ...     "baseline": [0.0, 0.0],
+    ...     "amplitude": [1.0, 1.0],
+    ... })
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)
+    (2, 20)
 
     """
 

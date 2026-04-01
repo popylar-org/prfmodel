@@ -41,6 +41,13 @@ def load_2d_prf_bar_stimulus() -> PRFStimulus:
         neuroimaging software: The case of population receptive fields. *PLOS Computational Biology, 16*(6),
         e1007924. https://doi.org/10.1371/journal.pcbi.1007924
 
+    Examples
+    --------
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+
     """
     path = files("prfmodel.data.stimuli").joinpath("2d_bar_stimulus.npz")
 
