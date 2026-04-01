@@ -71,12 +71,12 @@ class BaseModel(ABC):
     Create a custom model class that inherits from the base class:
 
     >>> class CustomModel(BaseModel):
-    >>>     @property
-    >>>     def parameter_names(self):
-    >>>         return ["a", "b"]
+    ...     @property
+    ...     def parameter_names(self):
+    ...         return ["a", "b"]
     >>> model = CustomModel()
     >>> print(model.parameter_names)
-    ["a", "b"]
+    ['a', 'b']
 
     """
 

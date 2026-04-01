@@ -22,14 +22,14 @@ class BaselineAmplitude(BaseTemporal):
     >>> import numpy as np
     >>> import pandas as pd
     >>> params = pd.DataFrame({
-    >>>     "baseline": [5.0, 10.0, -3.0],
-    >>>     "amplitude": [2.0, -1.0, 1.0],
-    >>> })
+    ...     "baseline": [5.0, 10.0, -3.0],
+    ...     "amplitude": [2.0, -1.0, 1.0],
+    ... })
     >>> num_frames = 10
     >>> inputs = np.ones((params.shape[0], num_frames))
     >>> model = BaselineAmplitude()
     >>> resp = model(inputs, params)
-    >>> print(resp.shape) # (num_rows, num_frames)
+    >>> print(resp.shape)  # (num_units, num_frames)
     (3, 10)
 
     """

@@ -66,18 +66,18 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
     --------
     >>> import pandas as pd
     >>> params = pd.DataFrame({
-    >>>     "delay": [2.0, 1.0, 1.5],
-    >>>     "dispersion": [1.0, 1.0, 1.0],
-    >>>     "undershoot": [1.5, 2.0, 1.0],
-    >>>     "u_dispersion": [1.0, 1.0, 1.0],
-    >>>     "ratio": [0.7, 0.2, 0.5],
-    >>>     "weight_deriv": [0.5, -0.7, 0.9],
-    >>> })
+    ...     "delay": [2.0, 1.0, 1.5],
+    ...     "dispersion": [1.0, 1.0, 1.0],
+    ...     "undershoot": [1.5, 2.0, 1.0],
+    ...     "u_dispersion": [1.0, 1.0, 1.0],
+    ...     "ratio": [0.7, 0.2, 0.5],
+    ...     "weight_deriv": [0.5, -0.7, 0.9],
+    ... })
     >>> impulse_model = DerivativeTwoGammaImpulse(
-    >>>     duration=100.0 # 100 seconds
-    >>> )
+    ...     duration=100.0  # 100 seconds
+    ... )
     >>> resp = impulse_model(params)
-    >>> print(resp.shape) # (num_rows, duration)
+    >>> print(resp.shape)  # (num_units, num_frames)
     (3, 100)
 
     """

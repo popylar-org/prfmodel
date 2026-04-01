@@ -73,7 +73,7 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
     >>> print(resp.shape) # (num_units, height)
     (3, 5)
     >>> resp_encoded = encode_prf_response(resp, design)
-    >>> print(resp_encoded.shape) (num_units, num_frames)
+    >>> print(resp_encoded.shape)  # (num_units, num_frames)
     (3, 10)
 
     Encode a 2D model response:
@@ -87,7 +87,7 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
     >>> print(resp.shape) # (num_units, height, width)
     (3, 5, 4)
     >>> resp_encoded = encode_prf_response(resp, design)
-    >>> print(resp_encoded.shape) (num_units, num_frames)
+    >>> print(resp_encoded.shape)  # (num_units, num_frames)
     (3, 10)
 
     """
