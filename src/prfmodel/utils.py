@@ -204,6 +204,18 @@ def normalize_response(response: Tensor, norm: str | None = "sum") -> Tensor:
     -----
     A warning is raised when the normalization is zero which leads to an undefined normalized response.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from prfmodel.utils import normalize_response
+    >>> response = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+    >>> normed = normalize_response(response, norm="sum")
+    >>> print(normed.shape)
+    (2, 3)
+    >>> from keras import ops
+    >>> print(round(float(ops.sum(normed[0])), 6))
+    1.0
+
     """
     response = ops.convert_to_tensor(response)
     response_ndim = ops.ndim(response)

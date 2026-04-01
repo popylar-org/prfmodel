@@ -108,6 +108,17 @@ def gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True)
 
         f_{norm} = \frac{\mathtt{\lambda}^{\mathtt{\alpha}}}{\Gamma(\mathtt{\alpha})} * f(x).
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from prfmodel.models.impulse.density import gamma_density
+    >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
+    >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
+    >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
+    >>> dens = gamma_density(t, shape, rate)
+    >>> print(dens.shape)
+    (2, 3)
+
     """
     value = ops.convert_to_tensor(value)
     shape = ops.convert_to_tensor(shape)
@@ -166,6 +177,18 @@ def shifted_gamma_density(
     See Also
     --------
     gamma_density : The (unshifted) gamma distribution density.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from prfmodel.models.impulse.density import shifted_gamma_density
+    >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
+    >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
+    >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
+    >>> shift = np.array([[0.5], [0.0]])   # shape (2, 1)
+    >>> dens = shifted_gamma_density(t, shape, rate, shift)
+    >>> print(dens.shape)
+    (2, 3)
 
     """
     value = ops.convert_to_tensor(value)
@@ -228,6 +251,17 @@ def derivative_gamma_density(value: Tensor, shape: Tensor, rate: Tensor) -> Tens
     See Also
     --------
     gamma_density : The gamma distribution density.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from prfmodel.models.impulse.density import derivative_gamma_density
+    >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
+    >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
+    >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
+    >>> dens = derivative_gamma_density(t, shape, rate)
+    >>> print(dens.shape)
+    (2, 3)
 
     """
     value = ops.convert_to_tensor(value)

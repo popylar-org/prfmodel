@@ -83,6 +83,22 @@ class DoGAmplitude(BaseTemporal):
     Combines two temporal responses with independent amplitudes and a baseline:
     y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_surround + baseline
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> params = pd.DataFrame({
+    ...     "amplitude_center": [1.0, -1.0],
+    ...     "amplitude_surround": [-0.5, 0.5],
+    ...     "baseline": [0.0, 0.1],
+    ... })
+    >>> num_frames = 10
+    >>> inputs = np.ones((params.shape[0], 2, num_frames))
+    >>> model = DoGAmplitude()
+    >>> resp = model(inputs, params)
+    >>> print(resp.shape)
+    (2, 10)
+
     """
 
     @property

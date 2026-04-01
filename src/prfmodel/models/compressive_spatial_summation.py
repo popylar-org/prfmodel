@@ -41,6 +41,43 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     4. The encoded response is convolved with the impulse response.
     5. The temporal model modifies the convolved response.
 
+    Examples
+    --------
+    Predict a model response for multiple units.
+
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> from prfmodel.models.compressive_spatial_summation import Gaussian2DCSSPRFModel
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+    >>> model = Gaussian2DCSSPRFModel()
+    ['undershoot', 'u_dispersion', 'ratio', 'weight_deriv', 'baseline', 'amplitude']
+    >>> # Define all model parameters for 3 units
+    >>> params = pd.DataFrame({
+    ...     # Gaussian parameters
+    ...     "mu_x": [0.0, 1.0, 0.0],
+    ...     "mu_y": [1.0, 0.0, 0.0],
+    ...     "sigma": [1.0, 1.5, 2.0],
+    ...     # CSS parameters
+    ...     "gain": [1.0, 1.0, 1.0],
+    ...     "n": [0.5, 0.5, 0.5],
+    ...     # Impulse model parameters
+    ...     "delay": [6.0, 6.0, 6.0],
+    ...     "dispersion": [0.9, 0.9, 0.9],
+    ...     "undershoot": [12.0, 12.0, 12.0],
+    ...     "u_dispersion": [0.9, 0.9, 0.9],
+    ...     "ratio": [0.48, 0.48, 0.48],
+    ...     "weight_deriv": [0.5, 0.5, 0.5],
+    ...     # Temporal model parameters
+    ...     "baseline": [0.1, -0.1, 0.5],
+    ...     "amplitude": [-2.0, 1.2, 0.1],
+    ... })
+    >>> # Predict model response
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 200)
+
     """
 
     def __init__(
@@ -83,6 +120,21 @@ def init_css_from_gaussian(gaussian_params: pd.DataFrame, gain: float = 1.0, n: 
     ------
     ValueError
         If ``n`` <= 0 or if ``n`` or ``gain`` are not finite.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from prfmodel.models.compressive_spatial_summation import init_css_from_gaussian
+    >>> gaussian_params = pd.DataFrame({
+    ...     "mu_x": [0.0, 1.0],
+    ...     "mu_y": [0.0, -1.0],
+    ...     "sigma": [1.0, 2.0],
+    ...     "baseline": [0.0, 0.1],
+    ...     "amplitude": [1.0, -1.0],
+    ... })
+    >>> css_params = init_css_from_gaussian(gaussian_params, gain=1.0, n=0.5)
+    >>> print(sorted(css_params.columns.tolist()))
+    ['amplitude', 'baseline', 'gain', 'mu_x', 'mu_y', 'n', 'sigma']
 
     """
     if not np.isfinite(n):

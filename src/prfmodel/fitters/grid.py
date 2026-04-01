@@ -10,6 +10,7 @@ import pandas as pd
 from keras import ops
 from more_itertools import chunked
 from tqdm.auto import tqdm
+from prfmodel._docstring import doc
 from prfmodel.models.base import BaseComposite
 from prfmodel.stimuli.base import Stimulus
 from prfmodel.typing import Tensor
@@ -48,24 +49,50 @@ class GridFitter:
     model : BaseModel
         Population receptive field model instance that can be fit to data.
         The model must implement `__call__` to make predictions that can be compared to data.
-    stimulus : Stimulus
-        Stimulus object used to make model predictions.
+    %(stimulus)s
     loss : keras.optimizers.Loss or Callable, optional
         Loss instance or function with the signature `f(y, y_pred)`, where `y` is the target data and `y_pred` are the
         model predicitons. Default is `None` where a `keras.optimizers.MeanSquaredError` loss is used. Note that, when
         a `keras.losses.Loss` instance is used, the argument `reduction` must be set to `"none"` to enable loss
         computation for all data batches.
-    dtype : str, optional
-        The dtype used for fitting. If `None` (the default), uses the dtype from
-        :func:`prfmodel.utils.get_dtype`.
+    %(dtype)s
 
     Notes
     -----
     Depending on the size of the parameter grid and the number of batches in the data, the search can be very
     memory-intensive. For this reason, the grid is first split into batches that are evaluated iteratively.
 
+    Examples
+    --------
+    Fit a 2D Gaussian population receptive field model.
+
+    >>> import numpy as np
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> from prfmodel.models.gaussian import Gaussian2DPRFModel
+    >>> from prfmodel.fitters.grid import GridFitter
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+    >>> # Only fit response model
+    >>> model = Gaussian2DPRFModel(
+    ...     impulse_model=None,
+    ...     temporal_model=None,
+    ... )
+    >>> fitter = GridFitter(model=model, stimulus=stimulus)
+    >>> # Create dummy data for a single unit
+    >>> data = np.zeros((1, 200))
+    >>> # Define possible parameters in grid
+    >>> params_dict = {"mu_y": [0.0], "mu_x": [0.0], "sigma": [1.0]}
+    >>> # Fit model parameters
+    >>> history, params_grid = fitter.fit(data, params_dict)
+    >>> print(list(params_grid.columns))
+    ['mu_y', 'mu_x', 'sigma']
+    >>> print(params_grid.shape)
+    (1, 3)
+
     """
 
+    @doc
     def __init__(
         self,
         model: BaseComposite,
