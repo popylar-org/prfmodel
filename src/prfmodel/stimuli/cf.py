@@ -51,10 +51,10 @@ class CFStimulus(Stimulus):
     Parameters
     ----------
     distance_matrix : numpy.ndarray
-        A matrix with distances between source units (e.g., voxels).
+        A matrix with distances between source units.
     source_response : numpy.ndarray
-        Array with responses for each source unit with shape `(num_voxels, num_frames)`. `num_voxels` is the number of
-        source units and `num_frames` the number of time frames for each source response. `num_voxels` must match the
+        Array with responses for each source unit with shape `(num_units, num_frames)`. `num_units` is the number of
+        source units and `num_frames` the number of time frames for each source response. `num_units` must match the
         number of rows and columns in `distance_matrix`.
 
     Raises

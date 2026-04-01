@@ -145,11 +145,11 @@ class SGDFitter(BackendSGDFitter):
         Parameters
         ----------
         data : Tensor
-            Target data to fit the model to. Must have shape (num_batches, num_frames), where `num_batches` is the
-            number of batches for which parameters are estimated and `num_frames` is the number of time steps.
+            Target data to fit the model to. Must have shape (num_units, num_frames), where `num_units` is the
+            number of units for which parameters are estimated and `num_frames` is the number of time steps.
         init_parameters : pandas.DataFrame
             Dataframe with initial model parameters. Columns must contain different model parameters and
-            rows parameter values for each batch in `data`.
+            rows parameter values for each unit in `data`.
         fixed_parameters : Sequence of str, optional
             Names of model parameters that are fixed to their starting values, i.e., their values are not optimized
             during the fitting. If `None` (the default), all parameters are optimized during fitting.

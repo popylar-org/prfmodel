@@ -112,7 +112,7 @@ class BaseResponse(BaseModel, Generic[S]):
         Returns
         -------
         Tensor
-            Model predictions of shape `(num_voxels, ...)` and dtype `dtype`. The number of voxels is the
+            Model predictions of shape `(num_units, ...)` and dtype `dtype`. The number of units is the
             number of rows in `parameters`. The number and size of other axes depends on the stimulus.
 
         """
@@ -151,7 +151,7 @@ class BaseEncoder(BaseModel, Generic[S]):
         Returns
         -------
         Tensor
-            The stimulus encoded model response with shape `(num_voxels, ...)` dtype `dtype`. The number of voxels is
+            The stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`. The number of units is
             the number of rows in `parameters`. The number and size of other axes depends on the stimulus and the
             response.
 
@@ -281,7 +281,7 @@ class BaseTemporal(BaseModel):
         Parameters
         ----------
         inputs : Tensor
-            Input tensor with temporal response and shape (num_batches, num_frames).
+            Input tensor with temporal response and shape (num_units, num_frames).
         %(parameters)s
         %(dtype)s
 

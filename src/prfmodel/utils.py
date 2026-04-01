@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from keras import ops
 from keras.config import floatx
+from ._docstring import doc
 from .stimuli.base import Stimulus
 from .typing import Tensor
 
@@ -27,19 +28,18 @@ class UndefinedResponseWarning(UserWarning):
     """Warning for when a response is undefined and contains NaNs."""
 
 
+@doc
 def convert_parameters_to_tensor(parameters: pd.DataFrame, dtype: str) -> Tensor:
     """Convert model parameters in a dataframe into a tensor.
 
     Parameters
     ----------
-    parameters : pandas.DataFrame
-        Dataframe with columns containing different model parameters and rows containing
-        parameter values for different voxels.
+    %(parameters)s
 
     Returns
     -------
     Tensor
-        Tensor with the first axis corresponding to voxels and the second axis corresponding to different parameters.
+        Tensor with the first axis corresponding to units and the second axis corresponding to different parameters.
 
     Examples
     --------
@@ -97,11 +97,11 @@ def get_dtype(dtype: str | None) -> str:
 def batched(fn: Callable) -> Callable:
     """Decorate a model prediction function to make batched predictions.
 
-    Splits the `parameters` argument (a :class:`pandas.DataFrame`) along the row (voxel) dimension into
+    Splits the `parameters` argument (a :class:`pandas.DataFrame`) along the row (unit) dimension into
     chunks of size `batch_size`, calls `fn` for each chunk, and concatenates the results along the first axis.
 
     The wrapped function gains a ``batch_size`` keyword argument. When ``batch_size`` is ``None`` (the default),
-    all voxels are processed in a single call.
+    all units are processed in a single call.
 
     Parameters
     ----------
@@ -138,13 +138,13 @@ def batched(fn: Callable) -> Callable:
         if batch_size is None:
             return fn(stimulus, parameters, **kwargs)
 
-        num_voxels = len(parameters)
-        num_batches = math.ceil(num_voxels / batch_size)
+        num_units = len(parameters)
+        num_batches = math.ceil(num_units / batch_size)
 
         results = []
         for i in range(num_batches):
             start = i * batch_size
-            end = min(start + batch_size, num_voxels)
+            end = min(start + batch_size, num_units)
             batch_parameters = parameters.iloc[start:end]
             results.append(fn(stimulus, batch_parameters, **kwargs))
 
@@ -191,14 +191,14 @@ def normalize_response(response: Tensor, norm: str | None = "sum") -> Tensor:
     Parameters
     ----------
     response : Tensor
-        Response with shape (num_voxels, num_frames).
+        Response with shape (num_units, num_frames).
     norm : str, optional, default="sum"
         Normalization to apply.
 
     Returns
     -------
     Tensor
-        The normalized response with shape (num_voxels, num_frames).
+        The normalized response with shape (num_units, num_frames).
 
     Notes
     -----

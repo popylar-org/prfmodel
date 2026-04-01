@@ -22,12 +22,12 @@ def _prepare_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
     prf_response_padded = _pad_response(prf_response, pad_len)
 
     # Transpose to meet shape requirements of depthwise convolution
-    prf_response_transposed = ops.expand_dims(  # shape (1, num_frames, num_batches)
+    prf_response_transposed = ops.expand_dims(  # shape (1, num_frames, num_units)
         ops.transpose(prf_response_padded),
         0,
     )
     # Transpose and flip impulse response on batch axis
-    impulse_response_transposed = ops.flip(  # shape (num_frames, num_batches, 1)
+    impulse_response_transposed = ops.flip(  # shape (num_frames, num_units, 1)
         ops.expand_dims(ops.transpose(impulse_response_flipped), -1),
         axis=1,
     )
@@ -40,31 +40,31 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
     """
     Convolve the encoded response from a population receptive field model with an impulse response.
 
-    Both responses must have the same number of batches but can have different numbers of frames.
+    Both responses must have the same number of units but can have different numbers of frames.
 
     Parameters
     ----------
     prf_response : Tensor
-        Encoded population receptive field model response. Must have shape (num_batches, num_response_frames).
+        Encoded population receptive field model response. Must have shape (num_units, num_response_frames).
     impulse_response : Tensor
-        Impulse response. Must have shape (num_batches, num_impulse_frames).
+        Impulse response. Must have shape (num_units, num_impulse_frames).
     %(dtype)s
 
     Returns
     -------
     Tensor
-        Convolved response with shape (num_batches, num_response_frames).
+        Convolved response with shape (num_units, num_response_frames).
 
     Notes
     -----
     Before convolving both responses, the `prf_response` is padded on the left side in the
-    `num_frames` dimension by repeating the first value of each batch. This ensures that the output of the convolution
+    `num_frames` dimension by repeating the first value of each unit. This ensures that the output of the convolution
     has the same shape as `prf_response` and the `impulse_response` starts at every frame of the `prf_response`.
 
     Raises
     ------
     BatchDimensionError
-        If `prf_response` and `impulse_response` have batch (first) dimensions with different sizes.
+        If `prf_response` and `impulse_response` have unit (first) dimensions with different sizes.
 
     """
     dtype = get_dtype(dtype)
@@ -90,5 +90,5 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
         padding="valid",
     )
 
-    # Transpose back and remove first dummy dimension: (num_batches, num_frames)
+    # Transpose back and remove first dummy dimension: (num_units, num_frames)
     return ops.transpose(response_conv[0, :, :])
