@@ -47,6 +47,30 @@ _PARAMS: dict[str, str] = {
         "    The dtype of the prediction result. If `None` (the default), uses the dtype from\n"
         "    :func:`prfmodel.utils.get_dtype`."
     ),
+    "model_cf": ("cf_model : BaseResponse\n    A connective field response model instance."),
+    "model_encoding": (
+        "encoding_model : BaseEncoder or type, default=PRFStimulusEncoder\n"
+        "    An encoding model class or instance. Model classes will be instantiated during initialization. The\n"
+        "    default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance."
+    ),
+    "model_fitter": (
+        "model : BaseModel\n"
+        "    A model instance that can be fit to data.\n"
+        "    The model must implement the :meth:`__call__` method to make predictions that can be\n"
+        "    compared to data."
+    ),
+    "model_impulse": (
+        "impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional\n"
+        "    An impulse response model class or instance. Model classes will be instantiated during\n"
+        "    initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`\n"
+        "    instance with default values."
+    ),
+    "model_prf": ("prf_model : BaseResponse\n    A population receptive field response model instance."),
+    "model_temporal": (
+        "temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional\n"
+        "    A temporal model class or instance. Model classes will be instantiated during initialization.\n"
+        "    The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance."
+    ),
     "parameters": (
         "parameters : pandas.DataFrame\n"
         "    Dataframe with columns containing different model parameters and rows containing parameter values\n"

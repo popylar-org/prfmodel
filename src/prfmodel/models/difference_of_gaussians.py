@@ -22,13 +22,9 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
 
     Parameters
     ----------
-     encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
-        An encoding model class or instance. Model classes will be instantiated during initialization. The
-        default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
-    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
-        An impulse response model class or instance.
-    temporal_model : BaseTemporal or type or None, default=DoGAmplitude
-        A temporal model class or instance.
+    %(model_encoding)s
+    %(model_impulse)s
+    %(model_temporal)s
 
     Examples
     --------

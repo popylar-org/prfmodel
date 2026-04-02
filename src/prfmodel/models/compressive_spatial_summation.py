@@ -23,13 +23,8 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
 
     Parameters
     ----------
-    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
-        An impulse response model class or instance. Model classes will be instantiated during
-        initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
-        instance with default values.
-    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
-        A temporal model class or instance. Model classes will be instantiated during initialization.
-        The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
+    %(model_impulse)s
+    %(model_temporal)s
 
     Notes
     -----

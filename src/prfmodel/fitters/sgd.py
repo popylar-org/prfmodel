@@ -70,10 +70,7 @@ class SGDFitter(BackendSGDFitter):
 
     Parameters
     ----------
-    model : BaseModel
-        Population receptive field model instance that can be fit to data.
-        The model must implement :meth:`~prfmodel.models.base.BaseModel.__call__` to make predictions that can be
-        compared to data.
+    %(model_fitter)s
     %(stimulus)s
     adapter : Adapter, optional
         Adapter object to apply transformations to parameters during fitting.
