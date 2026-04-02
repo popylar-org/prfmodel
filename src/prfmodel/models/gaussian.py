@@ -399,7 +399,7 @@ class GaussianCFModel(SimpleCFModel):
         default creates a :class:`~prfmodel.models.encoding.CFStimulusEncoder` instance.
     temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
         A temporal model class or instance. Temporal model instances will be instantiated during initialization.
-        The default creates a `BaselineAmplitude` instance.
+        The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
 
     Notes
     -----

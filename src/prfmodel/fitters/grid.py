@@ -48,7 +48,8 @@ class GridFitter:
     ----------
     model : BaseModel
         Population receptive field model instance that can be fit to data.
-        The model must implement `__call__` to make predictions that can be compared to data.
+        The model must implement :meth:`~prfmodel.models.base.BaseModel.__call__` to make predictions that can be
+        compared to data.
     %(stimulus)s
     loss : keras.optimizers.Loss or Callable, optional
         Loss instance or function with the signature `f(y, y_pred)`, where `y` is the target data and `y_pred` are the
@@ -130,7 +131,7 @@ class GridFitter:
         Parameters
         ----------
         data : Tensor
-            Target data to fit the model to. Must have shape (num_units, num_frames), where `num_units` is the
+            Target data to fit the model to. Must have shape `(num_units, num_frames)`, where `num_units` is the
             number of units for which parameters are estimated and `num_frames` is the number of time steps.
         parameter_values : dict
             Dictionary with keys indicating model parameters and values indicating parameter values in the grid. The
