@@ -2,6 +2,7 @@
 
 import pandas as pd
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.models.base import BaseImpulse
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
@@ -53,15 +54,15 @@ class ShiftedGammaImpulse(BaseImpulse):
     --------
     >>> import pandas as pd
     >>> params = pd.DataFrame({
-    >>>     "delay": [2.0, 1.0, 1.5],
-    >>>     "dispersion": [1.0, 1.0, 1.0],
-    >>>     "shift": [1.0, 2.0, 5.0],
-    >>> })
+    ...     "delay": [2.0, 1.0, 1.5],
+    ...     "dispersion": [1.0, 1.0, 1.0],
+    ...     "shift": [1.0, 2.0, 5.0],
+    ... })
     >>> impulse_model = ShiftedGammaImpulse(
-    >>>     duration=100.0 # 100 seconds
-    >>> )
+    ...     duration=100.0  # 100 seconds
+    ... )
     >>> resp = impulse_model(params)
-    >>> print(resp.shape) # (num_rows, duration)
+    >>> print(resp.shape)  # (num_units, num_frames)
     (3, 100)
 
     """
@@ -76,23 +77,20 @@ class ShiftedGammaImpulse(BaseImpulse):
         """
         return ["delay", "dispersion", "shift"]
 
+    @doc
     def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the impulse response.
 
         Parameters
         ----------
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different batches. Must contain the columns `delay`, `dispersion`, and `shift`.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            The predicted impulse response with shape `(num_batches, num_frames)` and dtype `dtype`.
+        :data:`prfmodel.typing.Tensor`
+            The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
 
         """
         parameters = self._join_default_parameters(parameters)

@@ -6,6 +6,7 @@ import keras
 import pandas as pd
 from keras import ops
 from tqdm.auto import tqdm
+from prfmodel._docstring import doc
 from prfmodel.adapter import Adapter
 from prfmodel.models.base import BaseComposite
 from prfmodel.stimuli.base import Stimulus
@@ -69,11 +70,8 @@ class SGDFitter(BackendSGDFitter):
 
     Parameters
     ----------
-    model : BaseModel
-        Population receptive field model instance that can be fit to data.
-        The model must implement `__call__` to make predictions that can be compared to data.
-    stimulus : Stimulus
-        Stimulus object used to make model predictions.
+    %(model_fitter)s
+    %(stimulus)s
     adapter : Adapter, optional
         Adapter object to apply transformations to parameters during fitting.
     optimizer : keras.optimizers.Optimizer, optional
@@ -81,9 +79,7 @@ class SGDFitter(BackendSGDFitter):
     loss : keras.optimizers.Loss or Callable, optional
         Loss instance or function with the signatur `f(y, y_pred)`, where `y` are the target data and `y_pred` are the
         model predicitons. Default is `None` where a `keras.optimizers.MeanSquaredError` loss is used.
-    dtype : str, optional
-        The dtype used for fitting. If `None` (the default), uses the dtype from
-        :func:`prfmodel.utils.get_dtype`.
+    %(dtype)s
 
     Notes
     -----
@@ -91,8 +87,40 @@ class SGDFitter(BackendSGDFitter):
     given the `stimulus` and the current parameter values. The predictions are then compared to the target data and
     the parameter values are updated given the `optimizer` schedule.
 
+    Examples
+    --------
+    Fit a 2D Gaussian population receptive field model.
+
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> from prfmodel.models.gaussian import Gaussian2DPRFModel
+    >>> from prfmodel.fitters.sgd import SGDFitter
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+    >>> # Only fit response model
+    >>> model = Gaussian2DPRFModel(
+    ...     impulse_model=None,
+    ...     temporal_model=None,
+    ... )
+    >>> fitter = SGDFitter(model=model, stimulus=stimulus)
+    >>> # Define start parameters
+    >>> params_init = pd.DataFrame({
+    ...     "mu_y": [0.0],
+    ...     "mu_x": [0.0],
+    ...     "sigma": [1.0],
+    ... })
+    >>> # Create dummy data for a single unit
+    >>> data = np.zeros((1, 200))
+    >>> # Fit model parameters
+    >>> history, params_sgd = fitter.fit(data, params_init, num_steps=5)
+    >>> print(list(params_sgd.columns))
+    ['mu_y', 'mu_x', 'sigma']
+
     """
 
+    @doc
     def __init__(  # noqa: PLR0913 (too many arguments in function definition)
         self,
         model: BaseComposite,
@@ -144,12 +172,12 @@ class SGDFitter(BackendSGDFitter):
 
         Parameters
         ----------
-        data : Tensor
-            Target data to fit the model to. Must have shape (num_batches, num_frames), where `num_batches` is the
-            number of batches for which parameters are estimated and `num_frames` is the number of time steps.
+        data : :data:`prfmodel.typing.Tensor`
+            Target data to fit the model to. Must have shape `(num_units, num_frames)`, where `num_units` is the
+            number of units for which parameters are estimated and `num_frames` is the number of time steps.
         init_parameters : pandas.DataFrame
             Dataframe with initial model parameters. Columns must contain different model parameters and
-            rows parameter values for each batch in `data`.
+            rows parameter values for each unit in `data`.
         fixed_parameters : Sequence of str, optional
             Names of model parameters that are fixed to their starting values, i.e., their values are not optimized
             during the fitting. If `None` (the default), all parameters are optimized during fitting.

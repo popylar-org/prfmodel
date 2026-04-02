@@ -2,6 +2,7 @@
 
 import pandas as pd
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.models.base import BaseImpulse
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
@@ -53,17 +54,17 @@ class TwoGammaImpulse(BaseImpulse):
     --------
     >>> import pandas as pd
     >>> params = pd.DataFrame({
-    >>>     "delay": [2.0, 1.0, 1.5],
-    >>>     "dispersion": [1.0, 1.0, 1.0],
-    >>>     "undershoot": [1.5, 2.0, 1.0],
-    >>>     "u_dispersion": [1.0, 1.0, 1.0],
-    >>>     "ratio": [0.7, 0.2, 0.5],
-    >>> })
+    ...     "delay": [2.0, 1.0, 1.5],
+    ...     "dispersion": [1.0, 1.0, 1.0],
+    ...     "undershoot": [1.5, 2.0, 1.0],
+    ...     "u_dispersion": [1.0, 1.0, 1.0],
+    ...     "ratio": [0.7, 0.2, 0.5],
+    ... })
     >>> impulse_model = TwoGammaImpulse(
-    >>>     duration=100.0 # 100 seconds
-    >>> )
+    ...     duration=100.0  # 100 seconds
+    ... )
     >>> resp = impulse_model(params)
-    >>> print(resp.shape) # (num_rows, duration)
+    >>> print(resp.shape)  # (num_units, num_frames)
     (3, 100)
 
     """
@@ -78,24 +79,20 @@ class TwoGammaImpulse(BaseImpulse):
         """
         return ["delay", "dispersion", "undershoot", "u_dispersion", "ratio"]
 
+    @doc
     def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the impulse response.
 
         Parameters
         ----------
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different batches. Must contain the columns `delay`, `dispersion`, `undershoot`, `u_dispersion`,
-            and `ratio`.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            The predicted impulse response with shape `(num_batches, num_frames)` and dtype `dtype`.
+        :data:`prfmodel.typing.Tensor`
+            The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
 
         """
         parameters = self._join_default_parameters(parameters)

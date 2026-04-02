@@ -1,6 +1,7 @@
 """Convolution functions."""
 
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.models.base import BatchDimensionError
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
@@ -21,12 +22,12 @@ def _prepare_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
     prf_response_padded = _pad_response(prf_response, pad_len)
 
     # Transpose to meet shape requirements of depthwise convolution
-    prf_response_transposed = ops.expand_dims(  # shape (1, num_frames, num_batches)
+    prf_response_transposed = ops.expand_dims(  # shape (1, num_frames, num_units)
         ops.transpose(prf_response_padded),
         0,
     )
     # Transpose and flip impulse response on batch axis
-    impulse_response_transposed = ops.flip(  # shape (num_frames, num_batches, 1)
+    impulse_response_transposed = ops.flip(  # shape (num_frames, num_units, 1)
         ops.expand_dims(ops.transpose(impulse_response_flipped), -1),
         axis=1,
     )
@@ -34,37 +35,48 @@ def _prepare_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
     return prf_response_transposed, impulse_response_transposed
 
 
+@doc
 def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor, dtype: str | None = None) -> Tensor:
     """
     Convolve the encoded response from a population receptive field model with an impulse response.
 
-    Both responses must have the same number of batches but can have different numbers of frames.
+    Both responses must have the same number of units but can have different numbers of frames.
 
     Parameters
     ----------
-    prf_response : Tensor
-        Encoded population receptive field model response. Must have shape (num_batches, num_response_frames).
-    impulse_response : Tensor
-        Impulse response. Must have shape (num_batches, num_impulse_frames).
-    dtype : str, optional
-        The dtype of the prediction result. If `None` (the default), uses the dtype from
-        :func:`prfmodel.utils.get_dtype`.
+    prf_response : :data:`prfmodel.typing.Tensor`
+        Encoded population receptive field model response. Must have shape (num_units, num_response_frames).
+    impulse_response : :data:`prfmodel.typing.Tensor`
+        Impulse response. Must have shape (num_units, num_impulse_frames).
+    %(dtype)s
 
     Returns
     -------
-    Tensor
-        Convolved response with shape (num_batches, num_response_frames).
+    :data:`prfmodel.typing.Tensor`
+        Convolved response with shape (num_units, num_response_frames).
 
     Notes
     -----
     Before convolving both responses, the `prf_response` is padded on the left side in the
-    `num_frames` dimension by repeating the first value of each batch. This ensures that the output of the convolution
+    `num_frames` dimension by repeating the first value of each unit. This ensures that the output of the convolution
     has the same shape as `prf_response` and the `impulse_response` starts at every frame of the `prf_response`.
 
     Raises
     ------
     BatchDimensionError
-        If `prf_response` and `impulse_response` have batch (first) dimensions with different sizes.
+        If `prf_response` and `impulse_response` have unit (first) dimensions with different sizes.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from prfmodel.models.impulse.convolve import convolve_prf_impulse_response
+    >>> num_units, num_frames, hrf_len = 3, 20, 10
+    >>> prf_response = np.ones((num_units, num_frames))
+    >>> impulse_response = np.zeros((num_units, hrf_len))
+    >>> impulse_response[:, 0] = 1.0  # identity impulse
+    >>> result = convolve_prf_impulse_response(prf_response, impulse_response)
+    >>> print(result.shape)
+    (3, 20)
 
     """
     dtype = get_dtype(dtype)
@@ -90,5 +102,5 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
         padding="valid",
     )
 
-    # Transpose back and remove first dummy dimension: (num_batches, num_frames)
+    # Transpose back and remove first dummy dimension: (num_units, num_frames)
     return ops.transpose(response_conv[0, :, :])

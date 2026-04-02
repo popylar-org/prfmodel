@@ -16,48 +16,50 @@ cd prfmodel
 We recommend installing prfmodel in a virtual environment to prevent conflicts with other packages,
 for example using [venv](https://docs.python.org/3/library/venv.html).
 
-On Linux/MacOS (using bash/zsh):
+````````{tab-set}
 
-```bash
-python -m venv my_venv # Create a virtual environment called 'my_venv'
-source my_venv/bin/activate # Activate the virtual environment
-```
-
-On Windows (using cmd.exe):
-
+``````{tab-item} Windows
 ```console
-python -m venv my_venv # Create a virtual environment called 'my_venv'
-my_venv\Scripts\activate.bat # Activate the virtual environment
+python -m venv .venv # Create a virtual environment called '.venv'
+.venv\Scripts\activate.bat # Activate the virtual environment
 ```
+``````
 
-To install the development version of prfmodel from the local clone of the repository:
-
+``````{tab-item} Unix (MacOS / Linux)
 ```bash
-python -m pip install .
+python -m venv .venv  # Create a virtual environment called '.venv'
+source .venv/bin/activate  # Activate the virtual environment
 ```
+``````
 
-## Installing a Keras backend
+````````
 
 prfmodel relies on [Keras](https://keras.io/) to enable users to use different backends for model fitting.
 Currently, users can choose between three backends: TensorFlow, PyTorch, and JAX.
 
-To install prfmodel with the Tensorflow backend:
+To install the development version of prfmodel from the local clone of the repository with a backend:
 
+````````{tab-set}
+
+``````{tab-item} Tensorflow
 ```bash
 python -m pip install .[tensorflow]
 ```
+``````
 
-To install the PyTorch backend:
-
+``````{tab-item} PyTorch
 ```bash
 python -m pip install .[torch]
 ```
+``````
 
-To install the JAX backend:
-
+``````{tab-item} JAX
 ```bash
 python -m pip install .[jax]
 ```
+``````
+
+````````
 
 ## Installing dependencies for package development
 
