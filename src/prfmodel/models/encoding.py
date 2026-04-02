@@ -50,7 +50,7 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
 
     Returns
     -------
-    Tensor
+    :data:`prfmodel.typing.Tensor`
         The stimulus encoded model response with shape (num_units, num_frames) and dtype `dtype`.
 
     Raises
@@ -290,7 +290,7 @@ class CompressiveEncoder(BaseEncoder[S]):
 
         Returns
         -------
-        Tensor
+        :data:`prfmodel.typing.Tensor`
             The compressed and stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`.
             The number of units is the number of rows in `parameters`. The number and size of other axes depends on
             the stimulus and the response.

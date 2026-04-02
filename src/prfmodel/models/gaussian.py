@@ -94,14 +94,14 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
 
     Parameters
     ----------
-    grid : Tensor
+    grid : :data:`prfmodel.typing.Tensor`
         Stimulus grid for which to make predictions.
-    mu : Tensor
+    mu : :data:`prfmodel.typing.Tensor`
         Centroid of the population receptive field. Must have at least two dimensions.
         The first dimension corresponds to the number of units.
         The second dimension corresponds to the number of grid dimensions and must match the size of the
         last `grid` dimension.
-    sigma : Tensor
+    sigma : :data:`prfmodel.typing.Tensor`
         Size of the population receptive field. Must have at least two dimensions.
         The first dimension corresponds to the number of units,
         and its size must match the size of the first `mu` dimension.
@@ -109,7 +109,7 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
 
     Returns
     -------
-    Tensor
+    :data:`prfmodel.typing.Tensor`
         The predicted Gaussian population receptive field response with shape (num_units, ...)
         where `...` corresponds to the dimensions of the Gaussian.
 

@@ -91,7 +91,7 @@ class TwoGammaImpulse(BaseImpulse):
 
         Returns
         -------
-        Tensor
+        :data:`prfmodel.typing.Tensor`
             The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
 
         """

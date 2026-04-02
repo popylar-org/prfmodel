@@ -233,7 +233,7 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
 
         Returns
         -------
-        Tensor
+        :data:`prfmodel.typing.Tensor`
             Stacked predictions of shape (num_units, 2, num_frames).
 
         """

@@ -44,15 +44,15 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
 
     Parameters
     ----------
-    prf_response : Tensor
+    prf_response : :data:`prfmodel.typing.Tensor`
         Encoded population receptive field model response. Must have shape (num_units, num_response_frames).
-    impulse_response : Tensor
+    impulse_response : :data:`prfmodel.typing.Tensor`
         Impulse response. Must have shape (num_units, num_impulse_frames).
     %(dtype)s
 
     Returns
     -------
-    Tensor
+    :data:`prfmodel.typing.Tensor`
         Convolved response with shape (num_units, num_response_frames).
 
     Notes
