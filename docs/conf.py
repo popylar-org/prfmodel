@@ -67,6 +67,7 @@ autoapi_own_page_level = "function"
 
 autoapi_options = [
     "members",
+    "inherited-members",
     "special-members",
     "imported-members",
 ]
@@ -113,7 +114,7 @@ intersphinx_mapping = {
 nb_kernel_rgx_aliases = {"python312": "python3"}
 
 
-# -- Docstring placeholder substitution --------------------------------------
+# -- Docstring placeholder substitution
 
 
 def _process_docstring(  # noqa: PLR0913
@@ -136,6 +137,28 @@ def _process_docstring(  # noqa: PLR0913
     lines[:] = joined.split("\n")
 
 
+# -- Skip external inherited members
+
+
+def _skip_external_inherited_members(  # noqa: PLR0913
+    app: object,  # noqa: ARG001
+    what: str,  # noqa: ARG001
+    name: str,  # noqa: ARG001
+    obj: object,
+    skip: bool,  # noqa: ARG001
+    options: dict | None,  # noqa: ARG001
+) -> None:
+    if not obj.inherited:
+        return None
+
+    inherited_from = obj.obj.get("inherited_from", {})
+    if not inherited_from.get("full_name", "").startswith("prfmodel."):
+        return True
+
+    return None
+
+
 def setup(app: object) -> None:
     """Connect `_process_docstring` to autodoc event."""
+    app.connect("autoapi-skip-member", _skip_external_inherited_members)
     app.connect("autodoc-process-docstring", _process_docstring, priority=100)
