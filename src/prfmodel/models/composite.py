@@ -29,18 +29,10 @@ class SimplePRFModel(BaseComposite[PRFStimulus]):
 
     Parameters
     ----------
-    prf_model : BasePRFResponse
-        A population receptive field response model instance.
-    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
-        An encoding model class or instance. Model classes will be instantiated during initialization. The
-        default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
-    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
-        An impulse response model class or instance. Model classes will be instantiated during
-        initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
-        instance with default values.
-    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
-        A temporal model class or instance. Model classes will be instantiated during initialization.
-        The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
+    %(model_prf)s
+    %(model_encoding)s
+    %(model_impulse)s
+    %(model_temporal)s
 
     Notes
     -----
@@ -54,6 +46,7 @@ class SimplePRFModel(BaseComposite[PRFStimulus]):
 
     """
 
+    @doc
     def __init__(
         self,
         prf_model: BaseResponse,
@@ -129,15 +122,10 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
 
     Parameters
     ----------
-    prf_model : BaseResponse
-        A population receptive field response model instance.
-    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
-        An encoding model class or instance. Model classes will be instantiated during initialization. The
-        default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
-    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
-        An impulse response model class or instance.
-    temporal_model : BaseTemporal or type or None, default=DoGAmplitude
-        A temporal model class or instance.
+    %(model_prf)s
+    %(model_encoding)s
+    %(model_impulse)s
+    %(model_temporal)s
     change_params : list[str], default=["sigma"]
         Names of the parameters that differ between the center and surround responses.
         All entries must be present in ``prf_model.parameter_names``.
@@ -298,11 +286,8 @@ class SimpleCFModel(BaseComposite[CFStimulus]):
 
     Parameters
     ----------
-    cf_model : BaseResponse
-        A connective field response model instance.
-    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
-        A temporal model class or instance. Temporal model instances will be instantiated during initialization.
-        The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
+    %(model_cf)s
+    %(model_temporal)s
 
     Notes
     -----

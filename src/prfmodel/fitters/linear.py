@@ -35,10 +35,7 @@ class LeastSquaresFitter:
 
     Parameters
     ----------
-    model : BaseModel
-        Population receptive field model instance that can be fit to data.
-        The model must implement :meth:`~prfmodel.models.base.BaseModel.__call__` to make predictions that can be
-        compared to data.
+    %(model_fitter)s
     %(stimulus)s
     %(dtype)s
 
