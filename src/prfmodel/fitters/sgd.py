@@ -72,7 +72,8 @@ class SGDFitter(BackendSGDFitter):
     ----------
     model : BaseModel
         Population receptive field model instance that can be fit to data.
-        The model must implement `__call__` to make predictions that can be compared to data.
+        The model must implement :meth:`~prfmodel.models.base.BaseModel.__call__` to make predictions that can be
+        compared to data.
     %(stimulus)s
     adapter : Adapter, optional
         Adapter object to apply transformations to parameters during fitting.
@@ -175,7 +176,7 @@ class SGDFitter(BackendSGDFitter):
         Parameters
         ----------
         data : Tensor
-            Target data to fit the model to. Must have shape (num_units, num_frames), where `num_units` is the
+            Target data to fit the model to. Must have shape `(num_units, num_frames)`, where `num_units` is the
             number of units for which parameters are estimated and `num_frames` is the number of time steps.
         init_parameters : pandas.DataFrame
             Dataframe with initial model parameters. Columns must contain different model parameters and

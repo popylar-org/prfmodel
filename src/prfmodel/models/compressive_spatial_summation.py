@@ -99,12 +99,12 @@ def init_css_from_gaussian(gaussian_params: pd.DataFrame, gain: float = 1.0, n: 
     Initialize compressive spatial summation parameters from fitted Gaussian parameters.
 
     Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
-    into starting parameters for a :class:`Gaussian2DCSSPRFModel`.
+    into starting parameters for a :class:`~prfmodel.models.compressive_spatial_summation.Gaussian2DCSSPRFModel`.
 
     Parameters
     ----------
     gaussian_params : pandas.DataFrame
-        DataFrame of fitted parameters from a ``Gaussian2DPRFModel``.
+        DataFrame of fitted parameters from a :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`.
     gain : float, default=1.0
         Amplification parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`.
     n : float, default=0.5

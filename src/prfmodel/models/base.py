@@ -60,7 +60,7 @@ class BaseModel(ABC):
 
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom model classes.
-    Subclasses must override the abstract `parameter_names` property.
+    Subclasses must override the abstract :attr:`parameter_names` property.
 
     Attributes
     ----------
@@ -92,7 +92,7 @@ class BaseResponse(BaseModel, Generic[S]):
 
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom population receptive field models.
-    Subclasses must override the abstract `__call__` method and must be defined
+    Subclasses must override the abstract :meth:`__call__` method and must be defined
     with a specific stimulus type.
 
     """
@@ -124,8 +124,8 @@ class BaseEncoder(BaseModel, Generic[S]):
 
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom encoding models.
-    Subclasses must override the abstract `parameter_names` property and `__call__` method and must be defined
-    with a specific stimulus type.
+    Subclasses must override the abstract :attr:`parameter_names` property and
+    :meth:`__call__` method and must be defined with a specific stimulus type.
 
     """
 
@@ -146,13 +146,13 @@ class BaseEncoder(BaseModel, Generic[S]):
         response : Tensor
             Model response.
         %(parameters)s
-        %(dtype_encoded)s
+        %(dtype)s
 
         Returns
         -------
         Tensor
             The stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`. The number of units is
-            the number of rows in `parameters`. The number and size of other axes depends on the stimulus and the
+            the number of rows in :attr:`parameters`. The number and size of other axes depends on the stimulus and the
             response.
 
         """
@@ -164,7 +164,7 @@ class BaseImpulse(BaseModel):
 
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom impulse response models.
-    Subclasses must override the abstract `__call__` method.
+    Subclasses must override the abstract :meth:`__call__` method.
 
     Parameters
     ----------
@@ -227,7 +227,7 @@ class BaseImpulse(BaseModel):
         """
         The time frames at which the impulse response function is evaluated.
 
-        Time frames are linearly interpolated between `offset` and `duration` and have shape (1, `num_frames`).
+        Time frames are linearly interpolated between `offset` and `duration` and have shape `(1, num_frames)`.
 
         """
         if self._frames is None:
@@ -268,7 +268,7 @@ class BaseTemporal(BaseModel):
 
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom temporal models.
-    Subclasses must override the abstract `__call__` method.
+    Subclasses must override the abstract :meth:`__call__` method.
 
     """
 
@@ -297,20 +297,20 @@ class BaseComposite(BaseModel, Generic[S]):
     Generic abstract base class for creating composite models.
 
     Cannot be instantiated on its own. Can only be used as a parent class to create custom composite models.
-    Subclasses must override the abstract `__call__` method and must be defined
+    Subclasses must override the abstract :meth:`__call__` method and must be defined
     with a specific stimulus type.
-    This class is intended for combining multiple submodels into a composite model with a custom `__call__`
+    This class is intended for combining multiple submodels into a composite model with a custom :meth:`__call__`
     method that defines how the submodels interact to make a composite prediction.
 
     Parameters
     ----------
     **models
-        Submodels to be combined into the composite model. All submodel classes must inherit from `BaseModel`.
+        Submodels to be combined into the composite model. All submodel classes must inherit from :class:`BaseModel`.
 
     Raises
     ------
     TypeError
-        If submodel classes do not inherit from `BaseModel`.
+        If submodel classes do not inherit from :class:`BaseModel`.
 
     """
 
