@@ -67,7 +67,7 @@ def load_surface_mesh(
     """
     Download and load a standardized cortical surface mesh.
 
-    Downloads a surface mesh based on the Human Connectome Project[1]_ from Fig Share and extracts the surface
+    Downloads a surface mesh based on the Human Connectome Project [1]_ from Fig Share and extracts the surface
     meshes for the left and right hemispheres.
 
     Parameters

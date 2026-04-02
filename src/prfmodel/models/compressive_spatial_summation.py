@@ -28,13 +28,19 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
 
     Notes
     -----
-    The simple composite model follows five steps:
+    The simple composite model follows five steps [1]_:
 
     1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
     2. The encoding model encodes the response with the stimulus design and applies compressive spatial summation.
     3. A impulse response model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
     5. The temporal model modifies the convolved response.
+
+    References
+    ----------
+    .. [1] Kay, K. N., Winawer, J., Mezer, A., & Wandell, B. A. (2013). Compressive spatial summation in human visual
+        cortex. Journal of Neurophysiology, 110(2), 481-494. https://doi.org/10.1152/jn.00105.2013
+
 
     Examples
     --------

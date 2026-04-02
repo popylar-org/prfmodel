@@ -35,6 +35,11 @@ class ShiftedGammaImpulse(BaseImpulse):
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Keys must be valid parameter names.
 
+    See Also
+    --------
+    gamma_density : Density of the gamma distribution.
+    shifted_gamma_density : Shifted density of the gamma distribution.
+
     Notes
     -----
     The predicted impulse response at time :math:`t` with :math:`\alpha = delay / dispersion`,
@@ -46,9 +51,15 @@ class ShiftedGammaImpulse(BaseImpulse):
 
     The response prior to the onset of the gamma distribution is set to zero.
 
-    See Also
-    --------
-    shifted_gamma_density : Shifted density of the gamma distribution.
+    References
+    ----------
+    .. [1] Boynton, G. M., Engel, S. A., Glover, G. H., & Heeger, D. J. (1996). Linear systems analysis of functional
+        magnetic resonance imaging in human V1. *The Journal of Neuroscience*, 16(13), 4207-4221.
+        https://doi.org/10.1523/JNEUROSCI.16-13-04207.1996
+    .. [2] Friston, K. J., Fletcher, P., Josephs, O., Holmes, A., Rugg, M. D., & Turner, R. (1998). Event-related fMRI:
+        Characterizing differential responses. *NeuroImage*, 7(1), 30-40. https://doi.org/10.1006/nimg.1997.0306
+    .. [3] Glover, G. H. (1999). Deconvolution of impulse response in event-related BOLD fMRI. *NeuroImage*, 9(4),
+        416-429. https://doi.org/10.1006/nimg.1998.0419
 
     Examples
     --------

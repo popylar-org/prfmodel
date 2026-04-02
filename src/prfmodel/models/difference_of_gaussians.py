@@ -26,6 +26,16 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
 
     Notes
     -----
+    The simple composite model follows five steps [1]_:
+
+    1. The center and surround 2D Gaussian population receptive field response models make separate predictions for
+        the stimulus grid. The two response models have the same center but different sizes.
+    2. The encoding model encodes each response with the stimulus design.
+    3. A impulse response model generates an impulse response.
+    4. Each encoded response is convolved with the impulse response.
+    5. The temporal model modifies the convolved response. By default it subtracts the surround from the center
+        response after multiplying the responses with separate amplitude parameters.
+        
     Let :math:`p_{\text{center}}(t)` and :math:`p_{\text{surround}}(t)` be the predicted temporal
     responses for the center and surround Gaussians. With :math:`a_c = \text{amplitude\_center}`,
     :math:`a_s = \text{amplitude\_surround}`, and :math:`\beta = \text{baseline}`, the predicted
@@ -34,7 +44,12 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     .. math::
 
         y(t) = a_c \, p_{\text{center}}(t) + a_s \, p_{\text{surround}}(t) + \beta
-        
+
+    References
+    ----------
+    .. [1] Zuiderbaan, W., Harvey, B. M., & Dumoulin, S. O. (2012). Modeling center-surround configurations in
+        population receptive fields using fMRI. *Journal of Vision*, 12(3), 10. https://doi.org/10.1167/12.3.10
+
     Examples
     --------
     Predict a model response for multiple units.

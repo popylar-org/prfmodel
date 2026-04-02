@@ -219,7 +219,7 @@ class CompressiveEncoder(BaseEncoder[S]):
 
     Notes
     -----
-    Compressive encoding with `gain` :math:`g` and :math:`n` is done according to the equation:
+    Compressive encoding with `gain` :math:`g` and :math:`n` is done according to the equation [1]_:
 
     .. math::
 

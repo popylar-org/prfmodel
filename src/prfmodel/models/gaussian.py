@@ -322,13 +322,18 @@ class Gaussian2DPRFModel(SimplePRFModel):
 
     Notes
     -----
-    The simple composite model follows five steps:
+    The simple composite model follows five steps [1]_:
 
     1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
     2. The encoding model encodes the response with the stimulus design.
     3. A impulse response model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
     5. The temporal model modifies the convolved response.
+
+    References
+    ----------
+    .. [1] Dumoulin, S. O., & Wandell, B. A. (2008). Population receptive field estimates in human visual cortex.
+        *NeuroImage*, 39(2), 647-660. https://doi.org/10.1016/j.neuroimage.2007.09.034
 
     Examples
     --------
@@ -392,11 +397,18 @@ class GaussianCFModel(SimpleCFModel):
 
     Notes
     -----
-    The simple composite model follows three steps:
+    The simple composite model follows three steps [1]_:
 
     1. The Gaussian connective field response model makes a prediction for the stimulus distance matrix.
     2. The encoding model encodes the connective field response with the source response.
     3. The temporal model modifies the encoded response.
+
+    References
+    ----------
+    .. [1] Haak, K. V., Winawer, J., Harvey, B. M., Renken, R., Dumoulin, S. O., Wandell, B. A., &
+        Cornelissen, F. W. (2013). Connective field modeling. *NeuroImage*, 66, 376-384.
+        https://doi.org/10.1016/j.neuroimage.2012.10.037
+
 
     Examples
     --------
