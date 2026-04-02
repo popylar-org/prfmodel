@@ -115,7 +115,7 @@ class LeastSquaresFitter:
 
         Parameters
         ----------
-        data : Tensor
+        data : :data:`prfmodel.typing.Tensor`
             Target data to fit the model to. Must have shape `(num_units, num_frames)`, where `num_units` is the
             number of units for which parameters are estimated and `num_frames` is the number of time steps.
         parameters : pandas.DataFrame

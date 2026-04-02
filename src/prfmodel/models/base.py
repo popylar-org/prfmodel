@@ -111,7 +111,7 @@ class BaseResponse(BaseModel, Generic[S]):
 
         Returns
         -------
-        Tensor
+        :data:`prfmodel.typing.Tensor`
             Model predictions of shape `(num_units, ...)` and dtype `dtype`. The number of units is the
             number of rows in `parameters`. The number and size of other axes depends on the stimulus.
 
@@ -143,14 +143,14 @@ class BaseEncoder(BaseModel, Generic[S]):
         Parameters
         ----------
         %(stimulus)s
-        response : Tensor
+        response : :data:`prfmodel.typing.Tensor`
             Model response.
         %(parameters)s
         %(dtype)s
 
         Returns
         -------
-        Tensor
+        :data:`prfmodel.typing.Tensor`
             The stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`. The number of units is
             the number of rows in :attr:`parameters`. The number and size of other axes depends on the stimulus and the
             response.
@@ -280,7 +280,7 @@ class BaseTemporal(BaseModel):
 
         Parameters
         ----------
-        inputs : Tensor
+        inputs : :data:`prfmodel.typing.Tensor`
             Input tensor with temporal response and shape (num_units, num_frames).
         %(parameters)s
         %(dtype)s

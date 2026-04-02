@@ -79,18 +79,18 @@ def gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True)
 
     Parameters
     ----------
-    value : Tensor
+    value : :data:`prfmodel.typing.Tensor`
         The values at which to evaluate the gamma distribution. Must be > 0 and scalar or with shape (1, m).
-    shape : Tensor
+    shape : :data:`prfmodel.typing.Tensor`
         The shape parameter. Must be > 0 with shape () and scalar or with shape (n, 1).
-    rate : Tensor
+    rate : :data:`prfmodel.typing.Tensor`
         The rate parameter. Must be > 0 and scalar or with shape (n, 1).
     norm : bool, default=True
         Whether to compute the normalized density.
 
     Returns
     -------
-    Tensor
+    :data:`prfmodel.typing.Tensor`
         The density of the gamma distribution at `value` as a scalar or with shape (n, m).
 
     Notes
@@ -157,20 +157,20 @@ def shifted_gamma_density(
 
     Parameters
     ----------
-    value : Tensor
+    value : :data:`prfmodel.typing.Tensor`
         The values at which to evaluate the shifted gamma distribution. Must be scalar or with shape (1, m).
-    shape : Tensor
+    shape : :data:`prfmodel.typing.Tensor`
         The shape parameter. Must be > 0 and scalar or with shape (n, 1).
-    rate : Tensor
+    rate : :data:`prfmodel.typing.Tensor`
         The rate parameter. Must be > 0 and scalar or with shape (n, 1).
-    shift : Tensor
+    shift : :data:`prfmodel.typing.Tensor`
         The shift parameter. When > 0, shifts the distribution to the right.
     norm : bool, default=True
         Whether to compute the normalized density.
 
     Returns
     -------
-    Tensor
+    :data:`prfmodel.typing.Tensor`
         The density of the shifted gamma distribution at `value` as a scalar or with shape (n, m).
         The density for shifted values that are zero or lower is zero.
 
@@ -219,16 +219,16 @@ def derivative_gamma_density(value: Tensor, shape: Tensor, rate: Tensor) -> Tens
 
     Parameters
     ----------
-    value : Tensor
+    value : :data:`prfmodel.typing.Tensor`
         The values at which to evaluate the derivative gamma distribution. Must be > 0 and scalar or with shape (1, m).
-    shape : Tensor
+    shape : :data:`prfmodel.typing.Tensor`
         The shape parameter. Must be > 0 and scalar or with shape (n, m).
-    rate : Tensor
+    rate : :data:`prfmodel.typing.Tensor`
         The rate parameter. Must be > 0 and scalar or with shape (n, m).
 
     Returns
     -------
-    Tensor
+    :data:`prfmodel.typing.Tensor`
         The derivative density of the gamma distribution at `value` as a scalar or with shape (n, m).
 
     Notes

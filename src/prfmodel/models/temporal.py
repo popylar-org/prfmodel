@@ -51,7 +51,7 @@ class BaselineAmplitude(BaseTemporal):
 
         Parameters
         ----------
-        inputs : Tensor
+        inputs : :data:`prfmodel.typing.Tensor`
             Input tensor with temporal response and shape (num_units, num_frames).
         %(parameters)s
         %(dtype)s
@@ -118,7 +118,7 @@ class DoGAmplitude(BaseTemporal):
 
         Parameters
         ----------
-        inputs : Tensor
+        inputs : :data:`prfmodel.typing.Tensor`
             Input tensor with two temporal responses stacked along axis 1,
             shape (num_units, 2, num_frames).
         %(parameters)s
