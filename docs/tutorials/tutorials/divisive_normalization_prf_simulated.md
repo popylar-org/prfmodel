@@ -90,8 +90,8 @@ are then combined using the divisive normalization formula:
 $$p_{DN}(t) = \frac{(a G_1 \cdot S + b)}{(c G_2 \cdot S + d)} - \frac{b}{d}$$
 
 where $G_1$ and $G_2$ are the activation and normalization Gaussian responses, with $a$ (`amplitude_activation`) ,
-$b$ (`activation_constant`), and $c$ (`amplitude_normalization`) , $d$
-(`normalization_constant`). The $-b/d$ term ensures a zero baseline response in
+$b$ (`baseline_activation`), and $c$ (`amplitude_normalization`) , $d$
+(`baseline_normalization`). The $-b/d$ term ensures a zero baseline response in
 the absence of a stimulus. The normalization constant $d$ must be positive to avoid division by zero.
 
 ```{code-cell} ipython3
@@ -112,8 +112,8 @@ The parameters `mu_x` and `mu_y` define the center of the pRF. `sigma_activation
 widths of the activation and normalization Gaussians (a hard requirement is that `sigma_normalization` must be at
 least as large as `sigma_activation`). The parameters `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`,
 and `weight_deriv` determine the haemodynamic impulse response. `amplitude_activation` scales the activation response,
-`activation_constant` sets the numerator baseline, `amplitude_normalization` scales the normalization response, and
-`normalization_constant` sets the denominator baseline. We store the parameter values in a `pandas.DataFrame`.
+`baseline_activation` sets the numerator baseline, `amplitude_normalization` scales the normalization response, and
+`baseline_normalization` sets the denominator baseline. We store the parameter values in a `pandas.DataFrame`.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -131,9 +131,9 @@ true_params = pd.DataFrame(
         "ratio": [0.48],
         "weight_deriv": [-0.5],
         "amplitude_activation": [10.2], # a
-        "activation_constant": [0.0], # b
+        "baseline_activation": [0.0], # b
         "amplitude_normalization": [0.8], # c
-        "normalization_constant": [10.0],  # d - normalization_constant must be > 0
+        "baseline_normalization": [10.0],  # d - baseline_normalization must be > 0
         "baseline": [10.0],
     },
 )
@@ -157,7 +157,7 @@ The predicted response shows the characteristic activation pattern of the DN mod
 
 We will fit the DN pRF model using a two-step approach.
 - In **Step 1**, we fit a vanilla Gaussian model to locate the pRF center (`mu_x`, `mu_y`) and size (`sigma`) using a grid search and least squares to determine the `amplitude`.
-- In **Step 2**, we initialize the DN model parameters from the Gaussian fit using `init_dn_from_gaussian`: `mu_x` and `mu_y` stay the same; `sigma` becomes `sigma_activation` and `amplitude` becomes `amplitude_activation`, while `sigma_normalization` is set to `sigma_activation * sigma_ratio`. We then fine-tune the whole model with SGD, constraining `normalization_constant > 0` to avoid division by zero.
+- In **Step 2**, we initialize the DN model parameters from the Gaussian fit using `init_dn_from_gaussian`: `mu_x` and `mu_y` stay the same; `sigma` becomes `sigma_activation` and `amplitude` becomes `amplitude_activation`, while `sigma_normalization` is set to `sigma_activation * sigma_ratio`. We then fine-tune the whole model with SGD, constraining `baseline_normalization > 0` to avoid division by zero.
 
 +++
 
@@ -264,16 +264,16 @@ We now initialize a DN model from the fitted Gaussian parameters.
 - `sigma_activation = sigma`
 - `sigma_normalization = sigma_activation * sigma_ratio` (default `sigma_ratio=2.0`)
 - `amplitude_activation = amplitude` (a)
-- `activation_constant = 0.0` (b)
+- `baseline_activation = 0.0` (b)
 - `amplitude_normalization = 1.0` (c)
-- `normalization_constant = 1.0` (d)
+- `baseline_normalization = 1.0` (d)
 
-We then run SGD on the DN model. To enforce `normalization_constant > 0` (required to prevent division by zero)
+We then run SGD on the DN model. To enforce `baseline_normalization > 0` (required to prevent division by zero)
 we pass a `ParameterConstraint(lower=0.0)` adapter.
 
 > **Note — one-shot alternative:** It would be possible to skip the Gaussian
 > pre-fit and run a joint grid search over `sigma_activation` and `sigma_normalization` followed
-> by SGD directly. This one-shot approach works but is slower, the `normalization_constant > 0`
+> by SGD directly. This one-shot approach works but is slower, the `baseline_normalization > 0`
 > constraint is not automatically enforced, and the larger search space increases the risk of
 > converging to a poor local minimum.
 
@@ -289,9 +289,9 @@ dn_init_params
 ```{code-cell} ipython3
 from prfmodel.adapter import Adapter, ParameterConstraint
 
-# Constrain normalization_constant > 0 during SGD to avoid division by zero
+# Constrain baseline_normalization > 0 during SGD to avoid division by zero
 dn_adapter = Adapter(transforms=[
-    ParameterConstraint(["normalization_constant"], lower=0.0),
+    ParameterConstraint(["baseline_normalization"], lower=0.0),
 ])
 
 sgd_fitter = SGDFitter(
@@ -331,7 +331,7 @@ two-step workflow.
 
 In **Step 1**, we fitted a plain Gaussian model with a grid search and least squares to efficiently locate the pRF center and size.
 
-In **Step 2**, we used `init_dn_from_gaussian` to seed the DN model from the Gaussian fit. We set the normalization size to twice the activation size and initialized the normalization parameters at their defaults (`activation_constant=0`, `amplitude_normalization=1`, `normalization_constant=1`).
+In **Step 2**, we used `init_dn_from_gaussian` to seed the DN model from the Gaussian fit. We set the normalization size to twice the activation size and initialized the normalization parameters at their defaults (`baseline_activation=0`, `amplitude_normalization=1`, `baseline_normalization=1`).
 
 +++
 

@@ -35,16 +35,13 @@ class DivNormPRFModel(CenterSurroundPRFModel):
     Notes
     -----
     Let :math:`G_i(\mathbf{x}; \mu_x, \mu_y, \sigma_i)` be an isotropic 2D Gaussian with
-    :math:`\sigma_1 = \text{sigma\_activation}` and :math:`\sigma_2 = \text{sigma\_normalization}`,
-    and let :math:`S_t(\mathbf{x})` be the stimulus at time :math:`t`. With
     :math:`a = \text{amplitude\_activation}`, :math:`b = \text{activation\_constant}`,
-    :math:`c = \text{amplitude\_normalization}`, :math:`d = \text{normalization\_constant}`, and
-    :math:`\langle G_i, S_t \rangle = \sum_{\mathbf{x}} G_i(\mathbf{x}) S_t(\mathbf{x})`, the
+    :math:`c = \text{amplitude\_normalization}`, :math:`d = \text{normalization\_constant}`, the
     predicted response is:
 
     .. math::
 
-        p_{\text{DN}}(t) = \frac{a \langle G_1, S_t \rangle + b}{c \langle G_2, S_t \rangle + d} - \frac{b}{d}
+        p_{\text{DN}}(t) = \frac{(aG_1 \cdot S + b)}{(cG_1 \cdot S + d)} - \frac{b}{d}
 
     The :math:`-b/d` term ensures a zero response in the absence of a stimulus.
 
@@ -112,9 +109,9 @@ def init_dn_from_gaussian(  # noqa: PLR0913
     gaussian_params: pd.DataFrame,
     sigma_ratio: float = 2.0,
     sigma_normalization: float | None = None,
-    activation_constant: float = 0.0,
+    baseline_activation: float = 0.0,
     amplitude_normalization: float = 1.0,
-    normalization_constant: float = 1.0,
+    baseline_normalization: float = 1.0,
 ) -> pd.DataFrame:
     """
     Initialize DN model parameters from fitted Gaussian model parameters.
@@ -136,14 +133,15 @@ def init_dn_from_gaussian(  # noqa: PLR0913
     sigma_normalization : float, optional
         Fixed normalization size applied to all rows. Must be >= ``sigma`` for every row in
         ``gaussian_params``. When provided, overrides ``sigma_ratio``.
-    activation_constant : float, default=0.0
-        Initial value for ``activation_constant`` (b in the DN formula). Controls the
-        activation baseline in the numerator.
+    baseline_activation : float, default=0.0
+        Initial value for ``baseline_activation`` (b in the DN formula). Controls the
+        activation baseline in the numerator. Ignored when ``gaussian_params`` contains a
+        ``baseline`` column, in which case that value is used instead.
     amplitude_normalization : float, default=1.0
         Initial value for ``amplitude_normalization`` (c in the DN formula). Controls the
         scaling of the normalization Gaussian.
-    normalization_constant : float, default=1.0
-        Initial value for ``normalization_constant`` (d in the DN formula). Controls the
+    baseline_normalization : float, default=1.0
+        Initial value for ``baseline_normalization`` (d in the DN formula). Controls the
         normalization baseline in the denominator. Must be > 0 to avoid division by zero.
 
     Returns
@@ -151,9 +149,10 @@ def init_dn_from_gaussian(  # noqa: PLR0913
     pandas.DataFrame
         DataFrame of DN initial parameters with columns:
         ``sigma_activation`` (= ``sigma``), ``sigma_normalization``,
-        ``amplitude_activation`` (= ``amplitude``), ``activation_constant`` (b),
-        ``amplitude_normalization`` (c), ``normalization_constant`` (d),
-        plus all shared columns unchanged.
+        ``amplitude_activation`` (= ``amplitude``), ``baseline_activation`` (b, = ``baseline``
+        if present), ``amplitude_normalization`` (c), ``baseline_normalization`` (d),
+        plus all shared columns unchanged. The ``sigma``, ``amplitude``, and ``baseline``
+        (if present) columns are dropped.
 
     Raises
     ------
@@ -186,8 +185,9 @@ def init_dn_from_gaussian(  # noqa: PLR0913
         dn_params["sigma_normalization"] = dn_params["sigma"] * sigma_ratio
 
     dn_params["amplitude_activation"] = dn_params["amplitude"]
-    dn_params["activation_constant"] = activation_constant
+    dn_params["baseline_activation"] = dn_params["baseline"] if "baseline" in dn_params.columns else baseline_activation
     dn_params["amplitude_normalization"] = amplitude_normalization
-    dn_params["normalization_constant"] = normalization_constant
+    dn_params["baseline_normalization"] = baseline_normalization
 
-    return dn_params.drop(columns=["sigma", "amplitude"])
+    cols_to_drop = ["sigma", "amplitude"] + (["baseline"] if "baseline" in dn_params.columns else [])
+    return dn_params.drop(columns=cols_to_drop)

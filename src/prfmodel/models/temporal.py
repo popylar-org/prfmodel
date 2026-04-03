@@ -113,11 +113,11 @@ class DivNormAmplitude(BaseTemporal):
         """
         Names of parameters used by the model.
 
-        Parameter names are: ``amplitude_activation``, ``activation_constant`` (b in the DN formula),
-            ``amplitude_normalization``, and ``normalization_constant`` (d in the DN formula).
+        Parameter names are: ``amplitude_activation``, ``baseline_activation`` (b in the DN formula),
+            ``amplitude_normalization``, and ``baseline_normalization`` (d in the DN formula).
 
         """
-        return ["amplitude_activation", "activation_constant", "amplitude_normalization", "normalization_constant"]
+        return ["amplitude_activation", "baseline_activation", "amplitude_normalization", "baseline_normalization"]
 
     def __call__(self, inputs: Tensor, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -130,8 +130,8 @@ class DivNormAmplitude(BaseTemporal):
             shape (num_batches, 2, num_frames). Axis 1 index 0 is the activation response
             (G1·S) and index 1 is the normalization response (G2·S).
         parameters : pandas.DataFrame
-            Dataframe with columns ``amplitude_activation``, ``activation_constant`` (b),
-            ``amplitude_normalization``, and ``normalization_constant`` (d).
+            Dataframe with columns ``amplitude_activation``, ``baseline_activation`` (b),
+            ``amplitude_normalization``, and ``baseline_normalization`` (d).
         dtype : str, optional
             The dtype of the prediction result. If ``None`` (the default), uses the dtype from
             :func:`prfmodel.utils.get_dtype`.
@@ -152,9 +152,9 @@ class DivNormAmplitude(BaseTemporal):
             )
 
         amplitude_activation = convert_parameters_to_tensor(parameters[["amplitude_activation"]], dtype=dtype)
-        b = convert_parameters_to_tensor(parameters[["activation_constant"]], dtype=dtype)
+        b = convert_parameters_to_tensor(parameters[["baseline_activation"]], dtype=dtype)
         amplitude_normalization = convert_parameters_to_tensor(parameters[["amplitude_normalization"]], dtype=dtype)
-        d = convert_parameters_to_tensor(parameters[["normalization_constant"]], dtype=dtype)
+        d = convert_parameters_to_tensor(parameters[["baseline_normalization"]], dtype=dtype)
 
         numerator = amplitude_activation * inputs[:, 0] + b
         denominator = amplitude_normalization * inputs[:, 1] + d

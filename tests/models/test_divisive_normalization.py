@@ -47,9 +47,9 @@ class TestDivNormPRFModel(PRFStimulusSetup):
                 "ratio": [0.48, 0.48, 0.48],
                 "weight_deriv": [0.5, 0.5, 0.5],
                 "amplitude_activation": [1.1, 1.0, 0.9],
-                "activation_constant": [0.0, 0.1, 0.5],
+                "baseline_activation": [0.0, 0.1, 0.5],
                 "amplitude_normalization": [1.0, 1.0, 1.0],
-                "normalization_constant": [1.0, 1.0, 1.0],
+                "baseline_normalization": [1.0, 1.0, 1.0],
             },
         )
 
@@ -152,9 +152,9 @@ class TestInitDnFromGaussian:
             "weight_deriv",
             "baseline",
             "amplitude_activation",
-            "activation_constant",
+            "baseline_activation",
             "amplitude_normalization",
-            "normalization_constant",
+            "baseline_normalization",
         }
         assert set(dn_params.columns) == expected_cols
 
@@ -176,26 +176,26 @@ class TestInitDnFromGaussian:
         assert list(dn_params["amplitude_activation"]) == [10.0, 7.0]
 
     def test_default_constants(self, gaussian_params: pd.DataFrame):
-        """Default activation_constant=0, amplitude_normalization=1, normalization_constant=1."""
+        """Default baseline_activation=0, amplitude_normalization=1, baseline_normalization=1."""
         dn_params = init_dn_from_gaussian(gaussian_params)
-        assert list(dn_params["activation_constant"]) == [0.0, 0.0]
+        assert list(dn_params["baseline_activation"]) == [0.0, 0.0]
         assert list(dn_params["amplitude_normalization"]) == [1.0, 1.0]
-        assert list(dn_params["normalization_constant"]) == [1.0, 1.0]
+        assert list(dn_params["baseline_normalization"]) == [1.0, 1.0]
 
-    def test_custom_activation_constant(self, gaussian_params: pd.DataFrame):
-        """Custom activation_constant (b) is applied to all rows."""
-        dn_params = init_dn_from_gaussian(gaussian_params, activation_constant=0.5)
-        assert list(dn_params["activation_constant"]) == [0.5, 0.5]
+    def test_custom_baseline_activation(self, gaussian_params: pd.DataFrame):
+        """Custom baseline_activation (b) is applied to all rows."""
+        dn_params = init_dn_from_gaussian(gaussian_params, baseline_activation=0.5)
+        assert list(dn_params["baseline_activation"]) == [0.5, 0.5]
 
     def test_custom_amplitude_normalization(self, gaussian_params: pd.DataFrame):
         """Custom amplitude_normalization (c) is applied to all rows."""
         dn_params = init_dn_from_gaussian(gaussian_params, amplitude_normalization=2.0)
         assert list(dn_params["amplitude_normalization"]) == [2.0, 2.0]
 
-    def test_custom_normalization_constant(self, gaussian_params: pd.DataFrame):
-        """Custom normalization_constant (d) is applied to all rows."""
-        dn_params = init_dn_from_gaussian(gaussian_params, normalization_constant=0.5)
-        assert list(dn_params["normalization_constant"]) == [0.5, 0.5]
+    def test_custom_baseline_normalization(self, gaussian_params: pd.DataFrame):
+        """Custom baseline_normalization (d) is applied to all rows."""
+        dn_params = init_dn_from_gaussian(gaussian_params, baseline_normalization=0.5)
+        assert list(dn_params["baseline_normalization"]) == [0.5, 0.5]
 
     def test_passthrough_columns(self, gaussian_params: pd.DataFrame):
         """Non-sigma/amplitude columns pass through unchanged."""

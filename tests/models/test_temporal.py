@@ -118,9 +118,9 @@ class TestDivNormAmplitude:
         return pd.DataFrame(
             {
                 "amplitude_activation": [2.0, -1.0, 1.0],
-                "activation_constant": [0.5, 0.0, 1.0],
+                "baseline_activation": [0.5, 0.0, 1.0],
                 "amplitude_normalization": [1.0, 0.5, 2.0],
-                "normalization_constant": [1.0, 2.0, 0.5],
+                "baseline_normalization": [1.0, 2.0, 0.5],
             },
         )
 
@@ -128,9 +128,9 @@ class TestDivNormAmplitude:
         """Test that correct parameter names are returned."""
         assert model.parameter_names == [
             "amplitude_activation",
-            "activation_constant",
+            "baseline_activation",
             "amplitude_normalization",
-            "normalization_constant",
+            "baseline_normalization",
         ]
 
     @parametrize_dtype
@@ -146,9 +146,9 @@ class TestDivNormAmplitude:
         assert resp.shape == (num_voxels, self.num_frames)
 
         a = np.expand_dims(params["amplitude_activation"].to_numpy(), 1)
-        b = np.expand_dims(params["activation_constant"].to_numpy(), 1)
+        b = np.expand_dims(params["baseline_activation"].to_numpy(), 1)
         c = np.expand_dims(params["amplitude_normalization"].to_numpy(), 1)
-        d = np.expand_dims(params["normalization_constant"].to_numpy(), 1)
+        d = np.expand_dims(params["baseline_normalization"].to_numpy(), 1)
         expected = (a * p1 + b) / (c * p2 + d) - b / d
         assert np.allclose(resp, expected)
 
@@ -164,9 +164,9 @@ class TestDivNormAmplitude:
         resp = np.asarray(model(inputs, params, dtype))
 
         a = np.expand_dims(params["amplitude_activation"].to_numpy(), 1)
-        b = np.expand_dims(params["activation_constant"].to_numpy(), 1)
+        b = np.expand_dims(params["baseline_activation"].to_numpy(), 1)
         c = np.expand_dims(params["amplitude_normalization"].to_numpy(), 1)
-        d = np.expand_dims(params["normalization_constant"].to_numpy(), 1)
+        d = np.expand_dims(params["baseline_normalization"].to_numpy(), 1)
         expected = (a * p1 + b) / (c * p2 + d)
         assert np.allclose(resp, expected)
 
