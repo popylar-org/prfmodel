@@ -1,6 +1,7 @@
 """Difference of Gaussians population receptive field models."""
 
 import pandas as pd
+from .base import BaseEncoder
 from .base import BaseImpulse
 from .base import BaseTemporal
 from .composite import CenterSurroundPRFModel
@@ -19,6 +20,8 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
 
     Parameters
     ----------
+    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
+        An encoding model class or instance.
     impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
         An impulse response model class or instance.
     temporal_model : BaseTemporal or type or None, default=DoGAmplitude
@@ -39,12 +42,13 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
 
     def __init__(
         self,
+        encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         temporal_model: BaseTemporal | type[BaseTemporal] | None = DoGAmplitude,
     ):
         super().__init__(
             prf_model=Gaussian2DPRFResponse(),
-            encoding_model=PRFStimulusEncoder(),
+            encoding_model=encoding_model,
             impulse_model=impulse_model,
             temporal_model=temporal_model,
             change_params=["sigma"],
