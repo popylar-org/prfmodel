@@ -17,21 +17,13 @@ from .temporal import DivNormAmplitude
 
 
 class DivNormPRFModel(CenterSurroundPRFModel):
-    """
+    r"""
     Two-dimensional divisive normalization population receptive field model.
 
     Both the activation and normalization pRFs are isotropic 2D Gaussians centered on the
     same position (``mu_x``, ``mu_y``) but with different sizes (``sigma_activation``,
     ``sigma_normalization``) and different amplitudes (``amplitude_activation``,
-    ``amplitude_normalization``). The predicted neural response is:
-
-    p_DN(t) = (a * G1·S + b) / (c * G2·S + d) - b/d
-
-    where G1 and G2 are the activation and normalization Gaussians, ``a`` and ``b`` are the
-    activation amplitude and constant, and ``c`` and ``d`` are the normalization amplitude
-    and constant. ``b`` and ``d`` together modulate suppression and compression in the model.
-    G*·S denotes the element-wise product of the Gaussian and the stimulus, summed over all
-    spatial coordinates.
+    ``amplitude_normalization``).
 
     Parameters
     ----------
@@ -39,6 +31,22 @@ class DivNormPRFModel(CenterSurroundPRFModel):
         An impulse response model class or instance.
     temporal_model : BaseTemporal or type or None, default=DivNormAmplitude
         A temporal model class or instance.
+
+    Notes
+    -----
+    Let :math:`G_i(\mathbf{x}; \mu_x, \mu_y, \sigma_i)` be an isotropic 2D Gaussian with
+    :math:`\sigma_1 = \text{sigma\_activation}` and :math:`\sigma_2 = \text{sigma\_normalization}`,
+    and let :math:`S_t(\mathbf{x})` be the stimulus at time :math:`t`. With
+    :math:`a = \text{amplitude\_activation}`, :math:`b = \text{activation\_constant}`,
+    :math:`c = \text{amplitude\_normalization}`, :math:`d = \text{normalization\_constant}`, and
+    :math:`\langle G_i, S_t \rangle = \sum_{\mathbf{x}} G_i(\mathbf{x}) S_t(\mathbf{x})`, the
+    predicted response is:
+
+    .. math::
+
+        p_{\text{DN}}(t) = \frac{a \langle G_1, S_t \rangle + b}{c \langle G_2, S_t \rangle + d} - \frac{b}{d}
+
+    The :math:`-b/d` term ensures a zero response in the absence of a stimulus.
 
     """
 

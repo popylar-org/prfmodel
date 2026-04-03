@@ -80,25 +80,29 @@ class BaselineAmplitude(BaseTemporal):
 
 
 class DivNormAmplitude(BaseTemporal):
-    """
+    r"""
     Divisive normalization amplitude model.
 
-    Combines two temporal responses using the divisive normalization formula:
-
-    p_DN(t) = (a * inputs[:, 0] + b) / (c * inputs[:, 1] + d) - b/d
-
-    where ``a`` and ``b`` are the activation amplitude and constant (b = ``activation_constant``),
-    and ``c`` and ``d`` are the normalization amplitude and constant (d = ``normalization_constant``).
-    ``activation_constant`` and ``normalization_constant`` together modulate suppression and
-    compression in the model.
-
-    The ``- b/d`` term ensures a zero predicted response in the absence of a stimulus, which is
-    appropriate for fMRI. For non-fMRI data you can set ``subtract_baseline=False`` to remove this correction.
+    Combines two temporal responses using the divisive normalization formula. The ``- b/d`` term
+    ensures a zero predicted response in the absence of a stimulus, which is appropriate for fMRI.
+    For non-fMRI data you can set ``subtract_baseline=False`` to remove this correction.
 
     Parameters
     ----------
     subtract_baseline : bool, default=True
         If ``True`` (default), subtracts ``b/d`` from the output.
+
+    Notes
+    -----
+    Given activation response :math:`r_1(t)` (``inputs[:, 0]``) and normalization response
+    :math:`r_2(t)` (``inputs[:, 1]``), with :math:`a = \text{amplitude\_activation}`,
+    :math:`b = \text{activation\_constant}`, :math:`c = \text{amplitude\_normalization}`, and
+    :math:`d = \text{normalization\_constant}`, the predicted response is:
+
+    .. math::
+
+        p_{\text{DN}}(t) = \frac{a \, r_1(t) + b}{c \, r_2(t) + d} - \frac{b}{d}
+
     """
 
     def __init__(self, subtract_baseline: bool = True):
@@ -163,11 +167,21 @@ class DivNormAmplitude(BaseTemporal):
 
 
 class DoGAmplitude(BaseTemporal):
-    """
+    r"""
     Linear amplitude model for difference of Gaussians.
 
-    Combines two temporal responses with independent amplitudes and a baseline:
-    y(t) = inputs[:, 0] * amplitude_center + inputs[:, 1] * amplitude_surround + baseline
+    Combines two temporal responses with independent amplitudes and a baseline.
+
+    Notes
+    -----
+    Given center response :math:`r_c(t)` (``inputs[:, 0]``) and surround response :math:`r_s(t)`
+    (``inputs[:, 1]``), with :math:`a_c = \text{amplitude\_center}`,
+    :math:`a_s = \text{amplitude\_surround}`, and :math:`\beta = \text{baseline}`, the predicted
+    response is:
+
+    .. math::
+
+        y(t) = a_c \, r_c(t) + a_s \, r_s(t) + \beta
 
     """
 
