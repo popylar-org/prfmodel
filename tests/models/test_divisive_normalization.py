@@ -137,7 +137,7 @@ class TestInitDnFromGaussian:
         )
 
     def test_output_columns(self, gaussian_params: pd.DataFrame):
-        """Output DataFrame has the expected DN column set."""
+        """Output DataFrame has the expected DN column set; baseline is dropped."""
         dn_params = init_dn_from_gaussian(gaussian_params)
         expected_cols = {
             "mu_x",
@@ -150,7 +150,6 @@ class TestInitDnFromGaussian:
             "u_dispersion",
             "ratio",
             "weight_deriv",
-            "baseline",
             "amplitude_activation",
             "baseline_activation",
             "amplitude_normalization",
@@ -175,12 +174,18 @@ class TestInitDnFromGaussian:
         dn_params = init_dn_from_gaussian(gaussian_params)
         assert list(dn_params["amplitude_activation"]) == [10.0, 7.0]
 
-    def test_default_constants(self, gaussian_params: pd.DataFrame):
-        """Default baseline_activation=0, amplitude_normalization=1, baseline_normalization=1."""
+    def test_baseline_mapped_from_gaussian(self, gaussian_params: pd.DataFrame):
+        """baseline_activation is read from the gaussian_params baseline column by default."""
         dn_params = init_dn_from_gaussian(gaussian_params)
-        assert list(dn_params["baseline_activation"]) == [0.0, 0.0]
+        assert list(dn_params["baseline_activation"]) == [5.0, 8.0]
         assert list(dn_params["amplitude_normalization"]) == [1.0, 1.0]
         assert list(dn_params["baseline_normalization"]) == [1.0, 1.0]
+
+    def test_baseline_activation_missing_raises(self, gaussian_params: pd.DataFrame):
+        """ValueError when baseline_activation=None and no baseline column present."""
+        params_no_baseline = gaussian_params.drop(columns=["baseline"])
+        with pytest.raises(ValueError, match="baseline_activation"):
+            init_dn_from_gaussian(params_no_baseline)
 
     def test_custom_baseline_activation(self, gaussian_params: pd.DataFrame):
         """Custom baseline_activation (b) is applied to all rows."""
@@ -198,9 +203,9 @@ class TestInitDnFromGaussian:
         assert list(dn_params["baseline_normalization"]) == [0.5, 0.5]
 
     def test_passthrough_columns(self, gaussian_params: pd.DataFrame):
-        """Non-sigma/amplitude columns pass through unchanged."""
+        """Non-sigma/amplitude/baseline columns pass through unchanged."""
         dn_params = init_dn_from_gaussian(gaussian_params)
-        for col in ["mu_x", "mu_y", "baseline", "delay", "dispersion"]:
+        for col in ["mu_x", "mu_y", "delay", "dispersion"]:
             assert list(dn_params[col]) == list(gaussian_params[col])
 
     def test_custom_sigma_ratio(self, gaussian_params: pd.DataFrame):

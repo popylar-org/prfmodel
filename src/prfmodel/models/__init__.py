@@ -10,6 +10,7 @@ from .compressive_spatial_summation import init_css_from_gaussian
 from .difference_of_gaussians import DoG2DPRFModel
 from .difference_of_gaussians import init_dog_from_gaussian
 from .divisive_normalization import DivNormPRFModel
+from .divisive_normalization import init_dn_from_dog
 from .divisive_normalization import init_dn_from_gaussian
 from .encoding import CFStimulusEncoder
 from .encoding import CompressiveEncoder
@@ -34,6 +35,7 @@ __all__ = [
     "PRFStimulusEncoder",
     "encode_prf_response",
     "init_css_from_gaussian",
+    "init_dn_from_dog",
     "init_dn_from_gaussian",
     "init_dog_from_gaussian",
 ]
