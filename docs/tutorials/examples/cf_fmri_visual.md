@@ -304,7 +304,7 @@ The {py:class}`prfmodel.models.gaussian.GaussianCFModel` class performs these st
 
 ```{code-cell} ipython3
 import pandas as pd
-from prfmodel.models.gaussian import GaussianCFModel
+from prfmodel.models import GaussianCFModel
 
 cf_model = GaussianCFModel()
 ```
@@ -383,7 +383,7 @@ evaluate 20 parameter combinations at the same time (which saves us some memory)
 
 ```{code-cell} ipython3
 from keras.losses import CosineSimilarity
-from prfmodel.fitters.grid import GridFitter
+from prfmodel.fitters import GridFitter
 
 # Create grid fitter object
 grid_fitter = GridFitter(
@@ -409,7 +409,7 @@ we also optimize the `amplitude` of the pRF model together with the `baseline` u
 scale of our model predictions to scale the observed data.
 
 ```{code-cell} ipython3
-from prfmodel.fitters.linear import LeastSquaresFitter
+from prfmodel.fitters import LeastSquaresFitter
 
 # Create least-squares fitter
 ls_fitter = LeastSquaresFitter(

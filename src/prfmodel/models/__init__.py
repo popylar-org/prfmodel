@@ -2,9 +2,11 @@
 
 from .base import BaseComposite
 from .base import BaseEncoder
+from .base import BaseImpulse
 from .base import BaseModel
 from .base import BaseResponse
 from .base import BaseTemporal
+from .base import BatchDimensionError
 from .css import Gaussian2DCSSPRFModel
 from .css import init_css_from_gaussian
 from .div_norm import DivNormGaussian2DPRFModel
@@ -23,9 +25,11 @@ from .gaussian import GaussianCFModel
 __all__ = [
     "BaseComposite",
     "BaseEncoder",
+    "BaseImpulse",
     "BaseModel",
     "BaseResponse",
     "BaseTemporal",
+    "BatchDimensionError",
     "CFStimulusEncoder",
     "CompressiveEncoder",
     "DivNormGaussian2DPRFModel",

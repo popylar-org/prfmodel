@@ -4,8 +4,8 @@ from typing import cast
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.stimuli.cf import CFStimulus
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.stimuli import CFStimulus
+from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from .base import BaseComposite

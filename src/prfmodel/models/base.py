@@ -8,7 +8,7 @@ from typing import TypeVar
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.stimuli.base import Stimulus
+from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _get_norm_fun
 

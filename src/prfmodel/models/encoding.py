@@ -3,10 +3,10 @@
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.models.base import BaseEncoder
+from prfmodel.models import BaseEncoder
 from prfmodel.models.base import S
-from prfmodel.stimuli.cf import CFStimulus
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.stimuli import CFStimulus
+from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
@@ -237,7 +237,7 @@ class CompressiveEncoder(BaseEncoder[S]):
     >>> import numpy as np
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-    >>> from prfmodel.models.encoding import CompressiveEncoder, PRFStimulusEncoder
+    >>> from prfmodel.models import CompressiveEncoder, PRFStimulusEncoder
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> print(stimulus)
     PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])

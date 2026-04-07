@@ -182,7 +182,7 @@ For all three parameters, we defined ranges of 10 values, giving $10 \times 10 \
 parameter combinations to evaluate. Let's construct the `GridFitter` and run the grid search.
 
 ```{code-cell} ipython3
-from prfmodel.fitters.grid import GridFitter
+from prfmodel.fitters import GridFitter
 
 grid_fitter = GridFitter(model=gaussian_model, stimulus=stimulus)
 
@@ -223,7 +223,7 @@ in the amplitude of the activation peaks and the baseline activation.
 Using least squares, we can estimate the `baseline` and `amplitude` parameters of our model.
 
 ```{code-cell} ipython3
-from prfmodel.fitters.linear import LeastSquaresFitter
+from prfmodel.fitters import LeastSquaresFitter
 
 ls_fitter = LeastSquaresFitter(model=gaussian_model, stimulus=stimulus)
 
@@ -264,7 +264,7 @@ In the first SGD run, we restrict `n` to be fixed to its starting value.
 from keras import ops
 from prfmodel.adapter import Adapter, ParameterTransform
 from prfmodel.models import init_css_from_gaussian
-from prfmodel.fitters.sgd import SGDFitter
+from prfmodel.fitters import SGDFitter
 
 css_adapter = Adapter([
     ParameterTransform(["sigma", "n"], ops.log, ops.exp)

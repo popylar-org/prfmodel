@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 from nilearn.surface import PolyMesh
 from nilearn.surface import load_surf_data
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.stimuli import PRFStimulus
 
 
 def load_2d_prf_bar_stimulus() -> PRFStimulus:

@@ -11,8 +11,8 @@ from keras import ops
 from more_itertools import chunked
 from tqdm.auto import tqdm
 from prfmodel._docstring import doc
-from prfmodel.models.base import BaseComposite
-from prfmodel.stimuli.base import Stimulus
+from prfmodel.models import BaseComposite
+from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from prfmodel.utils import get_dtype
@@ -66,7 +66,7 @@ class GridFitter:
 
     >>> import numpy as np
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-    >>> from prfmodel.models.gaussian import Gaussian2DPRFModel
+    >>> from prfmodel.models import Gaussian2DPRFModel
     >>> from prfmodel.fitters.grid import GridFitter
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> print(stimulus)

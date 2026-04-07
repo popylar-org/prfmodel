@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from keras import ops
 from prfmodel.backend import gammaln
-from prfmodel.models.base import BatchDimensionError
+from prfmodel.models import BatchDimensionError
 from prfmodel.typing import Tensor
 
 _ARG_DIM = 2
@@ -111,7 +111,7 @@ def gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True)
     Examples
     --------
     >>> import numpy as np
-    >>> from prfmodel.models.impulse.density import gamma_density
+    >>> from prfmodel.models.impulse import gamma_density
     >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
     >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
     >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
@@ -181,7 +181,7 @@ def shifted_gamma_density(
     Examples
     --------
     >>> import numpy as np
-    >>> from prfmodel.models.impulse.density import shifted_gamma_density
+    >>> from prfmodel.models.impulse import shifted_gamma_density
     >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
     >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
     >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
@@ -255,7 +255,7 @@ def derivative_gamma_density(value: Tensor, shape: Tensor, rate: Tensor) -> Tens
     Examples
     --------
     >>> import numpy as np
-    >>> from prfmodel.models.impulse.density import derivative_gamma_density
+    >>> from prfmodel.models.impulse import derivative_gamma_density
     >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
     >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
     >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)

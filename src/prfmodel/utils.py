@@ -10,7 +10,7 @@ import pandas as pd
 from keras import ops
 from keras.config import floatx
 from ._docstring import doc
-from .stimuli.base import Stimulus
+from .stimuli import Stimulus
 from .typing import Tensor
 
 _EXPECTED_NDIM = 2

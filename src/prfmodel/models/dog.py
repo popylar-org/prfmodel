@@ -56,7 +56,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
 
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-    >>> from prfmodel.models.dog import DoG2DPRFModel
+    >>> from prfmodel.models import DoG2DPRFModel
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> print(stimulus)
     PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
@@ -142,7 +142,7 @@ def init_dog_from_gaussian(
     Examples
     --------
     >>> import pandas as pd
-    >>> from prfmodel.models.dog import init_dog_from_gaussian
+    >>> from prfmodel.models import init_dog_from_gaussian
     >>> gaussian_params = pd.DataFrame({
     ...     "mu_x": [0.0, 1.0],
     ...     "mu_y": [0.0, -1.0],

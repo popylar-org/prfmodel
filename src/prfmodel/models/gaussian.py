@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.stimuli.cf import CFStimulus
-from prfmodel.stimuli.prf import GridDimensionsError
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.stimuli import CFStimulus
+from prfmodel.stimuli import GridDimensionsError
+from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
@@ -341,7 +341,7 @@ class Gaussian2DPRFModel(SimplePRFModel):
 
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-    >>> from prfmodel.models.gaussian import Gaussian2DPRFModel
+    >>> from prfmodel.models import Gaussian2DPRFModel
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> print(stimulus)
     PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
@@ -416,7 +416,7 @@ class GaussianCFModel(SimpleCFModel):
 
     >>> import numpy as np
     >>> import pandas as pd
-    >>> from prfmodel.models.gaussian import GaussianCFModel
+    >>> from prfmodel.models import GaussianCFModel
     >>> from prfmodel.stimuli.cf import CFStimulus
     >>> num_source_units, num_frames = 10, 20
     >>> distances = np.abs(
