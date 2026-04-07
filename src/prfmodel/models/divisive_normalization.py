@@ -6,28 +6,39 @@ from keras import ops
 from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
+from .base import BaseComposite
 from .base import BaseEncoder
 from .base import BaseImpulse
 from .base import BaseResponse
 from .base import BaseTemporal
-from .composite import CenterSurroundPRFModel
 from .encoding import PRFStimulusEncoder
 from .gaussian import Gaussian2DPRFResponse
 from .impulse import DerivativeTwoGammaImpulse
+from .impulse import convolve_prf_impulse_response
 from .temporal import DivNormAmplitude
 
 
-class DivNormPRFModel(CenterSurroundPRFModel):
+class DivNormPRFModel(BaseComposite[PRFStimulus]):
     r"""
-    Two-dimensional divisive normalization population receptive field model.
+    Divisive normalization population receptive field model.
 
-    Both the activation and normalization pRFs are isotropic 2D Gaussians centered on the
-    same position (``mu_x``, ``mu_y``) but with different sizes (``sigma_activation``,
-    ``sigma_normalization``) and different amplitudes (``amplitude_activation``,
-    ``amplitude_normalization``).
+    Receives two independent pRF responses (activation and normalization) and combines them
+    via the divisive normalization formula.
+    Parameters that should be shared between both responses (e.g. the pRF centre
+    ``mu_x``, ``mu_y``) are listed in ``shared_params`` and appear once in
+    :attr:`parameter_names` without a suffix. All remaining pRF parameters are suffixed
+    with ``_activation`` or ``_normalization`` respectively.
 
     Parameters
     ----------
+    activation_prf_model : BaseResponse
+        pRF response model (activation).
+    normalization_prf_model : BaseResponse
+        pRF response model (normalization).
+    shared_params : list of str, default=["mu_x", "mu_y"]
+        Names of pRF parameters that are shared between the two responses.  Each name
+        must appear in *both* ``activation_prf_model.parameter_names`` and
+        ``normalization_prf_model.parameter_names``.
     encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
         An encoding model class or instance.
     impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
@@ -37,31 +48,57 @@ class DivNormPRFModel(CenterSurroundPRFModel):
 
     Notes
     -----
-    Let :math:`G_i(\mathbf{x}; \mu_x, \mu_y, \sigma_i)` be an isotropic 2D Gaussian with
-    :math:`a = \text{amplitude\_activation}`, :math:`b = \text{activation\_constant}`,
-    :math:`c = \text{amplitude\_normalization}`, :math:`d = \text{normalization\_constant}`, the
-    predicted response is:
+    The predicted response is:
 
     .. math::
 
-        p_{\text{DN}}(t) = \frac{(aG_1 \cdot S + b)}{(cG_1 \cdot S + d)} - \frac{b}{d}
+        p_{\text{DN}} = \frac{(a R_1 \cdot S + b)}{(c R_2 \cdot S + d)} - \frac{b}{d}
 
+    Where `R_1` and `R_2` are the activation and normalization pRF responses, `S` is the stimulus.
     The :math:`-b/d` term ensures a zero response in the absence of a stimulus.
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
+        activation_prf_model: BaseResponse,
+        normalization_prf_model: BaseResponse,
+        shared_params: list[str] | None = None,
         encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         temporal_model: BaseTemporal | type[BaseTemporal] | None = DivNormAmplitude,
     ):
+        if shared_params is None:
+            shared_params = ["mu_x", "mu_y"]
+
+        if encoding_model is not None and isinstance(encoding_model, type):
+            encoding_model = encoding_model()
+
+        if impulse_model is not None and isinstance(impulse_model, type):
+            impulse_model = impulse_model()
+
+        if temporal_model is not None and isinstance(temporal_model, type):
+            temporal_model = temporal_model()
+
+        act_names = activation_prf_model.parameter_names
+        norm_names = normalization_prf_model.parameter_names
+        invalid = [p for p in shared_params if p not in act_names or p not in norm_names]
+        if invalid:
+            msg = (
+                f"DivNormPRFModel: shared_params {invalid} not found in both "
+                f"activation_prf_model.parameter_names {act_names} and "
+                f"normalization_prf_model.parameter_names {norm_names}"
+            )
+            raise ValueError(msg)
+
+        self._shared_params = shared_params
+
         super().__init__(
-            prf_model=Gaussian2DPRFResponse(),
+            activation_prf_model=activation_prf_model,
+            normalization_prf_model=normalization_prf_model,
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             temporal_model=temporal_model,
-            change_params=["sigma"],
         )
 
     @property
@@ -69,23 +106,61 @@ class DivNormPRFModel(CenterSurroundPRFModel):
         """
         Names of parameters used by the model.
 
-        Overrides the parent to use ``activation``/``normalization`` suffixes.
+        Shared parameters appear once (no suffix). Response-specific parameters are suffixed
+        with ``_activation`` or ``_normalization``.
 
         """
-        prf_model = cast("BaseResponse", self.models["prf_model"])
-        prf_params = prf_model.parameter_names.copy()
+        shared = set(self._shared_params)
+        act_model = cast("BaseResponse", self.models["activation_prf_model"])
+        norm_model = cast("BaseResponse", self.models["normalization_prf_model"])
 
-        for param in self._change_params:
-            idx = prf_params.index(param)
-            prf_params[idx : idx + 1] = [f"{param}_activation", f"{param}_normalization"]
+        param_names: list[str] = []
 
-        param_names = prf_params
+        # Activation model params: shared appear as-is, non-shared get _activation suffix
+        for p in act_model.parameter_names:
+            if p in shared:
+                param_names.append(p)
+            else:
+                param_names.append(f"{p}_activation")
 
+        # Normalization model non-shared params get _normalization suffix
+        param_names.extend(f"{p}_normalization" for p in norm_model.parameter_names if p not in shared)
+
+        # Encoding, impulse, and temporal model params
         for key, model in self.models.items():
-            if key != "prf_model" and model is not None:
+            if key not in ("activation_prf_model", "normalization_prf_model") and model is not None:
                 param_names.extend(model.parameter_names)
 
         return list(dict.fromkeys(param_names))
+
+    def _predict_single_response(
+        self,
+        stimulus: PRFStimulus,
+        parameters: pd.DataFrame,
+        suffix: str,
+        dtype: str,
+    ) -> Tensor:
+        """Run one pRF response (pRF response -> encoding -> optional impulse convolution)."""
+        prf_model = cast("BaseResponse", self.models[f"{suffix}_prf_model"])
+        shared = set(self._shared_params)
+
+        # Build a parameter slice for this pRF model: copy all params, then
+        # overwrite non-shared params from the suffixed columns.
+        params_single = parameters.copy()
+        for p in prf_model.parameter_names:
+            if p not in shared:
+                params_single[p] = parameters[f"{p}_{suffix}"]
+
+        response = prf_model(stimulus, params_single, dtype=dtype)
+        encoding_model = cast("BaseEncoder", self.models["encoding_model"])
+        response = encoding_model(stimulus, response, parameters, dtype=dtype)
+
+        if self.models["impulse_model"] is not None:
+            impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+            impulse_response = impulse_model(parameters, dtype=dtype)
+            response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
+
+        return response
 
     def predict_responses(
         self,
@@ -100,13 +175,98 @@ class DivNormPRFModel(CenterSurroundPRFModel):
         -------
         Tensor
             Stacked predictions of shape (num_voxels, 2, num_frames), where axis 1 index 0
-            is the activation response (G1·S) and index 1 is the normalization response (G2·S).
+            is the activation response and index 1 is the normalization response.
 
         """
         dtype = get_dtype(dtype)
         p1 = self._predict_single_response(stimulus, parameters, "activation", dtype)
         p2 = self._predict_single_response(stimulus, parameters, "normalization", dtype)
         return ops.stack([p1, p2], axis=1)
+
+    def __call__(
+        self,
+        stimulus: PRFStimulus,
+        parameters: pd.DataFrame,
+        dtype: str | None = None,
+    ) -> Tensor:
+        """
+        Predict the DN model response to a stimulus.
+
+        Parameters
+        ----------
+        stimulus : PRFStimulus
+            Population receptive field stimulus object.
+        parameters : pandas.DataFrame
+            Dataframe with model parameters; one row per voxel.
+        dtype : str, optional
+            The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        Tensor
+            Model predictions of shape (num_voxels, num_frames).
+
+        """
+        dtype = get_dtype(dtype)
+        stacked = self.predict_responses(stimulus, parameters, dtype=dtype)
+
+        if self.models["temporal_model"] is not None:
+            temporal_model = cast("BaseTemporal", self.models["temporal_model"])
+            return temporal_model(stacked, parameters, dtype=dtype)
+
+        # TODO: Is this a sensible default? Or what would word best in the absence of a temporal model?
+        return stacked[:, 0] / stacked[:, 1]
+
+
+class DivNormGaussian2DPRFModel(DivNormPRFModel):
+    r"""
+    Divisive normalization pRF model with isotropic 2D Gaussian responses.
+
+    Convenience subclass of :class:`DivNormPRFModel` that uses
+    :class:`~prfmodel.models.gaussian.Gaussian2DPRFResponse` as the pRF model. Both the
+    activation and normalization pRFs are isotropic 2D Gaussians centered on the same
+    position (``mu_x``, ``mu_y``) but with different sizes (``sigma_activation``,
+    ``sigma_normalization``) and different amplitudes (``amplitude_activation``,
+    ``amplitude_normalization``).
+
+    Parameters
+    ----------
+    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
+        An encoding model class or instance.
+    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
+        An impulse response model class or instance.
+    temporal_model : BaseTemporal or type or None, default=DivNormAmplitude
+        A temporal model class or instance.
+
+    Notes
+    -----
+    With :math:`a = \text{amplitude\_activation}`, :math:`b = \text{baseline\_activation}`,
+    :math:`c = \text{amplitude\_normalization}`, and :math:`d = \text{baseline\_normalization}`,
+    the predicted response is:
+
+    .. math::
+
+        p_{\text{DN}} = \frac{(a G_1 \cdot S + b)}{(c G_2 \cdot S + d)} - \frac{b}{d}
+
+    The :math:`-b/d` term ensures a zero response in the absence of a stimulus.
+
+    """
+
+    def __init__(
+        self,
+        encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
+        temporal_model: BaseTemporal | type[BaseTemporal] | None = DivNormAmplitude,
+    ):
+        super().__init__(
+            activation_prf_model=Gaussian2DPRFResponse(),
+            normalization_prf_model=Gaussian2DPRFResponse(),
+            shared_params=["mu_x", "mu_y"],
+            encoding_model=encoding_model,
+            impulse_model=impulse_model,
+            temporal_model=temporal_model,
+        )
 
 
 def init_dn_from_gaussian(  # noqa: PLR0913
@@ -121,7 +281,7 @@ def init_dn_from_gaussian(  # noqa: PLR0913
     Initialize DN model parameters from fitted Gaussian model parameters.
 
     Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
-    into starting parameters for a :class:`DivNormPRFModel`, suitable for
+    into starting parameters for a :class:`DivNormGaussian2DPRFModel`, suitable for
     subsequent SGD.
 
     Parameters
@@ -219,7 +379,7 @@ def init_dn_from_dog(
     Initialize DN model parameters from fitted DoG model parameters.
 
     Converts the output of a fitted :class:`~prfmodel.models.difference_of_gaussians.DoG2DPRFModel`
-    into starting parameters for a :class:`DivNormPRFModel`, suitable for subsequent SGD.
+    into starting parameters for a :class:`DivNormGaussian2DPRFModel`, suitable for subsequent SGD.
 
     Parameters
     ----------

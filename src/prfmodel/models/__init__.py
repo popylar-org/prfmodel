@@ -9,6 +9,7 @@ from .compressive_spatial_summation import Gaussian2DCSSPRFModel
 from .compressive_spatial_summation import init_css_from_gaussian
 from .difference_of_gaussians import DoG2DPRFModel
 from .difference_of_gaussians import init_dog_from_gaussian
+from .divisive_normalization import DivNormGaussian2DPRFModel
 from .divisive_normalization import DivNormPRFModel
 from .divisive_normalization import init_dn_from_dog
 from .divisive_normalization import init_dn_from_gaussian
@@ -27,6 +28,7 @@ __all__ = [
     "BaseTemporal",
     "CFStimulusEncoder",
     "CompressiveEncoder",
+    "DivNormGaussian2DPRFModel",
     "DivNormPRFModel",
     "DoG2DPRFModel",
     "Gaussian2DCSSPRFModel",

@@ -26,7 +26,7 @@ This tutorial explains how to fit a Divisive Normalization (DN) population recep
 A pRF model maps neural activity in a region of interest in the brain (e.g., V1 in the human visual cortex)
 to an experimental stimulus (e.g., a bar moving through the visual field). The DN model was first proposed to overcome the inability of linear receptive field models to capture nonlinear phenomena, such as contrast saturation and surround suppression, observed in primary visual cortex (V1).
 
-The DN model summarizes activation and normalization pRFs as isotropic, two-dimensional Gaussians, $G_1$ and $G_2$, centered on the same position $(x0, y0)$ in visual space $(x, y)$, but with different sizes, $σ1$ and $σ2$, and different amplitudes, $a$ and $c$, respectively. Activation and normalization also have constant “baselines” that is, an activation constant $b$ and $a$ normalization constant $d$.
+The DN model summarizes activation and normalization pRFs as isotropic, two-dimensional Gaussians, $G_1$ and $G_2$, centered on the same position $(x0, y0)$ in visual space $(x, y)$, but with different sizes, $σ1$ and $σ2$, and different amplitudes, $a$ and $c$, respectively. Activation and normalization also have constant “baselines” that is, an activation constant $b$ and a normalization constant $d$.
 
 +++
 
@@ -82,22 +82,22 @@ HTML(ani.to_html5_video())
 ## Defining the DN pRF model
 
 Now that we defined our stimulus, we can create a DN pRF model to predict a neural response to this stimulus.
-The `DivNormPRFModel` runs two independent Gaussian pipelines sharing the same center (`mu_x`, `mu_y`) but with
+The `DivNormGaussian2DPRFModel` runs two independent Gaussian pipelines sharing the same center (`mu_x`, `mu_y`) but with
 different widths (`sigma_activation` for the activation pRF, `sigma_normalization` for the normalization pRF).
 Each pipeline is encoded with the stimulus and convolved with a haemodynamic impulse response. The two responses
 are then combined using the divisive normalization formula:
 
-$$p_{DN}(t) = \frac{(a G_1 \cdot S + b)}{(c G_2 \cdot S + d)} - \frac{b}{d}$$
+$$p_{DN} = \frac{(a G_1 \cdot S + b)}{(c G_2 \cdot S + d)} - \frac{b}{d}$$
 
 where $G_1$ and $G_2$ are the activation and normalization Gaussian responses, with $a$ (`amplitude_activation`) ,
 $b$ (`baseline_activation`), and $c$ (`amplitude_normalization`) , $d$
 (`baseline_normalization`). The $-b/d$ term ensures a zero baseline response in
-the absence of a stimulus. The normalization constant $d$ must be positive to avoid division by zero.
+the absence of a stimulus. The normalization baseline $d$ must be positive to avoid division by zero.
 
 ```{code-cell} ipython3
-from prfmodel.models.divisive_normalization import DivNormPRFModel
+from prfmodel.models.divisive_normalization import DivNormGaussian2DPRFModel
 
-prf_model = DivNormPRFModel()
+prf_model = DivNormGaussian2DPRFModel()
 ```
 
 To simulate a neural response to our stimulus with our DN pRF model, we need to define a set of parameters.
@@ -130,11 +130,10 @@ true_params = pd.DataFrame(
         "u_dispersion": [0.9],
         "ratio": [0.48],
         "weight_deriv": [-0.5],
-        "amplitude_activation": [10.2], # a
-        "baseline_activation": [0.0], # b
-        "amplitude_normalization": [0.8], # c
+        "amplitude_activation": [5.5], # a
+        "baseline_activation": [2.0], # b
+        "amplitude_normalization": [0.5], # c
         "baseline_normalization": [10.0],  # d - baseline_normalization must be > 0
-        "baseline": [10.0],
     },
 )
 ```
@@ -177,7 +176,7 @@ gaussian_center_model = Gaussian2DPRFModel()
 param_ranges_gaussian = {
     "mu_x": np.linspace(-3.0, 3.0, 10),
     "mu_y": np.linspace(-3.0, 3.0, 10),
-    "sigma": np.linspace(0.5, 3.0, 10),
+    "sigma": np.linspace(0.5, 5.0, 10),
     "delay": [6.0],
     "dispersion": [0.9],
     "undershoot": [12.0],
@@ -193,9 +192,10 @@ For all three parameters, we defined ranges of 10 values, giving $10 \times 10 \
 parameter combinations to evaluate. Let's construct the `GridFitter` and run the grid search.
 
 ```{code-cell} ipython3
+from keras.losses import CosineSimilarity
 from prfmodel.fitters.grid import GridFitter
 
-grid_fitter = GridFitter(model=gaussian_center_model, stimulus=stimulus)
+grid_fitter = GridFitter(model=gaussian_center_model, stimulus=stimulus, loss=CosineSimilarity(reduction="none"))
 
 grid_history, grid_params = grid_fitter.fit(
     data=simulated_response,
@@ -244,6 +244,10 @@ ls_history, gaussian_center_params = ls_fitter.fit(
 gaussian_center_params
 ```
 
+```{code-cell} ipython3
+true_params
+```
+
 The Gaussian least-squares fit adjusts the scale and baseline to match the simulated response.
 
 ```{code-cell} ipython3
@@ -257,6 +261,61 @@ ax.plot(gaussian_pred_response[0], label="Predicted (Gaussian, least-squares)")
 fig.legend();
 ```
 
+```{code-cell} ipython3
+from prfmodel.models.difference_of_gaussians import DoG2DPRFModel
+
+dog_model = DoG2DPRFModel()
+```
+
+```{code-cell} ipython3
+from prfmodel.models import init_dog_from_gaussian
+
+# Convert Gaussian fit to DoG starting parameters
+dog_init_params = init_dog_from_gaussian(gaussian_center_params, sigma_ratio=2.0)
+dog_init_params
+```
+
+```{code-cell} ipython3
+from prfmodel.adapter import Adapter
+from prfmodel.adapter import ParameterConstraint
+from prfmodel.fitters.sgd import SGDFitter
+
+dog_adapter = Adapter(transforms=[
+    ParameterConstraint(["amplitude_surround"], upper=0.0),
+])
+
+sgd_fitter = SGDFitter(
+    model=dog_model,
+    stimulus=stimulus,
+    adapter=dog_adapter,
+)
+
+sgd_history, dog_params = sgd_fitter.fit(
+    data=simulated_response,
+    init_parameters=dog_init_params,
+    fixed_parameters=["delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv"],
+)
+```
+
+```{code-cell} ipython3
+dog_params
+```
+
+```{code-cell} ipython3
+true_params
+```
+
+```{code-cell} ipython3
+dog_pred_response = dog_model(stimulus, dog_params)
+
+fig, ax = plt.subplots()
+
+ax.plot(simulated_response[0], label="True")
+ax.plot(dog_pred_response[0], "--", label="Predicted (SGD)")
+
+fig.legend();
+```
+
 ### Step 2: Fit the DN model
 
 We now initialize a DN model from the fitted Gaussian parameters.
@@ -264,7 +323,7 @@ We now initialize a DN model from the fitted Gaussian parameters.
 - `sigma_activation = sigma`
 - `sigma_normalization = sigma_activation * sigma_ratio` (default `sigma_ratio=2.0`)
 - `amplitude_activation = amplitude` (a)
-- `baseline_activation = 0.0` (b)
+- `baseline_activation = baseline` (b, from the Gaussian fit)
 - `amplitude_normalization = 1.0` (c)
 - `baseline_normalization = 1.0` (d)
 
@@ -278,37 +337,61 @@ we pass a `ParameterConstraint(lower=0.0)` adapter.
 > converging to a poor local minimum.
 
 ```{code-cell} ipython3
-from prfmodel.models import init_dn_from_gaussian
-from prfmodel.fitters.sgd import SGDFitter
+from prfmodel.models import init_dn_from_dog
 
-# Convert Gaussian fit to DN starting parameters
-dn_init_params = init_dn_from_gaussian(gaussian_center_params, sigma_ratio=2.0)
-dn_init_params
+# # Convert Gaussian fit to DN starting parameters
+dn_init_params = init_dn_from_dog(dog_init_params, baseline_normalization=10)
 ```
 
 ```{code-cell} ipython3
-from prfmodel.adapter import Adapter, ParameterConstraint
+dn_init_pred_response = prf_model(stimulus, dn_init_params)
+
+fig, ax = plt.subplots()
+
+ax.plot(simulated_response[0], label="True")
+ax.plot(dn_init_pred_response[0], "--", label="Predicted (SGD)")
+
+fig.legend();
+```
+
+```{code-cell} ipython3
+from keras import ops
+from keras.optimizers import Adam
+from prfmodel.adapter import Adapter, ParameterTransform
 
 # Constrain baseline_normalization > 0 during SGD to avoid division by zero
 dn_adapter = Adapter(transforms=[
-    ParameterConstraint(["baseline_normalization"], lower=0.0),
+    ParameterTransform(["baseline_normalization"], transform_fun=ops.log, inverse_fun=ops.exp),
 ])
 
 sgd_fitter = SGDFitter(
     model=prf_model,
     stimulus=stimulus,
     adapter=dn_adapter,
+    optimizer=Adam(learning_rate=0.01),
 )
 
 sgd_history, sgd_params = sgd_fitter.fit(
     data=simulated_response,
     init_parameters=dn_init_params,
-    fixed_parameters=["mu_x", "mu_y", "delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv"],
+    fixed_parameters=[
+        "mu_x", "mu_y", "delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv",
+        "sigma_activation",
+        "sigma_normalization",
+        # "amplitude_activation",
+        # "baseline_activation",
+        # "amplitude_normalization",
+        # "baseline_normalization",
+    ],
 )
 ```
 
 ```{code-cell} ipython3
 sgd_params
+```
+
+```{code-cell} ipython3
+true_params
 ```
 
 We can plot the predicted model response and see that it matches the original simulated response almost perfectly.
@@ -331,7 +414,7 @@ two-step workflow.
 
 In **Step 1**, we fitted a plain Gaussian model with a grid search and least squares to efficiently locate the pRF center and size.
 
-In **Step 2**, we used `init_dn_from_gaussian` to seed the DN model from the Gaussian fit. We set the normalization size to twice the activation size and initialized the normalization parameters at their defaults (`baseline_activation=0`, `amplitude_normalization=1`, `baseline_normalization=1`).
+In **Step 2**, we used `init_dn_from_gaussian` to seed the DN model from the Gaussian fit. We set the normalization size to twice the activation size and initialized the normalization parameters at their defaults (`baseline_activation` from Gaussian fit, `amplitude_normalization=1`, `baseline_normalization=1`).
 
 +++
 
