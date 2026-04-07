@@ -35,7 +35,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     4. Each encoded response is convolved with the impulse response.
     5. The temporal model modifies the convolved response. By default it subtracts the surround from the center
         response after multiplying the responses with separate amplitude parameters.
-        
+
     Let :math:`p_{\text{center}}(t)` and :math:`p_{\text{surround}}(t)` be the predicted temporal
     responses for the center and surround Gaussians. With :math:`a_c = \text{amplitude\_center}`,
     :math:`a_s = \text{amplitude\_surround}`, and :math:`\beta = \text{baseline}`, the predicted
@@ -56,7 +56,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
 
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-    >>> from prfmodel.models.difference_of_gaussians import DoG2DPRFModel
+    >>> from prfmodel.models.dog import DoG2DPRFModel
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> print(stimulus)
     PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
@@ -111,7 +111,7 @@ def init_dog_from_gaussian(
     Initialize DoG model parameters from fitted Gaussian model parameters.
 
     Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
-    into starting parameters for a :class:`~prfmodel.models.difference_of_gaussians.DoG2DPRFModel`, suitable for
+    into starting parameters for a :class:`~prfmodel.models.dog.DoG2DPRFModel`, suitable for
     subsequent SGD.
 
     Parameters
@@ -142,7 +142,7 @@ def init_dog_from_gaussian(
     Examples
     --------
     >>> import pandas as pd
-    >>> from prfmodel.models.difference_of_gaussians import init_dog_from_gaussian
+    >>> from prfmodel.models.dog import init_dog_from_gaussian
     >>> gaussian_params = pd.DataFrame({
     ...     "mu_x": [0.0, 1.0],
     ...     "mu_y": [0.0, -1.0],
