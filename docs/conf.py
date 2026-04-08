@@ -41,6 +41,8 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
+    "sphinx.ext.graphviz",
+    "sphinx.ext.inheritance_diagram",
     "autoapi.extension",
     "sphinx.ext.viewcode",
     "sphinx_copybutton",

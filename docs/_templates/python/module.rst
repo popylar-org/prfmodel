@@ -12,10 +12,10 @@
 
       {% endif %}
 
+      {% set visible_subpackages = obj.subpackages|selectattr("display")|list %}
+      {% set visible_submodules = obj.submodules|selectattr("display")|list %}
+      {% set visible_submodules = (visible_subpackages + visible_submodules)|sort %}
       {% block submodules %}
-         {% set visible_subpackages = obj.subpackages|selectattr("display")|list %}
-         {% set visible_submodules = obj.submodules|selectattr("display")|list %}
-         {% set visible_submodules = (visible_subpackages + visible_submodules)|sort %}
          {% if visible_submodules %}
 Submodules
 ----------
@@ -38,10 +38,46 @@ Submodules
       {% endblock %}
       {% block content %}
          {% set visible_children = obj.children|selectattr("display")|list %}
+         {% set ns = namespace(class_ids=[], top_ids=[]) %}
+         {% for submod in visible_submodules %}
+            {% for klass in submod.children|selectattr("display")|selectattr("type", "equalto", "class")|list %}
+               {% if klass.id not in ns.class_ids %}
+                  {% set ns.class_ids = ns.class_ids + [klass.id] %}
+               {% endif %}
+            {% endfor %}
+         {% endfor %}
+         {% for submod in visible_submodules %}
+            {% for klass in submod.children|selectattr("display")|selectattr("type", "equalto", "class")|list %}
+               {% set has_internal_base = namespace(value=false) %}
+               {% for base in klass.bases %}
+                  {% for cid in ns.class_ids %}
+                     {% if cid.endswith("." + base) or cid == base %}
+                        {% set has_internal_base.value = true %}
+                     {% endif %}
+                  {% endfor %}
+               {% endfor %}
+               {% if not has_internal_base.value and klass.id not in ns.top_ids %}
+                  {% set ns.top_ids = ns.top_ids + [klass.id] %}
+               {% endif %}
+            {% endfor %}
+         {% endfor %}
+         {% if ns.class_ids %}
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: {{ ns.class_ids | join(" ") }}
+   {% if ns.top_ids %}
+   :top-classes: {{ ns.top_ids | join(", ") }}
+   {% endif %}
+   :parts: -1
+
+         {% endif %}
          {% if visible_children %}
             {% set visible_attributes = visible_children|selectattr("type", "equalto", "data")|list %}
             {% if visible_attributes %}
                {% if "attribute" in own_page_types or "show-module-summary" in autoapi_options %}
+
 Attributes
 ----------
 
