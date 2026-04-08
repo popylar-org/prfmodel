@@ -1,0 +1,45 @@
+prfmodel.stimuli.cf.CFStimulus
+==============================
+
+.. py:class:: prfmodel.stimuli.cf.CFStimulus
+
+
+
+   Container for a connective field stimulus distance matrix and source response.
+
+   :param distance_matrix: A matrix with distances between source units.
+   :type distance_matrix: numpy.ndarray
+   :param source_response: Array with responses for each source unit with shape `(num_units, num_frames)`. `num_units` is the number of
+                           source units and `num_frames` the number of time frames for each source response. `num_units` must match the
+                           number of rows and columns in `distance_matrix`.
+   :type source_response: numpy.ndarray
+
+   :raises DistanceMatrixShapeError: If the distance matrix has more or less than two dimensions or dimensions of different size.
+   :raises DistanceMatrixSourceShapeError: If the source response has a first dimension with a different size than the number of rows or columns in the
+       distance matrix.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> from prfmodel.stimuli.cf import CFStimulus
+   >>> num_vertices, num_frames = 10, 20
+   >>> distance_matrix = np.zeros((num_vertices, num_vertices))
+   >>> source_response = np.ones((num_vertices, num_frames))
+   >>> stimulus = CFStimulus(distance_matrix=distance_matrix, source_response=source_response)
+   >>> print(stimulus.distance_matrix.shape)
+   (10, 10)
+   >>> print(stimulus.source_response.shape)
+   (10, 20)
+
+
+   .. py:method:: __repr__() -> str
+
+      Create a round-trippable string representation of the stimulus object.
+
+
+
+   .. py:method:: __str__() -> str
+
+      Create a human-readable string representation of the stimulus object.
+
+

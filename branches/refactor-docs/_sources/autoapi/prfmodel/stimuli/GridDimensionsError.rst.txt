@@ -1,0 +1,12 @@
+prfmodel.stimuli.GridDimensionsError
+====================================
+
+.. py:exception:: prfmodel.stimuli.GridDimensionsError(grid_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when number of grid dimensions except for the last does not match last grid dimension size.
+
+   :param grid_shape: Shape of the grid array.
+   :type grid_shape: tuple of int
+

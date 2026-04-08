@@ -1,0 +1,24 @@
+prfmodel.stimuli.base
+=====================
+
+.. py:module:: prfmodel.stimuli.base
+
+.. autoapi-nested-parse::
+
+   Stimulus base classes.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   Stimulus </autoapi/prfmodel/stimuli/base/Stimulus>
+
+.. autoapisummary::
+
+   prfmodel.stimuli.base.Stimulus
+
+

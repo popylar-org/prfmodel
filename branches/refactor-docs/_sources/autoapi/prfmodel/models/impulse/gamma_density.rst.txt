@@ -1,0 +1,48 @@
+prfmodel.models.impulse.gamma_density
+=====================================
+
+.. py:function:: prfmodel.models.impulse.gamma_density(value: prfmodel.typing.Tensor, shape: prfmodel.typing.Tensor, rate: prfmodel.typing.Tensor, norm: bool = True) -> prfmodel.typing.Tensor
+
+   Calculate the density of a gamma distribution.
+
+   The distribution uses a shape and rate parameterization.
+   Raises an error when evaluated at negative values.
+
+   :param value: The values at which to evaluate the gamma distribution. Must be > 0 and scalar or with shape (1, m).
+   :type value: :data:`prfmodel.typing.Tensor`
+   :param shape: The shape parameter. Must be > 0 with shape () and scalar or with shape (n, 1).
+   :type shape: :data:`prfmodel.typing.Tensor`
+   :param rate: The rate parameter. Must be > 0 and scalar or with shape (n, 1).
+   :type rate: :data:`prfmodel.typing.Tensor`
+   :param norm: Whether to compute the normalized density.
+   :type norm: bool, default=True
+
+   :returns: The density of the gamma distribution at `value` as a scalar or with shape (n, m).
+   :rtype: :data:`prfmodel.typing.Tensor`
+
+   .. rubric:: Notes
+
+   The unnormalized density of the gamma distribution
+   with `shape` :math:`\alpha` and `rate` :math:`\lambda` is given by:
+
+   .. math::
+
+       f(x) = x^{\mathtt{\alpha} - 1} e^{-\mathtt{\lambda} x}.
+
+   When `norm=True`, the density is multiplied with a normalizing constant:
+
+   .. math::
+
+       f_{norm} = \frac{\mathtt{\lambda}^{\mathtt{\alpha}}}{\Gamma(\mathtt{\alpha})} * f(x).
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> from prfmodel.models.impulse import gamma_density
+   >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
+   >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
+   >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
+   >>> dens = gamma_density(t, shape, rate)
+   >>> print(dens.shape)
+   (2, 3)
+

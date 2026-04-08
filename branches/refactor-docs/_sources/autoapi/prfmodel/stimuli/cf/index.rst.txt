@@ -1,0 +1,39 @@
+prfmodel.stimuli.cf
+===================
+
+.. py:module:: prfmodel.stimuli.cf
+
+.. autoapi-nested-parse::
+
+   Container for connective field stimulus distance matrix and source signal.
+
+
+
+Exceptions
+----------
+
+.. toctree::
+   :hidden:
+
+   DistanceMatrixShapeError </autoapi/prfmodel/stimuli/cf/DistanceMatrixShapeError>
+   DistanceMatrixSourceShapeError </autoapi/prfmodel/stimuli/cf/DistanceMatrixSourceShapeError>
+
+.. autoapisummary::
+
+   prfmodel.stimuli.cf.DistanceMatrixShapeError
+   prfmodel.stimuli.cf.DistanceMatrixSourceShapeError
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   CFStimulus </autoapi/prfmodel/stimuli/cf/CFStimulus>
+
+.. autoapisummary::
+
+   prfmodel.stimuli.cf.CFStimulus
+
+

@@ -1,0 +1,92 @@
+prfmodel.fitters.linear.LeastSquaresFitter
+==========================================
+
+.. py:class:: prfmodel.fitters.linear.LeastSquaresFitter(model: prfmodel.models.BaseComposite, stimulus: prfmodel.stimuli.Stimulus, dtype: str | None = None)
+
+   Fit population receptive field models with least squares.
+
+   Estimates model parameters by minimizing the sum of least squares between model predictions and data.
+
+   :param model: A model instance that can be fit to data.
+                 The model must implement the :meth:`__call__` method to make predictions that can be
+                 compared to data.
+   :type model: BaseModel
+   :param stimulus: Stimulus object.
+   :type stimulus: Stimulus
+   :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+   .. rubric:: Notes
+
+   This fitter optimizes one or more slope parameters (and optionally an intercept) by estimating a general linear
+   model between model predictions and data. Typically, these are baseline and amplitude parameters. When multiple
+   slope names are given, each basis function is isolated by setting that slope to 1.0 and all others to 0.0, and
+   the resulting design matrix is solved with least squares in one shot.
+
+   Internally, the fitter applies `keras.ops.lstsq` to each data batch.
+
+   .. rubric:: Examples
+
+   Fit a 2D Gaussian population receptive field model.
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+   >>> from prfmodel.models import Gaussian2DPRFModel
+   >>> from prfmodel.fitters.linear import LeastSquaresFitter
+   >>> stimulus = load_2d_prf_bar_stimulus()
+   >>> print(stimulus)
+   PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+   >>> # Only fit response and temporal model
+   >>> model = Gaussian2DPRFModel(impulse_model=None)
+   >>> # Define init parameters
+   >>> params_init = pd.DataFrame({
+   ...     "mu_x": [0.0], "mu_y": [0.0], "sigma": [1.0],
+   ...     "baseline": [0.0], "amplitude": [0.0],
+   ... })
+   >>> # Create dummy data for a single unit
+   >>> data = np.zeros((1, 200))
+   >>> fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
+   >>> # Fit model parameters
+   >>> history, params_ls = fitter.fit(
+   ...     data,
+   ...     params_init,
+   ...     slope_name="amplitude",
+   ...     intercept_name="baseline",
+   ... )
+   >>> print(list(params_ls.columns))
+   ['mu_x', 'mu_y', 'sigma', 'baseline', 'amplitude']
+
+
+   .. py:method:: fit(data: prfmodel.typing.Tensor, parameters: pandas.DataFrame, slope_name: str | list[str], intercept_name: str | None = None, batch_size: int | None = None) -> tuple[LeastSquaresHistory, pandas.DataFrame]
+
+      Fit a population receptive field model to target data.
+
+      :param data: Target data to fit the model to. Must have shape `(num_units, num_frames)`, where `num_units` is the
+                   number of units for which parameters are estimated and `num_frames` is the number of time steps.
+      :type data: :data:`prfmodel.typing.Tensor`
+      :param parameters: Dataframe with model parameters. Columns must contain different model parameters and
+                         rows parameter values for each unit in `data`.
+      :type parameters: pandas.DataFrame
+      :param slope_name: The name(s) of the parameter(s) that will be the estimated slope(s). Must refer to column(s) within
+                         `parameters`.
+      :type slope_name: str or list of str
+      :param intercept_name: The name of the parameter that will be the estimated intercept. Must refer to a column within `parameters`.
+                             If `None`, no intercept is estimated.
+      :type intercept_name: str, optional
+      :param batch_size: Number of data batches to fit at the same time. If `None` (the default), all batches are fit at once.
+      :type batch_size: int, optional
+
+      :returns: * *LeastSquaresHistory* -- A history object that contains a dict with the key `loss` and the residual sum of squares
+                  for each data batch.
+                * *pandas.DataFrame* -- A dataframe with final model parameters.
+
+
+
+   .. py:property:: dtype
+      :type: str
+
+
+      The dtype that is used during fitting.
+

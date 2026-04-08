@@ -1,0 +1,91 @@
+prfmodel.models.encoding.CompressiveEncoder
+===========================================
+
+.. py:class:: prfmodel.models.encoding.CompressiveEncoder(encoding_model: prfmodel.models.BaseEncoder, min_response: float = 1e-10)
+
+
+
+   Compressive encoding model.
+
+   Amplifies and compresses an encoded stimulus response.
+   The model has two parameters: `gain` (amplification amplitude) and `n` (compression exponent).
+
+   :param encoding_model: A encoding model instance.
+   :type encoding_model: BasePRFEncoder
+   :param min_response: Minimum encoded response (:math:`\epsilon`). A small value ensures numerical stability of gradients when
+                        :math:`n < 1`.
+   :type min_response: float, default=1e-10
+
+   .. rubric:: Notes
+
+   Compressive encoding with `gain` :math:`g` and :math:`n` is done according to the equation [1]_:
+
+   .. math::
+
+       p(x) = g \times \text{max}(f(x), \epsilon)^n
+
+   .. rubric:: References
+
+   .. [1] Kay, K. N., Winawer, J., Mezer, A., & Wandell, B. A. (2013). Compressive spatial summation in human visual
+       cortex. *Journal of Neurophysiology*, 110(2), 481-494. https://doi.org/10.1152/jn.00105.2013
+
+   .. rubric:: Examples
+
+   Predict a model response for multiple units.
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+   >>> from prfmodel.models import CompressiveEncoder, PRFStimulusEncoder
+   >>> stimulus = load_2d_prf_bar_stimulus()
+   >>> print(stimulus)
+   PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+   >>> # Create dummy response as input for encdoder
+   >>> prf_response = np.ones((3, 101, 101))  # Must have same number of frames as stimulus
+   >>> model = CompressiveEncoder(
+   ...     encoding_model=PRFStimulusEncoder(),
+   ... )
+   >>> # Define model parameters for 3 units
+   >>> params = pd.DataFrame({
+   ...     # Compressive parameters
+   ...     "gain": [0.5, 0.1, 1.2],
+   ...     "n": [0.4, 0.5, 0.9],
+   ... })
+   >>> # Predict model response
+   >>> resp = model(stimulus, prf_response, params)
+   >>> print(resp.shape)  # (num_units, num_frames)
+   (3, 200)
+
+
+   .. py:method:: __call__(stimulus: prfmodel.models.base.S, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Compress and encode a model response with a stimulus.
+
+      Encodes the model response, then compresses and amplifies the encoded response.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param response: Model response.
+      :type response: Tensor
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The compressed and stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`.
+                The number of units is the number of rows in `parameters`. The number and size of other axes depends on
+                the stimulus and the response.
+      :rtype: :data:`prfmodel.typing.Tensor`
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      `gain` and `n`.
+
+      :type: Names of parameters used by the model
+

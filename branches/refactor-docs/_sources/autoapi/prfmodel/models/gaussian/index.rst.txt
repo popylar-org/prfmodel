@@ -1,0 +1,56 @@
+prfmodel.models.gaussian
+========================
+
+.. py:module:: prfmodel.models.gaussian
+
+.. autoapi-nested-parse::
+
+   Gaussian response models.
+
+
+
+Exceptions
+----------
+
+.. toctree::
+   :hidden:
+
+   GridMuDimensionsError </autoapi/prfmodel/models/gaussian/GridMuDimensionsError>
+
+.. autoapisummary::
+
+   prfmodel.models.gaussian.GridMuDimensionsError
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   Gaussian2DPRFModel </autoapi/prfmodel/models/gaussian/Gaussian2DPRFModel>
+   Gaussian2DPRFResponse </autoapi/prfmodel/models/gaussian/Gaussian2DPRFResponse>
+   GaussianCFModel </autoapi/prfmodel/models/gaussian/GaussianCFModel>
+   GaussianCFResponse </autoapi/prfmodel/models/gaussian/GaussianCFResponse>
+
+.. autoapisummary::
+
+   prfmodel.models.gaussian.Gaussian2DPRFModel
+   prfmodel.models.gaussian.Gaussian2DPRFResponse
+   prfmodel.models.gaussian.GaussianCFModel
+   prfmodel.models.gaussian.GaussianCFResponse
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   predict_gaussian_response </autoapi/prfmodel/models/gaussian/predict_gaussian_response>
+
+.. autoapisummary::
+
+   prfmodel.models.gaussian.predict_gaussian_response
+
+

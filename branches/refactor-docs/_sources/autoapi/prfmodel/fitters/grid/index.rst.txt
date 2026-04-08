@@ -1,0 +1,39 @@
+prfmodel.fitters.grid
+=====================
+
+.. py:module:: prfmodel.fitters.grid
+
+.. autoapi-nested-parse::
+
+   Grid fitters.
+
+
+
+Exceptions
+----------
+
+.. toctree::
+   :hidden:
+
+   InfiniteLossWarning </autoapi/prfmodel/fitters/grid/InfiniteLossWarning>
+
+.. autoapisummary::
+
+   prfmodel.fitters.grid.InfiniteLossWarning
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   GridFitter </autoapi/prfmodel/fitters/grid/GridFitter>
+   GridHistory </autoapi/prfmodel/fitters/grid/GridHistory>
+
+.. autoapisummary::
+
+   prfmodel.fitters.grid.GridFitter
+   prfmodel.fitters.grid.GridHistory
+
+

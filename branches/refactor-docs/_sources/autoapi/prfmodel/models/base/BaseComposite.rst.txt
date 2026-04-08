@@ -1,0 +1,46 @@
+prfmodel.models.base.BaseComposite
+==================================
+
+.. py:class:: prfmodel.models.base.BaseComposite(**models: BaseModel | None)
+
+
+
+   Generic abstract base class for creating composite models.
+
+   Cannot be instantiated on its own. Can only be used as a parent class to create custom composite models.
+   Subclasses must override the abstract :meth:`__call__` method and must be defined
+   with a specific stimulus type.
+   This class is intended for combining multiple submodels into a composite model with a custom :meth:`__call__`
+   method that defines how the submodels interact to make a composite prediction.
+
+   :param \*\*models: Submodels to be combined into the composite model. All submodel classes must inherit from :class:`BaseModel`.
+
+   :raises TypeError: If submodel classes do not inherit from :class:`BaseModel`.
+
+
+   .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+      :abstractmethod:
+
+
+      Predict a composite model response to a stimulus.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters that are used by the submodels.
+

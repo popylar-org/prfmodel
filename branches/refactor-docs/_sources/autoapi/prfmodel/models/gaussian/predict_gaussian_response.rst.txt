@@ -1,0 +1,55 @@
+prfmodel.models.gaussian.predict_gaussian_response
+==================================================
+
+.. py:function:: prfmodel.models.gaussian.predict_gaussian_response(grid: prfmodel.typing.Tensor, mu: prfmodel.typing.Tensor, sigma: prfmodel.typing.Tensor) -> prfmodel.typing.Tensor
+
+   Predict a isotropic Gaussian population receptive field response.
+
+   The dimensionality of the Gaussian depends on the number of dimensions of `grid` and `mu`. All dimensions have
+   the same size `sigma`.
+
+   :param grid: Stimulus grid for which to make predictions.
+   :type grid: :data:`prfmodel.typing.Tensor`
+   :param mu: Centroid of the population receptive field. Must have at least two dimensions.
+              The first dimension corresponds to the number of units.
+              The second dimension corresponds to the number of grid dimensions and must match the size of the
+              last `grid` dimension.
+   :type mu: :data:`prfmodel.typing.Tensor`
+   :param sigma: Size of the population receptive field. Must have at least two dimensions.
+                 The first dimension corresponds to the number of units,
+                 and its size must match the size of the first `mu` dimension.
+                 The second dimension must have size one (because all Gaussian dimensions have the same size).
+   :type sigma: :data:`prfmodel.typing.Tensor`
+
+   :returns: The predicted Gaussian population receptive field response with shape (num_units, ...)
+             where `...` corresponds to the dimensions of the Gaussian.
+   :rtype: :data:`prfmodel.typing.Tensor`
+
+   :raises BatchDimensionError: If `mu` and `sigma` have batch (first) dimensions with different sizes.
+   :raises GridDimensionsError: If the grid has mismatching dimensions.
+   :raises GridMuDimensionsError: If the grid and mu dimensions do not match.
+   :raises ParameterShapeError: If `mu` or `sigma` have less than two dimensions.
+
+   .. rubric:: Examples
+
+   Predict a 2D Gaussian response.
+
+   >>> import numpy as np
+   >>> # Define a 2D grid
+   >>> num_x, num_y = 10, 10
+   >>> x = np.linspace(-3, 3, num_x)
+   >>> y = np.linspace(-4, 4, num_y)
+   >>> xv, yv = np.meshgrid(x, y)
+   >>> grid = np.stack((xv, yv), axis=-1)  # shape (10, 10, 2)
+   >>> # Define 2D centroids of Gaussian for 3 units
+   >>> mu = np.array([  # shape (3, 2), first column y, second column x
+   ...     [0.0, 1.0],
+   ...     [1.0, 0.0],
+   ...     [0.0, 0.0],
+   ... ])
+   >>> # Define size of Gaussian for 3 units
+   >>> sigma = np.array([[1.0], [1.5], [2.0]])  # shape (3, 1)
+   >>> resp = predict_gaussian_response(grid, mu, sigma)
+   >>> print(resp.shape)  # (num_units, num_y, num_x)
+   (3, 10, 10)
+

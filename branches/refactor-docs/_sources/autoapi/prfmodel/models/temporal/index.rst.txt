@@ -1,0 +1,26 @@
+prfmodel.models.temporal
+========================
+
+.. py:module:: prfmodel.models.temporal
+
+.. autoapi-nested-parse::
+
+   Temporal response models.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   BaselineAmplitude </autoapi/prfmodel/models/temporal/BaselineAmplitude>
+   DoGAmplitude </autoapi/prfmodel/models/temporal/DoGAmplitude>
+
+.. autoapisummary::
+
+   prfmodel.models.temporal.BaselineAmplitude
+   prfmodel.models.temporal.DoGAmplitude
+
+

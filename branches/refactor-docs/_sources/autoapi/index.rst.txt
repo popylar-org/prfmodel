@@ -1,0 +1,31 @@
+API Reference
+=============
+
+This page contains auto-generated API reference documentation [#f1]_.
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+
+   /autoapi/prfmodel/adapter/index
+   /autoapi/prfmodel/backend/index
+   /autoapi/prfmodel/examples/index
+   /autoapi/prfmodel/fitters/index
+   /autoapi/prfmodel/models/index
+   /autoapi/prfmodel/stimuli/index
+   /autoapi/prfmodel/typing/index
+   /autoapi/prfmodel/utils/index
+
+.. autoapisummary::
+
+   prfmodel.adapter
+   prfmodel.backend
+   prfmodel.examples
+   prfmodel.fitters
+   prfmodel.models
+   prfmodel.stimuli
+   prfmodel.typing
+   prfmodel.utils
+
+
+.. [#f1] Created with `sphinx-autoapi <https://github.com/readthedocs/sphinx-autoapi>`_

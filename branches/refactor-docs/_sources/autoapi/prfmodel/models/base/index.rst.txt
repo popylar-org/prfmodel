@@ -1,0 +1,49 @@
+prfmodel.models.base
+====================
+
+.. py:module:: prfmodel.models.base
+
+.. autoapi-nested-parse::
+
+   Model base classes.
+
+
+
+Exceptions
+----------
+
+.. toctree::
+   :hidden:
+
+   BatchDimensionError </autoapi/prfmodel/models/base/BatchDimensionError>
+   ShapeError </autoapi/prfmodel/models/base/ShapeError>
+
+.. autoapisummary::
+
+   prfmodel.models.base.BatchDimensionError
+   prfmodel.models.base.ShapeError
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   BaseComposite </autoapi/prfmodel/models/base/BaseComposite>
+   BaseEncoder </autoapi/prfmodel/models/base/BaseEncoder>
+   BaseImpulse </autoapi/prfmodel/models/base/BaseImpulse>
+   BaseModel </autoapi/prfmodel/models/base/BaseModel>
+   BaseResponse </autoapi/prfmodel/models/base/BaseResponse>
+   BaseTemporal </autoapi/prfmodel/models/base/BaseTemporal>
+
+.. autoapisummary::
+
+   prfmodel.models.base.BaseComposite
+   prfmodel.models.base.BaseEncoder
+   prfmodel.models.base.BaseImpulse
+   prfmodel.models.base.BaseModel
+   prfmodel.models.base.BaseResponse
+   prfmodel.models.base.BaseTemporal
+
+

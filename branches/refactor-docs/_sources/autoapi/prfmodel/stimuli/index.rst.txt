@@ -1,0 +1,73 @@
+prfmodel.stimuli
+================
+
+.. py:module:: prfmodel.stimuli
+
+.. autoapi-nested-parse::
+
+   Stimuli.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :hidden:
+
+   /autoapi/prfmodel/stimuli/base/index
+   /autoapi/prfmodel/stimuli/cf/index
+   /autoapi/prfmodel/stimuli/prf/index
+
+.. autoapisummary::
+
+   prfmodel.stimuli.base
+   prfmodel.stimuli.cf
+   prfmodel.stimuli.prf
+
+
+Exceptions
+----------
+
+.. toctree::
+   :hidden:
+
+   GridDimensionsError </autoapi/prfmodel/stimuli/GridDimensionsError>
+
+.. autoapisummary::
+
+   prfmodel.stimuli.GridDimensionsError
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   CFStimulus </autoapi/prfmodel/stimuli/CFStimulus>
+   PRFStimulus </autoapi/prfmodel/stimuli/PRFStimulus>
+   Stimulus </autoapi/prfmodel/stimuli/Stimulus>
+
+.. autoapisummary::
+
+   prfmodel.stimuli.CFStimulus
+   prfmodel.stimuli.PRFStimulus
+   prfmodel.stimuli.Stimulus
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   animate_2d_prf_stimulus </autoapi/prfmodel/stimuli/animate_2d_prf_stimulus>
+   plot_2d_prf_stimulus </autoapi/prfmodel/stimuli/plot_2d_prf_stimulus>
+
+.. autoapisummary::
+
+   prfmodel.stimuli.animate_2d_prf_stimulus
+   prfmodel.stimuli.plot_2d_prf_stimulus
+
+

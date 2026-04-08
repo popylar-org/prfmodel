@@ -1,0 +1,28 @@
+prfmodel.models.composite
+=========================
+
+.. py:module:: prfmodel.models.composite
+
+.. autoapi-nested-parse::
+
+   Composite models.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   CenterSurroundPRFModel </autoapi/prfmodel/models/composite/CenterSurroundPRFModel>
+   SimpleCFModel </autoapi/prfmodel/models/composite/SimpleCFModel>
+   SimplePRFModel </autoapi/prfmodel/models/composite/SimplePRFModel>
+
+.. autoapisummary::
+
+   prfmodel.models.composite.CenterSurroundPRFModel
+   prfmodel.models.composite.SimpleCFModel
+   prfmodel.models.composite.SimplePRFModel
+
+

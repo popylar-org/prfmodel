@@ -1,0 +1,14 @@
+prfmodel.stimuli.prf.DimensionLabelsError
+=========================================
+
+.. py:exception:: prfmodel.stimuli.prf.DimensionLabelsError(dimensions_len: int, grid_dim: int)
+
+
+
+   Exception raised when the number of dimensions does not match the grid's last dimension.
+
+   :param dimensions_len: Length of the dimensions sequence.
+   :type dimensions_len: int
+   :param grid_dim: Size of the last dimension of the grid.
+   :type grid_dim: int
+

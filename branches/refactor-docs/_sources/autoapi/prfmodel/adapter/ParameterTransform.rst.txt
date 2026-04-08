@@ -1,0 +1,80 @@
+prfmodel.adapter.ParameterTransform
+===================================
+
+.. py:class:: prfmodel.adapter.ParameterTransform(parameter_names: collections.abc.Sequence[str], transform_fun: collections.abc.Callable, inverse_fun: collections.abc.Callable)
+
+   Apply transformations to parameters.
+
+   Instances of this class can be used inside an :class:`~prfmodel.adapter.Adapter` object to transform specific
+   parameters during model fitting.
+
+   :param parameter_names: Names of parameters to be transformed.
+   :type parameter_names: Sequence of str
+   :param transform_fun: Function to apply to parameters for the transformation. During model fitting, parameters will be
+                         optimized on the scale of the transformation (e.g., for a log-transformation, parameters will be
+                         optimized on the log-scale).
+   :type transform_fun: Callable
+   :param inverse_fun: Function to apply to parameters for the inverse transformation. Should be the inverse of `transform_fun`
+                       or the identity function (e.g., `lambda x: x`). During model fitting, model predictions will
+                       be made using parameters on the scale of the inverse transformation (e.g., for a log-transformation, model
+                       predictions will be made with parameters on the natural scale).
+   :type inverse_fun: Callable
+
+   .. rubric:: Notes
+
+   When using the transform within stochastic gradient descent, the transform and inverse functions should allow for
+   gradient tracking (e.g., by using functions from the `keras.ops` module).
+
+   .. rubric:: Examples
+
+   Log-transform parameters.
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   ...     "x": np.arange(1, 5)
+   ... })
+   >>> transform = ParameterTransform(
+   ...     parameter_names=["x"],
+   ...     transform_fun=np.log,
+   ...     inverse_fun=np.exp,
+   ... )
+   >>> params_transformed = transform.transform(params)
+   >>> print(params_transformed)  # doctest: +NORMALIZE_WHITESPACE
+             x
+   0  0.000000
+   1  0.693147
+   2  1.098612
+   3  1.386294
+
+   Inverse transformation returns the original parameters for finite values.
+
+   >>> params_inverse = transform.inverse(params_transformed)
+   >>> assert all(params_inverse == params)
+
+
+   .. py:method:: inverse(parameters: P) -> P
+
+      Apply the inverse transformation.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :returns: Dataframe with the inverse transformation applied to the parameters specified in `parameter_names`.
+      :rtype: pd.DataFrame
+
+
+
+   .. py:method:: transform(parameters: P) -> P
+
+      Apply the transformation.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :returns: Dataframe with the transformation applied to the parameters specified in `parameter_names`.
+      :rtype: pd.DataFrame
+
+

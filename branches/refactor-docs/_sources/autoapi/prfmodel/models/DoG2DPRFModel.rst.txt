@@ -1,0 +1,114 @@
+prfmodel.models.DoG2DPRFModel
+=============================
+
+.. py:class:: prfmodel.models.DoG2DPRFModel(encoding_model: prfmodel.models.base.BaseEncoder | type[prfmodel.models.base.BaseEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = DoGAmplitude)
+
+
+
+   Two-dimensional difference of Gaussians population receptive field model.
+
+   Runs two Gaussian 2D PRF responses (center and surround) through stimulus encoding and impulse response convolution
+   independently, then combines them as a linear model:
+
+   y(t) = p1(t) * amplitude_center + p2(t) * amplitude_surround + baseline
+
+   :param encoding_model: An encoding model class or instance. Model classes will be instantiated during initialization. The
+                          default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
+   :type encoding_model: BaseEncoder or type, default=PRFStimulusEncoder
+   :param impulse_model: An impulse response model class or instance. Model classes will be instantiated during
+                         initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
+                         instance with default values.
+   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
+   :param temporal_model: A temporal model class or instance. Model classes will be instantiated during initialization.
+                          The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
+   :type temporal_model: BaseTemporal or type or None, default=BaselineAmplitude, optional
+
+   .. rubric:: Notes
+
+   The simple composite model follows five steps [1]_:
+
+   1. The center and surround 2D Gaussian population receptive field response models make separate predictions for
+       the stimulus grid. The two response models have the same center but different sizes.
+   2. The encoding model encodes each response with the stimulus design.
+   3. A impulse response model generates an impulse response.
+   4. Each encoded response is convolved with the impulse response.
+   5. The temporal model modifies the convolved response. By default it subtracts the surround from the center
+       response after multiplying the responses with separate amplitude parameters.
+
+   .. rubric:: References
+
+   .. [1] Zuiderbaan, W., Harvey, B. M., & Dumoulin, S. O. (2012). Modeling center-surround configurations in
+       population receptive fields using fMRI. *Journal of Vision*, 12(3), 10. https://doi.org/10.1167/12.3.10
+
+   .. rubric:: Examples
+
+   Predict a model response for multiple units.
+
+   >>> import pandas as pd
+   >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+   >>> from prfmodel.models import DoG2DPRFModel
+   >>> stimulus = load_2d_prf_bar_stimulus()
+   >>> print(stimulus)
+   PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+   >>> model = DoG2DPRFModel()
+   >>> # Define all model parameters for 3 units
+   >>> params = pd.DataFrame({
+   ...     # DoG parameters
+   ...     "mu_x": [0.0, 1.0, 0.0],
+   ...     "mu_y": [1.0, 0.0, 0.0],
+   ...     "sigma_center": [1.0, 1.5, 2.0],
+   ...     "sigma_surround": [5.0, 7.5, 10.0],
+   ...     # Impulse model parameters
+   ...     "delay": [6.0, 6.0, 6.0],
+   ...     "dispersion": [0.9, 0.9, 0.9],
+   ...     "undershoot": [12.0, 12.0, 12.0],
+   ...     "u_dispersion": [0.9, 0.9, 0.9],
+   ...     "ratio": [0.48, 0.48, 0.48],
+   ...     "weight_deriv": [0.5, 0.5, 0.5],
+   ...     # Temporal model parameters
+   ...     "amplitude_center": [2.0, 1.2, 0.1],
+   ...     "amplitude_surround": [-0.5, -0.3, -0.1],
+   ...     "baseline": [0.1, -0.1, 0.5],
+   ... })
+   >>> # Predict model response
+   >>> resp = model(stimulus, params)
+   >>> print(resp.shape)  # (num_units, num_frames)
+   (3, 200)
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the composite model response (considering Center and Surround responses).
+
+      Applies the temporal model to the stacked responses from predict_responses.
+      When temporal_model=None, returns a simple subtraction (response_center - response_surround)
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:method:: predict_responses(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the each of the two responses before applying betas.
+
+      :returns: Stacked predictions of shape (num_units, 2, num_frames).
+      :rtype: :data:`prfmodel.typing.Tensor`
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters used by the model.
+

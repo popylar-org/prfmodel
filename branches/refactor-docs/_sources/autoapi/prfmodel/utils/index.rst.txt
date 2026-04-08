@@ -1,0 +1,67 @@
+prfmodel.utils
+==============
+
+.. py:module:: prfmodel.utils
+
+.. autoapi-nested-parse::
+
+   Utility functions.
+
+
+
+
+
+Exceptions
+----------
+
+.. toctree::
+   :hidden:
+
+   UndefinedResponseWarning </autoapi/prfmodel/utils/UndefinedResponseWarning>
+
+.. autoapisummary::
+
+   prfmodel.utils.UndefinedResponseWarning
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   ParamsDict </autoapi/prfmodel/utils/ParamsDict>
+
+.. autoapisummary::
+
+   prfmodel.utils.ParamsDict
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   batched </autoapi/prfmodel/utils/batched>
+   convert_parameters_to_tensor </autoapi/prfmodel/utils/convert_parameters_to_tensor>
+   get_dtype </autoapi/prfmodel/utils/get_dtype>
+   normalize_response </autoapi/prfmodel/utils/normalize_response>
+
+.. autoapisummary::
+
+   prfmodel.utils.batched
+   prfmodel.utils.convert_parameters_to_tensor
+   prfmodel.utils.get_dtype
+   prfmodel.utils.normalize_response
+
+
+Module Contents
+---------------
+
+.. py:data:: DTYPES
+
+   Accepted dtypes for `prfmodel.typing.Tensor` objects.
+
+   Accepted dtypes are: `"bfloat16"`, `"float16"`, `"float32"`, and `"float64"`.
+

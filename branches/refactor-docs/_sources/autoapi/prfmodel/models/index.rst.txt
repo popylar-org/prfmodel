@@ -1,0 +1,97 @@
+prfmodel.models
+===============
+
+.. py:module:: prfmodel.models
+
+.. autoapi-nested-parse::
+
+   Population receptive and connective field models.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :hidden:
+
+   /autoapi/prfmodel/models/base/index
+   /autoapi/prfmodel/models/composite/index
+   /autoapi/prfmodel/models/css/index
+   /autoapi/prfmodel/models/dog/index
+   /autoapi/prfmodel/models/encoding/index
+   /autoapi/prfmodel/models/gaussian/index
+   /autoapi/prfmodel/models/impulse/index
+   /autoapi/prfmodel/models/temporal/index
+
+.. autoapisummary::
+
+   prfmodel.models.base
+   prfmodel.models.composite
+   prfmodel.models.css
+   prfmodel.models.dog
+   prfmodel.models.encoding
+   prfmodel.models.gaussian
+   prfmodel.models.impulse
+   prfmodel.models.temporal
+
+
+Exceptions
+----------
+
+.. toctree::
+   :hidden:
+
+   BatchDimensionError </autoapi/prfmodel/models/BatchDimensionError>
+
+.. autoapisummary::
+
+   prfmodel.models.BatchDimensionError
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   BaseComposite </autoapi/prfmodel/models/BaseComposite>
+   BaseEncoder </autoapi/prfmodel/models/BaseEncoder>
+   BaseImpulse </autoapi/prfmodel/models/BaseImpulse>
+   BaseModel </autoapi/prfmodel/models/BaseModel>
+   BaseResponse </autoapi/prfmodel/models/BaseResponse>
+   BaseTemporal </autoapi/prfmodel/models/BaseTemporal>
+   DoG2DPRFModel </autoapi/prfmodel/models/DoG2DPRFModel>
+   Gaussian2DCSSPRFModel </autoapi/prfmodel/models/Gaussian2DCSSPRFModel>
+   Gaussian2DPRFModel </autoapi/prfmodel/models/Gaussian2DPRFModel>
+   GaussianCFModel </autoapi/prfmodel/models/GaussianCFModel>
+
+.. autoapisummary::
+
+   prfmodel.models.BaseComposite
+   prfmodel.models.BaseEncoder
+   prfmodel.models.BaseImpulse
+   prfmodel.models.BaseModel
+   prfmodel.models.BaseResponse
+   prfmodel.models.BaseTemporal
+   prfmodel.models.DoG2DPRFModel
+   prfmodel.models.Gaussian2DCSSPRFModel
+   prfmodel.models.Gaussian2DPRFModel
+   prfmodel.models.GaussianCFModel
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   init_css_from_gaussian </autoapi/prfmodel/models/init_css_from_gaussian>
+   init_dog_from_gaussian </autoapi/prfmodel/models/init_dog_from_gaussian>
+
+.. autoapisummary::
+
+   prfmodel.models.init_css_from_gaussian
+   prfmodel.models.init_dog_from_gaussian
+
+

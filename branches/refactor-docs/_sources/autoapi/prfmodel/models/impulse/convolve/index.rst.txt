@@ -1,0 +1,24 @@
+prfmodel.models.impulse.convolve
+================================
+
+.. py:module:: prfmodel.models.impulse.convolve
+
+.. autoapi-nested-parse::
+
+   Convolution functions.
+
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   convolve_prf_impulse_response </autoapi/prfmodel/models/impulse/convolve/convolve_prf_impulse_response>
+
+.. autoapisummary::
+
+   prfmodel.models.impulse.convolve.convolve_prf_impulse_response
+
+

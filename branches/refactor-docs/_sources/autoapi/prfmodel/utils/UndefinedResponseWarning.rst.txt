@@ -1,0 +1,9 @@
+prfmodel.utils.UndefinedResponseWarning
+=======================================
+
+.. py:exception:: prfmodel.utils.UndefinedResponseWarning
+
+
+
+   Warning for when a response is undefined and contains NaNs.
+

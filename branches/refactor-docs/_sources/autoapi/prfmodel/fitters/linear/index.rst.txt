@@ -1,0 +1,26 @@
+prfmodel.fitters.linear
+=======================
+
+.. py:module:: prfmodel.fitters.linear
+
+.. autoapi-nested-parse::
+
+   Linear fitters.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   LeastSquaresFitter </autoapi/prfmodel/fitters/linear/LeastSquaresFitter>
+   LeastSquaresHistory </autoapi/prfmodel/fitters/linear/LeastSquaresHistory>
+
+.. autoapisummary::
+
+   prfmodel.fitters.linear.LeastSquaresFitter
+   prfmodel.fitters.linear.LeastSquaresHistory
+
+

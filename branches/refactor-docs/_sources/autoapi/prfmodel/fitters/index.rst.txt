@@ -1,0 +1,45 @@
+prfmodel.fitters
+================
+
+.. py:module:: prfmodel.fitters
+
+.. autoapi-nested-parse::
+
+   Model fitters.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :hidden:
+
+   /autoapi/prfmodel/fitters/grid/index
+   /autoapi/prfmodel/fitters/linear/index
+   /autoapi/prfmodel/fitters/sgd/index
+
+.. autoapisummary::
+
+   prfmodel.fitters.grid
+   prfmodel.fitters.linear
+   prfmodel.fitters.sgd
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   GridFitter </autoapi/prfmodel/fitters/GridFitter>
+   LeastSquaresFitter </autoapi/prfmodel/fitters/LeastSquaresFitter>
+   SGDFitter </autoapi/prfmodel/fitters/SGDFitter>
+
+.. autoapisummary::
+
+   prfmodel.fitters.GridFitter
+   prfmodel.fitters.LeastSquaresFitter
+   prfmodel.fitters.SGDFitter
+
+

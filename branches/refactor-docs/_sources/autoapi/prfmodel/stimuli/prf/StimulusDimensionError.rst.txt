@@ -1,0 +1,16 @@
+prfmodel.stimuli.prf.StimulusDimensionError
+===========================================
+
+.. py:exception:: prfmodel.stimuli.prf.StimulusDimensionError(actual: int, expected: int)
+
+
+
+   Exception raised when Stimulus does not have the right number of dimensions.
+
+   The dimension for the frames is ignored.
+
+   :param actual: Number of dimensions in the stimulus grid.
+   :type actual: int
+   :param expected: Number of expected dimensions in the stimulus grid.
+   :type expected: int
+

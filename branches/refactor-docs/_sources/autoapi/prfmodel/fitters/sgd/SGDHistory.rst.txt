@@ -1,0 +1,32 @@
+prfmodel.fitters.sgd.SGDHistory
+===============================
+
+.. py:class:: prfmodel.fitters.sgd.SGDHistory
+
+   Stochastic gradient descent metric history.
+
+   Logs losses and metrics over stochastic gradient descent steps.
+
+   .. attribute:: history
+
+      Dictionary with keys indicating metric names and values containing metric values for each step.
+
+      :type: dict
+
+   .. attribute:: step
+
+      List of step indices.
+
+      :type: list of int
+
+
+   .. py:method:: on_step_end(step: int, logs: dict | None) -> None
+
+      Append metrics to the history after a stochastic gradient descent step.
+
+      :param step: Step index.
+      :type step: int
+      :param logs: Dictionary with keys indicating metric names and values containing the metric value for the step.
+      :type logs: dict
+
+

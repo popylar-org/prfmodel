@@ -1,0 +1,112 @@
+prfmodel.models.impulse.shifted_gamma.ShiftedGammaImpulse
+=========================================================
+
+.. py:class:: prfmodel.models.impulse.shifted_gamma.ShiftedGammaImpulse(duration: float = 32.0, offset: float = 0.0001, resolution: float = 1.0, norm: str | None = 'sum', default_parameters: dict[str, float] | None = None)
+
+
+
+   Shifted gamma distribution impulse response model.
+
+   Predicts an impulse response that is a shifted gamma distribution.
+   The model has three parameters: `delay` refers to the positive peak, `dispersion` to the
+   rate, and `shift` to the onset of the gamma distribution.
+
+   :param duration: The duration of the impulse response (in seconds).
+   :type duration: float, default=32.0
+   :param offset: The offset of the impulse response (in seconds). By default a very small offset is added to prevent infinite
+                  response values at t = 0.
+   :type offset: float, default=0.0001
+   :param resolution: The time resultion of the impulse response (in seconds), that is the number of points per second at which the
+                      impulse response function is evaluated.
+   :type resolution: float, default=1.0
+   :param norm: The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
+                no normalization is performed.
+   :type norm: str, optional, default="sum"
+   :param default_parameters: Dictionary with scalar default parameter values. Keys must be valid parameter names.
+   :type default_parameters: dict of float, optional
+
+   .. seealso::
+
+      :py:obj:`gamma_density`
+          Density of the gamma distribution.
+
+      :py:obj:`shifted_gamma_density`
+          Shifted density of the gamma distribution.
+
+   .. rubric:: Notes
+
+   The predicted impulse response at time :math:`t` with :math:`\alpha = delay / dispersion`,
+   :math:`\lambda = dispersion`, and :math:`\delta = shift` is:
+
+   .. math::
+
+       f(t) = f_{\text{gamma}}(t - \delta; \alpha, \lambda)
+
+   The response prior to the onset of the gamma distribution is set to zero.
+
+   .. rubric:: References
+
+   .. [1] Boynton, G. M., Engel, S. A., Glover, G. H., & Heeger, D. J. (1996). Linear systems analysis of functional
+       magnetic resonance imaging in human V1. *The Journal of Neuroscience*, 16(13), 4207-4221.
+       https://doi.org/10.1523/JNEUROSCI.16-13-04207.1996
+   .. [2] Friston, K. J., Fletcher, P., Josephs, O., Holmes, A., Rugg, M. D., & Turner, R. (1998). Event-related fMRI:
+       Characterizing differential responses. *NeuroImage*, 7(1), 30-40. https://doi.org/10.1006/nimg.1997.0306
+   .. [3] Glover, G. H. (1999). Deconvolution of impulse response in event-related BOLD fMRI. *NeuroImage*, 9(4),
+       416-429. https://doi.org/10.1006/nimg.1998.0419
+
+   .. rubric:: Examples
+
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   ...     "delay": [2.0, 1.0, 1.5],
+   ...     "dispersion": [1.0, 1.0, 1.0],
+   ...     "shift": [1.0, 2.0, 5.0],
+   ... })
+   >>> impulse_model = ShiftedGammaImpulse(
+   ...     duration=100.0  # 100 seconds
+   ... )
+   >>> resp = impulse_model(params)
+   >>> print(resp.shape)  # (num_units, num_frames)
+   (3, 100)
+
+
+   .. py:method:: __call__(parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the impulse response.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
+      :rtype: :data:`prfmodel.typing.Tensor`
+
+
+
+   .. py:property:: frames
+      :type: prfmodel.typing.Tensor
+
+
+      The time frames at which the impulse response function is evaluated.
+
+      Time frames are linearly interpolated between `offset` and `duration` and have shape `(1, num_frames)`.
+
+
+   .. py:property:: num_frames
+      :type: int
+
+
+      The total number of time frames at which the impulse response function is evaluated.
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      Names of parameters used by the model.
+
+      Parameter names are: `delay`, `dispersion`, and `shift`.
+

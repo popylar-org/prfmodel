@@ -1,0 +1,28 @@
+prfmodel.models.impulse.density
+===============================
+
+.. py:module:: prfmodel.models.impulse.density
+
+.. autoapi-nested-parse::
+
+   Density functions.
+
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   derivative_gamma_density </autoapi/prfmodel/models/impulse/density/derivative_gamma_density>
+   gamma_density </autoapi/prfmodel/models/impulse/density/gamma_density>
+   shifted_gamma_density </autoapi/prfmodel/models/impulse/density/shifted_gamma_density>
+
+.. autoapisummary::
+
+   prfmodel.models.impulse.density.derivative_gamma_density
+   prfmodel.models.impulse.density.gamma_density
+   prfmodel.models.impulse.density.shifted_gamma_density
+
+

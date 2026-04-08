@@ -1,0 +1,96 @@
+prfmodel.models.Gaussian2DPRFModel
+==================================
+
+.. py:class:: prfmodel.models.Gaussian2DPRFModel(encoding_model: prfmodel.models.base.BaseEncoder | type[prfmodel.models.base.BaseEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = BaselineAmplitude)
+
+
+
+   Two-dimensional isotropic Gaussian population receptive field model.
+
+   This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
+   and temporal model response.
+
+   :param encoding_model: An encoding model class or instance. Model classes will be instantiated during initialization. The
+                          default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
+   :type encoding_model: BaseEncoder or type, default=PRFStimulusEncoder
+   :param impulse_model: An impulse response model class or instance. Model classes will be instantiated during
+                         initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
+                         instance with default values.
+   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
+   :param temporal_model: A temporal model class or instance. Model classes will be instantiated during initialization.
+                          The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
+   :type temporal_model: BaseTemporal or type or None, default=BaselineAmplitude, optional
+
+   .. rubric:: Notes
+
+   The simple composite model follows five steps [1]_:
+
+   1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
+   2. The encoding model encodes the response with the stimulus design.
+   3. A impulse response model generates an impulse response.
+   4. The encoded response is convolved with the impulse response.
+   5. The temporal model modifies the convolved response.
+
+   .. rubric:: References
+
+   .. [1] Dumoulin, S. O., & Wandell, B. A. (2008). Population receptive field estimates in human visual cortex.
+       *NeuroImage*, 39(2), 647-660. https://doi.org/10.1016/j.neuroimage.2007.09.034
+
+   .. rubric:: Examples
+
+   Predict a model response for multiple units.
+
+   >>> import pandas as pd
+   >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+   >>> from prfmodel.models import Gaussian2DPRFModel
+   >>> stimulus = load_2d_prf_bar_stimulus()
+   >>> print(stimulus)
+   PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+   >>> model = Gaussian2DPRFModel()
+   >>> # Define all model parameters for 3 units
+   >>> params = pd.DataFrame({
+   ...     # Gaussian parameters
+   ...     "mu_x": [0.0, 1.0, 0.0],
+   ...     "mu_y": [1.0, 0.0, 0.0],
+   ...     "sigma": [1.0, 1.5, 2.0],
+   ...     # Impulse model parameters
+   ...     "delay": [6.0, 6.0, 6.0],
+   ...     "dispersion": [0.9, 0.9, 0.9],
+   ...     "undershoot": [12.0, 12.0, 12.0],
+   ...     "u_dispersion": [0.9, 0.9, 0.9],
+   ...     "ratio": [0.48, 0.48, 0.48],
+   ...     "weight_deriv": [0.5, 0.5, 0.5],
+   ...     # Temporal model parameters
+   ...     "baseline": [0.1, -0.1, 0.5],
+   ...     "amplitude": [-2.0, 1.2, 0.1],
+   ... })
+   >>> # Predict model response
+   >>> resp = model(stimulus, params)
+   >>> print(resp.shape)  # (num_units, num_frames)
+   (3, 200)
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict a simple population receptive field model response to a stimulus.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters that are used by the submodels.
+

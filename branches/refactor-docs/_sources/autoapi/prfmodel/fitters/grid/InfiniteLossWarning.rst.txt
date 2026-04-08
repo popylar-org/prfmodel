@@ -1,0 +1,9 @@
+prfmodel.fitters.grid.InfiniteLossWarning
+=========================================
+
+.. py:exception:: prfmodel.fitters.grid.InfiniteLossWarning
+
+
+
+   Warning for when infinite loss values are returned.
+

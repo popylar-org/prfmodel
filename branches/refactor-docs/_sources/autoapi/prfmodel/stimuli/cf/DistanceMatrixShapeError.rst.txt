@@ -1,0 +1,12 @@
+prfmodel.stimuli.cf.DistanceMatrixShapeError
+============================================
+
+.. py:exception:: prfmodel.stimuli.cf.DistanceMatrixShapeError(distance_matrix_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raise when distance matrix is not a matrix.
+
+   :param distance_matrix_shape: Shape of the distance matrix.
+   :type distance_matrix_shape: tuple of int
+

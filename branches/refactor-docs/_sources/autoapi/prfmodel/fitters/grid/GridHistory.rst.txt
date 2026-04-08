@@ -1,0 +1,15 @@
+prfmodel.fitters.grid.GridHistory
+=================================
+
+.. py:class:: prfmodel.fitters.grid.GridHistory(history: dict | None)
+
+   Grid search metric history.
+
+   Logs losses and metrics over data batches resulting from a grid search.
+
+   .. attribute:: history
+
+      Dictionary with keys indicating metric names and values containing metric values for each data batch.
+
+      :type: dict
+

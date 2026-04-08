@@ -1,0 +1,28 @@
+prfmodel.adapter
+================
+
+.. py:module:: prfmodel.adapter
+
+.. autoapi-nested-parse::
+
+   Adapters and parameter transformations.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   Adapter </autoapi/prfmodel/adapter/Adapter>
+   ParameterConstraint </autoapi/prfmodel/adapter/ParameterConstraint>
+   ParameterTransform </autoapi/prfmodel/adapter/ParameterTransform>
+
+.. autoapisummary::
+
+   prfmodel.adapter.Adapter
+   prfmodel.adapter.ParameterConstraint
+   prfmodel.adapter.ParameterTransform
+
+

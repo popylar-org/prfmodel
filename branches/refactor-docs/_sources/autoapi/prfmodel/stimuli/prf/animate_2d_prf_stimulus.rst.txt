@@ -1,0 +1,41 @@
+prfmodel.stimuli.prf.animate_2d_prf_stimulus
+============================================
+
+.. py:function:: prfmodel.stimuli.prf.animate_2d_prf_stimulus(stimulus: PRFStimulus, title: str | None = None, origin: Literal['upper', 'lower'] = 'lower', interval: int = 50, blit: bool = True, repeat_delay: int = 1000, **kwargs) -> matplotlib.animation.ArtistAnimation
+
+   Animate a two-dimensional population receptive field stimulus.
+
+   :param stimulus: The population receptive field stimulus to visualize.
+   :type stimulus: PRFStimulus
+   :param title: Title for the video animation.
+   :type title: str or None, optional
+   :param origin: `origin` argument for :meth:`matplotlib.axes.Axes.imshow`.
+   :type origin: str, optional
+   :param interval: `interval` argument passed to :class:`matplotlib.animation.ArtistAnimation`.
+   :type interval: int, optional
+   :param blit: `blit` argument passed to :class:`matplotlib.animation.ArtistAnimation`.
+   :type blit: bool, optional
+   :param repeat_delay: `repeat_delay` argument passed to :class:`matplotlib.animation.ArtistAnimation`.
+   :type repeat_delay: int, optional
+   :param kwargs: Extra arguments passed to :func:`matplotlib.pyplot.subplots`
+                  and :class:`matplotlib.animation.ArtistAnimation`.
+
+   :rtype: matplotlib.animation.ArtistAnimation
+
+   :raises StimulusDimensionError: If `stimulus` is not 2-dimensional.
+
+   .. rubric:: Notes
+
+   The function uses matplotlib under the hood, and you can use the :data:`matplotlib.rcParams`
+   to customize the animation, as described on the
+   `matplotlib docs <https://matplotlib.org/stable/users/explain/customizing.html>`_.
+
+   .. rubric:: Examples
+
+   >>> from IPython.display import HTML  # doctest: +SKIP
+   >>> from prfmodel.stimuli.prf import PRFStimulus, animate_2d_prf_stimulus  # doctest: +SKIP
+   >>> bar_stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64)  # doctest: +SKIP
+   >>> ani = animate_2d_prf_stimulus(bar_stimulus)  # doctest: +SKIP
+   >>> video = ani.to_html5_video()  # doctest: +SKIP
+   >>> HTML(video)  # doctest: +SKIP
+

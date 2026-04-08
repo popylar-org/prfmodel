@@ -1,0 +1,14 @@
+prfmodel.stimuli.cf.DistanceMatrixSourceShapeError
+==================================================
+
+.. py:exception:: prfmodel.stimuli.cf.DistanceMatrixSourceShapeError(distance_matrix_shape: tuple[int, Ellipsis], source_response_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when the shapes of the distance matrix and source response do not match.
+
+   :param distance_matrix_shape: Shape of the distance matrix.
+   :type distance_matrix_shape: tuple of int
+   :param source_response_shape: Shape of the source response array.
+   :type source_response_shape: tuple of int
+

@@ -1,0 +1,97 @@
+prfmodel.fitters.SGDFitter
+==========================
+
+.. py:class:: prfmodel.fitters.SGDFitter(model: prfmodel.models.BaseComposite, stimulus: prfmodel.stimuli.Stimulus, adapter: prfmodel.adapter.Adapter | None = None, optimizer: keras.optimizers.Optimizer | None = None, loss: keras.losses.Loss | collections.abc.Callable | None = None, dtype: str | None = None)
+
+
+
+   Fit population receptive field models with stochastic gradient descent (SGD).
+
+   Estimates model parameters iteratively through SGD by minimizing the loss between model predictions and target
+   data.
+
+   :param model: A model instance that can be fit to data.
+                 The model must implement the :meth:`__call__` method to make predictions that can be
+                 compared to data.
+   :type model: BaseModel
+   :param stimulus: Stimulus object.
+   :type stimulus: Stimulus
+   :param adapter: Adapter object to apply transformations to parameters during fitting.
+   :type adapter: Adapter, optional
+   :param optimizer: Optimizer instance. Default is `None` where a `keras.optimizers.Adam` optimizer is used.
+   :type optimizer: keras.optimizers.Optimizer, optional
+   :param loss: Loss instance or function with the signatur `f(y, y_pred)`, where `y` are the target data and `y_pred` are the
+                model predicitons. Default is `None` where a `keras.optimizers.MeanSquaredError` loss is used.
+   :type loss: keras.optimizers.Loss or Callable, optional
+   :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+   .. rubric:: Notes
+
+   At each step during the fitting, the `model` makes a prediction for each batch in the target data
+   given the `stimulus` and the current parameter values. The predictions are then compared to the target data and
+   the parameter values are updated given the `optimizer` schedule.
+
+   .. rubric:: Examples
+
+   Fit a 2D Gaussian population receptive field model.
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+   >>> from prfmodel.models import Gaussian2DPRFModel
+   >>> from prfmodel.fitters.sgd import SGDFitter
+   >>> stimulus = load_2d_prf_bar_stimulus()
+   >>> print(stimulus)
+   PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+   >>> # Only fit response model
+   >>> model = Gaussian2DPRFModel(
+   ...     impulse_model=None,
+   ...     temporal_model=None,
+   ... )
+   >>> fitter = SGDFitter(model=model, stimulus=stimulus)
+   >>> # Define start parameters
+   >>> params_init = pd.DataFrame({
+   ...     "mu_y": [0.0],
+   ...     "mu_x": [0.0],
+   ...     "sigma": [1.0],
+   ... })
+   >>> # Create dummy data for a single unit
+   >>> data = np.zeros((1, 200))
+   >>> # Fit model parameters
+   >>> history, params_sgd = fitter.fit(data, params_init, num_steps=5)
+   >>> print(list(params_sgd.columns))
+   ['mu_y', 'mu_x', 'sigma']
+
+
+   .. py:method:: fit(data: prfmodel.typing.Tensor, init_parameters: pandas.DataFrame, fixed_parameters: collections.abc.Sequence[str] | None = None, num_steps: int = 1000) -> tuple[SGDHistory, pandas.DataFrame]
+
+      Fit a population receptive field model to target data.
+
+      :param data: Target data to fit the model to. Must have shape `(num_units, num_frames)`, where `num_units` is the
+                   number of units for which parameters are estimated and `num_frames` is the number of time steps.
+      :type data: :data:`prfmodel.typing.Tensor`
+      :param init_parameters: Dataframe with initial model parameters. Columns must contain different model parameters and
+                              rows parameter values for each unit in `data`.
+      :type init_parameters: pandas.DataFrame
+      :param fixed_parameters: Names of model parameters that are fixed to their starting values, i.e., their values are not optimized
+                               during the fitting. If `None` (the default), all parameters are optimized during fitting.
+      :type fixed_parameters: Sequence of str, optional
+      :param num_steps: Number of optimization steps.
+      :type num_steps: int, default=1000
+
+      :returns: * *SGDHistory* -- A history object that contains loss and metric values for each optimization step.
+                * *pandas.DataFrame* -- A dataframe with final model parameters.
+
+
+
+   .. py:attribute:: dtype
+      :value: None
+
+
+      The dtype that is used during fitting.
+
+      If `None`, uses `keras.config.floatx()` which defaults
+      to `float32`.
+

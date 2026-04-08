@@ -1,0 +1,26 @@
+prfmodel.fitters.sgd
+====================
+
+.. py:module:: prfmodel.fitters.sgd
+
+.. autoapi-nested-parse::
+
+   Stochastic gradient descent fitters.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   SGDFitter </autoapi/prfmodel/fitters/sgd/SGDFitter>
+   SGDHistory </autoapi/prfmodel/fitters/sgd/SGDHistory>
+
+.. autoapisummary::
+
+   prfmodel.fitters.sgd.SGDFitter
+   prfmodel.fitters.sgd.SGDHistory
+
+

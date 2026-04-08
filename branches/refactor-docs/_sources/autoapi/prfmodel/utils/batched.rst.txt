@@ -1,0 +1,32 @@
+prfmodel.utils.batched
+======================
+
+.. py:function:: prfmodel.utils.batched(fn: collections.abc.Callable) -> collections.abc.Callable
+
+   Decorate a model prediction function to make batched predictions.
+
+   Splits the `parameters` argument (a :class:`pandas.DataFrame`) along the row (unit) dimension into
+   chunks of size `batch_size`, calls `fn` for each chunk, and concatenates the results along the first axis.
+
+   The wrapped function gains a ``batch_size`` keyword argument. When ``batch_size`` is ``None`` (the default),
+   all units are processed in a single call.
+
+   :param fn: A model prediction function with signature ``fn(stimulus, parameters, **kwargs)``.
+   :type fn: callable
+
+   :returns: Wrapped function with signature ``fn(stimulus, parameters, *, batch_size=None, **kwargs)``.
+   :rtype: callable
+
+   .. rubric:: Examples
+
+   >>> from prfmodel.utils import batched
+   >>> batched_predict = batched(model)  # doctest: +SKIP
+   >>> result = batched_predict(stimulus, parameters, batch_size=128)  # doctest: +SKIP
+
+   As a decorator:
+
+   >>> @batched
+   ... def predict(stimulus, parameters, *, dtype=None):
+   ...     ...
+   >>> result = predict(stimulus, parameters, batch_size=64)  # doctest: +SKIP
+

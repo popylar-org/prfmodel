@@ -1,0 +1,37 @@
+prfmodel.models.dog
+===================
+
+.. py:module:: prfmodel.models.dog
+
+.. autoapi-nested-parse::
+
+   Difference of Gaussians population receptive field models.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   DoG2DPRFModel </autoapi/prfmodel/models/dog/DoG2DPRFModel>
+
+.. autoapisummary::
+
+   prfmodel.models.dog.DoG2DPRFModel
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   init_dog_from_gaussian </autoapi/prfmodel/models/dog/init_dog_from_gaussian>
+
+.. autoapisummary::
+
+   prfmodel.models.dog.init_dog_from_gaussian
+
+

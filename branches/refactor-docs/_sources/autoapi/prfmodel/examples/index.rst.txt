@@ -1,0 +1,28 @@
+prfmodel.examples
+=================
+
+.. py:module:: prfmodel.examples
+
+.. autoapi-nested-parse::
+
+   Example stimuli and data.
+
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   load_2d_prf_bar_stimulus </autoapi/prfmodel/examples/load_2d_prf_bar_stimulus>
+   load_single_subject_fmri_data </autoapi/prfmodel/examples/load_single_subject_fmri_data>
+   load_surface_mesh </autoapi/prfmodel/examples/load_surface_mesh>
+
+.. autoapisummary::
+
+   prfmodel.examples.load_2d_prf_bar_stimulus
+   prfmodel.examples.load_single_subject_fmri_data
+   prfmodel.examples.load_surface_mesh
+
+

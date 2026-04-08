@@ -1,0 +1,14 @@
+prfmodel.models.BatchDimensionError
+===================================
+
+.. py:exception:: prfmodel.models.BatchDimensionError(arg_names: collections.abc.Sequence[str], arg_shapes: collections.abc.Sequence[tuple[int, Ellipsis]])
+
+
+
+   Exception raised when arguments have different sizes in the batch (first) dimension.
+
+   :param arg_names: Names of arguments that have different sizes in batch dimension.
+   :type arg_names: Sequence[str]
+   :param arg_shapes: Shapes of arguments that have different sizes in batch dimension.
+   :type arg_shapes: Sequence[tuple of int]
+

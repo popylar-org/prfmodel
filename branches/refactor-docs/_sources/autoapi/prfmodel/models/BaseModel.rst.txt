@@ -1,0 +1,38 @@
+prfmodel.models.BaseModel
+=========================
+
+.. py:class:: prfmodel.models.BaseModel
+
+
+
+   Abstract base class for models.
+
+   Cannot be instantiated on its own.
+   Can only be used as a parent class to create custom model classes.
+   Subclasses must override the abstract :attr:`parameter_names` property.
+
+   .. attribute:: parameter_names
+
+
+
+   .. rubric:: Examples
+
+   Create a custom model class that inherits from the base class:
+
+   >>> class CustomModel(BaseModel):
+   ...     @property
+   ...     def parameter_names(self):
+   ...         return ["a", "b"]
+   >>> model = CustomModel()
+   >>> print(model.parameter_names)
+   ['a', 'b']
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
+

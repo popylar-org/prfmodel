@@ -1,0 +1,24 @@
+prfmodel.models.impulse.two_gamma_deriv
+=======================================
+
+.. py:module:: prfmodel.models.impulse.two_gamma_deriv
+
+.. autoapi-nested-parse::
+
+   Weighted difference of two derivative gamma distribution impulse response.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   DerivativeTwoGammaImpulse </autoapi/prfmodel/models/impulse/two_gamma_deriv/DerivativeTwoGammaImpulse>
+
+.. autoapisummary::
+
+   prfmodel.models.impulse.two_gamma_deriv.DerivativeTwoGammaImpulse
+
+

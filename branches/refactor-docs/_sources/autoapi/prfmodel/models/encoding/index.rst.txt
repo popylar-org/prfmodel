@@ -1,0 +1,54 @@
+prfmodel.models.encoding
+========================
+
+.. py:module:: prfmodel.models.encoding
+
+.. autoapi-nested-parse::
+
+   Stimulus encoding classes.
+
+
+
+Exceptions
+----------
+
+.. toctree::
+   :hidden:
+
+   ResponseDesignShapeError </autoapi/prfmodel/models/encoding/ResponseDesignShapeError>
+
+.. autoapisummary::
+
+   prfmodel.models.encoding.ResponseDesignShapeError
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   CFStimulusEncoder </autoapi/prfmodel/models/encoding/CFStimulusEncoder>
+   CompressiveEncoder </autoapi/prfmodel/models/encoding/CompressiveEncoder>
+   PRFStimulusEncoder </autoapi/prfmodel/models/encoding/PRFStimulusEncoder>
+
+.. autoapisummary::
+
+   prfmodel.models.encoding.CFStimulusEncoder
+   prfmodel.models.encoding.CompressiveEncoder
+   prfmodel.models.encoding.PRFStimulusEncoder
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   encode_prf_response </autoapi/prfmodel/models/encoding/encode_prf_response>
+
+.. autoapisummary::
+
+   prfmodel.models.encoding.encode_prf_response
+
+

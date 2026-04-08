@@ -1,0 +1,67 @@
+prfmodel.models.gaussian.GaussianCFResponse
+===========================================
+
+.. py:class:: prfmodel.models.gaussian.GaussianCFResponse
+
+
+
+   Gaussian connective field response model.
+
+   Predicts a response to a stimulus distance matrix.
+   The model has two parameters: `center_index` is the index of the row in the stimulus distance matrix that is the
+   center of the Gaussian; `sigma` for the width of the Gaussian.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> from prfmodel.stimuli.cf import CFStimulus
+   >>> num_source_units, num_frames = 10, 20
+   >>> distances = np.abs(
+   ...     np.arange(num_source_units, dtype=float)[:, None]
+   ...     - np.arange(num_source_units, dtype=float)[None, :]
+   ... )
+   >>> source_response = np.ones((num_source_units, num_frames))
+   >>> stimulus = CFStimulus(
+   ...     distance_matrix=distances,
+   ...     source_response=source_response
+   ... )
+   >>> # Define parameters for 2 target units
+   >>> params = pd.DataFrame({
+   ...     "center_index": [0, 5],
+   ...     "sigma": [1.0, 2.0]
+   ... })
+   >>> model = GaussianCFResponse()
+   >>> resp = model(stimulus, params)
+   >>> print(resp.shape)  # (num_units, num_source_units)
+   (2, 10)
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.CFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the model response for a stimulus with a distance matrix.
+
+      :param stimulus: Connective field stimulus object.
+      :type stimulus: CFStimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape `(num_units, num_rows)` and dtype `dtype`.
+                `num_units` is the number of rows in `parameters` and `num_rows` is the number of rows in the stimulus
+                distance matrix.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      `center_index`, `sigma`.
+
+      :type: Names of parameters used by the model
+

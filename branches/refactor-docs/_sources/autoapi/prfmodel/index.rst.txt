@@ -1,0 +1,75 @@
+prfmodel
+========
+
+.. py:module:: prfmodel
+
+.. autoapi-nested-parse::
+
+   Documentation about prfmodel.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :hidden:
+
+   /autoapi/prfmodel/adapter/index
+   /autoapi/prfmodel/backend/index
+   /autoapi/prfmodel/examples/index
+   /autoapi/prfmodel/fitters/index
+   /autoapi/prfmodel/models/index
+   /autoapi/prfmodel/stimuli/index
+   /autoapi/prfmodel/typing/index
+   /autoapi/prfmodel/utils/index
+
+.. autoapisummary::
+
+   prfmodel.adapter
+   prfmodel.backend
+   prfmodel.examples
+   prfmodel.fitters
+   prfmodel.models
+   prfmodel.stimuli
+   prfmodel.typing
+   prfmodel.utils
+
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   PRFStimulus </autoapi/prfmodel/PRFStimulus>
+
+.. autoapisummary::
+
+   prfmodel.PRFStimulus
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   convert_parameters_to_tensor </autoapi/prfmodel/convert_parameters_to_tensor>
+
+.. autoapisummary::
+
+   prfmodel.convert_parameters_to_tensor
+
+
+Package Contents
+----------------
+
+.. py:type:: Tensor
+   :canonical: BackendTensor
+
+
+   Backend-specific tensor type.
+

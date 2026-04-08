@@ -1,0 +1,24 @@
+prfmodel.models.impulse.two_gamma
+=================================
+
+.. py:module:: prfmodel.models.impulse.two_gamma
+
+.. autoapi-nested-parse::
+
+   Weighted difference of two gamma distribution impulse response.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   TwoGammaImpulse </autoapi/prfmodel/models/impulse/two_gamma/TwoGammaImpulse>
+
+.. autoapisummary::
+
+   prfmodel.models.impulse.two_gamma.TwoGammaImpulse
+
+

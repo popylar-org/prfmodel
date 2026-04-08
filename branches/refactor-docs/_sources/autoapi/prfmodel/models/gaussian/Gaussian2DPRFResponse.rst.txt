@@ -1,0 +1,58 @@
+prfmodel.models.gaussian.Gaussian2DPRFResponse
+==============================================
+
+.. py:class:: prfmodel.models.gaussian.Gaussian2DPRFResponse
+
+
+
+   Two-dimensional isotropic Gaussian population receptive field response model.
+
+   Predicts a response to a stimulus grid.
+   The model has three parameters: `mu_y` and `mu_x` for the center and `sigma` for the width of the Gaussian.
+
+   .. rubric:: Examples
+
+   >>> import pandas as pd
+   >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+   >>> stimulus = load_2d_prf_bar_stimulus()
+   >>> print(stimulus)
+   PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+   >>> params = pd.DataFrame({
+   ...     "mu_x": [0.0, 1.0, 0.0],
+   ...     "mu_y": [1.0, 0.0, 0.0],
+   ...     "sigma": [1.0, 1.5, 2.0],
+   ... })
+   >>> model = Gaussian2DPRFResponse()
+   >>> resp = model(stimulus, params)
+   >>> print(resp.shape)  # (num_units, num_y, num_x)
+   (3, 101, 101)
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the model response for a stimulus with a 2D grid.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape `(num_units, size_y, size_x)` and dtype `dtype`.
+                `num_units` is the number of rows in `parameters` and `size_y` and `size_x` are the sizes of the
+                x and y stimulus grid dimension.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      `mu_y`, `mu_x`, `sigma`.
+
+      :type: Names of parameters used by the model
+

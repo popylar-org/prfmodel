@@ -1,0 +1,36 @@
+prfmodel.utils.convert_parameters_to_tensor
+===========================================
+
+.. py:function:: prfmodel.utils.convert_parameters_to_tensor(parameters: pandas.DataFrame, dtype: str) -> prfmodel.typing.Tensor
+
+   Convert model parameters in a dataframe into a tensor.
+
+   :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                      for different units.
+   :type parameters: pandas.DataFrame
+
+   :returns: Tensor with the first axis corresponding to units and the second axis corresponding to different parameters.
+   :rtype: Tensor
+
+   .. rubric:: Examples
+
+   Single parameters:
+
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   ...     "param_1": [0.0, 1.0, 2.0],
+   ... })
+   >>> x = convert_parameters_to_tensor(params, dtype="float32")
+   >>> print(x.shape)
+   (3, 1)
+
+   Multiple parameters:
+
+   >>> params = pd.DataFrame({
+   ...     "param_1": [0.0, 1.0, 2.0],
+   ...     "param_2": [0.0, -1.0, -2.0],
+   ... })
+   >>> x = convert_parameters_to_tensor(params, dtype="float32")
+   >>> print(x.shape)
+   (3, 2)
+

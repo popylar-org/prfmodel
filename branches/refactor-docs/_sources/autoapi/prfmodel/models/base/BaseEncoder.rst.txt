@@ -1,0 +1,48 @@
+prfmodel.models.base.BaseEncoder
+================================
+
+.. py:class:: prfmodel.models.base.BaseEncoder
+
+
+
+   Generic abstract base class for encoding model responses.
+
+   Cannot be instantiated on its own.
+   Can only be used as a parent class to create custom encoding models.
+   Subclasses must override the abstract :attr:`parameter_names` property and
+   :meth:`__call__` method and must be defined with a specific stimulus type.
+
+
+
+   .. py:method:: __call__(stimulus: S, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None)
+      :abstractmethod:
+
+
+      Encode a model response with a stimulus.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param response: Model response.
+      :type response: :data:`prfmodel.typing.Tensor`
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`. The number of units is
+                the number of rows in :attr:`parameters`. The number and size of other axes depends on the stimulus and the
+                response.
+      :rtype: :data:`prfmodel.typing.Tensor`
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
+

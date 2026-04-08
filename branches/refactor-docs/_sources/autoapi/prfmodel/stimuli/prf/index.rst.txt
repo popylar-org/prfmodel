@@ -1,0 +1,58 @@
+prfmodel.stimuli.prf
+====================
+
+.. py:module:: prfmodel.stimuli.prf
+
+.. autoapi-nested-parse::
+
+   Container for population receptive field stimulus design and grid.
+
+
+
+Exceptions
+----------
+
+.. toctree::
+   :hidden:
+
+   DimensionLabelsError </autoapi/prfmodel/stimuli/prf/DimensionLabelsError>
+   GridDesignShapeError </autoapi/prfmodel/stimuli/prf/GridDesignShapeError>
+   GridDimensionsError </autoapi/prfmodel/stimuli/prf/GridDimensionsError>
+   StimulusDimensionError </autoapi/prfmodel/stimuli/prf/StimulusDimensionError>
+
+.. autoapisummary::
+
+   prfmodel.stimuli.prf.DimensionLabelsError
+   prfmodel.stimuli.prf.GridDesignShapeError
+   prfmodel.stimuli.prf.GridDimensionsError
+   prfmodel.stimuli.prf.StimulusDimensionError
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   PRFStimulus </autoapi/prfmodel/stimuli/prf/PRFStimulus>
+
+.. autoapisummary::
+
+   prfmodel.stimuli.prf.PRFStimulus
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   animate_2d_prf_stimulus </autoapi/prfmodel/stimuli/prf/animate_2d_prf_stimulus>
+   plot_2d_prf_stimulus </autoapi/prfmodel/stimuli/prf/plot_2d_prf_stimulus>
+
+.. autoapisummary::
+
+   prfmodel.stimuli.prf.animate_2d_prf_stimulus
+   prfmodel.stimuli.prf.plot_2d_prf_stimulus
+
+

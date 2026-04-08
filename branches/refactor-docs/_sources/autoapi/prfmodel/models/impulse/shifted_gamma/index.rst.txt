@@ -1,0 +1,24 @@
+prfmodel.models.impulse.shifted_gamma
+=====================================
+
+.. py:module:: prfmodel.models.impulse.shifted_gamma
+
+.. autoapi-nested-parse::
+
+   Shifted gamma distribution impulse response.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   ShiftedGammaImpulse </autoapi/prfmodel/models/impulse/shifted_gamma/ShiftedGammaImpulse>
+
+.. autoapisummary::
+
+   prfmodel.models.impulse.shifted_gamma.ShiftedGammaImpulse
+
+

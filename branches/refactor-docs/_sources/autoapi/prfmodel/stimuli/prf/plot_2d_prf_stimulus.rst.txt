@@ -1,0 +1,21 @@
+prfmodel.stimuli.prf.plot_2d_prf_stimulus
+=========================================
+
+.. py:function:: prfmodel.stimuli.prf.plot_2d_prf_stimulus(stimulus: PRFStimulus, frame_idx: int, origin: Literal['upper', 'lower'] = 'lower', title: str | None = None, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Plot a single frame of a two-dimensional population receptive field stimulus.
+
+   :param stimulus: The population receptive field stimulus to visualize.
+   :type stimulus: PRFStimulus
+   :param frame_idx: Index of the frame to plot.
+   :type frame_idx: int
+   :param origin: `origin` argument for :meth:`matplotlib.axes.Axes.imshow`.
+   :type origin: str, optional
+   :param title: Title for the plot.
+   :type title: str or None, optional
+   :param kwargs: Extra arguments passed to :func:`matplotlib.pyplot.subplots`.
+
+   :rtype: tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   :raises StimulusDimensionError: If the stimulus is not 2-dimensional.
+
