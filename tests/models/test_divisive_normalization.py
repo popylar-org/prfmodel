@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from pytest_regressions.num_regression import NumericRegressionFixture
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseTemporal
 from prfmodel.models.div_norm import DivNormGaussian2DPRFModel
@@ -114,6 +115,29 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
         assert "sigma_normalization" in prf_model.parameter_names
         assert "sigma_center" not in prf_model.parameter_names
         assert "sigma_surround" not in prf_model.parameter_names
+
+    @pytest.mark.parametrize("temporal_model", [None, DivNormAmplitude()])
+    @pytest.mark.parametrize("impulse_model", [None, DerivativeTwoGammaImpulse()])
+    def test_predict_regression(
+        self,
+        num_regression: NumericRegressionFixture,
+        impulse_model: BaseImpulse,
+        temporal_model: BaseTemporal,
+        stimulus: PRFStimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that model prediction matches reference file."""
+        prf_model = DivNormGaussian2DPRFModel(
+            impulse_model=impulse_model,
+            temporal_model=temporal_model,
+        )
+
+        resp = prf_model(stimulus, params)
+
+        num_regression.check(
+            {f"response_{i}": x for i, x in enumerate(resp)},
+            default_tolerance={"atol": 1e-4},
+        )
 
 
 class TestInitDnFromGaussian:
