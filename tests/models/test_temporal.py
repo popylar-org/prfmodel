@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 from prfmodel.models.base import ShapeError
 from prfmodel.models.temporal import BaselineAmplitude
+from prfmodel.models.temporal import DivNormAmplitude
 from prfmodel.models.temporal import DoGAmplitude
 from .conftest import parametrize_dtype
 
@@ -94,6 +95,91 @@ class TestDoGAmplitude:
         assert np.allclose(resp, expected)
 
     def test_shape_error(self, model: DoGAmplitude, params: pd.DataFrame):
+        """Test that ShapeError is raised for wrong number of dimensions."""
+        inputs = np.ones(self.num_frames)
+
+        with pytest.raises(ShapeError):
+            model(inputs, params)
+
+
+class TestDivNormAmplitude:
+    """Tests for DivNormAmplitude class."""
+
+    num_frames = 10
+
+    @pytest.fixture
+    def model(self):
+        """Model object."""
+        return DivNormAmplitude()
+
+    @pytest.fixture
+    def params(self):
+        """Model parameters."""
+        return pd.DataFrame(
+            {
+                "amplitude_activation": [2.0, -1.0, 1.0],
+                "baseline_activation": [0.5, 0.0, 1.0],
+                "amplitude_normalization": [1.0, 0.5, 2.0],
+                "baseline_normalization": [1.0, 2.0, 0.5],
+            },
+        )
+
+    def test_parameter_names(self, model: DivNormAmplitude):
+        """Test that correct parameter names are returned."""
+        assert model.parameter_names == [
+            "amplitude_activation",
+            "baseline_activation",
+            "amplitude_normalization",
+            "baseline_normalization",
+        ]
+
+    @parametrize_dtype
+    def test_call(self, model: DivNormAmplitude, params: pd.DataFrame, dtype: str):
+        """Test that DivNormAmplitude returns correct shape and values."""
+        num_voxels = params.shape[0]
+        p1 = np.ones((num_voxels, self.num_frames)) * 2.0
+        p2 = np.ones((num_voxels, self.num_frames)) * 3.0
+        inputs = np.stack([p1, p2], axis=1)
+
+        resp = np.asarray(model(inputs, params, dtype))
+
+        assert resp.shape == (num_voxels, self.num_frames)
+
+        a = np.expand_dims(params["amplitude_activation"].to_numpy(), 1)
+        b = np.expand_dims(params["baseline_activation"].to_numpy(), 1)
+        c = np.expand_dims(params["amplitude_normalization"].to_numpy(), 1)
+        d = np.expand_dims(params["baseline_normalization"].to_numpy(), 1)
+        expected = (a * p1 + b) / (c * p2 + d) - b / d
+        assert np.allclose(resp, expected)
+
+    @parametrize_dtype
+    def test_call_no_subtract_baseline(self, params: pd.DataFrame, dtype: str):
+        """Test that subtract_baseline=False omits the b/d correction term."""
+        model = DivNormAmplitude(subtract_baseline=False)
+        num_voxels = params.shape[0]
+        p1 = np.ones((num_voxels, self.num_frames)) * 2.0
+        p2 = np.ones((num_voxels, self.num_frames)) * 3.0
+        inputs = np.stack([p1, p2], axis=1)
+
+        resp = np.asarray(model(inputs, params, dtype))
+
+        a = np.expand_dims(params["amplitude_activation"].to_numpy(), 1)
+        b = np.expand_dims(params["baseline_activation"].to_numpy(), 1)
+        c = np.expand_dims(params["amplitude_normalization"].to_numpy(), 1)
+        d = np.expand_dims(params["baseline_normalization"].to_numpy(), 1)
+        expected = (a * p1 + b) / (c * p2 + d)
+        assert np.allclose(resp, expected)
+
+    def test_zero_response_no_stimulus(self, model: DivNormAmplitude, params: pd.DataFrame):
+        """Test that the response is zero when there is no stimulus (p1 = p2 = 0)."""
+        num_voxels = params.shape[0]
+        inputs = np.zeros((num_voxels, 2, self.num_frames))
+
+        resp = np.asarray(model(inputs, params))
+
+        assert np.allclose(resp, 0.0)
+
+    def test_shape_error(self, model: DivNormAmplitude, params: pd.DataFrame):
         """Test that ShapeError is raised for wrong number of dimensions."""
         inputs = np.ones(self.num_frames)
 

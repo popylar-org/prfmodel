@@ -12,23 +12,31 @@ from .temporal import DoGAmplitude
 
 
 class DoG2DPRFModel(CenterSurroundPRFModel):
-    """
+    r"""
     Two-dimensional difference of Gaussians population receptive field model.
 
-    Runs two Gaussian 2D PRF responses (center and surround) through stimulus encoding and impulse response convolution
-    independently, then combines them as a linear model:
-
-    y(t) = p1(t) * amplitude_center + p2(t) * amplitude_surround + baseline
+    Runs two Gaussian 2D PRF responses (center and surround) through stimulus encoding and impulse
+    response convolution independently, then combines them as a linear model.
 
     Parameters
     ----------
-     encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
-        An encoding model class or instance. Model classes will be instantiated during initialization. The
-        default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
+    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
+        An encoding model class or instance.
     impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
         An impulse response model class or instance.
     temporal_model : BaseTemporal or type or None, default=DoGAmplitude
         A temporal model class or instance.
+
+    Notes
+    -----
+    Let :math:`p_{\text{center}}(t)` and :math:`p_{\text{surround}}(t)` be the predicted temporal
+    responses for the center and surround Gaussians. With :math:`a_c = \text{amplitude\_center}`,
+    :math:`a_s = \text{amplitude\_surround}`, and :math:`\beta = \text{baseline}`, the predicted
+    response is:
+
+    .. math::
+
+        y(t) = a_c \, p_{\text{center}}(t) + a_s \, p_{\text{surround}}(t) + \beta
 
     """
 
