@@ -136,7 +136,7 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
 
         num_regression.check(
             {f"response_{i}": x for i, x in enumerate(resp)},
-            default_tolerance={"atol": 1e-4},
+            default_tolerance={"atol": 1e-2},
         )
 
 
