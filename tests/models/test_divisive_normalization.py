@@ -5,9 +5,9 @@ import pandas as pd
 import pytest
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseTemporal
-from prfmodel.models.divisive_normalization import DivNormGaussian2DPRFModel
-from prfmodel.models.divisive_normalization import DivNormPRFModel
-from prfmodel.models.divisive_normalization import init_dn_from_gaussian
+from prfmodel.models.div_norm import DivNormGaussian2DPRFModel
+from prfmodel.models.div_norm import DivNormPRFModel
+from prfmodel.models.div_norm import init_dn_from_gaussian
 from prfmodel.models.gaussian import Gaussian2DPRFResponse
 from prfmodel.models.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.temporal import DivNormAmplitude
