@@ -3,12 +3,12 @@
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.exceptions import ShapeError
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 from .base import BaseTemporal
-from .base import ShapeError
 
 
 class BaselineAmplitude(BaseTemporal):

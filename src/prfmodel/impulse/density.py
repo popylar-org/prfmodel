@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from keras import ops
 from prfmodel._backend import gammaln
-from prfmodel.models import BatchDimensionError
+from prfmodel.exceptions import BatchDimensionError
 from prfmodel.typing import Tensor
 
 _ARG_DIM = 2

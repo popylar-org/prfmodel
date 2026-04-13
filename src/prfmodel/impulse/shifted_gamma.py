@@ -3,11 +3,11 @@
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.models import BaseImpulse
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 from prfmodel.utils import normalize_response
+from .base import BaseImpulse
 from .density import shifted_gamma_density
 
 

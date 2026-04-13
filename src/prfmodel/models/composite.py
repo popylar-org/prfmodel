@@ -4,19 +4,19 @@ from typing import cast
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.impulse import convolve_prf_impulse_response
+from prfmodel.impulse.base import BaseImpulse
 from prfmodel.stimuli import CFStimulus
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from .base import BaseComposite
 from .base import BaseEncoder
-from .base import BaseImpulse
 from .base import BaseResponse
 from .base import BaseTemporal
 from .encoding import CFStimulusEncoder
 from .encoding import PRFStimulusEncoder
-from .impulse import DerivativeTwoGammaImpulse
-from .impulse import convolve_prf_impulse_response
 from .temporal import BaselineAmplitude
 from .temporal import DoGAmplitude
 

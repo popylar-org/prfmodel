@@ -1,13 +1,13 @@
 """Difference of Gaussians population receptive field models."""
 
 import pandas as pd
+from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.impulse.base import BaseImpulse
 from .base import BaseEncoder
-from .base import BaseImpulse
 from .base import BaseTemporal
 from .composite import CenterSurroundPRFModel
 from .encoding import PRFStimulusEncoder
 from .gaussian import Gaussian2DPRFResponse
-from .impulse import DerivativeTwoGammaImpulse
 from .temporal import DoGAmplitude
 
 

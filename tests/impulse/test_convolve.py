@@ -2,10 +2,10 @@
 
 import numpy as np
 import pytest
-from prfmodel.models.base import BatchDimensionError
-from prfmodel.models.impulse.convolve import _pad_response
-from prfmodel.models.impulse.convolve import _prepare_prf_impulse_response
-from prfmodel.models.impulse.convolve import convolve_prf_impulse_response
+from prfmodel.exceptions import BatchDimensionError
+from prfmodel.impulse.convolve import _pad_response
+from prfmodel.impulse.convolve import _prepare_prf_impulse_response
+from prfmodel.impulse.convolve import convolve_prf_impulse_response
 
 
 def test_pad_response():

@@ -4,7 +4,7 @@ from itertools import product
 import numpy as np
 import pandas as pd
 import pytest
-from prfmodel.models.impulse import ShiftedGammaImpulse
+from prfmodel.impulse import ShiftedGammaImpulse
 from .conftest import TestImpulseSetup
 
 

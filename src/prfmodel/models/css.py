@@ -2,13 +2,13 @@
 
 import numpy as np
 import pandas as pd
+from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.impulse.base import BaseImpulse
 from .base import BaseEncoder
-from .base import BaseImpulse
 from .base import BaseTemporal
 from .encoding import CompressiveEncoder
 from .encoding import PRFStimulusEncoder
 from .gaussian import Gaussian2DPRFModel
-from .impulse import DerivativeTwoGammaImpulse
 from .temporal import BaselineAmplitude
 
 

@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from prfmodel.models.base import ShapeError
+from prfmodel.exceptions import ShapeError
 from prfmodel.models.temporal import BaselineAmplitude
 from prfmodel.models.temporal import DivNormAmplitude
 from prfmodel.models.temporal import DoGAmplitude

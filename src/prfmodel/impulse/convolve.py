@@ -2,7 +2,7 @@
 
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.models import BatchDimensionError
+from prfmodel.exceptions import BatchDimensionError
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 
