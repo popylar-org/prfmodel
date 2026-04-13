@@ -6,7 +6,7 @@ from keras import ops
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
-from prfmodel.models.base import BaseComposite
+from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BaseResponse
 from prfmodel.scaling import DivNormAmplitude
@@ -18,7 +18,7 @@ from .gaussian import Gaussian2DPRFResponse
 from .stimulus_encoding import PRFStimulusEncoder
 
 
-class DivNormPRFModel(BaseComposite[PRFStimulus]):
+class DivNormPRFModel(BaseCanonical[PRFStimulus]):
     r"""
     Divisive normalization population receptive field model.
 

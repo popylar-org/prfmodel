@@ -10,7 +10,7 @@ from prfmodel.models.prf.dog import DoG2DPRFModel
 from prfmodel.models.prf.dog import init_dog_from_gaussian
 from prfmodel.models.prf.gaussian import Gaussian2DPRFResponse
 from prfmodel.scaling import DoGAmplitude
-from prfmodel.scaling.base import BaseScaling
+from prfmodel.scaling.base import BaseTemporal
 from prfmodel.stimuli.prf import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 
@@ -82,14 +82,14 @@ class TestDoG2DPRFModel(PRFStimulusSetup):
     def test_predict(
         self,
         impulse_model: BaseImpulse,
-        temporal_model: BaseScaling,
+        temporal_model: BaseTemporal,
         stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction returns correct shape."""
         prf_model = DoG2DPRFModel(
             impulse_model=impulse_model,
-            scaling_model=temporal_model,
+            temporal_model=temporal_model,
         )
 
         resp = prf_model(stimulus, params)

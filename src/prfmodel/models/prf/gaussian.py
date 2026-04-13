@@ -18,7 +18,7 @@ from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
-from .composite import SimplePRFModel
+from .canonical import CanonicalPRFModel
 from .stimulus_encoding import PRFStimulusEncoder
 
 
@@ -225,7 +225,7 @@ class Gaussian2DPRFResponse(BaseResponse[PRFStimulus]):
         return predict_gaussian_response(grid, mu, sigma)
 
 
-class Gaussian2DPRFModel(SimplePRFModel):
+class Gaussian2DPRFModel(CanonicalPRFModel):
     """
     Two-dimensional isotropic Gaussian population receptive field model.
 

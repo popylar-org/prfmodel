@@ -1,9 +1,9 @@
-"""Composite CF models."""
+"""Canonical connective field (CF) models."""
 
 from typing import cast
 import pandas as pd
 from prfmodel._docstring import doc
-from prfmodel.models.base import BaseComposite
+from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BaseResponse
 from prfmodel.scaling import BaselineAmplitude
@@ -14,15 +14,16 @@ from prfmodel.utils import get_dtype
 from .stimulus_encoding import CFStimulusEncoder
 
 
-class SimpleCFModel(BaseComposite[CFStimulus]):
+class CanonicalCFModel(BaseCanonical[CFStimulus]):
     """
-    Simple composite connective field model.
+    Canonical connective field model.
 
-    This is a generic class that combines a connective field and temporal response.
+    This class combines a connective field response and scaling model.
 
     Parameters
     ----------
     %(model_cf)s
+    %(model_encoding)s
     %(model_temporal)s
 
     Notes
@@ -32,6 +33,9 @@ class SimpleCFModel(BaseComposite[CFStimulus]):
     1. The connective field response model makes a prediction for the stimulus distance matrix.
     2. The connective field response is encoded with the source response.
     3. The temporal model modifies the encoded response.
+
+    In contrast to pRF models (e.g., :class:`~prfmodel.models.CanonicalPRFModel`), connective field models do not
+    require an impulse response model because it already contained in the signal of the source response.
 
     """
 

@@ -3,7 +3,7 @@
 import pytest
 from prfmodel.exceptions import BatchDimensionError
 from prfmodel.exceptions import ShapeError
-from prfmodel.models.base import BaseComposite
+from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BaseResponse
 from prfmodel.utils import ModelProtocol
@@ -61,4 +61,4 @@ class TestBaseEncoder(TestBaseModel):
 class TestBaseComposite(TestBaseModel):
     """Tests for BaseComposite class."""
 
-    model_class = BaseComposite
+    model_class = BaseCanonical
