@@ -5,7 +5,7 @@ import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
 from prfmodel.models.cf.gaussian import GaussianCFModel
 from prfmodel.models.cf.stimulus_encoding import CFStimulusEncoder
-from prfmodel.models.prf.stimulus_encoding import CompressiveEncoder
+from prfmodel.models.compression import CompressiveEncoder
 from prfmodel.stimuli.cf import CFStimulus
 from tests.models.conftest import CFSetup
 
