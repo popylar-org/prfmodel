@@ -11,7 +11,7 @@ from keras import ops
 from more_itertools import chunked
 from tqdm.auto import tqdm
 from prfmodel._docstring import doc
-from prfmodel.models import BaseCanonical
+from prfmodel.models.base import BaseCanonical
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
