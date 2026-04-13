@@ -8,10 +8,10 @@ from scipy import differentiate
 from scipy import integrate
 from scipy import special
 from scipy import stats
+from prfmodel.density import derivative_gamma_density
+from prfmodel.density import gamma_density
+from prfmodel.density import shifted_gamma_density
 from prfmodel.exceptions import BatchDimensionError
-from prfmodel.impulse import derivative_gamma_density
-from prfmodel.impulse import gamma_density
-from prfmodel.impulse import shifted_gamma_density
 
 
 class TestGammaDensitySetup:

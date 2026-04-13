@@ -3,12 +3,12 @@
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.density.gamma import gamma_density
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 from prfmodel.utils import normalize_response
 from .base import BaseImpulse
-from .density import gamma_density
 
 
 class TwoGammaImpulse(BaseImpulse):
