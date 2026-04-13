@@ -2,6 +2,7 @@
 
 import pandas as pd
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
@@ -21,14 +22,14 @@ class BaselineAmplitude(BaseTemporal):
     >>> import numpy as np
     >>> import pandas as pd
     >>> params = pd.DataFrame({
-    >>>     "baseline": [5.0, 10.0, -3.0],
-    >>>     "amplitude": [2.0, -1.0, 1.0],
-    >>> })
+    ...     "baseline": [5.0, 10.0, -3.0],
+    ...     "amplitude": [2.0, -1.0, 1.0],
+    ... })
     >>> num_frames = 10
     >>> inputs = np.ones((params.shape[0], num_frames))
     >>> model = BaselineAmplitude()
     >>> resp = model(inputs, params)
-    >>> print(resp.shape) # (num_rows, num_frames)
+    >>> print(resp.shape)  # (num_units, num_frames)
     (3, 10)
 
     """
@@ -43,25 +44,21 @@ class BaselineAmplitude(BaseTemporal):
         """
         return ["baseline", "amplitude"]
 
+    @doc
     def __call__(self, inputs: Tensor, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the model response.
 
         Parameters
         ----------
-        inputs : Tensor
-            Input tensor with temporal response and shape (num_batches, num_frames).
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels. Must contain the columns `baseline` and `amplitude`.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        inputs : :data:`prfmodel.typing.Tensor`
+            Input tensor with temporal response and shape (num_units, num_frames).
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Model predictions with the same shape as `inputs` and dtype `dtype`.
+        %(predicted_response_2d)s
 
         """
         dtype = get_dtype(dtype)
@@ -183,6 +180,22 @@ class DoGAmplitude(BaseTemporal):
 
         y(t) = a_c \, r_c(t) + a_s \, r_s(t) + \beta
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> params = pd.DataFrame({
+    ...     "amplitude_center": [1.0, -1.0],
+    ...     "amplitude_surround": [-0.5, 0.5],
+    ...     "baseline": [0.0, 0.1],
+    ... })
+    >>> num_frames = 10
+    >>> inputs = np.ones((params.shape[0], 2, num_frames))
+    >>> model = DoGAmplitude()
+    >>> resp = model(inputs, params)
+    >>> print(resp.shape)
+    (2, 10)
+
     """
 
     @property
@@ -195,25 +208,22 @@ class DoGAmplitude(BaseTemporal):
         """
         return ["amplitude_center", "amplitude_surround", "baseline"]
 
+    @doc
     def __call__(self, inputs: Tensor, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the model response.
 
         Parameters
         ----------
-        inputs : Tensor
+        inputs : :data:`prfmodel.typing.Tensor`
             Input tensor with two temporal responses stacked along axis 1,
-            shape (num_batches, 2, num_frames).
-        parameters : pandas.DataFrame
-            Dataframe with columns ``amplitude_center``, ``amplitude_surround``, and ``baseline``.
-        dtype : str, optional
-            The dtype of the prediction result. If ``None`` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+            shape (num_units, 2, num_frames).
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Model predictions with shape (num_batches, num_frames) and dtype ``dtype``.
+        %(predicted_response_2d)s
 
         """
         dtype = get_dtype(dtype)

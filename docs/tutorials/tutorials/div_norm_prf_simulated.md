@@ -95,7 +95,7 @@ $b$ (`baseline_activation`), and $c$ (`amplitude_normalization`) , $d$
 the absence of a stimulus. The normalization baseline $d$ must be positive to avoid division by zero.
 
 ```{code-cell} ipython3
-from prfmodel.models.divisive_normalization import DivNormGaussian2DPRFModel
+from prfmodel.models import DivNormGaussian2DPRFModel
 
 prf_model = DivNormGaussian2DPRFModel()
 ```
@@ -193,7 +193,7 @@ parameter combinations to evaluate. Let's construct the `GridFitter` and run the
 
 ```{code-cell} ipython3
 from keras.losses import CosineSimilarity
-from prfmodel.fitters.grid import GridFitter
+from prfmodel.fitters import GridFitter
 
 grid_fitter = GridFitter(model=gaussian_center_model, stimulus=stimulus, loss=CosineSimilarity(reduction="none"))
 
@@ -231,7 +231,7 @@ Using least squares, we estimate the `amplitude` and `baseline` parameters of th
 Gaussian model, which will seed the DN initialisation.
 
 ```{code-cell} ipython3
-from prfmodel.fitters.linear import LeastSquaresFitter
+from prfmodel.fitters import LeastSquaresFitter
 
 ls_fitter = LeastSquaresFitter(model=gaussian_center_model, stimulus=stimulus)
 
@@ -262,7 +262,7 @@ fig.legend();
 ```
 
 ```{code-cell} ipython3
-from prfmodel.models.difference_of_gaussians import DoG2DPRFModel
+from prfmodel.models import DoG2DPRFModel
 
 dog_model = DoG2DPRFModel()
 ```

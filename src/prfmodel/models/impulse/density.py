@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from keras import ops
 from prfmodel.backend import gammaln
-from prfmodel.models.base import BatchDimensionError
+from prfmodel.models import BatchDimensionError
 from prfmodel.typing import Tensor
 
 _ARG_DIM = 2
@@ -79,18 +79,18 @@ def gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True)
 
     Parameters
     ----------
-    value : Tensor
+    value : :data:`prfmodel.typing.Tensor`
         The values at which to evaluate the gamma distribution. Must be > 0 and scalar or with shape (1, m).
-    shape : Tensor
+    shape : :data:`prfmodel.typing.Tensor`
         The shape parameter. Must be > 0 with shape () and scalar or with shape (n, 1).
-    rate : Tensor
+    rate : :data:`prfmodel.typing.Tensor`
         The rate parameter. Must be > 0 and scalar or with shape (n, 1).
     norm : bool, default=True
         Whether to compute the normalized density.
 
     Returns
     -------
-    Tensor
+    :data:`prfmodel.typing.Tensor`
         The density of the gamma distribution at `value` as a scalar or with shape (n, m).
 
     Notes
@@ -107,6 +107,17 @@ def gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True)
     .. math::
 
         f_{norm} = \frac{\mathtt{\lambda}^{\mathtt{\alpha}}}{\Gamma(\mathtt{\alpha})} * f(x).
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from prfmodel.models.impulse import gamma_density
+    >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
+    >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
+    >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
+    >>> dens = gamma_density(t, shape, rate)
+    >>> print(dens.shape)
+    (2, 3)
 
     """
     value = ops.convert_to_tensor(value)
@@ -146,26 +157,38 @@ def shifted_gamma_density(
 
     Parameters
     ----------
-    value : Tensor
+    value : :data:`prfmodel.typing.Tensor`
         The values at which to evaluate the shifted gamma distribution. Must be scalar or with shape (1, m).
-    shape : Tensor
+    shape : :data:`prfmodel.typing.Tensor`
         The shape parameter. Must be > 0 and scalar or with shape (n, 1).
-    rate : Tensor
+    rate : :data:`prfmodel.typing.Tensor`
         The rate parameter. Must be > 0 and scalar or with shape (n, 1).
-    shift : Tensor
+    shift : :data:`prfmodel.typing.Tensor`
         The shift parameter. When > 0, shifts the distribution to the right.
     norm : bool, default=True
         Whether to compute the normalized density.
 
     Returns
     -------
-    Tensor
+    :data:`prfmodel.typing.Tensor`
         The density of the shifted gamma distribution at `value` as a scalar or with shape (n, m).
         The density for shifted values that are zero or lower is zero.
 
     See Also
     --------
     gamma_density : The (unshifted) gamma distribution density.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from prfmodel.models.impulse import shifted_gamma_density
+    >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
+    >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
+    >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
+    >>> shift = np.array([[0.5], [0.0]])   # shape (2, 1)
+    >>> dens = shifted_gamma_density(t, shape, rate, shift)
+    >>> print(dens.shape)
+    (2, 3)
 
     """
     value = ops.convert_to_tensor(value)
@@ -196,16 +219,16 @@ def derivative_gamma_density(value: Tensor, shape: Tensor, rate: Tensor) -> Tens
 
     Parameters
     ----------
-    value : Tensor
+    value : :data:`prfmodel.typing.Tensor`
         The values at which to evaluate the derivative gamma distribution. Must be > 0 and scalar or with shape (1, m).
-    shape : Tensor
+    shape : :data:`prfmodel.typing.Tensor`
         The shape parameter. Must be > 0 and scalar or with shape (n, m).
-    rate : Tensor
+    rate : :data:`prfmodel.typing.Tensor`
         The rate parameter. Must be > 0 and scalar or with shape (n, m).
 
     Returns
     -------
-    Tensor
+    :data:`prfmodel.typing.Tensor`
         The derivative density of the gamma distribution at `value` as a scalar or with shape (n, m).
 
     Notes
@@ -228,6 +251,17 @@ def derivative_gamma_density(value: Tensor, shape: Tensor, rate: Tensor) -> Tens
     See Also
     --------
     gamma_density : The gamma distribution density.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from prfmodel.models.impulse import derivative_gamma_density
+    >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
+    >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
+    >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
+    >>> dens = derivative_gamma_density(t, shape, rate)
+    >>> print(dens.shape)
+    (2, 3)
 
     """
     value = ops.convert_to_tensor(value)

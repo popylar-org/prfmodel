@@ -16,35 +16,35 @@ from .conftest import parametrize_dtype
 class TestSetup(PRFStimulusGridSetup):
     """Setup for tests."""
 
-    num_voxels: int = 3
+    num_units: int = 3
     num_source: int = 6
     num_frames: int = 10
 
     @pytest.fixture
     def response_1d(self):
         """1D model response."""
-        resp_dummy = np.ones((self.num_voxels, self.num_height))
+        resp_dummy = np.ones((self.num_units, self.num_height))
         # Response is function of height
         return resp_dummy * np.expand_dims(np.sin(np.arange(self.num_height)), 0)
 
     @pytest.fixture
     def response_2d(self):
         """2D model response."""
-        resp_dummy = np.ones((self.num_voxels, self.num_height, self.num_width))
+        resp_dummy = np.ones((self.num_units, self.num_height, self.num_width))
         # Response is function of width
         return resp_dummy * np.expand_dims(np.sin(np.arange(self.num_width)), (0, 1))
 
     @pytest.fixture
     def response_3d(self):
         """3D model response."""
-        resp_dummy = np.ones((self.num_voxels, self.num_height, self.num_width, self.num_depth))
+        resp_dummy = np.ones((self.num_units, self.num_height, self.num_width, self.num_depth))
         # Response is function of depth
         return resp_dummy * np.expand_dims(np.sin(np.arange(self.num_depth)), (0, 1, 2))
 
     @pytest.fixture
     def cf_response(self):
-        """CF model response of shape (num_voxels, num_vertices)."""
-        return np.ones((self.num_voxels, self.num_source)) * np.expand_dims(np.sin(np.arange(self.num_source)), 0)
+        """CF model response of shape (num_units, num_vertices)."""
+        return np.ones((self.num_units, self.num_source)) * np.expand_dims(np.sin(np.arange(self.num_source)), 0)
 
     @pytest.fixture
     def cf_stimulus(self):
@@ -62,9 +62,9 @@ class TestEncodePRFResponse(TestSetup):
     """Tests for encode_prf_response."""
 
     def _check_encoding(self, x: np.ndarray) -> None:
-        assert x.shape == (self.num_voxels, self.num_frames)
-        # Check that all voxels have identical encoding for identical response and design
-        assert np.unique(x, axis=1).shape == (self.num_voxels, 1)
+        assert x.shape == (self.num_units, self.num_frames)
+        # Check that all units have identical encoding for identical response and design
+        assert np.unique(x, axis=1).shape == (self.num_units, 1)
 
     def test_call_1d(self, response_1d: np.ndarray, dtype: str):
         """Test that 1D encoding returns the correct shape."""
@@ -179,10 +179,10 @@ class TestCFStimulusEncoder(TestSetup):
         cf_stimulus_encoder: CFStimulusEncoder,
         dtype: str,
     ):
-        """Test that CF encoding returns shape (num_voxels, num_frames)."""
+        """Test that CF encoding returns shape (num_units, num_frames)."""
         result = np.asarray(cf_stimulus_encoder(cf_stimulus, cf_response, parameters, dtype))
 
-        assert result.shape == (self.num_voxels, self.num_frames)
+        assert result.shape == (self.num_units, self.num_frames)
 
     @parametrize_dtype
     def test_call_values(
@@ -207,7 +207,7 @@ class TestCFStimulusEncoder(TestSetup):
         cf_stimulus_encoder: CFStimulusEncoder,
     ):
         """Test that dimension mismatches between connective field and source response raise an error."""
-        cf_response = np.ones((self.num_voxels, 4))
+        cf_response = np.ones((self.num_units, 4))
 
         with pytest.raises(ValueError):
             cf_stimulus_encoder(cf_stimulus, cf_response, parameters)

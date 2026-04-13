@@ -20,15 +20,22 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
 
     Parameters
     ----------
-    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
-        An encoding model class or instance.
-    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
-        An impulse response model class or instance.
-    temporal_model : BaseTemporal or type or None, default=DoGAmplitude
-        A temporal model class or instance.
+    %(model_encoding)s
+    %(model_impulse)s
+    %(model_temporal)s
 
     Notes
     -----
+    The simple composite model follows five steps [1]_:
+
+    1. The center and surround 2D Gaussian population receptive field response models make separate predictions for
+        the stimulus grid. The two response models have the same center but different sizes.
+    2. The encoding model encodes each response with the stimulus design.
+    3. A impulse response model generates an impulse response.
+    4. Each encoded response is convolved with the impulse response.
+    5. The temporal model modifies the convolved response. By default it subtracts the surround from the center
+        response after multiplying the responses with separate amplitude parameters.
+
     Let :math:`p_{\text{center}}(t)` and :math:`p_{\text{surround}}(t)` be the predicted temporal
     responses for the center and surround Gaussians. With :math:`a_c = \text{amplitude\_center}`,
     :math:`a_s = \text{amplitude\_surround}`, and :math:`\beta = \text{baseline}`, the predicted
@@ -37,6 +44,46 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     .. math::
 
         y(t) = a_c \, p_{\text{center}}(t) + a_s \, p_{\text{surround}}(t) + \beta
+
+    References
+    ----------
+    .. [1] Zuiderbaan, W., Harvey, B. M., & Dumoulin, S. O. (2012). Modeling center-surround configurations in
+        population receptive fields using fMRI. *Journal of Vision*, 12(3), 10. https://doi.org/10.1167/12.3.10
+
+    Examples
+    --------
+    Predict a model response for multiple units.
+
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> from prfmodel.models import DoG2DPRFModel
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+    >>> model = DoG2DPRFModel()
+    >>> # Define all model parameters for 3 units
+    >>> params = pd.DataFrame({
+    ...     # DoG parameters
+    ...     "mu_x": [0.0, 1.0, 0.0],
+    ...     "mu_y": [1.0, 0.0, 0.0],
+    ...     "sigma_center": [1.0, 1.5, 2.0],
+    ...     "sigma_surround": [5.0, 7.5, 10.0],
+    ...     # Impulse model parameters
+    ...     "delay": [6.0, 6.0, 6.0],
+    ...     "dispersion": [0.9, 0.9, 0.9],
+    ...     "undershoot": [12.0, 12.0, 12.0],
+    ...     "u_dispersion": [0.9, 0.9, 0.9],
+    ...     "ratio": [0.48, 0.48, 0.48],
+    ...     "weight_deriv": [0.5, 0.5, 0.5],
+    ...     # Temporal model parameters
+    ...     "amplitude_center": [2.0, 1.2, 0.1],
+    ...     "amplitude_surround": [-0.5, -0.3, -0.1],
+    ...     "baseline": [0.1, -0.1, 0.5],
+    ... })
+    >>> # Predict model response
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 200)
 
     """
 
@@ -64,12 +111,13 @@ def init_dog_from_gaussian(
     Initialize DoG model parameters from fitted Gaussian model parameters.
 
     Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
-    into starting parameters for a :class:`DoG2DPRFModel`, suitable for subsequent SGD.
+    into starting parameters for a :class:`~prfmodel.models.dog.DoG2DPRFModel`, suitable for
+    subsequent SGD.
 
     Parameters
     ----------
     gaussian_params : pandas.DataFrame
-        DataFrame of fitted parameters from a ``Gaussian2DPRFModel``.
+        DataFrame of fitted parameters from a :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`.
         Must contain columns: ``sigma`` and ``amplitude`` (plus all shared columns).
     sigma_ratio : float, default=5.0
         Ratio used to set the surround size: ``sigma_surround = sigma_center * sigma_ratio``.
@@ -90,6 +138,23 @@ def init_dog_from_gaussian(
     ------
     ValueError
         If ``sigma_surround`` is smaller than ``sigma`` for any row in ``gaussian_params``.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from prfmodel.models import init_dog_from_gaussian
+    >>> gaussian_params = pd.DataFrame({
+    ...     "mu_x": [0.0, 1.0],
+    ...     "mu_y": [0.0, -1.0],
+    ...     "sigma": [1.0, 2.0],
+    ...     "amplitude": [1.0, -1.0],
+    ...     "baseline": [0.0, 0.1],
+    ... })
+    >>> dog_params = init_dog_from_gaussian(gaussian_params, sigma_ratio=3.0)
+    >>> print(dog_params["sigma_center"].tolist())
+    [1.0, 2.0]
+    >>> print(dog_params["sigma_surround"].tolist())
+    [3.0, 6.0]
 
     Notes
     -----

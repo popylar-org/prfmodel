@@ -46,7 +46,7 @@ by Dumoulin and Wandell (2008).
 The `Gaussian2DPRFModel` class performs all these steps to make a combined prediction.
 
 ```{code-cell} ipython3
-from prfmodel.models.gaussian import Gaussian2DPRFModel
+from prfmodel.models import Gaussian2DPRFModel
 
 prf_model = Gaussian2DPRFModel()
 ```
@@ -137,7 +137,7 @@ Let's construct the `GridFitter` and perform the grid search. Note that we set `
 evaluate 20 parameter combinations at the same time (which saves us some memory).
 
 ```{code-cell} ipython3
-from prfmodel.fitters.grid import GridFitter
+from prfmodel.fitters import GridFitter
 
 grid_fitter = GridFitter(
     model=prf_model,
@@ -181,7 +181,7 @@ in the amplitude of the activation peaks and the baseline activation.
 Using least squares, we can estimate the baseline and amplitude parameters of our model.
 
 ```{code-cell} ipython3
-from prfmodel.fitters.linear import LeastSquaresFitter
+from prfmodel.fitters import LeastSquaresFitter
 
 ls_fitter = LeastSquaresFitter(
     model=prf_model,
@@ -218,7 +218,7 @@ As initial parameters, we use the result from the grid search and least squares 
 the impulse response to their initial values (which are the "true" values).
 
 ```{code-cell} ipython3
-from prfmodel.fitters.sgd import SGDFitter
+from prfmodel.fitters import SGDFitter
 
 sgd_fitter = SGDFitter(
     model=prf_model,

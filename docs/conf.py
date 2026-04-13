@@ -7,13 +7,11 @@
 
 # -- Path setup --------------------------------------------------------------
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import pathlib
+import sys
+
+sys.path.insert(0, pathlib.Path("../src").resolve().as_posix())
+from prfmodel._docstring import _PARAMS
 
 # -- Project information -----------------------------------------------------
 
@@ -45,16 +43,18 @@ extensions = [
     "sphinx.ext.todo",
     "autoapi.extension",
     "sphinx.ext.viewcode",
+    "sphinx_copybutton",
+    "sphinx_design",
     "myst_nb",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+autoapi_template_dir = "_templates"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "_templates"]
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -62,10 +62,12 @@ todo_include_todos = False
 # -- Use autoapi.extension to run sphinx-apidoc -------
 
 autoapi_dirs = ["../src/prfmodel"]
+autoapi_member_order = "groupwise"
+autoapi_own_page_level = "function"
+
 autoapi_options = [
     "members",
     "inherited-members",
-    "show-module-summary",
     "special-members",
     "imported-members",
 ]
@@ -110,3 +112,53 @@ intersphinx_mapping = {
 # -- Options for myst-nb
 
 nb_kernel_rgx_aliases = {"python312": "python3"}
+
+
+# -- Docstring placeholder substitution
+
+
+def _process_docstring(  # noqa: PLR0913
+    app: object,  # noqa: ARG001
+    what: str,  # noqa: ARG001
+    name: str,  # noqa: ARG001
+    obj: object,  # noqa: ARG001
+    options: dict | None,  # noqa: ARG001
+    lines: list[str],
+) -> None:
+    """Replace %(key)s placeholders in docstrings with shared snippets.
+
+    sphinx-autoapi does not automatically replace keys in the docstring when rendering the HTML documentation because
+    it does not import the package modules. This function adds performs the replacement when sphinx-autoapi is run.
+
+    """
+    joined = "\n".join(lines)
+    for key, value in _PARAMS.items():
+        joined = joined.replace(f"%({key})s", value)
+    lines[:] = joined.split("\n")
+
+
+# -- Skip external inherited members
+
+
+def _skip_external_inherited_members(  # noqa: PLR0913
+    app: object,  # noqa: ARG001
+    what: str,  # noqa: ARG001
+    name: str,  # noqa: ARG001
+    obj: object,
+    skip: bool,  # noqa: ARG001
+    options: dict | None,  # noqa: ARG001
+) -> None:
+    if not obj.inherited:
+        return None
+
+    inherited_from = obj.obj.get("inherited_from", {})
+    if not inherited_from.get("full_name", "").startswith("prfmodel."):
+        return True
+
+    return None
+
+
+def setup(app: object) -> None:
+    """Connect `_process_docstring` to autodoc event."""
+    app.connect("autoapi-skip-member", _skip_external_inherited_members)
+    app.connect("autodoc-process-docstring", _process_docstring, priority=100)

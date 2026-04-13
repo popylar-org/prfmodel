@@ -7,7 +7,8 @@ from typing import Generic
 from typing import TypeVar
 import pandas as pd
 from keras import ops
-from prfmodel.stimuli.base import Stimulus
+from prfmodel._docstring import doc
+from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _get_norm_fun
 
@@ -59,7 +60,7 @@ class BaseModel(ABC):
 
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom model classes.
-    Subclasses must override the abstract `parameter_names` property.
+    Subclasses must override the abstract :attr:`parameter_names` property.
 
     Attributes
     ----------
@@ -70,12 +71,12 @@ class BaseModel(ABC):
     Create a custom model class that inherits from the base class:
 
     >>> class CustomModel(BaseModel):
-    >>>     @property
-    >>>     def parameter_names(self):
-    >>>         return ["a", "b"]
+    ...     @property
+    ...     def parameter_names(self):
+    ...         return ["a", "b"]
     >>> model = CustomModel()
     >>> print(model.parameter_names)
-    ["a", "b"]
+    ['a', 'b']
 
     """
 
@@ -91,11 +92,12 @@ class BaseResponse(BaseModel, Generic[S]):
 
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom population receptive field models.
-    Subclasses must override the abstract `__call__` method and must be defined
+    Subclasses must override the abstract :meth:`__call__` method and must be defined
     with a specific stimulus type.
 
     """
 
+    @doc
     @abstractmethod
     def __call__(self, stimulus: S, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -103,19 +105,14 @@ class BaseResponse(BaseModel, Generic[S]):
 
         Parameters
         ----------
-        stimulus : Stimulus
-            Stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus)s
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Model predictions of shape `(num_voxels, ...)` and dtype `dtype`. The number of voxels is the
+        :data:`prfmodel.typing.Tensor`
+            Model predictions of shape `(num_units, ...)` and dtype `dtype`. The number of units is the
             number of rows in `parameters`. The number and size of other axes depends on the stimulus.
 
         """
@@ -127,11 +124,12 @@ class BaseEncoder(BaseModel, Generic[S]):
 
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom encoding models.
-    Subclasses must override the abstract `parameter_names` property and `__call__` method and must be defined
-    with a specific stimulus type.
+    Subclasses must override the abstract :attr:`parameter_names` property and
+    :meth:`__call__` method and must be defined with a specific stimulus type.
 
     """
 
+    @doc
     @abstractmethod
     def __call__(
         self,
@@ -144,22 +142,17 @@ class BaseEncoder(BaseModel, Generic[S]):
 
         Parameters
         ----------
-        stimulus : Stimulus
-            Stimulus object.
-        response : Tensor
+        %(stimulus)s
+        response : :data:`prfmodel.typing.Tensor`
             Model response.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the encoded response. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            The stimulus encoded model response with shape `(num_voxels, ...)` dtype `dtype`. The number of voxels is
-            the number of rows in `parameters`. The number and size of other axes depends on the stimulus and the
+        :data:`prfmodel.typing.Tensor`
+            The stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`. The number of units is
+            the number of rows in :attr:`parameters`. The number and size of other axes depends on the stimulus and the
             response.
 
         """
@@ -171,7 +164,7 @@ class BaseImpulse(BaseModel):
 
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom impulse response models.
-    Subclasses must override the abstract `__call__` method.
+    Subclasses must override the abstract :meth:`__call__` method.
 
     Parameters
     ----------
@@ -234,7 +227,7 @@ class BaseImpulse(BaseModel):
         """
         The time frames at which the impulse response function is evaluated.
 
-        Time frames are linearly interpolated between `offset` and `duration` and have shape (1, `num_frames`).
+        Time frames are linearly interpolated between `offset` and `duration` and have shape `(1, num_frames)`.
 
         """
         if self._frames is None:
@@ -251,6 +244,7 @@ class BaseImpulse(BaseModel):
 
         return parameters
 
+    @doc
     @abstractmethod
     def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -258,18 +252,12 @@ class BaseImpulse(BaseModel):
 
         Parameters
         ----------
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Model predictions of shape `(num_voxels, num_frames)` and dtype `dtype`. The number of voxels is the
-            number of rows in `parameters`.
+        %(predicted_response_2d)s
 
         """
 
@@ -280,10 +268,11 @@ class BaseTemporal(BaseModel):
 
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom temporal models.
-    Subclasses must override the abstract `__call__` method.
+    Subclasses must override the abstract :meth:`__call__` method.
 
     """
 
+    @doc
     @abstractmethod
     def __call__(self, inputs: Tensor, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -291,20 +280,14 @@ class BaseTemporal(BaseModel):
 
         Parameters
         ----------
-        inputs : Tensor
-            Input tensor with temporal response and shape (num_batches, num_frames).
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different batches.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        inputs : :data:`prfmodel.typing.Tensor`
+            Input tensor with temporal response and shape (num_units, num_frames).
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Model predictions of shape `(num_voxels, num_frames)` and dtype `dtype`. The number of voxels is the
-            number of rows in `parameters`.
+        %(predicted_response_2d)s
 
         """
 
@@ -314,20 +297,20 @@ class BaseComposite(BaseModel, Generic[S]):
     Generic abstract base class for creating composite models.
 
     Cannot be instantiated on its own. Can only be used as a parent class to create custom composite models.
-    Subclasses must override the abstract `__call__` method and must be defined
+    Subclasses must override the abstract :meth:`__call__` method and must be defined
     with a specific stimulus type.
-    This class is intended for combining multiple submodels into a composite model with a custom `__call__`
+    This class is intended for combining multiple submodels into a composite model with a custom :meth:`__call__`
     method that defines how the submodels interact to make a composite prediction.
 
     Parameters
     ----------
     **models
-        Submodels to be combined into the composite model. All submodel classes must inherit from `BaseModel`.
+        Submodels to be combined into the composite model. All submodel classes must inherit from :class:`BaseModel`.
 
     Raises
     ------
     TypeError
-        If submodel classes do not inherit from `BaseModel`.
+        If submodel classes do not inherit from :class:`BaseModel`.
 
     """
 
@@ -353,6 +336,7 @@ class BaseComposite(BaseModel, Generic[S]):
         # Make sure no duplicates are returned (preserve insertion order)
         return list(dict.fromkeys(param_names))
 
+    @doc
     @abstractmethod
     def __call__(
         self,
@@ -365,19 +349,12 @@ class BaseComposite(BaseModel, Generic[S]):
 
         Parameters
         ----------
-        stimulus : Stimulus.
-            Stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus)s
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Composite model predictions of shape `(num_voxels, num_frames)` and dtype `dtype`. The number of voxels is
-            the number of rows in `parameters`.
+        %(predicted_response_2d)s
 
         """

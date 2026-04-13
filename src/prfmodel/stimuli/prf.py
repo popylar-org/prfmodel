@@ -316,12 +316,12 @@ def animate_2d_prf_stimulus(  # noqa: PLR0913
 
     Examples
     --------
-    >>> from IPython.display import HTML
-    >>> from prfmodel.stimulus import PRFStimulus, animate_2d_prf_stimulus
+    >>> from IPython.display import HTML  # doctest: +SKIP
+    >>> from prfmodel.stimuli.prf import PRFStimulus, animate_2d_prf_stimulus
     >>> bar_stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64)
     >>> ani = animate_2d_prf_stimulus(bar_stimulus)
-    >>> video = ani.to_html5_video()
-    >>> HTML(video)
+    >>> video = ani.to_html5_video()  # doctest: +SKIP
+    >>> HTML(video)  # doctest: +SKIP
 
     """
     fig, ax, grid_limits = _setup_2d_plot(stimulus, title, **kwargs)

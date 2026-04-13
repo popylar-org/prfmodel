@@ -88,7 +88,7 @@ class TestSetup(PRFStimulusGridSetup):
     @pytest.fixture
     def sigma(self):
         """Gaussian sigma parameters."""
-        return np.expand_dims(np.array([1.0, 1.5, 2.0]), axis=1)  # (num_voxels, 1)
+        return np.expand_dims(np.array([1.0, 1.5, 2.0]), axis=1)  # (num_units, 1)
 
 
 class TestExpandGaussianArgs(TestSetup):
@@ -150,7 +150,7 @@ class TestGaussian2DPRFResponse(PRFStimulusSetup):
     @parametrize_dtype
     def test_predict(self, response_model: Gaussian2DPRFResponse, stimulus: PRFStimulus, dtype: str):
         """Test that response prediction returns correct shape."""
-        # 3 voxels
+        # 3 units
         params = pd.DataFrame(
             {
                 "mu_x": [0.0, 1.0, 0.0],
@@ -161,7 +161,7 @@ class TestGaussian2DPRFResponse(PRFStimulusSetup):
 
         preds = np.asarray(response_model(stimulus, params, dtype))
 
-        # Check result shape (num_voxels, height, width)
+        # Check result shape (num_units, height, width)
         assert preds.shape == (params.shape[0], stimulus.design.shape[1], stimulus.design.shape[2])
 
 
@@ -181,7 +181,7 @@ class TestGaussianCFResponse(CFSetup):
     @parametrize_dtype
     def test_predict(self, response_model: GaussianCFResponse, stimulus: CFStimulus, dtype: str):
         """Test that response prediction returns correct shape."""
-        # 3 voxels
+        # 3 units
         params = pd.DataFrame(
             {
                 "center_index": [0, 1, 2],
@@ -192,7 +192,7 @@ class TestGaussianCFResponse(CFSetup):
         preds = np.asarray(response_model(stimulus, params, dtype))
 
         # Check result shape
-        assert preds.shape == (params.shape[0], self.num_source)  # (num_voxels, distance_matrix.shape[0])
+        assert preds.shape == (params.shape[0], self.num_source)  # (num_units, distance_matrix.shape[0])
 
 
 class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):

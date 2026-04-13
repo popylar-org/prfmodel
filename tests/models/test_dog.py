@@ -6,8 +6,8 @@ import pytest
 from prfmodel.models.base import BaseImpulse
 from prfmodel.models.base import BaseTemporal
 from prfmodel.models.composite import CenterSurroundPRFModel
-from prfmodel.models.difference_of_gaussians import DoG2DPRFModel
-from prfmodel.models.difference_of_gaussians import init_dog_from_gaussian
+from prfmodel.models.dog import DoG2DPRFModel
+from prfmodel.models.dog import init_dog_from_gaussian
 from prfmodel.models.gaussian import Gaussian2DPRFResponse
 from prfmodel.models.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.temporal import DoGAmplitude

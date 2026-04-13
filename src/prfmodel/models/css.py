@@ -23,23 +23,60 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
 
     Parameters
     ----------
-    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
-        An impulse response model class or instance. Model classes will be instantiated during
-        initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
-        instance with default values.
-    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
-        A temporal model class or instance. Model classes will be instantiated during initialization.
-        The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
+    %(model_impulse)s
+    %(model_temporal)s
 
     Notes
     -----
-    The simple composite model follows five steps:
+    The simple composite model follows five steps [1]_:
 
     1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
     2. The encoding model encodes the response with the stimulus design and applies compressive spatial summation.
     3. A impulse response model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
     5. The temporal model modifies the convolved response.
+
+    References
+    ----------
+    .. [1] Kay, K. N., Winawer, J., Mezer, A., & Wandell, B. A. (2013). Compressive spatial summation in human visual
+        cortex. Journal of Neurophysiology, 110(2), 481-494. https://doi.org/10.1152/jn.00105.2013
+
+
+    Examples
+    --------
+    Predict a model response for multiple units.
+
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> from prfmodel.models import Gaussian2DCSSPRFModel
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+    >>> model = Gaussian2DCSSPRFModel()
+    >>> # Define all model parameters for 3 units
+    >>> params = pd.DataFrame({
+    ...     # Gaussian parameters
+    ...     "mu_x": [0.0, 1.0, 0.0],
+    ...     "mu_y": [1.0, 0.0, 0.0],
+    ...     "sigma": [1.0, 1.5, 2.0],
+    ...     # CSS parameters
+    ...     "gain": [1.0, 1.0, 1.0],
+    ...     "n": [0.5, 0.5, 0.5],
+    ...     # Impulse model parameters
+    ...     "delay": [6.0, 6.0, 6.0],
+    ...     "dispersion": [0.9, 0.9, 0.9],
+    ...     "undershoot": [12.0, 12.0, 12.0],
+    ...     "u_dispersion": [0.9, 0.9, 0.9],
+    ...     "ratio": [0.48, 0.48, 0.48],
+    ...     "weight_deriv": [0.5, 0.5, 0.5],
+    ...     # Temporal model parameters
+    ...     "baseline": [0.1, -0.1, 0.5],
+    ...     "amplitude": [-2.0, 1.2, 0.1],
+    ... })
+    >>> # Predict model response
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 200)
 
     """
 
@@ -63,12 +100,12 @@ def init_css_from_gaussian(gaussian_params: pd.DataFrame, gain: float = 1.0, n: 
     Initialize compressive spatial summation parameters from fitted Gaussian parameters.
 
     Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
-    into starting parameters for a :class:`Gaussian2DCSSPRFModel`.
+    into starting parameters for a :class:`~prfmodel.models.css.Gaussian2DCSSPRFModel`.
 
     Parameters
     ----------
     gaussian_params : pandas.DataFrame
-        DataFrame of fitted parameters from a ``Gaussian2DPRFModel``.
+        DataFrame of fitted parameters from a :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`.
     gain : float, default=1.0
         Amplification parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`.
     n : float, default=0.5
@@ -83,6 +120,21 @@ def init_css_from_gaussian(gaussian_params: pd.DataFrame, gain: float = 1.0, n: 
     ------
     ValueError
         If ``n`` <= 0 or if ``n`` or ``gain`` are not finite.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from prfmodel.models import init_css_from_gaussian
+    >>> gaussian_params = pd.DataFrame({
+    ...     "mu_x": [0.0, 1.0],
+    ...     "mu_y": [0.0, -1.0],
+    ...     "sigma": [1.0, 2.0],
+    ...     "baseline": [0.0, 0.1],
+    ...     "amplitude": [1.0, -1.0],
+    ... })
+    >>> css_params = init_css_from_gaussian(gaussian_params, gain=1.0, n=0.5)
+    >>> print(sorted(css_params.columns.tolist()))
+    ['amplitude', 'baseline', 'gain', 'mu_x', 'mu_y', 'n', 'sigma']
 
     """
     if not np.isfinite(n):

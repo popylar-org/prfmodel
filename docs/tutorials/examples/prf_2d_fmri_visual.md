@@ -336,7 +336,7 @@ response model to account for the fact that each time frame is one TR (1.5 secon
 of our predicted impulse response to the TR.
 
 ```{code-cell} ipython3
-from prfmodel.models.gaussian import Gaussian2DPRFModel
+from prfmodel.models import Gaussian2DPRFModel
 from prfmodel.models.impulse import DerivativeTwoGammaImpulse
 
 # Define repetition time (TR)
@@ -465,7 +465,7 @@ evaluate 20 parameter combinations at the same time (which saves us some memory)
 
 ```{code-cell} ipython3
 from keras.losses import CosineSimilarity
-from prfmodel.fitters.grid import GridFitter
+from prfmodel.fitters import GridFitter
 
 # Create grid fitter object
 grid_fitter = GridFitter(
@@ -494,7 +494,7 @@ scale of our model predictions to scale the observed data. We set `batch_size=20
 for batches of vertices sequentially and save memory.
 
 ```{code-cell} ipython3
-from prfmodel.fitters.linear import LeastSquaresFitter
+from prfmodel.fitters import LeastSquaresFitter
 
 # Create least-squares fitter
 ls_fitter = LeastSquaresFitter(

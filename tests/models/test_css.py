@@ -3,7 +3,7 @@
 import pandas as pd
 import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
-from prfmodel.models.compressive_spatial_summation import Gaussian2DCSSPRFModel
+from prfmodel.models.css import Gaussian2DCSSPRFModel
 from prfmodel.models.encoding import CFStimulusEncoder
 from prfmodel.models.encoding import CompressiveEncoder
 from prfmodel.models.gaussian import Gaussian2DPRFModel

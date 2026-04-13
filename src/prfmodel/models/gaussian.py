@@ -4,9 +4,10 @@ import math
 import numpy as np
 import pandas as pd
 from keras import ops
-from prfmodel.stimuli.cf import CFStimulus
-from prfmodel.stimuli.prf import GridDimensionsError
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel._docstring import doc
+from prfmodel.stimuli import CFStimulus
+from prfmodel.stimuli import GridDimensionsError
+from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
@@ -29,7 +30,7 @@ class GridMuDimensionsError(Exception):
     """
     Exception raised when the dimensions of the stimulus grid and the Gaussian mu parameter do not match.
 
-    For a stimulus grid with shape (..., m), the shape of the Gaussian mu parameter must be (num_batches, m).
+    For a stimulus grid with shape (..., m), the shape of the Gaussian mu parameter must be (num_units, m).
 
     Parameters
     ----------
@@ -71,14 +72,14 @@ def _check_gaussian_args(grid: Tensor, mu: Tensor, sigma: Tensor) -> None:
 
 
 def _expand_gaussian_args(grid: Tensor, mu: Tensor, sigma: Tensor) -> tuple[Tensor, Tensor, Tensor]:
-    # Expand mu to same shape as grid: (num_batches, ..., grid.shape[-1])
+    # Expand mu to same shape as grid: (num_units, ..., grid.shape[-1])
     mu_expand = tuple(range(1, grid.shape[-1] + 1))
     # Expand sigma to same shape as grid but omit last grid dimension
     sigma_expand = mu_expand[:-1]
 
     mu = ops.expand_dims(mu, axis=mu_expand)
     sigma = ops.expand_dims(sigma, axis=sigma_expand)
-    # Add new first dimension to grid corresponding to num_batches
+    # Add new first dimension to grid corresponding to num_units
     grid = ops.expand_dims(grid, axis=0)
 
     return grid, mu, sigma
@@ -93,23 +94,23 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
 
     Parameters
     ----------
-    grid : Tensor
+    grid : :data:`prfmodel.typing.Tensor`
         Stimulus grid for which to make predictions.
-    mu : Tensor
+    mu : :data:`prfmodel.typing.Tensor`
         Centroid of the population receptive field. Must have at least two dimensions.
-        The first dimension corresponds to the number of batches.
+        The first dimension corresponds to the number of units.
         The second dimension corresponds to the number of grid dimensions and must match the size of the
         last `grid` dimension.
-    sigma : Tensor
+    sigma : :data:`prfmodel.typing.Tensor`
         Size of the population receptive field. Must have at least two dimensions.
-        The first dimension corresponds to the number of batches,
+        The first dimension corresponds to the number of units,
         and its size must match the size of the first `mu` dimension.
         The second dimension must have size one (because all Gaussian dimensions have the same size).
 
     Returns
     -------
-    Tensor
-        The predicted Gaussian population receptive field response with shape (num_batches, ...)
+    :data:`prfmodel.typing.Tensor`
+        The predicted Gaussian population receptive field response with shape (num_units, ...)
         where `...` corresponds to the dimensions of the Gaussian.
 
     Raises
@@ -125,7 +126,7 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
 
     Examples
     --------
-    Predict a 2D Gaussian response:
+    Predict a 2D Gaussian response.
 
     >>> import numpy as np
     >>> # Define a 2D grid
@@ -134,16 +135,16 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     >>> y = np.linspace(-4, 4, num_y)
     >>> xv, yv = np.meshgrid(x, y)
     >>> grid = np.stack((xv, yv), axis=-1)  # shape (10, 10, 2)
-    >>> # Define 2D centroids of Gaussian for 3 batches
-    >>> mu = np.array([ # shape (3, 2), first column y, second column x
-    >>>     [0.0, 1.0],
-    >>>     [1.0, 0.0],
-    >>>     [0.0, 0.0],
-    >>> ])
-    >>> # Define size of Gaussian for 3 batches
-    >>> sigma = np.array([[1.0], [1.5], [2.0]]) # shape (3, 1)
+    >>> # Define 2D centroids of Gaussian for 3 units
+    >>> mu = np.array([  # shape (3, 2), first column y, second column x
+    ...     [0.0, 1.0],
+    ...     [1.0, 0.0],
+    ...     [0.0, 0.0],
+    ... ])
+    >>> # Define size of Gaussian for 3 units
+    >>> sigma = np.array([[1.0], [1.5], [2.0]])  # shape (3, 1)
     >>> resp = predict_gaussian_response(grid, mu, sigma)
-    >>> print(resp.shape) # (num_batches, num_y, num_x)
+    >>> print(resp.shape)  # (num_units, num_y, num_x)
     (3, 10, 10)
 
     """
@@ -179,35 +180,20 @@ class Gaussian2DPRFResponse(BaseResponse[PRFStimulus]):
 
     Examples
     --------
-    >>> import numpy as np
     >>> import pandas as pd
-    >>> import prfmodel as pm
-    >>> # Define a 2D grid
-    >>> num_x, num_y = 20, 10
-    >>> x = np.linspace(-3, 3, num_x)
-    >>> y = np.linspace(-4, 4, num_y)
-    >>> xv, yv = np.meshgrid(x, y)
-    >>> grid = np.stack((xv, yv), axis=-1)  # shape (20, 10, 2)
-    >>> # Define 2D centroids of Gaussian for 3 voxels
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> params = pd.DataFrame({
-    >>>     "mu_x": [0.0, 1.0, 0.0],
-    >>>     "mu_y": [1.0, 0.0, 0.0],
-    >>>     "sigma": [1.0, 1.5, 2.0],
-    >>> })
-    >>> # Define dummy design for 10 frames
-    >>> design = np.ones(10, num_y, num_x)
-    >>> # Create stimulus object
-    >>> stimulus = pm.Stimulus(
-    >>>     design=design,
-    >>>     grid=grid,
-    >>>     dimension_labels=("y", "x"),
-    >>> )
-    >>> # Create model instance
-    >>> model = Gaussian2DResponse()
-    >>> # Predict response to stimulus grid
+    ...     "mu_x": [0.0, 1.0, 0.0],
+    ...     "mu_y": [1.0, 0.0, 0.0],
+    ...     "sigma": [1.0, 1.5, 2.0],
+    ... })
+    >>> model = Gaussian2DPRFResponse()
     >>> resp = model(stimulus, params)
-    >>> print(resp.shape) # (num_voxels, num_y, num_x)
-    (3, 20, 10)
+    >>> print(resp.shape)  # (num_units, num_y, num_x)
+    (3, 101, 101)
     """
 
     @property
@@ -215,26 +201,22 @@ class Gaussian2DPRFResponse(BaseResponse[PRFStimulus]):
         """Names of parameters used by the model: `mu_y`, `mu_x`, `sigma`."""
         return ["mu_y", "mu_x", "sigma"]
 
+    @doc
     def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the model response for a stimulus with a 2D grid.
 
         Parameters
         ----------
-        stimulus : Stimulus
-            Stimulus object with a 2D stimulus grid.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels. Must contain the columns `mu_y`, `mu_x` and `sigma`.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus_prf)s
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
         Tensor
-            Model predictions of shape `(num_voxels, size_y, size_x)` and dtype `dtype`.
-            `num_voxels` is the number of rows in `parameters` and `size_y` and `size_x` are the sizes of the
+            Model predictions of shape `(num_units, size_y, size_x)` and dtype `dtype`.
+            `num_units` is the number of rows in `parameters` and `size_y` and `size_x` are the sizes of the
             x and y stimulus grid dimension.
 
         """
@@ -255,6 +237,31 @@ class GaussianCFResponse(BaseResponse[CFStimulus]):
     The model has two parameters: `center_index` is the index of the row in the stimulus distance matrix that is the
     center of the Gaussian; `sigma` for the width of the Gaussian.
 
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from prfmodel.stimuli.cf import CFStimulus
+    >>> num_source_units, num_frames = 10, 20
+    >>> distances = np.abs(
+    ...     np.arange(num_source_units, dtype=float)[:, None]
+    ...     - np.arange(num_source_units, dtype=float)[None, :]
+    ... )
+    >>> source_response = np.ones((num_source_units, num_frames))
+    >>> stimulus = CFStimulus(
+    ...     distance_matrix=distances,
+    ...     source_response=source_response
+    ... )
+    >>> # Define parameters for 2 target units
+    >>> params = pd.DataFrame({
+    ...     "center_index": [0, 5],
+    ...     "sigma": [1.0, 2.0]
+    ... })
+    >>> model = GaussianCFResponse()
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_source_units)
+    (2, 10)
+
     """
 
     @property
@@ -262,26 +269,22 @@ class GaussianCFResponse(BaseResponse[CFStimulus]):
         """Names of parameters used by the model: `center_index`, `sigma`."""
         return ["center_index", "sigma"]
 
+    @doc
     def __call__(self, stimulus: CFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the model response for a stimulus with a distance matrix.
 
         Parameters
         ----------
-        stimulus : CFStimulus
-            Connective field stimulus object with a distance matrix.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels. Must contain the columns `center_index` and `sigma`.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus_cf)s
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
         Tensor
-            Model predictions of shape `(num_voxels, num_rows)` and dtype `dtype`.
-            `num_voxels` is the number of rows in `parameters` and `num_rows` is the number of rows in the stimulus
+            Model predictions of shape `(num_units, num_rows)` and dtype `dtype`.
+            `num_units` is the number of rows in `parameters` and `num_rows` is the number of rows in the stimulus
             distance matrix.
 
         """
@@ -313,26 +316,57 @@ class Gaussian2DPRFModel(SimplePRFModel):
 
     Parameters
     ----------
-    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
-        An encoding model class or instance. Model classes will be instantiated during initialization. The
-        default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
-    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
-        An impulse response model class or instance. Model classes will be instantiated during
-        initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
-        instance with default values.
-    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
-        A temporal model class or instance. Model classes will be instantiated during initialization.
-        The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
+    %(model_encoding)s
+    %(model_impulse)s
+    %(model_temporal)s
 
     Notes
     -----
-    The simple composite model follows five steps:
+    The simple composite model follows five steps [1]_:
 
     1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
     2. The encoding model encodes the response with the stimulus design.
     3. A impulse response model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
     5. The temporal model modifies the convolved response.
+
+    References
+    ----------
+    .. [1] Dumoulin, S. O., & Wandell, B. A. (2008). Population receptive field estimates in human visual cortex.
+        *NeuroImage*, 39(2), 647-660. https://doi.org/10.1016/j.neuroimage.2007.09.034
+
+    Examples
+    --------
+    Predict a model response for multiple units.
+
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> from prfmodel.models import Gaussian2DPRFModel
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+    >>> model = Gaussian2DPRFModel()
+    >>> # Define all model parameters for 3 units
+    >>> params = pd.DataFrame({
+    ...     # Gaussian parameters
+    ...     "mu_x": [0.0, 1.0, 0.0],
+    ...     "mu_y": [1.0, 0.0, 0.0],
+    ...     "sigma": [1.0, 1.5, 2.0],
+    ...     # Impulse model parameters
+    ...     "delay": [6.0, 6.0, 6.0],
+    ...     "dispersion": [0.9, 0.9, 0.9],
+    ...     "undershoot": [12.0, 12.0, 12.0],
+    ...     "u_dispersion": [0.9, 0.9, 0.9],
+    ...     "ratio": [0.48, 0.48, 0.48],
+    ...     "weight_deriv": [0.5, 0.5, 0.5],
+    ...     # Temporal model parameters
+    ...     "baseline": [0.1, -0.1, 0.5],
+    ...     "amplitude": [-2.0, 1.2, 0.1],
+    ... })
+    >>> # Predict model response
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 200)
 
     """
 
@@ -358,20 +392,55 @@ class GaussianCFModel(SimpleCFModel):
 
     Parameters
     ----------
-    encoding_model : BaseEncoder or type, default=CFStimulusEncoder
-        An encoding model class or instance. Model classes will be instantiated during initialization. The
-        default creates a :class:`~prfmodel.models.encoding.CFStimulusEncoder` instance.
-    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
-        A temporal model class or instance. Temporal model instances will be instantiated during initialization.
-        The default creates a `BaselineAmplitude` instance.
+    %(model_encoding)s
+    %(model_temporal)s
 
     Notes
     -----
-    The simple composite model follows three steps:
+    The simple composite model follows three steps [1]_:
 
     1. The Gaussian connective field response model makes a prediction for the stimulus distance matrix.
     2. The encoding model encodes the connective field response with the source response.
     3. The temporal model modifies the encoded response.
+
+    References
+    ----------
+    .. [1] Haak, K. V., Winawer, J., Harvey, B. M., Renken, R., Dumoulin, S. O., Wandell, B. A., &
+        Cornelissen, F. W. (2013). Connective field modeling. *NeuroImage*, 66, 376-384.
+        https://doi.org/10.1016/j.neuroimage.2012.10.037
+
+
+    Examples
+    --------
+    Predict a model response for multiple units.
+
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from prfmodel.models import GaussianCFModel
+    >>> from prfmodel.stimuli.cf import CFStimulus
+    >>> num_source_units, num_frames = 10, 20
+    >>> distances = np.abs(
+    ...     np.arange(num_source_units, dtype=float)[:, None]
+    ...     - np.arange(num_source_units, dtype=float)[None, :]
+    ... )
+    >>> source_response = np.ones((num_source_units, num_frames))
+    >>> stimulus = CFStimulus(
+    ...     distance_matrix=distances,
+    ...     source_response=source_response
+    ... )
+    >>> model = GaussianCFModel()
+    >>> # Define parameters for 2 target units
+    >>> params = pd.DataFrame({
+    ...     # Gaussian parameters
+    ...     "center_index": [0, 5],
+    ...     "sigma": [1.0, 2.0],
+    ...     # Temporal model parameters
+    ...     "baseline": [0.0, 0.0],
+    ...     "amplitude": [1.0, 1.0],
+    ... })
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)
+    (2, 20)
 
     """
 

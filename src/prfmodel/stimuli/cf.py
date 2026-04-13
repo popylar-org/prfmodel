@@ -51,10 +51,10 @@ class CFStimulus(Stimulus):
     Parameters
     ----------
     distance_matrix : numpy.ndarray
-        A matrix with distances between source units (e.g., voxels).
+        A matrix with distances between source units.
     source_response : numpy.ndarray
-        Array with responses for each source unit with shape `(num_voxels, num_frames)`. `num_voxels` is the number of
-        source units and `num_frames` the number of time frames for each source response. `num_voxels` must match the
+        Array with responses for each source unit with shape `(num_units, num_frames)`. `num_units` is the number of
+        source units and `num_frames` the number of time frames for each source response. `num_units` must match the
         number of rows and columns in `distance_matrix`.
 
     Raises
@@ -64,6 +64,19 @@ class CFStimulus(Stimulus):
     DistanceMatrixSourceShapeError
         If the source response has a first dimension with a different size than the number of rows or columns in the
         distance matrix.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from prfmodel.stimuli.cf import CFStimulus
+    >>> num_vertices, num_frames = 10, 20
+    >>> distance_matrix = np.zeros((num_vertices, num_vertices))
+    >>> source_response = np.ones((num_vertices, num_frames))
+    >>> stimulus = CFStimulus(distance_matrix=distance_matrix, source_response=source_response)
+    >>> print(stimulus.distance_matrix.shape)
+    (10, 10)
+    >>> print(stimulus.source_response.shape)
+    (10, 20)
 
     """
 

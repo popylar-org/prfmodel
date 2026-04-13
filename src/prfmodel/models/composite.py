@@ -3,8 +3,9 @@
 from typing import cast
 import pandas as pd
 from keras import ops
-from prfmodel.stimuli.cf import CFStimulus
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel._docstring import doc
+from prfmodel.stimuli import CFStimulus
+from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from .base import BaseComposite
@@ -28,18 +29,10 @@ class SimplePRFModel(BaseComposite[PRFStimulus]):
 
     Parameters
     ----------
-    prf_model : BasePRFResponse
-        A population receptive field response model instance.
-    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
-        An encoding model class or instance. Model classes will be instantiated during initialization. The
-        default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
-    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
-        An impulse response model class or instance. Model classes will be instantiated during
-        initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
-        instance with default values.
-    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
-        A temporal model class or instance. Model classes will be instantiated during initialization.
-        The default creates a :class:`~prfmodel.models.temporal.BaselineAmplitude` instance.
+    %(model_prf)s
+    %(model_encoding)s
+    %(model_impulse)s
+    %(model_temporal)s
 
     Notes
     -----
@@ -53,6 +46,7 @@ class SimplePRFModel(BaseComposite[PRFStimulus]):
 
     """
 
+    @doc
     def __init__(
         self,
         prf_model: BaseResponse,
@@ -76,6 +70,7 @@ class SimplePRFModel(BaseComposite[PRFStimulus]):
             temporal_model=temporal_model,
         )
 
+    @doc
     def __call__(
         self,
         stimulus: PRFStimulus,
@@ -87,20 +82,13 @@ class SimplePRFModel(BaseComposite[PRFStimulus]):
 
         Parameters
         ----------
-        stimulus : PRFStimulus
-            Population receptive field stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus_prf)s
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Model predictions of shape (num_voxels, num_frames) and dtype `dtype`. The number of voxels is the
-            number of rows in `parameters`. The number of frames is the number of frames in the stimulus design.
+        %(predicted_response_2d)s
 
         """
         dtype = get_dtype(dtype)
@@ -134,15 +122,10 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
 
     Parameters
     ----------
-    prf_model : BaseResponse
-        A population receptive field response model instance.
-    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
-        An encoding model class or instance. Model classes will be instantiated during initialization. The
-        default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
-    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
-        An impulse response model class or instance.
-    temporal_model : BaseTemporal or type or None, default=DoGAmplitude
-        A temporal model class or instance.
+    %(model_prf)s
+    %(model_encoding)s
+    %(model_impulse)s
+    %(model_temporal)s
     change_params : list[str], default=["sigma"]
         Names of the parameters that differ between the center and surround responses.
         All entries must be present in ``prf_model.parameter_names``.
@@ -250,8 +233,8 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
 
         Returns
         -------
-        Tensor
-            Stacked predictions of shape (num_voxels, 2, num_frames).
+        :data:`prfmodel.typing.Tensor`
+            Stacked predictions of shape (num_units, 2, num_frames).
 
         """
         dtype = get_dtype(dtype)
@@ -260,6 +243,7 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
 
         return ops.stack([p1, p2], axis=1)
 
+    @doc
     def __call__(
         self,
         stimulus: PRFStimulus,
@@ -274,19 +258,13 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
 
         Parameters
         ----------
-        stimulus : PRFStimulus
-            Population receptive field stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If ``None`` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus_prf)s
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Model predictions of shape (num_voxels, num_frames).
+        %(predicted_response_2d)s
 
         """
         dtype = get_dtype(dtype)
@@ -308,11 +286,8 @@ class SimpleCFModel(BaseComposite[CFStimulus]):
 
     Parameters
     ----------
-    cf_model : BaseResponse
-        A connective field response model instance.
-    temporal_model : BaseTemporal or type or None, default=BaselineAmplitude, optional
-        A temporal model class or instance. Temporal model instances will be instantiated during initialization.
-        The default creates a `BaselineAmplitude` instance.
+    %(model_cf)s
+    %(model_temporal)s
 
     Notes
     -----
@@ -342,6 +317,7 @@ class SimpleCFModel(BaseComposite[CFStimulus]):
             temporal_model=temporal_model,
         )
 
+    @doc
     def __call__(
         self,
         stimulus: CFStimulus,
@@ -353,21 +329,13 @@ class SimpleCFModel(BaseComposite[CFStimulus]):
 
         Parameters
         ----------
-        stimulus : CFStimulus
-            Connective field stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different (sub-) model parameters and rows containing parameter values
-            for different voxels.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus_cf)s
+        %(parameters)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Model predictions of shape (num_voxels, num_frames) and dtype `dtype`. The number of voxels is the
-            number of rows in `parameters`. The number of frames is the number of frames in the stimulus source
-            response.
+        %(predicted_response_2d)s
 
         """
         dtype = get_dtype(dtype)

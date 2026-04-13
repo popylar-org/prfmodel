@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 from nilearn.surface import PolyMesh
 from nilearn.surface import load_surf_data
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.stimuli import PRFStimulus
 
 
 def load_2d_prf_bar_stimulus() -> PRFStimulus:
@@ -38,8 +38,15 @@ def load_2d_prf_bar_stimulus() -> PRFStimulus:
     References
     ----------
     .. [1] Lerma-Usabiaga, G., Benson, N., Winawer, J., & Wandell, B. A. (2020). A validation framework for
-        neuroimaging software: The case of population receptive fields. *PLOS Computational Biology, 16*(6),
+        neuroimaging software: The case of population receptive fields. *PLOS Computational Biology*, 16(6),
         e1007924. https://doi.org/10.1371/journal.pcbi.1007924
+
+    Examples
+    --------
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
 
     """
     path = files("prfmodel.data.stimuli").joinpath("2d_bar_stimulus.npz")
@@ -60,7 +67,7 @@ def load_surface_mesh(
     """
     Download and load a standardized cortical surface mesh.
 
-    Downloads a surface mesh based on the Human Connectome Project[1]_ from Fig Share and extracts the surface
+    Downloads a surface mesh based on the Human Connectome Project [1]_ from Fig Share and extracts the surface
     meshes for the left and right hemispheres.
 
     Parameters
@@ -81,7 +88,7 @@ def load_surface_mesh(
     .. [1] Van Essen, D. C., Ugurbil, K., Auerbach, E., Barch, D., Behrens, T. E. J., Bucholz, R., Chang, A., Chen, L.,
         Corbetta, M., Curtiss, S. W., Della Penna, S., Feinberg, D., Glasser, M. F., Harel, N., Heath, A. C.,
         Larson-Prior, L., Marcus, D., Michalareas, G., Moeller, S., … WU-Minn HCP Consortium. (2012).
-        The Human Connectome Project: A data acquisition perspective. *NeuroImage, 62*(4), 2222-2231.
+        The Human Connectome Project: A data acquisition perspective. *NeuroImage*, 62(4), 2222-2231.
         https://doi.org/10.1016/j.neuroimage.2012.02.018
 
     """
