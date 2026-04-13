@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 from keras import ops
-from prfmodel.backend import gammaln
+from prfmodel._backend import gammaln
 from prfmodel.models import BatchDimensionError
 from prfmodel.typing import Tensor
 

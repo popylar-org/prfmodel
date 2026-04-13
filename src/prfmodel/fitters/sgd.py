@@ -6,22 +6,12 @@ import keras
 import pandas as pd
 from keras import ops
 from tqdm.auto import tqdm
+from prfmodel._backend import BackendSGDFitter
 from prfmodel._docstring import doc
 from prfmodel.adapter import Adapter
 from prfmodel.models import BaseComposite
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
-
-match keras.backend.backend():
-    case "jax":
-        from .backend.jax import JAXSGDFitter as BackendSGDFitter
-    case "tensorflow":
-        from .backend.tensorflow import TensorFlowSGDFitter as BackendSGDFitter
-    case "torch":
-        from .backend.torch import TorchSGDFitter as BackendSGDFitter
-    case other:
-        msg = f"Backend '{other}' is not supported."
-        raise ValueError(msg)
 
 
 class SGDHistory:
