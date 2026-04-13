@@ -3,7 +3,6 @@
 from .base import BaseComposite
 from .base import BaseEncoder
 from .base import BaseResponse
-from .base import BaseTemporal
 from .base import ModelProtocol
 from .css import Gaussian2DCSSPRFModel
 from .css import init_css_from_gaussian
@@ -24,7 +23,6 @@ __all__ = [
     "BaseComposite",
     "BaseEncoder",
     "BaseResponse",
-    "BaseTemporal",
     "CFStimulusEncoder",
     "CompressiveEncoder",
     "DivNormGaussian2DPRFModel",

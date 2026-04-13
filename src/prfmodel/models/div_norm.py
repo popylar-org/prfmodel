@@ -6,16 +6,16 @@ from keras import ops
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
+from prfmodel.scaling import DivNormAmplitude
+from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from .base import BaseComposite
 from .base import BaseEncoder
 from .base import BaseResponse
-from .base import BaseTemporal
 from .encoding import PRFStimulusEncoder
 from .gaussian import Gaussian2DPRFResponse
-from .temporal import DivNormAmplitude
 
 
 class DivNormPRFModel(BaseComposite[PRFStimulus]):
@@ -43,8 +43,8 @@ class DivNormPRFModel(BaseComposite[PRFStimulus]):
         An encoding model class or instance.
     impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
         An impulse response model class or instance.
-    temporal_model : BaseTemporal or type or None, default=DivNormAmplitude
-        A temporal model class or instance.
+    scaling_model : BaseScaling or type or None, default=DivNormAmplitude
+        A scaling model class or instance.
 
     Notes
     -----
@@ -66,7 +66,7 @@ class DivNormPRFModel(BaseComposite[PRFStimulus]):
         shared_params: list[str] | None = None,
         encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
-        temporal_model: BaseTemporal | type[BaseTemporal] | None = DivNormAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = DivNormAmplitude,
     ):
         if shared_params is None:
             shared_params = ["mu_x", "mu_y"]
@@ -77,8 +77,8 @@ class DivNormPRFModel(BaseComposite[PRFStimulus]):
         if impulse_model is not None and isinstance(impulse_model, type):
             impulse_model = impulse_model()
 
-        if temporal_model is not None and isinstance(temporal_model, type):
-            temporal_model = temporal_model()
+        if scaling_model is not None and isinstance(scaling_model, type):
+            scaling_model = scaling_model()
 
         act_names = activation_prf_model.parameter_names
         norm_names = normalization_prf_model.parameter_names
@@ -98,7 +98,7 @@ class DivNormPRFModel(BaseComposite[PRFStimulus]):
             normalization_prf_model=normalization_prf_model,
             encoding_model=encoding_model,
             impulse_model=impulse_model,
-            temporal_model=temporal_model,
+            scaling_model=scaling_model,
         )
 
     @property
@@ -126,7 +126,7 @@ class DivNormPRFModel(BaseComposite[PRFStimulus]):
         # Normalization model non-shared params get _normalization suffix
         param_names.extend(f"{p}_normalization" for p in norm_model.parameter_names if p not in shared)
 
-        # Encoding, impulse, and temporal model params
+        # Encoding, impulse, and scaling model params
         for key, model in self.models.items():
             if key not in ("activation_prf_model", "normalization_prf_model") and model is not None:
                 param_names.extend(model.parameter_names)
@@ -211,11 +211,11 @@ class DivNormPRFModel(BaseComposite[PRFStimulus]):
         dtype = get_dtype(dtype)
         stacked = self.predict_responses(stimulus, parameters, dtype=dtype)
 
-        if self.models["temporal_model"] is not None:
-            temporal_model = cast("BaseTemporal", self.models["temporal_model"])
-            return temporal_model(stacked, parameters, dtype=dtype)
+        if self.models["scaling_model"] is not None:
+            scaling_model = cast("BaseScaling", self.models["scaling_model"])
+            return scaling_model(stacked, parameters, dtype=dtype)
 
-        # TODO: Is this a sensible default? Or what would word best in the absence of a temporal model?
+        # TODO: Is this a sensible default? Or what would word best in the absence of a scaling model?
         return stacked[:, 0] / stacked[:, 1]
 
 
@@ -236,8 +236,8 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
         An encoding model class or instance.
     impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
         An impulse response model class or instance.
-    temporal_model : BaseTemporal or type or None, default=DivNormAmplitude
-        A temporal model class or instance.
+    scaling_model : BaseScaling or type or None, default=DivNormAmplitude
+        A scaling model class or instance.
 
     Notes
     -----
@@ -257,7 +257,7 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
         self,
         encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
-        temporal_model: BaseTemporal | type[BaseTemporal] | None = DivNormAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = DivNormAmplitude,
     ):
         super().__init__(
             activation_prf_model=Gaussian2DPRFResponse(),
@@ -265,7 +265,7 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
             shared_params=["mu_x", "mu_y"],
             encoding_model=encoding_model,
             impulse_model=impulse_model,
-            temporal_model=temporal_model,
+            scaling_model=scaling_model,
         )
 
 

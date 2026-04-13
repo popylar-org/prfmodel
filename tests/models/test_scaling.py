@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 import pytest
 from prfmodel.exceptions import ShapeError
-from prfmodel.models.temporal import BaselineAmplitude
-from prfmodel.models.temporal import DivNormAmplitude
-from prfmodel.models.temporal import DoGAmplitude
+from prfmodel.scaling import BaselineAmplitude
+from prfmodel.scaling import DivNormAmplitude
+from prfmodel.scaling import DoGAmplitude
 from .conftest import parametrize_dtype
 
 

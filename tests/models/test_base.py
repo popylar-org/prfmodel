@@ -6,8 +6,7 @@ from prfmodel.exceptions import ShapeError
 from prfmodel.models.base import BaseComposite
 from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BaseResponse
-from prfmodel.models.base import BaseTemporal
-from prfmodel.models.base import ModelProtocol
+from prfmodel.utils import ModelProtocol
 
 
 def test_parameter_shape_error():
@@ -57,12 +56,6 @@ class TestBaseEncoder(TestBaseModel):
     """Tests for BaseEncoder class."""
 
     model_class = BaseEncoder
-
-
-class TestBaseTemporal(TestBaseModel):
-    """Tests for BaseTemporal class."""
-
-    model_class = BaseTemporal
 
 
 class TestBaseComposite(TestBaseModel):

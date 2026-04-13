@@ -10,7 +10,6 @@ from prfmodel.exceptions import ShapeError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseEncoder
-from prfmodel.models.base import BaseTemporal
 from prfmodel.models.encoding import CFStimulusEncoder
 from prfmodel.models.encoding import PRFStimulusEncoder
 from prfmodel.models.gaussian import Gaussian2DPRFModel
@@ -21,7 +20,8 @@ from prfmodel.models.gaussian import GridMuDimensionsError
 from prfmodel.models.gaussian import _check_gaussian_args
 from prfmodel.models.gaussian import _expand_gaussian_args
 from prfmodel.models.gaussian import predict_gaussian_response
-from prfmodel.models.temporal import BaselineAmplitude
+from prfmodel.scaling import BaselineAmplitude
+from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli.cf import CFStimulus
 from prfmodel.stimuli.prf import GridDimensionsError
 from prfmodel.stimuli.prf import PRFStimulus
@@ -238,7 +238,7 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
             Gaussian2DPRFModel(impulse_model="test")
 
         with pytest.raises(TypeError):
-            Gaussian2DPRFModel(temporal_model="test")
+            Gaussian2DPRFModel(scaling_model="test")
 
     def test_parameter_names(
         self,
@@ -267,7 +267,7 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
         self,
         encoding_model: BaseEncoder,
         impulse_model: BaseImpulse,
-        temporal_model: BaseTemporal,
+        temporal_model: BaseScaling,
         stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
@@ -281,7 +281,7 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
         prf_model = Gaussian2DPRFModel(
             encoding_model=encoding_model,
             impulse_model=impulse_model,
-            temporal_model=temporal_model,
+            scaling_model=temporal_model,
         )
 
         resp = prf_model(stimulus, params)
@@ -300,14 +300,14 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
         self,
         num_regression: NumericRegressionFixture,
         impulse_model: BaseImpulse,
-        temporal_model: BaseTemporal,
+        temporal_model: BaseScaling,
         stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction matches reference file."""
         prf_model = Gaussian2DPRFModel(
             impulse_model=impulse_model,
-            temporal_model=temporal_model,
+            scaling_model=temporal_model,
         )
 
         resp = prf_model(stimulus, params)
@@ -346,7 +346,7 @@ class TestGaussianCFModel(TestGaussianCFResponse):
     def test_submodels_inherit_basemodel(self):
         """Test that submodels that do not inherit from BaseModel raise an error."""
         with pytest.raises(TypeError):
-            GaussianCFModel(temporal_model="test")
+            GaussianCFModel(scaling_model="test")
 
     def test_parameter_names(
         self,
@@ -375,14 +375,14 @@ class TestGaussianCFModel(TestGaussianCFResponse):
     def test_predict(
         self,
         encoding_model: BaseEncoder,
-        temporal_model: BaseTemporal,
+        temporal_model: BaseScaling,
         stimulus: CFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction returns correct shape."""
         cf_model = GaussianCFModel(
             encoding_model=encoding_model,
-            temporal_model=temporal_model,
+            scaling_model=temporal_model,
         )
 
         resp = cf_model(stimulus, params)

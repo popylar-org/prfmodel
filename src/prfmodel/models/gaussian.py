@@ -9,6 +9,8 @@ from prfmodel.exceptions import BatchDimensionError
 from prfmodel.exceptions import ShapeError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
+from prfmodel.scaling import BaselineAmplitude
+from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
 from prfmodel.stimuli import GridDimensionsError
 from prfmodel.stimuli import PRFStimulus
@@ -18,12 +20,10 @@ from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 from .base import BaseEncoder
 from .base import BaseResponse
-from .base import BaseTemporal
 from .composite import SimpleCFModel
 from .composite import SimplePRFModel
 from .encoding import CFStimulusEncoder
 from .encoding import PRFStimulusEncoder
-from .temporal import BaselineAmplitude
 
 
 class GridMuDimensionsError(Exception):
@@ -312,13 +312,13 @@ class Gaussian2DPRFModel(SimplePRFModel):
     Two-dimensional isotropic Gaussian population receptive field model.
 
     This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
-    and temporal model response.
+    and scaling model response.
 
     Parameters
     ----------
     %(model_encoding)s
     %(model_impulse)s
-    %(model_temporal)s
+    %(model_scaling)s
 
     Notes
     -----
@@ -328,7 +328,7 @@ class Gaussian2DPRFModel(SimplePRFModel):
     2. The encoding model encodes the response with the stimulus design.
     3. A impulse response model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
-    5. The temporal model modifies the convolved response.
+    5. The scaling model modifies the convolved response.
 
     References
     ----------
@@ -359,7 +359,7 @@ class Gaussian2DPRFModel(SimplePRFModel):
     ...     "u_dispersion": [0.9, 0.9, 0.9],
     ...     "ratio": [0.48, 0.48, 0.48],
     ...     "weight_deriv": [0.5, 0.5, 0.5],
-    ...     # Temporal model parameters
+    ...     # Scaling model parameters
     ...     "baseline": [0.1, -0.1, 0.5],
     ...     "amplitude": [-2.0, 1.2, 0.1],
     ... })
@@ -374,13 +374,13 @@ class Gaussian2DPRFModel(SimplePRFModel):
         self,
         encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
-        temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):
         super().__init__(
             prf_model=Gaussian2DPRFResponse(),
             encoding_model=encoding_model,
             impulse_model=impulse_model,
-            temporal_model=temporal_model,
+            scaling_model=scaling_model,
         )
 
 
@@ -388,12 +388,12 @@ class GaussianCFModel(SimpleCFModel):
     """
     Gaussian connective field model.
 
-    This is a generic class that combines a Gaussian connective field and temporal model response.
+    This is a generic class that combines a Gaussian connective field and scaling model response.
 
     Parameters
     ----------
     %(model_encoding)s
-    %(model_temporal)s
+    %(model_scaling)s
 
     Notes
     -----
@@ -401,7 +401,7 @@ class GaussianCFModel(SimpleCFModel):
 
     1. The Gaussian connective field response model makes a prediction for the stimulus distance matrix.
     2. The encoding model encodes the connective field response with the source response.
-    3. The temporal model modifies the encoded response.
+    3. The scaling model modifies the encoded response.
 
     References
     ----------
@@ -434,7 +434,7 @@ class GaussianCFModel(SimpleCFModel):
     ...     # Gaussian parameters
     ...     "center_index": [0, 5],
     ...     "sigma": [1.0, 2.0],
-    ...     # Temporal model parameters
+    ...     # Scaling model parameters
     ...     "baseline": [0.0, 0.0],
     ...     "amplitude": [1.0, 1.0],
     ... })
@@ -447,10 +447,10 @@ class GaussianCFModel(SimpleCFModel):
     def __init__(
         self,
         encoding_model: BaseEncoder | type[BaseEncoder] = CFStimulusEncoder,
-        temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):
         super().__init__(
             cf_model=GaussianCFResponse(),
             encoding_model=encoding_model,
-            temporal_model=temporal_model,
+            scaling_model=scaling_model,
         )

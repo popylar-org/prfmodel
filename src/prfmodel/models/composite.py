@@ -7,6 +7,9 @@ from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
+from prfmodel.scaling import BaselineAmplitude
+from prfmodel.scaling import DoGAmplitude
+from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
@@ -14,11 +17,8 @@ from prfmodel.utils import get_dtype
 from .base import BaseComposite
 from .base import BaseEncoder
 from .base import BaseResponse
-from .base import BaseTemporal
 from .encoding import CFStimulusEncoder
 from .encoding import PRFStimulusEncoder
-from .temporal import BaselineAmplitude
-from .temporal import DoGAmplitude
 
 
 class SimplePRFModel(BaseComposite[PRFStimulus]):
@@ -32,7 +32,7 @@ class SimplePRFModel(BaseComposite[PRFStimulus]):
     %(model_prf)s
     %(model_encoding)s
     %(model_impulse)s
-    %(model_temporal)s
+    %(model_scaling)s
 
     Notes
     -----
@@ -52,7 +52,7 @@ class SimplePRFModel(BaseComposite[PRFStimulus]):
         prf_model: BaseResponse,
         encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
-        temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):
         if encoding_model is not None and isinstance(encoding_model, type):
             encoding_model = encoding_model()
@@ -60,14 +60,14 @@ class SimplePRFModel(BaseComposite[PRFStimulus]):
         if impulse_model is not None and isinstance(impulse_model, type):
             impulse_model = impulse_model()
 
-        if temporal_model is not None and isinstance(temporal_model, type):
-            temporal_model = temporal_model()
+        if scaling_model is not None and isinstance(scaling_model, type):
+            scaling_model = scaling_model()
 
         super().__init__(
             prf_model=prf_model,
             encoding_model=encoding_model,
             impulse_model=impulse_model,
-            temporal_model=temporal_model,
+            scaling_model=scaling_model,
         )
 
     @doc
@@ -102,8 +102,8 @@ class SimplePRFModel(BaseComposite[PRFStimulus]):
             impulse_response = impulse_model(parameters, dtype=dtype)
             response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
 
-        if self.models["temporal_model"] is not None:
-            temporal_model = cast("BaseTemporal", self.models["temporal_model"])
+        if self.models["scaling_model"] is not None:
+            temporal_model = cast("BaseScaling", self.models["scaling_model"])
             response = temporal_model(response, parameters, dtype=dtype)
 
         return response
@@ -125,7 +125,7 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
     %(model_prf)s
     %(model_encoding)s
     %(model_impulse)s
-    %(model_temporal)s
+    %(model_scaling)s
     change_params : list[str], default=["sigma"]
         Names of the parameters that differ between the center and surround responses.
         All entries must be present in ``prf_model.parameter_names``.
@@ -147,7 +147,7 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
         prf_model: BaseResponse,
         encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
-        temporal_model: BaseTemporal | type[BaseTemporal] | None = DoGAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = DoGAmplitude,
         change_params: list[str] | None = None,
     ):
         if encoding_model is not None and isinstance(encoding_model, type):
@@ -156,8 +156,8 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
         if impulse_model is not None and isinstance(impulse_model, type):
             impulse_model = impulse_model()
 
-        if temporal_model is not None and isinstance(temporal_model, type):
-            temporal_model = temporal_model()
+        if scaling_model is not None and isinstance(scaling_model, type):
+            scaling_model = scaling_model()
 
         if change_params is None:
             change_params = ["sigma"]
@@ -176,7 +176,7 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
             prf_model=prf_model,
             encoding_model=encoding_model,
             impulse_model=impulse_model,
-            temporal_model=temporal_model,
+            scaling_model=scaling_model,
         )
 
     @property
@@ -254,7 +254,7 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
         Predict the composite model response (considering Center and Surround responses).
 
         Applies the temporal model to the stacked responses from predict_responses.
-        When temporal_model=None, returns a simple subtraction (response_center - response_surround)
+        When scaling_model=None, returns a simple subtraction (response_center - response_surround)
 
         Parameters
         ----------
@@ -270,11 +270,11 @@ class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
         dtype = get_dtype(dtype)
         stacked = self.predict_responses(stimulus, parameters, dtype=dtype)
 
-        if self.models["temporal_model"] is not None:
-            temporal_model = cast("BaseTemporal", self.models["temporal_model"])
+        if self.models["scaling_model"] is not None:
+            temporal_model = cast("BaseScaling", self.models["scaling_model"])
             return temporal_model(stacked, parameters, dtype=dtype)
 
-        # When temporal_model=None, return a simple subtraction (resp1 - resp2)
+        # When scaling_model=None, return a simple subtraction (resp1 - resp2)
         return stacked[:, 0] - stacked[:, 1]
 
 
@@ -287,7 +287,7 @@ class SimpleCFModel(BaseComposite[CFStimulus]):
     Parameters
     ----------
     %(model_cf)s
-    %(model_temporal)s
+    %(model_scaling)s
 
     Notes
     -----
@@ -303,18 +303,18 @@ class SimpleCFModel(BaseComposite[CFStimulus]):
         self,
         cf_model: BaseResponse,
         encoding_model: BaseEncoder | type[BaseEncoder] = CFStimulusEncoder,
-        temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):
         if encoding_model is not None and isinstance(encoding_model, type):
             encoding_model = encoding_model()
 
-        if temporal_model is not None and isinstance(temporal_model, type):
-            temporal_model = temporal_model()
+        if scaling_model is not None and isinstance(scaling_model, type):
+            scaling_model = scaling_model()
 
         super().__init__(
             cf_model=cf_model,
             encoding_model=encoding_model,
-            temporal_model=temporal_model,
+            scaling_model=scaling_model,
         )
 
     @doc
@@ -344,8 +344,8 @@ class SimpleCFModel(BaseComposite[CFStimulus]):
         encoding_model = cast("BaseEncoder", self.models["encoding_model"])
         response = encoding_model(stimulus, response, parameters, dtype=dtype)
 
-        if self.models["temporal_model"] is not None:
-            temporal_model = cast("BaseTemporal", self.models["temporal_model"])
+        if self.models["scaling_model"] is not None:
+            temporal_model = cast("BaseScaling", self.models["scaling_model"])
             response = temporal_model(response, parameters, dtype=dtype)
 
         return response

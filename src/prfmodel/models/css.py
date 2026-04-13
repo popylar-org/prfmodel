@@ -1,15 +1,18 @@
 """Compressive spatial summation (CSS) population receptive field models."""
 
+from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
-from .base import BaseEncoder
-from .base import BaseTemporal
+from prfmodel.scaling import BaselineAmplitude
+from prfmodel.scaling.base import BaseScaling
 from .encoding import CompressiveEncoder
 from .encoding import PRFStimulusEncoder
 from .gaussian import Gaussian2DPRFModel
-from .temporal import BaselineAmplitude
+
+if TYPE_CHECKING:
+    from .base import BaseEncoder
 
 
 class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
@@ -17,14 +20,14 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     Two-dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS).
 
     This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
-    and temporal model response. In contrast to :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`, it
+    and scaling model response. In contrast to :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`, it
     encodes the stimulus response using compressive spatial summation (see
     :class:`~prfmodel.models.encoding.CompressiveEncoder`).
 
     Parameters
     ----------
     %(model_impulse)s
-    %(model_temporal)s
+    %(model_scaling)s
 
     Notes
     -----
@@ -34,7 +37,7 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     2. The encoding model encodes the response with the stimulus design and applies compressive spatial summation.
     3. A impulse response model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
-    5. The temporal model modifies the convolved response.
+    5. The scaling model modifies the convolved response.
 
     References
     ----------
@@ -69,7 +72,7 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     ...     "u_dispersion": [0.9, 0.9, 0.9],
     ...     "ratio": [0.48, 0.48, 0.48],
     ...     "weight_deriv": [0.5, 0.5, 0.5],
-    ...     # Temporal model parameters
+    ...     # Scaling model parameters
     ...     "baseline": [0.1, -0.1, 0.5],
     ...     "amplitude": [-2.0, 1.2, 0.1],
     ... })
@@ -83,7 +86,7 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     def __init__(
         self,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
-        temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):
         compressive_encoder: BaseEncoder = CompressiveEncoder(
             encoding_model=PRFStimulusEncoder(),
@@ -91,7 +94,7 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
         super().__init__(
             encoding_model=compressive_encoder,
             impulse_model=impulse_model,
-            temporal_model=temporal_model,
+            scaling_model=scaling_model,
         )
 
 

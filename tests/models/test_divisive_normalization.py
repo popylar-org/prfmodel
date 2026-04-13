@@ -6,12 +6,12 @@ import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
-from prfmodel.models.base import BaseTemporal
 from prfmodel.models.div_norm import DivNormGaussian2DPRFModel
 from prfmodel.models.div_norm import DivNormPRFModel
 from prfmodel.models.div_norm import init_dn_from_gaussian
 from prfmodel.models.gaussian import Gaussian2DPRFResponse
-from prfmodel.models.temporal import DivNormAmplitude
+from prfmodel.scaling import DivNormAmplitude
+from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli.prf import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 
@@ -84,14 +84,14 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
     def test_predict(
         self,
         impulse_model: BaseImpulse,
-        temporal_model: BaseTemporal,
+        temporal_model: BaseScaling,
         stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction returns correct shape."""
         prf_model = DivNormGaussian2DPRFModel(
             impulse_model=impulse_model,
-            temporal_model=temporal_model,
+            scaling_model=temporal_model,
         )
 
         resp = prf_model(stimulus, params)
@@ -122,14 +122,14 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
         self,
         num_regression: NumericRegressionFixture,
         impulse_model: BaseImpulse,
-        temporal_model: BaseTemporal,
+        temporal_model: BaseScaling,
         stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction matches reference file."""
         prf_model = DivNormGaussian2DPRFModel(
             impulse_model=impulse_model,
-            temporal_model=temporal_model,
+            scaling_model=temporal_model,
         )
 
         resp = prf_model(stimulus, params)
@@ -316,7 +316,7 @@ class TestDivNormPRFModel(PRFStimulusSetup):
             normalization_prf_model=Gaussian2DPRFResponse(),
             shared_params=["mu_x", "mu_y"],
             impulse_model=None,
-            temporal_model=None,
+            scaling_model=None,
         )
         names = model.parameter_names
         assert "mu_x" in names
@@ -336,7 +336,7 @@ class TestDivNormPRFModel(PRFStimulusSetup):
             normalization_prf_model=Gaussian2DPRFResponse(),
             shared_params=[],
             impulse_model=None,
-            temporal_model=None,
+            scaling_model=None,
         )
         names = model.parameter_names
         assert "mu_y_activation" in names

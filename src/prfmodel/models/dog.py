@@ -3,12 +3,12 @@
 import pandas as pd
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
+from prfmodel.scaling import DoGAmplitude
+from prfmodel.scaling.base import BaseScaling
 from .base import BaseEncoder
-from .base import BaseTemporal
 from .composite import CenterSurroundPRFModel
 from .encoding import PRFStimulusEncoder
 from .gaussian import Gaussian2DPRFResponse
-from .temporal import DoGAmplitude
 
 
 class DoG2DPRFModel(CenterSurroundPRFModel):
@@ -22,7 +22,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     ----------
     %(model_encoding)s
     %(model_impulse)s
-    %(model_temporal)s
+    %(model_scaling)s
 
     Notes
     -----
@@ -33,7 +33,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     2. The encoding model encodes each response with the stimulus design.
     3. A impulse response model generates an impulse response.
     4. Each encoded response is convolved with the impulse response.
-    5. The temporal model modifies the convolved response. By default it subtracts the surround from the center
+    5. The scaling model modifies the convolved response. By default it subtracts the surround from the center
         response after multiplying the responses with separate amplitude parameters.
 
     Let :math:`p_{\text{center}}(t)` and :math:`p_{\text{surround}}(t)` be the predicted temporal
@@ -75,7 +75,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     ...     "u_dispersion": [0.9, 0.9, 0.9],
     ...     "ratio": [0.48, 0.48, 0.48],
     ...     "weight_deriv": [0.5, 0.5, 0.5],
-    ...     # Temporal model parameters
+    ...     # Scaling model parameters
     ...     "amplitude_center": [2.0, 1.2, 0.1],
     ...     "amplitude_surround": [-0.5, -0.3, -0.1],
     ...     "baseline": [0.1, -0.1, 0.5],
@@ -91,13 +91,13 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
         self,
         encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
-        temporal_model: BaseTemporal | type[BaseTemporal] | None = DoGAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = DoGAmplitude,
     ):
         super().__init__(
             prf_model=Gaussian2DPRFResponse(),
             encoding_model=encoding_model,
             impulse_model=impulse_model,
-            temporal_model=temporal_model,
+            scaling_model=scaling_model,
             change_params=["sigma"],
         )
 
