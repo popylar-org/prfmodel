@@ -10,7 +10,7 @@ from prfmodel.adapter import ParameterConstraint
 from prfmodel.adapter import ParameterTransform
 from prfmodel.fitters.sgd import SGDFitter
 from prfmodel.fitters.sgd import SGDHistory
-from prfmodel.models.gaussian import Gaussian2DPRFModel
+from prfmodel.models.prf.gaussian import Gaussian2DPRFModel
 from prfmodel.stimuli.prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype

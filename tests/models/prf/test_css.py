@@ -1,17 +1,12 @@
-"""Tests compressive spatial summation model classes."""
+"""Tests for compressive spatial summation pRF model class."""
 
 import pandas as pd
 import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
-from prfmodel.models.css import Gaussian2DCSSPRFModel
-from prfmodel.models.encoding import CFStimulusEncoder
-from prfmodel.models.encoding import CompressiveEncoder
-from prfmodel.models.gaussian import Gaussian2DPRFModel
-from prfmodel.models.gaussian import GaussianCFModel
-from prfmodel.stimuli.cf import CFStimulus
+from prfmodel.models.prf.css import Gaussian2DCSSPRFModel
+from prfmodel.models.prf.gaussian import Gaussian2DPRFModel
 from prfmodel.stimuli.prf import PRFStimulus
 from tests.conftest import PRFStimulusSetup
-from .conftest import CFSetup
 
 
 class TestCompressiveGaussian2DPRFModel(PRFStimulusSetup):
@@ -63,57 +58,6 @@ class TestCompressiveGaussian2DPRFModel(PRFStimulusSetup):
     ):
         """Test that model prediction matches reference file."""
         resp = css_model(stimulus, params)
-
-        num_regression.check(
-            {f"response_{i}": x for i, x in enumerate(resp)},
-            default_tolerance={"atol": 1e-4},
-        )
-
-
-class TestCompressiveGaussianCFModel(CFSetup):
-    """Tests for compressive spatial summation Gaussian CF model."""
-
-    @pytest.fixture
-    def cf_model(self):
-        """CF model object."""
-        return GaussianCFModel(
-            encoding_model=CompressiveEncoder(CFStimulusEncoder()),
-        )
-
-    @pytest.fixture
-    def params(self):
-        """Dataframe with parameters."""
-        return pd.DataFrame(
-            {
-                "center_index": [0, 2, 1],
-                "sigma": [1.0, 2.0, 3.0],
-                "baseline": [0.5, -0.1, 0.2],
-                "amplitude": [-1.1, 0.5, 2.0],
-                "gain": [0.1, 0.2, 0.3],
-                "n": [0.9, 1.1, 0.1],
-            },
-        )
-
-    def test_predict(
-        self,
-        cf_model: GaussianCFModel,
-        stimulus: CFStimulus,
-        params: pd.DataFrame,
-    ):
-        """Test that model prediction returns correct shape."""
-        resp = cf_model(stimulus, params)
-
-        assert resp.shape == (params.shape[0], stimulus.source_response.shape[-1])
-
-    def test_predict_regression_cf_css(
-        self,
-        cf_model: GaussianCFModel,
-        num_regression: NumericRegressionFixture,
-        stimulus: CFStimulus,
-        params: pd.DataFrame,
-    ):
-        """Test that model prediction matches reference file."""
-        resp = cf_model(stimulus, params)
 
         num_regression.check(
             {f"response_{i}": x for i, x in enumerate(resp)},
