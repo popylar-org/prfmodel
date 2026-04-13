@@ -4,7 +4,10 @@ import functools
 import math
 import re
 import warnings
+from abc import abstractmethod
 from collections.abc import Callable
+from typing import Protocol
+from typing import runtime_checkable
 import numpy as np
 import pandas as pd
 from keras import ops
@@ -26,6 +29,41 @@ Accepted dtypes are: `"bfloat16"`, `"float16"`, `"float32"`, and `"float64"`.
 
 class UndefinedResponseWarning(UserWarning):
     """Warning for when a response is undefined and contains NaNs."""
+
+
+@runtime_checkable
+class ModelProtocol(Protocol):
+    """
+    Protocol for model classes.
+
+    Cannot be instantiated on its own.
+    This protocol is intended to serve as the parent class for custom submodels within
+    :class:`~prfmodel.models.base.BaseComposite`. Subclasses must override the abstract
+    :attr:`parameter_names` property.
+
+    Attributes
+    ----------
+    parameter_names : list of str
+        Names of parameters used by the model class.
+
+    Examples
+    --------
+    Create a custom object class that inherits from the base class:
+
+    >>> class CustomModel(BaseModel):
+    ...     @property
+    ...     def parameter_names(self):
+    ...         return ["a", "b"]
+    >>> model = CustomModel()
+    >>> print(model.parameter_names)
+    ['a', 'b']
+
+    """
+
+    @property
+    @abstractmethod
+    def parameter_names(self) -> list[str]:
+        """A list with names of parameters that are used by the model."""
 
 
 @doc

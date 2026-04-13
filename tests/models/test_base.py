@@ -1,14 +1,13 @@
 """Test model base classes."""
 
 import pytest
+from prfmodel.exceptions import BatchDimensionError
+from prfmodel.exceptions import ShapeError
 from prfmodel.models.base import BaseComposite
 from prfmodel.models.base import BaseEncoder
-from prfmodel.models.base import BaseImpulse
-from prfmodel.models.base import BaseModel
 from prfmodel.models.base import BaseResponse
 from prfmodel.models.base import BaseTemporal
-from prfmodel.models.base import BatchDimensionError
-from prfmodel.models.base import ShapeError
+from prfmodel.models.base import ModelProtocol
 
 
 def test_parameter_shape_error():
@@ -39,7 +38,7 @@ def test_batch_dimension_error():
 class TestBaseModel:
     """Tests for BaseModel class."""
 
-    model_class = BaseModel
+    model_class = ModelProtocol
 
     def test_abstract_fail(self):
         """Test that model instantiation fails."""
@@ -58,12 +57,6 @@ class TestBaseEncoder(TestBaseModel):
     """Tests for BaseEncoder class."""
 
     model_class = BaseEncoder
-
-
-class TestBaseImpulse(TestBaseModel):
-    """Tests for BaseImpulse class."""
-
-    model_class = BaseImpulse
 
 
 class TestBaseTemporal(TestBaseModel):

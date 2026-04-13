@@ -5,7 +5,7 @@ from abc import abstractmethod
 import numpy as np
 import pandas as pd
 import pytest
-from prfmodel.models.base import BaseImpulse
+from prfmodel.impulse.base import BaseImpulse
 from tests.models.conftest import parametrize_dtype
 
 
