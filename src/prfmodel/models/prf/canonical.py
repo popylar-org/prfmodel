@@ -1,4 +1,4 @@
-"""Composite models."""
+"""Canonical populationr receptive field (pRF) models."""
 
 from typing import cast
 import pandas as pd
@@ -7,7 +7,7 @@ from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
-from prfmodel.models.base import BaseComposite
+from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BaseResponse
 from prfmodel.scaling import BaselineAmplitude
@@ -19,11 +19,11 @@ from prfmodel.utils import get_dtype
 from .stimulus_encoding import PRFStimulusEncoder
 
 
-class SimplePRFModel(BaseComposite[PRFStimulus]):
+class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
     """
-    Simple composite population receptive field model.
+    Canonical population receptive field (pRF) model.
 
-    This is a generic class that combines a population receptive field, impulse, and temporal response.
+    This class combines a pRF response, impulse, and scaling model.
 
     Parameters
     ----------
@@ -107,7 +107,7 @@ class SimplePRFModel(BaseComposite[PRFStimulus]):
         return response
 
 
-class CenterSurroundPRFModel(BaseComposite[PRFStimulus]):
+class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
     """
     Center-surround composite population receptive field model.
 

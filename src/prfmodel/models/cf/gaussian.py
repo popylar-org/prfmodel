@@ -13,7 +13,7 @@ from prfmodel.stimuli import CFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
-from .composite import SimpleCFModel
+from .canonical import CanonicalCFModel
 from .stimulus_encoding import CFStimulusEncoder
 
 
@@ -95,7 +95,7 @@ class GaussianCFResponse(BaseResponse[CFStimulus]):
         return ops.exp(-resp) / volume
 
 
-class GaussianCFModel(SimpleCFModel):
+class GaussianCFModel(CanonicalCFModel):
     """
     Gaussian connective field model.
 

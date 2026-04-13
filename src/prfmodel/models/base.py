@@ -84,7 +84,7 @@ class BaseEncoder(ModelProtocol, Generic[S]):
         """
 
 
-class BaseComposite(ModelProtocol, Generic[S]):
+class BaseCanonical(ModelProtocol, Generic[S]):
     """
     Generic abstract base class for creating composite models.
 

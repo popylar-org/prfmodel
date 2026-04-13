@@ -1,11 +1,13 @@
 """Population receptive and connective field models."""
 
-from .base import BaseComposite
+from .base import BaseCanonical
 from .base import BaseEncoder
 from .base import BaseResponse
 from .base import ModelProtocol
+from .cf.canonical import CanonicalCFModel
 from .cf.gaussian import GaussianCFModel
 from .cf.stimulus_encoding import CFStimulusEncoder
+from .prf.canonical import CanonicalPRFModel
 from .prf.css import Gaussian2DCSSPRFModel
 from .prf.css import init_css_from_gaussian
 from .prf.div_norm import DivNormGaussian2DPRFModel
@@ -20,10 +22,12 @@ from .prf.stimulus_encoding import PRFStimulusEncoder
 from .prf.stimulus_encoding import encode_prf_response
 
 __all__ = [
-    "BaseComposite",
+    "BaseCanonical",
     "BaseEncoder",
     "BaseResponse",
     "CFStimulusEncoder",
+    "CanonicalCFModel",
+    "CanonicalPRFModel",
     "CompressiveEncoder",
     "DivNormGaussian2DPRFModel",
     "DivNormPRFModel",

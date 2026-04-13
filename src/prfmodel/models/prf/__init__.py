@@ -1,7 +1,7 @@
 """Population receptive field models."""
 
-from .composite import CenterSurroundPRFModel
-from .composite import SimplePRFModel
+from .canonical import CanonicalPRFModel
+from .canonical import CenterSurroundPRFModel
 from .css import Gaussian2DCSSPRFModel
 from .css import init_css_from_gaussian
 from .div_norm import DivNormGaussian2DPRFModel
@@ -17,6 +17,7 @@ from .stimulus_encoding import PRFStimulusEncoder
 from .stimulus_encoding import encode_prf_response
 
 __all__ = [
+    "CanonicalPRFModel",
     "CenterSurroundPRFModel",
     "CompressiveEncoder",
     "DivNormGaussian2DPRFModel",
@@ -26,7 +27,6 @@ __all__ = [
     "Gaussian2DPRFModel",
     "Gaussian2DPRFResponse",
     "PRFStimulusEncoder",
-    "SimplePRFModel",
     "encode_prf_response",
     "init_css_from_gaussian",
     "init_dn_from_dog",
