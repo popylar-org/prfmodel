@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from prfmodel.models.prf.stimulus_encoding import CompressiveEncoder
+from prfmodel.models.compression import CompressiveEncoder
 from prfmodel.models.prf.stimulus_encoding import PRFStimulusEncoder
 from prfmodel.models.prf.stimulus_encoding import encode_prf_response
 from prfmodel.stimuli.prf import PRFStimulus

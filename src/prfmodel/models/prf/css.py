@@ -5,10 +5,10 @@ import numpy as np
 import pandas as pd
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
+from prfmodel.models.compression import CompressiveEncoder
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseTemporal
 from .gaussian import Gaussian2DPRFModel
-from .stimulus_encoding import CompressiveEncoder
 from .stimulus_encoding import PRFStimulusEncoder
 
 if TYPE_CHECKING:

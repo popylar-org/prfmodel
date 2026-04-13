@@ -12,14 +12,12 @@ from .dog import DoG2DPRFModel
 from .dog import init_dog_from_gaussian
 from .gaussian import Gaussian2DPRFModel
 from .gaussian import Gaussian2DPRFResponse
-from .stimulus_encoding import CompressiveEncoder
 from .stimulus_encoding import PRFStimulusEncoder
 from .stimulus_encoding import encode_prf_response
 
 __all__ = [
     "CanonicalPRFModel",
     "CenterSurroundPRFModel",
-    "CompressiveEncoder",
     "DivNormGaussian2DPRFModel",
     "DivNormPRFModel",
     "DoG2DPRFModel",

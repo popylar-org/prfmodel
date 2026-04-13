@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from prfmodel.models.cf.stimulus_encoding import CFStimulusEncoder
-from prfmodel.models.prf.stimulus_encoding import CompressiveEncoder
+from prfmodel.models.compression import CompressiveEncoder
 from prfmodel.stimuli.cf import CFStimulus
 from tests.models.conftest import parametrize_dtype
 
