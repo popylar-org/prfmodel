@@ -4,7 +4,7 @@ import keras
 import numpy as np
 import pandas as pd
 import pytest
-from prfmodel.models.gaussian import Gaussian2DPRFModel
+from prfmodel.models.prf.gaussian import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict

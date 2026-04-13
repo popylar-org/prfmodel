@@ -3,12 +3,12 @@
 import pandas as pd
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
+from prfmodel.models.base import BaseEncoder
 from prfmodel.scaling import DoGAmplitude
 from prfmodel.scaling.base import BaseTemporal
-from .base import BaseEncoder
 from .composite import CenterSurroundPRFModel
-from .encoding import PRFStimulusEncoder
 from .gaussian import Gaussian2DPRFResponse
+from .stimulus_encoding import PRFStimulusEncoder
 
 
 class DoG2DPRFModel(CenterSurroundPRFModel):

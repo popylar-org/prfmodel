@@ -7,12 +7,12 @@ from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseTemporal
-from .encoding import CompressiveEncoder
-from .encoding import PRFStimulusEncoder
 from .gaussian import Gaussian2DPRFModel
+from .stimulus_encoding import CompressiveEncoder
+from .stimulus_encoding import PRFStimulusEncoder
 
 if TYPE_CHECKING:
-    from .base import BaseEncoder
+    from prfmodel.models.base import BaseEncoder
 
 
 class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
