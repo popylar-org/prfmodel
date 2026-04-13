@@ -1,0 +1,16 @@
+prfmodel.models.encoding.ResponseDesignShapeError
+=================================================
+
+.. py:exception:: prfmodel.models.encoding.ResponseDesignShapeError(response_shape: tuple[int, Ellipsis], design_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when the shapes of the model response and stimulus design do not match.
+
+   Both must have the same shape after the first dimension.
+
+   :param response_shape: Shape of the model response array.
+   :type response_shape: tuple of int
+   :param design_shape: Shape of the design array.
+   :type design_shape: tuple of int
+

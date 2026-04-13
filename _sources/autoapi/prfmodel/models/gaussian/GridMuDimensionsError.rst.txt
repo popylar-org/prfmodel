@@ -1,0 +1,16 @@
+prfmodel.models.gaussian.GridMuDimensionsError
+==============================================
+
+.. py:exception:: prfmodel.models.gaussian.GridMuDimensionsError(grid_shape: tuple[int, Ellipsis], mu_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when the dimensions of the stimulus grid and the Gaussian mu parameter do not match.
+
+   For a stimulus grid with shape (..., m), the shape of the Gaussian mu parameter must be (num_units, m).
+
+   :param grid_shape: Shape of the stimulus grid.
+   :type grid_shape: tuple of int
+   :param mu_shape: Shape of the Gaussian mu parameter.
+   :type mu_shape: tuple of int
+

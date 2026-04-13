@@ -1,0 +1,37 @@
+prfmodel.models.div_norm.init_dn_from_dog
+=========================================
+
+.. py:function:: prfmodel.models.div_norm.init_dn_from_dog(dog_params: pandas.DataFrame, baseline_activation: float | None = None, baseline_normalization: float = 1.0) -> pandas.DataFrame
+
+   Initialize DN model parameters from fitted DoG model parameters.
+
+   Converts the output of a fitted :class:`~prfmodel.models.difference_of_gaussians.DoG2DPRFModel`
+   into starting parameters for a :class:`DivNormGaussian2DPRFModel`, suitable for subsequent SGD.
+
+   :param dog_params: DataFrame of fitted parameters from a ``DoG2DPRFModel``.
+                      Must contain columns: ``sigma_center``, ``sigma_surround``, ``amplitude_center``,
+                      and ``amplitude_surround`` (plus all shared columns).
+   :type dog_params: pandas.DataFrame
+   :param baseline_activation: Initial value for ``baseline_activation`` (b in the DN formula). If ``None`` (the
+                               default), the value is taken from the ``baseline`` column of ``dog_params``; a
+                               ``ValueError`` is raised if that column is absent. When an explicit float is given it
+                               is always used, regardless of whether a ``baseline`` column is present.
+   :type baseline_activation: float, optional
+   :param baseline_normalization: Initial value for ``baseline_normalization`` (d in the DN formula). Controls the
+                                  normalization baseline in the denominator. Must be > 0 to avoid division by zero.
+   :type baseline_normalization: float, default=1.0
+
+   :returns: DataFrame of DN initial parameters with columns:
+             ``sigma_activation`` (= ``sigma_center``), ``sigma_normalization`` (= ``sigma_surround``),
+             ``amplitude_activation`` (= ``amplitude_center``),
+             ``amplitude_normalization`` (= ``abs(amplitude_surround)``; negated to start in the
+             normalization regime — can go negative during SGD if unconstrained),
+             ``baseline_activation`` (b, = ``baseline`` if present), ``baseline_normalization`` (d),
+             plus all shared columns unchanged. The ``sigma_center``, ``sigma_surround``,
+             ``amplitude_center``, ``amplitude_surround``, and ``baseline`` (if present) columns
+             are dropped.
+   :rtype: pandas.DataFrame
+
+   :raises ValueError: If ``baseline_activation`` is ``None`` and ``dog_params`` does not contain a
+       ``baseline`` column.
+

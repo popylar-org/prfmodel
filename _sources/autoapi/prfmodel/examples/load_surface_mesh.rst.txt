@@ -1,0 +1,27 @@
+prfmodel.examples.load_surface_mesh
+===================================
+
+.. py:function:: prfmodel.examples.load_surface_mesh(dest_dir: str | os.PathLike, surface_type: str = 'flat') -> nilearn.surface.PolyMesh
+
+   Download and load a standardized cortical surface mesh.
+
+   Downloads a surface mesh based on the Human Connectome Project [1]_ from Fig Share and extracts the surface
+   meshes for the left and right hemispheres.
+
+   :param dest_dir: Directory where the surface files should be stored.
+   :type dest_dir: str or os.PathLike
+   :param type: The surface type. Must be either `"flat"` (the default), `"inflated"`, `"pial"`, or `"wm"`
+                (for white matter).
+   :type type: str, default="flat"
+
+   :returns: The surface mesh.
+   :rtype: nilearn.surface.PolyMesh
+
+   .. rubric:: References
+
+   .. [1] Van Essen, D. C., Ugurbil, K., Auerbach, E., Barch, D., Behrens, T. E. J., Bucholz, R., Chang, A., Chen, L.,
+       Corbetta, M., Curtiss, S. W., Della Penna, S., Feinberg, D., Glasser, M. F., Harel, N., Heath, A. C.,
+       Larson-Prior, L., Marcus, D., Michalareas, G., Moeller, S., … WU-Minn HCP Consortium. (2012).
+       The Human Connectome Project: A data acquisition perspective. *NeuroImage*, 62(4), 2222-2231.
+       https://doi.org/10.1016/j.neuroimage.2012.02.018
+

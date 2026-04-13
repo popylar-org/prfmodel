@@ -1,0 +1,14 @@
+prfmodel.stimuli.prf.GridDesignShapeError
+=========================================
+
+.. py:exception:: prfmodel.stimuli.prf.GridDesignShapeError(design_shape: tuple[int, Ellipsis], grid_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when the shapes of the design and grid do not match.
+
+   :param design_shape: Shape of the design array.
+   :type design_shape: tuple of int
+   :param grid_shape: Shape of the grid array.
+   :type grid_shape: tuple of int
+

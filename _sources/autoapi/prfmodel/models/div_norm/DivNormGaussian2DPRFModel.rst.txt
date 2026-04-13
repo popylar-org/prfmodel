@@ -1,0 +1,72 @@
+prfmodel.models.div_norm.DivNormGaussian2DPRFModel
+==================================================
+
+.. py:class:: prfmodel.models.div_norm.DivNormGaussian2DPRFModel(encoding_model: prfmodel.models.base.BaseEncoder | type[prfmodel.models.base.BaseEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.models.base.BaseImpulse | type[prfmodel.models.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, temporal_model: prfmodel.models.base.BaseTemporal | type[prfmodel.models.base.BaseTemporal] | None = DivNormAmplitude)
+
+
+
+   Divisive normalization pRF model with isotropic 2D Gaussian responses.
+
+   Convenience subclass of :class:`DivNormPRFModel` that uses
+   :class:`~prfmodel.models.gaussian.Gaussian2DPRFResponse` as the pRF model. Both the
+   activation and normalization pRFs are isotropic 2D Gaussians centered on the same
+   position (``mu_x``, ``mu_y``) but with different sizes (``sigma_activation``,
+   ``sigma_normalization``) and different amplitudes (``amplitude_activation``,
+   ``amplitude_normalization``).
+
+   :param encoding_model: An encoding model class or instance.
+   :type encoding_model: BaseEncoder or type, default=PRFStimulusEncoder
+   :param impulse_model: An impulse response model class or instance.
+   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
+   :param temporal_model: A temporal model class or instance.
+   :type temporal_model: BaseTemporal or type or None, default=DivNormAmplitude
+
+   .. rubric:: Notes
+
+   With :math:`a = \text{amplitude\_activation}`, :math:`b = \text{baseline\_activation}`,
+   :math:`c = \text{amplitude\_normalization}`, and :math:`d = \text{baseline\_normalization}`,
+   the predicted response is:
+
+   .. math::
+
+       p_{\text{DN}} = \frac{(a G_1 \cdot S + b)}{(c G_2 \cdot S + d)} - \frac{b}{d}
+
+   The :math:`-b/d` term ensures a zero response in the absence of a stimulus.
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the DN model response to a stimulus.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with model parameters; one row per voxel.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape (num_voxels, num_frames).
+      :rtype: Tensor
+
+
+
+   .. py:method:: predict_responses(stimulus: prfmodel.stimuli.prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict each of the two responses before applying the DN formula.
+
+      :returns: Stacked predictions of shape (num_voxels, 2, num_frames), where axis 1 index 0
+                is the activation response and index 1 is the normalization response.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      Names of parameters used by the model.
+
+      Shared parameters appear once (no suffix). Response-specific parameters are suffixed
+      with ``_activation`` or ``_normalization``.
+

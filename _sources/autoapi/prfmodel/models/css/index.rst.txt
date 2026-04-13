@@ -1,0 +1,37 @@
+prfmodel.models.css
+===================
+
+.. py:module:: prfmodel.models.css
+
+.. autoapi-nested-parse::
+
+   Compressive spatial summation (CSS) population receptive field models.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   Gaussian2DCSSPRFModel </autoapi/prfmodel/models/css/Gaussian2DCSSPRFModel>
+
+.. autoapisummary::
+
+   prfmodel.models.css.Gaussian2DCSSPRFModel
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   init_css_from_gaussian </autoapi/prfmodel/models/css/init_css_from_gaussian>
+
+.. autoapisummary::
+
+   prfmodel.models.css.init_css_from_gaussian
+
+

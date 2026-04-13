@@ -3,14 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.stimuli.base" href="base/index.html"><link rel="prev" title="prfmodel.models.temporal" href="../models/temporal/index.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.stimuli.base" href="base/index.html"><link rel="prev" title="prfmodel.models.init_dog_from_gaussian" href="../models/init_dog_from_gaussian.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>prfmodel.stimuli - prfmodel 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=ad54fe46" />
     
@@ -212,42 +214,191 @@
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">prfmodel</a><input aria-label="Toggle navigation of prfmodel" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../adapter/index.html">prfmodel.adapter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../backend/index.html">prfmodel.backend</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../examples/index.html">prfmodel.examples</a></li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../fitters/index.html">prfmodel.fitters</a><input aria-label="Toggle navigation of prfmodel.fitters" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../fitters/grid/index.html">prfmodel.fitters.grid</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../fitters/linear/index.html">prfmodel.fitters.linear</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../fitters/sgd/index.html">prfmodel.fitters.sgd</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../adapter/index.html">prfmodel.adapter</a><input aria-label="Toggle navigation of prfmodel.adapter" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../adapter/Adapter.html">Adapter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../adapter/ParameterConstraint.html">ParameterConstraint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../adapter/ParameterTransform.html">ParameterTransform</a></li>
 </ul>
 </li>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../models/base/index.html">prfmodel.models.base</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../models/composite/index.html">prfmodel.models.composite</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../models/compressive_spatial_summation/index.html">prfmodel.models.compressive_spatial_summation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../models/difference_of_gaussians/index.html">prfmodel.models.difference_of_gaussians</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../models/encoding/index.html">prfmodel.models.encoding</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../models/gaussian/index.html">prfmodel.models.gaussian</a></li>
-<li class="toctree-l4 has-children"><a class="reference internal" href="../models/impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../models/impulse/convolve/index.html">prfmodel.models.impulse.convolve</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../models/impulse/density/index.html">prfmodel.models.impulse.density</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../models/impulse/shifted_gamma/index.html">prfmodel.models.impulse.shifted_gamma</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../models/impulse/two_gamma/index.html">prfmodel.models.impulse.two_gamma</a></li>
-<li class="toctree-l5"><a class="reference internal" href="../models/impulse/two_gamma_deriv/index.html">prfmodel.models.impulse.two_gamma_deriv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../backend/index.html">prfmodel.backend</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../examples/index.html">prfmodel.examples</a><input aria-label="Toggle navigation of prfmodel.examples" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../examples/load_2d_prf_bar_stimulus.html">load_2d_prf_bar_stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/load_single_subject_fmri_data.html">load_single_subject_fmri_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/load_surface_mesh.html">load_surface_mesh</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="../models/temporal/index.html">prfmodel.models.temporal</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../fitters/index.html">prfmodel.fitters</a><input aria-label="Toggle navigation of prfmodel.fitters" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../fitters/grid/index.html">prfmodel.fitters.grid</a><input aria-label="Toggle navigation of prfmodel.fitters.grid" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../fitters/grid/InfiniteLossWarning.html">InfiniteLossWarning</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../fitters/grid/GridFitter.html">GridFitter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../fitters/grid/GridHistory.html">GridHistory</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current has-children current-page"><a class="current reference internal" href="#">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" checked="" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="base/index.html">prfmodel.stimuli.base</a></li>
-<li class="toctree-l4"><a class="reference internal" href="cf/index.html">prfmodel.stimuli.cf</a></li>
-<li class="toctree-l4"><a class="reference internal" href="prf/index.html">prfmodel.stimuli.prf</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../fitters/linear/index.html">prfmodel.fitters.linear</a><input aria-label="Toggle navigation of prfmodel.fitters.linear" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../fitters/linear/LeastSquaresFitter.html">LeastSquaresFitter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../fitters/linear/LeastSquaresHistory.html">LeastSquaresHistory</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../typing/index.html">prfmodel.typing</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../utils/index.html">prfmodel.utils</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../fitters/sgd/index.html">prfmodel.fitters.sgd</a><input aria-label="Toggle navigation of prfmodel.fitters.sgd" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../fitters/sgd/SGDFitter.html">SGDFitter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../fitters/sgd/SGDHistory.html">SGDHistory</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../fitters/GridFitter.html">GridFitter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fitters/LeastSquaresFitter.html">LeastSquaresFitter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fitters/SGDFitter.html">SGDFitter</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../models/base/index.html">prfmodel.models.base</a><input aria-label="Toggle navigation of prfmodel.models.base" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../models/base/BatchDimensionError.html">BatchDimensionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/base/ShapeError.html">ShapeError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/base/BaseComposite.html">BaseComposite</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/base/BaseEncoder.html">BaseEncoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/base/BaseImpulse.html">BaseImpulse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/base/BaseModel.html">BaseModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/base/BaseResponse.html">BaseResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/base/BaseTemporal.html">BaseTemporal</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../models/composite/index.html">prfmodel.models.composite</a><input aria-label="Toggle navigation of prfmodel.models.composite" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../models/composite/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/composite/SimpleCFModel.html">SimpleCFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/composite/SimplePRFModel.html">SimplePRFModel</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../models/css/index.html">prfmodel.models.css</a><input aria-label="Toggle navigation of prfmodel.models.css" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../models/css/Gaussian2DCSSPRFModel.html">Gaussian2DCSSPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/css/init_css_from_gaussian.html">init_css_from_gaussian</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../models/div_norm/index.html">prfmodel.models.div_norm</a><input aria-label="Toggle navigation of prfmodel.models.div_norm" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../models/div_norm/DivNormGaussian2DPRFModel.html">DivNormGaussian2DPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/div_norm/DivNormPRFModel.html">DivNormPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/div_norm/init_dn_from_dog.html">init_dn_from_dog</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/div_norm/init_dn_from_gaussian.html">init_dn_from_gaussian</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../models/dog/index.html">prfmodel.models.dog</a><input aria-label="Toggle navigation of prfmodel.models.dog" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../models/dog/DoG2DPRFModel.html">DoG2DPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/dog/init_dog_from_gaussian.html">init_dog_from_gaussian</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../models/encoding/index.html">prfmodel.models.encoding</a><input aria-label="Toggle navigation of prfmodel.models.encoding" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../models/encoding/ResponseDesignShapeError.html">ResponseDesignShapeError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/encoding/CFStimulusEncoder.html">CFStimulusEncoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/encoding/CompressiveEncoder.html">CompressiveEncoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/encoding/PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/encoding/encode_prf_response.html">encode_prf_response</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../models/gaussian/index.html">prfmodel.models.gaussian</a><input aria-label="Toggle navigation of prfmodel.models.gaussian" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../models/gaussian/GridMuDimensionsError.html">GridMuDimensionsError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/gaussian/Gaussian2DPRFModel.html">Gaussian2DPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/gaussian/Gaussian2DPRFResponse.html">Gaussian2DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/gaussian/GaussianCFModel.html">GaussianCFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/gaussian/GaussianCFResponse.html">GaussianCFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/gaussian/predict_gaussian_response.html">predict_gaussian_response</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../models/impulse/index.html">prfmodel.models.impulse</a><input aria-label="Toggle navigation of prfmodel.models.impulse" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../models/impulse/convolve/index.html">prfmodel.models.impulse.convolve</a><input aria-label="Toggle navigation of prfmodel.models.impulse.convolve" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/convolve/convolve_prf_impulse_response.html">convolve_prf_impulse_response</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../models/impulse/density/index.html">prfmodel.models.impulse.density</a><input aria-label="Toggle navigation of prfmodel.models.impulse.density" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/density/derivative_gamma_density.html">derivative_gamma_density</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/density/gamma_density.html">gamma_density</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/density/shifted_gamma_density.html">shifted_gamma_density</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../models/impulse/shifted_gamma/index.html">prfmodel.models.impulse.shifted_gamma</a><input aria-label="Toggle navigation of prfmodel.models.impulse.shifted_gamma" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/shifted_gamma/ShiftedGammaImpulse.html">ShiftedGammaImpulse</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../models/impulse/two_gamma/index.html">prfmodel.models.impulse.two_gamma</a><input aria-label="Toggle navigation of prfmodel.models.impulse.two_gamma" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/two_gamma/TwoGammaImpulse.html">TwoGammaImpulse</a></li>
+</ul>
+</li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../models/impulse/two_gamma_deriv/index.html">prfmodel.models.impulse.two_gamma_deriv</a><input aria-label="Toggle navigation of prfmodel.models.impulse.two_gamma_deriv" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../models/impulse/two_gamma_deriv/DerivativeTwoGammaImpulse.html">DerivativeTwoGammaImpulse</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../models/impulse/DerivativeTwoGammaImpulse.html">DerivativeTwoGammaImpulse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/impulse/ShiftedGammaImpulse.html">ShiftedGammaImpulse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/impulse/TwoGammaImpulse.html">TwoGammaImpulse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/impulse/convolve_prf_impulse_response.html">convolve_prf_impulse_response</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/impulse/derivative_gamma_density.html">derivative_gamma_density</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/impulse/gamma_density.html">gamma_density</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/impulse/shifted_gamma_density.html">shifted_gamma_density</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../models/temporal/index.html">prfmodel.models.temporal</a><input aria-label="Toggle navigation of prfmodel.models.temporal" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../models/temporal/BaselineAmplitude.html">BaselineAmplitude</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/temporal/DivNormAmplitude.html">DivNormAmplitude</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/temporal/DoGAmplitude.html">DoGAmplitude</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../models/BatchDimensionError.html">BatchDimensionError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/BaseComposite.html">BaseComposite</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/BaseEncoder.html">BaseEncoder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/BaseImpulse.html">BaseImpulse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/BaseModel.html">BaseModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/BaseResponse.html">BaseResponse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/BaseTemporal.html">BaseTemporal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/CFStimulusEncoder.html">CFStimulusEncoder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/CompressiveEncoder.html">CompressiveEncoder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/DivNormGaussian2DPRFModel.html">DivNormGaussian2DPRFModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/DivNormPRFModel.html">DivNormPRFModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/DoG2DPRFModel.html">DoG2DPRFModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/Gaussian2DCSSPRFModel.html">Gaussian2DCSSPRFModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/Gaussian2DPRFModel.html">Gaussian2DPRFModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/GaussianCFModel.html">GaussianCFModel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/encode_prf_response.html">encode_prf_response</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/init_css_from_gaussian.html">init_css_from_gaussian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/init_dn_from_dog.html">init_dn_from_dog</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/init_dn_from_gaussian.html">init_dn_from_gaussian</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../models/init_dog_from_gaussian.html">init_dog_from_gaussian</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" checked="" class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="base/index.html">prfmodel.stimuli.base</a><input aria-label="Toggle navigation of prfmodel.stimuli.base" class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" role="switch" type="checkbox"/><label for="toctree-checkbox-27"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="base/Stimulus.html">Stimulus</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="cf/index.html">prfmodel.stimuli.cf</a><input aria-label="Toggle navigation of prfmodel.stimuli.cf" class="toctree-checkbox" id="toctree-checkbox-28" name="toctree-checkbox-28" role="switch" type="checkbox"/><label for="toctree-checkbox-28"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="cf/DistanceMatrixShapeError.html">DistanceMatrixShapeError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cf/DistanceMatrixSourceShapeError.html">DistanceMatrixSourceShapeError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="cf/CFStimulus.html">CFStimulus</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="prf/index.html">prfmodel.stimuli.prf</a><input aria-label="Toggle navigation of prfmodel.stimuli.prf" class="toctree-checkbox" id="toctree-checkbox-29" name="toctree-checkbox-29" role="switch" type="checkbox"/><label for="toctree-checkbox-29"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="prf/DimensionLabelsError.html">DimensionLabelsError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="prf/GridDesignShapeError.html">GridDesignShapeError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="prf/GridDimensionsError.html">GridDimensionsError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="prf/StimulusDimensionError.html">StimulusDimensionError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="prf/PRFStimulus.html">PRFStimulus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="prf/animate_2d_prf_stimulus.html">animate_2d_prf_stimulus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="prf/plot_2d_prf_stimulus.html">plot_2d_prf_stimulus</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="GridDimensionsError.html">GridDimensionsError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CFStimulus.html">CFStimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="PRFStimulus.html">PRFStimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Stimulus.html">Stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="animate_2d_prf_stimulus.html">animate_2d_prf_stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_2d_prf_stimulus.html">plot_2d_prf_stimulus</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../typing/index.html">prfmodel.typing</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../utils/index.html">prfmodel.utils</a><input aria-label="Toggle navigation of prfmodel.utils" class="toctree-checkbox" id="toctree-checkbox-30" name="toctree-checkbox-30" role="switch" type="checkbox"/><label for="toctree-checkbox-30"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../utils/UndefinedResponseWarning.html">UndefinedResponseWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/ParamsDict.html">ParamsDict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/batched.html">batched</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/convert_parameters_to_tensor.html">convert_parameters_to_tensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/get_dtype.html">get_dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/normalize_response.html">normalize_response</a></li>
 </ul>
 </li>
 </ul>
@@ -296,26 +447,52 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="base/index.html">prfmodel.stimuli.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cf/index.html">prfmodel.stimuli.cf</a></li>
-<li class="toctree-l1"><a class="reference internal" href="prf/index.html">prfmodel.stimuli.prf</a></li>
-</ul>
+</div>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="base/index.html#module-prfmodel.stimuli.base" title="prfmodel.stimuli.base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">base</span></code></a></p></td>
+<td><p>Stimulus base classes.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="cf/index.html#module-prfmodel.stimuli.cf" title="prfmodel.stimuli.cf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cf</span></code></a></p></td>
+<td><p>Container for connective field stimulus distance matrix and source signal.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="prf/index.html#module-prfmodel.stimuli.prf" title="prfmodel.stimuli.prf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prf</span></code></a></p></td>
+<td><p>Container for population receptive field stimulus design and grid.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="GridDimensionsError.html#prfmodel.stimuli.GridDimensionsError" title="prfmodel.stimuli.GridDimensionsError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GridDimensionsError</span></code></a></p></td>
+<td><p>Exception raised when number of grid dimensions except for the last does not match last grid dimension size.</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 </section>
 <section id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.stimuli.Stimulus" title="prfmodel.stimuli.Stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Stimulus</span></code></a></p></td>
-<td><p>Stimulus base class.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.stimuli.CFStimulus" title="prfmodel.stimuli.CFStimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CFStimulus</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="CFStimulus.html#prfmodel.stimuli.CFStimulus" title="prfmodel.stimuli.CFStimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CFStimulus</span></code></a></p></td>
 <td><p>Container for a connective field stimulus distance matrix and source response.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PRFStimulus</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="PRFStimulus.html#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PRFStimulus</span></code></a></p></td>
 <td><p>Container for a population receptive field stimulus design and its associated grid.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="Stimulus.html#prfmodel.stimuli.Stimulus" title="prfmodel.stimuli.Stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Stimulus</span></code></a></p></td>
+<td><p>Stimulus base class.</p></td>
 </tr>
 </tbody>
 </table>
@@ -323,233 +500,20 @@
 </section>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#prfmodel.stimuli.animate_2d_prf_stimulus" title="prfmodel.stimuli.animate_2d_prf_stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">animate_2d_prf_stimulus</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="animate_2d_prf_stimulus.html#prfmodel.stimuli.animate_2d_prf_stimulus" title="prfmodel.stimuli.animate_2d_prf_stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">animate_2d_prf_stimulus</span></code></a>(...)</p></td>
 <td><p>Animate a two-dimensional population receptive field stimulus.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#prfmodel.stimuli.plot_2d_prf_stimulus" title="prfmodel.stimuli.plot_2d_prf_stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_2d_prf_stimulus</span></code></a>(→ tuple[matplotlib.figure.Figure, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="plot_2d_prf_stimulus.html#prfmodel.stimuli.plot_2d_prf_stimulus" title="prfmodel.stimuli.plot_2d_prf_stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_2d_prf_stimulus</span></code></a>(→ tuple[matplotlib.figure.Figure, ...)</p></td>
 <td><p>Plot a single frame of a two-dimensional population receptive field stimulus.</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-</section>
-<section id="package-contents">
-<h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="prfmodel.stimuli.Stimulus">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.stimuli.</span></span><span class="sig-name descname"><span class="pre">Stimulus</span></span><a class="reference internal" href="../../../_modules/prfmodel/stimuli/base.html#Stimulus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.stimuli.Stimulus" title="Link to this definition">¶</a></dt>
-<dd><p>Stimulus base class.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="prfmodel.stimuli.Stimulus.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../../_modules/prfmodel/stimuli/base.html#Stimulus.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.stimuli.Stimulus.__repr__" title="Link to this definition">¶</a></dt>
-<dd><p>Create a round-trippable string representation of the stimulus object.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="prfmodel.stimuli.Stimulus.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../../_modules/prfmodel/stimuli/base.html#Stimulus.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.stimuli.Stimulus.__str__" title="Link to this definition">¶</a></dt>
-<dd><p>Create a human-readable string representation of the stimulus object.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="prfmodel.stimuli.CFStimulus">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.stimuli.</span></span><span class="sig-name descname"><span class="pre">CFStimulus</span></span><a class="reference internal" href="../../../_modules/prfmodel/stimuli/cf.html#CFStimulus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.stimuli.CFStimulus" title="Link to this definition">¶</a></dt>
-<dd><p>Container for a connective field stimulus distance matrix and source response.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>distance_matrix</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>numpy.ndarray</em></a>) – A matrix with distances between source units (e.g., voxels).</p></li>
-<li><p><strong>source_response</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>numpy.ndarray</em></a>) – Array with responses for each source unit with shape <cite>(num_voxels, num_frames)</cite>. <cite>num_voxels</cite> is the number of
-source units and <cite>num_frames</cite> the number of time frames for each source response. <cite>num_voxels</cite> must match the
-number of rows and columns in <cite>distance_matrix</cite>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference internal" href="cf/index.html#prfmodel.stimuli.cf.DistanceMatrixShapeError" title="prfmodel.stimuli.cf.DistanceMatrixShapeError"><strong>DistanceMatrixShapeError</strong></a> – If the distance matrix has more or less than two dimensions or dimensions of different size.</p></li>
-<li><p><a class="reference internal" href="cf/index.html#prfmodel.stimuli.cf.DistanceMatrixSourceShapeError" title="prfmodel.stimuli.cf.DistanceMatrixSourceShapeError"><strong>DistanceMatrixSourceShapeError</strong></a> – If the source response has a first dimension with a different size than the number of rows or columns in the
-distance matrix.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="prfmodel.stimuli.CFStimulus.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#prfmodel.stimuli.CFStimulus.__repr__" title="Link to this definition">¶</a></dt>
-<dd><p>Create a round-trippable string representation of the stimulus object.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="prfmodel.stimuli.CFStimulus.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#prfmodel.stimuli.CFStimulus.__str__" title="Link to this definition">¶</a></dt>
-<dd><p>Create a human-readable string representation of the stimulus object.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="prfmodel.stimuli.PRFStimulus">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.stimuli.</span></span><span class="sig-name descname"><span class="pre">PRFStimulus</span></span><a class="reference internal" href="../../../_modules/prfmodel/stimuli/prf.html#PRFStimulus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.stimuli.PRFStimulus" title="Link to this definition">¶</a></dt>
-<dd><p>Container for a population receptive field stimulus design and its associated grid.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>design</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>numpy.ndarray</em></a>) – The stimulus design array containing the stimulus value in one or more dimensions over different time frames.
-The first axis is assumed to be time frames. Additional axes represent design dimensions.</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><em>numpy.ndarray</em></a>) – The coordinate system of the design. The last axis is the number of design dimensions
-excluding the time frame dimension. The shape excluding the last axis must match the shape
-of the design excluding the first axis.</p></li>
-<li><p><strong>dimension_labels</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] or </em><em>None</em><em>, </em><em>optional</em>) – Names of the grid dimensions (e.g., <cite>[“y”, “x”]</cite>). If given, the number of labels must match the last grid axis.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><a class="reference internal" href="prf/index.html#prfmodel.stimuli.prf.GridDesignShapeError" title="prfmodel.stimuli.prf.GridDesignShapeError"><strong>GridDesignShapeError</strong></a> – If the design and grid dimensions do not match.</p></li>
-<li><p><a class="reference internal" href="prf/index.html#prfmodel.stimuli.prf.GridDimensionsError" title="prfmodel.stimuli.prf.GridDimensionsError"><strong>GridDimensionsError</strong></a> – If the number of dimensions of the grid except the last does not match the size of the last grid dimension.</p></li>
-<li><p><a class="reference internal" href="prf/index.html#prfmodel.stimuli.prf.DimensionLabelsError" title="prfmodel.stimuli.prf.DimensionLabelsError"><strong>DimensionLabelsError</strong></a> – If the number of dimensions does not match the grid’s last dimension.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The shapes of the design and grid must match according to <cite>design.shape[1:] == grid.shape[:-1]</cite>.
-That is, all design dimensions but the first must have the same size as the grid
-dimensions excluding the last grid dimension.</p>
-<p class="rubric">Examples</p>
-<p>Create a population receptive field stimulus on a 2D grid.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">num_frames</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">design</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">num_frames</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pixel_size</span> <span class="o">=</span> <span class="mf">0.05</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">pixel_size</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">pixel_size</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (height, width, 2)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (height, width, 2)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The coordinates of the bottom-left corner:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
-<span class="go">array([-0.375, -0.375])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The coordinates of the top-right corner:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span><span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="p">:]</span>
-<span class="go">array([0.375, 0.375])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">dimension_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
-<span class="go">PRFStimulus(design=array[10, 16, 16], grid=array[16, 16, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">create_2d_bar_stimulus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bar_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'horizontal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><span class="pre">PRFStimulus</span></a></span></span><a class="reference internal" href="../../../_modules/prfmodel/stimuli/prf.html#PRFStimulus.create_2d_bar_stimulus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus" title="Link to this definition">¶</a></dt>
-<dd><p>Create a population receptive field bar stimulus that moves across a 2D screen.</p>
-<p>The stimulus starts and ends moving just outside the screen.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>num_frames</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of time frames in the stimulus.</p></li>
-<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Width of the stimulus grid (in pixels).</p></li>
-<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Height of the stimulus grid (in pixels).</p></li>
-<li><p><strong>bar_width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Width of the moving bar (in pixels).</p></li>
-<li><p><strong>direction</strong> (<em>{&quot;horizontal&quot;</em><em>, </em><em>&quot;vertical&quot;}</em><em>, </em><em>optional</em>) – Direction in which the bar moves.</p></li>
-<li><p><strong>pixel_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Size of a pixel in spatial units.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A stimulus instance with the generated design and grid.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus">PRFStimulus</a></p>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <cite>direction</cite> is not “horizontal” or “vertical”.</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="o">.</span><span class="n">create_2d_bar_stimulus</span><span class="p">(</span><span class="n">num_frames</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
-<span class="go">PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="prfmodel.stimuli.PRFStimulus.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#prfmodel.stimuli.PRFStimulus.__repr__" title="Link to this definition">¶</a></dt>
-<dd><p>Create a round-trippable string representation of the stimulus object.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="prfmodel.stimuli.PRFStimulus.__str__">
-<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#prfmodel.stimuli.PRFStimulus.__str__" title="Link to this definition">¶</a></dt>
-<dd><p>Create a human-readable string representation of the stimulus object.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="prfmodel.stimuli.animate_2d_prf_stimulus">
-<span class="sig-prename descclassname"><span class="pre">prfmodel.stimuli.</span></span><span class="sig-name descname"><span class="pre">animate_2d_prf_stimulus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><span class="pre">PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'upper'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'lower'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'lower'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repeat_delay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.ArtistAnimation.html#matplotlib.animation.ArtistAnimation" title="(in Matplotlib v3.10.8)"><span class="pre">matplotlib.animation.ArtistAnimation</span></a></span></span><a class="reference internal" href="../../../_modules/prfmodel/stimuli/prf.html#animate_2d_prf_stimulus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.stimuli.animate_2d_prf_stimulus" title="Link to this definition">¶</a></dt>
-<dd><p>Animate a two-dimensional population receptive field stimulus.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>stimulus</strong> (<a class="reference internal" href="#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><em>PRFStimulus</em></a>) – The population receptive field stimulus to visualize.</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Title for the video animation.</p></li>
-<li><p><strong>origin</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <cite>origin</cite> argument for <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.imshow.html#matplotlib.axes.Axes.imshow" title="(in Matplotlib v3.10.8)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.axes.Axes.imshow()</span></code></a>.</p></li>
-<li><p><strong>interval</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – <cite>interval</cite> argument passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.ArtistAnimation.html#matplotlib.animation.ArtistAnimation" title="(in Matplotlib v3.10.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.animation.ArtistAnimation</span></code></a>.</p></li>
-<li><p><strong>blit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – <cite>blit</cite> argument passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.ArtistAnimation.html#matplotlib.animation.ArtistAnimation" title="(in Matplotlib v3.10.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.animation.ArtistAnimation</span></code></a>.</p></li>
-<li><p><strong>repeat_delay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – <cite>repeat_delay</cite> argument passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.ArtistAnimation.html#matplotlib.animation.ArtistAnimation" title="(in Matplotlib v3.10.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.animation.ArtistAnimation</span></code></a>.</p></li>
-<li><p><strong>kwargs</strong> – Extra arguments passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="(in Matplotlib v3.10.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">matplotlib.pyplot.subplots()</span></code></a>
-and <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.ArtistAnimation.html#matplotlib.animation.ArtistAnimation" title="(in Matplotlib v3.10.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.animation.ArtistAnimation</span></code></a>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.animation.ArtistAnimation.html#matplotlib.animation.ArtistAnimation" title="(in Matplotlib v3.10.8)">matplotlib.animation.ArtistAnimation</a></p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="prf/index.html#prfmodel.stimuli.prf.StimulusDimensionError" title="prfmodel.stimuli.prf.StimulusDimensionError"><strong>StimulusDimensionError</strong></a> – If <cite>stimulus</cite> is not 2-dimensional.</p>
-</dd>
-</dl>
-<p class="rubric">Notes</p>
-<p>The function uses matplotlib under the hood, and you can use the <a class="reference external" href="https://matplotlib.org/stable/api/matplotlib_configuration_api.html#matplotlib.rcParams" title="(in Matplotlib v3.10.8)"><code class="xref py py-data docutils literal notranslate"><span class="pre">matplotlib.rcParams</span></code></a>
-to customize the animation, as described on the
-<a class="reference external" href="https://matplotlib.org/stable/users/explain/customizing.html">matplotlib docs</a>.</p>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTML</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimulus</span><span class="w"> </span><span class="kn">import</span> <span class="n">PRFStimulus</span><span class="p">,</span> <span class="n">animate_2d_prf_stimulus</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">bar_stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="o">.</span><span class="n">create_2d_bar_stimulus</span><span class="p">(</span><span class="n">num_frames</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ani</span> <span class="o">=</span> <span class="n">animate_2d_prf_stimulus</span><span class="p">(</span><span class="n">bar_stimulus</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">video</span> <span class="o">=</span> <span class="n">ani</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">HTML</span><span class="p">(</span><span class="n">video</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="prfmodel.stimuli.plot_2d_prf_stimulus">
-<span class="sig-prename descclassname"><span class="pre">prfmodel.stimuli.</span></span><span class="sig-name descname"><span class="pre">plot_2d_prf_stimulus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><span class="pre">PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'upper'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'lower'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'lower'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="(in Matplotlib v3.10.8)"><span class="pre">matplotlib.figure.Figure</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.10.8)"><span class="pre">matplotlib.axes.Axes</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/prfmodel/stimuli/prf.html#plot_2d_prf_stimulus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.stimuli.plot_2d_prf_stimulus" title="Link to this definition">¶</a></dt>
-<dd><p>Plot a single frame of a two-dimensional population receptive field stimulus.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>stimulus</strong> (<a class="reference internal" href="#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><em>PRFStimulus</em></a>) – The population receptive field stimulus to visualize.</p></li>
-<li><p><strong>frame_idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Index of the frame to plot.</p></li>
-<li><p><strong>origin</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – <cite>origin</cite> argument for <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.imshow.html#matplotlib.axes.Axes.imshow" title="(in Matplotlib v3.10.8)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">matplotlib.axes.Axes.imshow()</span></code></a>.</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Title for the plot.</p></li>
-<li><p><strong>kwargs</strong> – Extra arguments passed to <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html#matplotlib.pyplot.subplots" title="(in Matplotlib v3.10.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">matplotlib.pyplot.subplots()</span></code></a>.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="(in Matplotlib v3.10.8)">matplotlib.figure.Figure</a>, <a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.10.8)">matplotlib.axes.Axes</a>]</p>
-</dd>
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="prf/index.html#prfmodel.stimuli.prf.StimulusDimensionError" title="prfmodel.stimuli.prf.StimulusDimensionError"><strong>StimulusDimensionError</strong></a> – If the stimulus is not 2-dimensional.</p>
-</dd>
-</dl>
-</dd></dl>
-
 </section>
 </section>
 
@@ -567,14 +531,14 @@ to customize the animation, as described on the
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../models/temporal/index.html">
+          <a class="prev-page" href="../models/init_dog_from_gaussian.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">prfmodel.models.temporal</div>
+                <div class="title">prfmodel.models.init_dog_from_gaussian</div>
                 
               </div>
             </a>
@@ -610,29 +574,9 @@ to customize the animation, as described on the
             <ul>
 <li><a class="reference internal" href="#">prfmodel.stimuli</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#exceptions">Exceptions</a></li>
 <li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
-<li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
-<li><a class="reference internal" href="#prfmodel.stimuli.Stimulus"><code class="docutils literal notranslate"><span class="pre">Stimulus</span></code></a><ul>
-<li><a class="reference internal" href="#prfmodel.stimuli.Stimulus.__repr__"><code class="docutils literal notranslate"><span class="pre">Stimulus.__repr__()</span></code></a></li>
-<li><a class="reference internal" href="#prfmodel.stimuli.Stimulus.__str__"><code class="docutils literal notranslate"><span class="pre">Stimulus.__str__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#prfmodel.stimuli.CFStimulus"><code class="docutils literal notranslate"><span class="pre">CFStimulus</span></code></a><ul>
-<li><a class="reference internal" href="#prfmodel.stimuli.CFStimulus.__repr__"><code class="docutils literal notranslate"><span class="pre">CFStimulus.__repr__()</span></code></a></li>
-<li><a class="reference internal" href="#prfmodel.stimuli.CFStimulus.__str__"><code class="docutils literal notranslate"><span class="pre">CFStimulus.__str__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#prfmodel.stimuli.PRFStimulus"><code class="docutils literal notranslate"><span class="pre">PRFStimulus</span></code></a><ul>
-<li><a class="reference internal" href="#prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus"><code class="docutils literal notranslate"><span class="pre">PRFStimulus.create_2d_bar_stimulus()</span></code></a></li>
-<li><a class="reference internal" href="#prfmodel.stimuli.PRFStimulus.__repr__"><code class="docutils literal notranslate"><span class="pre">PRFStimulus.__repr__()</span></code></a></li>
-<li><a class="reference internal" href="#prfmodel.stimuli.PRFStimulus.__str__"><code class="docutils literal notranslate"><span class="pre">PRFStimulus.__str__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#prfmodel.stimuli.animate_2d_prf_stimulus"><code class="docutils literal notranslate"><span class="pre">animate_2d_prf_stimulus()</span></code></a></li>
-<li><a class="reference internal" href="#prfmodel.stimuli.plot_2d_prf_stimulus"><code class="docutils literal notranslate"><span class="pre">plot_2d_prf_stimulus()</span></code></a></li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -648,5 +592,8 @@ to customize the animation, as described on the
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
     </body>
 </html>

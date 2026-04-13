@@ -1,0 +1,37 @@
+prfmodel.models.init_css_from_gaussian
+======================================
+
+.. py:function:: prfmodel.models.init_css_from_gaussian(gaussian_params: pandas.DataFrame, gain: float = 1.0, n: float = 0.5) -> pandas.DataFrame
+
+   Initialize compressive spatial summation parameters from fitted Gaussian parameters.
+
+   Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
+   into starting parameters for a :class:`~prfmodel.models.css.Gaussian2DCSSPRFModel`.
+
+   :param gaussian_params: DataFrame of fitted parameters from a :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`.
+   :type gaussian_params: pandas.DataFrame
+   :param gain: Amplification parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`.
+   :type gain: float, default=1.0
+   :param n: Compression exponent parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`. Must be > 0.
+   :type n: float, default=0.5
+
+   :returns: DataFrame with two additional columns: ``gain`` and ``m``.
+   :rtype: pandas.DataFrame
+
+   :raises ValueError: If ``n`` <= 0 or if ``n`` or ``gain`` are not finite.
+
+   .. rubric:: Examples
+
+   >>> import pandas as pd
+   >>> from prfmodel.models import init_css_from_gaussian
+   >>> gaussian_params = pd.DataFrame({
+   ...     "mu_x": [0.0, 1.0],
+   ...     "mu_y": [0.0, -1.0],
+   ...     "sigma": [1.0, 2.0],
+   ...     "baseline": [0.0, 0.1],
+   ...     "amplitude": [1.0, -1.0],
+   ... })
+   >>> css_params = init_css_from_gaussian(gaussian_params, gain=1.0, n=0.5)
+   >>> print(sorted(css_params.columns.tolist()))
+   ['amplitude', 'baseline', 'gain', 'mu_x', 'mu_y', 'n', 'sigma']
+

@@ -1,0 +1,53 @@
+prfmodel.models.impulse.derivative_gamma_density
+================================================
+
+.. py:function:: prfmodel.models.impulse.derivative_gamma_density(value: prfmodel.typing.Tensor, shape: prfmodel.typing.Tensor, rate: prfmodel.typing.Tensor) -> prfmodel.typing.Tensor
+
+   Calculate the derivative density of a gamma distribution.
+
+   The distribution uses a shape and rate parameterization.
+   Raises an error when evaluated at negative values.
+
+   :param value: The values at which to evaluate the derivative gamma distribution. Must be > 0 and scalar or with shape (1, m).
+   :type value: :data:`prfmodel.typing.Tensor`
+   :param shape: The shape parameter. Must be > 0 and scalar or with shape (n, m).
+   :type shape: :data:`prfmodel.typing.Tensor`
+   :param rate: The rate parameter. Must be > 0 and scalar or with shape (n, m).
+   :type rate: :data:`prfmodel.typing.Tensor`
+
+   :returns: The derivative density of the gamma distribution at `value` as a scalar or with shape (n, m).
+   :rtype: :data:`prfmodel.typing.Tensor`
+
+   .. rubric:: Notes
+
+   The density of the gamma distribution
+   with `shape` :math:`\alpha` and `rate` :math:`\lambda` is given by:
+
+   .. math::
+
+       f(x) =  \frac{\mathtt{\lambda}^{\mathtt{\alpha}}}{\Gamma(\mathtt{\alpha})}
+       x^{\mathtt{\alpha} - 1} e^{\mathtt{\lambda} x}.
+
+   The derivative of the density with respect to :math:`x` can be defined as a function of the original density
+   :math:`f(x)`:
+
+   .. math::
+
+       f(x)' = f(x) \frac{(\alpha - 1)}{t} - \lambda
+
+   .. seealso::
+
+      :py:obj:`gamma_density`
+          The gamma distribution density.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> from prfmodel.models.impulse import derivative_gamma_density
+   >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
+   >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
+   >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
+   >>> dens = derivative_gamma_density(t, shape, rate)
+   >>> print(dens.shape)
+   (2, 3)
+

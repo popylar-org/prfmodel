@@ -1,0 +1,33 @@
+prfmodel.utils.normalize_response
+=================================
+
+.. py:function:: prfmodel.utils.normalize_response(response: prfmodel.typing.Tensor, norm: str | None = 'sum') -> prfmodel.typing.Tensor
+
+   Normalize a response.
+
+   Divides a response by a normalization (e.g., its sum) computed over the second dimension.
+
+   :param response: Response with shape (num_units, num_frames).
+   :type response: Tensor
+   :param norm: Normalization to apply.
+   :type norm: str, optional, default="sum"
+
+   :returns: The normalized response with shape (num_units, num_frames).
+   :rtype: Tensor
+
+   .. rubric:: Notes
+
+   A warning is raised when the normalization is zero which leads to an undefined normalized response.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> from prfmodel.utils import normalize_response
+   >>> response = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
+   >>> normed = normalize_response(response, norm="sum")
+   >>> print(normed.shape)
+   (2, 3)
+   >>> from keras import ops
+   >>> print(round(float(ops.sum(normed[0])), 6))
+   1.0
+

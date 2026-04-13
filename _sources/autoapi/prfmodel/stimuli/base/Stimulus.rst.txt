@@ -1,0 +1,19 @@
+prfmodel.stimuli.base.Stimulus
+==============================
+
+.. py:class:: prfmodel.stimuli.base.Stimulus
+
+   Stimulus base class.
+
+
+   .. py:method:: __repr__() -> str
+
+      Create a round-trippable string representation of the stimulus object.
+
+
+
+   .. py:method:: __str__() -> str
+
+      Create a human-readable string representation of the stimulus object.
+
+

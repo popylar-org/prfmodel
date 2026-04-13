@@ -1,0 +1,69 @@
+prfmodel.adapter.Adapter
+========================
+
+.. py:class:: prfmodel.adapter.Adapter(transforms: list[ParameterTransform] | None = None)
+
+   Apply a series of transformations to parameters.
+
+   Applies transformations sequentially to different parameters. This can be useful for model fitting to optimize
+   parameters on a different scale instead of their natural one.
+
+   :param transforms: A list of :class:`~prfmodel.adapter.ParameterTransform` or :class:`~prfmodel.adapter.ParameterConstraint`
+                      objects that will be applied in the given order. If `None`, no transformations will be applied.
+   :type transforms: list of ParameterTransform, optional
+
+   .. rubric:: Examples
+
+   Apply multiple transformations to different parameters.
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   ...     "x": np.arange(1, 5),
+   ...     "y": np.arange(2, 6)
+   ... })
+   >>> transform_x = ParameterTransform(
+   ...     parameter_names=["x"],
+   ...     transform_fun=np.log,
+   ...     inverse_fun=np.exp,
+   ... )
+   >>> transform_y = ParameterTransform(
+   ...     parameter_names=["y"],
+   ...     transform_fun=np.sqrt,
+   ...     inverse_fun=np.square,
+   ... )
+   >>> adapter = Adapter(transforms=[transform_x, transform_y])
+   >>> params_transformed = adapter.transform(params)
+   >>> params_inverse = adapter.inverse(params_transformed)
+   >>> assert all(params_inverse == params)
+
+
+   .. py:method:: inverse(parameters: P) -> P
+
+      Apply the inverse transformations sequentially.
+
+      Applies each inverse transformation in the list of transforms to the parameters in reverse order.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :returns: Transformed parameters after applying all inverse transformations in reverse order.
+      :rtype: pd.DataFrame
+
+
+
+   .. py:method:: transform(parameters: P) -> P
+
+      Apply the transformations sequentially.
+
+      Applies each transformation in the list of transforms to the parameters in order.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :returns: Transformed parameters after applying all transformations.
+      :rtype: pd.DataFrame
+
+

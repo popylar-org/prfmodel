@@ -1,0 +1,41 @@
+prfmodel.models.div_norm
+========================
+
+.. py:module:: prfmodel.models.div_norm
+
+.. autoapi-nested-parse::
+
+   Divisive normalization population receptive field models.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   DivNormGaussian2DPRFModel </autoapi/prfmodel/models/div_norm/DivNormGaussian2DPRFModel>
+   DivNormPRFModel </autoapi/prfmodel/models/div_norm/DivNormPRFModel>
+
+.. autoapisummary::
+
+   prfmodel.models.div_norm.DivNormGaussian2DPRFModel
+   prfmodel.models.div_norm.DivNormPRFModel
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   init_dn_from_dog </autoapi/prfmodel/models/div_norm/init_dn_from_dog>
+   init_dn_from_gaussian </autoapi/prfmodel/models/div_norm/init_dn_from_gaussian>
+
+.. autoapisummary::
+
+   prfmodel.models.div_norm.init_dn_from_dog
+   prfmodel.models.div_norm.init_dn_from_gaussian
+
+

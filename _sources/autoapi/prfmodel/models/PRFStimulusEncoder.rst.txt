@@ -1,0 +1,41 @@
+prfmodel.models.PRFStimulusEncoder
+==================================
+
+.. py:class:: prfmodel.models.PRFStimulusEncoder
+
+
+
+   Encoding model for population receptive field stimuli.
+
+   Multiplies a stimulus design with a population receptive field model response along the
+   stimulus dimensions and sums over them.
+
+   .. seealso:: :py:obj:`encode_prf_response`
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Encode a population receptive field model response with a stimulus design.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param response: Population receptive field response.
+      :type response: Tensor
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list
+
+
+      Does not have any parameters. Returns an empty list.
+

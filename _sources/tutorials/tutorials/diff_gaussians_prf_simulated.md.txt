@@ -89,7 +89,7 @@ For a surround-suppression model, `amplitude_center > 0` (excitatory center) and
 with `|amplitude_surround| < amplitude_center` so the center response dominates.
 
 ```{code-cell} ipython3
-from prfmodel.models.difference_of_gaussians import DoG2DPRFModel
+from prfmodel.models import DoG2DPRFModel
 
 prf_model = DoG2DPRFModel()
 ```
@@ -160,8 +160,8 @@ Let's start with a grid search over `mu_x`, `mu_y`, and `sigma` using a plain
 simultaneously, and gives us a good initialisation point for the DoG model.
 
 ```{code-cell} ipython3
-from prfmodel.models import Gaussian2DPRFModel
 import numpy as np
+from prfmodel.models import Gaussian2DPRFModel
 
 # Step 1: fit a plain Gaussian model to locate the center and size of the pRF
 gaussian_center_model = Gaussian2DPRFModel()
@@ -185,7 +185,7 @@ For all three parameters, we defined ranges of 10 values, giving $10 \times 10 \
 parameter combinations to evaluate. Let's construct the `GridFitter` and run the grid search.
 
 ```{code-cell} ipython3
-from prfmodel.fitters.grid import GridFitter
+from prfmodel.fitters import GridFitter
 
 grid_fitter = GridFitter(model=gaussian_center_model, stimulus=stimulus)
 
@@ -223,7 +223,7 @@ Using least squares, we estimate the `amplitude` and `baseline` parameters of th
 Gaussian model, which will seed the DoG initialisation.
 
 ```{code-cell} ipython3
-from prfmodel.fitters.linear import LeastSquaresFitter
+from prfmodel.fitters import LeastSquaresFitter
 
 ls_fitter = LeastSquaresFitter(model=gaussian_center_model, stimulus=stimulus)
 
@@ -271,7 +271,7 @@ also ensures `|amplitude_surround| < amplitude_center` at initialization.
 
 ```{code-cell} ipython3
 from prfmodel.models import init_dog_from_gaussian
-from prfmodel.fitters.sgd import SGDFitter
+from prfmodel.fitters import SGDFitter
 
 # Convert Gaussian fit to DoG starting parameters
 dog_init_params = init_dog_from_gaussian(gaussian_center_params, sigma_ratio=5.0)

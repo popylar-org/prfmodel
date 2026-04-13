@@ -1,0 +1,14 @@
+prfmodel.models.base.ShapeError
+===============================
+
+.. py:exception:: prfmodel.models.base.ShapeError(arg_name: str, arg_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when an argument has less than two dimensions.
+
+   :param arg_name: Argument name.
+   :type arg_name: str
+   :param arg_shape: Argument shape.
+   :type arg_shape: tuple of int
+

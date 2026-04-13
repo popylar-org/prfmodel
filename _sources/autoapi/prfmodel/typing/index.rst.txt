@@ -9,12 +9,6 @@ prfmodel.typing
 
 
 
-Attributes
-----------
-
-.. autoapisummary::
-
-   prfmodel.typing.Tensor
 
 
 Module Contents

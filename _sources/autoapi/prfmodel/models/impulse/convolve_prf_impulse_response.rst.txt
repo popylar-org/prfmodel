@@ -1,0 +1,40 @@
+prfmodel.models.impulse.convolve_prf_impulse_response
+=====================================================
+
+.. py:function:: prfmodel.models.impulse.convolve_prf_impulse_response(prf_response: prfmodel.typing.Tensor, impulse_response: prfmodel.typing.Tensor, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+   Convolve the encoded response from a population receptive field model with an impulse response.
+
+   Both responses must have the same number of units but can have different numbers of frames.
+
+   :param prf_response: Encoded population receptive field model response. Must have shape (num_units, num_response_frames).
+   :type prf_response: :data:`prfmodel.typing.Tensor`
+   :param impulse_response: Impulse response. Must have shape (num_units, num_impulse_frames).
+   :type impulse_response: :data:`prfmodel.typing.Tensor`
+   :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+   :returns: Convolved response with shape (num_units, num_response_frames).
+   :rtype: :data:`prfmodel.typing.Tensor`
+
+   .. rubric:: Notes
+
+   Before convolving both responses, the `prf_response` is padded on the left side in the
+   `num_frames` dimension by repeating the first value of each unit. This ensures that the output of the convolution
+   has the same shape as `prf_response` and the `impulse_response` starts at every frame of the `prf_response`.
+
+   :raises BatchDimensionError: If `prf_response` and `impulse_response` have unit (first) dimensions with different sizes.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> from prfmodel.models.impulse import convolve_prf_impulse_response
+   >>> num_units, num_frames, hrf_len = 3, 20, 10
+   >>> prf_response = np.ones((num_units, num_frames))
+   >>> impulse_response = np.zeros((num_units, hrf_len))
+   >>> impulse_response[:, 0] = 1.0  # identity impulse
+   >>> result = convolve_prf_impulse_response(prf_response, impulse_response)
+   >>> print(result.shape)
+   (3, 20)
+

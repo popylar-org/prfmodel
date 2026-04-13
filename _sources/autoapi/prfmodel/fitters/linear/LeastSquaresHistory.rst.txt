@@ -1,0 +1,15 @@
+prfmodel.fitters.linear.LeastSquaresHistory
+===========================================
+
+.. py:class:: prfmodel.fitters.linear.LeastSquaresHistory(history: dict | None)
+
+   Least squares metric history.
+
+   Logs losses and metrics over data batches resulting from least squares fitting.
+
+   .. attribute:: history
+
+      Dictionary with keys indicating metric names and values containing metric values for each data batch.
+
+      :type: dict
+

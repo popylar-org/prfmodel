@@ -12,90 +12,17 @@ prfmodel.examples
 Functions
 ---------
 
+.. toctree::
+   :hidden:
+
+   load_2d_prf_bar_stimulus </autoapi/prfmodel/examples/load_2d_prf_bar_stimulus>
+   load_single_subject_fmri_data </autoapi/prfmodel/examples/load_single_subject_fmri_data>
+   load_surface_mesh </autoapi/prfmodel/examples/load_surface_mesh>
+
 .. autoapisummary::
 
    prfmodel.examples.load_2d_prf_bar_stimulus
-   prfmodel.examples.load_surface_mesh
    prfmodel.examples.load_single_subject_fmri_data
-
-
-Module Contents
----------------
-
-.. py:function:: load_2d_prf_bar_stimulus() -> prfmodel.stimuli.prf.PRFStimulus
-
-   Load a two-dimensional population receptive field bar stimulus.
-
-   Loads an example stimulus that moves in eight directions (vertical, horizontal, diagonal) through a two-dimensional
-   space.
-
-   :returns: A stimulus object with a `design` with shape (200, 101, 101) and a `grid` with shape (101, 101, 2).
-   :rtype: PRFStimulus
-
-   .. rubric:: Notes
-
-   The stimulus was created with the validation framework developed by Lerma-Usabiaga et al (2020)[1]_.
-   It has 200 time frames, with 101 pixels in the x- and y-dimension, spanning a visual field of 20 degrees
-   vertically and horizontally.
-
-   .. seealso::
-
-      :py:obj:`prfmodel.stimuli.prf.animate_2d_prf_stimulus`
-          Create an animation for a two-dimensional stimulus.
-
-   .. rubric:: References
-
-   .. [1] Lerma-Usabiaga, G., Benson, N., Winawer, J., & Wandell, B. A. (2020). A validation framework for
-       neuroimaging software: The case of population receptive fields. *PLOS Computational Biology, 16*(6),
-       e1007924. https://doi.org/10.1371/journal.pcbi.1007924
-
-
-.. py:function:: load_surface_mesh(dest_dir: str | os.PathLike, surface_type: str = 'flat') -> nilearn.surface.PolyMesh
-
-   Download and load a standardized cortical surface mesh.
-
-   Downloads a surface mesh based on the Human Connectome Project[1]_ from Fig Share and extracts the surface
-   meshes for the left and right hemispheres.
-
-   :param dest_dir: Directory where the surface files should be stored.
-   :type dest_dir: str or os.PathLike
-   :param type: The surface type. Must be either `"flat"` (the default), `"inflated"`, `"pial"`, or `"wm"`
-                (for white matter).
-   :type type: str, default="flat"
-
-   :returns: The surface mesh.
-   :rtype: nilearn.surface.PolyMesh
-
-   .. rubric:: References
-
-   .. [1] Van Essen, D. C., Ugurbil, K., Auerbach, E., Barch, D., Behrens, T. E. J., Bucholz, R., Chang, A., Chen, L.,
-       Corbetta, M., Curtiss, S. W., Della Penna, S., Feinberg, D., Glasser, M. F., Harel, N., Heath, A. C.,
-       Larson-Prior, L., Marcus, D., Michalareas, G., Moeller, S., … WU-Minn HCP Consortium. (2012).
-       The Human Connectome Project: A data acquisition perspective. *NeuroImage, 62*(4), 2222-2231.
-       https://doi.org/10.1016/j.neuroimage.2012.02.018
-
-
-.. py:function:: load_single_subject_fmri_data(dest_dir: str | os.PathLike, hemisphere: str = 'both') -> numpy.ndarray
-
-   Load example functional magnetic resonance imaging (fMRI) data for a single subject.
-
-   Loads the blood oxygenation level-dependent (BOLD) response and the visual stimulus used in the experiment.
-   Downloads the data from Fig Share if it does not yet exist.
-
-   :param dest_dir: Directory where the data should be stored. If the directory does not contain all required files the data is
-                    downloaded from Fig Share.
-   :type dest_dir: str or os.PathLike
-   :param hemisphere: Hemisphere(s) for which the BOLD response data should be loaded. Must be either 'left', 'right', or 'both'.
-                      For 'both', the data of both hemispheres are concatenated (left is first).
-   :type hemisphere: str, default="both"
-
-   :returns: **response** -- The BOLD response in the requested unit.
-   :rtype: numpy.ndarray
-
-   .. rubric:: Notes
-
-   The data have been obtained by averaging 43 runs across 4 sessions from a single subject in a 7T fMRI scanner
-   using a repitition time of 1.5 (see this
-   `link <https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209>`_ for further details).
+   prfmodel.examples.load_surface_mesh
 
 

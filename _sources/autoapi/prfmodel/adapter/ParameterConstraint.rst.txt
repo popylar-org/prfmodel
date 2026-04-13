@@ -1,0 +1,94 @@
+prfmodel.adapter.ParameterConstraint
+====================================
+
+.. py:class:: prfmodel.adapter.ParameterConstraint(parameter_names: collections.abc.Sequence[str], lower: str | float | None = None, upper: str | float | None = None, bound_fun: collections.abc.Callable | None = None)
+
+
+
+   Constrain parameters to lower or upper bounds.
+
+   Instances of this class can be used inside an :class:`~prfmodel.adapter.Adapter` object to constrain specific
+   parameters during model fitting using exponential transformation.
+
+   :param parameter_names: Names of parameters to be transformed.
+   :type parameter_names: Sequence of str
+   :param lower: Lower bound of parameter constraint. If the argument has type `str`, it will use another parameter as the
+                 dynamic lower bound. An argument of type `float` will be used as a static lower bound.
+   :type lower: str or float, optional
+   :param upper: Upper bound of parameter constraint. If the argument has type `str`, it will use another parameter as the
+                 dynamic upper bound. An argument of type `float` will be used as a static upper bound.
+   :type upper: str or float, optional
+   :param bound_fun: Function to apply to the lower or upper bound before applying the constraint.
+   :type bound_fun: Callable, optional
+
+   .. rubric:: Examples
+
+   Constrain a parameter to be greater than another parameter.
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> params = pd.DataFrame({
+   ...     "x": np.array([0.5, 1.0, 1.5]),
+   ...     "lower_bound": np.array([0.1, 0.2, 0.3])
+   ... })
+   >>> constraint = ParameterConstraint(
+   ...     parameter_names=["x"],
+   ...     lower="lower_bound",
+   ... )
+   >>> params_transformed = constraint.transform(params)
+   >>> params_inverse = constraint.inverse(params_transformed)
+   >>> assert np.allclose(params_inverse["x"], params["x"])
+
+   Constrain a parameter to be greater than a fixed value.
+
+   >>> constraint = ParameterConstraint(
+   ...     parameter_names=["x"],
+   ...     lower=1.0,
+   ... )
+   >>> params_transformed = constraint.transform(params)
+   >>> params_inverse = constraint.inverse(params_transformed)
+   >>> assert np.allclose(params_inverse["x"], params["x"])
+
+   Constrain a parameter to be greater than the square of another parameter.
+
+   >>> constraint = ParameterConstraint(
+   ...     parameter_names=["x"],
+   ...     lower="lower_bound",
+   ...     bound_fun=lambda x: x**2
+   ... )
+   >>> params_transformed = constraint.transform(params)
+   >>> params_inverse = constraint.inverse(params_transformed)
+   >>> assert np.allclose(params_inverse["x"], params["x"])
+
+
+   .. py:method:: inverse(parameters: P) -> P
+
+      Apply the inverse constraint transformation.
+
+      Transforms parameters back from the constrained space to the natural scale.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :returns: Dataframe with the inverse constraint transformation applied to the parameters specified in
+                `parameter_names`.
+      :rtype: pd.DataFrame
+
+
+
+   .. py:method:: transform(parameters: P) -> P
+
+      Apply the constraint transformation.
+
+      Transforms parameters by constraining them to be within specified bounds using exponential transformations.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :returns: Dataframe with the constraint transformation applied to the parameters specified in
+                `parameter_names`.
+      :rtype: pd.DataFrame
+
+
