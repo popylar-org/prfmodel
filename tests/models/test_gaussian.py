@@ -10,7 +10,6 @@ from prfmodel.exceptions import ShapeError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseEncoder
-from prfmodel.models.base import BaseTemporal
 from prfmodel.models.encoding import CFStimulusEncoder
 from prfmodel.models.encoding import PRFStimulusEncoder
 from prfmodel.models.gaussian import Gaussian2DPRFModel
@@ -21,7 +20,8 @@ from prfmodel.models.gaussian import GridMuDimensionsError
 from prfmodel.models.gaussian import _check_gaussian_args
 from prfmodel.models.gaussian import _expand_gaussian_args
 from prfmodel.models.gaussian import predict_gaussian_response
-from prfmodel.models.temporal import BaselineAmplitude
+from prfmodel.scaling import BaselineAmplitude
+from prfmodel.scaling.base import BaseTemporal
 from prfmodel.stimuli.cf import CFStimulus
 from prfmodel.stimuli.prf import GridDimensionsError
 from prfmodel.stimuli.prf import PRFStimulus

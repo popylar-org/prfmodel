@@ -6,12 +6,12 @@ import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
-from prfmodel.models.base import BaseTemporal
 from prfmodel.models.div_norm import DivNormGaussian2DPRFModel
 from prfmodel.models.div_norm import DivNormPRFModel
 from prfmodel.models.div_norm import init_dn_from_gaussian
 from prfmodel.models.gaussian import Gaussian2DPRFResponse
-from prfmodel.models.temporal import DivNormAmplitude
+from prfmodel.scaling import DivNormAmplitude
+from prfmodel.scaling.base import BaseTemporal
 from prfmodel.stimuli.prf import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 

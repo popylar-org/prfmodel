@@ -1,15 +1,18 @@
 """Compressive spatial summation (CSS) population receptive field models."""
 
+from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
-from .base import BaseEncoder
-from .base import BaseTemporal
+from prfmodel.scaling import BaselineAmplitude
+from prfmodel.scaling.base import BaseTemporal
 from .encoding import CompressiveEncoder
 from .encoding import PRFStimulusEncoder
 from .gaussian import Gaussian2DPRFModel
-from .temporal import BaselineAmplitude
+
+if TYPE_CHECKING:
+    from .base import BaseEncoder
 
 
 class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):

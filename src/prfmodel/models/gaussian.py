@@ -9,6 +9,8 @@ from prfmodel.exceptions import BatchDimensionError
 from prfmodel.exceptions import ShapeError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
+from prfmodel.scaling import BaselineAmplitude
+from prfmodel.scaling.base import BaseTemporal
 from prfmodel.stimuli import CFStimulus
 from prfmodel.stimuli import GridDimensionsError
 from prfmodel.stimuli import PRFStimulus
@@ -18,12 +20,10 @@ from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 from .base import BaseEncoder
 from .base import BaseResponse
-from .base import BaseTemporal
 from .composite import SimpleCFModel
 from .composite import SimplePRFModel
 from .encoding import CFStimulusEncoder
 from .encoding import PRFStimulusEncoder
-from .temporal import BaselineAmplitude
 
 
 class GridMuDimensionsError(Exception):
