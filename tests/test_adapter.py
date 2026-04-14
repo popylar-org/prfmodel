@@ -5,9 +5,9 @@ import numpy as np
 import pandas as pd
 import pytest
 from keras import ops
-from prfmodel.adapter import Adapter
-from prfmodel.adapter import ParameterConstraint
-from prfmodel.adapter import ParameterTransform
+from prfmodel.fitters.adapter import Adapter
+from prfmodel.fitters.adapter import ParameterConstraint
+from prfmodel.fitters.adapter import ParameterTransform
 from prfmodel.utils import ParamsDict
 
 parameterize_params_wrapper = pytest.mark.parametrize("params_wrapper", [pd.DataFrame, ParamsDict])

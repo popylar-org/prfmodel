@@ -8,7 +8,7 @@ from keras import ops
 from tqdm.auto import tqdm
 from prfmodel._backend import BackendSGDFitter
 from prfmodel._docstring import doc
-from prfmodel.adapter import Adapter
+from prfmodel.fitters.adapter import Adapter
 from prfmodel.models.base import BaseCanonical
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
