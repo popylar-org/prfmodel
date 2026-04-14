@@ -5,11 +5,11 @@ import numpy as np
 import pandas as pd
 import pytest
 from pytest_regressions.dataframe_regression import DataFrameRegressionFixture
-from prfmodel.adapter import Adapter
-from prfmodel.adapter import ParameterConstraint
-from prfmodel.adapter import ParameterTransform
 from prfmodel.fitters import SGDFitter
 from prfmodel.fitters import SGDHistory
+from prfmodel.fitters.adapter import Adapter
+from prfmodel.fitters.adapter import ParameterConstraint
+from prfmodel.fitters.adapter import ParameterTransform
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
