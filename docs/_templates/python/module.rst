@@ -70,7 +70,7 @@ Inheritance diagram
    {% if ns.top_ids %}
    :top-classes: {{ ns.top_ids | join(", ") }}
    {% endif %}
-   :parts: -1
+   :parts: -2
 
          {% endif %}
          {% if visible_children %}
