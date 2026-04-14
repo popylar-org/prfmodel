@@ -95,7 +95,7 @@ $b$ (`baseline_activation`), and $c$ (`amplitude_normalization`) , $d$
 the absence of a stimulus. The normalization baseline $d$ must be positive to avoid division by zero.
 
 ```{code-cell} ipython3
-from prfmodel.models import DivNormGaussian2DPRFModel
+from prfmodel.models.prf import DivNormGaussian2DPRFModel
 
 prf_model = DivNormGaussian2DPRFModel()
 ```
@@ -167,7 +167,7 @@ Let's start with a grid search over `mu_x`, `mu_y`, and `sigma` using a plain
 simultaneously, and gives us a good initialisation point for the DN model.
 
 ```{code-cell} ipython3
-from prfmodel.models import Gaussian2DPRFModel
+from prfmodel.models.prf import Gaussian2DPRFModel
 import numpy as np
 
 # Step 1: fit a plain Gaussian model to locate the center and size of the pRF
@@ -262,13 +262,13 @@ fig.legend();
 ```
 
 ```{code-cell} ipython3
-from prfmodel.models import DoG2DPRFModel
+from prfmodel.models.prf import DoG2DPRFModel
 
 dog_model = DoG2DPRFModel()
 ```
 
 ```{code-cell} ipython3
-from prfmodel.models import init_dog_from_gaussian
+from prfmodel.models.prf import init_dog_from_gaussian
 
 # Convert Gaussian fit to DoG starting parameters
 dog_init_params = init_dog_from_gaussian(gaussian_center_params, sigma_ratio=2.0)
@@ -337,7 +337,7 @@ we pass a `ParameterConstraint(lower=0.0)` adapter.
 > converging to a poor local minimum.
 
 ```{code-cell} ipython3
-from prfmodel.models import init_dn_from_dog
+from prfmodel.models.prf import init_dn_from_dog
 
 # # Convert Gaussian fit to DN starting parameters
 dn_init_params = init_dn_from_dog(dog_init_params, baseline_normalization=10)

@@ -304,7 +304,7 @@ The {py:class}`prfmodel.models.gaussian.GaussianCFModel` class performs these st
 
 ```{code-cell} ipython3
 import pandas as pd
-from prfmodel.models import GaussianCFModel
+from prfmodel.models.cf import GaussianCFModel
 
 cf_model = GaussianCFModel()
 ```
