@@ -4,10 +4,10 @@ import numpy as np
 import pandas as pd
 import pytest
 from pytest_regressions.dataframe_regression import DataFrameRegressionFixture
-from prfmodel.fitters.least_squares import LeastSquaresFitter
-from prfmodel.fitters.least_squares import LeastSquaresHistory
-from prfmodel.models.prf.dog import DoG2DPRFModel
-from prfmodel.models.prf.gaussian import Gaussian2DPRFModel
+from prfmodel.fitters import LeastSquaresFitter
+from prfmodel.fitters import LeastSquaresHistory
+from prfmodel.models.prf import DoG2DPRFModel
+from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 from tests.conftest import TestSetup

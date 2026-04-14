@@ -5,12 +5,12 @@ import pandas as pd
 import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
 from prfmodel.models.base import BaseEncoder
-from prfmodel.models.cf.gaussian import GaussianCFModel
-from prfmodel.models.cf.gaussian import GaussianCFResponse
-from prfmodel.models.cf.stimulus_encoding import CFStimulusEncoder
+from prfmodel.models.cf import CFStimulusEncoder
+from prfmodel.models.cf import GaussianCFModel
+from prfmodel.models.cf import GaussianCFResponse
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseTemporal
-from prfmodel.stimuli.cf import CFStimulus
+from prfmodel.stimuli import CFStimulus
 from tests.models.conftest import CFSetup
 from tests.models.conftest import parametrize_dtype
 

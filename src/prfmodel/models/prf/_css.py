@@ -8,8 +8,8 @@ from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.compression import CompressiveEncoder
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseTemporal
-from .gaussian import Gaussian2DPRFModel
-from .stimulus_encoding import PRFStimulusEncoder
+from ._gaussian import Gaussian2DPRFModel
+from ._stimulus_encoding import PRFStimulusEncoder
 
 if TYPE_CHECKING:
     from prfmodel.models.base import BaseEncoder

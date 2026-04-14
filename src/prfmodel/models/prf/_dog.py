@@ -6,9 +6,9 @@ from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseEncoder
 from prfmodel.scaling import DoGAmplitude
 from prfmodel.scaling.base import BaseTemporal
+from ._gaussian import Gaussian2DPRFResponse
+from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import CenterSurroundPRFModel
-from .gaussian import Gaussian2DPRFResponse
-from .stimulus_encoding import PRFStimulusEncoder
 
 
 class DoG2DPRFModel(CenterSurroundPRFModel):

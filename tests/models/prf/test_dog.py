@@ -5,13 +5,13 @@ import pandas as pd
 import pytest
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
+from prfmodel.models.prf import DoG2DPRFModel
+from prfmodel.models.prf import Gaussian2DPRFResponse
+from prfmodel.models.prf import init_dog_from_gaussian
 from prfmodel.models.prf.canonical import CenterSurroundPRFModel
-from prfmodel.models.prf.dog import DoG2DPRFModel
-from prfmodel.models.prf.dog import init_dog_from_gaussian
-from prfmodel.models.prf.gaussian import Gaussian2DPRFResponse
 from prfmodel.scaling import DoGAmplitude
 from prfmodel.scaling.base import BaseTemporal
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 
 

@@ -11,7 +11,7 @@ from prfmodel.scaling.base import BaseTemporal
 from prfmodel.stimuli import CFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
-from .stimulus_encoding import CFStimulusEncoder
+from ._stimulus_encoding import CFStimulusEncoder
 
 
 class CanonicalCFModel(BaseCanonical[CFStimulus]):

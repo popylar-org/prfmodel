@@ -11,11 +11,11 @@ from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BaseResponse
 from prfmodel.scaling import DivNormAmplitude
 from prfmodel.scaling.base import BaseTemporal
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.stimuli._prf import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
-from .gaussian import Gaussian2DPRFResponse
-from .stimulus_encoding import PRFStimulusEncoder
+from ._gaussian import Gaussian2DPRFResponse
+from ._stimulus_encoding import PRFStimulusEncoder
 
 
 class DivNormPRFModel(BaseCanonical[PRFStimulus]):

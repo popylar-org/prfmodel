@@ -8,8 +8,8 @@ import pandas as pd
 import pytest
 from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.impulse import DerivativeTwoGammaImpulse
-from prfmodel.models.prf.gaussian import Gaussian2DPRFModel
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.models.prf import Gaussian2DPRFModel
+from prfmodel.stimuli import PRFStimulus
 
 parametrize_impulse_model = pytest.mark.parametrize("model", [None, {"delay": 6.0, "dispersion": 0.9}], indirect=True)
 

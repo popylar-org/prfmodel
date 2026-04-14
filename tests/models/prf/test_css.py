@@ -3,9 +3,9 @@
 import pandas as pd
 import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
-from prfmodel.models.prf.css import Gaussian2DCSSPRFModel
-from prfmodel.models.prf.gaussian import Gaussian2DPRFModel
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.models.prf import Gaussian2DCSSPRFModel
+from prfmodel.models.prf import Gaussian2DPRFModel
+from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 
 
