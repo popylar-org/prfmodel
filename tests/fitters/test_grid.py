@@ -4,10 +4,10 @@ import keras
 import numpy as np
 import pandas as pd
 import pytest
-from prfmodel.fitters.grid import GridFitter
-from prfmodel.fitters.grid import GridHistory
-from prfmodel.fitters.grid import InfiniteLossWarning
-from prfmodel.models.prf.gaussian import Gaussian2DPRFModel
+from prfmodel.fitters import GridFitter
+from prfmodel.fitters import GridHistory
+from prfmodel.fitters._grid import InfiniteLossWarning
+from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model

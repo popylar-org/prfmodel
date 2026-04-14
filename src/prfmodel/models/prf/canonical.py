@@ -16,7 +16,7 @@ from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
-from .stimulus_encoding import PRFStimulusEncoder
+from ._stimulus_encoding import PRFStimulusEncoder
 
 
 class CanonicalPRFModel(BaseCanonical[PRFStimulus]):

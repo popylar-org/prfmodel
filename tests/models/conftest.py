@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-from prfmodel.stimuli.cf import CFStimulus
+from prfmodel.stimuli import CFStimulus
 
 parametrize_dtype = pytest.mark.parametrize("dtype", [None, "float32", "float64"])
 

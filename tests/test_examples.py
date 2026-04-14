@@ -5,7 +5,7 @@ import pytest
 from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.examples import load_single_subject_fmri_data
 from prfmodel.examples import load_surface_mesh
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.stimuli import PRFStimulus
 
 _NUM_VERTICES = 118584
 _NUM_FRAMES = 120

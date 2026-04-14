@@ -1,9 +1,9 @@
-"""Weighted difference of two gamma distribution impulse response."""
+"""Shifted gamma distribution impulse response."""
 
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.density.gamma import gamma_density
+from prfmodel.density._gamma import shifted_gamma_density
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
@@ -11,14 +11,13 @@ from prfmodel.utils import normalize_response
 from .base import BaseImpulse
 
 
-class TwoGammaImpulse(BaseImpulse):
+class ShiftedGammaImpulse(BaseImpulse):
     r"""
-    Weighted difference of two gamma distributions impulse response model.
+    Shifted gamma distribution impulse response model.
 
-    Predicts an impulse response that is the weighted difference of two gamma distributions.
-    The model has five parameters: `delay` and `undershoot` refer to the positive and negative peaks of the response
-    while `dispersion` and `u_dispersion` refer to the rate parameters of the two gamma distributions. The `ratio`
-    parameter indicates the weight of the second gamma distribution.
+    Predicts an impulse response that is a shifted gamma distribution.
+    The model has three parameters: `delay` refers to the positive peak, `dispersion` to the
+    rate, and `shift` to the onset of the gamma distribution.
 
     Parameters
     ----------
@@ -39,16 +38,18 @@ class TwoGammaImpulse(BaseImpulse):
     See Also
     --------
     gamma_density : Density of the gamma distribution.
+    shifted_gamma_density : Shifted density of the gamma distribution.
 
     Notes
     -----
-    The predicted impulse response at time :math:`t` with :math:`\alpha_1 = delay / dispersion`,
-    :math:`\lambda_1 = dispersion`, :math:`\alpha_2  = undershoot / u\_dispersion`, :math:`\lambda_2 = u\_dispersion`,
-    and :math:`\omega = ratio` is:
+    The predicted impulse response at time :math:`t` with :math:`\alpha = delay / dispersion`,
+    :math:`\lambda = dispersion`, and :math:`\delta = shift` is:
 
     .. math::
 
-        f(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega f_{\text{gamma}}(t; \alpha_2, \lambda_2)
+        f(t) = f_{\text{gamma}}(t - \delta; \alpha, \lambda)
+
+    The response prior to the onset of the gamma distribution is set to zero.
 
     References
     ----------
@@ -60,18 +61,15 @@ class TwoGammaImpulse(BaseImpulse):
     .. [3] Glover, G. H. (1999). Deconvolution of impulse response in event-related BOLD fMRI. *NeuroImage*, 9(4),
         416-429. https://doi.org/10.1006/nimg.1998.0419
 
-
     Examples
     --------
     >>> import pandas as pd
     >>> params = pd.DataFrame({
     ...     "delay": [2.0, 1.0, 1.5],
     ...     "dispersion": [1.0, 1.0, 1.0],
-    ...     "undershoot": [1.5, 2.0, 1.0],
-    ...     "u_dispersion": [1.0, 1.0, 1.0],
-    ...     "ratio": [0.7, 0.2, 0.5],
+    ...     "shift": [1.0, 2.0, 5.0],
     ... })
-    >>> impulse_model = TwoGammaImpulse(
+    >>> impulse_model = ShiftedGammaImpulse(
     ...     duration=100.0  # 100 seconds
     ... )
     >>> resp = impulse_model(params)
@@ -85,10 +83,10 @@ class TwoGammaImpulse(BaseImpulse):
         """
         Names of parameters used by the model.
 
-        Parameter names are: `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`.
+        Parameter names are: `delay`, `dispersion`, and `shift`.
 
         """
-        return ["delay", "dispersion", "undershoot", "u_dispersion", "ratio"]
+        return ["delay", "dispersion", "shift"]
 
     @doc
     def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
@@ -109,14 +107,10 @@ class TwoGammaImpulse(BaseImpulse):
         parameters = self._join_default_parameters(parameters)
         dtype = get_dtype(dtype)
         frames = ops.cast(self.frames, dtype=dtype)
-
         delay = convert_parameters_to_tensor(parameters[["delay"]], dtype=dtype)
         dispersion = convert_parameters_to_tensor(parameters[["dispersion"]], dtype=dtype)
-        undershoot = convert_parameters_to_tensor(parameters[["undershoot"]], dtype=dtype)
-        u_dispersion = convert_parameters_to_tensor(parameters[["u_dispersion"]], dtype=dtype)
-        ratio = convert_parameters_to_tensor(parameters[["ratio"]], dtype=dtype)
+        shift = convert_parameters_to_tensor(parameters[["shift"]], dtype=dtype)
 
-        dens_1 = gamma_density(frames, delay / dispersion, dispersion)
-        dens_2 = gamma_density(frames, undershoot / u_dispersion, u_dispersion)
+        dens = shifted_gamma_density(frames, delay / dispersion, dispersion, shift)
 
-        return normalize_response(dens_1 - ratio * dens_2, self.norm)
+        return normalize_response(dens, self.norm)

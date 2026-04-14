@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 import pytest
 from prfmodel.models.compression import CompressiveEncoder
-from prfmodel.models.prf.stimulus_encoding import PRFStimulusEncoder
-from prfmodel.models.prf.stimulus_encoding import encode_prf_response
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.models.prf import PRFStimulusEncoder
+from prfmodel.models.prf import encode_prf_response
+from prfmodel.stimuli import PRFStimulus
 from tests.models.conftest import PRFStimulusGridSetup
 from tests.models.conftest import parametrize_dtype
 

@@ -13,8 +13,8 @@ from prfmodel.stimuli import CFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
+from ._stimulus_encoding import CFStimulusEncoder
 from .canonical import CanonicalCFModel
-from .stimulus_encoding import CFStimulusEncoder
 
 
 class GaussianCFResponse(BaseResponse[CFStimulus]):

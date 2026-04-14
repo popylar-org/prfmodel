@@ -1,23 +1,20 @@
 """Population receptive field models."""
 
-from .canonical import CanonicalPRFModel
-from .canonical import CenterSurroundPRFModel
-from .css import Gaussian2DCSSPRFModel
-from .css import init_css_from_gaussian
-from .div_norm import DivNormGaussian2DPRFModel
-from .div_norm import DivNormPRFModel
-from .div_norm import init_dn_from_dog
-from .div_norm import init_dn_from_gaussian
-from .dog import DoG2DPRFModel
-from .dog import init_dog_from_gaussian
-from .gaussian import Gaussian2DPRFModel
-from .gaussian import Gaussian2DPRFResponse
-from .stimulus_encoding import PRFStimulusEncoder
-from .stimulus_encoding import encode_prf_response
+from ._css import Gaussian2DCSSPRFModel
+from ._css import init_css_from_gaussian
+from ._div_norm import DivNormGaussian2DPRFModel
+from ._div_norm import DivNormPRFModel
+from ._div_norm import init_dn_from_dog
+from ._div_norm import init_dn_from_gaussian
+from ._dog import DoG2DPRFModel
+from ._dog import init_dog_from_gaussian
+from ._gaussian import Gaussian2DPRFModel
+from ._gaussian import Gaussian2DPRFResponse
+from ._gaussian import predict_gaussian_response
+from ._stimulus_encoding import PRFStimulusEncoder
+from ._stimulus_encoding import encode_prf_response
 
 __all__ = [
-    "CanonicalPRFModel",
-    "CenterSurroundPRFModel",
     "DivNormGaussian2DPRFModel",
     "DivNormPRFModel",
     "DoG2DPRFModel",
@@ -30,4 +27,5 @@ __all__ = [
     "init_dn_from_dog",
     "init_dn_from_gaussian",
     "init_dog_from_gaussian",
+    "predict_gaussian_response",
 ]

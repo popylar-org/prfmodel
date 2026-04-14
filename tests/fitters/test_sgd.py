@@ -8,10 +8,10 @@ from pytest_regressions.dataframe_regression import DataFrameRegressionFixture
 from prfmodel.adapter import Adapter
 from prfmodel.adapter import ParameterConstraint
 from prfmodel.adapter import ParameterTransform
-from prfmodel.fitters.sgd import SGDFitter
-from prfmodel.fitters.sgd import SGDHistory
-from prfmodel.models.prf.gaussian import Gaussian2DPRFModel
-from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.fitters import SGDFitter
+from prfmodel.fitters import SGDHistory
+from prfmodel.models.prf import Gaussian2DPRFModel
+from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from tests.conftest import TestSetup

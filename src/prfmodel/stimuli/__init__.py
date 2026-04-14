@@ -1,11 +1,11 @@
 """Stimuli."""
 
+from ._cf import CFStimulus
+from ._prf import GridDimensionsError
+from ._prf import PRFStimulus
+from ._prf import animate_2d_prf_stimulus
+from ._prf import plot_2d_prf_stimulus
 from .base import Stimulus
-from .cf import CFStimulus
-from .prf import GridDimensionsError
-from .prf import PRFStimulus
-from .prf import animate_2d_prf_stimulus
-from .prf import plot_2d_prf_stimulus
 
 __all__ = [
     "CFStimulus",

@@ -5,9 +5,9 @@ import pytest
 
 # Needs to be imported to recreate stimulus from repr
 from numpy import array  # noqa: F401
-from prfmodel.stimuli.cf import CFStimulus
-from prfmodel.stimuli.cf import DistanceMatrixShapeError
-from prfmodel.stimuli.cf import DistanceMatrixSourceShapeError
+from prfmodel.stimuli import CFStimulus
+from prfmodel.stimuli._cf import DistanceMatrixShapeError
+from prfmodel.stimuli._cf import DistanceMatrixSourceShapeError
 
 
 def test_distance_matrix_shape_error():

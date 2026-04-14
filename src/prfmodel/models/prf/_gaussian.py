@@ -18,8 +18,8 @@ from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
+from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import CanonicalPRFModel
-from .stimulus_encoding import PRFStimulusEncoder
 
 
 class GridMuDimensionsError(Exception):
