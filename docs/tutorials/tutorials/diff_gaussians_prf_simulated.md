@@ -89,7 +89,7 @@ For a surround-suppression model, `amplitude_center > 0` (excitatory center) and
 with `|amplitude_surround| < amplitude_center` so the center response dominates.
 
 ```{code-cell} ipython3
-from prfmodel.models import DoG2DPRFModel
+from prfmodel.models.prf import DoG2DPRFModel
 
 prf_model = DoG2DPRFModel()
 ```
@@ -161,7 +161,7 @@ simultaneously, and gives us a good initialisation point for the DoG model.
 
 ```{code-cell} ipython3
 import numpy as np
-from prfmodel.models import Gaussian2DPRFModel
+from prfmodel.models.prf import Gaussian2DPRFModel
 
 # Step 1: fit a plain Gaussian model to locate the center and size of the pRF
 gaussian_center_model = Gaussian2DPRFModel()
@@ -270,7 +270,7 @@ also ensures `|amplitude_surround| < amplitude_center` at initialization.
 > automatically enforced, and could lead to non-interpretable amplitudes.
 
 ```{code-cell} ipython3
-from prfmodel.models import init_dog_from_gaussian
+from prfmodel.models.prf import init_dog_from_gaussian
 from prfmodel.fitters import SGDFitter
 
 # Convert Gaussian fit to DoG starting parameters

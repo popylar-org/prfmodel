@@ -336,8 +336,8 @@ response model to account for the fact that each time frame is one TR (1.5 secon
 of our predicted impulse response to the TR.
 
 ```{code-cell} ipython3
-from prfmodel.models import Gaussian2DPRFModel
-from prfmodel.models.impulse import DerivativeTwoGammaImpulse
+from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.models.prf import Gaussian2DPRFModel
 
 # Define repetition time (TR)
 tr = 1.5
