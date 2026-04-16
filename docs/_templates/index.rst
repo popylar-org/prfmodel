@@ -1,7 +1,12 @@
 API Reference
 =============
 
-This page contains auto-generated API reference documentation [#f1]_.
+This page contains auto-generated API reference documentation [#f1]_. While the API reference includes small exmaples
+for functions and classes, we recommend taking a look at the :ref:`tutorials` section for a detailed introduction to
+the package.
+
+The prfmodel package includes several submodules listed below. The most important functions and classes can be found
+in the :py:mod:`~prmfodel.models`, :py:mod:`~prmfodel.fitters`, and :py:mod:`~prmfodel.stimuli` submodules.
 
 .. toctree::
    :hidden:

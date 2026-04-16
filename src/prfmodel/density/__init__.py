@@ -1,4 +1,9 @@
-"""Density functions."""
+"""Density functions.
+
+This modules contains helper functions to compute densities. Currently, it only contains gamma densities that are
+used in the :py:mod:`~prfmodel.impulse` module.
+
+"""
 
 from ._gamma import derivative_gamma_density
 from ._gamma import gamma_density
