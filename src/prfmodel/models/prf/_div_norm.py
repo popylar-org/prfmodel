@@ -39,12 +39,9 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
         Names of pRF parameters that are shared between the two responses.  Each name
         must appear in *both* ``activation_prf_model.parameter_names`` and
         ``normalization_prf_model.parameter_names``.
-    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
-        An encoding model class or instance.
-    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
-        An impulse response model class or instance.
-    scaling_model : BaseScaling or type or None, default=DivNormAmplitude
-        A scaling model class or instance.
+    %(model_encoding)s
+    %(model_impulse)s
+    %(model_scaling)s
 
     Notes
     -----

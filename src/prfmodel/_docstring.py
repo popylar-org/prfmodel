@@ -68,7 +68,7 @@ _PARAMS: dict[str, str] = {
     "model_prf": ("prf_model : BaseResponse\n    A population receptive field response model instance."),
     "model_scaling": (
         "scaling_model : BaseScaling or type or None, default=BaselineAmplitude, optional\n"
-        "    A temporal model class or instance. Model classes will be instantiated during initialization.\n"
+        "    A scaling model class or instance. Model classes will be instantiated during initialization.\n"
         "    The default creates a :class:`~prfmodel.models.scaling.BaselineAmplitude` instance."
     ),
     "parameters": (

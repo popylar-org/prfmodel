@@ -1,4 +1,4 @@
-"""Stimulus encoding classes."""
+"""Population receptive field stimulus encoding."""
 
 import pandas as pd
 from keras import ops

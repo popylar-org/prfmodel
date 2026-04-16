@@ -9,7 +9,7 @@ from prfmodel.models.cf import CFStimulusEncoder
 from prfmodel.models.cf import GaussianCFModel
 from prfmodel.models.cf import GaussianCFResponse
 from prfmodel.scaling import BaselineAmplitude
-from prfmodel.scaling.base import BaseTemporal
+from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
 from tests.models.conftest import CFSetup
 from tests.models.conftest import parametrize_dtype
@@ -73,7 +73,7 @@ class TestGaussianCFModel(TestGaussianCFResponse):
     def test_submodels_inherit_basemodel(self):
         """Test that submodels that do not inherit from BaseModel raise an error."""
         with pytest.raises(TypeError):
-            GaussianCFModel(temporal_model="test")
+            GaussianCFModel(scaling_model="test")
 
     def test_parameter_names(
         self,
@@ -102,14 +102,14 @@ class TestGaussianCFModel(TestGaussianCFResponse):
     def test_predict(
         self,
         encoding_model: BaseEncoder,
-        temporal_model: BaseTemporal,
+        temporal_model: BaseScaling,
         stimulus: CFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction returns correct shape."""
         cf_model = GaussianCFModel(
             encoding_model=encoding_model,
-            temporal_model=temporal_model,
+            scaling_model=temporal_model,
         )
 
         resp = cf_model(stimulus, params)

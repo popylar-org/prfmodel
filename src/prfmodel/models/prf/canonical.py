@@ -1,4 +1,8 @@
-"""Canonical populationr receptive field (pRF) models."""
+"""Canonical population receptive field (pRF) models.
+
+This module contains models that combine multiple exchangeable submodels in a way that is considered "canonical".
+
+"""
 
 from typing import cast
 import pandas as pd
@@ -40,7 +44,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
     2. The encoding model encodes the response with the stimulus design.
     3. The impulse response model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
-    5. The temporal model modifies the convolved response.
+    5. The scaling model modifies the convolved response.
 
     """
 
@@ -136,7 +140,7 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
        using ``{p}_sorround`` for each ``p`` in ``change_params``.
     2. The encoding model encodes each response with the stimulus design.
     3. Each encoded response is optionally convolved with an impulse response.
-    4. The two responses are stacked and combined by the temporal model.
+    4. The two responses are stacked and combined by the scaling model.
 
     """
 

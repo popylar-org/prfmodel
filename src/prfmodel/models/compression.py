@@ -1,4 +1,16 @@
-"""Generic compressive models."""
+"""Generic compressive models.
+
+This module contains classes for (de-) compressing stimulus-encoded model responses.
+
+Compressive models are intented to be used as encoding submodels within canonical models, e.g.,
+:class:`~prfmodel.models.prf.canonical.CanonicalPRFModel`.
+
+Notes
+-----
+Classes in this module are generic, that is, they can take arbitrary stimuli as input (e.g., they work both
+for :class:`~prfmodel.stimuli.PRFStimulus` and :class:`~prfmodel.stimuli.CFStimulus`).
+
+"""
 
 import pandas as pd
 from keras import ops
@@ -19,7 +31,7 @@ class CompressiveEncoder(BaseEncoder[S]):
 
     Parameters
     ----------
-    encoding_model : BasePRFEncoder
+    encoding_model : BaseEncoder
         A encoding model instance.
     min_response : float, default=1e-10
         Minimum encoded response (:math:`\epsilon`). A small value ensures numerical stability of gradients when
@@ -90,7 +102,8 @@ class CompressiveEncoder(BaseEncoder[S]):
 
         Parameters
         ----------
-        %(stimulus)s
+        %(stimulus)s The stimulus type must match the expected stimulus type of the wrapped encoding model instance
+            (i.e., :attr:`~CompressiveEncoder.encoding_model`).
         response : Tensor
             Model response.
         %(parameters)s

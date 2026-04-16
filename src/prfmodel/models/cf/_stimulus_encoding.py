@@ -1,4 +1,4 @@
-"""CF stimulus encoding classes."""
+"""Connective field stimulus encoding."""
 
 import pandas as pd
 from keras import ops

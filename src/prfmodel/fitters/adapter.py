@@ -1,4 +1,9 @@
-"""Adapters and parameter transformations."""
+"""Adapters and parameter transformations.
+
+This module contains functionality to transform parameters during model fitting
+(e.g., to optimize a parameter on the log scale). Currently, this is only implemented for SGD.
+
+"""
 
 from collections.abc import Callable
 from collections.abc import Sequence
@@ -16,8 +21,7 @@ class ParameterTransform:
     """
     Apply transformations to parameters.
 
-    Instances of this class can be used inside an :class:`~prfmodel.adapter.Adapter` object to transform specific
-    parameters during model fitting.
+    Transforms parameter values using a custom function. Applies a custom function to invert the transformation.
 
     Parameters
     ----------
@@ -35,6 +39,9 @@ class ParameterTransform:
 
     Notes
     -----
+    Instances of this class can be used inside an :class:`~prfmodel.adapter.Adapter` object to transform specific
+    parameters during model fitting.
+
     When using the transform within stochastic gradient descent, the transform and inverse functions should allow for
     gradient tracking (e.g., by using functions from the `keras.ops` module).
 
@@ -121,8 +128,7 @@ class ParameterConstraint(ParameterTransform):
     """
     Constrain parameters to lower or upper bounds.
 
-    Instances of this class can be used inside an :class:`~prfmodel.adapter.Adapter` object to constrain specific
-    parameters during model fitting using exponential transformation.
+    Transforms parameter values to stay above or below a lower or upper bound. The transformation can be inverted.
 
     Parameters
     ----------
@@ -136,6 +142,16 @@ class ParameterConstraint(ParameterTransform):
         dynamic upper bound. An argument of type `float` will be used as a static upper bound.
     bound_fun : Callable, optional
         Function to apply to the lower or upper bound before applying the constraint.
+
+    Raises
+    ------
+    NotImplementedError
+        When both a lower and upper bound are specified.
+
+    Notes
+    -----
+    Instances of this class can be used inside an :class:`~prfmodel.adapter.Adapter` object to constrain specific
+    parameters during model fitting using exponential transformation.
 
     Examples
     --------

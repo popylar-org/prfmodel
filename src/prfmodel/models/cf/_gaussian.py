@@ -8,7 +8,7 @@ from prfmodel._docstring import doc
 from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BaseResponse
 from prfmodel.scaling import BaselineAmplitude
-from prfmodel.scaling.base import BaseTemporal
+from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
@@ -99,12 +99,12 @@ class GaussianCFModel(CanonicalCFModel):
     """
     Gaussian connective field model.
 
-    This is a generic class that combines a Gaussian connective field and temporal model response.
+    This is a generic class that combines a Gaussian connective field and scaling model response.
 
     Parameters
     ----------
     %(model_encoding)s
-    %(model_temporal)s
+    %(model_scaling)s
 
     Notes
     -----
@@ -112,7 +112,7 @@ class GaussianCFModel(CanonicalCFModel):
 
     1. The Gaussian connective field response model makes a prediction for the stimulus distance matrix.
     2. The encoding model encodes the connective field response with the source response.
-    3. The temporal model modifies the encoded response.
+    3. The scaling model modifies the encoded response.
 
     References
     ----------
@@ -158,10 +158,10 @@ class GaussianCFModel(CanonicalCFModel):
     def __init__(
         self,
         encoding_model: BaseEncoder | type[BaseEncoder] = CFStimulusEncoder,
-        temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):
         super().__init__(
             cf_model=GaussianCFResponse(),
             encoding_model=encoding_model,
-            temporal_model=temporal_model,
+            scaling_model=scaling_model,
         )

@@ -1,4 +1,16 @@
-"""Impulse model base classes."""
+"""Impulse response model base classes.
+
+Classes in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that requires them to implement a
+:attr:`~prfmodel.utils.ModelProtocol.parameter_names` property.
+
+They are abstract base classes, meaning that they
+cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
+shared by all child classes. For example, :class:`~prfmodel.models.base.BaseImpulse` defines that all child classes
+must implement a :meth:`~prfmodel.models.base.BaseImpulse.__call__` method that takes a set of parameters
+as input. However, it leaves it up to each child class to define how input parameters are used to make
+model predictions.
+
+"""
 
 from abc import abstractmethod
 import pandas as pd
@@ -13,9 +25,8 @@ class BaseImpulse(ModelProtocol):
     """
     Abstract base class for impulse response models.
 
-    Cannot be instantiated on its own.
-    Can only be used as a parent class to create custom impulse response models.
-    Subclasses must override the abstract :meth:`__call__` method.
+    An impulse response model takes a set of parameters as input a predicts an impulse for time frames that are
+    defined by an offset, duration, and resolution.
 
     Parameters
     ----------
@@ -32,6 +43,11 @@ class BaseImpulse(ModelProtocol):
         If `None`, no normalization is performed.
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Keys must be valid parameter names.
+
+    Notes
+    -----
+    This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
+    models. Subclasses must override the abstract :attr:`parameter_names` and :meth:`__call__` method.
 
     """
 

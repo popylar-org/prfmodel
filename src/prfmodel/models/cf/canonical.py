@@ -1,4 +1,8 @@
-"""Canonical connective field (CF) models."""
+"""Canonical connective field (CF) models.
+
+This module contains models that combine multiple exchangeable submodels in a way that is considered "canonical".
+
+"""
 
 from typing import cast
 import pandas as pd
@@ -7,7 +11,7 @@ from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BaseResponse
 from prfmodel.scaling import BaselineAmplitude
-from prfmodel.scaling.base import BaseTemporal
+from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
@@ -24,7 +28,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
     ----------
     %(model_cf)s
     %(model_encoding)s
-    %(model_temporal)s
+    %(model_scaling)s
 
     Notes
     -----
@@ -32,7 +36,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
 
     1. The connective field response model makes a prediction for the stimulus distance matrix.
     2. The connective field response is encoded with the source response.
-    3. The temporal model modifies the encoded response.
+    3. The scaling model modifies the encoded response.
 
     In contrast to pRF models (e.g., :class:`~prfmodel.models.CanonicalPRFModel`), connective field models do not
     require an impulse response model because it already contained in the signal of the source response.
@@ -43,18 +47,18 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
         self,
         cf_model: BaseResponse,
         encoding_model: BaseEncoder | type[BaseEncoder] = CFStimulusEncoder,
-        temporal_model: BaseTemporal | type[BaseTemporal] | None = BaselineAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):
         if encoding_model is not None and isinstance(encoding_model, type):
             encoding_model = encoding_model()
 
-        if temporal_model is not None and isinstance(temporal_model, type):
-            temporal_model = temporal_model()
+        if scaling_model is not None and isinstance(scaling_model, type):
+            scaling_model = scaling_model()
 
         super().__init__(
             cf_model=cf_model,
             encoding_model=encoding_model,
-            temporal_model=temporal_model,
+            scaling_model=scaling_model,
         )
 
     @doc
@@ -84,8 +88,8 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
         encoding_model = cast("BaseEncoder", self.models["encoding_model"])
         response = encoding_model(stimulus, response, parameters, dtype=dtype)
 
-        if self.models["temporal_model"] is not None:
-            temporal_model = cast("BaseTemporal", self.models["temporal_model"])
+        if self.models["scaling_model"] is not None:
+            temporal_model = cast("BaseScaling", self.models["scaling_model"])
             response = temporal_model(response, parameters, dtype=dtype)
 
         return response

@@ -1,4 +1,8 @@
-"""Exceptions."""
+"""Exceptions and warnings.
+
+This module contains exceptions and warnings that are mostly for internal use.
+
+"""
 
 from collections.abc import Sequence
 
