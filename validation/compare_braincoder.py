@@ -56,7 +56,6 @@ from shared import SIGMA
 from shared import check_and_exit
 from shared import load_stimulus
 from shared import make_params
-from shared import pearson_r
 from shared import prfmodel_response
 
 
@@ -99,8 +98,7 @@ def main() -> None:
     ref = prfmodel_response(stimulus, params, with_hrf=False)
     bc = _braincoder_response(stimulus)
 
-    r = pearson_r(ref, bc)
-    check_and_exit(r, "braincoder")
+    check_and_exit(ref, bc, "braincoder")
 
 
 if __name__ == "__main__":

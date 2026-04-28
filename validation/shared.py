@@ -37,8 +37,8 @@ HRF_PARAMS: dict = {
     "weight_deriv": -0.5,
 }
 
-# Minimum Pearson r accepted for the pre-HRF response comparison.
-MIN_PEARSON_R: float = 0.9999
+# Relative tolerance for normalised timeseries comparison.
+RTOL: float = 1e-4
 
 
 def load_stimulus():
@@ -70,24 +70,27 @@ def prfmodel_response(stimulus, params: pd.DataFrame, *, with_hrf: bool = False)
     return np.asarray(model(stimulus, params)).ravel()
 
 
-def zscore(arr: np.ndarray) -> np.ndarray:
-    """Z-score a 1-D array; return zeros if std is zero."""
+def normalize(arr: np.ndarray) -> np.ndarray:
+    """Normalize a 1-D array to unit absolute sum."""
     arr = np.asarray(arr, dtype=float).ravel()
-    std = arr.std()
-    return (arr - arr.mean()) / std if std > 0 else np.zeros_like(arr)
+    total = np.abs(arr).sum()
+    return arr / total if total > 0 else arr
 
 
-def pearson_r(a: np.ndarray, b: np.ndarray) -> float:
-    """Pearson correlation between two 1-D arrays."""
-    return float(np.corrcoef(zscore(a), zscore(b))[0, 1])
+def check_and_exit(a: np.ndarray, b: np.ndarray, package: str) -> None:
+    """Compare two timeseries and exit with 0 (pass) or 1 (fail).
 
-
-def check_and_exit(r: float, package: str) -> None:
-    """Print result and exit with 0 (pass) or 1 (fail)."""
-    label = f"Pearson r (prfmodel vs {package}, pre-HRF)"
-    if r >= MIN_PEARSON_R:
-        print(f"PASS  {label}: {r:.8f}")
+    Both arrays are normalized to unit absolute sum before comparison
+    to handle RF scale differences across packages.
+    """
+    a_norm = normalize(a)
+    b_norm = normalize(b)
+    passed = np.allclose(a_norm, b_norm, rtol=RTOL)
+    max_diff = float(np.abs(a_norm - b_norm).max())
+    label = f"prfmodel vs {package} (pre-HRF, normalised)"
+    if passed:
+        print(f"PASS  {label}  max_diff={max_diff:.2e}  rtol={RTOL}")
         sys.exit(0)
     else:
-        print(f"FAIL  {label}: {r:.8f}  (threshold: {MIN_PEARSON_R})")
+        print(f"FAIL  {label}  max_diff={max_diff:.2e}  rtol={RTOL}")
         sys.exit(1)
