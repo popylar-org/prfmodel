@@ -18,10 +18,6 @@ os.environ.setdefault("KERAS_BACKEND", "tensorflow")
 from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.models import Gaussian2DPRFModel
 
-# ---------------------------------------------------------------------------
-# Canonical parameters - from the diff_gaussians tutorial.
-# sigma maps to sigma_center (the Gaussian centre width).
-# ---------------------------------------------------------------------------
 MU_X: float = -2.1
 MU_Y: float = 1.45
 SIGMA: float = 1.35
@@ -47,7 +43,7 @@ def load_stimulus():
 
 
 def make_params() -> pd.DataFrame:
-    """Return a one-row DataFrame with the canonical tutorial parameters."""
+    """Return a one-row DataFrame with pre-chosen parameters."""
     return pd.DataFrame(
         {
             "mu_x": [MU_X],

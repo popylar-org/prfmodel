@@ -6,11 +6,7 @@ We compare the pre-HRF neural response: the dot product of the Gaussian RF
 with the stimulus design matrix.
 
 - prfmodel: Gaussian2DPRFModel(impulse_model=None, temporal_model=None)
-- braincoder: GaussianPRF2D.predict() - this class has no HRF convolution,
-  so the prediction is already the RF-weighted stimulus projection.
-
-Both timeseries are z-scored before Pearson r is computed;
-we assert r > MIN_PEARSON_R.
+- braincoder: GaussianPRF2D.predict() - this class has no HRF convolution option, so it matches prfmodel's no-HRF setup.
 
 Coordinate conventions
 ----------------------
@@ -49,7 +45,6 @@ tf.keras.backend.set_floatx("float32")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from shared import AMPLITUDE
-from shared import BASELINE
 from shared import MU_X
 from shared import MU_Y
 from shared import SIGMA
@@ -77,7 +72,7 @@ def _braincoder_response(stimulus) -> np.ndarray:
             "y": [MU_Y],
             "sd": [SIGMA],
             "amplitude": [AMPLITUDE],
-            "baseline": [BASELINE],
+            "baseline": [0.0],  # no baseline: matches prfmodel with temporal_model=None
         },
     ).astype("float32")
 

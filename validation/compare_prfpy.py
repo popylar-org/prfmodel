@@ -9,10 +9,6 @@ with the stimulus design matrix, summed over the spatial dimensions.
   normalised RF: exp(-d^2/2*sigma^2) / (2*pi*sigma^2)
 - prfpy:    gauss2D_iso_cart -> unnormalised RF: exp(-d^2/2*sigma^2)
 
-Because the overall scale differs (prfmodel divides by the Gaussian volume),
-we z-score both timeseries before computing Pearson r. A true implementation
-match -> r approx 1; we assert r > shared.MIN_PEARSON_R (default 0.9999).
-
 Coordinate conventions
 ----------------------
 prfmodel stimulus grid: shape (H, W, 2), last axis = [y, x] in visual-angle degrees.
