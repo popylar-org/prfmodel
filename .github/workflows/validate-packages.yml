@@ -1,0 +1,75 @@
+name: Validate against external pRF packages
+
+# Run manually from the Actions tab.
+# Choose which external package and which model to compare against prfmodel.
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run the validations from (leave empty to deploy main)'
+        required: false
+        default: ''
+        type: string
+      package:
+        description: 'External package to compare against prfmodel'
+        required: true
+        default: 'prfpy'
+        type: choice
+        options:
+          - prfpy
+          - braincoder
+      model:
+        description: 'pRF model to validate (only gaussian-2d supported for now)'
+        required: true
+        default: 'gaussian-2d'
+        type: choice
+        options:
+          - gaussian-2d
+
+jobs:
+  validate:
+    name: Validate ${{ inputs.model }} pRF against ${{ inputs.package }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch != '' && inputs.branch || github.ref }}
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-3.12-validate-${{ inputs.package }}-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-3.12-validate-${{ inputs.package }}-
+
+      # Install prfmodel (base only – no heavy backend needed; validation uses
+      # KERAS_BACKEND=numpy which avoids the TensorFlow/JAX install for prfmodel itself).
+      - name: Install prfmodel
+        run: pip install -e .
+
+      # Package-specific installs
+      - name: Install prfpy
+        if: inputs.package == 'prfpy'
+        run: pip install prfpy
+
+      - name: Install braincoder (+ TensorFlow backend it requires)
+        if: inputs.package == 'braincoder'
+        run: |
+          pip install tensorflow tensorflow-probability
+          pip install git+https://github.com/Gilles86/braincoder.git
+
+      # -----------------------------------------------------------------------
+      # Run comparison – the script exits 0 on PASS, 1 on FAIL.
+      # KERAS_BACKEND=numpy lets prfmodel run without a heavy backend installed.
+      # -----------------------------------------------------------------------
+      - name: Run validation
+        run: python validation/compare_${{ inputs.package }}.py
+        env:
+          KERAS_BACKEND: numpy
