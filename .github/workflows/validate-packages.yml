@@ -1,4 +1,4 @@
-name: Validate against external pRF packages
+name: Validate external pRF packages
 
 # Run manually from the Actions tab.
 # Choose which external package and which model to compare against prfmodel.
@@ -60,13 +60,9 @@ jobs:
       - name: Install braincoder (+ TensorFlow backend it requires)
         if: inputs.package == 'braincoder'
         run: |
-          pip install tensorflow tensorflow-probability
+          pip install tensorflow "tensorflow-probability[tf]"
           pip install git+https://github.com/Gilles86/braincoder.git
 
-      # -----------------------------------------------------------------------
-      # Run comparison – the script exits 0 on PASS, 1 on FAIL.
-      # KERAS_BACKEND=numpy lets prfmodel run without a heavy backend installed.
-      # -----------------------------------------------------------------------
       - name: Run validation
         run: python validation/compare_${{ inputs.package }}.py
         env:

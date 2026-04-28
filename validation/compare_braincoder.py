@@ -34,6 +34,7 @@ import numpy as np
 import pandas as pd
 
 try:
+    import tensorflow as tf
     from braincoder.models import GaussianPRF2D
 except ImportError:
     print(
@@ -42,6 +43,9 @@ except ImportError:
         "Note: braincoder requires tensorflow and tensorflow-probability.",
     )
     sys.exit(1)
+
+# Force float32 globally so all TF operations use a consistent dtype.
+tf.keras.backend.set_floatx("float32")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from shared import AMPLITUDE
@@ -61,16 +65,12 @@ def _braincoder_response(stimulus) -> np.ndarray:
 
     Returns a 1-D array of length n_frames.
     """
-    # Build grid_coordinates from prfmodel's stimulus grid.
     # prfmodel grid: (H, W, 2) with [:,:,0]=y, [:,:,1]=x.
-    # braincoder expects rows = pixels (row-major / C order), columns = ['x', 'y'].
+    # braincoder expects rows=pixels, columns=['x', 'y'].
     grid_flat = stimulus.grid.reshape(-1, 2)  # (H*W, 2)
     grid_coordinates = pd.DataFrame(
         {"x": grid_flat[:, 1], "y": grid_flat[:, 0]},  # swap [y, x] -> [x, y]
-    )
-
-    # braincoder paradigm: (n_timepoints, H, W) - same shape as prfmodel's design.
-    paradigm = stimulus.design  # (T, H, W)
+    ).astype("float32")
 
     bc_params = pd.DataFrame(
         {
@@ -80,10 +80,13 @@ def _braincoder_response(stimulus) -> np.ndarray:
             "amplitude": [AMPLITUDE],
             "baseline": [BASELINE],
         },
-    )
+    ).astype("float32")
 
-    model = GaussianPRF2D(paradigm=paradigm, grid_coordinates=grid_coordinates)
-    prediction = model.predict(parameters=bc_params)  # DataFrame (T, 1) or ndarray
+    model = GaussianPRF2D(
+        paradigm=stimulus.design.astype("float32"),
+        grid_coordinates=grid_coordinates,
+    )
+    prediction = model.predict(parameters=bc_params)  # DataFrame (T, 1)
 
     return np.asarray(prediction).ravel()
 
