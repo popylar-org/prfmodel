@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 # Must be set before importing prfmodel (selects the Keras backend).
-os.environ.setdefault("KERAS_BACKEND", "numpy")
+os.environ.setdefault("KERAS_BACKEND", "tensorflow")
 
 from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.models import Gaussian2DPRFModel

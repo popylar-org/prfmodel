@@ -49,15 +49,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-3.12-validate-${{ inputs.package }}-
 
-      # Install prfmodel (base only – no heavy backend needed; validation uses
-      # KERAS_BACKEND=numpy which avoids the TensorFlow/JAX install for prfmodel itself).
       - name: Install prfmodel
-        run: pip install -e .
+        run: pip install -e .[tensorflow]
 
       # Package-specific installs
       - name: Install prfpy
         if: inputs.package == 'prfpy'
-        run: pip install prfpy
+        run: pip install git+https://github.com/VU-Cog-Sci/prfpy.git
 
       - name: Install braincoder (+ TensorFlow backend it requires)
         if: inputs.package == 'braincoder'
@@ -72,4 +70,4 @@ jobs:
       - name: Run validation
         run: python validation/compare_${{ inputs.package }}.py
         env:
-          KERAS_BACKEND: numpy
+          KERAS_BACKEND: tensorflow
