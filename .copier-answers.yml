@@ -1,0 +1,26 @@
+# Changes here will be overwritten by Copier
+SelectCodeQualityFeatures:
+- AddLocalTests_flag
+- SelectGitHubActions_flag
+- AddLinting_flag
+- AddPreCommit_flag
+- AddEditorConfig_flag
+SelectCommunityFeatures: []
+SelectDocumentationFeatures:
+- AddLocalDocumentation_flag
+SelectGitHubActions:
+- AddGitHubActionBuild_flag
+SelectPublishReleaseFeatures: []
+_commit: 0.6.1
+_src_path: https://github.com/nlesc/python-template.git
+copyright_holder: Netherlands eScience Center
+email: m.luken@esciencecenter.nl
+full_name: Malte Luken
+github_organization: popylar-org
+keywords: ''
+license: Apachev2
+package_name: prfmodel
+package_short_description: A modern Python implementation for population receptive
+    field model fitting.
+template_profile: ask
+version: 0.0.1

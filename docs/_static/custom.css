@@ -1,0 +1,4 @@
+/* Make pandas DataFrame tables horizontally scrollable */
+div.output.text_html {
+    overflow-x: auto;
+}

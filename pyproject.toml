@@ -1,0 +1,168 @@
+# see documentation, e.g.
+# - https://packaging.python.org/en/latest/specifications/declaring-project-metadata/#declaring-project-metadata
+# - https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+# - https://www.python.org/dev/peps/pep-0621/
+
+[build-system]
+requires = ["setuptools>=64.0.0", "setuptools-scm", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+authors = [
+    { name = "Malte Luken", email = "m.luken@esciencecenter.nl" },
+    { name = "Flavio Hafner", email = "f.hafner@esciencecenter.nl" },
+    { name = "Gilles de Hollander", email = "gilles.de.hollander@gmail.com" },
+    { name = "Tomas Knapen", email = "t.knapen@spinozacentre.nl" }
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "keras",
+    "matplotlib",
+    "more-itertools",
+    "nilearn",
+    "numpy<2.0.0",
+    "pandas",
+    "scipy",
+    "tqdm"
+]
+description = "A modern Python implementation for population receptive field modelling."
+keywords = [""]
+license = {file = "LICENSE"}
+name = "prfmodel"
+readme = {file = "README.md", content-type = "text/markdown"}
+requires-python = ">=3.10,<3.13"
+version = "0.0.1"
+
+[project.optional-dependencies]
+dev = [
+    "build",  # build is not only used in publishing (below), but also in the template's test suite
+    "bump-my-version",
+    "coverage [toml]",
+    "pytest",
+    "pytest-cov",
+    "pytest-regressions[dataframe,num]",  # install pandas and numpy extensions
+    "ruff",
+    "tox",
+    "myst_nb",
+    "myst_parser",
+    "pre-commit",
+    "sphinx",
+    "sphinx-autoapi",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "furo",
+    "mypy",
+    "types-tensorflow",
+    "pandas-stubs",
+    "jupyter",
+    "types-tqdm",
+    "ipykernel",
+    "plotly",
+]
+publishing = [
+    "build",
+    "twine",
+    "wheel",
+]
+torch = ["torch"]
+jax = ["jax"]
+tensorflow = ["tensorflow"]
+
+[project.urls]
+Repository = "https://github.com/popylar-org/prfmodel"
+Issues = "https://github.com/popylar-org/prfmodel/issues"
+
+[tool.setuptools.package-data]
+"prfmodel.data" = ["*.nii.gz"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+
+[tool.coverage.run]
+branch = true
+source = ["src/prfmodel"]
+command_line = "-m pytest"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = py310,py311,py312
+skip_missing_interpreters = true
+[testenv]
+commands = pytest
+extras = dev
+"""
+
+[tool.ruff]
+line-length = 120
+output-format = "concise"
+
+[tool.ruff.lint]
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# Enable Pyflakes `E` and `F` codes by default.
+select = ["ALL"]
+ignore = [
+    "ANN204", # Missing return type annotation for special (dunder) method
+    "ANN003", # Missing type annotation for `**kwargs`
+    "FBT",    # Using boolean function arguments
+    "TD",     # TODOs
+    "FIX001", # Resolve FIXMEs
+    "FIX002", # Resolve TODOs
+    "B028",   # No explicit `stacklevel` keyword argument found in warning
+    # No docstrings required in the following cases
+    "D100", # Missing module docstring
+    "D104", # Missing public package docstring
+    "D105", # Missing docstring in magic method
+    "D107", # Missing docstring in `__init__`
+]
+pydocstyle.convention = "numpy"
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can ignore a few extra rules
+"tests/**.py" = [
+    "ANN201", # Missing return type annotation for public function
+    "PT011",  # Missing `match` parameter in `pytest.raises()`
+    "S101",   # Use of assert is detected
+]
+"docs/conf.py" = [
+    "ERA001", # Found commented-out code
+    "INP001", # Part of implicit namespace package
+    "A001", # Variable `copyright` is shadowing Python builtin. See https://github.com/sphinx-doc/sphinx/issues/8132
+]
+"validation/**.py" = [
+    "ANN",   # Type annotations not required in validation scripts
+    "T201",  # print() is intentional for script output
+    "D103",  # Docstrings not required for script-level main()
+    "E402",  # sys.path/backend setup must precede local imports
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["prfmodel"]
+force-single-line = true
+no-lines-before = ["future","standard-library","third-party","first-party","local-folder"]
+
+[tool.bumpversion]
+current_version = "0.0.1"
+
+[[tool.bumpversion.files]]
+filename = "src/prfmodel/__init__.py"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+
+[[tool.mypy.overrides]]
+module = ["keras.*", "nilearn.*"]
+ignore_missing_imports = true

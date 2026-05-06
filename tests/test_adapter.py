@@ -1,0 +1,235 @@
+"""Tests for adapter and transformations."""
+
+from collections.abc import Callable
+import numpy as np
+import pandas as pd
+import pytest
+from keras import ops
+from prfmodel.adapter import Adapter
+from prfmodel.adapter import ParameterConstraint
+from prfmodel.adapter import ParameterTransform
+from prfmodel.utils import ParamsDict
+
+parameterize_params_wrapper = pytest.mark.parametrize("params_wrapper", [pd.DataFrame, ParamsDict])
+
+
+@pytest.fixture
+def params(num_rows: int = 10):
+    """Parameters dictionary."""
+    return {
+        "x": np.linspace(-5, 5, num_rows),
+        "y": np.linspace(0, 5, num_rows),
+        "z": np.linspace(1, 5, num_rows),
+    }
+
+
+@pytest.fixture
+def transform(request: pytest.FixtureRequest):
+    """Transform object."""
+    return ParameterTransform(
+        request.param[0],
+        request.param[1],
+        request.param[2],
+    )
+
+
+@parameterize_params_wrapper
+@pytest.mark.parametrize("transform", [(["x"], ops.log, ops.exp), (["y", "z"], ops.sqrt, ops.square)], indirect=True)
+def test_parameter_transform(transform: ParameterTransform, params_wrapper: type, params: dict):
+    """Test that transformation and inverse give the correct results."""
+    params = params_wrapper(params)
+
+    result_transformed = transform.transform(params)
+    result_inverse = transform.inverse(params)
+
+    for param in transform.parameter_names:
+        ref_transformed = np.asarray(transform.transform_fun(params[param]))
+        result_transformed_param = np.asarray(result_transformed[param])
+        np.testing.assert_allclose(
+            result_transformed_param,
+            ref_transformed,
+            equal_nan=True,
+            err_msg="Transform does not give correct results",
+        )
+
+        ref_inverse = np.asarray(transform.inverse_fun(params[param]))
+        result_inverse_param = np.asarray(result_inverse[param])
+        np.testing.assert_allclose(
+            result_inverse_param[np.isfinite(result_inverse_param)],
+            ref_inverse[np.isfinite(ref_inverse)],
+            equal_nan=True,
+            err_msg="Inverse transform does not give correct results",
+        )
+
+
+@parameterize_params_wrapper
+def test_parameter_transform_inverse(params_wrapper: type, params: dict):
+    """Test that transform(inverse(input)) == input for valid transform ranges."""
+    params = params_wrapper(params)
+    transform = ParameterTransform(["z"], ops.log, ops.exp)
+    result_transformed = transform.transform(params)
+    result_inverse = transform.inverse(result_transformed)
+
+    np.testing.assert_allclose(np.asarray(result_inverse["z"]), np.asarray(params["z"]))
+
+
+@parameterize_params_wrapper
+def test_parameter_constraint_lower(params_wrapper: type, params: dict):
+    """Test that lower constraint gives correct result."""
+    params = params_wrapper(params)
+    transform = ParameterConstraint(
+        parameter_names=["z"],
+        lower="x",
+    )
+
+    result_transformed = transform.transform(params)
+
+    np.testing.assert_array_less(np.asarray(result_transformed["x"]), np.asarray(result_transformed["z"]))
+
+
+@parameterize_params_wrapper
+def test_parameter_constraint_lower_inverse(params_wrapper: type, params: dict):
+    """Test that transform(inverse(input)) == input."""
+    params = params_wrapper(params)
+    transform = ParameterConstraint(
+        parameter_names=["z"],
+        lower="x",
+    )
+    result_transformed = transform.transform(params)
+    result_inverse = transform.inverse(result_transformed)
+
+    np.testing.assert_allclose(np.asarray(result_inverse["z"]), np.asarray(params["z"]))
+
+
+@parameterize_params_wrapper
+def test_parameter_constraint_upper(params_wrapper: type, params: dict):
+    """Test that upper constraint gives correct result."""
+    params = params_wrapper(params)
+    transform = ParameterConstraint(
+        parameter_names=["x"],
+        upper="z",
+    )
+
+    result_transformed = transform.transform(params)
+
+    np.testing.assert_array_less(np.asarray(result_transformed["x"]), np.asarray(result_transformed["z"]))
+
+
+@parameterize_params_wrapper
+def test_parameter_constraint_upper_inverse(params_wrapper: type, params: dict):
+    """Test that transform(inverse(input)) == input."""
+    params = params_wrapper(params)
+    transform = ParameterConstraint(
+        parameter_names=["x"],
+        lower="z",
+    )
+    result_transformed = transform.transform(params)
+    result_inverse = transform.inverse(result_transformed)
+
+    np.testing.assert_allclose(np.asarray(result_inverse["x"]), np.asarray(params["x"]), rtol=1e-6)
+
+
+def test_parameter_constraint_lower_upper_error():
+    """Test that providing lower and upper bound returns an error."""
+    with pytest.raises(NotImplementedError):
+        _ = ParameterConstraint(
+            parameter_names=["x"],
+            lower="y",
+            upper="z",
+        )
+
+
+@parameterize_params_wrapper
+def test_parameter_constraint_value_error(params_wrapper: type, params: dict):
+    """Test that missing string bound names return an error."""
+    params = params_wrapper(params)
+
+    transform_lower = ParameterConstraint(
+        parameter_names=["x"],
+        lower="foo",
+    )
+    transform_upper = ParameterConstraint(
+        parameter_names=["x"],
+        lower="bar",
+    )
+
+    with pytest.raises(ValueError):
+        _ = transform_lower.transform(params)
+
+    with pytest.raises(ValueError):
+        _ = transform_lower.inverse(params)
+
+    with pytest.raises(ValueError):
+        _ = transform_upper.transform(params)
+
+    with pytest.raises(ValueError):
+        _ = transform_upper.inverse(params)
+
+
+@parameterize_params_wrapper
+@pytest.mark.parametrize("transform_fun", [lambda x: x**2, ops.exp, ops.log])
+def test_parameter_constraint_upper_transform(params_wrapper: type, transform_fun: Callable, params: dict):
+    """Test that upper constraint with transform function gives correct result."""
+    params = params_wrapper(params)
+    transform = ParameterConstraint(
+        parameter_names=["x"],
+        upper="z",
+        bound_fun=transform_fun,
+    )
+
+    result_transformed = transform.transform(params)
+
+    np.testing.assert_array_less(
+        np.asarray(result_transformed["x"]),
+        transform_fun(np.asarray(result_transformed["z"])),
+    )
+
+
+@parameterize_params_wrapper
+def test_parameter_constraint_lower_fixed(params_wrapper: type, params: dict):
+    """Test that lower constraint with fixed value gives correct result."""
+    fixed = -3.0
+    params = params_wrapper(params)
+    transform = ParameterConstraint(
+        parameter_names=["x"],
+        lower=fixed,
+    )
+
+    result_transformed = transform.transform(params)
+
+    np.testing.assert_array_less(fixed, np.asarray(result_transformed["x"]))
+
+
+@parameterize_params_wrapper
+def test_parameter_constraint_upper_fixed(params_wrapper: type, params: dict):
+    """Test that upper constraint with fixed value gives correct result."""
+    fixed = 3.0
+    params = params_wrapper(params)
+    transform = ParameterConstraint(
+        parameter_names=["x"],
+        upper=fixed,
+    )
+
+    result_transformed = transform.transform(params)
+
+    np.testing.assert_array_less(np.asarray(result_transformed["x"]), fixed)
+
+
+@parameterize_params_wrapper
+def test_adapter(params_wrapper: type, params: dict):
+    """Test that Adapter returns the correct object type."""
+    adapter = Adapter(
+        transforms=[
+            ParameterTransform(["x"], ops.log, ops.exp),
+            ParameterTransform(["y"], ops.sqrt, ops.log),
+            ParameterConstraint(["x"], lower="z", bound_fun=ops.abs),
+        ],
+    )
+
+    params = params_wrapper(params)
+
+    result_transformed = adapter.transform(params)
+    result_inverse = adapter.inverse(result_transformed)
+
+    assert isinstance(result_transformed, params_wrapper)
+    assert isinstance(result_inverse, params_wrapper)

@@ -1,0 +1,93 @@
+name: Python package
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+
+  build:
+    name: Build for (${{ matrix.python-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        python-version: ['3.10', '3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-cached
+        with:
+          python-version: ${{ matrix.python-version }}
+          extras: dev,publishing,tensorflow
+      - name: Run unit tests with examples
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
+        run: python -m pytest -v --examples
+        env:
+          KERAS_BACKEND: tensorflow
+      - name: Run unit tests without examples
+        if: matrix.os != 'ubuntu-latest' || matrix.python-version != '3.12'
+        run: python -m pytest -v
+        env:
+          KERAS_BACKEND: tensorflow
+      - name: Run doctests
+        run: python -m pytest --doctest-modules --ignore=src/prfmodel/fitters/backend/ -v src/
+        env:
+          KERAS_BACKEND: tensorflow
+      - name: Verify that we can build the package
+        run: python -m build
+  lint:
+    name: Linting build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-cached
+        with:
+          python-version: '3.12'
+          extras: dev,publishing
+      - name: Check style against standards using ruff
+        run: |
+          ruff check
+          ruff format --check
+  backend:
+    name: Run tests for backend ${{ matrix.backend }}
+    runs-on: 'ubuntu-latest'
+    strategy:
+      fail-fast: true
+      matrix:
+        backend: ['tensorflow', 'torch', 'jax']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-cached
+        with:
+          python-version: '3.12'
+          extras: dev,publishing,${{ matrix.backend }}
+      - name: Run unit tests
+        run: python -m pytest -v
+        env:
+          KERAS_BACKEND: ${{ matrix.backend }}
+          JAX_ENABLE_X64: "true"
+
+  mypy:
+    name: Check types with mypy
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clean up space
+        run: |
+          sudo rm -rf "/opt/ghc" || true
+          sudo rm -rf "/usr/share/dotnet" || true
+          sudo rm -rf "/usr/local/lib/android" || true
+          sudo rm -rf "/usr/local/share/boost" || true
+      - uses: ./.github/actions/setup-python-cached
+        with:
+          python-version: '3.12'
+          extras: dev,publishing,tensorflow,torch,jax
+      - name: Run mypy on package
+        run: mypy src/

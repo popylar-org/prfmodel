@@ -1,0 +1,161 @@
+"""Tests for stochastic gradient descent fitting."""
+
+import keras
+import numpy as np
+import pandas as pd
+import pytest
+from pytest_regressions.dataframe_regression import DataFrameRegressionFixture
+from prfmodel.adapter import Adapter
+from prfmodel.adapter import ParameterConstraint
+from prfmodel.adapter import ParameterTransform
+from prfmodel.fitters.sgd import SGDFitter
+from prfmodel.fitters.sgd import SGDHistory
+from prfmodel.models.gaussian import Gaussian2DPRFModel
+from prfmodel.stimuli.prf import PRFStimulus
+from prfmodel.typing import Tensor
+from prfmodel.utils import get_dtype
+from tests.conftest import TestSetup
+from tests.conftest import parametrize_impulse_model
+from .conftest import parametrize_dtype
+from .conftest import skip_torch
+from .conftest import skip_windows
+
+
+@skip_windows
+@skip_torch
+@parametrize_dtype
+class TestSGDFitter(TestSetup):
+    """Tests for SGDFitter class.
+
+    Uses a `Gaussian2DPRFModel` model with a `keras.optimizers.Adam` optimizer and `keras.losses.MeanSquaredError` loss
+    as a test case.
+
+    """
+
+    num_steps: int = 10
+
+    def _check_history(self, history: SGDHistory) -> None:
+        assert isinstance(history, SGDHistory)
+        assert history.step == list(range(self.num_steps))
+        assert isinstance(history.history, dict)
+        assert all(isinstance(x, Tensor) for x in history.history["loss"])
+
+    def _check_sgd_params_shape(self, result_params: pd.DataFrame, params: pd.DataFrame) -> None:
+        assert isinstance(result_params, pd.DataFrame)
+        assert result_params.shape == params.shape
+
+    def _check_sgd_params_regression(
+        self,
+        result_params: pd.DataFrame,
+        dataframe_regression: DataFrameRegressionFixture,
+        dtype: str,
+    ) -> None:
+        if dtype != "float64":
+            dataframe_regression.check(
+                result_params,
+                default_tolerance={"atol": 1e-6},
+            )
+
+    @pytest.mark.parametrize(
+        ("optimizer", "loss"),
+        [(None, None), (keras.optimizers.Adam, keras.losses.MeanSquaredError)],
+    )
+    def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
+        self,
+        dataframe_regression: DataFrameRegressionFixture,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        optimizer: type[keras.optimizers.Optimizer],
+        loss: type[keras.losses.Loss],
+        params: pd.DataFrame,
+        dtype: str,
+    ):
+        """Test that fit returns parameters with the correct shape."""
+        # Instantiate class args if not None
+        if optimizer is not None:
+            optimizer = optimizer()
+
+        if loss is not None:
+            loss = loss()
+
+        fitter = SGDFitter(
+            model=model,
+            stimulus=stimulus,
+            optimizer=optimizer,
+            loss=loss,
+            dtype=dtype,
+        )
+
+        observed = model(stimulus, params)
+
+        history, sgd_params = fitter.fit(observed, params, num_steps=self.num_steps)
+
+        self._check_history(history)
+        self._check_sgd_params_shape(sgd_params, params)
+        self._check_sgd_params_regression(sgd_params, dataframe_regression, dtype)
+
+    def test_fit_fixed_params(
+        self,
+        dataframe_regression: DataFrameRegressionFixture,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        dtype: str,
+    ):
+        """Test that fit with fixed parameters returns parameters with the correct shape and fixed values."""
+        fitter = SGDFitter(
+            model=model,
+            stimulus=stimulus,
+            dtype=dtype,
+        )
+
+        observed = model(stimulus, params)
+
+        fixed = ["baseline", "amplitude"]
+
+        history, sgd_params = fitter.fit(observed, params, fixed_parameters=fixed, num_steps=self.num_steps)
+
+        self._check_history(history)
+        self._check_sgd_params_shape(sgd_params, params)
+
+        assert np.all(sgd_params[fixed] == params[fixed].astype(get_dtype(dtype)))
+
+        self._check_sgd_params_regression(sgd_params, dataframe_regression, dtype)
+
+    @parametrize_impulse_model
+    def test_fit_adapter(
+        self,
+        dataframe_regression: DataFrameRegressionFixture,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        dtype: str,
+    ):
+        """Test that fit with an adapter returns parameters with the correct shape."""
+        adapter = Adapter(
+            [
+                ParameterTransform(["sigma", "delay"], keras.ops.log, keras.ops.exp),
+                ParameterConstraint(["delay"], lower="dispersion", bound_fun=keras.ops.log),
+            ],
+        )
+
+        fitter = SGDFitter(
+            model=model,
+            stimulus=stimulus,
+            adapter=adapter,
+            dtype=dtype,
+        )
+
+        observed = model(stimulus, params)
+
+        fixed_parameters = None
+
+        # We need to fix the default parameters of the impulse model because they won't have gradients
+        if model.models["impulse_model"].default_parameters is not None:
+            fixed_parameters = model.models["impulse_model"].default_parameters.keys()
+
+        history, sgd_params = fitter.fit(observed, params, num_steps=self.num_steps, fixed_parameters=fixed_parameters)
+
+        self._check_history(history)
+        self._check_sgd_params_shape(sgd_params, params)
+        self._check_sgd_params_regression(sgd_params, dataframe_regression, dtype)

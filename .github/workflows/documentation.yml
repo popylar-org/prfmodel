@@ -1,0 +1,65 @@
+name: documentation
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build and deploy docs for (leave empty to deploy main)'
+        required: false
+        default: ''
+        type: string
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+permissions:
+  contents: write
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch != '' && github.event.inputs.branch || github.ref }}
+      - name: Determine deployment target
+        id: deploy-target
+        run: |
+          BRANCH="${{ github.event.inputs.branch }}"
+          if [[ -z "$BRANCH" || "$BRANCH" == "main" ]]; then
+            echo "dir=." >> "$GITHUB_OUTPUT"
+          else
+            SAFE=$(echo "$BRANCH" | sed 's/[^a-zA-Z0-9._-]/-/g')
+            echo "dir=branches/${SAFE}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+      - uses: ./.github/actions/setup-python-cached
+        with:
+          python-version: '3.12'
+          extras: dev,tensorflow
+      - name: Cache jupyter-cache
+        uses: actions/cache@v4
+        with:
+          path: docs/_build/.jupyter_cache
+          key: ${{ runner.os }}-jupyter-cache-${{ hashFiles('docs/tutorials/**') }}
+          restore-keys: |
+            ${{ runner.os }}-jupyter-cache-
+      - name: Build documentation
+        run: |
+          cd docs
+          make html
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: docs/_build/html/
+          destination_dir: ${{ steps.deploy-target.outputs.dir }}
+          keep_files: true
