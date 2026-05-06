@@ -9,10 +9,15 @@ Comparing the pre-HRF neural response — the dot product of the Gaussian RF wit
 the stimulus design matrix — isolates the spatial encoding step and makes the
 comparison package-agnostic: if the RF and the projection agree, any remaining
 differences in the full prediction must come from the temporal model.
+
+--- Changes in this commit ---
+check_and_exit now returns bool instead of calling sys.exit, and accepts an
+optional rtol keyword argument (default RTOL).  This allows a single script to
+run multiple checks, collect all results, and exit once at the end — which is
+needed for the prfpy with-HRF check added in compare_prfpy.py.
 """
 
 import os
-import sys
 import numpy as np
 import pandas as pd
 
@@ -77,20 +82,20 @@ def normalize(arr: np.ndarray) -> np.ndarray:
     return arr / total if total > 0 else arr
 
 
-def check_and_exit(a: np.ndarray, b: np.ndarray, package: str) -> None:
-    """Compare two timeseries and exit with 0 (pass) or 1 (fail).
+def check_and_exit(a: np.ndarray, b: np.ndarray, package: str, *, rtol: float = RTOL) -> bool:
+    """Compare two normalised timeseries; print result and return True (pass) or False (fail).
+
+    Returns bool rather than calling sys.exit so that callers running multiple
+    checks can collect all results before deciding the final exit code.
 
     Both arrays are normalized to unit absolute sum before comparison
     to handle RF scale differences across packages.
     """
     a_norm = normalize(a)
     b_norm = normalize(b)
-    passed = np.allclose(a_norm, b_norm, rtol=RTOL)
+    passed = np.allclose(a_norm, b_norm, rtol=rtol)
     max_diff = float(np.abs(a_norm - b_norm).max())
     label = f"prfmodel vs {package} (normalised)"
     status = "PASS" if passed else "FAIL"
-    print(f"{status}  {label}  max_diff={max_diff:.2e}  rtol={RTOL}")
-    if passed:
-        sys.exit(0)
-    else:
-        sys.exit(1)
+    print(f"{status}  {label}  max_diff={max_diff:.2e}  rtol={rtol}")
+    return passed

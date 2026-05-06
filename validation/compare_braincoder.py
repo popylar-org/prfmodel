@@ -13,6 +13,11 @@ encoding step.
 - braincoder: GaussianPRF2D.predict() - this class has no HRF convolution option,
   so it matches prfmodel's no-HRF setup.
 
+--- Changes in this commit ---
+check_and_exit now returns bool instead of calling sys.exit (see shared.py).
+main() captures the return value and calls sys.exit explicitly at the end.
+Behaviour is identical to before.
+
 Coordinate conventions
 ----------------------
 prfmodel stimulus grid: shape (H, W, 2), last axis = [y, x] in visual-angle degrees.
@@ -96,7 +101,8 @@ def main() -> None:
     params = make_params()
     ref = prfmodel_response(stimulus, params, with_hrf=False)
     bc = _braincoder_response(stimulus)
-    check_and_exit(ref, bc, "braincoder")
+    passed = check_and_exit(ref, bc, "braincoder (pre-HRF)")
+    sys.exit(0 if passed else 1)
 
 
 if __name__ == "__main__":
