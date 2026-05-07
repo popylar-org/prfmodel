@@ -40,6 +40,56 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     4. The encoded neuron population response is convolved with the impulse response.
     5. The scaling model modifies the convolved response.
 
+    Using the default impulse and scaling models, the following columns are expected in the
+    :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
+
+    .. list-table::
+       :header-rows: 1
+       :widths: 20 12 53
+
+       * - Parameter
+         - Model
+         - Description
+       * - ``mu_x``
+         - pRF
+         - x-coordinate of the Gaussian center.
+       * - ``mu_y``
+         - pRF
+         - y-coordinate of the Gaussian center.
+       * - ``sigma``
+         - pRF
+         - Standard deviation of the isotropic Gaussian.
+       * - ``gain``
+         - Encoding
+         - Amplification factor for the compressive encoder.
+       * - ``n``
+         - Encoding
+         - Compression exponent (must be > 0).
+       * - ``delay``
+         - Impulse
+         - Peak time of the positive gamma component (in seconds).
+       * - ``dispersion``
+         - Impulse
+         - Rate parameter of the positive gamma component.
+       * - ``undershoot``
+         - Impulse
+         - Peak time of the negative gamma component (in seconds).
+       * - ``u_dispersion``
+         - Impulse
+         - Rate parameter of the negative gamma component.
+       * - ``ratio``
+         - Impulse
+         - Weight of the negative gamma component.
+       * - ``weight_deriv``
+         - Impulse
+         - Weight of the derivative component.
+       * - ``baseline``
+         - Scaling
+         - Additive constant.
+       * - ``amplitude``
+         - Scaling
+         - Multiplicative scale factor.
+
     References
     ----------
     .. [1] Kay, K. N., Winawer, J., Mezer, A., & Wandell, B. A. (2013). Compressive spatial summation in human visual

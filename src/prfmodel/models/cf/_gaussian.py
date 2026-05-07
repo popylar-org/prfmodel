@@ -114,6 +114,29 @@ class GaussianCFModel(CanonicalCFModel):
     2. The encoding model encodes the connective field response with the source response.
     3. The scaling model modifies the encoded response.
 
+    Using the default scaling model, the following columns are expected in the
+    :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
+
+    .. list-table::
+       :header-rows: 1
+       :widths: 20 12 53
+
+       * - Parameter
+         - Model
+         - Description
+       * - ``center_index``
+         - CF
+         - Row index of the center unit in the source distance matrix.
+       * - ``sigma``
+         - CF
+         - Standard deviation of the Gaussian.
+       * - ``baseline``
+         - Scaling
+         - Additive constant.
+       * - ``amplitude``
+         - Scaling
+         - Multiplicative scale factor.
+
     References
     ----------
     .. [1] Haak, K. V., Winawer, J., Harvey, B. M., Renken, R., Dumoulin, S. O., Wandell, B. A., &

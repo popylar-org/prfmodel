@@ -248,6 +248,59 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
 
     The :math:`-b/d` term ensures a zero response in the absence of a stimulus.
 
+    Using the default impulse and scaling models, the following columns are expected in the
+    :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
+
+    .. list-table::
+       :header-rows: 1
+       :widths: 26 12 47
+
+       * - Parameter
+         - Model
+         - Description
+       * - ``mu_x``
+         - pRF
+         - Shared x-coordinate of both Gaussian centers.
+       * - ``mu_y``
+         - pRF
+         - Shared y-coordinate of both Gaussian centers.
+       * - ``sigma_activation``
+         - pRF
+         - Standard deviation of the activation Gaussian.
+       * - ``sigma_normalization``
+         - pRF
+         - Standard deviation of the normalization Gaussian (must be >= ``sigma_activation``).
+       * - ``delay``
+         - Impulse
+         - Peak time of the positive gamma component (in seconds).
+       * - ``dispersion``
+         - Impulse
+         - Rate parameter of the positive gamma component.
+       * - ``undershoot``
+         - Impulse
+         - Peak time of the negative gamma component (in seconds).
+       * - ``u_dispersion``
+         - Impulse
+         - Rate parameter of the negative gamma component.
+       * - ``ratio``
+         - Impulse
+         - Weight of the negative gamma component.
+       * - ``weight_deriv``
+         - Impulse
+         - Weight of the derivative component.
+       * - ``amplitude_activation``
+         - Scaling
+         - Amplitude of the activation response (:math:`a`).
+       * - ``baseline_activation``
+         - Scaling
+         - Baseline of the activation response (:math:`b`).
+       * - ``amplitude_normalization``
+         - Scaling
+         - Amplitude of the normalization response (:math:`c`).
+       * - ``baseline_normalization``
+         - Scaling
+         - Baseline of the normalization response (:math:`d`; must be > 0).
+
     """
 
     def __init__(

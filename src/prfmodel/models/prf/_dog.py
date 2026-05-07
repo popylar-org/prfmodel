@@ -45,6 +45,56 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
 
         y(t) = a_c \, p_{\text{center}}(t) + a_s \, p_{\text{surround}}(t) + \beta
 
+    Using the default impulse and scaling models, the following columns are expected in the
+    :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
+
+    .. list-table::
+       :header-rows: 1
+       :widths: 22 12 51
+
+       * - Parameter
+         - Model
+         - Description
+       * - ``mu_x``
+         - pRF
+         - Shared x-coordinate of the center and surround Gaussians.
+       * - ``mu_y``
+         - pRF
+         - Shared y-coordinate of the center and surround Gaussians.
+       * - ``sigma_center``
+         - pRF
+         - Standard deviation of the center Gaussian.
+       * - ``sigma_surround``
+         - pRF
+         - Standard deviation of the surround Gaussian (must be > ``sigma_center``).
+       * - ``delay``
+         - Impulse
+         - Peak time of the positive gamma component (in seconds).
+       * - ``dispersion``
+         - Impulse
+         - Rate parameter of the positive gamma component.
+       * - ``undershoot``
+         - Impulse
+         - Peak time of the negative gamma component (in seconds).
+       * - ``u_dispersion``
+         - Impulse
+         - Rate parameter of the negative gamma component.
+       * - ``ratio``
+         - Impulse
+         - Weight of the negative gamma component.
+       * - ``weight_deriv``
+         - Impulse
+         - Weight of the derivative component.
+       * - ``amplitude_center``
+         - Scaling
+         - Amplitude of the center response.
+       * - ``amplitude_surround``
+         - Scaling
+         - Amplitude of the surround response (typically negative).
+       * - ``baseline``
+         - Scaling
+         - Additive constant.
+
     References
     ----------
     .. [1] Zuiderbaan, W., Harvey, B. M., & Dumoulin, S. O. (2012). Modeling center-surround configurations in
