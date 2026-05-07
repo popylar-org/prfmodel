@@ -54,10 +54,10 @@ _PARAMS: dict[str, str] = {
         "    default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance."
     ),
     "model_fitter": (
-        "model : BaseModel\n"
+        "model : BaseCanonical\n"
         "    A model instance that can be fit to data.\n"
-        "    The model must implement the :meth:`__call__` method to make predictions that can be\n"
-        "    compared to data."
+        "    The model must implement the :meth:`~prfmodel.models.base.BaseCanonical.__call__` method to make\n"
+        "    predictions that can be compared to data."
     ),
     "model_impulse": (
         "impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional\n"
