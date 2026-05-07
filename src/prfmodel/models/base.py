@@ -5,15 +5,15 @@ Classes in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that 
 
 They are abstract base classes, meaning that they
 cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
-shared by all child classes. For example, :class:`~prfmodel.models.base.BaseResponse` defines that all child classes
-must implement a :meth:`~prfmodel.models.base.BaseResponse.__call__` method that takes a stimulus and set of parameters
-as input. However, it leaves it up to each child class to define how input stimulus and parameters are used to make
-model predictions.
+shared by all child classes. For example, :class:`~prfmodel.models.base.BasePopulationResponse` defines that all child
+classes must implement a :meth:`~prfmodel.models.base.BasePopulationResponse.__call__` method that takes a stimulus
+and set of parameters as input. However, it leaves it up to each child class to define how input stimulus and
+parameters are used to make model predictions.
 
 Classes in this module are also generic with respect to the input stimulus, that is, child classes can specify whether
 they take a :class:`~prfmodel.stimuli.PRFStimulus` or :class:`~prfmodel.stimuli.CFStimulus` as input. In the case of
-:meth:`~prfmodel.models.base.BaseResponse`, child classes can choose the type of input stimulus in the signature of
-:meth:`~prfmodel.models.base.BaseResponse.__call__`.
+:meth:`~prfmodel.models.base.BasePopulationResponse`, child classes can choose the type of input stimulus in the
+signature of :meth:`~prfmodel.models.base.BasePopulationResponse.__call__`.
 
 """
 
@@ -29,11 +29,11 @@ from prfmodel.utils import ModelProtocol
 S = TypeVar("S", bound=Stimulus)
 
 
-class BaseResponse(ModelProtocol, Generic[S]):
+class BasePopulationResponse(ModelProtocol, Generic[S]):
     """
-    Generic abstract base class for response models.
+    Generic abstract base class for neuron population response models.
 
-    A response model takes a stimulus and parameters as input and predicts a response.
+    A neuron population response model takes a stimulus and parameters as input and predicts a population response.
 
     Notes
     -----

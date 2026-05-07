@@ -9,7 +9,7 @@ import pandas as pd
 from prfmodel._docstring import doc
 from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BaseEncoder
-from prfmodel.models.base import BaseResponse
+from prfmodel.models.base import BasePopulationResponse
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
@@ -22,7 +22,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
     """
     Canonical connective field model.
 
-    This class combines a connective field response and scaling model.
+    This class combines a connective field and scaling model response.
 
     Parameters
     ----------
@@ -45,7 +45,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
 
     def __init__(
         self,
-        cf_model: BaseResponse,
+        cf_model: BasePopulationResponse,
         encoding_model: BaseEncoder | type[BaseEncoder] = CFStimulusEncoder,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):
@@ -83,7 +83,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
 
         """
         dtype = get_dtype(dtype)
-        cf_model = cast("BaseResponse", self.models["cf_model"])
+        cf_model = cast("BasePopulationResponse", self.models["cf_model"])
         response = cf_model(stimulus, parameters, dtype=dtype)
         encoding_model = cast("BaseEncoder", self.models["encoding_model"])
         response = encoding_model(stimulus, response, parameters, dtype=dtype)

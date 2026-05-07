@@ -32,7 +32,7 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
     """
     Encode a population receptive field model response with a stimulus design.
 
-    Multiplies a stimulus design with a model response along the
+    Multiplies a stimulus design with a neuron population response along the
     stimulus dimensions and sums over them.
 
     Parameters

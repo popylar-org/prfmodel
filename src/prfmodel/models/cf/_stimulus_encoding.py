@@ -13,7 +13,8 @@ class CFStimulusEncoder(BaseEncoder[CFStimulus]):
     """
     Encoding model for connective field stimuli.
 
-    Multiplies a source response with a connective model response and sums over the vertices in the source response.
+    Multiplies a source response with a connective field model response and sums over the vertices in the source
+    response.
 
     """
 
@@ -30,7 +31,7 @@ class CFStimulusEncoder(BaseEncoder[CFStimulus]):
         parameters: pd.DataFrame,  # noqa: ARG002 (unused method argument)
         dtype: str | None = None,
     ) -> Tensor:
-        """Encode a Connective field model response with a source response.
+        """Encode a connective field model response with a source response.
 
         Parameters
         ----------

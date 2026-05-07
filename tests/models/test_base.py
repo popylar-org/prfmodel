@@ -5,7 +5,7 @@ from prfmodel.exceptions import BatchDimensionError
 from prfmodel.exceptions import ShapeError
 from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BaseEncoder
-from prfmodel.models.base import BaseResponse
+from prfmodel.models.base import BasePopulationResponse
 from prfmodel.utils import ModelProtocol
 
 
@@ -46,10 +46,10 @@ class TestBaseModel:
 
 
 # Inherit all checks from TestBaseModel
-class TestBaseResponse(TestBaseModel):
-    """Tests for BaseResponse class."""
+class TestBasePopulationResponse(TestBaseModel):
+    """Tests for BasePopulationResponse class."""
 
-    model_class = BaseResponse
+    model_class = BasePopulationResponse
 
 
 class TestBaseEncoder(TestBaseModel):

@@ -6,7 +6,7 @@ import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.models.base import BaseEncoder
-from prfmodel.models.base import BaseResponse
+from prfmodel.models.base import BasePopulationResponse
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
@@ -17,11 +17,11 @@ from ._stimulus_encoding import CFStimulusEncoder
 from .canonical import CanonicalCFModel
 
 
-class GaussianCFResponse(BaseResponse[CFStimulus]):
+class GaussianCFResponse(BasePopulationResponse[CFStimulus]):
     """
     Gaussian connective field response model.
 
-    Predicts a response to a stimulus distance matrix.
+    Predicts a neuron population response to a stimulus distance matrix.
     The model has two parameters: `center_index` is the index of the row in the stimulus distance matrix that is the
     center of the Gaussian; `sigma` for the width of the Gaussian.
 

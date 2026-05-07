@@ -9,7 +9,7 @@ from prfmodel.exceptions import ShapeError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseEncoder
-from prfmodel.models.base import BaseResponse
+from prfmodel.models.base import BasePopulationResponse
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import GridDimensionsError
@@ -167,11 +167,11 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     return ops.exp(-resp) / volume
 
 
-class Gaussian2DPRFResponse(BaseResponse[PRFStimulus]):
+class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus]):
     """
-    Two-dimensional isotropic Gaussian population receptive field response model.
+    Two-dimensional isotropic Gaussian neuron population receptive field response model.
 
-    Predicts a response to a stimulus grid.
+    Predicts a neuron population response to a stimulus grid.
     The model has three parameters: `mu_y` and `mu_x` for the center and `sigma` for the width of the Gaussian.
 
     Examples
@@ -243,9 +243,9 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
     The simple composite model follows five steps [1]_:
 
     1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
-    2. The encoding model encodes the response with the stimulus design.
+    2. The encoding model encodes the neuron population response with the stimulus design.
     3. An impulse model generates an impulse response.
-    4. The encoded response is convolved with the impulse response.
+    4. The encoded neuron population response is convolved with the impulse response.
     5. The scaling model modifies the convolved response.
 
     References

@@ -13,7 +13,7 @@ from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BaseEncoder
-from prfmodel.models.base import BaseResponse
+from prfmodel.models.base import BasePopulationResponse
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling import DoGAmplitude
 from prfmodel.scaling.base import BaseScaling
@@ -51,7 +51,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
     @doc
     def __init__(
         self,
-        prf_model: BaseResponse,
+        prf_model: BasePopulationResponse,
         encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
@@ -94,7 +94,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
 
         """
         dtype = get_dtype(dtype)
-        prf_model = cast("BaseResponse", self.models["prf_model"])
+        prf_model = cast("BasePopulationResponse", self.models["prf_model"])
         response = prf_model(stimulus, parameters, dtype=dtype)
         encoding_model = cast("BaseEncoder", self.models["encoding_model"])
         response = encoding_model(stimulus, response, parameters, dtype=dtype)
@@ -146,7 +146,7 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
 
     def __init__(
         self,
-        prf_model: BaseResponse,
+        prf_model: BasePopulationResponse,
         encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = DoGAmplitude,
@@ -184,7 +184,7 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
     @property
     def parameter_names(self) -> list[str]:
         """A list with names of unique parameters used by the model."""
-        prf_model = cast("BaseResponse", self.models["prf_model"])
+        prf_model = cast("BasePopulationResponse", self.models["prf_model"])
         prf_params = prf_model.parameter_names.copy()
 
         # Replace each change_param with its center/surround variants in-place
@@ -212,7 +212,7 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
         for param in self._change_params:
             params_single[param] = parameters[f"{param}_{suffix}"]
 
-        prf_model = cast("BaseResponse", self.models["prf_model"])
+        prf_model = cast("BasePopulationResponse", self.models["prf_model"])
         response = prf_model(stimulus, params_single, dtype=dtype)
         encoding_model = cast("BaseEncoder", self.models["encoding_model"])
         response = encoding_model(stimulus, response, parameters, dtype=dtype)

@@ -8,7 +8,7 @@ from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BaseEncoder
-from prfmodel.models.base import BaseResponse
+from prfmodel.models.base import BasePopulationResponse
 from prfmodel.scaling import DivNormAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli._prf import PRFStimulus
@@ -58,8 +58,8 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
 
     def __init__(  # noqa: PLR0913
         self,
-        activation_prf_model: BaseResponse,
-        normalization_prf_model: BaseResponse,
+        activation_prf_model: BasePopulationResponse,
+        normalization_prf_model: BasePopulationResponse,
         shared_params: list[str] | None = None,
         encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
@@ -108,8 +108,8 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
 
         """
         shared = set(self._shared_params)
-        act_model = cast("BaseResponse", self.models["activation_prf_model"])
-        norm_model = cast("BaseResponse", self.models["normalization_prf_model"])
+        act_model = cast("BasePopulationResponse", self.models["activation_prf_model"])
+        norm_model = cast("BasePopulationResponse", self.models["normalization_prf_model"])
 
         param_names: list[str] = []
 
@@ -138,7 +138,7 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
         dtype: str,
     ) -> Tensor:
         """Run one pRF response (pRF response -> encoding -> optional impulse convolution)."""
-        prf_model = cast("BaseResponse", self.models[f"{suffix}_prf_model"])
+        prf_model = cast("BasePopulationResponse", self.models[f"{suffix}_prf_model"])
         shared = set(self._shared_params)
 
         # Build a parameter slice for this pRF model: copy all params, then
