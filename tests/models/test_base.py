@@ -4,8 +4,8 @@ import pytest
 from prfmodel.exceptions import BatchDimensionError
 from prfmodel.exceptions import ShapeError
 from prfmodel.models.base import BaseCanonical
-from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BasePopulationResponse
+from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.utils import ModelProtocol
 
 
@@ -52,10 +52,10 @@ class TestBasePopulationResponse(TestBaseModel):
     model_class = BasePopulationResponse
 
 
-class TestBaseEncoder(TestBaseModel):
-    """Tests for BaseEncoder class."""
+class TestBaseStimulusEncoder(TestBaseModel):
+    """Tests for BaseStimulusEncoder class."""
 
-    model_class = BaseEncoder
+    model_class = BaseStimulusEncoder
 
 
 class TestBaseComposite(TestBaseModel):

@@ -15,14 +15,14 @@ for :class:`~prfmodel.stimuli.PRFStimulus` and :class:`~prfmodel.stimuli.CFStimu
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.models.base import BaseEncoder
+from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.models.base import S
 from prfmodel.typing import Tensor
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 
 
-class CompressiveEncoder(BaseEncoder[S]):
+class CompressiveEncoder(BaseStimulusEncoder[S]):
     r"""
     Compressive encoding model.
 
@@ -79,7 +79,7 @@ class CompressiveEncoder(BaseEncoder[S]):
 
     """
 
-    def __init__(self, encoding_model: BaseEncoder, min_response: float = 1e-10):
+    def __init__(self, encoding_model: BaseStimulusEncoder, min_response: float = 1e-10):
         self.encoding_model = encoding_model
         self.min_response = min_response
 

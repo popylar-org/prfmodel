@@ -9,7 +9,7 @@ from prfmodel.exceptions import BatchDimensionError
 from prfmodel.exceptions import ShapeError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
-from prfmodel.models.base import BaseEncoder
+from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFResponse
 from prfmodel.models.prf import PRFStimulusEncoder
@@ -230,7 +230,7 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
     @pytest.mark.parametrize("encoding_model", [PRFStimulusEncoder, PRFStimulusEncoder()])
     def test_predict(
         self,
-        encoding_model: BaseEncoder,
+        encoding_model: BaseStimulusEncoder,
         impulse_model: BaseImpulse,
         temporal_model: BaseScaling,
         stimulus: PRFStimulus,

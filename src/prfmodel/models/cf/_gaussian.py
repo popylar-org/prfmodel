@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BasePopulationResponse
+from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
@@ -157,7 +157,7 @@ class GaussianCFModel(CanonicalCFModel):
 
     def __init__(
         self,
-        encoding_model: BaseEncoder | type[BaseEncoder] = CFStimulusEncoder,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = CFStimulusEncoder,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):
         super().__init__(

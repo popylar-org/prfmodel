@@ -3,13 +3,13 @@
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.models.base import BaseEncoder
+from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.stimuli import CFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 
 
-class CFStimulusEncoder(BaseEncoder[CFStimulus]):
+class CFStimulusEncoder(BaseStimulusEncoder[CFStimulus]):
     """
     Encoding model for connective field stimuli.
 

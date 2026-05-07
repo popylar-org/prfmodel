@@ -3,7 +3,7 @@
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.models.base import BaseEncoder
+from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
@@ -103,7 +103,7 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
     return ops.squeeze(ops.tensordot(response, design, axes=[axes, axes]), axis=(1, 2))
 
 
-class PRFStimulusEncoder(BaseEncoder[PRFStimulus]):
+class PRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus]):
     """
     Encoding model for population receptive field stimuli.
 

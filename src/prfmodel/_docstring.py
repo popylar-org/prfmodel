@@ -49,7 +49,7 @@ _PARAMS: dict[str, str] = {
     ),
     "model_cf": ("cf_model : BasePopulationResponse\n    A connective field response model instance."),
     "model_encoding": (
-        "encoding_model : BaseEncoder or type, default=PRFStimulusEncoder\n"
+        "encoding_model : BaseStimulusEncoder or type, default=PRFStimulusEncoder\n"
         "    An encoding model class or instance. Model classes will be instantiated during initialization. The\n"
         "    default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance."
     ),

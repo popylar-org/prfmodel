@@ -7,8 +7,8 @@ from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseCanonical
-from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BasePopulationResponse
+from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.scaling import DivNormAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli._prf import PRFStimulus
@@ -61,7 +61,7 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
         activation_prf_model: BasePopulationResponse,
         normalization_prf_model: BasePopulationResponse,
         shared_params: list[str] | None = None,
-        encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = DivNormAmplitude,
     ):
@@ -149,7 +149,7 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
                 params_single[p] = parameters[f"{p}_{suffix}"]
 
         response = prf_model(stimulus, params_single, dtype=dtype)
-        encoding_model = cast("BaseEncoder", self.models["encoding_model"])
+        encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
         response = encoding_model(stimulus, response, parameters, dtype=dtype)
 
         if self.models["impulse_model"] is not None:
@@ -252,7 +252,7 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
 
     def __init__(
         self,
-        encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = DivNormAmplitude,
     ):

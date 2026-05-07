@@ -8,8 +8,8 @@ from prfmodel.exceptions import BatchDimensionError
 from prfmodel.exceptions import ShapeError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
-from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BasePopulationResponse
+from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import GridDimensionsError
@@ -290,7 +290,7 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
 
     def __init__(
         self,
-        encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):

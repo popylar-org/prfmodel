@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
-from prfmodel.models.base import BaseEncoder
+from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.models.cf import CFStimulusEncoder
 from prfmodel.models.cf import GaussianCFModel
 from prfmodel.models.cf import GaussianCFResponse
@@ -101,7 +101,7 @@ class TestGaussianCFModel(TestGaussianCFResponse):
     )
     def test_predict(
         self,
-        encoding_model: BaseEncoder,
+        encoding_model: BaseStimulusEncoder,
         temporal_model: BaseScaling,
         stimulus: CFStimulus,
         params: pd.DataFrame,

@@ -100,7 +100,7 @@ class BasePopulationResponse(ModelProtocol, Generic[S]):
         """
 
 
-class BaseEncoder(ModelProtocol, Generic[S]):
+class BaseStimulusEncoder(ModelProtocol, Generic[S]):
     """
     Generic abstract base class for encoding model responses with a stimulus.
 

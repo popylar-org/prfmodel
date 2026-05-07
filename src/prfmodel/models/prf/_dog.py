@@ -3,7 +3,7 @@
 import pandas as pd
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
-from prfmodel.models.base import BaseEncoder
+from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.scaling import DoGAmplitude
 from prfmodel.scaling.base import BaseScaling
 from ._gaussian import Gaussian2DPRFResponse
@@ -89,7 +89,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
 
     def __init__(
         self,
-        encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = DoGAmplitude,
     ):

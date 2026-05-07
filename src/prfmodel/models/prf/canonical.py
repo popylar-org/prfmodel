@@ -12,8 +12,8 @@ from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseCanonical
-from prfmodel.models.base import BaseEncoder
 from prfmodel.models.base import BasePopulationResponse
+from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling import DoGAmplitude
 from prfmodel.scaling.base import BaseScaling
@@ -52,7 +52,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
     def __init__(
         self,
         prf_model: BasePopulationResponse,
-        encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):
@@ -96,7 +96,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
         dtype = get_dtype(dtype)
         prf_model = cast("BasePopulationResponse", self.models["prf_model"])
         response = prf_model(stimulus, parameters, dtype=dtype)
-        encoding_model = cast("BaseEncoder", self.models["encoding_model"])
+        encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
         response = encoding_model(stimulus, response, parameters, dtype=dtype)
 
         if self.models["impulse_model"] is not None:
@@ -147,7 +147,7 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
     def __init__(
         self,
         prf_model: BasePopulationResponse,
-        encoding_model: BaseEncoder | type[BaseEncoder] = PRFStimulusEncoder,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = DoGAmplitude,
         change_params: list[str] | None = None,
@@ -214,7 +214,7 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
 
         prf_model = cast("BasePopulationResponse", self.models["prf_model"])
         response = prf_model(stimulus, params_single, dtype=dtype)
-        encoding_model = cast("BaseEncoder", self.models["encoding_model"])
+        encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
         response = encoding_model(stimulus, response, parameters, dtype=dtype)
 
         if self.models["impulse_model"] is not None:

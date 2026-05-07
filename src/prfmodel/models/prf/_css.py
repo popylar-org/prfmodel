@@ -12,7 +12,7 @@ from ._gaussian import Gaussian2DPRFModel
 from ._stimulus_encoding import PRFStimulusEncoder
 
 if TYPE_CHECKING:
-    from prfmodel.models.base import BaseEncoder
+    from prfmodel.models.base import BaseStimulusEncoder
 
 
 class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
@@ -89,7 +89,7 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
     ):
-        compressive_encoder: BaseEncoder = CompressiveEncoder(
+        compressive_encoder: BaseStimulusEncoder = CompressiveEncoder(
             encoding_model=PRFStimulusEncoder(),
         )
         super().__init__(
