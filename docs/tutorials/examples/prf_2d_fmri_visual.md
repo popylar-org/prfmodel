@@ -342,7 +342,7 @@ from prfmodel.models.prf import Gaussian2DPRFModel
 # Define repetition time (TR)
 tr = 1.5
 
-# Create custom impulse response model
+# Create custom impulse model
 impulse_model = DerivativeTwoGammaImpulse(
     resolution=tr,
     offset=tr / 2.0,
@@ -714,7 +714,7 @@ The predictions by our pRF model can potentially be improved. We suggest differe
 - Increasing the number of points in the parameter grid for the grid search
 - Finetuning the pRF model parameters with stochastic gradient descent with {py:class}`prfmodel.fitters.sgd.SGDFitter`
 - Applying preprocessing steps before fitting the pRF model (e.g., high-pass filtering)
-- Optimizing the impulse response model parameters in the grid search
+- Optimizing the impulse model parameters in the grid search
 - Building a more complex pRF model (e.g., compressive spatial summation, see Kay et al., 2013)
 
 +++

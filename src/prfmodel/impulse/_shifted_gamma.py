@@ -13,7 +13,7 @@ from .base import BaseImpulse
 
 class ShiftedGammaImpulse(BaseImpulse):
     r"""
-    Shifted gamma distribution impulse response model.
+    Shifted gamma distribution impulse model.
 
     Predicts an impulse response that is a shifted gamma distribution.
     The model has three parameters: `delay` refers to the positive peak, `dispersion` to the

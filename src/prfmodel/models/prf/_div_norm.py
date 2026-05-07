@@ -232,7 +232,7 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
     encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
         An encoding model class or instance.
     impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
-        An impulse response model class or instance.
+        An impulse model class or instance.
     scaling_model : BaseScaling or type or None, default=DivNormAmplitude
         A scaling model class or instance.
 

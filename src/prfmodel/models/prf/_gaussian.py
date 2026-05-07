@@ -244,7 +244,7 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
 
     1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
     2. The encoding model encodes the response with the stimulus design.
-    3. A impulse response model generates an impulse response.
+    3. An impulse model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
     5. The scaling model modifies the convolved response.
 

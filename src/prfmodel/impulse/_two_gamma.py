@@ -13,7 +13,7 @@ from .base import BaseImpulse
 
 class TwoGammaImpulse(BaseImpulse):
     r"""
-    Weighted difference of two gamma distributions impulse response model.
+    Weighted difference of two gamma distributions impulse model.
 
     Predicts an impulse response that is the weighted difference of two gamma distributions.
     The model has five parameters: `delay` and `undershoot` refer to the positive and negative peaks of the response

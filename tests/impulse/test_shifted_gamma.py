@@ -37,12 +37,12 @@ class TestShiftedGammaImpulse(TestImpulseSetup):
 
     @pytest.fixture
     def irf_model(self):
-        """Impulse response model object."""
+        """Impulse model object."""
         return ShiftedGammaImpulse(self.duration, self.offset, self.resolution, self.norm)
 
     @pytest.fixture
     def irf_model_default(self):
-        """Impulse response model object with default parameters."""
+        """Impulse model object with default parameters."""
         default_params = {
             "delay": 6.0,
             "dispersion": 0.9,

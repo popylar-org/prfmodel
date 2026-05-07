@@ -1,6 +1,6 @@
 """Impulse response submodels.
 
-This module contains impulse response models that describe the physiological shape of neural response signals. For
+This module contains impulse models that describe the physiological shape of neural response signals. For
 example, in functional magnetic resonance imaging (fMRI), the physiological shape of the neural signal is captured by
 the hemodynamic response function (HRF). Importantly, the impulse models implemented in this module are agnostic to the
 neuroimaging method. Depending on the (default) parameters given by the user, they can be adapted to different

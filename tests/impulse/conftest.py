@@ -10,7 +10,7 @@ from tests.models.conftest import parametrize_dtype
 
 
 class TestImpulseSetup(ABC):
-    """Parameters for impulse response model tests."""
+    """Parameters for impulse model tests."""
 
     duration = 32.0
     offset = 0.0001
@@ -20,12 +20,12 @@ class TestImpulseSetup(ABC):
     @pytest.fixture
     @abstractmethod
     def irf_model(self):
-        """Impulse response model object."""
+        """Impulse model object."""
 
     @pytest.fixture
     @abstractmethod
     def irf_model_default(self):
-        """Impulse response model object with default parameters."""
+        """Impulse model object with default parameters."""
 
     def test_num_frames(self, irf_model: BaseImpulse):
         """Test that property num_frames is correct."""

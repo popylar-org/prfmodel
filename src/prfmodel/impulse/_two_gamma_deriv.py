@@ -14,7 +14,7 @@ from .base import BaseImpulse
 
 class DerivativeTwoGammaImpulse(BaseImpulse):
     r"""
-    Weighted difference of two derivative gamma distributions impulse response model.
+    Weighted difference of two derivative gamma distributions impulse model.
 
     Predicts an impulse response that is the weighted derivative difference of two gamma distributions. This
     weighted derivative difference is added to the weighted difference of the two gamma distributions.
@@ -41,7 +41,7 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
 
     See Also
     --------
-    TwoGammaImpulse : Weighted difference of two gamma distributions impulse response model.
+    TwoGammaImpulse : Weighted difference of two gamma distributions impulse model.
     gamma_density : Density of the gamma distribution.
     derivative_gamma_density : Derivative density of the gamma distribution.
 

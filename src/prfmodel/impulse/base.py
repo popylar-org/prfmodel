@@ -1,4 +1,4 @@
-"""Impulse response model base classes.
+"""Impulse model base classes.
 
 Classes in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that requires them to implement a
 :attr:`~prfmodel.utils.ModelProtocol.parameter_names` property.
@@ -23,9 +23,9 @@ from prfmodel.utils import _get_norm_fun
 
 class BaseImpulse(ModelProtocol):
     """
-    Abstract base class for impulse response models.
+    Abstract base class for impulse models.
 
-    An impulse response model takes a set of parameters as input a predicts an impulse for time frames that are
+    An impulse model takes a set of parameters as input a predicts an impulse for time frames that are
     defined by an offset, duration, and resolution.
 
     Parameters

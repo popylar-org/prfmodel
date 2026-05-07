@@ -61,7 +61,7 @@ _PARAMS: dict[str, str] = {
     ),
     "model_impulse": (
         "impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional\n"
-        "    An impulse response model class or instance. Model classes will be instantiated during\n"
+        "    An impulse model class or instance. Model classes will be instantiated during\n"
         "    initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`\n"
         "    instance with default values."
     ),

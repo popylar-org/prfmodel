@@ -31,7 +31,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     1. The center and surround 2D Gaussian population receptive field response models make separate predictions for
         the stimulus grid. The two response models have the same center but different sizes.
     2. The encoding model encodes each response with the stimulus design.
-    3. A impulse response model generates an impulse response.
+    3. An impulse model generates an impulse response.
     4. Each encoded response is convolved with the impulse response.
     5. The scaling model modifies the convolved response. By default it subtracts the surround from the center
         response after multiplying the responses with separate amplitude parameters.

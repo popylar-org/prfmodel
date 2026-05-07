@@ -42,7 +42,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
 
     1. The population receptive field response model makes a prediction for the stimulus grid.
     2. The encoding model encodes the response with the stimulus design.
-    3. The impulse response model generates an impulse response.
+    3. The impulse model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
     5. The scaling model modifies the convolved response.
 

@@ -39,7 +39,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
     3. The scaling model modifies the encoded response.
 
     In contrast to pRF models (e.g., :class:`~prfmodel.models.CanonicalPRFModel`), connective field models do not
-    require an impulse response model because it already contained in the signal of the source response.
+    require an impulse model because it already contained in the signal of the source response.
 
     """
 

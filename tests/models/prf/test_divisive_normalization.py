@@ -26,7 +26,7 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
 
     @pytest.fixture
     def impulse_model(self):
-        """Impulse response model object."""
+        """Impulse model object."""
         return DerivativeTwoGammaImpulse()
 
     @pytest.fixture
