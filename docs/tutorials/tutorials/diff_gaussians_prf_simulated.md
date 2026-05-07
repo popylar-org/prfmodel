@@ -279,7 +279,7 @@ dog_init_params
 ```
 
 ```{code-cell} ipython3
-from prfmodel.adapter import Adapter, ParameterConstraint
+from prfmodel.fitters.adapter import Adapter, ParameterConstraint
 
 # Constrain amplitude_surround < 0 during SGD
 # (|amplitude_surround| < amplitude_center is satisfied by initializing amplitude_surround near 0)

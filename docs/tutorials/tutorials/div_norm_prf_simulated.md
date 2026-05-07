@@ -276,9 +276,8 @@ dog_init_params
 ```
 
 ```{code-cell} ipython3
-from prfmodel.adapter import Adapter
-from prfmodel.adapter import ParameterConstraint
-from prfmodel.fitters.sgd import SGDFitter
+from prfmodel.fitters import SGDFitter
+from prfmodel.fitters.adapter import Adapter, ParameterConstraint
 
 dog_adapter = Adapter(transforms=[
     ParameterConstraint(["amplitude_surround"], upper=0.0),
@@ -357,7 +356,7 @@ fig.legend();
 ```{code-cell} ipython3
 from keras import ops
 from keras.optimizers import Adam
-from prfmodel.adapter import Adapter, ParameterTransform
+from prfmodel.fitters.adapter import ParameterTransform
 
 # Constrain baseline_normalization > 0 during SGD to avoid division by zero
 dn_adapter = Adapter(transforms=[

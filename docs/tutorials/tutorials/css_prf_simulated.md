@@ -263,9 +263,9 @@ In the first SGD run, we restrict `n` to be fixed to its starting value.
 
 ```{code-cell} ipython3
 from keras import ops
-from prfmodel.adapter import Adapter, ParameterTransform
 from prfmodel.models.prf import init_css_from_gaussian
 from prfmodel.fitters import SGDFitter
+from prfmodel.fitters.adapter import Adapter, ParameterTransform
 
 css_adapter = Adapter([
     ParameterTransform(["sigma", "n"], ops.log, ops.exp)
