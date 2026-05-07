@@ -55,8 +55,7 @@ class LeastSquaresFitter:
     >>> import numpy as np
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-    >>> from prfmodel.models import Gaussian2DPRFModel
-    >>> from prfmodel.fitters.linear import LeastSquaresFitter
+    >>> from prfmodel.models.prf import Gaussian2DPRFModel
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> print(stimulus)
     PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])

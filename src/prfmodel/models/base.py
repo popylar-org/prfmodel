@@ -52,7 +52,7 @@ class BasePopulationResponse(ModelProtocol, Generic[S]):
     >>> from prfmodel.utils import convert_parameters_to_tensor, get_dtype
     >>> from keras import ops
     >>> # Define custom child class
-    >>> class CustomGaussian2DResponse(BaseResponse[PRFStimulus]):
+    >>> class CustomGaussian2DResponse(BasePopulationResponse[PRFStimulus]):
     ...     @property
     ...     def parameter_names(self):
     ...         return ["mu_y", "mu_x", "sigma"]
@@ -126,7 +126,7 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S]):
     >>> from prfmodel.models.prf import encode_prf_response
     >>> from prfmodel.utils import get_dtype
     >>> from keras import ops
-    >>> class CustomPRFEncoder(BaseEncoder[PRFStimulus]):
+    >>> class CustomPRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus]):
     ...     @property
     ...     def parameter_names(self):
     ...         return []
@@ -137,7 +137,7 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S]):
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> response = np.ones((3, 101, 101))  # dummy response of shape (num_units, num_y, num_x)
     >>> params = pd.DataFrame()
-    >>> encoder = CustomPRFEncoder()
+    >>> encoder = CustomPRFStimulusEncoder()
     >>> encoded = encoder(stimulus, response, params)
     >>> print(encoded.shape)  # (num_units, num_frames)
     (3, 200)
@@ -206,13 +206,13 @@ class BaseCanonical(ModelProtocol, Generic[S]):
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> from prfmodel.stimuli import PRFStimulus
     >>> from prfmodel.models.prf import Gaussian2DPRFResponse, PRFStimulusEncoder
-    >>> class SimplePRFComposite(BaseCanonical[PRFStimulus]):
+    >>> class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
     ...     def __call__(self, stimulus, parameters, dtype=None):
-    ...         response = self.models["prf_response"](stimulus, parameters, dtype=dtype)
-    ...         return self.models["encoder"](stimulus, response, parameters, dtype=dtype)
-    >>> model = SimplePRFComposite(
-    ...     prf_response=Gaussian2DPRFResponse(),
-    ...     encoder=PRFStimulusEncoder(),
+    ...         response = self.models["prf_model"](stimulus, parameters, dtype=dtype)
+    ...         return self.models["encoding_model"](stimulus, response, parameters, dtype=dtype)
+    >>> model = CanonicalPRFModel(
+    ...     prf_model=Gaussian2DPRFResponse(),
+    ...     encoding_model=PRFStimulusEncoder(),
     ... )
     >>> model.parameter_names
     ['mu_y', 'mu_x', 'sigma']

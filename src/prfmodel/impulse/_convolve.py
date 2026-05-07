@@ -69,7 +69,6 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
     Examples
     --------
     >>> import numpy as np
-    >>> from prfmodel.models.impulse import convolve_prf_impulse_response
     >>> num_units, num_frames, hrf_len = 3, 20, 10
     >>> prf_response = np.ones((num_units, num_frames))
     >>> impulse_response = np.zeros((num_units, hrf_len))

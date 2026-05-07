@@ -84,15 +84,14 @@ class SGDFitter(BackendSGDFitter):
     >>> import numpy as np
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-    >>> from prfmodel.models import Gaussian2DPRFModel
-    >>> from prfmodel.fitters.sgd import SGDFitter
+    >>> from prfmodel.models.prf import Gaussian2DPRFModel
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> print(stimulus)
     PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> # Only fit response model
     >>> model = Gaussian2DPRFModel(
     ...     impulse_model=None,
-    ...     temporal_model=None,
+    ...     scaling_model=None,
     ... )
     >>> fitter = SGDFitter(model=model, stimulus=stimulus)
     >>> # Define start parameters

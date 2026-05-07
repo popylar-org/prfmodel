@@ -68,7 +68,6 @@ class CFStimulus(Stimulus):
     Examples
     --------
     >>> import numpy as np
-    >>> from prfmodel.stimuli.cf import CFStimulus
     >>> num_vertices, num_frames = 10, 20
     >>> distance_matrix = np.zeros((num_vertices, num_vertices))
     >>> source_response = np.ones((num_vertices, num_frames))

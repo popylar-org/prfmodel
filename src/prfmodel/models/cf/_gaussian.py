@@ -29,7 +29,7 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus]):
     --------
     >>> import numpy as np
     >>> import pandas as pd
-    >>> from prfmodel.stimuli.cf import CFStimulus
+    >>> from prfmodel.stimuli import CFStimulus
     >>> num_source_units, num_frames = 10, 20
     >>> distances = np.abs(
     ...     np.arange(num_source_units, dtype=float)[:, None]
@@ -150,8 +150,7 @@ class GaussianCFModel(CanonicalCFModel):
 
     >>> import numpy as np
     >>> import pandas as pd
-    >>> from prfmodel.models import GaussianCFModel
-    >>> from prfmodel.stimuli.cf import CFStimulus
+    >>> from prfmodel.stimuli import CFStimulus
     >>> num_source_units, num_frames = 10, 20
     >>> distances = np.abs(
     ...     np.arange(num_source_units, dtype=float)[:, None]

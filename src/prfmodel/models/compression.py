@@ -52,12 +52,12 @@ class CompressiveEncoder(BaseStimulusEncoder[S]):
 
     Examples
     --------
-    Predict a model response for multiple units.
+    Predict an encode population receptive field model response for multiple units.
 
     >>> import numpy as np
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-    >>> from prfmodel.models import CompressiveEncoder, PRFStimulusEncoder
+    >>> from prfmodel.models.prf import PRFStimulusEncoder
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> print(stimulus)
     PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])

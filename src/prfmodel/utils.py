@@ -50,7 +50,7 @@ class ModelProtocol(Protocol):
     --------
     Create a custom object class that inherits from the base class:
 
-    >>> class CustomModel(BaseModel):
+    >>> class CustomModel(ModelProtocol):
     ...     @property
     ...     def parameter_names(self):
     ...         return ["a", "b"]
