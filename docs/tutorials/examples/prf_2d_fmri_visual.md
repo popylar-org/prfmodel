@@ -250,11 +250,11 @@ print(stimulus)
 
 When printing the `stimulus` object, we can see the shapes of its attributes.
 
-We can visualize the stimulus using {py:func}`prfmodel.stimuli.animate_2d_prf_stimulus`.
+We can visualize the stimulus using {py:func}`prfmodel.plotting.animate_2d_prf_stimulus`.
 
 ```{code-cell} ipython3
 from IPython.display import HTML
-from prfmodel.stimuli import animate_2d_prf_stimulus
+from prfmodel.plotting import animate_2d_prf_stimulus
 
 ani = animate_2d_prf_stimulus(stimulus, interval=50)  # Pause 50 ms between time frames
 
