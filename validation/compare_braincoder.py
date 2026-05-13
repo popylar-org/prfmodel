@@ -13,11 +13,6 @@ encoding step.
 - braincoder: GaussianPRF2D.predict() - this class has no HRF convolution option,
   so it matches prfmodel's no-HRF setup.
 
---- Changes in this commit ---
-check_and_exit now returns bool instead of calling sys.exit (see shared.py).
-main() captures the return value and calls sys.exit explicitly at the end.
-Behaviour is identical to before.
-
 Coordinate conventions
 ----------------------
 prfmodel stimulus grid: shape (H, W, 2), last axis = [y, x] in visual-angle degrees.
@@ -54,17 +49,15 @@ except ImportError:
 tf.keras.backend.set_floatx("float32")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from shared import AMPLITUDE
-from shared import MU_X
-from shared import MU_Y
-from shared import SIGMA
-from shared import check_and_exit
+from shared import BASE_MODEL_PARAMS
+from shared import PRFStimulus
+from shared import compare_predictions
 from shared import load_stimulus
 from shared import make_params
 from shared import prfmodel_response
 
 
-def _braincoder_response(stimulus) -> np.ndarray:
+def _braincoder_response(stimulus: PRFStimulus) -> np.ndarray:
     """Compute pre-HRF response using braincoder's GaussianPRF2D.
 
     Returns a 1-D array of length n_frames.
@@ -78,10 +71,10 @@ def _braincoder_response(stimulus) -> np.ndarray:
 
     bc_params = pd.DataFrame(
         {
-            "x": [MU_X],
-            "y": [MU_Y],
-            "sd": [SIGMA],
-            "amplitude": [AMPLITUDE],
+            "x": [BASE_MODEL_PARAMS["mu_x"]],
+            "y": [BASE_MODEL_PARAMS["mu_y"]],
+            "sd": [BASE_MODEL_PARAMS["sigma"]],
+            "amplitude": [BASE_MODEL_PARAMS["amplitude"]],
             "baseline": [0.0],  # no baseline: matches prfmodel with temporal_model=None
         },
     ).astype("float32")
@@ -101,7 +94,7 @@ def main() -> None:
     params = make_params()
     ref = prfmodel_response(stimulus, params, with_hrf=False)
     bc = _braincoder_response(stimulus)
-    passed = check_and_exit(ref, bc, "braincoder (pre-HRF)")
+    passed = compare_predictions(ref, bc, "braincoder (pre-HRF)")
     sys.exit(0 if passed else 1)
 
 

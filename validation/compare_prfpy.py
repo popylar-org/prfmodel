@@ -2,6 +2,7 @@
 
 Comparison strategy
 -------------------
+--- Non HRF Comparison ---
 We compare the pre-HRF neural response: the dot product of the Gaussian RF
 with the stimulus design matrix, summed over the spatial dimensions.
 
@@ -12,7 +13,7 @@ the meaningful invariant between packages.
   normalised RF: exp(-d^2/2*sigma^2) / (2*pi*sigma^2)
 - prfpy:    gauss2D_iso_cart -> unnormalised RF: exp(-d^2/2*sigma^2)
 
---- Changes in this commit ---
+--- Comparison with including HRF ---
 Adds a second check that compares the full HRF-convolved prediction.  Both
 sides are locked to the SPM canonical double-gamma (no time-derivative
 component) by explicitly setting prfmodel's parameters to match nilearn's
@@ -62,10 +63,9 @@ except ImportError:
     sys.exit(1)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from shared import MU_X
-from shared import MU_Y
-from shared import SIGMA
-from shared import check_and_exit
+from shared import BASE_MODEL_PARAMS
+from shared import PRFStimulus
+from shared import compare_predictions
 from shared import load_stimulus
 from shared import make_params
 from shared import prfmodel_response
@@ -89,7 +89,7 @@ _SPM_HRF_PARAMS = {
 RTOL_WITH_HRF: float = 1e-3
 
 
-def _prfpy_response(stimulus) -> np.ndarray:
+def _prfpy_response(stimulus: PRFStimulus) -> np.ndarray:
     """Compute pre-HRF response using prfpy's gauss2D_iso_cart.
 
     Returns a 1-D array of length n_frames (unnormalised scale).
@@ -100,7 +100,12 @@ def _prfpy_response(stimulus) -> np.ndarray:
     x_grid = stimulus.grid[:, :, 1]  # shape (H, W)
 
     # gauss2D_iso_cart returns exp(-((x-mu_x)^2 + (y-mu_y)^2) / (2*sigma^2)) - unnormalised.
-    rf = gauss2D_iso_cart(x=x_grid, y=y_grid, mu=(MU_X, MU_Y), sigma=SIGMA)  # (H, W)
+    rf = gauss2D_iso_cart(
+        x=x_grid,
+        y=y_grid,
+        mu=(BASE_MODEL_PARAMS["mu_x"], BASE_MODEL_PARAMS["mu_y"]),
+        sigma=BASE_MODEL_PARAMS["sigma"],
+    )  # (H, W)
 
     # Project RF onto stimulus: sum over spatial dims for each time frame.
     # design shape: (T, H, W)
@@ -115,12 +120,12 @@ def _make_spm_params() -> pd.DataFrame:
     """
     return pd.DataFrame(
         {
-            "mu_x": [MU_X],
-            "mu_y": [MU_Y],
-            "sigma": [SIGMA],
+            "mu_x": [BASE_MODEL_PARAMS["mu_x"]],
+            "mu_y": [BASE_MODEL_PARAMS["mu_y"]],
+            "sigma": [BASE_MODEL_PARAMS["sigma"]],
             **{k: [v] for k, v in _SPM_HRF_PARAMS.items()},
-            "baseline": [0.0],
-            "amplitude": [1.0],
+            "baseline": [0.0],  # no baseline: prfpy does not support baseline
+            "amplitude": [1.0],  # no amplitude: prfpy returns unscaled signal
         },
     )
 
@@ -152,13 +157,13 @@ def main() -> None:
     params = make_params()
     ref = prfmodel_response(stimulus, params, with_hrf=False)
     prfpy = _prfpy_response(stimulus)
-    passed_pre = check_and_exit(ref, prfpy, "prfpy (pre-HRF)")
+    passed_pre = compare_predictions(ref, prfpy, "prfpy (pre-HRF)")
 
     # Full-prediction check: spatial encoding + SPM canonical HRF convolution.
     spm_params = _make_spm_params()
     ref_hrf = prfmodel_response(stimulus, spm_params, with_hrf=True)
     prfpy_hrf = _prfpy_response_with_hrf(_prfpy_response(stimulus))
-    passed_hrf = check_and_exit(ref_hrf, prfpy_hrf, "prfpy (with HRF)", rtol=RTOL_WITH_HRF)
+    passed_hrf = compare_predictions(ref_hrf, prfpy_hrf, "prfpy (with HRF)", rtol=RTOL_WITH_HRF)
 
     sys.exit(0 if passed_pre and passed_hrf else 1)
 

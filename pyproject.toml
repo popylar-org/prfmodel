@@ -143,7 +143,6 @@ pydocstyle.convention = "numpy"
     "A001", # Variable `copyright` is shadowing Python builtin. See https://github.com/sphinx-doc/sphinx/issues/8132
 ]
 "validation/**.py" = [
-    "ANN",   # Type annotations not required in validation scripts
     "T201",  # print() is intentional for script output
     "D103",  # Docstrings not required for script-level main()
     "E402",  # sys.path/backend setup must precede local imports

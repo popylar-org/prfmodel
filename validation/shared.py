@@ -26,12 +26,15 @@ os.environ.setdefault("KERAS_BACKEND", "tensorflow")
 
 from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.models import Gaussian2DPRFModel
+from prfmodel.stimuli import PRFStimulus
 
-MU_X: float = -2.1
-MU_Y: float = 1.45
-SIGMA: float = 1.35
-AMPLITUDE: float = 1.2
-BASELINE: float = 10.0
+BASE_MODEL_PARAMS: dict = {
+    "mu_x": -2.1,
+    "mu_y": 1.45,
+    "sigma": 1.35,
+    "amplitude": 1.2,
+    "baseline": 10.0,
+}
 
 HRF_PARAMS: dict = {
     "delay": 6.0,
@@ -46,7 +49,7 @@ HRF_PARAMS: dict = {
 RTOL: float = 1e-4
 
 
-def load_stimulus():
+def load_stimulus() -> PRFStimulus:
     """Return the standard bar stimulus (design: 200 x 101 x 101, FOV: 20 deg)."""
     return load_2d_prf_bar_stimulus()
 
@@ -55,17 +58,17 @@ def make_params() -> pd.DataFrame:
     """Return a one-row DataFrame with pre-chosen parameters."""
     return pd.DataFrame(
         {
-            "mu_x": [MU_X],
-            "mu_y": [MU_Y],
-            "sigma": [SIGMA],
+            "mu_x": [BASE_MODEL_PARAMS["mu_x"]],
+            "mu_y": [BASE_MODEL_PARAMS["mu_y"]],
+            "sigma": [BASE_MODEL_PARAMS["sigma"]],
             **{k: [v] for k, v in HRF_PARAMS.items()},
-            "baseline": [BASELINE],
-            "amplitude": [AMPLITUDE],
+            "baseline": [BASE_MODEL_PARAMS["baseline"]],
+            "amplitude": [BASE_MODEL_PARAMS["amplitude"]],
         },
     )
 
 
-def prfmodel_response(stimulus, params: pd.DataFrame, *, with_hrf: bool = False) -> np.ndarray:
+def prfmodel_response(stimulus: PRFStimulus, params: pd.DataFrame, *, with_hrf: bool = False) -> np.ndarray:
     """Return prfmodel's 2D Gaussian pRF prediction as a 1-D NumPy array.
 
     When with_hrf=False (default) the impulse and temporal models are disabled,
@@ -82,7 +85,7 @@ def normalize(arr: np.ndarray) -> np.ndarray:
     return arr / total if total > 0 else arr
 
 
-def check_and_exit(a: np.ndarray, b: np.ndarray, package: str, *, rtol: float = RTOL) -> bool:
+def compare_predictions(a: np.ndarray, b: np.ndarray, package: str, *, rtol: float = RTOL) -> bool:
     """Compare two normalised timeseries; print result and return True (pass) or False (fail).
 
     Returns bool rather than calling sys.exit so that callers running multiple
