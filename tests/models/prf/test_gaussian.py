@@ -5,8 +5,8 @@ import pandas as pd
 import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
 from scipy import stats
-from prfmodel.exceptions import BatchDimensionError
 from prfmodel.exceptions import ShapeError
+from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseStimulusEncoder
@@ -14,12 +14,10 @@ from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFResponse
 from prfmodel.models.prf import PRFStimulusEncoder
 from prfmodel.models.prf import predict_gaussian_response
-from prfmodel.models.prf._gaussian import GridMuDimensionsError
 from prfmodel.models.prf._gaussian import _check_gaussian_args
 from prfmodel.models.prf._gaussian import _expand_gaussian_args
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
-from prfmodel.stimuli import GridDimensionsError
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 from tests.models.conftest import PRFStimulusGridSetup
@@ -30,27 +28,27 @@ class TestCheckGaussianArgs:
     """Tests for _check_gaussian_args function."""
 
     def test_grid_dimensions_error(self):
-        """Test that GridDimensionsError is raised."""
+        """Test that ValueError is raised when grid axis count doesn't match last dim."""
         grid = np.ones((4, 5, 1))  # len(shape[:-1]) = 2, shape[-1] = 1
         mu = np.ones((3, 1))
         sigma = np.ones((3, 1))
-        with pytest.raises(GridDimensionsError):
+        with pytest.raises(ValueError, match="Number of grid axes"):
             _check_gaussian_args(grid, mu, sigma)
 
     def test_grid_mu_dimensions_error(self):
-        """Test that GridMuDimensionsError is raised."""
+        """Test that ShapeMismatchError is raised."""
         grid = np.ones((4, 5, 2))
         mu = np.ones((3, 3))  # mu.shape[-1] = 3, grid.shape[-1] = 2
         sigma = np.ones((3, 1))
-        with pytest.raises(GridMuDimensionsError):
+        with pytest.raises(ShapeMismatchError):
             _check_gaussian_args(grid, mu, sigma)
 
     def test_parameter_size_error(self):
-        """Test that BatchDimensionError is raised."""
+        """Test that ShapeMismatchError is raised when batch dimensions of mu and sigma differ."""
         grid = np.ones((4, 5, 2))
         mu = np.ones((2, 2))
         sigma = np.ones((3, 1))  # Mismatch in first axis
-        with pytest.raises(BatchDimensionError):
+        with pytest.raises(ShapeMismatchError):
             _check_gaussian_args(grid, mu, sigma)
 
     def test_parameter_shape_error(self):

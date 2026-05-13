@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from keras import ops
 from prfmodel._backend import gammaln
-from prfmodel.exceptions import BatchDimensionError
+from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.typing import Tensor
 
 _ARG_DIM = 2
@@ -28,17 +28,13 @@ def _check_gamma_density_input(
         shift = ops.convert_to_tensor(shift)
         _check_parameter_shape(shift, "Shift")
 
-        if shape.shape != rate.shape or shape.shape != shift.shape:
-            raise BatchDimensionError(
-                ["shape", "rate", "shift"],
-                [shape.shape, rate.shape, shift.shape],
-            )
+        if shape.shape != rate.shape:
+            raise ShapeMismatchError("shape", shape.shape, "rate", rate.shape)  # noqa: EM101 (exception literal)
+        if shape.shape != shift.shape:
+            raise ShapeMismatchError("shape", shape.shape, "shift", shift.shape)  # noqa: EM101 (exception literal)
     else:
         if shape.shape != rate.shape:
-            raise BatchDimensionError(
-                ["shape", "rate"],
-                [shape.shape, rate.shape],
-            )
+            raise ShapeMismatchError("shape", shape.shape, "rate", rate.shape)  # noqa: EM101 (exception literal)
 
         if (value.shape != () and len(value.shape) != _ARG_DIM) or (
             len(value.shape) == _ARG_DIM and value.shape[0] != 1

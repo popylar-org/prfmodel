@@ -4,43 +4,48 @@ This module contains exceptions and warnings that are mostly for internal use.
 
 """
 
-from collections.abc import Sequence
 
-
-class BatchDimensionError(Exception):
+class ShapeError(ValueError):
     """
-    Exception raised when arguments have different sizes in the batch (first) dimension.
+    Exception raised when an argument has an invalid shape.
 
     Parameters
     ----------
-    arg_names: Sequence[str]
-        Names of arguments that have different sizes in batch dimension.
-    arg_shapes: Sequence[tuple of int]
-        Shapes of arguments that have different sizes in batch dimension.
+    arg_name : str
+        Name of the argument.
+    arg_shape : tuple of int
+        Shape of the argument.
+    requirement : str
+        Description of the shape requirement that was violated (e.g. ``"must have at least 2 dimensions"``).
 
     """
 
-    def __init__(self, arg_names: Sequence[str], arg_shapes: Sequence[tuple[int, ...]]):
-        names = ", ".join(arg_names)
-        shapes = ", ".join([str(s[0]) for s in arg_shapes])
-
-        super().__init__(f"Arguments {names} have different sizes in batch (first) dimension: {shapes}")
+    def __init__(self, arg_name: str, arg_shape: tuple[int, ...], requirement: str):
+        super().__init__(f"Argument '{arg_name}' with shape {arg_shape} {requirement}")
 
 
-class ShapeError(Exception):
+class ShapeMismatchError(ValueError):
     """
-    Exception raised when an argument has less than two dimensions.
+    Exception raised when two arguments have incompatible shapes.
 
     Parameters
     ----------
-    arg_name: str
-        Argument name.
-    arg_shape: tuple of int
-        Argument shape.
+    arg1_name : str
+        Name of the first argument.
+    arg1_shape : tuple of int
+        Shape of the first argument.
+    arg2_name : str
+        Name of the second argument.
+    arg2_shape : tuple of int
+        Shape of the second argument.
 
     """
 
-    def __init__(self, arg_name: str, arg_shape: tuple[int, ...]):
-        super().__init__(
-            f"Argument {arg_name} must have at least two dimensions but has shape {arg_shape}",
-        )
+    def __init__(
+        self,
+        arg1_name: str,
+        arg1_shape: tuple[int, ...],
+        arg2_name: str,
+        arg2_shape: tuple[int, ...],
+    ):
+        super().__init__(f"Shapes of '{arg1_name}' {arg1_shape} and '{arg2_name}' {arg2_shape} do not match")

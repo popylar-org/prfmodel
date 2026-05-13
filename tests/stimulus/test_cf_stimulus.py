@@ -5,14 +5,14 @@ import pytest
 
 # Needs to be imported to recreate stimulus from repr
 from numpy import array  # noqa: F401
+from prfmodel.exceptions import ShapeError
+from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.stimuli import CFStimulus
-from prfmodel.stimuli._cf import DistanceMatrixShapeError
-from prfmodel.stimuli._cf import DistanceMatrixSourceShapeError
 
 
 def test_distance_matrix_shape_error():
-    """Test that DistanceMatrixShapeError is raised."""
-    with pytest.raises(DistanceMatrixShapeError):
+    """Test that ShapeError is raised when distance matrix is not square."""
+    with pytest.raises(ShapeError):
         _ = CFStimulus(
             distance_matrix=np.ones((3, 2)),
             source_response=np.zeros((3, 1)),
@@ -20,8 +20,8 @@ def test_distance_matrix_shape_error():
 
 
 def test_distance_matrix_source_shape_error():
-    """Test that DistanceMatrixSourceShapeError is raised."""
-    with pytest.raises(DistanceMatrixSourceShapeError):
+    """Test that ShapeMismatchError is raised."""
+    with pytest.raises(ShapeMismatchError):
         _ = CFStimulus(
             distance_matrix=np.ones((3, 3)),
             source_response=np.zeros((2, 1)),

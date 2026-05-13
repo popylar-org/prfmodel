@@ -4,15 +4,14 @@ import math
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.exceptions import BatchDimensionError
 from prfmodel.exceptions import ShapeError
+from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
-from prfmodel.stimuli import GridDimensionsError
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
@@ -22,49 +21,24 @@ from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import CanonicalPRFModel
 
 
-class GridMuDimensionsError(Exception):
-    """
-    Exception raised when the dimensions of the stimulus grid and the Gaussian mu parameter do not match.
-
-    For a stimulus grid with shape (..., m), the shape of the Gaussian mu parameter must be (num_units, m).
-
-    Parameters
-    ----------
-    grid_shape : tuple of int
-        Shape of the stimulus grid.
-    mu_shape : tuple of int
-        Shape of the Gaussian mu parameter.
-
-    """
-
-    def __init__(self, grid_shape: tuple[int, ...], mu_shape: tuple[int, ...]):
-        super().__init__(f"For 'grid' {grid_shape} and 'mu' {mu_shape} do not match")
-
-
 def _check_gaussian_args(grid: Tensor, mu: Tensor, sigma: Tensor) -> None:
-    if not len(grid.shape[:-1]) == grid.shape[-1]:
-        raise GridDimensionsError(grid.shape)
+    num_grid_axes = len(grid.shape[:-1])
+    last_dim = grid.shape[-1]
+    if num_grid_axes != last_dim:
+        msg = f"Number of grid axes {num_grid_axes} does not match last grid dimension {last_dim}"
+        raise ValueError(msg)
 
     if len(mu.shape) < _EXPECTED_NDIM:
-        raise ShapeError(
-            arg_name="mu",
-            arg_shape=mu.shape,
-        )
+        raise ShapeError("mu", mu.shape, f"must have at least {_EXPECTED_NDIM} dimensions")  # noqa: EM101 (exception literal)
 
     if len(sigma.shape) < _EXPECTED_NDIM:
-        raise ShapeError(
-            arg_name="sigma",
-            arg_shape=sigma.shape,
-        )
+        raise ShapeError("sigma", sigma.shape, f"must have at least {_EXPECTED_NDIM} dimensions")  # noqa: EM101 (exception literal)
 
     if grid.shape[-1] != mu.shape[-1]:
-        raise GridMuDimensionsError(grid.shape, mu.shape)
+        raise ShapeMismatchError("grid", grid.shape, "mu", mu.shape)  # noqa: EM101 (exception literal)
 
     if mu.shape[0] != sigma.shape[0]:
-        raise BatchDimensionError(
-            arg_names=("mu", "sigma"),
-            arg_shapes=(mu.shape, sigma.shape),
-        )
+        raise ShapeMismatchError("mu", mu.shape, "sigma", sigma.shape)  # noqa: EM101 (exception literal)
 
 
 def _expand_gaussian_args(grid: Tensor, mu: Tensor, sigma: Tensor) -> tuple[Tensor, Tensor, Tensor]:
@@ -111,14 +85,13 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
 
     Raises
     ------
-    BatchDimensionError
-        If `mu` and `sigma` have batch (first) dimensions with different sizes.
-    GridDimensionsError
-        If the grid has mismatching dimensions.
-    GridMuDimensionsError
-        If the grid and mu dimensions do not match.
-    ParameterShapeError
+    ShapeMismatchError
+        If `mu` and `sigma` have batch (first) dimensions with different sizes, or if the grid and mu dimensions
+        do not match.
+    ShapeError
         If `mu` or `sigma` have less than two dimensions.
+    ValueError
+        If the grid's spatial axes count does not match its last-dimension value.
 
     Examples
     --------

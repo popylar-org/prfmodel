@@ -74,10 +74,7 @@ class DivNormAmplitude(BaseScaling):
         inputs = ops.convert_to_tensor(inputs, dtype=dtype)
 
         if len(inputs.shape) < _EXPECTED_NDIM:
-            raise ShapeError(
-                arg_name="inputs",
-                arg_shape=inputs.shape,
-            )
+            raise ShapeError("inputs", inputs.shape, f"must have at least {_EXPECTED_NDIM} dimensions")  # noqa: EM101 (exception literal)
 
         amplitude_activation = convert_parameters_to_tensor(parameters[["amplitude_activation"]], dtype=dtype)
         b = convert_parameters_to_tensor(parameters[["baseline_activation"]], dtype=dtype)

@@ -5,15 +5,14 @@ import pytest
 
 # Needs to be imported to recreate stimulus from repr
 from numpy import array  # noqa: F401
+from prfmodel.exceptions import ShapeError
+from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.stimuli import PRFStimulus
-from prfmodel.stimuli._prf import DimensionLabelsError
-from prfmodel.stimuli._prf import GridDesignShapeError
-from prfmodel.stimuli._prf import GridDimensionsError
 
 
 def test_grid_design_shape_error():
-    """Check that shape mismatches are detected correctly by PRFStimulus."""
-    with pytest.raises(GridDesignShapeError):
+    """Test that shape mismatches are detected correctly by PRFStimulus."""
+    with pytest.raises(ShapeMismatchError):
         _ = PRFStimulus(
             design=np.zeros((1, 2)),
             grid=np.zeros((1, 1)),
@@ -21,8 +20,8 @@ def test_grid_design_shape_error():
 
 
 def test_grid_dimension_error():
-    """Check that shape mismatches are detected correctly by PRFStimulus."""
-    with pytest.raises(GridDimensionsError):
+    """Test that grid axis-count vs last-dim mismatches are detected correctly by PRFStimulus."""
+    with pytest.raises(ShapeError):
         _ = PRFStimulus(
             design=np.zeros((1, 1, 2)),
             grid=np.zeros((1, 2, 1)),
@@ -30,8 +29,8 @@ def test_grid_dimension_error():
 
 
 def test_dimension_labels_error():
-    """Check that dimension mismatches are detected correctly by PRFStimulus."""
-    with pytest.raises(DimensionLabelsError):
+    """Test that label-count vs grid-dim mismatches are detected correctly by PRFStimulus."""
+    with pytest.raises(ValueError, match="dimension_labels"):
         _ = PRFStimulus(
             design=np.zeros((1, 2)),
             grid=np.zeros((2, 1)),

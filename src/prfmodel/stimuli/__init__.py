@@ -6,13 +6,11 @@ field (pRF) models and connective field (CF) models are implemented.
 """
 
 from ._cf import CFStimulus
-from ._prf import GridDimensionsError
 from ._prf import PRFStimulus
 from .base import Stimulus
 
 __all__ = [
     "CFStimulus",
-    "GridDimensionsError",
     "PRFStimulus",
     "Stimulus",
 ]

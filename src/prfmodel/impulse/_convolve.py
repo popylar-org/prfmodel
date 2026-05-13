@@ -2,7 +2,7 @@
 
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.exceptions import BatchDimensionError
+from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 
@@ -63,7 +63,7 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
 
     Raises
     ------
-    BatchDimensionError
+    ShapeMismatchError
         If `prf_response` and `impulse_response` have unit (first) dimensions with different sizes.
 
     Examples
@@ -83,10 +83,7 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
     impulse_response = ops.convert_to_tensor(impulse_response, dtype=dtype)
 
     if prf_response.shape[0] != impulse_response.shape[0]:
-        raise BatchDimensionError(
-            arg_names=("prf_response", "impulse_response"),
-            arg_shapes=(prf_response.shape, impulse_response.shape),
-        )
+        raise ShapeMismatchError("prf_response", prf_response.shape, "impulse_response", impulse_response.shape)  # noqa: EM101 (exception literal)
 
     # Flip, pad, and transpose responses
     prf_response_transposed, impulse_response_transposed = _prepare_prf_impulse_response(

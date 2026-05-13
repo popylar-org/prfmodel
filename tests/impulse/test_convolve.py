@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-from prfmodel.exceptions import BatchDimensionError
+from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse._convolve import _pad_response
 from prfmodel.impulse._convolve import _prepare_prf_impulse_response
@@ -56,5 +56,5 @@ def test_convolve_prf_impulse_response():
 
 def test_convolve_prf_impulse_response_batch_dimension_error():
     """Test that convolve_prf_impulse_response raises error when batch dimension does not match."""
-    with pytest.raises(BatchDimensionError):
+    with pytest.raises(ShapeMismatchError):
         _ = convolve_prf_impulse_response(np.ones((20, 10)), np.ones((10, 3)))

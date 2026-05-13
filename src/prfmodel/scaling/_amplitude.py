@@ -65,10 +65,7 @@ class BaselineAmplitude(BaseScaling):
         inputs = ops.convert_to_tensor(inputs, dtype=dtype)
 
         if len(inputs.shape) != _EXPECTED_NDIM:
-            raise ShapeError(
-                arg_name="inputs",
-                arg_shape=inputs.shape,
-            )
+            raise ShapeError("inputs", inputs.shape, f"must have exactly {_EXPECTED_NDIM} dimensions")  # noqa: EM101 (exception literal)
 
         baseline = convert_parameters_to_tensor(parameters[["baseline"]], dtype=dtype)
         amplitude = convert_parameters_to_tensor(parameters[["amplitude"]], dtype=dtype)

@@ -3,28 +3,11 @@
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
-
-
-class ResponseDesignShapeError(Exception):
-    """
-    Exception raised when the shapes of the model response and stimulus design do not match.
-
-    Both must have the same shape after the first dimension.
-
-    Parameters
-    ----------
-    response_shape : tuple of int
-        Shape of the model response array.
-    design_shape : tuple of int
-        Shape of the design array.
-    """
-
-    def __init__(self, response_shape: tuple[int, ...], design_shape: tuple[int, ...]):
-        super().__init__(f"Shapes of 'response' {response_shape} and 'design' {design_shape} do not match")
 
 
 @doc
@@ -52,7 +35,7 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
 
     Raises
     ------
-    ResponseDesignShapeError
+    ShapeMismatchError
         If the shape of the model response and the stimulus design do not match.
 
     Examples
@@ -93,7 +76,7 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
     design = ops.convert_to_tensor(design, dtype)
 
     if response.shape[1:] != design.shape[1:]:
-        raise ResponseDesignShapeError(response.shape, design.shape)
+        raise ShapeMismatchError("response", response.shape, "design", design.shape)  # noqa: EM101 (exception literal)
 
     design = ops.expand_dims(design, 0)
     response = ops.expand_dims(response, 1)

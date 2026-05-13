@@ -11,7 +11,7 @@ from scipy import stats
 from prfmodel.density import derivative_gamma_density
 from prfmodel.density import gamma_density
 from prfmodel.density import shifted_gamma_density
-from prfmodel.exceptions import BatchDimensionError
+from prfmodel.exceptions import ShapeMismatchError
 
 
 class TestGammaDensitySetup:
@@ -180,7 +180,7 @@ class TestGammaDensity(TestGammaDensitySetup):
         shape = np.ones((3, 1))
         rate = np.ones((2, 1))
 
-        with pytest.raises(BatchDimensionError):
+        with pytest.raises(ShapeMismatchError):
             gamma_density(frames, shape, rate)
 
 
@@ -250,7 +250,7 @@ class TestShiftedGammaDensity(TestGammaDensitySetup):
         rate = np.ones((3, 1))
         shift = np.ones((2, 1))
 
-        with pytest.raises(BatchDimensionError):
+        with pytest.raises(ShapeMismatchError):
             shifted_gamma_density(frames, shape, rate, shift)
 
 

@@ -2,45 +2,11 @@
 
 from dataclasses import dataclass
 import numpy as np
+from prfmodel.exceptions import ShapeError
+from prfmodel.exceptions import ShapeMismatchError
 from .base import Stimulus
 
 _DISTANCE_MATRIX_DIMENSIONS = 2
-
-
-class DistanceMatrixShapeError(Exception):
-    """
-    Exception raise when distance matrix is not a matrix.
-
-    Parameters
-    ----------
-    distance_matrix_shape : tuple of int
-        Shape of the distance matrix.
-
-    """
-
-    def __init__(self, distance_matrix_shape: tuple[int, ...]):
-        super().__init__(
-            f"'distance_matrix' must be a matrix but has shape {distance_matrix_shape}",
-        )
-
-
-class DistanceMatrixSourceShapeError(Exception):
-    """
-    Exception raised when the shapes of the distance matrix and source response do not match.
-
-    Parameters
-    ----------
-    distance_matrix_shape : tuple of int
-        Shape of the distance matrix.
-    source_response_shape : tuple of int
-        Shape of the source response array.
-
-    """
-
-    def __init__(self, distance_matrix_shape: tuple[int, ...], source_response_shape: tuple[int, ...]):
-        super().__init__(
-            f"'Shapes of 'distance_matrix' {distance_matrix_shape} and 'source_response' {source_response_shape} do not match",  # noqa: E501 (line too long)
-        )
 
 
 @dataclass(frozen=True, eq=False)
@@ -59,9 +25,9 @@ class CFStimulus(Stimulus):
 
     Raises
     ------
-    DistanceMatrixShapeError
-        If the distance matrix has more or less than two dimensions or dimensions of different size.
-    DistanceMatrixSourceShapeError
+    ShapeError
+        If the distance matrix is not a square 2D matrix.
+    ShapeMismatchError
         If the source response has a first dimension with a different size than the number of rows or columns in the
         distance matrix.
 
@@ -91,8 +57,13 @@ class CFStimulus(Stimulus):
             len(self.distance_matrix.shape) != _DISTANCE_MATRIX_DIMENSIONS
             or self.distance_matrix.shape[0] != self.distance_matrix.shape[1]
         ):
-            raise DistanceMatrixShapeError(self.distance_matrix.shape)
+            raise ShapeError("distance_matrix", self.distance_matrix.shape, "must be a square matrix")  # noqa: EM101 (exception literal)
 
     def _check_distance_matrix_source_shape(self) -> None:
         if not self.distance_matrix.shape[0] == self.source_response.shape[0]:
-            raise DistanceMatrixSourceShapeError(self.distance_matrix.shape, self.source_response.shape)
+            raise ShapeMismatchError(
+                "distance_matrix",  # noqa: EM101 (exception literal)
+                self.distance_matrix.shape,
+                "source_response",
+                self.source_response.shape,
+            )

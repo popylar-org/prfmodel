@@ -3,77 +3,9 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
 import numpy as np
+from prfmodel.exceptions import ShapeError
+from prfmodel.exceptions import ShapeMismatchError
 from .base import Stimulus
-
-
-class GridDesignShapeError(Exception):
-    """
-    Exception raised when the shapes of the design and grid do not match.
-
-    Parameters
-    ----------
-    design_shape : tuple of int
-        Shape of the design array.
-    grid_shape : tuple of int
-        Shape of the grid array.
-
-    """
-
-    def __init__(self, design_shape: tuple[int, ...], grid_shape: tuple[int, ...]):
-        super().__init__(f"Shapes of 'design' {design_shape} and 'grid' {grid_shape} do not match")
-
-
-class GridDimensionsError(Exception):
-    """
-    Exception raised when number of grid dimensions except for the last does not match last grid dimension size.
-
-    Parameters
-    ----------
-    grid_shape: tuple of int
-        Shape of the grid array.
-
-    """
-
-    def __init__(self, grid_shape: tuple[int, ...]) -> None:
-        num_grid_axes = len(grid_shape[:-1])
-        super().__init__(
-            f"The number of dimensions in 'grid' {num_grid_axes} does not match its last dimension {grid_shape[-1]}",
-        )
-
-
-class DimensionLabelsError(Exception):
-    """
-    Exception raised when the number of dimensions does not match the grid's last dimension.
-
-    Parameters
-    ----------
-    dimensions_len : int
-        Length of the dimensions sequence.
-    grid_dim : int
-        Size of the last dimension of the grid.
-
-    """
-
-    def __init__(self, dimensions_len: int, grid_dim: int):
-        super().__init__(f"Length of 'dimensions' {dimensions_len} does not match last dimension of 'grid' {grid_dim}")
-
-
-class StimulusDimensionError(Exception):
-    """Exception raised when Stimulus does not have the right number of dimensions.
-
-    The dimension for the frames is ignored.
-
-    Parameters
-    ----------
-    actual : int
-        Number of dimensions in the stimulus grid.
-    expected : int
-        Number of expected dimensions in the stimulus grid.
-
-    """
-
-    def __init__(self, actual: int, expected: int):
-        super().__init__(f"Stimulus frames have {actual} dimensions, but expected {expected}.")
 
 
 @dataclass(frozen=True, eq=False)
@@ -95,12 +27,12 @@ class PRFStimulus(Stimulus):
 
     Raises
     ------
-    GridDesignShapeError
+    ShapeError
+        If the number of grid axes (excluding the last) does not match the last grid dimension.
+    ShapeMismatchError
         If the design and grid dimensions do not match.
-    GridDimensionsError
-        If the number of dimensions of the grid except the last does not match the size of the last grid dimension.
-    DimensionLabelsError
-        If the number of dimensions does not match the grid's last dimension.
+    ValueError
+        If the number of dimension labels does not match the last grid dimension.
 
     Notes
     -----
@@ -144,15 +76,21 @@ class PRFStimulus(Stimulus):
 
     def _check_grid_design_shape(self) -> None:
         if not self.design.shape[1:] == self.grid.shape[:-1]:
-            raise GridDesignShapeError(self.design.shape, self.grid.shape)
+            raise ShapeMismatchError("design", self.design.shape, "grid", self.grid.shape)  # noqa: EM101 (exception literal)
 
     def _check_grid_dimensions(self) -> None:
-        if not len(self.grid.shape[:-1]) == self.grid.shape[-1]:
-            raise GridDimensionsError(self.grid.shape)
+        num_grid_axes = len(self.grid.shape[:-1])
+        last_dim = self.grid.shape[-1]
+        if num_grid_axes != last_dim:
+            raise ShapeError("grid", self.grid.shape, f"must have axes matching the last dimension {last_dim}")  # noqa: EM101 (exception literal)
 
     def _check_dimension_labels(self) -> None:
-        if self.dimension_labels is not None and not self.grid.shape[-1] == len(self.dimension_labels):
-            raise DimensionLabelsError(len(self.dimension_labels), self.grid.shape[-1])
+        if self.dimension_labels is not None and self.grid.shape[-1] != len(self.dimension_labels):
+            msg = (
+                f"Length of 'dimension_labels' {len(self.dimension_labels)} does not match "
+                f"last grid dimension {self.grid.shape[-1]}"
+            )
+            raise ValueError(msg)
 
     @classmethod
     def create_2d_bar_stimulus(  # noqa: PLR0913 (too many arguments)
