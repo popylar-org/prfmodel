@@ -36,21 +36,10 @@ jobs:
         with:
           ref: ${{ inputs.branch != '' && inputs.branch || github.ref }}
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v5
+     - uses: ./.github/actions/setup-python-cached
         with:
           python-version: '3.12'
-
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-3.12-validate-${{ inputs.package }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-3.12-validate-${{ inputs.package }}-
-
-      - name: Install prfmodel
-        run: pip install -e .[tensorflow]
+          extras: tensorflow
 
       # Package-specific installs
       - name: Install prfpy
