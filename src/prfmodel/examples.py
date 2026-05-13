@@ -2,7 +2,7 @@
 
 import io
 import os
-import urllib
+import urllib.request
 import zipfile
 from collections.abc import Sequence
 from importlib.resources import files
