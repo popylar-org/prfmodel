@@ -48,10 +48,15 @@ _PARAMS: dict[str, str] = {
         "    :func:`prfmodel.utils.get_dtype`."
     ),
     "model_cf": ("cf_model : BasePopulationResponse\n    A connective field response model instance."),
-    "model_encoding": (
+    "model_encoding_cf": (
+        "encoding_model : BaseStimulusEncoder or type, default=CFStimulusEncoder\n"
+        "    An stimulus encoding model class or instance. Model classes will be instantiated during initialization.\n"
+        "    The default creates a :class:`~prfmodel.models.cf.CFStimulusEncoder` instance."
+    ),
+    "model_encoding_prf": (
         "encoding_model : BaseStimulusEncoder or type, default=PRFStimulusEncoder\n"
-        "    An encoding model class or instance. Model classes will be instantiated during initialization. The\n"
-        "    default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance."
+        "    An stimulus encoding model class or instance. Model classes will be instantiated during initialization.\n"
+        "    The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance."
     ),
     "model_fitter": (
         "model : BaseCanonical\n"
@@ -62,14 +67,20 @@ _PARAMS: dict[str, str] = {
     "model_impulse": (
         "impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional\n"
         "    An impulse model class or instance. Model classes will be instantiated during\n"
-        "    initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`\n"
+        "    initialization. The default creates a :class:`~prfmodel.impulse.DerivativeTwoGammaImpulse`\n"
         "    instance with default values."
     ),
     "model_prf": ("prf_model : BasePopulationResponse\n    A population receptive field response model instance."),
     "model_scaling": (
         "scaling_model : BaseScaling or type or None, default=BaselineAmplitude, optional\n"
         "    A scaling model class or instance. Model classes will be instantiated during initialization.\n"
-        "    The default creates a :class:`~prfmodel.models.scaling.BaselineAmplitude` instance."
+        "    The default creates a :class:`~prfmodel.scaling.BaselineAmplitude` instance."
+    ),
+    "model_regressors": (
+        "regressors_model : BaseRegressors or list of BaseRegressors or RegressorsList or None, default=None, optional\n"  # noqa: E501 (line too long)
+        "    A regressor model instance, a list of regressor model instances, or `None`. When a list is\n"
+        "    provided, it is wrapped in a :class:`~prfmodel.regressors.RegressorsList` and its contributions\n"
+        "    are summed. The regressor contribution is added after the scaling model."
     ),
     "parameters": (
         "parameters : pandas.DataFrame\n"
@@ -78,6 +89,17 @@ _PARAMS: dict[str, str] = {
     ),
     "predicted_response_2d": (
         "Tensor\n    The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`."
+    ),
+    "regressors": (
+        "regressors : pandas.DataFrame\n"
+        "    Regressor design with shape `(num_frames, num_regressors)`. Must contain a column for each name in\n"
+        "    :attr:`names`; extra columns are ignored."
+    ),
+    "regressors_canonical": (
+        "regressors : pandas.DataFrame, optional\n"
+        "    Regressor design data. Required when the canonical model has a regressors model configured.\n"
+        "    A single data frame with shape `(num_frames, num_regressors)` whose columns cover the names\n"
+        "    required by every configured regressor model. Extra columns are ignored."
     ),
     "stimulus": ("stimulus : Stimulus\n    Stimulus object."),
     "stimulus_cf": ("stimulus : CFStimulus\n    Connective field stimulus object."),

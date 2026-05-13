@@ -101,13 +101,14 @@ class LeastSquaresFitter:
     def dtype(self, value: str | None) -> None:
         self._dtype = get_dtype(value)
 
-    def fit(
+    def fit(  # noqa: PLR0913 (too many arguments)
         self,
         data: Tensor,
         parameters: pd.DataFrame,
         slope_name: str | list[str],
         intercept_name: str | None = None,
         batch_size: int | None = None,
+        regressors: pd.DataFrame | None = None,
     ) -> tuple[LeastSquaresHistory, pd.DataFrame]:
         """
         Fit a population receptive field model to target data.
@@ -128,6 +129,10 @@ class LeastSquaresFitter:
             If `None`, no intercept is estimated.
         batch_size : int, optional
             Number of data batches to fit at the same time. If `None` (the default), all batches are fit at once.
+        regressors : pandas.DataFrame, optional
+            Regressor design data. Required when the model has a ``regressors_model`` configured.
+            A single data frame with shape `(num_frames, num_regressors)` whose columns cover the names required
+            by every configured regressor model; extra columns are ignored.
 
         Returns
         -------
@@ -164,6 +169,7 @@ class LeastSquaresFitter:
                 new_parameters.iloc[start:end],
                 slope_names,
                 intercept_name,
+                regressors,
             )
             new_parameters.iloc[start:end] = batch_params
             residual_sums.append(batch_residuals)
@@ -176,6 +182,7 @@ class LeastSquaresFitter:
         parameter_batch: pd.DataFrame,
         slope_names: list[str],
         intercept_name: str | None,
+        regressors: pd.DataFrame | None,
     ) -> tuple[np.ndarray, pd.DataFrame]:
         """Fit a single data batch and return updated parameters."""
         data_batch = ops.convert_to_tensor(data_batch, dtype=self.dtype)
@@ -194,7 +201,7 @@ class LeastSquaresFitter:
 
         for name in slope_names:
             parameter_batch[name] = 1.0
-            predictions = self.model(self.stimulus, parameter_batch, self.dtype)
+            predictions = self.model(self.stimulus, parameter_batch, regressors=regressors, dtype=self.dtype)
             x_list.append(predictions)
             parameter_batch[name] = 0.0
 

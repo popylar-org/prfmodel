@@ -120,6 +120,7 @@ class GridFitter:
         data: Tensor,
         parameter_values: dict[str, Tensor | np.ndarray],
         batch_size: int | None = None,
+        regressors: pd.DataFrame | None = None,
     ) -> tuple[GridHistory, pd.DataFrame]:
         """
         Fit a population receptive field model to target data.
@@ -135,6 +136,9 @@ class GridFitter:
         batch_size : int, optional
             Number of parameter combinations to evaluate at the same time. If `None` (the default), all combinations
             are evaluated at once.
+        regressors : pandas.DataFrame, optional
+            Runtime regressor design data forwarded to every model prediction call. Must be provided when the model
+            has a ``regressors_model`` configured.
 
         Returns
         -------
@@ -162,7 +166,7 @@ class GridFitter:
 
         with tqdm(param_iter, desc="Processing parameter grid", total=num_batches) as pbar:
             for batch in pbar:
-                self._evaluate_parameter_batch(batch, parameter_names, data, best_params, best_loss)
+                self._evaluate_parameter_batch(batch, parameter_names, data, best_params, best_loss, regressors)
                 pbar.set_postfix({"loss": float(best_loss.mean())})
 
         if not all(ops.isfinite(best_loss)):
@@ -172,20 +176,21 @@ class GridFitter:
         best_params_df = pd.DataFrame(best_params.T, columns=parameter_names)
         return GridHistory({"loss": best_loss}), best_params_df
 
-    def _evaluate_parameter_batch(
+    def _evaluate_parameter_batch(  # noqa: PLR0913 (too many arguments)
         self,
         batch: list[tuple],
         parameter_names: list[str],
         data: Tensor,
         best_params: np.ndarray,
         best_loss: np.ndarray,
+        regressors: pd.DataFrame | None,
     ) -> None:
         """Evaluate a batch of parameter combinations and update best parameters if improved."""
         params = np.stack(batch).T
         param_dict = ParamsDict(dict(zip(parameter_names, params, strict=True)))
 
         # We ignore the arg type here because a ParamsDict is used internally (instead of pandas.DataFrame)
-        pred = ops.expand_dims(self.model(self.stimulus, param_dict), 1)  # type: ignore[arg-type]
+        pred = ops.expand_dims(self.model(self.stimulus, param_dict, regressors=regressors), 1)  # type: ignore[arg-type]
         losses = self.loss(data, pred)
 
         min_loss = ops.convert_to_numpy(ops.amin(losses, axis=0))

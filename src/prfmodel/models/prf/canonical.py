@@ -14,6 +14,8 @@ from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.regressors import RegressorsList
+from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling import DoGAmplitude
 from prfmodel.scaling.base import BaseScaling
@@ -21,6 +23,26 @@ from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from ._stimulus_encoding import PRFStimulusEncoder
+
+
+def _normalize_regressors_model(
+    regressors_model: BaseRegressors | list[BaseRegressors] | None,
+) -> BaseRegressors | None:
+    if isinstance(regressors_model, list):
+        return RegressorsList(regressors_model)
+    return regressors_model
+
+
+def _validate_regressors_argument(
+    regressors_model: object | None,
+    regressors: pd.DataFrame | None,
+) -> None:
+    if regressors_model is None and regressors is not None:
+        msg = "'regressors' was provided but 'regressors_model' is not configured on this model"
+        raise ValueError(msg)
+    if regressors_model is not None and regressors is None:
+        msg = "'regressors' must be provided when 'regressors_model' is configured on this model"
+        raise ValueError(msg)
 
 
 class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
@@ -32,19 +54,21 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
     Parameters
     ----------
     %(model_prf)s
-    %(model_encoding)s
+    %(model_encoding_prf)s
     %(model_impulse)s
     %(model_scaling)s
+    %(model_regressors)s
 
     Notes
     -----
-    The simple composite model follows five steps:
+    The canonical model follows the following steps:
 
     1. The population receptive field response model makes a prediction for the stimulus grid.
     2. The encoding model encodes the response with the stimulus design.
     3. The impulse model generates an impulse response.
     4. The encoded response is convolved with the impulse response.
     5. The scaling model modifies the convolved response.
+    6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 
     """
 
@@ -55,6 +79,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
         encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         if encoding_model is not None and isinstance(encoding_model, type):
             encoding_model = encoding_model()
@@ -65,11 +90,14 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
         if scaling_model is not None and isinstance(scaling_model, type):
             scaling_model = scaling_model()
 
+        regressors_model = _normalize_regressors_model(regressors_model)
+
         super().__init__(
             prf_model=prf_model,
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             scaling_model=scaling_model,
+            regressors_model=regressors_model,
         )
 
     @doc
@@ -77,6 +105,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
         self,
         stimulus: PRFStimulus,
         parameters: pd.DataFrame,
+        regressors: pd.DataFrame | None = None,
         dtype: str | None = None,
     ) -> Tensor:
         """
@@ -86,6 +115,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
         ----------
         %(stimulus_prf)s
         %(parameters)s
+        %(regressors_canonical)s
         %(dtype)s
 
         Returns
@@ -94,6 +124,8 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
 
         """
         dtype = get_dtype(dtype)
+        _validate_regressors_argument(self.models["regressors_model"], regressors)
+
         prf_model = cast("BasePopulationResponse", self.models["prf_model"])
         response = prf_model(stimulus, parameters, dtype=dtype)
         encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
@@ -107,6 +139,10 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
         if self.models["scaling_model"] is not None:
             temporal_model = cast("BaseScaling", self.models["scaling_model"])
             response = temporal_model(response, parameters, dtype=dtype)
+
+        if self.models["regressors_model"] is not None and regressors is not None:
+            regressors_model = cast("BaseRegressors", self.models["regressors_model"])
+            response = response + regressors_model(regressors, parameters, dtype=dtype)
 
         return response
 
@@ -125,9 +161,10 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
     Parameters
     ----------
     %(model_prf)s
-    %(model_encoding)s
+    %(model_encoding_prf)s
     %(model_impulse)s
     %(model_scaling)s
+    %(model_regressors)s
     change_params : list[str], default=["sigma"]
         Names of the parameters that differ between the center and surround responses.
         All entries must be present in ``prf_model.parameter_names``.
@@ -141,15 +178,17 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
     2. The encoding model encodes each response with the stimulus design.
     3. Each encoded response is optionally convolved with an impulse response.
     4. The two responses are stacked and combined by the scaling model.
+    5. The regressors model (optional) adds a linear combination of fixed regressors to the combined response.
 
     """
 
-    def __init__(
+    def __init__(  # noqa: PLR0913 (too many arguments)
         self,
         prf_model: BasePopulationResponse,
         encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = DoGAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
         change_params: list[str] | None = None,
     ):
         if encoding_model is not None and isinstance(encoding_model, type):
@@ -160,6 +199,8 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
 
         if scaling_model is not None and isinstance(scaling_model, type):
             scaling_model = scaling_model()
+
+        regressors_model = _normalize_regressors_model(regressors_model)
 
         if change_params is None:
             change_params = ["sigma"]
@@ -179,6 +220,7 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             scaling_model=scaling_model,
+            regressors_model=regressors_model,
         )
 
     @property
@@ -250,6 +292,7 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
         self,
         stimulus: PRFStimulus,
         parameters: pd.DataFrame,
+        regressors: pd.DataFrame | None = None,
         dtype: str | None = None,
     ) -> Tensor:
         """
@@ -262,6 +305,7 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
         ----------
         %(stimulus_prf)s
         %(parameters)s
+        %(regressors_canonical)s
         %(dtype)s
 
         Returns
@@ -270,11 +314,18 @@ class CenterSurroundPRFModel(BaseCanonical[PRFStimulus]):
 
         """
         dtype = get_dtype(dtype)
+        _validate_regressors_argument(self.models["regressors_model"], regressors)
+
         stacked = self.predict_responses(stimulus, parameters, dtype=dtype)
 
         if self.models["scaling_model"] is not None:
             temporal_model = cast("BaseScaling", self.models["scaling_model"])
-            return temporal_model(stacked, parameters, dtype=dtype)
+            response = temporal_model(stacked, parameters, dtype=dtype)
+        else:
+            response = stacked[:, 0] - stacked[:, 1]
 
-        # When scaling_model=None, return a simple subtraction (resp1 - resp2)
-        return stacked[:, 0] - stacked[:, 1]
+        if self.models["regressors_model"] is not None and regressors is not None:
+            regressors_model = cast("BaseRegressors", self.models["regressors_model"])
+            response = response + regressors_model(regressors, parameters, dtype=dtype)
+
+        return response

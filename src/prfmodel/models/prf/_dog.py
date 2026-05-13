@@ -4,6 +4,7 @@ import pandas as pd
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import DoGAmplitude
 from prfmodel.scaling.base import BaseScaling
 from ._gaussian import Gaussian2DPRFResponse
@@ -20,13 +21,16 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
 
     Parameters
     ----------
-    %(model_encoding)s
+    %(model_encoding_prf)s
     %(model_impulse)s
-    %(model_scaling)s
+    scaling_model : BaseScaling or type or None, default=DoGAmplitude, optional
+        A scaling model class or instance. Model classes will be instantiated during initialization.
+        The default creates a :class:`~prfmodel.scaling.DoGAmplitude` instance.
+    %(model_regressors)s
 
     Notes
     -----
-    The simple composite model follows five steps [1]_:
+    The canonical DoG model follows the following steps [1]_:
 
     1. The center and surround 2D Gaussian population receptive field response models make separate predictions for
         the stimulus grid. The two response models have the same center but different sizes.
@@ -35,6 +39,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     4. Each encoded response is convolved with the impulse response.
     5. The scaling model modifies the convolved response. By default it subtracts the surround from the center
         response after multiplying the responses with separate amplitude parameters.
+    6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 
     Let :math:`p_{\text{center}}(t)` and :math:`p_{\text{surround}}(t)` be the predicted temporal
     responses for the center and surround Gaussians. With :math:`a_c = \text{amplitude\_center}`,
@@ -141,12 +146,14 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
         encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = DoGAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
             prf_model=Gaussian2DPRFResponse(),
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             scaling_model=scaling_model,
+            regressors_model=regressors_model,
             change_params=["sigma"],
         )
 

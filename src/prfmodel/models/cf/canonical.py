@@ -10,6 +10,8 @@ from prfmodel._docstring import doc
 from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.regressors import RegressorsList
+from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
@@ -27,16 +29,18 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
     Parameters
     ----------
     %(model_cf)s
-    %(model_encoding)s
+    %(model_encoding_cf)s
     %(model_scaling)s
+    %(model_regressors)s
 
     Notes
     -----
-    The simple composite model follows three steps:
+    The canonical model follows the following steps:
 
     1. The connective field response model makes a prediction for the stimulus distance matrix.
     2. The connective field response is encoded with the source response.
     3. The scaling model modifies the encoded response.
+    4. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 
     In contrast to pRF models (e.g., :class:`~prfmodel.models.CanonicalPRFModel`), connective field models do not
     require an impulse model because it already contained in the signal of the source response.
@@ -48,6 +52,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
         cf_model: BasePopulationResponse,
         encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = CFStimulusEncoder,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         if encoding_model is not None and isinstance(encoding_model, type):
             encoding_model = encoding_model()
@@ -55,10 +60,14 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
         if scaling_model is not None and isinstance(scaling_model, type):
             scaling_model = scaling_model()
 
+        if isinstance(regressors_model, list):
+            regressors_model = RegressorsList(regressors_model)
+
         super().__init__(
             cf_model=cf_model,
             encoding_model=encoding_model,
             scaling_model=scaling_model,
+            regressors_model=regressors_model,
         )
 
     @doc
@@ -66,6 +75,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
         self,
         stimulus: CFStimulus,
         parameters: pd.DataFrame,
+        regressors: pd.DataFrame | None = None,
         dtype: str | None = None,
     ) -> Tensor:
         """
@@ -75,6 +85,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
         ----------
         %(stimulus_cf)s
         %(parameters)s
+        %(regressors_canonical)s
         %(dtype)s
 
         Returns
@@ -83,6 +94,14 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
 
         """
         dtype = get_dtype(dtype)
+        regressors_model = self.models["regressors_model"]
+        if regressors_model is None and regressors is not None:
+            msg = "'regressors' was provided but 'regressors_model' is not configured on this model"
+            raise ValueError(msg)
+        if regressors_model is not None and regressors is None:
+            msg = "'regressors' must be provided when 'regressors_model' is configured on this model"
+            raise ValueError(msg)
+
         cf_model = cast("BasePopulationResponse", self.models["cf_model"])
         response = cf_model(stimulus, parameters, dtype=dtype)
         encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
@@ -91,5 +110,9 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
         if self.models["scaling_model"] is not None:
             temporal_model = cast("BaseScaling", self.models["scaling_model"])
             response = temporal_model(response, parameters, dtype=dtype)
+
+        if regressors_model is not None and regressors is not None:
+            regressors_model = cast("BaseRegressors", regressors_model)
+            response = response + regressors_model(regressors, parameters, dtype=dtype)
 
         return response

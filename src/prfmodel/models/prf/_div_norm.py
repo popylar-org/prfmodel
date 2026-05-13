@@ -3,12 +3,15 @@
 from typing import cast
 import pandas as pd
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.regressors import RegressorsList
+from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import DivNormAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli._prf import PRFStimulus
@@ -39,9 +42,12 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
         Names of pRF parameters that are shared between the two responses.  Each name
         must appear in *both* ``activation_prf_model.parameter_names`` and
         ``normalization_prf_model.parameter_names``.
-    %(model_encoding)s
+    %(model_encoding_prf)s
     %(model_impulse)s
-    %(model_scaling)s
+    scaling_model : BaseScaling or type or None, default=DivNormAmplitude, optional
+        A scaling model class or instance. Model classes will be instantiated during initialization.
+        The default creates a :class:`~prfmodel.scaling.DivNormAmplitude` instance.
+    %(model_regressors)s
 
     Notes
     -----
@@ -64,6 +70,7 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
         encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = DivNormAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         if shared_params is None:
             shared_params = ["mu_x", "mu_y"]
@@ -76,6 +83,9 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
 
         if scaling_model is not None and isinstance(scaling_model, type):
             scaling_model = scaling_model()
+
+        if isinstance(regressors_model, list):
+            regressors_model = RegressorsList(regressors_model)
 
         act_names = activation_prf_model.parameter_names
         norm_names = normalization_prf_model.parameter_names
@@ -96,6 +106,7 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             scaling_model=scaling_model,
+            regressors_model=regressors_model,
         )
 
     @property
@@ -180,10 +191,12 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
         p2 = self._predict_single_response(stimulus, parameters, "normalization", dtype)
         return ops.stack([p1, p2], axis=1)
 
+    @doc
     def __call__(
         self,
         stimulus: PRFStimulus,
         parameters: pd.DataFrame,
+        regressors: pd.DataFrame | None = None,
         dtype: str | None = None,
     ) -> Tensor:
         """
@@ -191,29 +204,39 @@ class DivNormPRFModel(BaseCanonical[PRFStimulus]):
 
         Parameters
         ----------
-        stimulus : PRFStimulus
-            Population receptive field stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with model parameters; one row per voxel.
-        dtype : str, optional
-            The dtype of the prediction result. If ``None`` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus_prf)s
+        %(parameters)s
+        %(regressors_canonical)s
+        %(dtype)s
 
         Returns
         -------
-        Tensor
-            Model predictions of shape (num_voxels, num_frames).
+        %(predicted_response_2d)s
 
         """
         dtype = get_dtype(dtype)
+        regressors_model = self.models["regressors_model"]
+        if regressors_model is None and regressors is not None:
+            msg = "'regressors' was provided but 'regressors_model' is not configured on this model"
+            raise ValueError(msg)
+        if regressors_model is not None and regressors is None:
+            msg = "'regressors' must be provided when 'regressors_model' is configured on this model"
+            raise ValueError(msg)
+
         stacked = self.predict_responses(stimulus, parameters, dtype=dtype)
 
         if self.models["scaling_model"] is not None:
             scaling_model = cast("BaseScaling", self.models["scaling_model"])
-            return scaling_model(stacked, parameters, dtype=dtype)
+            response = scaling_model(stacked, parameters, dtype=dtype)
+        else:
+            # TODO: Is this a sensible default? Or what would word best in the absence of a scaling model?
+            response = stacked[:, 0] / stacked[:, 1]
 
-        # TODO: Is this a sensible default? Or what would word best in the absence of a scaling model?
-        return stacked[:, 0] / stacked[:, 1]
+        if regressors_model is not None and regressors is not None:
+            regressors_model = cast("BaseRegressors", regressors_model)
+            response = response + regressors_model(regressors, parameters, dtype=dtype)
+
+        return response
 
 
 class DivNormGaussian2DPRFModel(DivNormPRFModel):
@@ -229,12 +252,12 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
 
     Parameters
     ----------
-    encoding_model : BaseEncoder or type, default=PRFStimulusEncoder
-        An encoding model class or instance.
-    impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
-        An impulse model class or instance.
-    scaling_model : BaseScaling or type or None, default=DivNormAmplitude
-        A scaling model class or instance.
+    %(model_encoding_prf)s
+    %(model_impulse)s
+    scaling_model : BaseScaling or type or None, default=DivNormAmplitude, optional
+        A scaling model class or instance. Model classes will be instantiated during initialization.
+        The default creates a :class:`~prfmodel.scaling.DivNormAmplitude` instance.
+    %(model_regressors)s
 
     Notes
     -----
@@ -308,6 +331,7 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
         encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = DivNormAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
             activation_prf_model=Gaussian2DPRFResponse(),
@@ -316,6 +340,7 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             scaling_model=scaling_model,
+            regressors_model=regressors_model,
         )
 
 
