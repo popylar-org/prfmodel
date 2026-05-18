@@ -107,7 +107,7 @@ The list of parameters that need to be set to make model predictions can be obta
 prf_model.parameter_names
 ```
 
-The parameters `mu_x` and `mu_y` define the center of the pRF while `gain` and `n` determine the compression of the stimulus encoding. The parameters `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the impulse response that is convolved with our pRF response. The parameters `baseline` and `amplitude` shift and scale our convolved response, respectively. We store the parameter values in a `pandas.DataFrame` object.
+The parameters `mu_x` and `mu_y` define the center of the pRF while `gain` and `n` determine the compression of the stimulus encoding. The parameters `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the impulse response that is convolved with our pRF response; the two-gamma parameters (`delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`) default to the Glover HRF parameter set (see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only set `weight_deriv` here. The parameters `baseline` and `amplitude` shift and scale our convolved response, respectively. We store the parameter values in a `pandas.DataFrame` object.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -117,11 +117,7 @@ true_params = pd.DataFrame(
         "mu_x": [-2.1],
         "mu_y": [1.45],
         "sigma": [1.35],
-        "delay": [6.0],
-        "dispersion": [0.9],
-        "undershoot": [12.0],
-        "u_dispersion": [0.9],
-        "ratio": [0.48],
+        # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
         "weight_deriv": [-0.5],
         "baseline": [10.0],
         "amplitude": [1.1],
@@ -168,11 +164,7 @@ param_ranges_gaussian = {
     "mu_x": np.linspace(-3.0, 3.0, 10),
     "mu_y": np.linspace(-3.0, 3.0, 10),
     "sigma": np.linspace(0.5, 3.0, 10),
-    "delay": [6.0],
-    "dispersion": [0.9],
-    "undershoot": [12.0],
-    "u_dispersion": [0.9],
-    "ratio": [0.48],
+    # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-0.5],
     "baseline": [0.0],
     "amplitude": [1.0],
@@ -281,7 +273,7 @@ sgd_fitter = SGDFitter(
 init_params = init_css_from_gaussian(gaussian_params)
 
 # n is a fixed parameter
-fixed_params = ["delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv", "n"]
+fixed_params = ["weight_deriv", "n"]
 
 _, sgd_params_fixed_n = sgd_fitter.fit(
     data=simulated_response,

@@ -38,8 +38,9 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
         The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
         no normalization is performed.
     default_parameters : dict of float or str, optional, default="glover_hrf"
-        Dictionary with scalar default parameter values. Keys must be valid parameter names. Defaults to
-        :func:`prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`.
+        Dictionary with scalar default parameter values or name of default parameter set. Available default
+        parameter sets are `glover_hrf` (default) and `spm_hrf`. See :mod:`~prfmodel.impulse.defaults` for details.
+        Dictionary keys must be valid parameter names. Default values can be overriden in the :meth:`__call__` method.
 
     See Also
     --------
@@ -76,7 +77,20 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
 
     Examples
     --------
+    Predict an impulse response using the default parameter set
+    (:func:`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf()`).
+
     >>> import pandas as pd
+    >>> params = pd.DataFrame({
+    ...     "weight_deriv": [0.5, -0.7, 0.9],
+    ... })
+    >>> impulse_model = DerivativeTwoGammaImpulse()
+    >>> resp = impulse_model(params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 32)
+
+    Predict an impulse response by overriding the default parameter set in the :meth:`__call__` method.
+
     >>> params = pd.DataFrame({
     ...     "delay": [2.0, 1.0, 1.5],
     ...     "dispersion": [1.0, 1.0, 1.0],
@@ -85,12 +99,18 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
     ...     "ratio": [0.7, 0.2, 0.5],
     ...     "weight_deriv": [0.5, -0.7, 0.9],
     ... })
+    >>> resp = impulse_model(params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 32)
+
+    If ``default_parameters=None``, all parameters must be supplied to :meth:`__call__`.
+
     >>> impulse_model = DerivativeTwoGammaImpulse(
-    ...     duration=100.0  # 100 seconds
+    ...     default_parameters=None,
     ... )
     >>> resp = impulse_model(params)
     >>> print(resp.shape)  # (num_units, num_frames)
-    (3, 100)
+    (3, 32)
 
     """
 
@@ -124,7 +144,7 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
 
         Parameters
         ----------
-        %(parameters)s
+        %(parameters)s Parameter values override default parameters.
         %(dtype)s
 
         Returns
