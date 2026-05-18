@@ -33,6 +33,46 @@ def _extract_design(regressors: pd.DataFrame, names: list[str]) -> pd.DataFrame:
     return regressors[names]
 
 
+def _normalize_regressors_model(
+    regressors_model: "BaseRegressors | list[BaseRegressors] | None",
+) -> "BaseRegressors | None":
+    """Wrap a list of regressor models in a :class:`RegressorsList`; pass other values through unchanged.
+
+    Helper shared by canonical models to accept either a single regressor model, a list of regressor models, or
+    ``None`` for the ``regressors_model`` constructor argument.
+
+    """
+    from ._list import RegressorsList  # noqa: PLC0415 (local import avoids a circular dependency)
+
+    if isinstance(regressors_model, list):
+        return RegressorsList(regressors_model)
+    return regressors_model
+
+
+def _validate_regressors_argument(
+    regressors_model: object | None,
+    regressors: pd.DataFrame | None,
+) -> None:
+    """Validate the ``regressors`` argument against a model's configured ``regressors_model``.
+
+    Helper shared by canonical models to ensure that runtime regressor design data is supplied if (and only if) a
+    regressors model is configured.
+
+    Raises
+    ------
+    ValueError
+        If ``regressors`` is provided without a configured ``regressors_model``, or if a ``regressors_model`` is
+        configured but ``regressors`` is not provided.
+
+    """
+    if regressors_model is None and regressors is not None:
+        msg = "'regressors' was provided but 'regressors_model' is not configured on this model"
+        raise ValueError(msg)
+    if regressors_model is not None and regressors is None:
+        msg = "'regressors' must be provided when 'regressors_model' is configured on this model"
+        raise ValueError(msg)
+
+
 class BaseRegressors(ModelProtocol):
     r"""
     Abstract base class for regressor models.

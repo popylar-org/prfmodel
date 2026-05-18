@@ -125,6 +125,27 @@ class TestLeastSquaresIntegration:
                 slope_name="amplitude",
             )
 
+    def test_beta_missing_from_slopes_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        true_params: pd.DataFrame,
+        regressor_design: pd.DataFrame,
+    ):
+        """Omitting a regressor beta from slope_name raises, since LS would otherwise bias the estimates."""
+        observed = np.asarray(model(stimulus, true_params, regressors=regressor_design))
+
+        fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
+        # 'beta_reg_conv' is left out of the slope names even though 'reg_conv' is in the design.
+        with pytest.raises(ValueError, match="beta_reg_conv"):
+            fitter.fit(
+                observed,
+                true_params,
+                slope_name=["amplitude", "beta_reg_add"],
+                intercept_name="baseline",
+                regressors=regressor_design,
+            )
+
 
 class TestGridIntegration:
     """Smoke test for GridFitter with a regressors_model."""

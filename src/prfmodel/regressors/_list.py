@@ -54,16 +54,22 @@ class RegressorsList(BaseRegressors):
             msg = "Argument 'regressors' must be a non-empty list of BaseRegressors instances"
             raise ValueError(msg)
 
+        beta_names: list[str] = []
+
         for regressor in regressors:
             if not isinstance(regressor, BaseRegressors):
                 msg = "All entries in 'regressors' must be instances of BaseRegressors"
                 raise TypeError(msg)
+            if any(name in beta_names for name in regressor.parameter_names):
+                msg = "Regressor names must be unique"
+                raise ValueError(msg)
+            beta_names.extend(name for name in regressor.parameter_names if name.startswith("beta_"))
 
         self.regressors = list(regressors)
 
     @property
     def parameter_names(self) -> list[str]:
-        """Names of parameters used by the model, aggregated (and deduplicated) from all child regressor models."""
+        """Names of parameters used by the model, aggregated from all child regressor models."""
         names: list[str] = []
 
         for regressor in self.regressors:

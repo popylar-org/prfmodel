@@ -10,8 +10,9 @@ from prfmodel._docstring import doc
 from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
-from prfmodel.regressors import RegressorsList
 from prfmodel.regressors.base import BaseRegressors
+from prfmodel.regressors.base import _normalize_regressors_model
+from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
@@ -60,8 +61,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
         if scaling_model is not None and isinstance(scaling_model, type):
             scaling_model = scaling_model()
 
-        if isinstance(regressors_model, list):
-            regressors_model = RegressorsList(regressors_model)
+        regressors_model = _normalize_regressors_model(regressors_model)
 
         super().__init__(
             cf_model=cf_model,
@@ -95,12 +95,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
         """
         dtype = get_dtype(dtype)
         regressors_model = self.models["regressors_model"]
-        if regressors_model is None and regressors is not None:
-            msg = "'regressors' was provided but 'regressors_model' is not configured on this model"
-            raise ValueError(msg)
-        if regressors_model is not None and regressors is None:
-            msg = "'regressors' must be provided when 'regressors_model' is configured on this model"
-            raise ValueError(msg)
+        _validate_regressors_argument(regressors_model, regressors)
 
         cf_model = cast("BasePopulationResponse", self.models["cf_model"])
         response = cf_model(stimulus, parameters, dtype=dtype)

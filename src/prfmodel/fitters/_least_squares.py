@@ -150,6 +150,13 @@ class LeastSquaresFitter:
                 msg = f"Slope name '{name}' must be a column in 'parameters'"
                 raise ValueError(msg)
 
+        if regressors is not None:
+            # Beta weights must be in slope names if regressors are present, otherwise estimates are biased
+            name_diff = {f"beta_{name}" for name in regressors.columns}.difference(set(slope_names))
+            if len(name_diff) > 0:
+                msg = f"No beta weight parameters found for regressors: {list(name_diff)}"
+                raise ValueError(msg)
+
         if intercept_name is not None and intercept_name not in parameters.columns:
             msg = "Argument 'intercept_name' must be a column in 'parameters'"
             raise ValueError(msg)

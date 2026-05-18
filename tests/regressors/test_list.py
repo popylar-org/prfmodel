@@ -63,3 +63,10 @@ class TestRegressorsList:
         """A non-BaseRegressors element raises TypeError."""
         with pytest.raises(TypeError, match="BaseRegressors"):
             RegressorsList([regressor_a, "not a regressor"])  # type: ignore[list-item]
+
+    def test_duplicate_beta_names_raise(self):
+        """Children sharing a regressor (beta) name raise, to avoid silently double-counting one weight."""
+        a = AdditiveRegressors(names=["x"])
+        b = AdditiveRegressors(names=["x", "y"])
+        with pytest.raises(ValueError, match="unique"):
+            RegressorsList([a, b])

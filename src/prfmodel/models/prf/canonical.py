@@ -14,8 +14,9 @@ from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
-from prfmodel.regressors import RegressorsList
 from prfmodel.regressors.base import BaseRegressors
+from prfmodel.regressors.base import _normalize_regressors_model
+from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling import DoGAmplitude
 from prfmodel.scaling.base import BaseScaling
@@ -23,26 +24,6 @@ from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from ._stimulus_encoding import PRFStimulusEncoder
-
-
-def _normalize_regressors_model(
-    regressors_model: BaseRegressors | list[BaseRegressors] | None,
-) -> BaseRegressors | None:
-    if isinstance(regressors_model, list):
-        return RegressorsList(regressors_model)
-    return regressors_model
-
-
-def _validate_regressors_argument(
-    regressors_model: object | None,
-    regressors: pd.DataFrame | None,
-) -> None:
-    if regressors_model is None and regressors is not None:
-        msg = "'regressors' was provided but 'regressors_model' is not configured on this model"
-        raise ValueError(msg)
-    if regressors_model is not None and regressors is None:
-        msg = "'regressors' must be provided when 'regressors_model' is configured on this model"
-        raise ValueError(msg)
 
 
 class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
