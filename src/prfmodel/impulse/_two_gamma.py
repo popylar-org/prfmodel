@@ -9,6 +9,7 @@ from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 from prfmodel.utils import normalize_response
 from .base import BaseImpulse
+from .defaults import _fetch_default
 
 
 class TwoGammaImpulse(BaseImpulse):
@@ -33,8 +34,9 @@ class TwoGammaImpulse(BaseImpulse):
     norm : str, optional, default="sum"
         The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
         no normalization is performed.
-    default_parameters : dict of float, optional
-        Dictionary with scalar default parameter values. Keys must be valid parameter names.
+    default_parameters : dict of float or str, optional, default="glover_hrf"
+        Dictionary with scalar default parameter values. Keys must be valid parameter names. Defaults to
+        :func:`prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`.
 
     See Also
     --------
@@ -79,6 +81,19 @@ class TwoGammaImpulse(BaseImpulse):
     (3, 100)
 
     """
+
+    def __init__(
+        self,
+        duration: float = 32.0,
+        offset: float = 0.0001,
+        resolution: float = 1.0,
+        norm: str | None = "sum",
+        default_parameters: dict[str, float] | str | None = "glover_hrf",
+    ):
+        if isinstance(default_parameters, str):
+            default_parameters = _fetch_default(default_parameters)
+
+        super().__init__(duration, offset, resolution, norm, default_parameters)
 
     @property
     def parameter_names(self) -> list[str]:

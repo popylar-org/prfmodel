@@ -41,8 +41,9 @@ class BaseImpulse(ModelProtocol):
     norm : str, optional, default="sum"
         The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`.
         If `None`, no normalization is performed.
-    default_parameters : dict of float, optional
-        Dictionary with scalar default parameter values. Keys must be valid parameter names.
+    default_parameters : dict of float or str, optional
+        Dictionary with scalar default parameter values or name of default parameter set.
+        Dictionary keys must be valid parameter names.
 
     Notes
     -----
@@ -57,7 +58,7 @@ class BaseImpulse(ModelProtocol):
         offset: float = 0.0001,
         resolution: float = 1.0,
         norm: str | None = "sum",
-        default_parameters: dict[str, float] | None = None,
+        default_parameters: dict[str, float] | str | None = None,
     ):
         super().__init__()
 
