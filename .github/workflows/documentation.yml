@@ -39,6 +39,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ffmpeg
+      - name: Install graphviz (for inheritance diagrams)
+        run: sudo apt-get install -y graphviz
       - uses: ./.github/actions/setup-python-cached
         with:
           python-version: '3.12'
