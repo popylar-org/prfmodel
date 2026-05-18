@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="API Reference" href="../autoapi/index.html"><link rel="prev" title="Development" href="index.html">
+<link rel="index" title="Index" href="../genindex.html"><link rel="search" title="Search" href="../search.html"><link rel="next" title="Architecture" href="architecture.html"><link rel="prev" title="Fitting a connective field model to fMRI data from a visual experiment" href="../tutorials/examples/cf_fmri_visual.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Architecture - prfmodel 0.0.1 documentation</title>
+        <title>Development - prfmodel 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
@@ -177,7 +177,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
       </label>
     </div>
@@ -214,8 +214,8 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="index.html">Development</a><input aria-label="Toggle navigation of Development" checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Architecture</a></li>
+<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">Development</a><input aria-label="Toggle navigation of Development" checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">Architecture</a></li>
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -364,7 +364,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/development/architecture.md.txt" title="View this page">
+  <a class="muted-link" href="../_sources/development/index.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -377,60 +377,19 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="architecture">
-<h1>Architecture<a class="headerlink" href="#architecture" title="Link to this heading">¶</a></h1>
-<p>This page contains information about the package architecture.</p>
-<p>prfmodel contains different submodules that contain different types of (sub-) models.</p>
-<p>The main model classes that users interact with are in <a class="reference internal" href="../autoapi/prfmodel/models/index.html#module-prfmodel.models" title="prfmodel.models"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.models</span></code></a>, <a class="reference internal" href="../autoapi/prfmodel/impulse/index.html#module-prfmodel.impulse" title="prfmodel.impulse"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.impulse</span></code></a>,
-and <a class="reference internal" href="../autoapi/prfmodel/scaling/index.html#module-prfmodel.scaling" title="prfmodel.scaling"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.scaling</span></code></a>. We distinguish between three user profiles:</p>
-<ul class="simple">
-<li><p><strong>Entry-level</strong> users will interact with high-level canonical model classes such as
-<a class="reference internal" href="../autoapi/prfmodel/models/prf/Gaussian2DPRFModel.html#prfmodel.models.prf.Gaussian2DPRFModel" title="prfmodel.models.prf.Gaussian2DPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">prfmodel.models.prf.Gaussian2DPRFModel</span></code></a>. These classes have good defaults and require very little
-adjustment.</p></li>
-<li><p><strong>Advanced</strong> users will interact with submodel classes in <a class="reference internal" href="../autoapi/prfmodel/impulse/index.html#module-prfmodel.impulse" title="prfmodel.impulse"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.impulse</span></code></a> and <a class="reference internal" href="../autoapi/prfmodel/scaling/index.html#module-prfmodel.scaling" title="prfmodel.scaling"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.scaling</span></code></a>.
-For example, they might customize the parameters of impulse submodel in a canonical
-<a class="reference internal" href="../autoapi/prfmodel/models/prf/Gaussian2DPRFModel.html#prfmodel.models.prf.Gaussian2DPRFModel" title="prfmodel.models.prf.Gaussian2DPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">prfmodel.models.prf.Gaussian2DPRFModel</span></code></a>.</p></li>
-<li><p><strong>Expert</strong> uses will interact with all available public classes, potentially defining their own custom
-submodels or canonical models.</p></li>
+          <section id="development">
+<span id="id1"></span><h1>Development<a class="headerlink" href="#development" title="Link to this heading">¶</a></h1>
+<p>This section contains information about developing prfmodel. More content will follow soon.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
 </ul>
-<section id="inhertitance-diagrams">
-<h2>Inhertitance diagrams<a class="headerlink" href="#inhertitance-diagrams" title="Link to this heading">¶</a></h2>
-<p>To facilitate the development of the package and the creation of custom models, we provide an overview of the
-inhertiance structure of the three modules containing model classes.</p>
-<p>The inheritance diagram for <a class="reference internal" href="../autoapi/prfmodel/models/index.html#module-prfmodel.models" title="prfmodel.models"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.models</span></code></a>:</p>
-<div class="graphviz"><img src="../_images/inheritance-2de769682007910ad1446ea3f36c1efa2631d6e6.png" alt="Inheritance diagram of prfmodel.models.base, prfmodel.models.prf, prfmodel.models.cf, prfmodel.models.compression" usemap="#inheritance41013c3c15" class="inheritance graphviz" /></div>
-<map id="inheritance41013c3c15" name="inheritance41013c3c15">
-<area shape="rect" id="node1" href="../autoapi/prfmodel/models/base/BaseCanonical.html#prfmodel.models.base.BaseCanonical" target="_top" title="Generic abstract base class for creating canonical models." alt="" coords="140,98,223,116"/>
-<area shape="rect" id="node7" href="../autoapi/prfmodel/models/cf/canonical/CanonicalCFModel.html#prfmodel.models.cf.canonical.CanonicalCFModel" target="_top" title="Canonical connective field model." alt="" coords="296,107,395,124"/>
-<area shape="rect" id="node8" href="../autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel.html#prfmodel.models.prf.canonical.CanonicalPRFModel" target="_top" title="Canonical population receptive field (pRF) model." alt="" coords="293,4,397,21"/>
-<area shape="rect" id="node9" href="../autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel" target="_top" title="Center&#45;surround composite population receptive field model." alt="" coords="280,38,410,56"/>
-<area shape="rect" id="node2" href="../autoapi/prfmodel/utils/ModelProtocol.html#prfmodel.utils.ModelProtocol" target="_top" title="Protocol for model classes." alt="" coords="4,132,83,150"/>
-<area shape="rect" id="node4" href="../autoapi/prfmodel/models/base/BasePopulationResponse.html#prfmodel.models.base.BasePopulationResponse" target="_top" title="Generic abstract base class for neuron population response models." alt="" coords="117,149,246,167"/>
-<area shape="rect" id="node5" href="../autoapi/prfmodel/models/base/BaseStimulusEncoder.html#prfmodel.models.base.BaseStimulusEncoder" target="_top" title="Generic abstract base class for encoding model responses with a stimulus." alt="" coords="125,209,238,227"/>
-<area shape="rect" id="node3" href="https://docs.python.org/3/library/typing.html#typing.Generic" target="_top" title="Abstract base class for generic types." alt="" coords="19,167,69,184"/>
-<area shape="rect" id="node10" href="../autoapi/prfmodel/models/compression/CompressiveEncoder.html#prfmodel.models.compression.CompressiveEncoder" target="_top" title="Compressive encoding model." alt="" coords="290,244,400,261"/>
-</map><p>The inheritance diagram for <a class="reference internal" href="../autoapi/prfmodel/impulse/index.html#module-prfmodel.impulse" title="prfmodel.impulse"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.impulse</span></code></a>:</p>
-<div class="graphviz"><img src="../_images/inheritance-4cd6b348323027e813b88ad664f8649f184b4de9.png" alt="Inheritance diagram of prfmodel.impulse.base" usemap="#inheritance939a8a3aff" class="inheritance graphviz" /></div>
-<map id="inheritance939a8a3aff" name="inheritance939a8a3aff">
-<area shape="rect" id="node1" href="../autoapi/prfmodel/impulse/base/BaseImpulse.html#prfmodel.impulse.base.BaseImpulse" target="_top" title="Abstract base class for impulse models." alt="" coords="168,55,275,80"/>
-<area shape="rect" id="node2" href="../autoapi/prfmodel/utils/ModelProtocol.html#prfmodel.utils.ModelProtocol" target="_top" title="Protocol for model classes." alt="" coords="5,55,120,80"/>
-</map><p>The inheritance diagram for <a class="reference internal" href="../autoapi/prfmodel/scaling/index.html#module-prfmodel.scaling" title="prfmodel.scaling"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.scaling</span></code></a>:</p>
-<div class="graphviz"><img src="../_images/inheritance-9719c080735884ad87eadd7b6818d438002dcf93.png" alt="Inheritance diagram of prfmodel.scaling.base" usemap="#inheritancece32f9c195" class="inheritance graphviz" /></div>
-<map id="inheritancece32f9c195" name="inheritancece32f9c195">
-<area shape="rect" id="node1" href="../autoapi/prfmodel/scaling/base/BaseScaling.html#prfmodel.scaling.base.BaseScaling" target="_top" title="Abstract base class for scaling models." alt="" coords="168,55,269,80"/>
-<area shape="rect" id="node2" href="../autoapi/prfmodel/utils/ModelProtocol.html#prfmodel.utils.ModelProtocol" target="_top" title="Protocol for model classes." alt="" coords="5,55,120,80"/>
-</map></section>
-<section id="api">
-<h2>API<a class="headerlink" href="#api" title="Link to this heading">¶</a></h2>
-<p>The API uses a “public facade” design pattern where most complex model classes are defined in private submodules and
-exported as public in the next ancestor module in the hierarchy. This prevents the API docs from overflowing with
-submodules while keeping class definitions in separate files.</p>
-</section>
+</div>
 </section>
 
         </article>
@@ -438,23 +397,23 @@ submodules while keeping class definitions in separate files.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../autoapi/index.html">
+          <a class="next-page" href="architecture.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">API Reference</div>
+                <div class="title">Architecture</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="index.html">
+          <a class="prev-page" href="../tutorials/examples/cf_fmri_visual.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Development</div>
+                <div class="title">Fitting a connective field model to fMRI data from a visual experiment</div>
                 
               </div>
             </a>
@@ -476,28 +435,8 @@ submodules while keeping class definitions in separate files.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            On this page
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">Architecture</a><ul>
-<li><a class="reference internal" href="#inhertitance-diagrams">Inhertitance diagrams</a></li>
-<li><a class="reference internal" href="#api">API</a></li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>
