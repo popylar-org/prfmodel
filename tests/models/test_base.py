@@ -1,45 +1,46 @@
 """Test model base classes."""
 
 import pytest
-from prfmodel.models.base import BaseComposite
-from prfmodel.models.base import BaseEncoder
-from prfmodel.models.base import BaseImpulse
-from prfmodel.models.base import BaseModel
-from prfmodel.models.base import BaseResponse
-from prfmodel.models.base import BaseTemporal
-from prfmodel.models.base import BatchDimensionError
-from prfmodel.models.base import ShapeError
+from prfmodel.exceptions import ShapeError
+from prfmodel.exceptions import ShapeMismatchError
+from prfmodel.models.base import BaseCanonical
+from prfmodel.models.base import BasePopulationResponse
+from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.utils import ModelProtocol
 
 
 def test_parameter_shape_error():
-    """Test that ParameterShapeError shows correct parameter name and shape in error message."""
+    """Test that ShapeError shows correct parameter name and shape in error message."""
     param_name = "param_1"
-    param_shape = 1
+    param_shape = (1,)
+    requirement = "must have at least 2 dimensions"
 
     with pytest.raises(ShapeError) as excinfo:
-        raise ShapeError(param_name, param_shape)
+        raise ShapeError(param_name, param_shape, requirement)
 
     assert param_name in str(excinfo.value)
     assert str(param_shape) in str(excinfo.value)
+    assert requirement in str(excinfo.value)
 
 
-def test_batch_dimension_error():
-    """Test that BatchDimensionError shows correct arg names and shapes in error message."""
-    arg_names = ("arg_1", "arg_2")
-    arg_shapes = ((2, 1), (1, 1))
+def test_shape_mismatch_error():
+    """Test that ShapeMismatchError shows correct arg names and shapes in error message."""
+    arg1_name, arg1_shape = "arg_1", (2, 1)
+    arg2_name, arg2_shape = "arg_2", (1, 1)
 
-    with pytest.raises(BatchDimensionError) as excinfo:
-        raise BatchDimensionError(arg_names, arg_shapes)
+    with pytest.raises(ShapeMismatchError) as excinfo:
+        raise ShapeMismatchError(arg1_name, arg1_shape, arg2_name, arg2_shape)
 
-    for arg_name, arg_shape in zip(arg_names, arg_shapes, strict=False):
-        assert arg_name in str(excinfo.value)
-        assert str(arg_shape[0]) in str(excinfo.value)
+    assert arg1_name in str(excinfo.value)
+    assert arg2_name in str(excinfo.value)
+    assert str(arg1_shape) in str(excinfo.value)
+    assert str(arg2_shape) in str(excinfo.value)
 
 
 class TestBaseModel:
     """Tests for BaseModel class."""
 
-    model_class = BaseModel
+    model_class = ModelProtocol
 
     def test_abstract_fail(self):
         """Test that model instantiation fails."""
@@ -48,31 +49,19 @@ class TestBaseModel:
 
 
 # Inherit all checks from TestBaseModel
-class TestBaseResponse(TestBaseModel):
-    """Tests for BaseResponse class."""
+class TestBasePopulationResponse(TestBaseModel):
+    """Tests for BasePopulationResponse class."""
 
-    model_class = BaseResponse
-
-
-class TestBaseEncoder(TestBaseModel):
-    """Tests for BaseEncoder class."""
-
-    model_class = BaseEncoder
+    model_class = BasePopulationResponse
 
 
-class TestBaseImpulse(TestBaseModel):
-    """Tests for BaseImpulse class."""
+class TestBaseStimulusEncoder(TestBaseModel):
+    """Tests for BaseStimulusEncoder class."""
 
-    model_class = BaseImpulse
-
-
-class TestBaseTemporal(TestBaseModel):
-    """Tests for BaseTemporal class."""
-
-    model_class = BaseTemporal
+    model_class = BaseStimulusEncoder
 
 
 class TestBaseComposite(TestBaseModel):
     """Tests for BaseComposite class."""
 
-    model_class = BaseComposite
+    model_class = BaseCanonical

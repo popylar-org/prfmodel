@@ -35,7 +35,7 @@ jobs:
         env:
           KERAS_BACKEND: tensorflow
       - name: Run doctests
-        run: python -m pytest --doctest-modules --ignore=src/prfmodel/fitters/backend/ -v src/
+        run: python -m pytest --doctest-modules --ignore=src/prfmodel/_backend/ -v src/
         env:
           KERAS_BACKEND: tensorflow
       - name: Verify that we can build the package

@@ -1,47 +1,16 @@
-"""Population receptive and connective field models."""
+"""Neural response models.
 
-from .base import BaseComposite
-from .base import BaseEncoder
-from .base import BaseImpulse
-from .base import BaseModel
-from .base import BaseResponse
-from .base import BaseTemporal
-from .base import BatchDimensionError
-from .css import Gaussian2DCSSPRFModel
-from .css import init_css_from_gaussian
-from .div_norm import DivNormGaussian2DPRFModel
-from .div_norm import DivNormPRFModel
-from .div_norm import init_dn_from_dog
-from .div_norm import init_dn_from_gaussian
-from .dog import DoG2DPRFModel
-from .dog import init_dog_from_gaussian
-from .encoding import CFStimulusEncoder
-from .encoding import CompressiveEncoder
-from .encoding import PRFStimulusEncoder
-from .encoding import encode_prf_response
-from .gaussian import Gaussian2DPRFModel
-from .gaussian import GaussianCFModel
+This module contains models that map neural responses to input stimuli. These typically contain parameters of
+interest. Currently, it implements population receptive field (pRF) and connective field (CF) models.
 
-__all__ = [
-    "BaseComposite",
-    "BaseEncoder",
-    "BaseImpulse",
-    "BaseModel",
-    "BaseResponse",
-    "BaseTemporal",
-    "BatchDimensionError",
-    "CFStimulusEncoder",
-    "CompressiveEncoder",
-    "DivNormGaussian2DPRFModel",
-    "DivNormPRFModel",
-    "DoG2DPRFModel",
-    "Gaussian2DCSSPRFModel",
-    "Gaussian2DPRFModel",
-    "GaussianCFModel",
-    "PRFStimulusEncoder",
-    "encode_prf_response",
-    "init_css_from_gaussian",
-    "init_dn_from_dog",
-    "init_dn_from_gaussian",
-    "init_dog_from_gaussian",
-]
+The :mod:`~prfmodel.models.base` submodule contains generic abstract base classes that pRF and CF models inherit from.
+
+The :mod:`~prfmodel.models.compression` submodule contains generic classes to (de-) compress stimulus-encoded model
+responses.
+
+Notes
+-----
+All models in in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that requires them to implement a
+:attr:`~prfmodel.utils.ModelProtocol.parameter_names` property.
+
+"""

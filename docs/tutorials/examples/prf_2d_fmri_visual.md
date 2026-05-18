@@ -250,11 +250,11 @@ print(stimulus)
 
 When printing the `stimulus` object, we can see the shapes of its attributes.
 
-We can visualize the stimulus using {py:func}`prfmodel.stimuli.animate_2d_prf_stimulus`.
+We can visualize the stimulus using {py:func}`prfmodel.plotting.animate_2d_prf_stimulus`.
 
 ```{code-cell} ipython3
 from IPython.display import HTML
-from prfmodel.stimuli import animate_2d_prf_stimulus
+from prfmodel.plotting import animate_2d_prf_stimulus
 
 ani = animate_2d_prf_stimulus(stimulus, interval=50)  # Pause 50 ms between time frames
 
@@ -336,13 +336,13 @@ response model to account for the fact that each time frame is one TR (1.5 secon
 of our predicted impulse response to the TR.
 
 ```{code-cell} ipython3
-from prfmodel.models import Gaussian2DPRFModel
-from prfmodel.models.impulse import DerivativeTwoGammaImpulse
+from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.models.prf import Gaussian2DPRFModel
 
 # Define repetition time (TR)
 tr = 1.5
 
-# Create custom impulse response model
+# Create custom impulse model
 impulse_model = DerivativeTwoGammaImpulse(
     resolution=tr,
     offset=tr / 2.0,
@@ -714,7 +714,7 @@ The predictions by our pRF model can potentially be improved. We suggest differe
 - Increasing the number of points in the parameter grid for the grid search
 - Finetuning the pRF model parameters with stochastic gradient descent with {py:class}`prfmodel.fitters.sgd.SGDFitter`
 - Applying preprocessing steps before fitting the pRF model (e.g., high-pass filtering)
-- Optimizing the impulse response model parameters in the grid search
+- Optimizing the impulse model parameters in the grid search
 - Building a more complex pRF model (e.g., compressive spatial summation, see Kay et al., 2013)
 
 +++

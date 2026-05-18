@@ -72,7 +72,7 @@ We can visualize the stimulus using `animate_2d_stimulus`.
 
 ```{code-cell} ipython3
 from IPython.display import HTML
-from prfmodel.stimuli import animate_2d_prf_stimulus
+from prfmodel.plotting import animate_2d_prf_stimulus
 
 ani = animate_2d_prf_stimulus(stimulus, interval=25)  # Pause 25 ms between time frames
 
@@ -95,7 +95,7 @@ $b$ (`baseline_activation`), and $c$ (`amplitude_normalization`) , $d$
 the absence of a stimulus. The normalization baseline $d$ must be positive to avoid division by zero.
 
 ```{code-cell} ipython3
-from prfmodel.models import DivNormGaussian2DPRFModel
+from prfmodel.models.prf import DivNormGaussian2DPRFModel
 
 prf_model = DivNormGaussian2DPRFModel()
 ```
@@ -167,7 +167,7 @@ Let's start with a grid search over `mu_x`, `mu_y`, and `sigma` using a plain
 simultaneously, and gives us a good initialisation point for the DN model.
 
 ```{code-cell} ipython3
-from prfmodel.models import Gaussian2DPRFModel
+from prfmodel.models.prf import Gaussian2DPRFModel
 import numpy as np
 
 # Step 1: fit a plain Gaussian model to locate the center and size of the pRF
@@ -262,13 +262,13 @@ fig.legend();
 ```
 
 ```{code-cell} ipython3
-from prfmodel.models import DoG2DPRFModel
+from prfmodel.models.prf import DoG2DPRFModel
 
 dog_model = DoG2DPRFModel()
 ```
 
 ```{code-cell} ipython3
-from prfmodel.models import init_dog_from_gaussian
+from prfmodel.models.prf import init_dog_from_gaussian
 
 # Convert Gaussian fit to DoG starting parameters
 dog_init_params = init_dog_from_gaussian(gaussian_center_params, sigma_ratio=2.0)
@@ -276,9 +276,8 @@ dog_init_params
 ```
 
 ```{code-cell} ipython3
-from prfmodel.adapter import Adapter
-from prfmodel.adapter import ParameterConstraint
-from prfmodel.fitters.sgd import SGDFitter
+from prfmodel.fitters import SGDFitter
+from prfmodel.fitters.adapter import Adapter, ParameterConstraint
 
 dog_adapter = Adapter(transforms=[
     ParameterConstraint(["amplitude_surround"], upper=0.0),
@@ -337,7 +336,7 @@ we pass a `ParameterConstraint(lower=0.0)` adapter.
 > converging to a poor local minimum.
 
 ```{code-cell} ipython3
-from prfmodel.models import init_dn_from_dog
+from prfmodel.models.prf import init_dn_from_dog
 
 # # Convert Gaussian fit to DN starting parameters
 dn_init_params = init_dn_from_dog(dog_init_params, baseline_normalization=10)
@@ -357,7 +356,7 @@ fig.legend();
 ```{code-cell} ipython3
 from keras import ops
 from keras.optimizers import Adam
-from prfmodel.adapter import Adapter, ParameterTransform
+from prfmodel.fitters.adapter import ParameterTransform
 
 # Constrain baseline_normalization > 0 during SGD to avoid division by zero
 dn_adapter = Adapter(transforms=[

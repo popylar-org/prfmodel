@@ -1,17 +1,16 @@
-"""Stimuli."""
+"""Containers that contain stimuli information as model input.
 
+This module contains stimuli classes that serve as input for models. Currently, only stimuli for population receptive
+field (pRF) models and connective field (CF) models are implemented.
+
+"""
+
+from ._cf import CFStimulus
+from ._prf import PRFStimulus
 from .base import Stimulus
-from .cf import CFStimulus
-from .prf import GridDimensionsError
-from .prf import PRFStimulus
-from .prf import animate_2d_prf_stimulus
-from .prf import plot_2d_prf_stimulus
 
 __all__ = [
     "CFStimulus",
-    "GridDimensionsError",
     "PRFStimulus",
     "Stimulus",
-    "animate_2d_prf_stimulus",
-    "plot_2d_prf_stimulus",
 ]

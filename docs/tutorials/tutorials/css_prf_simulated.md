@@ -67,7 +67,7 @@ We can visualize the stimulus using `animate_2d_stimulus`.
 
 ```{code-cell} ipython3
 from IPython.display import HTML
-from prfmodel.stimuli import animate_2d_prf_stimulus
+from prfmodel.plotting import animate_2d_prf_stimulus
 
 ani = animate_2d_prf_stimulus(stimulus, interval=25)  # Pause 25 ms between time frames
 
@@ -87,7 +87,8 @@ where $S(t,x,y)$ is the stimulus design and $G(x,y)$ is the pRF response. The CS
 `gain` (encoded response amplitude) and `n` (compression exponent). When $n < 1.0$, the encode response is compressed.
 
 ```{code-cell} ipython3
-from prfmodel.models import Gaussian2DPRFModel, CompressiveEncoder, PRFStimulusEncoder
+from prfmodel.models.compression import CompressiveEncoder
+from prfmodel.models.prf import Gaussian2DPRFModel, PRFStimulusEncoder
 
 compressive_encoder = CompressiveEncoder(
     encoding_model=PRFStimulusEncoder(),
@@ -158,7 +159,7 @@ Let's start with a grid search over `mu_x`, `mu_y`, and `sigma` using a normal
 `Gaussian2DPRFModel`.
 
 ```{code-cell} ipython3
-from prfmodel.models import Gaussian2DPRFModel
+from prfmodel.models.prf import Gaussian2DPRFModel
 import numpy as np
 
 gaussian_model = Gaussian2DPRFModel()
@@ -262,9 +263,9 @@ In the first SGD run, we restrict `n` to be fixed to its starting value.
 
 ```{code-cell} ipython3
 from keras import ops
-from prfmodel.adapter import Adapter, ParameterTransform
-from prfmodel.models import init_css_from_gaussian
+from prfmodel.models.prf import init_css_from_gaussian
 from prfmodel.fitters import SGDFitter
+from prfmodel.fitters.adapter import Adapter, ParameterTransform
 
 css_adapter = Adapter([
     ParameterTransform(["sigma", "n"], ops.log, ops.exp)

@@ -43,6 +43,8 @@ extensions = [
     "sphinx.ext.todo",
     "autoapi.extension",
     "sphinx.ext.viewcode",
+    "sphinx.ext.graphviz",
+    "sphinx.ext.inheritance_diagram",
     "sphinx_copybutton",
     "sphinx_design",
     "myst_nb",
