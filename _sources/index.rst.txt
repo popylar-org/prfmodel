@@ -20,6 +20,7 @@ Welcome to prfmodel's documentation. For a conceptual introduction to the packag
   installation
   getting_started
   tutorials/index
+  development/index
 
 Indices and tables
 ------------------

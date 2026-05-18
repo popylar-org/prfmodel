@@ -46,7 +46,7 @@ by Dumoulin and Wandell (2008).
 The `Gaussian2DPRFModel` class performs all these steps to make a combined prediction.
 
 ```{code-cell} ipython3
-from prfmodel.models import Gaussian2DPRFModel
+from prfmodel.models.prf import Gaussian2DPRFModel
 
 prf_model = Gaussian2DPRFModel()
 ```

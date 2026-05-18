@@ -1,0 +1,16 @@
+prfmodel.exceptions.ShapeError
+==============================
+
+.. py:exception:: prfmodel.exceptions.ShapeError(arg_name: str, arg_shape: tuple[int, Ellipsis], requirement: str)
+
+
+
+   Exception raised when an argument has an invalid shape.
+
+   :param arg_name: Name of the argument.
+   :type arg_name: str
+   :param arg_shape: Shape of the argument.
+   :type arg_shape: tuple of int
+   :param requirement: Description of the shape requirement that was violated (e.g. ``"must have at least 2 dimensions"``).
+   :type requirement: str
+

@@ -1,0 +1,66 @@
+prfmodel.impulse
+================
+
+.. py:module:: prfmodel.impulse
+
+.. autoapi-nested-parse::
+
+   Impulse response submodels.
+
+   This module contains impulse models that describe the physiological shape of neural response signals. For
+   example, in functional magnetic resonance imaging (fMRI), the physiological shape of the neural signal is captured by
+   the hemodynamic response function (HRF). Importantly, the impulse models implemented in this module are agnostic to the
+   neuroimaging method. Depending on the (default) parameters given by the user, they can be adapted to different
+   physiological shapes. Parameters of impulse models are typically treated as nuisance parameters.
+
+   Impulse models are intended to be used as submodels within canonical models, e.g.,
+   :class:`~prfmodel.models.prf.canonical.CanonicalPRFModel`.
+
+   The function :func:`~prfmodel.impulse.convolve_prf_impulse_response` can be used to convolve an impulse response with
+   a response from a population receptive field (pRF) response model.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :hidden:
+
+   /autoapi/prfmodel/impulse/base/index
+
+.. autoapisummary::
+
+   prfmodel.impulse.base
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   DerivativeTwoGammaImpulse </autoapi/prfmodel/impulse/DerivativeTwoGammaImpulse>
+   ShiftedGammaImpulse </autoapi/prfmodel/impulse/ShiftedGammaImpulse>
+   TwoGammaImpulse </autoapi/prfmodel/impulse/TwoGammaImpulse>
+
+.. autoapisummary::
+
+   prfmodel.impulse.DerivativeTwoGammaImpulse
+   prfmodel.impulse.ShiftedGammaImpulse
+   prfmodel.impulse.TwoGammaImpulse
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   convolve_prf_impulse_response </autoapi/prfmodel/impulse/convolve_prf_impulse_response>
+
+.. autoapisummary::
+
+   prfmodel.impulse.convolve_prf_impulse_response
+
+

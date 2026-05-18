@@ -5,7 +5,20 @@ prfmodel.models
 
 .. autoapi-nested-parse::
 
-   Population receptive and connective field models.
+   Neural response models.
+
+   This module contains models that map neural responses to input stimuli. These typically contain parameters of
+   interest. Currently, it implements population receptive field (pRF) and connective field (CF) models.
+
+   The :mod:`~prfmodel.models.base` submodule contains generic abstract base classes that pRF and CF models inherit from.
+
+   The :mod:`~prfmodel.models.compression` submodule contains generic classes to (de-) compress stimulus-encoded model
+   responses.
+
+   .. rubric:: Notes
+
+   All models in in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that requires them to implement a
+   :attr:`~prfmodel.utils.ModelProtocol.parameter_names` property.
 
 
 
@@ -16,100 +29,15 @@ Submodules
    :hidden:
 
    /autoapi/prfmodel/models/base/index
-   /autoapi/prfmodel/models/composite/index
-   /autoapi/prfmodel/models/css/index
-   /autoapi/prfmodel/models/div_norm/index
-   /autoapi/prfmodel/models/dog/index
-   /autoapi/prfmodel/models/encoding/index
-   /autoapi/prfmodel/models/gaussian/index
-   /autoapi/prfmodel/models/impulse/index
-   /autoapi/prfmodel/models/temporal/index
+   /autoapi/prfmodel/models/cf/index
+   /autoapi/prfmodel/models/compression/index
+   /autoapi/prfmodel/models/prf/index
 
 .. autoapisummary::
 
    prfmodel.models.base
-   prfmodel.models.composite
-   prfmodel.models.css
-   prfmodel.models.div_norm
-   prfmodel.models.dog
-   prfmodel.models.encoding
-   prfmodel.models.gaussian
-   prfmodel.models.impulse
-   prfmodel.models.temporal
-
-
-Exceptions
-----------
-
-.. toctree::
-   :hidden:
-
-   BatchDimensionError </autoapi/prfmodel/models/BatchDimensionError>
-
-.. autoapisummary::
-
-   prfmodel.models.BatchDimensionError
-
-
-Classes
--------
-
-.. toctree::
-   :hidden:
-
-   BaseComposite </autoapi/prfmodel/models/BaseComposite>
-   BaseEncoder </autoapi/prfmodel/models/BaseEncoder>
-   BaseImpulse </autoapi/prfmodel/models/BaseImpulse>
-   BaseModel </autoapi/prfmodel/models/BaseModel>
-   BaseResponse </autoapi/prfmodel/models/BaseResponse>
-   BaseTemporal </autoapi/prfmodel/models/BaseTemporal>
-   CFStimulusEncoder </autoapi/prfmodel/models/CFStimulusEncoder>
-   CompressiveEncoder </autoapi/prfmodel/models/CompressiveEncoder>
-   DivNormGaussian2DPRFModel </autoapi/prfmodel/models/DivNormGaussian2DPRFModel>
-   DivNormPRFModel </autoapi/prfmodel/models/DivNormPRFModel>
-   DoG2DPRFModel </autoapi/prfmodel/models/DoG2DPRFModel>
-   Gaussian2DCSSPRFModel </autoapi/prfmodel/models/Gaussian2DCSSPRFModel>
-   Gaussian2DPRFModel </autoapi/prfmodel/models/Gaussian2DPRFModel>
-   GaussianCFModel </autoapi/prfmodel/models/GaussianCFModel>
-   PRFStimulusEncoder </autoapi/prfmodel/models/PRFStimulusEncoder>
-
-.. autoapisummary::
-
-   prfmodel.models.BaseComposite
-   prfmodel.models.BaseEncoder
-   prfmodel.models.BaseImpulse
-   prfmodel.models.BaseModel
-   prfmodel.models.BaseResponse
-   prfmodel.models.BaseTemporal
-   prfmodel.models.CFStimulusEncoder
-   prfmodel.models.CompressiveEncoder
-   prfmodel.models.DivNormGaussian2DPRFModel
-   prfmodel.models.DivNormPRFModel
-   prfmodel.models.DoG2DPRFModel
-   prfmodel.models.Gaussian2DCSSPRFModel
-   prfmodel.models.Gaussian2DPRFModel
-   prfmodel.models.GaussianCFModel
-   prfmodel.models.PRFStimulusEncoder
-
-
-Functions
----------
-
-.. toctree::
-   :hidden:
-
-   encode_prf_response </autoapi/prfmodel/models/encode_prf_response>
-   init_css_from_gaussian </autoapi/prfmodel/models/init_css_from_gaussian>
-   init_dn_from_dog </autoapi/prfmodel/models/init_dn_from_dog>
-   init_dn_from_gaussian </autoapi/prfmodel/models/init_dn_from_gaussian>
-   init_dog_from_gaussian </autoapi/prfmodel/models/init_dog_from_gaussian>
-
-.. autoapisummary::
-
-   prfmodel.models.encode_prf_response
-   prfmodel.models.init_css_from_gaussian
-   prfmodel.models.init_dn_from_dog
-   prfmodel.models.init_dn_from_gaussian
-   prfmodel.models.init_dog_from_gaussian
+   prfmodel.models.cf
+   prfmodel.models.compression
+   prfmodel.models.prf
 
 

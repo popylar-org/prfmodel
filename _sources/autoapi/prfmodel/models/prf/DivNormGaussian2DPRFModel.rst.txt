@@ -1,0 +1,125 @@
+prfmodel.models.prf.DivNormGaussian2DPRFModel
+=============================================
+
+.. py:class:: prfmodel.models.prf.DivNormGaussian2DPRFModel(encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = DivNormAmplitude)
+
+
+
+   Divisive normalization pRF model with isotropic 2D Gaussian responses.
+
+   Convenience subclass of :class:`DivNormPRFModel` that uses
+   :class:`~prfmodel.models.gaussian.Gaussian2DPRFResponse` as the pRF model. Both the
+   activation and normalization pRFs are isotropic 2D Gaussians centered on the same
+   position (``mu_x``, ``mu_y``) but with different sizes (``sigma_activation``,
+   ``sigma_normalization``) and different amplitudes (``amplitude_activation``,
+   ``amplitude_normalization``).
+
+   :param encoding_model: An encoding model class or instance.
+   :type encoding_model: BaseEncoder or type, default=PRFStimulusEncoder
+   :param impulse_model: An impulse model class or instance.
+   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse
+   :param scaling_model: A scaling model class or instance.
+   :type scaling_model: BaseScaling or type or None, default=DivNormAmplitude
+
+   .. rubric:: Notes
+
+   With :math:`a = \text{amplitude\_activation}`, :math:`b = \text{baseline\_activation}`,
+   :math:`c = \text{amplitude\_normalization}`, and :math:`d = \text{baseline\_normalization}`,
+   the predicted response is:
+
+   .. math::
+
+       p_{\text{DN}} = \frac{(a G_1 \cdot S + b)}{(c G_2 \cdot S + d)} - \frac{b}{d}
+
+   The :math:`-b/d` term ensures a zero response in the absence of a stimulus.
+
+   Using the default impulse and scaling models, the following columns are expected in the
+   :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 26 12 47
+
+      * - Parameter
+        - Model
+        - Description
+      * - ``mu_x``
+        - pRF
+        - Shared x-coordinate of both Gaussian centers.
+      * - ``mu_y``
+        - pRF
+        - Shared y-coordinate of both Gaussian centers.
+      * - ``sigma_activation``
+        - pRF
+        - Standard deviation of the activation Gaussian.
+      * - ``sigma_normalization``
+        - pRF
+        - Standard deviation of the normalization Gaussian (must be >= ``sigma_activation``).
+      * - ``delay``
+        - Impulse
+        - Peak time of the positive gamma component (in seconds).
+      * - ``dispersion``
+        - Impulse
+        - Rate parameter of the positive gamma component.
+      * - ``undershoot``
+        - Impulse
+        - Peak time of the negative gamma component (in seconds).
+      * - ``u_dispersion``
+        - Impulse
+        - Rate parameter of the negative gamma component.
+      * - ``ratio``
+        - Impulse
+        - Weight of the negative gamma component.
+      * - ``weight_deriv``
+        - Impulse
+        - Weight of the derivative component.
+      * - ``amplitude_activation``
+        - Scaling
+        - Amplitude of the activation response (:math:`a`).
+      * - ``baseline_activation``
+        - Scaling
+        - Baseline of the activation response (:math:`b`).
+      * - ``amplitude_normalization``
+        - Scaling
+        - Amplitude of the normalization response (:math:`c`).
+      * - ``baseline_normalization``
+        - Scaling
+        - Baseline of the normalization response (:math:`d`; must be > 0).
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli._prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the DN model response to a stimulus.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with model parameters; one row per voxel.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape (num_voxels, num_frames).
+      :rtype: Tensor
+
+
+
+   .. py:method:: predict_responses(stimulus: prfmodel.stimuli._prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict each of the two responses before applying the DN formula.
+
+      :returns: Stacked predictions of shape (num_voxels, 2, num_frames), where axis 1 index 0
+                is the activation response and index 1 is the normalization response.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      Names of parameters used by the model.
+
+      Shared parameters appear once (no suffix). Response-specific parameters are suffixed
+      with ``_activation`` or ``_normalization``.
+

@@ -5,23 +5,23 @@ prfmodel.models.base
 
 .. autoapi-nested-parse::
 
-   Model base classes.
+   Generic abstract base classes for response, stimulus encoder, and canonical models.
 
+   Classes in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that requires them to implement a
+   :attr:`~prfmodel.utils.ModelProtocol.parameter_names` property.
 
+   They are abstract base classes, meaning that they
+   cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
+   shared by all child classes. For example, :class:`~prfmodel.models.base.BasePopulationResponse` defines that all child
+   classes must implement a :meth:`~prfmodel.models.base.BasePopulationResponse.__call__` method that takes a stimulus
+   and set of parameters as input. However, it leaves it up to each child class to define how input stimulus and
+   parameters are used to make model predictions.
 
-Exceptions
-----------
+   Classes in this module are also generic with respect to the input stimulus, that is, child classes can specify whether
+   they take a :class:`~prfmodel.stimuli.PRFStimulus` or :class:`~prfmodel.stimuli.CFStimulus` as input. In the case of
+   :meth:`~prfmodel.models.base.BasePopulationResponse`, child classes can choose the type of input stimulus in the
+   signature of :meth:`~prfmodel.models.base.BasePopulationResponse.__call__`.
 
-.. toctree::
-   :hidden:
-
-   BatchDimensionError </autoapi/prfmodel/models/base/BatchDimensionError>
-   ShapeError </autoapi/prfmodel/models/base/ShapeError>
-
-.. autoapisummary::
-
-   prfmodel.models.base.BatchDimensionError
-   prfmodel.models.base.ShapeError
 
 
 Classes
@@ -30,20 +30,14 @@ Classes
 .. toctree::
    :hidden:
 
-   BaseComposite </autoapi/prfmodel/models/base/BaseComposite>
-   BaseEncoder </autoapi/prfmodel/models/base/BaseEncoder>
-   BaseImpulse </autoapi/prfmodel/models/base/BaseImpulse>
-   BaseModel </autoapi/prfmodel/models/base/BaseModel>
-   BaseResponse </autoapi/prfmodel/models/base/BaseResponse>
-   BaseTemporal </autoapi/prfmodel/models/base/BaseTemporal>
+   BaseCanonical </autoapi/prfmodel/models/base/BaseCanonical>
+   BasePopulationResponse </autoapi/prfmodel/models/base/BasePopulationResponse>
+   BaseStimulusEncoder </autoapi/prfmodel/models/base/BaseStimulusEncoder>
 
 .. autoapisummary::
 
-   prfmodel.models.base.BaseComposite
-   prfmodel.models.base.BaseEncoder
-   prfmodel.models.base.BaseImpulse
-   prfmodel.models.base.BaseModel
-   prfmodel.models.base.BaseResponse
-   prfmodel.models.base.BaseTemporal
+   prfmodel.models.base.BaseCanonical
+   prfmodel.models.base.BasePopulationResponse
+   prfmodel.models.base.BaseStimulusEncoder
 
 

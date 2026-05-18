@@ -1,0 +1,29 @@
+prfmodel.plotting
+=================
+
+.. py:module:: prfmodel.plotting
+
+.. autoapi-nested-parse::
+
+   Plotting functions.
+
+   Contains miscallenous plotting and visualization functions. Currently, only functions for visualizing population
+   receptive field (pRF) stimuli are implemented.
+
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   animate_2d_prf_stimulus </autoapi/prfmodel/plotting/animate_2d_prf_stimulus>
+   plot_2d_prf_stimulus </autoapi/prfmodel/plotting/plot_2d_prf_stimulus>
+
+.. autoapisummary::
+
+   prfmodel.plotting.animate_2d_prf_stimulus
+   prfmodel.plotting.plot_2d_prf_stimulus
+
+

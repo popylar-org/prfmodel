@@ -1,0 +1,26 @@
+prfmodel.models.cf.canonical
+============================
+
+.. py:module:: prfmodel.models.cf.canonical
+
+.. autoapi-nested-parse::
+
+   Canonical connective field (CF) models.
+
+   This module contains models that combine multiple exchangeable submodels in a way that is considered "canonical".
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   CanonicalCFModel </autoapi/prfmodel/models/cf/canonical/CanonicalCFModel>
+
+.. autoapisummary::
+
+   prfmodel.models.cf.canonical.CanonicalCFModel
+
+

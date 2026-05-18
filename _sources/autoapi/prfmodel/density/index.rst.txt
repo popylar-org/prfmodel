@@ -1,0 +1,31 @@
+prfmodel.density
+================
+
+.. py:module:: prfmodel.density
+
+.. autoapi-nested-parse::
+
+   Density functions.
+
+   This modules contains helper functions to compute densities. Currently, it only contains gamma densities that are
+   used in the :py:mod:`~prfmodel.impulse` module.
+
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   derivative_gamma_density </autoapi/prfmodel/density/derivative_gamma_density>
+   gamma_density </autoapi/prfmodel/density/gamma_density>
+   shifted_gamma_density </autoapi/prfmodel/density/shifted_gamma_density>
+
+.. autoapisummary::
+
+   prfmodel.density.derivative_gamma_density
+   prfmodel.density.gamma_density
+   prfmodel.density.shifted_gamma_density
+
+

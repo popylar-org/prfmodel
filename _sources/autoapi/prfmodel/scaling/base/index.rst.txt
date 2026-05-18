@@ -1,0 +1,34 @@
+prfmodel.scaling.base
+=====================
+
+.. py:module:: prfmodel.scaling.base
+
+.. autoapi-nested-parse::
+
+   Abstract base classes for scaling models.
+
+   Classes in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that requires them to implement a
+   :attr:`~prfmodel.utils.ModelProtocol.parameter_names` property.
+
+   They are abstract base classes, meaning that they
+   cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
+   shared by all child classes. For example, :class:`~prfmodel.models.base.BaseScaling` defines that all child classes
+   must implement a :meth:`~prfmodel.models.base.BaseScaling.__call__` method that takes a model response and a set of
+   parameters as input. However, it leaves it up to each child class to define how input response parameters are used to
+   make model predictions.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   BaseScaling </autoapi/prfmodel/scaling/base/BaseScaling>
+
+.. autoapisummary::
+
+   prfmodel.scaling.base.BaseScaling
+
+

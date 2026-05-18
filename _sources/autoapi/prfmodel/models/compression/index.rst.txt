@@ -1,0 +1,34 @@
+prfmodel.models.compression
+===========================
+
+.. py:module:: prfmodel.models.compression
+
+.. autoapi-nested-parse::
+
+   Generic compressive models.
+
+   This module contains classes for (de-) compressing stimulus-encoded model responses.
+
+   Compressive models are intented to be used as encoding submodels within canonical models, e.g.,
+   :class:`~prfmodel.models.prf.canonical.CanonicalPRFModel`.
+
+   .. rubric:: Notes
+
+   Classes in this module are generic, that is, they can take arbitrary stimuli as input (e.g., they work both
+   for :class:`~prfmodel.stimuli.PRFStimulus` and :class:`~prfmodel.stimuli.CFStimulus`).
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   CompressiveEncoder </autoapi/prfmodel/models/compression/CompressiveEncoder>
+
+.. autoapisummary::
+
+   prfmodel.models.compression.CompressiveEncoder
+
+

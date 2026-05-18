@@ -14,14 +14,13 @@ prfmodel.stimuli.CFStimulus
                            number of rows and columns in `distance_matrix`.
    :type source_response: numpy.ndarray
 
-   :raises DistanceMatrixShapeError: If the distance matrix has more or less than two dimensions or dimensions of different size.
-   :raises DistanceMatrixSourceShapeError: If the source response has a first dimension with a different size than the number of rows or columns in the
+   :raises ShapeError: If the distance matrix is not a square 2D matrix.
+   :raises ShapeMismatchError: If the source response has a first dimension with a different size than the number of rows or columns in the
        distance matrix.
 
    .. rubric:: Examples
 
    >>> import numpy as np
-   >>> from prfmodel.stimuli.cf import CFStimulus
    >>> num_vertices, num_frames = 10, 20
    >>> distance_matrix = np.zeros((num_vertices, num_vertices))
    >>> source_response = np.ones((num_vertices, num_frames))

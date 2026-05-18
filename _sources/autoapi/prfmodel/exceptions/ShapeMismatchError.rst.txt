@@ -1,0 +1,18 @@
+prfmodel.exceptions.ShapeMismatchError
+======================================
+
+.. py:exception:: prfmodel.exceptions.ShapeMismatchError(arg1_name: str, arg1_shape: tuple[int, Ellipsis], arg2_name: str, arg2_shape: tuple[int, Ellipsis])
+
+
+
+   Exception raised when two arguments have incompatible shapes.
+
+   :param arg1_name: Name of the first argument.
+   :type arg1_name: str
+   :param arg1_shape: Shape of the first argument.
+   :type arg1_shape: tuple of int
+   :param arg2_name: Name of the second argument.
+   :type arg2_name: str
+   :param arg2_shape: Shape of the second argument.
+   :type arg2_shape: tuple of int
+

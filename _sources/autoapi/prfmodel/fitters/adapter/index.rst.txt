@@ -1,0 +1,31 @@
+prfmodel.fitters.adapter
+========================
+
+.. py:module:: prfmodel.fitters.adapter
+
+.. autoapi-nested-parse::
+
+   Adapters and parameter transformations.
+
+   This module contains functionality to transform parameters during model fitting
+   (e.g., to optimize a parameter on the log scale). Currently, this is only implemented for SGD.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   Adapter </autoapi/prfmodel/fitters/adapter/Adapter>
+   ParameterConstraint </autoapi/prfmodel/fitters/adapter/ParameterConstraint>
+   ParameterTransform </autoapi/prfmodel/fitters/adapter/ParameterTransform>
+
+.. autoapisummary::
+
+   prfmodel.fitters.adapter.Adapter
+   prfmodel.fitters.adapter.ParameterConstraint
+   prfmodel.fitters.adapter.ParameterTransform
+
+

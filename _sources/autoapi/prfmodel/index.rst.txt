@@ -15,22 +15,28 @@ Submodules
 .. toctree::
    :hidden:
 
-   /autoapi/prfmodel/adapter/index
-   /autoapi/prfmodel/backend/index
+   /autoapi/prfmodel/density/index
    /autoapi/prfmodel/examples/index
+   /autoapi/prfmodel/exceptions/index
    /autoapi/prfmodel/fitters/index
+   /autoapi/prfmodel/impulse/index
    /autoapi/prfmodel/models/index
+   /autoapi/prfmodel/plotting/index
+   /autoapi/prfmodel/scaling/index
    /autoapi/prfmodel/stimuli/index
    /autoapi/prfmodel/typing/index
    /autoapi/prfmodel/utils/index
 
 .. autoapisummary::
 
-   prfmodel.adapter
-   prfmodel.backend
+   prfmodel.density
    prfmodel.examples
+   prfmodel.exceptions
    prfmodel.fitters
+   prfmodel.impulse
    prfmodel.models
+   prfmodel.plotting
+   prfmodel.scaling
    prfmodel.stimuli
    prfmodel.typing
    prfmodel.utils
@@ -72,4 +78,8 @@ Package Contents
 
 
    Backend-specific tensor type.
+
+   This is a type alias (:class:`typing.TypeAlias`). Depending on the Keras backend the alias refers to a different type.
+   For the TensorFlow backend, it refers to :class:`tensorflow.Tensor`. For the PyTorch backend, it refers to
+   :class:`torch.Tensor`. For the JAX backend, it refers to :class:`jax.Array`.
 

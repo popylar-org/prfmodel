@@ -1,28 +1,39 @@
 API Reference
 =============
 
-This page contains auto-generated API reference documentation [#f1]_.
+This page contains auto-generated API reference documentation [#f1]_. While the API reference includes small examples
+for functions and classes, we recommend taking a look at the :ref:`tutorials` section for a detailed introduction to
+the package.
+
+The prfmodel package includes several submodules listed below. The most important functions and classes can be found
+in the :py:mod:`~prfmodel.models`, :py:mod:`~prfmodel.fitters`, and :py:mod:`~prfmodel.stimuli` submodules.
 
 .. toctree::
    :hidden:
    :maxdepth: 1
 
-   /autoapi/prfmodel/adapter/index
-   /autoapi/prfmodel/backend/index
+   /autoapi/prfmodel/density/index
    /autoapi/prfmodel/examples/index
+   /autoapi/prfmodel/exceptions/index
    /autoapi/prfmodel/fitters/index
+   /autoapi/prfmodel/impulse/index
    /autoapi/prfmodel/models/index
+   /autoapi/prfmodel/plotting/index
+   /autoapi/prfmodel/scaling/index
    /autoapi/prfmodel/stimuli/index
    /autoapi/prfmodel/typing/index
    /autoapi/prfmodel/utils/index
 
 .. autoapisummary::
 
-   prfmodel.adapter
-   prfmodel.backend
+   prfmodel.density
    prfmodel.examples
+   prfmodel.exceptions
    prfmodel.fitters
+   prfmodel.impulse
    prfmodel.models
+   prfmodel.plotting
+   prfmodel.scaling
    prfmodel.stimuli
    prfmodel.typing
    prfmodel.utils

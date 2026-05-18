@@ -5,7 +5,20 @@ prfmodel.fitters
 
 .. autoapi-nested-parse::
 
-   Model fitters.
+   Fit models to data and estimate model parameters.
+
+   This module contains classes for fitting models implemented in the :mod:`~prfmodel.models` module to data.
+
+   Currently, only three fitting methods are available: Grid search, least-squares, and stochastic gradient descent (SGD).
+
+   The fitting methods can be combined: For examples, the parameter estimates from the grid search can be augmented
+   with least-squares estimates or used as the starting point for SGD for finetuning the estimates. See
+   :ref:`tutorials` for details.
+
+   Each fitting method returns a history object that stores final loss scores for all data units.
+
+   The :mod:`~prfmodel.fitters.adapter` submodule contains functionality to transform parameters during model fitting
+   (e.g., to optimize a parameter on the log scale). Currently, this is only implemented for SGD.
 
 
 
@@ -15,15 +28,11 @@ Submodules
 .. toctree::
    :hidden:
 
-   /autoapi/prfmodel/fitters/grid/index
-   /autoapi/prfmodel/fitters/linear/index
-   /autoapi/prfmodel/fitters/sgd/index
+   /autoapi/prfmodel/fitters/adapter/index
 
 .. autoapisummary::
 
-   prfmodel.fitters.grid
-   prfmodel.fitters.linear
-   prfmodel.fitters.sgd
+   prfmodel.fitters.adapter
 
 
 Classes
@@ -33,13 +42,19 @@ Classes
    :hidden:
 
    GridFitter </autoapi/prfmodel/fitters/GridFitter>
+   GridHistory </autoapi/prfmodel/fitters/GridHistory>
    LeastSquaresFitter </autoapi/prfmodel/fitters/LeastSquaresFitter>
+   LeastSquaresHistory </autoapi/prfmodel/fitters/LeastSquaresHistory>
    SGDFitter </autoapi/prfmodel/fitters/SGDFitter>
+   SGDHistory </autoapi/prfmodel/fitters/SGDHistory>
 
 .. autoapisummary::
 
    prfmodel.fitters.GridFitter
+   prfmodel.fitters.GridHistory
    prfmodel.fitters.LeastSquaresFitter
+   prfmodel.fitters.LeastSquaresHistory
    prfmodel.fitters.SGDFitter
+   prfmodel.fitters.SGDHistory
 
 

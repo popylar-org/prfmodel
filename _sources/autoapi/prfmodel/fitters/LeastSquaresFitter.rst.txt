@@ -1,16 +1,16 @@
 prfmodel.fitters.LeastSquaresFitter
 ===================================
 
-.. py:class:: prfmodel.fitters.LeastSquaresFitter(model: prfmodel.models.BaseComposite, stimulus: prfmodel.stimuli.Stimulus, dtype: str | None = None)
+.. py:class:: prfmodel.fitters.LeastSquaresFitter(model: prfmodel.models.base.BaseCanonical, stimulus: prfmodel.stimuli.Stimulus, dtype: str | None = None)
 
    Fit population receptive field models with least squares.
 
    Estimates model parameters by minimizing the sum of least squares between model predictions and data.
 
    :param model: A model instance that can be fit to data.
-                 The model must implement the :meth:`__call__` method to make predictions that can be
-                 compared to data.
-   :type model: BaseModel
+                 The model must implement the :meth:`~prfmodel.models.base.BaseCanonical.__call__` method to make
+                 predictions that can be compared to data.
+   :type model: BaseCanonical
    :param stimulus: Stimulus object.
    :type stimulus: Stimulus
    :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
@@ -33,8 +33,7 @@ prfmodel.fitters.LeastSquaresFitter
    >>> import numpy as np
    >>> import pandas as pd
    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-   >>> from prfmodel.models import Gaussian2DPRFModel
-   >>> from prfmodel.fitters.linear import LeastSquaresFitter
+   >>> from prfmodel.models.prf import Gaussian2DPRFModel
    >>> stimulus = load_2d_prf_bar_stimulus()
    >>> print(stimulus)
    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])

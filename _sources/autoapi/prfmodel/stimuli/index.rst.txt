@@ -5,7 +5,10 @@ prfmodel.stimuli
 
 .. autoapi-nested-parse::
 
-   Stimuli.
+   Containers that contain stimuli information as model input.
+
+   This module contains stimuli classes that serve as input for models. Currently, only stimuli for population receptive
+   field (pRF) models and connective field (CF) models are implemented.
 
 
 
@@ -16,27 +19,10 @@ Submodules
    :hidden:
 
    /autoapi/prfmodel/stimuli/base/index
-   /autoapi/prfmodel/stimuli/cf/index
-   /autoapi/prfmodel/stimuli/prf/index
 
 .. autoapisummary::
 
    prfmodel.stimuli.base
-   prfmodel.stimuli.cf
-   prfmodel.stimuli.prf
-
-
-Exceptions
-----------
-
-.. toctree::
-   :hidden:
-
-   GridDimensionsError </autoapi/prfmodel/stimuli/GridDimensionsError>
-
-.. autoapisummary::
-
-   prfmodel.stimuli.GridDimensionsError
 
 
 Classes
@@ -54,20 +40,5 @@ Classes
    prfmodel.stimuli.CFStimulus
    prfmodel.stimuli.PRFStimulus
    prfmodel.stimuli.Stimulus
-
-
-Functions
----------
-
-.. toctree::
-   :hidden:
-
-   animate_2d_prf_stimulus </autoapi/prfmodel/stimuli/animate_2d_prf_stimulus>
-   plot_2d_prf_stimulus </autoapi/prfmodel/stimuli/plot_2d_prf_stimulus>
-
-.. autoapisummary::
-
-   prfmodel.stimuli.animate_2d_prf_stimulus
-   prfmodel.stimuli.plot_2d_prf_stimulus
 
 

@@ -1,0 +1,75 @@
+prfmodel.models.base.BaseCanonical
+==================================
+
+.. py:class:: prfmodel.models.base.BaseCanonical(**models: prfmodel.utils.ModelProtocol | None)
+
+
+
+   Generic abstract base class for creating canonical models.
+
+   A canonical model combines multiple submodels and defines how they interact to make a combined prediction.
+
+   :param \*\*models: Submodels to be combined into the canonical model. All submodel classes must inherit from
+                      :class:`~prfmodel.utils.ModelProtocol`.
+
+   :raises TypeError: If submodel classes do not inherit from :class:`~prfmodel.utils.ModelProtocol`.
+
+   .. rubric:: Notes
+
+   Cannot be instantiated on its own. Can only be used as a parent class to create custom canonical models.
+   Subclasses must override the abstract :meth:`__call__` method and must be defined
+   with a specific stimulus type.
+
+   .. rubric:: Examples
+
+   Create a canonical model that combines a :class:`~prfmodel.models.prf.Gaussian2DPRFResponse` and a
+   :class:`~prfmodel.models.prf.PRFStimulusEncoder`. The :attr:`parameter_names` property automatically
+   aggregates the unique parameter names from all submodels.
+
+   >>> import pandas as pd
+   >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+   >>> from prfmodel.stimuli import PRFStimulus
+   >>> from prfmodel.models.prf import Gaussian2DPRFResponse, PRFStimulusEncoder
+   >>> class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
+   ...     def __call__(self, stimulus, parameters, dtype=None):
+   ...         response = self.models["prf_model"](stimulus, parameters, dtype=dtype)
+   ...         return self.models["encoding_model"](stimulus, response, parameters, dtype=dtype)
+   >>> model = CanonicalPRFModel(
+   ...     prf_model=Gaussian2DPRFResponse(),
+   ...     encoding_model=PRFStimulusEncoder(),
+   ... )
+   >>> model.parameter_names
+   ['mu_y', 'mu_x', 'sigma']
+   >>> stimulus = load_2d_prf_bar_stimulus()
+   >>> params = pd.DataFrame({"mu_y": [0.0, 1.0], "mu_x": [1.0, 0.0], "sigma": [1.0, 1.5]})
+   >>> resp = model(stimulus, params)
+   >>> print(resp.shape)  # (num_units, num_frames)
+   (2, 200)
+
+
+   .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+      :abstractmethod:
+
+
+      Predict a canonical model response to a stimulus.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters that are used by the submodels.
+

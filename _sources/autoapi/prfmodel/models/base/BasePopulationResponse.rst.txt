@@ -1,0 +1,83 @@
+prfmodel.models.base.BasePopulationResponse
+===========================================
+
+.. py:class:: prfmodel.models.base.BasePopulationResponse
+
+
+
+   Generic abstract base class for neuron population response models.
+
+   A neuron population response model takes a stimulus and parameters as input and predicts a population response.
+
+   .. rubric:: Notes
+
+   This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
+   models. Subclasses must override the abstract :attr:`parameter_names` and :meth:`__call__` method.
+   They must be defined with a specific stimulus type. See :mod:`~prfmodel.models.base` for details.
+
+   .. rubric:: Examples
+
+   Reimplement a 2D isotropic Gaussian response model for a :class:`~prfmodel.stimuli.PRFStimulus`.
+
+   >>> import pandas as pd
+   >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+   >>> from prfmodel.stimuli import PRFStimulus
+   >>> from prfmodel.models.prf import predict_gaussian_response
+   >>> from prfmodel.utils import convert_parameters_to_tensor, get_dtype
+   >>> from keras import ops
+   >>> # Define custom child class
+   >>> class CustomGaussian2DResponse(BasePopulationResponse[PRFStimulus]):
+   ...     @property
+   ...     def parameter_names(self):
+   ...         return ["mu_y", "mu_x", "sigma"]
+   ...     def __call__(self, stimulus, parameters, dtype=None):
+   ...         dtype = get_dtype(dtype)
+   ...         mu = convert_parameters_to_tensor(parameters[["mu_y", "mu_x"]], dtype=dtype)
+   ...         sigma = convert_parameters_to_tensor(parameters[["sigma"]], dtype=dtype)
+   ...         grid = ops.convert_to_tensor(stimulus.grid, dtype=dtype)
+   ...         return predict_gaussian_response(grid, mu, sigma)
+   >>> # Load example pRF stimulus
+   >>> stimulus = load_2d_prf_bar_stimulus()
+   >>> # Define parameters
+   >>> params = pd.DataFrame({
+   ...     "mu_y": [0.0, 1.0],
+   ...     "mu_x": [1.0, 0.0],
+   ...     "sigma": [1.0, 1.5],
+   ... })
+   >>> # Create child model instance
+   >>> model = CustomGaussian2DResponse()
+   >>> # Make model prediction for example stimulus
+   >>> resp = model(stimulus, params)
+   >>> print(resp.shape)  # (num_units, num_y, num_x)
+   (2, 101, 101)
+
+
+   .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+      :abstractmethod:
+
+
+      Predict the model response for a stimulus.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape `(num_units, ...)` and dtype `dtype`. The number of units is the
+                number of rows in `parameters`. The number and size of other axes depends on the stimulus.
+      :rtype: :data:`prfmodel.typing.Tensor`
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
+
