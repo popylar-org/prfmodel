@@ -43,7 +43,7 @@ class BaseImpulse(ModelProtocol):
         If `None`, no normalization is performed.
     default_parameters : dict of float or str, optional
         Dictionary with scalar default parameter values or name of default parameter set.
-        Dictionary keys must be valid parameter names.
+        Dictionary keys must be valid parameter names. Default values can be overriden in the :meth:`__call__` method.
 
     Notes
     -----
@@ -108,7 +108,8 @@ class BaseImpulse(ModelProtocol):
             parameters = parameters.copy()
 
             for key, val in self.default_parameters.items():
-                parameters[key] = val
+                if key not in parameters.columns:
+                    parameters[key] = val
 
         return parameters
 
@@ -125,7 +126,7 @@ class BaseImpulse(ModelProtocol):
 
         Parameters
         ----------
-        %(parameters)s
+        %(parameters)s Parameter values override default parameters.
         %(dtype)s
 
         Returns
