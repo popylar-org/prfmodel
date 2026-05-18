@@ -295,19 +295,19 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
          - Standard deviation of the normalization Gaussian (must be >= ``sigma_activation``).
        * - ``delay``
          - Impulse
-         - Peak time of the positive gamma component (in seconds).
+         - Peak time of the positive gamma component (in seconds; optional).
        * - ``dispersion``
          - Impulse
-         - Rate parameter of the positive gamma component.
+         - Rate parameter of the positive gamma component (optional).
        * - ``undershoot``
          - Impulse
-         - Peak time of the negative gamma component (in seconds).
+         - Peak time of the negative gamma component (in seconds; optional).
        * - ``u_dispersion``
          - Impulse
-         - Rate parameter of the negative gamma component.
+         - Rate parameter of the negative gamma component (optional).
        * - ``ratio``
          - Impulse
-         - Weight of the negative gamma component.
+         - Weight of the negative gamma component (optional).
        * - ``weight_deriv``
          - Impulse
          - Weight of the derivative component.

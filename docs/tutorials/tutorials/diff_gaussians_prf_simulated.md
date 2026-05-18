@@ -104,7 +104,9 @@ prf_model.parameter_names
 
 The parameters `mu_x` and `mu_y` define the center of the pRF. `sigma_center` and `sigma_surround` set the widths of the
 center and surround Gaussians (a hard requirement is that `sigma_surround` must be larger than `sigma_center`). The parameters `delay`, `dispersion`,
-`undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the haemodynamic impulse response.
+`undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the haemodynamic impulse response; the two-gamma
+parameters (`delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`) default to the Glover HRF parameter set (see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so
+we only set `weight_deriv` here.
 `amplitude_center` scales the center response (positive), `amplitude_surround` scales the surround (negative, with
 `|amplitude_surround| < amplitude_center`), and `baseline` shifts the whole response. We store the parameter values in a
 `pandas.DataFrame`.
@@ -118,11 +120,7 @@ true_params = pd.DataFrame(
         "mu_y": [1.45],
         "sigma_center": [1.35],
         "sigma_surround": [5.1], # sigma_surround should be larger than or equal to sigma_center
-        "delay": [6.0],
-        "dispersion": [0.9],
-        "undershoot": [12.0],
-        "u_dispersion": [0.9],
-        "ratio": [0.48],
+        # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
         "weight_deriv": [-0.5],
         "baseline": [10.0],
         "amplitude_center": [1.2],
@@ -170,11 +168,7 @@ param_ranges_gaussian = {
     "mu_x": np.linspace(-3.0, 3.0, 10),
     "mu_y": np.linspace(-3.0, 3.0, 10),
     "sigma": np.linspace(0.5, 3.0, 10),
-    "delay": [6.0],
-    "dispersion": [0.9],
-    "undershoot": [12.0],
-    "u_dispersion": [0.9],
-    "ratio": [0.48],
+    # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-0.5],
     "baseline": [0.0],
     "amplitude": [1.0],
@@ -296,7 +290,7 @@ sgd_fitter = SGDFitter(
 sgd_history, sgd_params = sgd_fitter.fit(
     data=simulated_response,
     init_parameters=dog_init_params,
-    fixed_parameters=["delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv"],
+    fixed_parameters=["weight_deriv"],
 )
 ```
 

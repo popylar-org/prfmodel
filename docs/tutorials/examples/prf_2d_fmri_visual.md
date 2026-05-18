@@ -349,22 +349,19 @@ impulse_model = DerivativeTwoGammaImpulse(
 )
 ```
 
-We can visualize the predicted impulse response for a set of default parameters.
+We can visualize the predicted impulse response. The two-gamma parameters (`delay`, `dispersion`, `undershoot`,
+`u_dispersion`, `ratio`) default to the Glover HRF parameter set
+(see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only need to set `weight_deriv`.
 
 ```{code-cell} ipython3
 import pandas as pd
 
-# Define default parameters for impulse response
+# Only weight_deriv is set; the two-gamma parameters use the model's default Glover HRF values
 impulse_default_params = pd.DataFrame({
-    "delay": [6.0],
-    "dispersion": [0.9],
-    "undershoot": [12.0],
-    "u_dispersion": [0.9],
-    "ratio": [0.48],
     "weight_deriv": [-0.5],
 })
 
-# Predict impulse response with default parameters
+# Predict impulse response (two-gamma parameters use the default Glover HRF values)
 impulse_response = np.asarray(impulse_model(impulse_default_params))
 
 fig = px.line(
@@ -438,18 +435,15 @@ our model.
 
 Let's start with the grid search by defining ranges of `mu_x`, `mu_y`, and `sigma` that we want to construct a grid
 of parameter values from. For `baseline` and `amplitude`, we only provide a single value so that they will stay constant
-across the entire grid. The parameters of the HRF model also remain constant at their default value.
+across the entire grid. The two-gamma parameters of the HRF model are omitted entirely: the impulse model supplies
+them from its default Glover HRF parameter set.
 
 ```{code-cell} ipython3
 param_ranges = {
     "mu_x": np.linspace(-10, 10, 20),  # Range of visual field in experiment
     "mu_y": np.linspace(-10, 10, 20),
     "sigma": np.linspace(0.005, 10.0, 20),
-    "delay": [6.0],
-    "dispersion": [0.9],
-    "undershoot": [12.0],
-    "u_dispersion": [0.9],
-    "ratio": [0.48],
+    # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-0.5],
     "baseline": [0.0],
     "amplitude": [1.0],

@@ -76,13 +76,11 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
 
     Examples
     --------
+    The two-gamma parameters (``delay``, ``dispersion``, ``undershoot``, ``u_dispersion``, ``ratio``) default to
+    the Glover HRF parameter set, so only ``weight_deriv`` needs to be supplied here.
+
     >>> import pandas as pd
     >>> params = pd.DataFrame({
-    ...     "delay": [2.0, 1.0, 1.5],
-    ...     "dispersion": [1.0, 1.0, 1.0],
-    ...     "undershoot": [1.5, 2.0, 1.0],
-    ...     "u_dispersion": [1.0, 1.0, 1.0],
-    ...     "ratio": [0.7, 0.2, 0.5],
     ...     "weight_deriv": [0.5, -0.7, 0.9],
     ... })
     >>> impulse_model = DerivativeTwoGammaImpulse(

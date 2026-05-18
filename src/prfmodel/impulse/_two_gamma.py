@@ -65,6 +65,9 @@ class TwoGammaImpulse(BaseImpulse):
 
     Examples
     --------
+    All two-gamma parameters default to the Glover HRF parameter set. To supply custom values instead, opt out of
+    the defaults with ``default_parameters=None``.
+
     >>> import pandas as pd
     >>> params = pd.DataFrame({
     ...     "delay": [2.0, 1.0, 1.5],
@@ -74,7 +77,8 @@ class TwoGammaImpulse(BaseImpulse):
     ...     "ratio": [0.7, 0.2, 0.5],
     ... })
     >>> impulse_model = TwoGammaImpulse(
-    ...     duration=100.0  # 100 seconds
+    ...     duration=100.0,  # 100 seconds
+    ...     default_parameters=None,
     ... )
     >>> resp = impulse_model(params)
     >>> print(resp.shape)  # (num_units, num_frames)
