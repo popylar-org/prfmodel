@@ -32,8 +32,9 @@ class ShiftedGammaImpulse(BaseImpulse):
     norm : str, optional, default="sum"
         The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
         no normalization is performed.
-    default_parameters : dict of float, optional
-        Dictionary with scalar default parameter values. Keys must be valid parameter names.
+    default_parameters : dict of float or str, optional
+        Dictionary with scalar default parameter values or name of default parameter set.
+        Dictionary keys must be valid parameter names. Default values can be overriden in the :meth:`__call__` method.
 
     See Also
     --------
@@ -69,12 +70,10 @@ class ShiftedGammaImpulse(BaseImpulse):
     ...     "dispersion": [1.0, 1.0, 1.0],
     ...     "shift": [1.0, 2.0, 5.0],
     ... })
-    >>> impulse_model = ShiftedGammaImpulse(
-    ...     duration=100.0  # 100 seconds
-    ... )
+    >>> impulse_model = ShiftedGammaImpulse()
     >>> resp = impulse_model(params)
     >>> print(resp.shape)  # (num_units, num_frames)
-    (3, 100)
+    (3, 32)
 
     """
 
@@ -95,7 +94,7 @@ class ShiftedGammaImpulse(BaseImpulse):
 
         Parameters
         ----------
-        %(parameters)s
+        %(parameters)s Parameter values override default parameters.
         %(dtype)s
 
         Returns
