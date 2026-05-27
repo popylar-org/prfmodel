@@ -9,10 +9,12 @@ Scaling models are intended to be used as submodels within canonical models, e.g
 """
 
 from ._amplitude import BaselineAmplitude
+from ._baseline import Baseline
 from ._div_norm_amplitude import DivNormAmplitude
 from ._dog_amplitude import DoGAmplitude
 
 __all__ = [
+    "Baseline",
     "BaselineAmplitude",
     "DivNormAmplitude",
     "DoGAmplitude",
