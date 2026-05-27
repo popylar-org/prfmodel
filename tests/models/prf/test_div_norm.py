@@ -7,10 +7,10 @@ from pytest_regressions.num_regression import NumericRegressionFixture
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.prf import DivNormGaussian2DPRFModel
-from prfmodel.models.prf import DivNormPRFModel
 from prfmodel.models.prf import Gaussian2DPRFResponse
 from prfmodel.models.prf import init_dn_from_gaussian
-from prfmodel.scaling import DivNormAmplitude
+from prfmodel.models.prf.canonical import DivNormPRFModel
+from prfmodel.scaling import Baseline
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
@@ -32,7 +32,7 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
     @pytest.fixture
     def temporal_model(self):
         """Temporal model object."""
-        return DivNormAmplitude()
+        return Baseline()
 
     @pytest.fixture
     def params(self):
@@ -43,16 +43,12 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
                 "mu_y": [1.0, 0.0, 0.0],
                 "sigma_activation": [1.0, 1.5, 2.0],
                 "sigma_normalization": [2.0, 3.0, 4.0],
-                "delay": [6.0, 7.0, 5.0],
-                "dispersion": [0.9, 1.0, 0.8],
-                "undershoot": [12.0, 11.0, 13.0],
-                "u_dispersion": [0.9, 1.0, 0.8],
-                "ratio": [0.48, 0.48, 0.48],
-                "weight_deriv": [0.5, 0.5, 0.5],
+                "weight_deriv": [-0.5, -0.5, -0.5],
                 "amplitude_activation": [1.1, 1.0, 0.9],
                 "baseline_activation": [0.0, 0.1, 0.5],
-                "amplitude_normalization": [1.0, 1.0, 1.0],
-                "baseline_normalization": [1.0, 1.0, 1.0],
+                "amplitude_normalization": [10.0, 5.0, 20.0],
+                "baseline_normalization": [20.0, 10.0, 5.0],
+                "baseline": [-0.5, 0.5, 2.0],
             },
         )
 
@@ -60,10 +56,19 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
         self,
         prf_model: DivNormGaussian2DPRFModel,
         impulse_model: DerivativeTwoGammaImpulse,
-        temporal_model: DivNormAmplitude,
+        temporal_model: Baseline,
     ):
         """Test that parameter names of composite model match parameter names of submodels."""
-        expected = ["mu_y", "mu_x", "sigma_activation", "sigma_normalization"]
+        expected = [
+            "amplitude_activation",
+            "amplitude_normalization",
+            "baseline_activation",
+            "baseline_normalization",
+            "mu_y",
+            "mu_x",
+            "sigma_activation",
+            "sigma_normalization",
+        ]
         expected.extend(impulse_model.parameter_names)
         expected.extend(temporal_model.parameter_names)
 
@@ -72,12 +77,12 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
     @pytest.mark.parametrize(
         ("impulse_model", "temporal_model"),
         [
-            (DerivativeTwoGammaImpulse(), DivNormAmplitude()),
-            (DerivativeTwoGammaImpulse, DivNormAmplitude),
+            (DerivativeTwoGammaImpulse(), Baseline()),
+            (DerivativeTwoGammaImpulse, Baseline),
             (DerivativeTwoGammaImpulse(), None),
-            (None, DivNormAmplitude()),
+            (None, Baseline()),
             (DerivativeTwoGammaImpulse, None),
-            (None, DivNormAmplitude),
+            (None, Baseline),
             (None, None),
         ],
     )
@@ -98,17 +103,6 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
 
         assert resp.shape == (params.shape[0], stimulus.design.shape[0])
 
-    def test_predict_responses(
-        self,
-        prf_model: DivNormGaussian2DPRFModel,
-        stimulus: PRFStimulus,
-        params: pd.DataFrame,
-    ):
-        """Test that predict_responses returns stacked tensor with correct shape."""
-        resp = prf_model.predict_responses(stimulus, params)
-
-        assert resp.shape == (params.shape[0], 2, stimulus.design.shape[0])
-
     def test_activation_normalization_suffixes(self, prf_model: DivNormGaussian2DPRFModel):
         """Test that sigma uses activation/normalization suffixes, not center/surround."""
         assert "sigma_activation" in prf_model.parameter_names
@@ -116,7 +110,7 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
         assert "sigma_center" not in prf_model.parameter_names
         assert "sigma_surround" not in prf_model.parameter_names
 
-    @pytest.mark.parametrize("temporal_model", [None, DivNormAmplitude()])
+    @pytest.mark.parametrize("temporal_model", [None, Baseline()])
     @pytest.mark.parametrize("impulse_model", [None, DerivativeTwoGammaImpulse()])
     def test_predict_regression(
         self,
@@ -306,6 +300,7 @@ class TestDivNormPRFModel(PRFStimulusSetup):
                 "baseline_activation": [0.0, 0.1],
                 "amplitude_normalization": [1.0, 1.0],
                 "baseline_normalization": [1.0, 1.0],
+                "baseline": [-0.5, 0.5],
             },
         )
 
@@ -350,7 +345,7 @@ class TestDivNormPRFModel(PRFStimulusSetup):
 
     def test_invalid_shared_param_raises(self):
         """Providing a shared_param not in both pRF models raises ValueError."""
-        with pytest.raises(ValueError, match="shared_params"):
+        with pytest.raises(ValueError, match="Shared parameters"):
             DivNormPRFModel(
                 activation_prf_model=Gaussian2DPRFResponse(),
                 normalization_prf_model=Gaussian2DPRFResponse(),
@@ -366,16 +361,6 @@ class TestDivNormPRFModel(PRFStimulusSetup):
         )
         resp = model(stimulus, params)
         assert resp.shape == (params.shape[0], stimulus.design.shape[0])
-
-    def test_predict_responses_shape(self, stimulus: PRFStimulus, params: pd.DataFrame):
-        """predict_responses returns (num_voxels, 2, num_frames)."""
-        model = DivNormPRFModel(
-            activation_prf_model=Gaussian2DPRFResponse(),
-            normalization_prf_model=Gaussian2DPRFResponse(),
-            shared_params=["mu_x", "mu_y"],
-        )
-        stacked = model.predict_responses(stimulus, params)
-        assert stacked.shape == (params.shape[0], 2, stimulus.design.shape[0])
 
     def test_matches_gaussian2d_subclass(self, stimulus: PRFStimulus, params: pd.DataFrame):
         """DivNormPRFModel with two Gaussians and shared mu_x/mu_y produces same output as DivNormGaussian2DPRFModel."""
