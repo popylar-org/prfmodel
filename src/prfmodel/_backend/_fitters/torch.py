@@ -1,5 +1,6 @@
 """PyTorch fitter implementations."""
 
+import pandas as pd
 import torch
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
@@ -14,14 +15,20 @@ class TorchSGDFitter(BaseSGDFitter):
     def _get_state(self) -> SGDState:
         return None
 
-    def _update_model_weights(self, x: Stimulus, y: Tensor, state: SGDState) -> tuple[dict, SGDState]:
+    def _update_model_weights(
+        self,
+        x: Stimulus,
+        y: Tensor,
+        state: SGDState,
+        regressors: pd.DataFrame | None,
+    ) -> tuple[dict, SGDState]:
         self.zero_grad()
 
         params = ParamsDict({v.name: v.value for v in self.trainable_variables + self.non_trainable_variables})
         # Make model predictions with parameters on natural scale
         params = self.adapter.inverse(params)
 
-        y_pred = self.model(x, params, dtype=self.dtype)
+        y_pred = self.model(x, params, regressors=regressors, dtype=self.dtype)
 
         loss = self.compute_loss(y=y, y_pred=y_pred)
 

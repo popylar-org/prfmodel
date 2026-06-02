@@ -10,6 +10,7 @@ from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
@@ -207,19 +208,21 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
 
     Parameters
     ----------
-    %(model_encoding)s
+    %(model_encoding_prf)s
     %(model_impulse)s
     %(model_scaling)s
+    %(model_regressors)s
 
     Notes
     -----
-    The simple composite model follows five steps [1]_:
+    The canonical model follows the following steps: [1]_:
 
     1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
     2. The encoding model encodes the neuron population response with the stimulus design.
     3. An impulse model generates an impulse response.
     4. The encoded neuron population response is convolved with the impulse response.
     5. The scaling model modifies the convolved response.
+    6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 
     Using the default impulse and scaling models, the following columns are expected in the
     :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
@@ -309,10 +312,12 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
         encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
             prf_model=Gaussian2DPRFResponse(),
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             scaling_model=scaling_model,
+            regressors_model=regressors_model,
         )

@@ -155,6 +155,7 @@ class SGDFitter(BackendSGDFitter):
         init_parameters: pd.DataFrame,
         fixed_parameters: Sequence[str] | None = None,
         num_steps: int = 1000,
+        regressors: pd.DataFrame | None = None,
     ) -> tuple[SGDHistory, pd.DataFrame]:
         """
         Fit a population receptive field model to target data.
@@ -172,6 +173,9 @@ class SGDFitter(BackendSGDFitter):
             during the fitting. If `None` (the default), all parameters are optimized during fitting.
         num_steps : int, default=1000
             Number of optimization steps.
+        regressors : pandas.DataFrame, optional
+            Runtime regressor design data forwarded to every model prediction call. Must be provided when the model
+            has a ``regressors_model`` configured.
 
         Returns
         -------
@@ -201,7 +205,7 @@ class SGDFitter(BackendSGDFitter):
 
         with tqdm(range(num_steps)) as pbar:
             for step in pbar:
-                logs, state = self._update_model_weights(self.stimulus, data, state)
+                logs, state = self._update_model_weights(self.stimulus, data, state, regressors)
 
                 if logs:
                     display_logs = {}

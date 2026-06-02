@@ -7,6 +7,7 @@ from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
@@ -103,16 +104,17 @@ class GaussianCFModel(CanonicalCFModel):
 
     Parameters
     ----------
-    %(model_encoding)s
+    %(model_encoding_cf)s
     %(model_scaling)s
 
     Notes
     -----
-    The simple composite model follows three steps [1]_:
+    The canonical model follows the following steps [1]_:
 
     1. The Gaussian connective field response model makes a prediction for the stimulus distance matrix.
     2. The encoding model encodes the connective field response with the source response.
     3. The scaling model modifies the encoded response.
+    4. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 
     Using the default scaling model, the following columns are expected in the
     :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
@@ -181,9 +183,11 @@ class GaussianCFModel(CanonicalCFModel):
         self,
         encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = CFStimulusEncoder,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
             cf_model=GaussianCFResponse(),
             encoding_model=encoding_model,
             scaling_model=scaling_model,
+            regressors_model=regressors_model,
         )

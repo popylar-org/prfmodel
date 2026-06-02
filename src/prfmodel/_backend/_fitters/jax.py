@@ -3,6 +3,7 @@
 import jax
 import jax.numpy as jnp
 import keras
+import pandas as pd
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
@@ -13,12 +14,13 @@ from .base import SGDState
 class JAXSGDFitter(BaseSGDFitter):
     """JAX stochastic gradient descent fitter."""
 
-    def _compute_loss_and_updates(
+    def _compute_loss_and_updates(  # noqa: PLR0913 (too many arguments)
         self,
         trainable_variables: list,
         non_trainable_variables: list,
         x: Stimulus,
         y: Tensor,
+        regressors: pd.DataFrame | None,
         dtype: str | None,
     ) -> tuple[Tensor, tuple[Tensor, list]]:
         state_mapping: list[tuple[str, Tensor]] = []
@@ -38,7 +40,7 @@ class JAXSGDFitter(BaseSGDFitter):
             )
             # Make model predictions with parameters on natural scale
             params = self.adapter.inverse(params)
-            y_pred = self.model(x, params, dtype=dtype)
+            y_pred = self.model(x, params, regressors=regressors, dtype=dtype)
             loss = self.compute_loss(y=y, y_pred=y_pred)
 
         non_trainable_variables = [scope.get_current_value(v) for v in self.non_trainable_variables]
@@ -48,7 +50,13 @@ class JAXSGDFitter(BaseSGDFitter):
     def _get_state(self) -> SGDState:
         return self.trainable_variables, self.non_trainable_variables, self.optimizer.variables, self.metrics_variables
 
-    def _update_model_weights(self, x: Stimulus, y: Tensor, state: SGDState) -> tuple[dict, SGDState]:
+    def _update_model_weights(
+        self,
+        x: Stimulus,
+        y: Tensor,
+        state: SGDState,
+        regressors: pd.DataFrame | None,
+    ) -> tuple[dict, SGDState]:
         if state is None:
             msg = "State must not be None when using JAX backend"
             raise TypeError(msg)
@@ -70,6 +78,7 @@ class JAXSGDFitter(BaseSGDFitter):
             non_trainable_variables,
             x,
             y,
+            regressors,
             self.dtype,
         )
 

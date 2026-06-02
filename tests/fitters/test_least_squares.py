@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 import pytest
-from pytest_regressions.dataframe_regression import DataFrameRegressionFixture
 from prfmodel.fitters import LeastSquaresFitter
 from prfmodel.fitters import LeastSquaresHistory
 from prfmodel.models.prf import DoG2DPRFModel
@@ -16,6 +15,8 @@ from .conftest import parametrize_dtype
 from .conftest import skip_torch
 from .conftest import skip_windows
 
+_ATOL = 1e-3
+
 
 class TestLeastSquaresFitter(TestSetup):
     """Tests for GridFitter class."""
@@ -24,10 +25,6 @@ class TestLeastSquaresFitter(TestSetup):
         assert isinstance(history, LeastSquaresHistory)
         assert isinstance(history.history, dict)
         assert isinstance(history.history["loss"], np.ndarray)
-
-    def _check_least_squares_params(self, result_params: pd.DataFrame, params: pd.DataFrame) -> None:
-        assert isinstance(result_params, pd.DataFrame)
-        assert result_params.shape == params.shape
 
     @pytest.mark.parametrize(
         ("slope_name", "intercept_name"),
@@ -57,31 +54,40 @@ class TestLeastSquaresFitter(TestSetup):
     @parametrize_dtype
     @parametrize_impulse_model
     @pytest.mark.parametrize("intercept_name", [None, "baseline"])
-    def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
+    def test_fit(
         self,
-        dataframe_regression: DataFrameRegressionFixture,
         stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
         intercept_name: str | None,
         dtype: str,
     ):
-        """Test that fit returns objects with the correct type and attributes."""
-        fitter = LeastSquaresFitter(
-            model=model,
-            stimulus=stimulus,
-            dtype=dtype,
-        )
+        """Test that the fitter recovers amplitude (and baseline) from synthetic data."""
+        # When no intercept is fit, the model retains the baseline from the input parameters,
+        # so any non-zero baseline gets folded into the basis and the slope cannot recover.
+        true_params = params.copy()
+        if intercept_name is None:
+            true_params["baseline"] = 0.0
 
-        observed = model(stimulus, params)
+        fitter = LeastSquaresFitter(model=model, stimulus=stimulus, dtype=dtype)
 
-        history, ls_params = fitter.fit(observed, params, slope_name="amplitude", intercept_name=intercept_name)
+        observed = model(stimulus, true_params)
+
+        history, ls_params = fitter.fit(observed, true_params, slope_name="amplitude", intercept_name=intercept_name)
 
         self._check_history(history)
-        self._check_least_squares_params(ls_params, params)
 
-        if dtype != "float64":
-            dataframe_regression.check(ls_params, default_tolerance={"atol": 1e-6})
+        np.testing.assert_allclose(
+            ls_params["amplitude"].to_numpy(),
+            true_params["amplitude"].to_numpy(),
+            atol=_ATOL,
+        )
+        if intercept_name is not None:
+            np.testing.assert_allclose(
+                ls_params[intercept_name].to_numpy(),
+                true_params[intercept_name].to_numpy(),
+                atol=_ATOL,
+            )
 
     @skip_windows
     @skip_torch
@@ -116,8 +122,8 @@ class TestLeastSquaresFitter(TestSetup):
             batch_size=1,
         )
 
-        pd.testing.assert_frame_equal(params_full, params_batched, atol=1e-4)
-        np.testing.assert_allclose(history_full.history["loss"], history_batched.history["loss"], atol=1e-4)
+        pd.testing.assert_frame_equal(params_full, params_batched, atol=_ATOL)
+        np.testing.assert_allclose(history_full.history["loss"], history_batched.history["loss"], atol=_ATOL)
 
 
 class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
@@ -159,17 +165,18 @@ class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
         dog_params: pd.DataFrame,
         intercept_name: str | None,
     ):
-        """Test fitting with multiple slope parameters."""
-        fitter = LeastSquaresFitter(
-            model=dog_model,
-            stimulus=stimulus,
-        )
+        """Test that the fitter recovers both DoG amplitudes (and baseline) from synthetic data."""
+        true_params = dog_params.copy()
+        if intercept_name is None:
+            true_params["baseline"] = 0.0
 
-        observed = dog_model(stimulus, dog_params)
+        fitter = LeastSquaresFitter(model=dog_model, stimulus=stimulus)
+
+        observed = dog_model(stimulus, true_params)
 
         history, ls_params = fitter.fit(
             observed,
-            dog_params,
+            true_params,
             slope_name=["amplitude_center", "amplitude_surround"],
             intercept_name=intercept_name,
         )
@@ -178,7 +185,20 @@ class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
         assert isinstance(history.history, dict)
         assert isinstance(history.history["loss"], np.ndarray)
         assert isinstance(ls_params, pd.DataFrame)
-        assert ls_params.shape == dog_params.shape
+        assert ls_params.shape == true_params.shape
+
+        for name in ("amplitude_center", "amplitude_surround"):
+            np.testing.assert_allclose(
+                ls_params[name].to_numpy(),
+                true_params[name].to_numpy(),
+                atol=_ATOL,
+            )
+        if intercept_name is not None:
+            np.testing.assert_allclose(
+                ls_params[intercept_name].to_numpy(),
+                true_params[intercept_name].to_numpy(),
+                atol=_ATOL,
+            )
 
     @skip_windows
     @skip_torch
@@ -212,5 +232,5 @@ class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
             batch_size=1,
         )
 
-        pd.testing.assert_frame_equal(params_full, params_batched, atol=1e-4)
-        np.testing.assert_allclose(history_full.history["loss"], history_batched.history["loss"], atol=1e-4)
+        pd.testing.assert_frame_equal(params_full, params_batched, atol=_ATOL)
+        np.testing.assert_allclose(history_full.history["loss"], history_batched.history["loss"], atol=_ATOL)

@@ -252,6 +252,7 @@ class BaseCanonical(ModelProtocol, Generic[S]):
         self,
         stimulus: S,
         parameters: pd.DataFrame,
+        regressors: pd.DataFrame | None = None,
         dtype: str | None = None,
     ) -> Tensor:
         """
@@ -261,6 +262,7 @@ class BaseCanonical(ModelProtocol, Generic[S]):
         ----------
         %(stimulus)s
         %(parameters)s
+        %(regressors_canonical)s
         %(dtype)s
 
         Returns
