@@ -1,0 +1,85 @@
+prfmodel.regressors.ConvolvedRegressors
+=======================================
+
+.. py:class:: prfmodel.regressors.ConvolvedRegressors(names: list[str], impulse_model: prfmodel.impulse.base.BaseImpulse)
+
+
+
+   Convolved regressor model.
+
+   Adds a linear combination of regressors after convolving each with an impulse response. Suitable for task or
+   event regressors that are specified at the neural-signal level and need to be transformed into the predicted
+   response space (e.g., BOLD space) via the impulse model.
+
+   Given a design matrix with columns :math:`x_k(t)`, an impulse response :math:`h(t)`, and per-unit beta weights
+   :math:`\beta_k`, the model prediction is:
+
+   .. math::
+
+       y(t) = \sum_k \beta_k \, (x_k * h)(t).
+
+   The impulse response is generated per unit from the same `parameters` data frame, so impulse parameters can be
+   shared with (or differ from) those of a parent canonical model. The design is supplied at call time as a
+   :class:`pandas.DataFrame`. The model selects the columns it needs by name, so column order is unimportant and
+   extra columns are silently ignored.
+
+   :param names: Names of the regressors. Each name must appear as a column in the ``regressors`` data frame supplied to the
+                 :meth:`__call__` method. Parameter names are derived as ``"beta_<name>"`` for each name.
+   :type names: list of str
+   :param impulse_model: The impulse model used to convolve each regressor with. Typically the same instance used by the parent
+                         canonical model, so that impulse parameter names dedupe naturally during parameter aggregation.
+   :type impulse_model: BaseImpulse
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> from prfmodel.impulse import DerivativeTwoGammaImpulse
+   >>> hrf = DerivativeTwoGammaImpulse()
+   >>> regressors_model = ConvolvedRegressors(names=["task"], impulse_model=hrf)
+   >>> sorted(set(regressors_model.parameter_names) - set(hrf.parameter_names))
+   ['beta_task']
+   >>> num_frames = 20
+   >>> design = pd.DataFrame({"task": np.zeros(num_frames)})
+   >>> design.loc[5, "task"] = 1.0
+   >>> params = pd.DataFrame({
+   ...     "beta_task": [1.0, -1.0],
+   ...     "delay": [6.0, 6.0],
+   ...     "dispersion": [0.9, 0.9],
+   ...     "undershoot": [12.0, 12.0],
+   ...     "u_dispersion": [0.9, 0.9],
+   ...     "ratio": [0.48, 0.48],
+   ...     "weight_deriv": [0.5, 0.5],
+   ... })
+   >>> resp = regressors_model(design, params)
+   >>> print(resp.shape)
+   (2, 20)
+
+
+   .. py:method:: __call__(regressors: pandas.DataFrame, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Compute the convolved regressor prediction.
+
+      :param regressors: Regressor design with shape `(num_frames, num_regressors)`. Must contain a column for each name in
+                         :attr:`names`; extra columns are ignored.
+      :type regressors: pandas.DataFrame
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      Names of parameters used by the model.
+
+      Includes ``beta_<name>`` for each regressor name as well as the parameter names of the impulse model.
+

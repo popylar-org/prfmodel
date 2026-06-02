@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Fitting a 2D population receptive field model to fMRI data from a visual experiment" href="prf_2d_fmri_visual.html"><link rel="prev" title="How to fit a Divisive Normalization population receptive field model to simulated data" href="../tutorials/div_norm_prf_simulated.html">
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Fitting a 2D population receptive field model to fMRI data from a visual experiment" href="prf_2d_fmri_visual.html"><link rel="prev" title="Adding regressors to a model" href="../tutorials/regressors.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>Examples - prfmodel 0.0.1 documentation</title>
@@ -205,6 +205,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../tutorials/css_prf_simulated.html">How to fit a compressive spatial summation population receptive field model to simulated data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../tutorials/diff_gaussians_prf_simulated.html">How to fit a Difference of Gaussians population receptive field model to simulated data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../tutorials/div_norm_prf_simulated.html">How to fit a Divisive Normalization population receptive field model to simulated data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutorials/regressors.html">Adding regressors to a model</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Examples</a><input aria-label="Toggle navigation of Examples" checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -311,8 +312,18 @@
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/plotting/plot_2d_prf_stimulus.html">plot_2d_prf_stimulus</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/scaling/index.html">prfmodel.scaling</a><input aria-label="Toggle navigation of prfmodel.scaling" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/scaling/base/index.html">prfmodel.scaling.base</a><input aria-label="Toggle navigation of prfmodel.scaling.base" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/regressors/index.html">prfmodel.regressors</a><input aria-label="Toggle navigation of prfmodel.regressors" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/regressors/base/index.html">prfmodel.regressors.base</a><input aria-label="Toggle navigation of prfmodel.regressors.base" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/regressors/base/BaseRegressors.html">BaseRegressors</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/regressors/AdditiveRegressors.html">AdditiveRegressors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/regressors/ConvolvedRegressors.html">ConvolvedRegressors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/regressors/RegressorsList.html">RegressorsList</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/scaling/index.html">prfmodel.scaling</a><input aria-label="Toggle navigation of prfmodel.scaling" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/scaling/base/index.html">prfmodel.scaling.base</a><input aria-label="Toggle navigation of prfmodel.scaling.base" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/scaling/base/BaseScaling.html">BaseScaling</a></li>
 </ul>
 </li>
@@ -321,8 +332,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/scaling/DoGAmplitude.html">DoGAmplitude</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/stimuli/index.html">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/stimuli/base/index.html">prfmodel.stimuli.base</a><input aria-label="Toggle navigation of prfmodel.stimuli.base" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/stimuli/index.html">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/stimuli/base/index.html">prfmodel.stimuli.base</a><input aria-label="Toggle navigation of prfmodel.stimuli.base" class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/stimuli/base/Stimulus.html">Stimulus</a></li>
 </ul>
 </li>
@@ -332,7 +343,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../autoapi/prfmodel/typing/index.html">prfmodel.typing</a></li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/utils/index.html">prfmodel.utils</a><input aria-label="Toggle navigation of prfmodel.utils" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/utils/index.html">prfmodel.utils</a><input aria-label="Toggle navigation of prfmodel.utils" class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" role="switch" type="checkbox"/><label for="toctree-checkbox-27"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/utils/UndefinedResponseWarning.html">UndefinedResponseWarning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/utils/ModelProtocol.html">ModelProtocol</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/utils/ParamsDict.html">ParamsDict</a></li>
@@ -407,14 +418,14 @@
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../tutorials/div_norm_prf_simulated.html">
+          <a class="prev-page" href="../tutorials/regressors.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">How to fit a Divisive Normalization population receptive field model to simulated data</div>
+                <div class="title">Adding regressors to a model</div>
                 
               </div>
             </a>

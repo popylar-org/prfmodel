@@ -64,7 +64,7 @@ prfmodel.fitters.SGDFitter
    ['mu_y', 'mu_x', 'sigma']
 
 
-   .. py:method:: fit(data: prfmodel.typing.Tensor, init_parameters: pandas.DataFrame, fixed_parameters: collections.abc.Sequence[str] | None = None, num_steps: int = 1000) -> tuple[SGDHistory, pandas.DataFrame]
+   .. py:method:: fit(data: prfmodel.typing.Tensor, init_parameters: pandas.DataFrame, fixed_parameters: collections.abc.Sequence[str] | None = None, num_steps: int = 1000, regressors: pandas.DataFrame | None = None) -> tuple[SGDHistory, pandas.DataFrame]
 
       Fit a population receptive field model to target data.
 
@@ -79,6 +79,9 @@ prfmodel.fitters.SGDFitter
       :type fixed_parameters: Sequence of str, optional
       :param num_steps: Number of optimization steps.
       :type num_steps: int, default=1000
+      :param regressors: Runtime regressor design data forwarded to every model prediction call. Must be provided when the model
+                         has a ``regressors_model`` configured.
+      :type regressors: pandas.DataFrame, optional
 
       :returns: * *SGDHistory* -- A history object that contains loss and metric values for each optimization step.
                 * *pandas.DataFrame* -- A dataframe with final model parameters.

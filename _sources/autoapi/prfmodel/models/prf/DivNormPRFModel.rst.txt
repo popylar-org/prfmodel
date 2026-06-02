@@ -1,7 +1,7 @@
 prfmodel.models.prf.DivNormPRFModel
 ===================================
 
-.. py:class:: prfmodel.models.prf.DivNormPRFModel(activation_prf_model: prfmodel.models.base.BasePopulationResponse, normalization_prf_model: prfmodel.models.base.BasePopulationResponse, shared_params: list[str] | None = None, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = DivNormAmplitude)
+.. py:class:: prfmodel.models.prf.DivNormPRFModel(activation_prf_model: prfmodel.models.base.BasePopulationResponse, normalization_prf_model: prfmodel.models.base.BasePopulationResponse, shared_params: list[str] | None = None, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = DivNormAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
 
 
 
@@ -22,16 +22,20 @@ prfmodel.models.prf.DivNormPRFModel
                          must appear in *both* ``activation_prf_model.parameter_names`` and
                          ``normalization_prf_model.parameter_names``.
    :type shared_params: list of str, default=["mu_x", "mu_y"]
-   :param encoding_model: An encoding model class or instance. Model classes will be instantiated during initialization. The
-                          default creates a :class:`~prfmodel.models.encoding.PRFStimulusEncoder` instance.
+   :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
+                          The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
    :type encoding_model: BaseStimulusEncoder or type, default=PRFStimulusEncoder
    :param impulse_model: An impulse model class or instance. Model classes will be instantiated during
-                         initialization. The default creates a :class:`~prfmodel.models.impulse.DerivativeTwoGammaImpulse`
+                         initialization. The default creates a :class:`~prfmodel.impulse.DerivativeTwoGammaImpulse`
                          instance with default values.
    :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
    :param scaling_model: A scaling model class or instance. Model classes will be instantiated during initialization.
-                         The default creates a :class:`~prfmodel.models.scaling.BaselineAmplitude` instance.
-   :type scaling_model: BaseScaling or type or None, default=BaselineAmplitude, optional
+                         The default creates a :class:`~prfmodel.scaling.DivNormAmplitude` instance.
+   :type scaling_model: BaseScaling or type or None, default=DivNormAmplitude, optional
+   :param regressors_model: A regressor model instance, a list of regressor model instances, or `None`. When a list is
+                            provided, it is wrapped in a :class:`~prfmodel.regressors.RegressorsList` and its contributions
+                            are summed. The regressor contribution is added after the scaling model.
+   :type regressors_model: BaseRegressors or list of BaseRegressors or RegressorsList or None, default=None, optional
 
    .. rubric:: Notes
 
@@ -45,19 +49,24 @@ prfmodel.models.prf.DivNormPRFModel
    The :math:`-b/d` term ensures a zero response in the absence of a stimulus.
 
 
-   .. py:method:: __call__(stimulus: prfmodel.stimuli._prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+   .. py:method:: __call__(stimulus: prfmodel.stimuli._prf.PRFStimulus, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor
 
       Predict the DN model response to a stimulus.
 
       :param stimulus: Population receptive field stimulus object.
       :type stimulus: PRFStimulus
-      :param parameters: Dataframe with model parameters; one row per voxel.
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
       :type parameters: pandas.DataFrame
-      :param dtype: The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+      :param regressors: Regressor design data. Required when the canonical model has a regressors model configured.
+                         A single data frame with shape `(num_frames, num_regressors)` whose columns cover the names
+                         required by every configured regressor model. Extra columns are ignored.
+      :type regressors: pandas.DataFrame, optional
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
                     :func:`prfmodel.utils.get_dtype`.
       :type dtype: str, optional
 
-      :returns: Model predictions of shape (num_voxels, num_frames).
+      :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
       :rtype: Tensor
 
 

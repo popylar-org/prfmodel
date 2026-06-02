@@ -58,7 +58,7 @@ prfmodel.fitters.LeastSquaresFitter
    ['mu_x', 'mu_y', 'sigma', 'baseline', 'amplitude']
 
 
-   .. py:method:: fit(data: prfmodel.typing.Tensor, parameters: pandas.DataFrame, slope_name: str | list[str], intercept_name: str | None = None, batch_size: int | None = None) -> tuple[LeastSquaresHistory, pandas.DataFrame]
+   .. py:method:: fit(data: prfmodel.typing.Tensor, parameters: pandas.DataFrame, slope_name: str | list[str], intercept_name: str | None = None, batch_size: int | None = None, regressors: pandas.DataFrame | None = None) -> tuple[LeastSquaresHistory, pandas.DataFrame]
 
       Fit a population receptive field model to target data.
 
@@ -76,6 +76,10 @@ prfmodel.fitters.LeastSquaresFitter
       :type intercept_name: str, optional
       :param batch_size: Number of data batches to fit at the same time. If `None` (the default), all batches are fit at once.
       :type batch_size: int, optional
+      :param regressors: Regressor design data. Required when the model has a ``regressors_model`` configured.
+                         A single data frame with shape `(num_frames, num_regressors)` whose columns cover the names required
+                         by every configured regressor model; extra columns are ignored.
+      :type regressors: pandas.DataFrame, optional
 
       :returns: * *LeastSquaresHistory* -- A history object that contains a dict with the key `loss` and the residual sum of squares
                   for each data batch.

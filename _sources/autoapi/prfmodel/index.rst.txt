@@ -22,6 +22,7 @@ Submodules
    /autoapi/prfmodel/impulse/index
    /autoapi/prfmodel/models/index
    /autoapi/prfmodel/plotting/index
+   /autoapi/prfmodel/regressors/index
    /autoapi/prfmodel/scaling/index
    /autoapi/prfmodel/stimuli/index
    /autoapi/prfmodel/typing/index
@@ -36,6 +37,7 @@ Submodules
    prfmodel.impulse
    prfmodel.models
    prfmodel.plotting
+   prfmodel.regressors
    prfmodel.scaling
    prfmodel.stimuli
    prfmodel.typing

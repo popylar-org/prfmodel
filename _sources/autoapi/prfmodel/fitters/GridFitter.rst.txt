@@ -56,7 +56,7 @@ prfmodel.fitters.GridFitter
    (1, 3)
 
 
-   .. py:method:: fit(data: prfmodel.typing.Tensor, parameter_values: dict[str, prfmodel.typing.Tensor | numpy.ndarray], batch_size: int | None = None) -> tuple[GridHistory, pandas.DataFrame]
+   .. py:method:: fit(data: prfmodel.typing.Tensor, parameter_values: dict[str, prfmodel.typing.Tensor | numpy.ndarray], batch_size: int | None = None, regressors: pandas.DataFrame | None = None) -> tuple[GridHistory, pandas.DataFrame]
 
       Fit a population receptive field model to target data.
 
@@ -69,6 +69,9 @@ prfmodel.fitters.GridFitter
       :param batch_size: Number of parameter combinations to evaluate at the same time. If `None` (the default), all combinations
                          are evaluated at once.
       :type batch_size: int, optional
+      :param regressors: Runtime regressor design data forwarded to every model prediction call. Must be provided when the model
+                         has a ``regressors_model`` configured.
+      :type regressors: pandas.DataFrame, optional
 
       :returns: * *GridHistory* -- A history object that contains loss and metric values for each data batch.
                 * *pandas.DataFrame* -- A dataframe with final model parameters.

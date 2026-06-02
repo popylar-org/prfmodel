@@ -1,0 +1,49 @@
+prfmodel.regressors.base.BaseRegressors
+=======================================
+
+.. py:class:: prfmodel.regressors.base.BaseRegressors
+
+
+
+   Abstract base class for regressor models.
+
+   A regressor model returns the additive contribution
+   :math:`\sum_k \beta_k \, x_k(t)` of a set of regressors :math:`x_k(t)` to a model prediction. The per-unit
+   weights :math:`\beta_k` come from the ``parameters`` argument and the design columns :math:`x_k(t)` come from
+   the ``regressors`` data frame at call time.
+
+   .. rubric:: Notes
+
+   This class cannot be instantiated on its own. It can only be used as a parent class to create custom regressor
+   models. Subclasses must override the abstract :attr:`parameter_names` property and :meth:`__call__` method.
+
+
+   .. py:method:: __call__(regressors: pandas.DataFrame, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+      :abstractmethod:
+
+
+      Compute the additive regressor contribution.
+
+      :param regressors: Regressor design with shape `(num_frames, num_regressors)`. Must contain a column for each name in
+                         :attr:`names`; extra columns are ignored.
+      :type regressors: pandas.DataFrame
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
+

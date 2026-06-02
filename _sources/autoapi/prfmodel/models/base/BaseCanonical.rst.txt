@@ -47,7 +47,7 @@ prfmodel.models.base.BaseCanonical
    (2, 200)
 
 
-   .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+   .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor
       :abstractmethod:
 
 
@@ -58,6 +58,10 @@ prfmodel.models.base.BaseCanonical
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different units.
       :type parameters: pandas.DataFrame
+      :param regressors: Regressor design data. Required when the canonical model has a regressors model configured.
+                         A single data frame with shape `(num_frames, num_regressors)` whose columns cover the names
+                         required by every configured regressor model. Extra columns are ignored.
+      :type regressors: pandas.DataFrame, optional
       :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
                     :func:`prfmodel.utils.get_dtype`.
       :type dtype: str, optional
