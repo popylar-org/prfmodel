@@ -1,0 +1,26 @@
+prfmodel.impulse.defaults
+=========================
+
+.. py:module:: prfmodel.impulse.defaults
+
+.. autoapi-nested-parse::
+
+   Default parameter sets for impulse models.
+
+
+
+Functions
+---------
+
+.. toctree::
+   :hidden:
+
+   default_two_gamma_impulse_glover_hrf </autoapi/prfmodel/impulse/defaults/default_two_gamma_impulse_glover_hrf>
+   default_two_gamma_impulse_spm_hrf </autoapi/prfmodel/impulse/defaults/default_two_gamma_impulse_spm_hrf>
+
+.. autoapisummary::
+
+   prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf
+   prfmodel.impulse.defaults.default_two_gamma_impulse_spm_hrf
+
+

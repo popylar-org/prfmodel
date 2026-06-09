@@ -44,11 +44,7 @@ prfmodel.regressors.ConvolvedRegressors
    >>> design.loc[5, "task"] = 1.0
    >>> params = pd.DataFrame({
    ...     "beta_task": [1.0, -1.0],
-   ...     "delay": [6.0, 6.0],
-   ...     "dispersion": [0.9, 0.9],
-   ...     "undershoot": [12.0, 12.0],
-   ...     "u_dispersion": [0.9, 0.9],
-   ...     "ratio": [0.48, 0.48],
+   ...     # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
    ...     "weight_deriv": [0.5, 0.5],
    ... })
    >>> resp = regressors_model(design, params)

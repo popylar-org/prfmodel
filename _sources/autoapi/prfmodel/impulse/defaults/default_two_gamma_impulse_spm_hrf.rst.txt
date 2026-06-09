@@ -1,0 +1,26 @@
+prfmodel.impulse.defaults.default_two_gamma_impulse_spm_hrf
+===========================================================
+
+.. py:function:: prfmodel.impulse.defaults.default_two_gamma_impulse_spm_hrf() -> dict[str, float]
+
+   SPM default parameters for the difference of two gamma distributions impulse model.
+
+   Default parameters for a hemodynamic response function (HRF) impulse model following SPM default values [1]_.
+
+   :returns: Dictionary with default values for each parameter of :class:`prfmodel.impulse.TwoGammaImpulse`.
+   :rtype: dict
+
+   .. rubric:: Notes
+
+   The default values are adapted from
+   `nilearn <https://github.com/nilearn/nilearn/blob/62934704a/nilearn/glm/first_level/hemodynamic_models.py>`_.
+
+   .. rubric:: References
+
+   .. [1] https://www.fil.ion.ucl.ac.uk/spm/
+
+   .. rubric:: Examples
+
+   >>> default_two_gamma_impulse_spm_hrf()
+   {'delay': 6.0, 'dispersion': 1.0, 'undershoot': 16.0, 'u_dispersion': 1.0, 'ratio': 0.167}
+

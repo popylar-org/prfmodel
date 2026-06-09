@@ -28,10 +28,12 @@ Submodules
    :hidden:
 
    /autoapi/prfmodel/impulse/base/index
+   /autoapi/prfmodel/impulse/defaults/index
 
 .. autoapisummary::
 
    prfmodel.impulse.base
+   prfmodel.impulse.defaults
 
 
 Classes
