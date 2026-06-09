@@ -74,19 +74,19 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
          - Standard deviation of the surround Gaussian (must be > ``sigma_center``).
        * - ``delay``
          - Impulse
-         - Peak time of the positive gamma component (in seconds).
+         - Peak time of the positive gamma component (in seconds; optional).
        * - ``dispersion``
          - Impulse
-         - Rate parameter of the positive gamma component.
+         - Rate parameter of the positive gamma component (optional).
        * - ``undershoot``
          - Impulse
-         - Peak time of the negative gamma component (in seconds).
+         - Peak time of the negative gamma component (in seconds; optional).
        * - ``u_dispersion``
          - Impulse
-         - Rate parameter of the negative gamma component.
+         - Rate parameter of the negative gamma component (optional).
        * - ``ratio``
          - Impulse
-         - Weight of the negative gamma component.
+         - Weight of the negative gamma component (optional).
        * - ``weight_deriv``
          - Impulse
          - Weight of the derivative component.
@@ -122,12 +122,8 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     ...     "mu_y": [1.0, 0.0, 0.0],
     ...     "sigma_center": [1.0, 1.5, 2.0],
     ...     "sigma_surround": [5.0, 7.5, 10.0],
-    ...     # Impulse model parameters
-    ...     "delay": [6.0, 6.0, 6.0],
-    ...     "dispersion": [0.9, 0.9, 0.9],
-    ...     "undershoot": [12.0, 12.0, 12.0],
-    ...     "u_dispersion": [0.9, 0.9, 0.9],
-    ...     "ratio": [0.48, 0.48, 0.48],
+    ...     # Impulse model parameters (delay, dispersion, undershoot, u_dispersion,
+    ...     # and ratio use the default Glover HRF parameters)
     ...     "weight_deriv": [0.5, 0.5, 0.5],
     ...     # Scaling model parameters
     ...     "amplitude_center": [2.0, 1.2, 0.1],

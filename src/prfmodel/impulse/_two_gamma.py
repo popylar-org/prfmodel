@@ -9,6 +9,7 @@ from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 from prfmodel.utils import normalize_response
 from .base import BaseImpulse
+from .defaults import _fetch_default
 
 
 class TwoGammaImpulse(BaseImpulse):
@@ -33,8 +34,10 @@ class TwoGammaImpulse(BaseImpulse):
     norm : str, optional, default="sum"
         The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
         no normalization is performed.
-    default_parameters : dict of float, optional
-        Dictionary with scalar default parameter values. Keys must be valid parameter names.
+    default_parameters : dict of float or str, optional, default="glover_hrf"
+        Dictionary with scalar default parameter values or name of default parameter set. Available default
+        parameter sets are `glover_hrf` (default) and `spm_hrf`. See :mod:`~prfmodel.impulse.defaults` for details.
+        Dictionary keys must be valid parameter names. Default values can be overriden in the :meth:`__call__` method.
 
     See Also
     --------
@@ -63,6 +66,20 @@ class TwoGammaImpulse(BaseImpulse):
 
     Examples
     --------
+    Predict an impulse response using the default parameter set
+    (:func:`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf()`). An empty :class:`pandas.DataFrame`
+    still must be supplied to :meth:`__call__` to indicate the number of units for which a response should be
+    predicted.
+
+    >>> import pandas as pd
+    >>> impulse_model = TwoGammaImpulse()
+    >>> params = pd.DataFrame(index=range(3))  # Predict for 3 units
+    >>> resp = impulse_model(params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 32)
+
+    Predict an impulse response by overriding the default parameter set in the :meth:`__call__` method.
+
     >>> import pandas as pd
     >>> params = pd.DataFrame({
     ...     "delay": [2.0, 1.0, 1.5],
@@ -71,14 +88,33 @@ class TwoGammaImpulse(BaseImpulse):
     ...     "u_dispersion": [1.0, 1.0, 1.0],
     ...     "ratio": [0.7, 0.2, 0.5],
     ... })
+    >>> resp = impulse_model(params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 32)
+
+    If ``default_parameters=None``, all parameters must be supplied to :meth:`__call__`.
+
     >>> impulse_model = TwoGammaImpulse(
-    ...     duration=100.0  # 100 seconds
+    ...     default_parameters=None,
     ... )
     >>> resp = impulse_model(params)
     >>> print(resp.shape)  # (num_units, num_frames)
-    (3, 100)
+    (3, 32)
 
     """
+
+    def __init__(
+        self,
+        duration: float = 32.0,
+        offset: float = 0.0001,
+        resolution: float = 1.0,
+        norm: str | None = "sum",
+        default_parameters: dict[str, float] | str | None = "glover_hrf",
+    ):
+        if isinstance(default_parameters, str):
+            default_parameters = _fetch_default(default_parameters)
+
+        super().__init__(duration, offset, resolution, norm, default_parameters)
 
     @property
     def parameter_names(self) -> list[str]:
@@ -97,7 +133,7 @@ class TwoGammaImpulse(BaseImpulse):
 
         Parameters
         ----------
-        %(parameters)s
+        %(parameters)s Parameter values override default parameters.
         %(dtype)s
 
         Returns

@@ -54,13 +54,15 @@ class TestImpulseSetup(ABC):
         parameters: pd.DataFrame,
     ):
         """Test that model with default parameters predicts correct response."""
-        resp_with_default = irf_model_default(parameters)
+        parameters_without_default = parameters.drop(columns=irf_model_default.default_parameters.keys())
 
-        assert resp_with_default.shape == (parameters.shape[0], irf_model_default.frames.shape[1])
+        resp_without_default = irf_model_default(parameters_without_default)
+
+        assert resp_without_default.shape == (parameters.shape[0], irf_model_default.frames.shape[1])
 
         parameters_with_default = parameters.copy()
 
         for key, val in irf_model_default.default_parameters.items():
             parameters_with_default[key] = val
 
-        assert np.all(np.asarray(resp_with_default) == np.asarray(irf_model(parameters_with_default)))
+        assert np.all(np.asarray(resp_without_default) == np.asarray(irf_model(parameters_with_default)))
