@@ -5,7 +5,7 @@ from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.regressors.base import BaseRegressors
-from prfmodel.scaling import DoGAmplitude
+from prfmodel.scaling import Baseline
 from prfmodel.scaling.base import BaseScaling
 from ._gaussian import Gaussian2DPRFResponse
 from ._stimulus_encoding import PRFStimulusEncoder
@@ -23,9 +23,9 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     ----------
     %(model_encoding_prf)s
     %(model_impulse)s
-    scaling_model : BaseScaling or type or None, default=DoGAmplitude, optional
+    scaling_model : BaseScaling or type or None, default=Baseline, optional
         A scaling model class or instance. Model classes will be instantiated during initialization.
-        The default creates a :class:`~prfmodel.scaling.DoGAmplitude` instance.
+        The default creates a :class:`~prfmodel.scaling.Baseline` instance.
     %(model_regressors)s
 
     Notes
@@ -33,12 +33,12 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     The canonical DoG model follows the following steps [1]_:
 
     1. The center and surround 2D Gaussian population receptive field response models make separate predictions for
-        the stimulus grid. The two response models have the same center but different sizes.
+       the stimulus grid. The two response models have the same center but different sizes.
     2. The encoding model encodes each response with the stimulus design.
     3. An impulse model generates an impulse response.
     4. Each encoded response is convolved with the impulse response.
     5. The scaling model modifies the convolved response. By default it subtracts the surround from the center
-        response after multiplying the responses with separate amplitude parameters.
+       response after multiplying the responses with separate amplitude parameters.
     6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 
     Let :math:`p_{\text{center}}(t)` and :math:`p_{\text{surround}}(t)` be the predicted temporal
@@ -139,7 +139,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
         self,
         encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
-        scaling_model: BaseScaling | type[BaseScaling] | None = DoGAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = Baseline,
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
@@ -148,7 +148,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
             impulse_model=impulse_model,
             scaling_model=scaling_model,
             regressors_model=regressors_model,
-            change_params=["sigma"],
+            shared_params=["mu_x", "mu_y"],
         )
 
 

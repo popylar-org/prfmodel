@@ -107,8 +107,7 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
-            activation_prf_model=Gaussian2DPRFResponse(),
-            normalization_prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFResponse(),
             shared_params=["mu_x", "mu_y"],
             encoding_model=encoding_model,
             impulse_model=impulse_model,

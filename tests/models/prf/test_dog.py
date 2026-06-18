@@ -9,7 +9,7 @@ from prfmodel.models.prf import DoG2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFResponse
 from prfmodel.models.prf import init_dog_from_gaussian
 from prfmodel.models.prf.canonical import CenterSurroundPRFModel
-from prfmodel.scaling import DoGAmplitude
+from prfmodel.scaling import Baseline
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
@@ -31,7 +31,7 @@ class TestDoG2DPRFModel(PRFStimulusSetup):
     @pytest.fixture
     def temporal_model(self):
         """Temporal model object."""
-        return DoGAmplitude()
+        return Baseline()
 
     @pytest.fixture
     def params(self):
@@ -58,10 +58,10 @@ class TestDoG2DPRFModel(PRFStimulusSetup):
         self,
         prf_model: DoG2DPRFModel,
         impulse_model: DerivativeTwoGammaImpulse,
-        temporal_model: DoGAmplitude,
+        temporal_model: Baseline,
     ):
         """Test that parameter names of composite model match parameter names of submodels."""
-        expected = ["mu_y", "mu_x", "sigma_center", "sigma_surround"]
+        expected = ["mu_y", "mu_x", "sigma_center", "sigma_surround", "amplitude_center", "amplitude_surround"]
         expected.extend(impulse_model.parameter_names)
         expected.extend(temporal_model.parameter_names)
 
@@ -70,12 +70,12 @@ class TestDoG2DPRFModel(PRFStimulusSetup):
     @pytest.mark.parametrize(
         ("impulse_model", "temporal_model"),
         [
-            (DerivativeTwoGammaImpulse(), DoGAmplitude()),
-            (DerivativeTwoGammaImpulse, DoGAmplitude),
+            (DerivativeTwoGammaImpulse(), Baseline()),
+            (DerivativeTwoGammaImpulse, Baseline),
             (DerivativeTwoGammaImpulse(), None),
-            (None, DoGAmplitude()),
+            (None, Baseline()),
             (DerivativeTwoGammaImpulse, None),
-            (None, DoGAmplitude),
+            (None, Baseline),
             (None, None),
         ],
     )
@@ -96,17 +96,6 @@ class TestDoG2DPRFModel(PRFStimulusSetup):
 
         assert resp.shape == (params.shape[0], stimulus.design.shape[0])
 
-    def test_predict_responses(
-        self,
-        prf_model: DoG2DPRFModel,
-        stimulus: PRFStimulus,
-        params: pd.DataFrame,
-    ):
-        """Test that predict_responses returns stacked tensor with correct shape."""
-        resp = prf_model.predict_responses(stimulus, params)
-
-        assert resp.shape == (params.shape[0], 2, stimulus.design.shape[0])
-
 
 class TestCenterSurroundPRFModel:
     """Tests for the change_params argument of CenterSurroundPRFModel."""
@@ -116,29 +105,29 @@ class TestCenterSurroundPRFModel:
         with pytest.raises(ValueError, match="not_a_param"):
             CenterSurroundPRFModel(
                 prf_model=Gaussian2DPRFResponse(),
-                change_params=["not_a_param"],
+                shared_params=["not_a_param"],
             )
 
     def test_non_default_change_params_parameter_names(self):
         """change_params=['mu_x'] splits mu_x into mu_x_center and mu_x_surround."""
         model = CenterSurroundPRFModel(
             prf_model=Gaussian2DPRFResponse(),
-            change_params=["mu_x"],
+            shared_params=["mu_x"],
         )
-        assert "mu_x_center" in model.parameter_names
-        assert "mu_x_surround" in model.parameter_names
-        assert "mu_x" not in model.parameter_names
+        assert "mu_x_center" not in model.parameter_names
+        assert "mu_x_surround" not in model.parameter_names
+        assert "mu_x" in model.parameter_names
 
     def test_multiple_change_params_parameter_names(self):
         """Multiple change_params each split into center/surround variants."""
         model = CenterSurroundPRFModel(
             prf_model=Gaussian2DPRFResponse(),
-            change_params=["mu_x", "sigma"],
+            shared_params=["mu_x", "sigma"],
         )
         for param in ("mu_x", "sigma"):
-            assert f"{param}_center" in model.parameter_names
-            assert f"{param}_surround" in model.parameter_names
-            assert param not in model.parameter_names
+            assert f"{param}_center" not in model.parameter_names
+            assert f"{param}_surround" not in model.parameter_names
+            assert param in model.parameter_names
 
 
 class TestInitDogFromGaussian:

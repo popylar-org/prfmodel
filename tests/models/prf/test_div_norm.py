@@ -60,14 +60,14 @@ class TestDivNormGaussian2DPRFModel(PRFStimulusSetup):
     ):
         """Test that parameter names of composite model match parameter names of submodels."""
         expected = [
-            "amplitude_activation",
-            "amplitude_normalization",
-            "baseline_activation",
-            "baseline_normalization",
             "mu_y",
             "mu_x",
             "sigma_activation",
             "sigma_normalization",
+            "amplitude_activation",
+            "amplitude_normalization",
+            "baseline_activation",
+            "baseline_normalization",
         ]
         expected.extend(impulse_model.parameter_names)
         expected.extend(temporal_model.parameter_names)
@@ -279,7 +279,7 @@ class TestInitDnFromGaussian:
 
 
 class TestDivNormPRFModel(PRFStimulusSetup):
-    """Tests for the general DivNormPRFModel with separate activation/normalization models."""
+    """Tests for the general DivNormPRFModel with a single shared pRF model."""
 
     @pytest.fixture
     def params(self):
@@ -305,10 +305,9 @@ class TestDivNormPRFModel(PRFStimulusSetup):
         )
 
     def test_parameter_names_two_gaussians(self):
-        """Two Gaussian models with shared mu_x/mu_y produce activation/normalization sigma suffixes."""
+        """A Gaussian model with shared mu_x/mu_y produces activation/normalization sigma suffixes."""
         model = DivNormPRFModel(
-            activation_prf_model=Gaussian2DPRFResponse(),
-            normalization_prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFResponse(),
             shared_params=["mu_x", "mu_y"],
             impulse_model=None,
             scaling_model=None,
@@ -327,8 +326,7 @@ class TestDivNormPRFModel(PRFStimulusSetup):
     def test_parameter_names_no_shared(self):
         """With no shared params all pRF params get suffixes."""
         model = DivNormPRFModel(
-            activation_prf_model=Gaussian2DPRFResponse(),
-            normalization_prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFResponse(),
             shared_params=[],
             impulse_model=None,
             scaling_model=None,
@@ -344,29 +342,26 @@ class TestDivNormPRFModel(PRFStimulusSetup):
         assert "mu_y" not in names
 
     def test_invalid_shared_param_raises(self):
-        """Providing a shared_param not in both pRF models raises ValueError."""
+        """Providing a shared_param not in the pRF model raises ValueError."""
         with pytest.raises(ValueError, match="Shared parameters"):
             DivNormPRFModel(
-                activation_prf_model=Gaussian2DPRFResponse(),
-                normalization_prf_model=Gaussian2DPRFResponse(),
+                prf_model=Gaussian2DPRFResponse(),
                 shared_params=["nonexistent"],
             )
 
     def test_predict_shape(self, stimulus: PRFStimulus, params: pd.DataFrame):
         """Model prediction has shape (num_voxels, num_frames)."""
         model = DivNormPRFModel(
-            activation_prf_model=Gaussian2DPRFResponse(),
-            normalization_prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFResponse(),
             shared_params=["mu_x", "mu_y"],
         )
         resp = model(stimulus, params)
         assert resp.shape == (params.shape[0], stimulus.design.shape[0])
 
     def test_matches_gaussian2d_subclass(self, stimulus: PRFStimulus, params: pd.DataFrame):
-        """DivNormPRFModel with two Gaussians and shared mu_x/mu_y produces same output as DivNormGaussian2DPRFModel."""
+        """DivNormPRFModel with a shared Gaussian and mu_x/mu_y matches DivNormGaussian2DPRFModel output."""
         general = DivNormPRFModel(
-            activation_prf_model=Gaussian2DPRFResponse(),
-            normalization_prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFResponse(),
             shared_params=["mu_x", "mu_y"],
         )
         specific = DivNormGaussian2DPRFModel()
