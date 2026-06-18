@@ -275,7 +275,7 @@ from prfmodel.fitters import SGDFitter
 from prfmodel.fitters.adapter import Adapter, ParameterConstraint
 
 dog_adapter = Adapter(transforms=[
-    ParameterConstraint(["amplitude_surround"], upper=0.0),
+    ParameterConstraint(["amplitude_surround"], lower=0.0),
 ])
 
 sgd_fitter = SGDFitter(

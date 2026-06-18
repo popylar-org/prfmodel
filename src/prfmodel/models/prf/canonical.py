@@ -32,7 +32,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
     """
     Canonical population receptive field (pRF) model.
 
-    This class combines a pRF response, impulse, and scaling model.
+    This class combines a pRF response, impulse, scaling, and regressors model.
 
     Parameters
     ----------
@@ -46,12 +46,11 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
     -----
     The canonical model follows the following steps:
 
-    1. The population receptive field response model makes a prediction for the stimulus grid.
+    1. The pRF response model makes a prediction for the stimulus grid.
     2. The encoding model encodes the response with the stimulus design.
-    3. The impulse model generates an impulse response.
-    4. The encoded response is convolved with the impulse response.
-    5. The scaling model modifies the convolved response.
-    6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
+    3. The encoded response is convolved with an impulse response (optional).
+    4. The scaling model modifies the convolved response (optional).
+    5. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
 
     """
 
@@ -92,7 +91,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
         dtype: str | None = None,
     ) -> Tensor:
         """
-        Predict a simple population receptive field model response to a stimulus.
+        Predict the model response to a stimulus.
 
         Parameters
         ----------

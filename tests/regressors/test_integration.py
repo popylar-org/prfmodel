@@ -182,7 +182,7 @@ class TestDoGIntegration(PRFStimulusSetup):
                 "ratio": [0.48, 0.48],
                 "weight_deriv": [0.5, 0.5],
                 "amplitude_center": [2.0, 1.2],
-                "amplitude_surround": [-0.5, -0.3],
+                "amplitude_surround": [0.5, 0.3],
                 "baseline": [0.1, -0.1],
             },
         )

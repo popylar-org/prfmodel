@@ -14,14 +14,10 @@ from .canonical import DivNormPRFModel
 
 class DivNormGaussian2DPRFModel(DivNormPRFModel):
     r"""
-    Divisive normalization pRF model with isotropic 2D Gaussian responses.
+    Divisive normalization population receptive field (pRF) model with isotropic 2D Gaussian responses.
 
-    Convenience subclass of :class:`DivNormPRFModel` that uses
-    :class:`~prfmodel.models.gaussian.Gaussian2DPRFResponse` as the pRF model. Both the
-    activation and normalization pRFs are isotropic 2D Gaussians centered on the same
-    position (``mu_x``, ``mu_y``) but with different sizes (``sigma_activation``,
-    ``sigma_normalization``) and different amplitudes (``amplitude_activation``,
-    ``amplitude_normalization``).
+    This class combines a divisive normalization 2D Gaussian response with an impulse,
+    scaling, and regressors model. The two Gaussian 2D pRF models share the same center but have different sizes.
 
     Parameters
     ----------
@@ -34,15 +30,14 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
 
     Notes
     -----
-    With :math:`a = \text{amplitude\_activation}`, :math:`b = \text{baseline\_activation}`,
-    :math:`c = \text{amplitude\_normalization}`, and :math:`d = \text{baseline\_normalization}`,
-    the predicted response is:
+    The divisive normalization model follows these steps [1]_:
 
-    .. math::
-
-        p_{\text{DN}} = \frac{(a G_1 \cdot S + b)}{(c G_2 \cdot S + d)} - \frac{b}{d}
-
-    The :math:`-b/d` term ensures a zero response in the absence of a stimulus.
+    1. The 2D Gaussian pRF response models make separate predictions for the stimulus grid.
+    2. The encoding model encodes the responses with the stimulus design.
+    3. The two encoded responses are combined through divisive normalization.
+    4. The combined response is convolved with an impulse response (optional).
+    5. The scaling model modifies the convolved response (optional).
+    6. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
 
     Using the default impulse and scaling models, the following columns are expected in the
     :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
@@ -96,6 +91,12 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
        * - ``baseline_normalization``
          - Scaling
          - Baseline of the normalization response (:math:`d`; must be > 0).
+
+    References
+    ----------
+    .. [1] Aqil, M., Knapen, T., & Dumoulin, S. O. (2021). Divisive normalization unifies disparate response signatures
+    throughout the human visual hierarchy. *Proceedings of the National Academy of Sciences*, *118*(46), e2108713118.
+    https://doi.org/10.1073/pnas.2108713118
 
     """
 
@@ -249,8 +250,8 @@ def init_dn_from_dog(
         DataFrame of DN initial parameters with columns:
         ``sigma_activation`` (= ``sigma_center``), ``sigma_normalization`` (= ``sigma_surround``),
         ``amplitude_activation`` (= ``amplitude_center``),
-        ``amplitude_normalization`` (= ``abs(amplitude_surround)``; negated to start in the
-        normalization regime — can go negative during SGD if unconstrained),
+        ``amplitude_normalization`` (= ``abs(amplitude_surround)``; the DoG surround amplitude is positive, so
+        its magnitude initializes the normalization amplitude — can go negative during SGD if unconstrained),
         ``baseline_activation`` (b, = ``baseline`` if present), ``baseline_normalization`` (d),
         plus all shared columns unchanged. The ``sigma_center``, ``sigma_surround``,
         ``amplitude_center``, ``amplitude_surround``, and ``baseline`` (if present) columns
@@ -267,8 +268,8 @@ def init_dn_from_dog(
     dn_params["sigma_activation"] = dn_params["sigma_center"]
     dn_params["sigma_normalization"] = dn_params["sigma_surround"]
     dn_params["amplitude_activation"] = dn_params["amplitude_center"]
-    # NOTE: I am not sure about this, but in the DN paper I never saw negative `amplitude_normalization`,
-    # and in the DoG model the surround amplitude is often negative, so I take the absolute value here ?????
+    # The surround is subtracted in the DoG model, so amplitude_surround is positive; abs() guards against
+    # legacy negative values to keep amplitude_normalization positive (the DN paper has no negative normalization).
     dn_params["amplitude_normalization"] = dn_params["amplitude_surround"].abs()
 
     if baseline_activation is None:
