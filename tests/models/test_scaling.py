@@ -5,7 +5,6 @@ import pandas as pd
 import pytest
 from prfmodel.exceptions import ShapeError
 from prfmodel.scaling import BaselineAmplitude
-from prfmodel.scaling import DoGAmplitude
 from .conftest import parametrize_dtype
 
 
@@ -44,57 +43,6 @@ class TestBaselineAmplitdue:
 
     def test_shape_error(self, model: BaselineAmplitude, params: pd.DataFrame):
         """Test that ShapeError is raised."""
-        inputs = np.ones(self.num_frames)
-
-        with pytest.raises(ShapeError):
-            model(inputs, params)
-
-
-class TestDoGAmplitude:
-    """Tests for DoGAmplitude class."""
-
-    num_frames = 10
-
-    @pytest.fixture
-    def model(self):
-        """Model object."""
-        return DoGAmplitude()
-
-    @pytest.fixture
-    def params(self):
-        """Model parameters."""
-        return pd.DataFrame(
-            {
-                "amplitude_center": [2.0, -1.0, 1.0],
-                "amplitude_surround": [0.5, 0.3, -0.5],
-                "baseline": [5.0, 10.0, -3.0],
-            },
-        )
-
-    def test_parameter_names(self, model: DoGAmplitude):
-        """Test that correct parameter names are returned."""
-        assert model.parameter_names == ["amplitude_center", "amplitude_surround", "baseline"]
-
-    @parametrize_dtype
-    def test_call(self, model: DoGAmplitude, params: pd.DataFrame, dtype: str):
-        """Test that DoGAmplitude returns response with correct shape and values."""
-        num_units = params.shape[0]
-        p1 = np.ones((num_units, self.num_frames)) * 2.0
-        p2 = np.ones((num_units, self.num_frames)) * 3.0
-        inputs = np.stack([p1, p2], axis=1)  # (num_units, 2, num_frames)
-
-        resp = np.asarray(model(inputs, params, dtype))
-
-        assert resp.shape == (num_units, self.num_frames)
-        expected = (
-            p1 * np.expand_dims(params["amplitude_center"], 1)
-            + p2 * np.expand_dims(params["amplitude_surround"], 1)
-            + np.expand_dims(params["baseline"], 1)
-        )
-        assert np.allclose(resp, expected)
-
-    def test_shape_error(self, model: DoGAmplitude, params: pd.DataFrame):
-        """Test that ShapeError is raised for wrong number of dimensions."""
         inputs = np.ones(self.num_frames)
 
         with pytest.raises(ShapeError):
