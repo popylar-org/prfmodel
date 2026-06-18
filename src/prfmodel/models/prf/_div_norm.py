@@ -1,12 +1,18 @@
 """Divisive normalization population receptive field models."""
 
+import warnings
+import numpy as np
+import numpy.typing as npt
 import pandas as pd
+from keras import ops
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import Baseline
 from prfmodel.scaling.base import BaseScaling
+from prfmodel.stimuli import PRFStimulus
+from prfmodel.utils import get_dtype
 from ._gaussian import Gaussian2DPRFResponse
 from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import DivNormPRFModel
@@ -27,6 +33,10 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
         A scaling model class or instance. Model classes will be instantiated during initialization.
         The default creates a :class:`~prfmodel.scaling.Baseline` instance.
     %(model_regressors)s
+
+    See Also
+    --------
+    init_div_norm_from_dog_css : Approximate good starting values for divisive normalization pRF models
 
     Notes
     -----
@@ -117,175 +127,127 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
         )
 
 
-def init_dn_from_gaussian(  # noqa: PLR0913
-    gaussian_params: pd.DataFrame,
-    sigma_ratio: float = 2.0,
-    sigma_normalization: float | None = None,
-    baseline_activation: float | None = None,
-    amplitude_normalization: float = 1.0,
-    baseline_normalization: float = 1.0,
-) -> pd.DataFrame:
-    """
-    Initialize DN model parameters from fitted Gaussian model parameters.
-
-    Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
-    into starting parameters for a :class:`DivNormGaussian2DPRFModel`, suitable for
-    subsequent SGD.
-
-    Parameters
-    ----------
-    gaussian_params : pandas.DataFrame
-        DataFrame of fitted parameters from a ``Gaussian2DPRFModel``.
-        Must contain columns: ``sigma`` and ``amplitude`` (plus all shared columns).
-    sigma_ratio : float, default=2.0
-        Ratio used to set the normalization size (phi = sigma_normalization / sigma_activation in the paper):
-        ``sigma_normalization = sigma_activation * sigma_ratio``.
-        Must be >= 1.0, as the normalization pRF must be at least as large as the activation
-        pRF. Ignored when ``sigma_normalization`` is provided.
-    sigma_normalization : float, optional
-        Fixed normalization size applied to all rows. Must be >= ``sigma`` for every row in
-        ``gaussian_params``. When provided, overrides ``sigma_ratio``.
-    baseline_activation : float, optional
-        Initial value for ``baseline_activation`` (b in the DN formula). If ``None`` (the
-        default), the value is taken from the ``baseline`` column of ``gaussian_params``; a
-        ``ValueError`` is raised if that column is absent. When an explicit float is given it
-        is always used, regardless of whether a ``baseline`` column is present.
-    amplitude_normalization : float, default=1.0
-        Initial value for ``amplitude_normalization`` (c in the DN formula). Controls the
-        scaling of the normalization Gaussian.
-    baseline_normalization : float, default=1.0
-        Initial value for ``baseline_normalization`` (d in the DN formula). Controls the
-        normalization baseline in the denominator. Must be > 0 to avoid division by zero.
-
-    Returns
-    -------
-    pandas.DataFrame
-        DataFrame of DN initial parameters with columns:
-        ``sigma_activation`` (= ``sigma``), ``sigma_normalization``,
-        ``amplitude_activation`` (= ``amplitude``), ``baseline_activation`` (b, = ``baseline``
-        if present), ``amplitude_normalization`` (c), ``baseline_normalization`` (d),
-        plus all shared columns unchanged. The ``sigma``, ``amplitude``, and ``baseline``
-        (if present) columns are dropped.
-
-    Raises
-    ------
-    ValueError
-        If ``sigma_ratio`` is less than 1.0.
-    ValueError
-        If ``sigma_normalization`` is smaller than ``sigma`` for any row in ``gaussian_params``.
-    ValueError
-        If ``baseline_activation`` is ``None`` and ``gaussian_params`` does not contain a
-        ``baseline`` column.
-
-    """
-    if sigma_ratio < 1.0:
-        msg = (
-            f"sigma_ratio must be >= 1.0 (got {sigma_ratio}), as the normalization pRF "
-            "must be at least as large as the activation pRF."
-        )
-        raise ValueError(msg)
-
-    dn_params = gaussian_params.copy()
-    dn_params["sigma_activation"] = dn_params["sigma"]
-
-    if sigma_normalization is not None:
-        if (gaussian_params["sigma"] > sigma_normalization).any():
-            max_sigma_activation = gaussian_params["sigma"].max()
-            msg = (
-                f"sigma_normalization ({sigma_normalization}) must be >= sigma_activation for all rows, "
-                f"but max sigma_activation is {max_sigma_activation}"
-            )
-            raise ValueError(msg)
-        dn_params["sigma_normalization"] = sigma_normalization
-    else:
-        dn_params["sigma_normalization"] = dn_params["sigma"] * sigma_ratio
-
-    dn_params["amplitude_activation"] = dn_params["amplitude"]
-    if baseline_activation is None:
-        if "baseline" not in dn_params.columns:
-            msg = (
-                "`baseline_activation` is None and gaussian_params does not contain a 'baseline' column. "
-                "Provide an explicit `baseline_activation` value."
-            )
-            raise ValueError(msg)
-        dn_params["baseline_activation"] = dn_params["baseline"]
-    else:
-        dn_params["baseline_activation"] = baseline_activation
-    dn_params["amplitude_normalization"] = amplitude_normalization
-    dn_params["baseline_normalization"] = baseline_normalization
-
-    cols_to_drop = ["sigma", "amplitude"] + (["baseline"] if "baseline" in dn_params.columns else [])
-    return dn_params.drop(columns=cols_to_drop)
-
-
-def init_dn_from_dog(
+def init_div_norm_from_dog_css(
     dog_params: pd.DataFrame,
-    baseline_activation: float | None = None,
-    baseline_normalization: float = 1.0,
+    css_n: npt.ArrayLike = 0.5,
+    stimulus: PRFStimulus | None = None,
 ) -> pd.DataFrame:
-    """
-    Initialize DN model parameters from fitted DoG model parameters.
+    r"""
+    Initialize divisive normalization model parameters.
 
-    Converts the output of a fitted :class:`~prfmodel.models.difference_of_gaussians.DoG2DPRFModel`
-    into starting parameters for a :class:`DivNormGaussian2DPRFModel`, suitable for subsequent SGD.
+    Aims to provide good starting parameters for divisive normalization models by approximating
+    suppression from Difference of Gaussian (DoG) model parameters and compression from
+    compressive spatial summation (CSS) model parameters.
 
     Parameters
     ----------
     dog_params : pandas.DataFrame
-        DataFrame of fitted parameters from a ``DoG2DPRFModel``.
-        Must contain columns: ``sigma_center``, ``sigma_surround``, ``amplitude_center``,
-        and ``amplitude_surround`` (plus all shared columns).
-    baseline_activation : float, optional
-        Initial value for ``baseline_activation`` (b in the DN formula). If ``None`` (the
-        default), the value is taken from the ``baseline`` column of ``dog_params``; a
-        ``ValueError`` is raised if that column is absent. When an explicit float is given it
-        is always used, regardless of whether a ``baseline`` column is present.
-    baseline_normalization : float, default=1.0
-        Initial value for ``baseline_normalization`` (d in the DN formula). Controls the
-        normalization baseline in the denominator. Must be > 0 to avoid division by zero.
+        Parameter estimates from a DoG model (e.g., :class:`~prfmodel.models.prf.DoG2DPRFModel`). Columns contain
+        different parameters and rows parameter values for different units.
+    css_n : float or array_like, default=0.5
+        Compression exponent from a CSS model (expected in the interval ``(0, 1)``).
+        Smaller values give higher compression resulting from lower baseline normalization. Must be a scalar or of
+        length equal to the rows in ``parameters``.
+    stimulus : prfmodel.stimuli.PRFStimulus, optional
+        Stimulus used to scale ``baseline_normalization`` to the actual normalization drive. When provided, the
+        normalization Gaussian is encoded against the stimulus to obtain the peak normalization drive per row, and
+        ``baseline_normalization`` is set so the local compression exponent of the divisive normalization response
+        matches ``css_n`` (see Notes). When omitted, the cruder ``baseline_normalization = css_n * 100`` heuristic is
+        used instead.
 
     Returns
     -------
     pandas.DataFrame
-        DataFrame of DN initial parameters with columns:
-        ``sigma_activation`` (= ``sigma_center``), ``sigma_normalization`` (= ``sigma_surround``),
-        ``amplitude_activation`` (= ``amplitude_center``),
-        ``amplitude_normalization`` (= ``abs(amplitude_surround)``; the DoG surround amplitude is positive, so
-        its magnitude initializes the normalization amplitude — can go negative during SGD if unconstrained),
-        ``baseline_activation`` (b, = ``baseline`` if present), ``baseline_normalization`` (d),
-        plus all shared columns unchanged. The ``sigma_center``, ``sigma_surround``,
-        ``amplitude_center``, ``amplitude_surround``, and ``baseline`` (if present) columns
-        are dropped.
+        Parameters required by divisive normalization models.
 
-    Raises
-    ------
-    ValueError
-        If ``baseline_activation`` is ``None`` and ``dog_params`` does not contain a
-        ``baseline`` column.
+    See Also
+    --------
+    DivNormGaussian2DPRFModel : 2D Gaussian divisive normalization pRF model.
+    prfmodel.models.prf.canonical.DivNormPRFModel : Generic divisive normalization pRF model.
+
+    Notes
+    -----
+    The divisive normalization parameters are computed as follows:
+
+    - ``sigma_activation = sigma_center``
+    - ``sigma_normalization = sigma_surround``
+    - ``amplitude_activation = 1.0``
+    - ``amplitude_normalization = 1.0``
+    - ``baseline_normalization = peak_normalization_drive * css_n / (1 - css_n)`` if ``stimulus`` is given, else
+      ``css_n * 100`` (``peak_normalization_drive`` is the maximum of the stimulus-encoded normalization response)
+    - ``baseline_activation = (amplitude_surround / amplitude_center) * baseline_normalization``
+
+    Warns
+    -----
+    UserWarning
+        If ``sigma_surround / sigma_center`` is less than 1.0 (normalization field smaller than activation field),
+        if ``amplitude_center`` or ``amplitude_surround`` is negative (negative ``baseline_activation`` for positive
+        ``amplitude``), if ``css_n`` is negative (negative ``baseline_normalization``), or if ``css_n`` is greater
+        than or equal to 1.0 while ``stimulus`` is given (non-positive ``baseline_normalization``).
 
     """
-    dn_params = dog_params.copy()
-    dn_params["sigma_activation"] = dn_params["sigma_center"]
-    dn_params["sigma_normalization"] = dn_params["sigma_surround"]
-    dn_params["amplitude_activation"] = dn_params["amplitude_center"]
-    # The surround is subtracted in the DoG model, so amplitude_surround is positive; abs() guards against
-    # legacy negative values to keep amplitude_normalization positive (the DN paper has no negative normalization).
-    dn_params["amplitude_normalization"] = dn_params["amplitude_surround"].abs()
+    css_n = np.asarray(css_n)
 
-    if baseline_activation is None:
-        if "baseline" not in dn_params.columns:
-            msg = (
-                "`baseline_activation` is None and dog_params does not contain a 'baseline' column. "
-                "Provide an explicit `baseline_activation` value."
-            )
-            raise ValueError(msg)
-        dn_params["baseline_activation"] = dn_params["baseline"]
+    num_rows = dog_params.shape[0]
+    if css_n.ndim > 0 and css_n.shape[0] not in (1, num_rows):
+        msg = f"'css_n' must be a single value or of length equal to the number of rows in 'dog_params' ({num_rows})"
+        raise ValueError(msg)
+
+    dog_sigma_ratio = np.asarray(dog_params["sigma_surround"] / dog_params["sigma_center"])
+    dog_amplitude_ratio = np.asarray(dog_params["amplitude_surround"] / dog_params["amplitude_center"])
+
+    if np.any(dog_sigma_ratio < 1.0):
+        warnings.warn(
+            "'dog_sigma_ratio' is less than 1.0, giving a normalization field smaller than the activation field.",
+            stacklevel=2,
+        )
+    if np.any(dog_amplitude_ratio < 0.0):
+        warnings.warn(
+            "'dog_amplitude_ratio' is negative, giving a negative baseline_activation for positive amplitude.",
+            stacklevel=2,
+        )
+    if np.any(css_n < 0.0):
+        warnings.warn(
+            "'css_n' is negative, giving a negative baseline_normalization.",
+            stacklevel=2,
+        )
+    if stimulus is not None and np.any(css_n >= 1.0):
+        warnings.warn(
+            "'css_n' is greater than or equal to 1.0, giving a non-positive baseline_normalization.",
+            stacklevel=2,
+        )
+
+    div_norm_params = dog_params.drop(
+        columns=["sigma_center", "sigma_surround", "amplitude_center", "amplitude_surround"],
+    )
+
+    div_norm_params["sigma_activation"] = dog_params["sigma_center"]
+    div_norm_params["sigma_normalization"] = dog_params["sigma_surround"]
+
+    div_norm_params["amplitude_activation"] = 1.0
+    div_norm_params["amplitude_normalization"] = 1.0
+
+    if stimulus is None:
+        div_norm_params["baseline_normalization"] = np.broadcast_to(css_n * 100, div_norm_params.shape[0])
     else:
-        dn_params["baseline_activation"] = baseline_activation
+        peak_drive = _peak_normalization_drive(div_norm_params, stimulus)
+        # css_n >= 1.0 (warned above) yields a non-positive denominator; ignore the numpy warning here.
+        amplitude_normalization = div_norm_params["amplitude_normalization"].to_numpy()
+        with np.errstate(divide="ignore", invalid="ignore"):
+            div_norm_params["baseline_normalization"] = amplitude_normalization * peak_drive * css_n / (1.0 - css_n)
 
-    dn_params["baseline_normalization"] = baseline_normalization
+    div_norm_params["baseline_activation"] = dog_amplitude_ratio * div_norm_params["baseline_normalization"]
 
-    cols_to_drop = ["sigma_center", "sigma_surround", "amplitude_center", "amplitude_surround"]
-    if "baseline" in dn_params.columns:
-        cols_to_drop.append("baseline")
-    return dn_params.drop(columns=cols_to_drop)
+    return div_norm_params
+
+
+def _peak_normalization_drive(div_norm_params: pd.DataFrame, stimulus: PRFStimulus) -> np.ndarray:
+    """Peak normalization drive per row from encoding the normalization Gaussian against the stimulus."""
+    norm_params = div_norm_params[["mu_x", "mu_y"]].copy()
+    norm_params["sigma"] = div_norm_params["sigma_normalization"]
+
+    dtype = get_dtype(None)
+    norm_response = Gaussian2DPRFResponse()(stimulus, norm_params, dtype=dtype)
+    norm_drive = PRFStimulusEncoder()(stimulus, norm_response, norm_params, dtype=dtype)
+
+    return np.asarray(ops.convert_to_numpy(ops.max(norm_drive, axis=1)))
