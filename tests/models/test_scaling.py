@@ -3,10 +3,8 @@
 import numpy as np
 import pandas as pd
 import pytest
-from pytest_regressions.num_regression import NumericRegressionFixture
 from prfmodel.exceptions import ShapeError
 from prfmodel.scaling import BaselineAmplitude
-from prfmodel.scaling import DelayedGainNormScaling
 from prfmodel.scaling import DivNormAmplitude
 from prfmodel.scaling import DoGAmplitude
 from .conftest import parametrize_dtype
@@ -187,105 +185,3 @@ class TestDivNormAmplitude:
 
         with pytest.raises(ShapeError):
             model(inputs, params)
-
-
-class TestDelayedGainNormScaling:
-    """Tests for DelayedGainNormScaling class."""
-
-    num_frames = 20
-
-    @pytest.fixture
-    def model(self):
-        """Model object."""
-        return DelayedGainNormScaling()
-
-    @pytest.fixture
-    def params(self):
-        """Model parameters."""
-        return pd.DataFrame(
-            {
-                "n": [2.0, 1.5],
-                "tau_2": [0.1, 0.2],
-                "sigma_saturation": [1.0, 2.0],
-                "amplitude": [1.0, 2.0],
-                "baseline": [0.0, 0.5],
-            },
-        )
-
-    @pytest.fixture
-    def inputs(self, params: pd.DataFrame):
-        """Input tensor."""
-        return np.ones((params.shape[0], self.num_frames))
-
-    def test_parameter_names(self, model: DelayedGainNormScaling):
-        """Test that correct parameter names are returned."""
-        assert model.parameter_names == ["n", "tau_2", "sigma_saturation", "amplitude", "baseline"]
-
-    @parametrize_dtype
-    def test_call(self, model: DelayedGainNormScaling, inputs: np.ndarray, params: pd.DataFrame, dtype: str):
-        """Test that output has correct shape and dtype is respected."""
-        resp = model(inputs, params, dtype)
-        assert resp.shape == (params.shape[0], self.num_frames)
-
-    def test_output_shape(self, model: DelayedGainNormScaling, inputs: np.ndarray, params: pd.DataFrame):
-        """Test that output has correct shape."""
-        resp = model(inputs, params)
-        assert resp.shape == (params.shape[0], self.num_frames)
-
-    def test_shape_error(self, model: DelayedGainNormScaling, params: pd.DataFrame):
-        """Test that ShapeError is raised for 1D input."""
-        with pytest.raises(ShapeError):
-            model(np.ones(self.num_frames), params)
-
-    def test_n_less_than_1_raises(self, model: DelayedGainNormScaling):
-        """Test that ValueError is raised when any n < 1."""
-        bad_params = pd.DataFrame(
-            {
-                "n": [0.5],
-                "tau_2": [0.1],
-                "sigma_saturation": [1.0],
-                "amplitude": [1.0],
-                "baseline": [0.0],
-            },
-        )
-        with pytest.raises(ValueError, match="n"):
-            model(np.ones((1, self.num_frames)), bad_params)
-
-    def test_amplitude_baseline_applied(self, model: DelayedGainNormScaling):
-        """Test that amplitude and baseline scale the output linearly."""
-        inputs = np.ones((1, self.num_frames))
-        base_params = pd.DataFrame(
-            {
-                "n": [2.0],
-                "tau_2": [0.5],
-                "sigma_saturation": [1.0],
-                "amplitude": [1.0],
-                "baseline": [0.0],
-            },
-        )
-        scaled_params = pd.DataFrame(
-            {
-                "n": [2.0],
-                "tau_2": [0.5],
-                "sigma_saturation": [1.0],
-                "amplitude": [3.0],
-                "baseline": [0.5],
-            },
-        )
-        base_resp = np.array(model(inputs, base_params))
-        scaled_resp = np.array(model(inputs, scaled_params))
-        np.testing.assert_allclose(scaled_resp, 3.0 * base_resp + 0.5, rtol=1e-5)
-
-    def test_regression(
-        self,
-        num_regression: NumericRegressionFixture,
-        model: DelayedGainNormScaling,
-        inputs: np.ndarray,
-        params: pd.DataFrame,
-    ):
-        """Test that model output matches reference values."""
-        resp = model(inputs, params)
-        num_regression.check(
-            {f"response_{i}": x for i, x in enumerate(resp)},
-            default_tolerance={"atol": 1e-4, "rtol": 1e-3},
-        )

@@ -7,8 +7,6 @@ from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.prf import DelayedGainNormGaussian2DPRFModel
 from prfmodel.models.prf import init_delayed_gain_norm_from_gaussian
-from prfmodel.scaling import DelayedGainNormScaling
-from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 
@@ -73,46 +71,40 @@ class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
         resp = prf_model(stimulus, params)
         assert resp.shape == (params.shape[0], stimulus.design.shape[0])
 
-    @pytest.mark.parametrize(
-        ("impulse_model", "scaling_model"),
-        [
-            (DerivativeTwoGammaImpulse(), DelayedGainNormScaling()),
-            (DerivativeTwoGammaImpulse, DelayedGainNormScaling),
-            (None, DelayedGainNormScaling()),
-            (DerivativeTwoGammaImpulse(), None),
-            (None, None),
-        ],
-    )
+    @pytest.mark.parametrize("impulse_model", [None, DerivativeTwoGammaImpulse(), DerivativeTwoGammaImpulse])
     def test_predict_shape_parametrized(
         self,
         impulse_model: BaseImpulse,
-        scaling_model: BaseScaling,
         stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
-        """Test output shape for various impulse/scaling model combinations."""
-        model = DelayedGainNormGaussian2DPRFModel(
-            impulse_model=impulse_model,
-            scaling_model=scaling_model,
-        )
+        """Test output shape for various impulse model combinations."""
+        model = DelayedGainNormGaussian2DPRFModel(impulse_model=impulse_model)
         resp = model(stimulus, params)
         assert resp.shape == (params.shape[0], stimulus.design.shape[0])
 
+    def test_n_less_than_1_raises(
+        self,
+        prf_model: DelayedGainNormGaussian2DPRFModel,
+        stimulus: PRFStimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that ValueError is raised when any n < 1."""
+        bad_params = params.copy()
+        bad_params["n"] = 0.5
+        with pytest.raises(ValueError, match="n"):
+            prf_model(stimulus, bad_params)
+
     @pytest.mark.parametrize("impulse_model", [None, DerivativeTwoGammaImpulse()])
-    @pytest.mark.parametrize("scaling_model", [None, DelayedGainNormScaling()])
     def test_predict_regression(
         self,
         num_regression: NumericRegressionFixture,
         impulse_model: BaseImpulse,
-        scaling_model: BaseScaling,
         stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
         """Test that model prediction matches reference values."""
-        model = DelayedGainNormGaussian2DPRFModel(
-            impulse_model=impulse_model,
-            scaling_model=scaling_model,
-        )
+        model = DelayedGainNormGaussian2DPRFModel(impulse_model=impulse_model)
         resp = model(stimulus, params)
         num_regression.check(
             {f"response_{i}": x for i, x in enumerate(resp)},
