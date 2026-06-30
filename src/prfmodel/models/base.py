@@ -75,7 +75,7 @@ class BasePopulationResponse(ModelProtocol, Generic[S]):
     >>> # Make model prediction for example stimulus
     >>> resp = model(stimulus, params)
     >>> print(resp.shape)  # (num_units, num_y, num_x)
-    (2, 101, 101)
+    (2, 128, 128)
 
     """
 
@@ -135,12 +135,12 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S]):
     ...         design = ops.convert_to_tensor(stimulus.design, dtype=dtype)
     ...         return encode_prf_response(response, design, dtype=dtype)
     >>> stimulus = load_2d_prf_bar_stimulus()
-    >>> response = np.ones((3, 101, 101))  # dummy response of shape (num_units, num_y, num_x)
+    >>> response = np.ones((3, 128, 128))  # dummy response of shape (num_units, num_y, num_x)
     >>> params = pd.DataFrame()
     >>> encoder = CustomPRFStimulusEncoder()
     >>> encoded = encoder(stimulus, response, params)
     >>> print(encoded.shape)  # (num_units, num_frames)
-    (3, 200)
+    (3, 170)
 
     """
 
@@ -220,7 +220,7 @@ class BaseCanonical(ModelProtocol, Generic[S]):
     >>> params = pd.DataFrame({"mu_y": [0.0, 1.0], "mu_x": [1.0, 0.0], "sigma": [1.0, 1.5]})
     >>> resp = model(stimulus, params)
     >>> print(resp.shape)  # (num_units, num_frames)
-    (2, 200)
+    (2, 170)
 
     """
 

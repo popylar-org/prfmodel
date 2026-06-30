@@ -68,8 +68,6 @@ class GridFitter:
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> from prfmodel.models.prf import Gaussian2DPRFModel
     >>> stimulus = load_2d_prf_bar_stimulus()
-    >>> print(stimulus)
-    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> # Only fit response model
     >>> model = Gaussian2DPRFModel(
     ...     impulse_model=None,
@@ -77,7 +75,7 @@ class GridFitter:
     ... )
     >>> fitter = GridFitter(model=model, stimulus=stimulus)
     >>> # Create dummy data for a single unit
-    >>> data = np.zeros((1, 200))
+    >>> data = np.zeros((1, stimulus.design.shape[0]))
     >>> # Define possible parameters in grid
     >>> params_dict = {"mu_y": [0.0], "mu_x": [0.0], "sigma": [1.0]}
     >>> # Fit model parameters
