@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 import pytest
-from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.fitters import GridFitter
 from prfmodel.fitters import LeastSquaresFitter
 from prfmodel.fitters import SGDFitter
@@ -14,15 +13,10 @@ from prfmodel.regressors import AdditiveRegressors
 from prfmodel.regressors import ConvolvedRegressors
 from prfmodel.regressors import RegressorsList
 from prfmodel.stimuli import PRFStimulus
+from tests.conftest import PRFStimulusSetup
 
 _LOSS_ATOL = 1e-6
 _SGD_NUM_STEPS = 3
-
-
-@pytest.fixture
-def stimulus():
-    """2D bar pRF stimulus."""
-    return load_2d_prf_bar_stimulus()
 
 
 @pytest.fixture
@@ -77,7 +71,7 @@ def regressor_design(stimulus: PRFStimulus):
     )
 
 
-class TestLeastSquaresIntegration:
+class TestLeastSquaresIntegration(PRFStimulusSetup):
     """Verify LeastSquaresFitter recovers beta coefficients alongside the pRF amplitude."""
 
     def test_recover_betas(
@@ -147,7 +141,7 @@ class TestLeastSquaresIntegration:
             )
 
 
-class TestGridIntegration:
+class TestGridIntegration(PRFStimulusSetup):
     """Smoke test for GridFitter with a regressors_model."""
 
     def test_grid_smoke(
@@ -186,7 +180,7 @@ class TestGridIntegration:
         assert grid_params.shape == (1, len(parameter_values))
 
 
-class TestSGDIntegration:
+class TestSGDIntegration(PRFStimulusSetup):
     """Smoke test for SGDFitter with a regressors_model (3 steps)."""
 
     def test_sgd_smoke(
