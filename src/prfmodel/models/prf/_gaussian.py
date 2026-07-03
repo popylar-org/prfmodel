@@ -58,7 +58,7 @@ def _expand_gaussian_args(grid: Tensor, mu: Tensor, sigma: Tensor) -> tuple[Tens
 
 def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor:
     """
-    Predict a isotropic Gaussian population receptive field response.
+    Predict an isotropic Gaussian population receptive field response.
 
     The dimensionality of the Gaussian depends on the number of dimensions of `grid` and `mu`. All dimensions have
     the same size `sigma`.
@@ -199,10 +199,9 @@ class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus]):
 
 class Gaussian2DPRFModel(CanonicalPRFModel):
     """
-    Two-dimensional isotropic Gaussian population receptive field model.
+    Two-dimensional isotropic Gaussian population receptive field (pRF) model.
 
-    This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
-    and scaling model response.
+    This class combines a 2D isotropic Gaussian pRF, impulse, scaling, and regressors model response.
 
     Parameters
     ----------
@@ -213,14 +212,13 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
 
     Notes
     -----
-    The canonical model follows the following steps: [1]_:
+    The canonical model follows the following steps [1]_:
 
-    1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
-    2. The encoding model encodes the neuron population response with the stimulus design.
-    3. An impulse model generates an impulse response.
-    4. The encoded neuron population response is convolved with the impulse response.
-    5. The scaling model modifies the convolved response.
-    6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
+    1. The 2D Gaussian pRF response model makes a prediction for the stimulus grid.
+    2. The encoding model encodes the response with the stimulus design.
+    3. The encoded response is convolved with an impulse response (optional).
+    4. The scaling model modifies the convolved response (optional).
+    5. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
 
     Using the default impulse and scaling models, the following columns are expected in the
     :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
