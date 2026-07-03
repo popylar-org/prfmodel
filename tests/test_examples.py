@@ -1,6 +1,7 @@
 """Tests for examples."""
 
 import tempfile
+import numpy as np
 import pytest
 from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.examples import load_single_subject_fmri_data
@@ -14,10 +15,19 @@ _NUM_FRAMES = 120
 pytest_skip_examples = pytest.mark.examples
 
 
-def test_load_2d_bar_stimulus():
-    """Test that load_2d_bar_stimulus returns stimulus object."""
+def test_load_2d_bar_stimulus_single():
+    """Test that load_2d_prf_bar_stimulus returns a single stimulus object by default."""
     stimulus = load_2d_prf_bar_stimulus()
     assert isinstance(stimulus, PRFStimulus)
+
+
+def test_load_2d_bar_stimulus_train_test():
+    """Test that load_2d_prf_bar_stimulus returns a train and test stimulus object when return_test is true."""
+    stimulus_train, stimulus_test = load_2d_prf_bar_stimulus(return_test=True)
+    assert isinstance(stimulus_train, PRFStimulus)
+    assert isinstance(stimulus_test, PRFStimulus)
+    assert stimulus_train.design.shape == stimulus_test.design.shape
+    np.testing.assert_array_equal(stimulus_train.grid, stimulus_test.grid)
 
 
 @pytest_skip_examples
