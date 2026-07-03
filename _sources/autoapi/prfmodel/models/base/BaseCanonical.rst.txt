@@ -44,7 +44,7 @@ prfmodel.models.base.BaseCanonical
    >>> params = pd.DataFrame({"mu_y": [0.0, 1.0], "mu_x": [1.0, 0.0], "sigma": [1.0, 1.5]})
    >>> resp = model(stimulus, params)
    >>> print(resp.shape)  # (num_units, num_frames)
-   (2, 200)
+   (2, 170)
 
 
    .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor

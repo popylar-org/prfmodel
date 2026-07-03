@@ -49,7 +49,7 @@ prfmodel.models.base.BasePopulationResponse
    >>> # Make model prediction for example stimulus
    >>> resp = model(stimulus, params)
    >>> print(resp.shape)  # (num_units, num_y, num_x)
-   (2, 101, 101)
+   (2, 128, 128)
 
 
    .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor

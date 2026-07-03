@@ -38,12 +38,12 @@ prfmodel.models.base.BaseStimulusEncoder
    ...         design = ops.convert_to_tensor(stimulus.design, dtype=dtype)
    ...         return encode_prf_response(response, design, dtype=dtype)
    >>> stimulus = load_2d_prf_bar_stimulus()
-   >>> response = np.ones((3, 101, 101))  # dummy response of shape (num_units, num_y, num_x)
+   >>> response = np.ones((3, 128, 128))  # dummy response of shape (num_units, num_y, num_x)
    >>> params = pd.DataFrame()
    >>> encoder = CustomPRFStimulusEncoder()
    >>> encoded = encoder(stimulus, response, params)
    >>> print(encoded.shape)  # (num_units, num_frames)
-   (3, 200)
+   (3, 170)
 
 
    .. py:method:: __call__(stimulus: S, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None)

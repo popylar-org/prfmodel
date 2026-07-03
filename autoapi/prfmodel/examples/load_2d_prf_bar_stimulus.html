@@ -402,22 +402,30 @@
 <h1>prfmodel.examples.load_2d_prf_bar_stimulus<a class="headerlink" href="#prfmodel-examples-load-2d-prf-bar-stimulus" title="Link to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="prfmodel.examples.load_2d_prf_bar_stimulus">
-<span class="sig-prename descclassname"><span class="pre">prfmodel.examples.</span></span><span class="sig-name descname"><span class="pre">load_2d_prf_bar_stimulus</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../stimuli/PRFStimulus.html#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><span class="pre">prfmodel.stimuli.PRFStimulus</span></a></span></span><a class="headerlink" href="#prfmodel.examples.load_2d_prf_bar_stimulus" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">prfmodel.examples.</span></span><span class="sig-name descname"><span class="pre">load_2d_prf_bar_stimulus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">return_test</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../stimuli/PRFStimulus.html#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><span class="pre">prfmodel.stimuli.PRFStimulus</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../stimuli/PRFStimulus.html#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><span class="pre">prfmodel.stimuli.PRFStimulus</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../stimuli/PRFStimulus.html#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><span class="pre">prfmodel.stimuli.PRFStimulus</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#prfmodel.examples.load_2d_prf_bar_stimulus" title="Link to this definition">¶</a></dt>
 <dd><p>Load a two-dimensional population receptive field bar stimulus.</p>
-<p>Loads an example stimulus that moves in eight directions (vertical, horizontal, diagonal) through a two-dimensional
-space.</p>
+<p>Loads an example stimulus in which a bar moves in four directions (top-bottom, left-right, bottom-top, right-left)
+through a two-dimensional space.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A stimulus object with a <cite>design</cite> with shape (200, 101, 101) and a <cite>grid</cite> with shape (101, 101, 2).</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>return_test</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – Whether to return a test stimulus. If <code class="docutils literal notranslate"><span class="pre">False</span></code>, returns a single stimulus with the first half of the design
+matrix. If <code class="docutils literal notranslate"><span class="pre">True</span></code>, returns a train and test stimulus with the first and second half of the design matrix
+(split in the time axis).</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../PRFStimulus.html#prfmodel.PRFStimulus" title="prfmodel.PRFStimulus">PRFStimulus</a></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>If <code class="docutils literal notranslate"><span class="pre">return_test=False</span></code> (the default), a single stimulus object with a <code class="docutils literal notranslate"><span class="pre">design</span></code> with shape
+<code class="docutils literal notranslate"><span class="pre">(170,</span> <span class="pre">128,</span> <span class="pre">128)</span></code> and a <code class="docutils literal notranslate"><span class="pre">grid</span></code> with shape <code class="docutils literal notranslate"><span class="pre">(128,</span> <span class="pre">128,</span> <span class="pre">2)</span></code>. If <code class="docutils literal notranslate"><span class="pre">return_test=True</span></code>, two stimulus objects
+with a <code class="docutils literal notranslate"><span class="pre">design</span></code> with shape <code class="docutils literal notranslate"><span class="pre">(170,</span> <span class="pre">128,</span> <span class="pre">128)</span></code> and a <code class="docutils literal notranslate"><span class="pre">grid</span></code> with shape <code class="docutils literal notranslate"><span class="pre">(128,</span> <span class="pre">128,</span> <span class="pre">2)</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../PRFStimulus.html#prfmodel.PRFStimulus" title="prfmodel.PRFStimulus">PRFStimulus</a></p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>The stimulus was created with the validation framework developed by Lerma-Usabiaga et al (2020)[1]_.
-It has 200 time frames, with 101 pixels in the x- and y-dimension, spanning a visual field of 20 degrees
-vertically and horizontally.</p>
+<p>The full stimulus has 340 time frames, with 128 pixels in the x- and y-dimension, spanning a visual field of
+approximately -4 to 4 degrees of visual angle vertically and horizontally. The stimulus coordinate grid has been
+transformed from a rectangular into a quadratic shape. The moving bar patterns is mirrored in the time axis
+which means that it can be split in two almost identical halfs.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
@@ -425,20 +433,18 @@ vertically and horizontally.</p>
 </dd>
 </dl>
 </div>
-<p class="rubric">References</p>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id1" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
-<p>Lerma-Usabiaga, G., Benson, N., Winawer, J., &amp; Wandell, B. A. (2020). A validation framework for
-neuroimaging software: The case of population receptive fields. <em>PLOS Computational Biology</em>, 16(6),
-e1007924. <a class="reference external" href="https://doi.org/10.1371/journal.pcbi.1007924">https://doi.org/10.1371/journal.pcbi.1007924</a></p>
-</aside>
-</aside>
 <p class="rubric">Examples</p>
+<p>Load a single stimulus with the first half of the design matrix.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.examples</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_2d_prf_bar_stimulus</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">load_2d_prf_bar_stimulus</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
-<span class="go">PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
+<span class="go">PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
+</pre></div>
+</div>
+<p>Load a train and test stimulus with the first and second half of the design matrix.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus_train</span><span class="p">,</span> <span class="n">stimulus_test</span> <span class="o">=</span> <span class="n">load_2d_prf_bar_stimulus</span><span class="p">(</span><span class="n">return_test</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus_train</span><span class="p">)</span>
+<span class="go">PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
 </pre></div>
 </div>
 </dd></dl>

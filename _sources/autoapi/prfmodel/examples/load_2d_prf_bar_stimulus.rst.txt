@@ -1,37 +1,47 @@
 prfmodel.examples.load_2d_prf_bar_stimulus
 ==========================================
 
-.. py:function:: prfmodel.examples.load_2d_prf_bar_stimulus() -> prfmodel.stimuli.PRFStimulus
+.. py:function:: prfmodel.examples.load_2d_prf_bar_stimulus(return_test: bool = False) -> prfmodel.stimuli.PRFStimulus | tuple[prfmodel.stimuli.PRFStimulus, prfmodel.stimuli.PRFStimulus]
 
    Load a two-dimensional population receptive field bar stimulus.
 
-   Loads an example stimulus that moves in eight directions (vertical, horizontal, diagonal) through a two-dimensional
-   space.
+   Loads an example stimulus in which a bar moves in four directions (top-bottom, left-right, bottom-top, right-left)
+   through a two-dimensional space.
 
-   :returns: A stimulus object with a `design` with shape (200, 101, 101) and a `grid` with shape (101, 101, 2).
+   :param return_test: Whether to return a test stimulus. If ``False``, returns a single stimulus with the first half of the design
+                       matrix. If ``True``, returns a train and test stimulus with the first and second half of the design matrix
+                       (split in the time axis).
+   :type return_test: bool, default=True
+
+   :returns: If ``return_test=False`` (the default), a single stimulus object with a ``design`` with shape
+             ``(170, 128, 128)`` and a ``grid`` with shape ``(128, 128, 2)``. If ``return_test=True``, two stimulus objects
+             with a ``design`` with shape ``(170, 128, 128)`` and a ``grid`` with shape ``(128, 128, 2)``.
    :rtype: PRFStimulus
 
    .. rubric:: Notes
 
-   The stimulus was created with the validation framework developed by Lerma-Usabiaga et al (2020)[1]_.
-   It has 200 time frames, with 101 pixels in the x- and y-dimension, spanning a visual field of 20 degrees
-   vertically and horizontally.
+   The full stimulus has 340 time frames, with 128 pixels in the x- and y-dimension, spanning a visual field of
+   approximately -4 to 4 degrees of visual angle vertically and horizontally. The stimulus coordinate grid has been
+   transformed from a rectangular into a quadratic shape. The moving bar patterns is mirrored in the time axis
+   which means that it can be split in two almost identical halfs.
 
    .. seealso::
 
       :py:obj:`prfmodel.stimuli.prf.animate_2d_prf_stimulus`
           Create an animation for a two-dimensional stimulus.
 
-   .. rubric:: References
-
-   .. [1] Lerma-Usabiaga, G., Benson, N., Winawer, J., & Wandell, B. A. (2020). A validation framework for
-       neuroimaging software: The case of population receptive fields. *PLOS Computational Biology*, 16(6),
-       e1007924. https://doi.org/10.1371/journal.pcbi.1007924
-
    .. rubric:: Examples
+
+   Load a single stimulus with the first half of the design matrix.
 
    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
    >>> stimulus = load_2d_prf_bar_stimulus()
    >>> print(stimulus)
-   PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
+   PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
+
+   Load a train and test stimulus with the first and second half of the design matrix.
+
+   >>> stimulus_train, stimulus_test = load_2d_prf_bar_stimulus(return_test=True)
+   >>> print(stimulus_train)
+   PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
 
