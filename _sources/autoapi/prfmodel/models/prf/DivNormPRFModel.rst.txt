@@ -1,27 +1,21 @@
 prfmodel.models.prf.DivNormPRFModel
 ===================================
 
-.. py:class:: prfmodel.models.prf.DivNormPRFModel(activation_prf_model: prfmodel.models.base.BasePopulationResponse, normalization_prf_model: prfmodel.models.base.BasePopulationResponse, shared_params: list[str] | None = None, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = DivNormAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
+.. py:class:: prfmodel.models.prf.DivNormPRFModel(prf_model: prfmodel.models.base.BasePopulationResponse, shared_params: list[str] | None = None, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = Baseline, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
 
 
 
-   Divisive normalization population receptive field model.
+   Divisive normalization population receptive field (pRF) model.
 
-   Receives two independent pRF responses (activation and normalization) and combines them
-   via the divisive normalization formula.
-   Parameters that should be shared between both responses (e.g. the pRF centre
-   ``mu_x``, ``mu_y``) are listed in ``shared_params`` and appear once in
-   :attr:`parameter_names` without a suffix. All remaining pRF parameters are suffixed
-   with ``_activation`` or ``_normalization`` respectively.
+   This class performs divisive normalization between an activation (numerator) and a normalization (denominator)
+   pRF response and combines them with an impulse and scaling model. Both responses come from the same model class,
+   but their parameters can differ.
 
-   :param activation_prf_model: pRF response model (activation).
-   :type activation_prf_model: BaseResponse
-   :param normalization_prf_model: pRF response model (normalization).
-   :type normalization_prf_model: BaseResponse
-   :param shared_params: Names of pRF parameters that are shared between the two responses.  Each name
-                         must appear in *both* ``activation_prf_model.parameter_names`` and
-                         ``normalization_prf_model.parameter_names``.
-   :type shared_params: list of str, default=["mu_x", "mu_y"]
+   :param prf_model: A population receptive field response model instance.
+   :type prf_model: BasePopulationResponse
+   :param shared_params: Names of pRF parameters that are shared between the two responses. All names must appear in
+                         ``prf_model.parameter_names``.
+   :type shared_params: list of str, optional
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
                           The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
    :type encoding_model: BaseStimulusEncoder or type, default=PRFStimulusEncoder
@@ -30,8 +24,8 @@ prfmodel.models.prf.DivNormPRFModel
                          instance with default values.
    :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
    :param scaling_model: A scaling model class or instance. Model classes will be instantiated during initialization.
-                         The default creates a :class:`~prfmodel.scaling.DivNormAmplitude` instance.
-   :type scaling_model: BaseScaling or type or None, default=DivNormAmplitude, optional
+                         The default creates a :class:`~prfmodel.scaling.Baseline` instance.
+   :type scaling_model: BaseScaling or type or None, default=Baseline, optional
    :param regressors_model: A regressor model instance, a list of regressor model instances, or `None`. When a list is
                             provided, it is wrapped in a :class:`~prfmodel.regressors.RegressorsList` and its contributions
                             are summed. The regressor contribution is added after the scaling model.
@@ -39,19 +33,19 @@ prfmodel.models.prf.DivNormPRFModel
 
    .. rubric:: Notes
 
-   The predicted response is:
+   The divisive normalization model follows these steps
 
-   .. math::
+   1. The two pRF response models make predictions for the stimulus grid.
+   2. The encoding model encodes the responses with the stimulus design.
+   3. The two encoded responses are combined through divisive normalization.
+   4. The combined response is convolved with an impulse response (optional).
+   5. The scaling model modifies the convolved response (optional).
+   6. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
 
-       p_{\text{DN}} = \frac{(a R_1 \cdot S + b)}{(c R_2 \cdot S + d)} - \frac{b}{d}
 
-   Where `R_1` and `R_2` are the activation and normalization pRF responses, `S` is the stimulus.
-   The :math:`-b/d` term ensures a zero response in the absence of a stimulus.
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor
 
-
-   .. py:method:: __call__(stimulus: prfmodel.stimuli._prf.PRFStimulus, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor
-
-      Predict the DN model response to a stimulus.
+      Predict the combined model response to a stimulus.
 
       :param stimulus: Population receptive field stimulus object.
       :type stimulus: PRFStimulus
@@ -71,22 +65,13 @@ prfmodel.models.prf.DivNormPRFModel
 
 
 
-   .. py:method:: predict_responses(stimulus: prfmodel.stimuli._prf.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
-
-      Predict each of the two responses before applying the DN formula.
-
-      :returns: Stacked predictions of shape (num_voxels, 2, num_frames), where axis 1 index 0
-                is the activation response and index 1 is the normalization response.
-      :rtype: Tensor
-
-
-
    .. py:property:: parameter_names
       :type: list[str]
 
 
       Names of parameters used by the model.
 
-      Shared parameters appear once (no suffix). Response-specific parameters are suffixed
-      with ``_activation`` or ``_normalization``.
+      Shared response model parameters appear once (no suffix). Non-shared parameters are suffixed with the two
+      response suffixes (e.g. ``_center``/``_surround``). The combination, encoding, impulse and scaling
+      parameters are appended.
 

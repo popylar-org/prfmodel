@@ -293,6 +293,7 @@
 <li class="toctree-l4 has-children"><a class="reference internal" href="canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l5"><a class="reference internal" href="canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
+<li class="toctree-l5"><a class="reference internal" href="canonical/DivNormPRFModel.html">DivNormPRFModel</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="DivNormGaussian2DPRFModel.html">DivNormGaussian2DPRFModel</a></li>
@@ -304,8 +305,7 @@
 <li class="toctree-l4"><a class="reference internal" href="PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="encode_prf_response.html">encode_prf_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="init_css_from_gaussian.html">init_css_from_gaussian</a></li>
-<li class="toctree-l4"><a class="reference internal" href="init_dn_from_dog.html">init_dn_from_dog</a></li>
-<li class="toctree-l4"><a class="reference internal" href="init_dn_from_gaussian.html">init_dn_from_gaussian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="init_div_norm_from_dog_css.html">init_div_norm_from_dog_css</a></li>
 <li class="toctree-l4"><a class="reference internal" href="init_dog_from_gaussian.html">init_dog_from_gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="predict_gaussian_response.html">predict_gaussian_response</a></li>
 </ul>
@@ -332,9 +332,8 @@
 <li class="toctree-l4"><a class="reference internal" href="../../scaling/base/BaseScaling.html">BaseScaling</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../../scaling/Baseline.html">Baseline</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../scaling/BaselineAmplitude.html">BaselineAmplitude</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../scaling/DivNormAmplitude.html">DivNormAmplitude</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../scaling/DoGAmplitude.html">DoGAmplitude</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../stimuli/index.html">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -546,7 +545,7 @@ cortex. Journal of Neurophysiology, 110(2), 481-494. <a class="reference externa
 <dl class="py method">
 <dt class="sig sig-object py" id="prfmodel.models.prf.Gaussian2DCSSPRFModel.__call__">
 <span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../stimuli/PRFStimulus.html#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><span class="pre">prfmodel.stimuli.PRFStimulus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.4)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">regressors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.4)"><span class="pre">pandas.DataFrame</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="headerlink" href="#prfmodel.models.prf.Gaussian2DCSSPRFModel.__call__" title="Link to this definition">¶</a></dt>
-<dd><p>Predict a simple population receptive field model response to a stimulus.</p>
+<dd><p>Predict the model response to a stimulus.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

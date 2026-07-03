@@ -1,14 +1,14 @@
 prfmodel.models.prf.DoG2DPRFModel
 =================================
 
-.. py:class:: prfmodel.models.prf.DoG2DPRFModel(encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = DoGAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
+.. py:class:: prfmodel.models.prf.DoG2DPRFModel(encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = Baseline, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
 
 
 
-   Two-dimensional difference of Gaussians population receptive field model.
+   Two-dimensional Difference of Gaussians (DoG) population receptive field (pRF) model.
 
-   Runs two Gaussian 2D PRF responses (center and surround) through stimulus encoding and impulse
-   response convolution independently, then combines them as a linear model.
+   This class combines the difference between two 2D Gaussian pRF responses (center and surround) with an impulse,
+   scaling, and regressors model. The two 2D Gaussian pRF models share the same center but have different sizes.
 
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
                           The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
@@ -18,8 +18,8 @@ prfmodel.models.prf.DoG2DPRFModel
                          instance with default values.
    :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
    :param scaling_model: A scaling model class or instance. Model classes will be instantiated during initialization.
-                         The default creates a :class:`~prfmodel.scaling.DoGAmplitude` instance.
-   :type scaling_model: BaseScaling or type or None, default=DoGAmplitude, optional
+                         The default creates a :class:`~prfmodel.scaling.Baseline` instance.
+   :type scaling_model: BaseScaling or type or None, default=Baseline, optional
    :param regressors_model: A regressor model instance, a list of regressor model instances, or `None`. When a list is
                             provided, it is wrapped in a :class:`~prfmodel.regressors.RegressorsList` and its contributions
                             are summed. The regressor contribution is added after the scaling model.
@@ -29,23 +29,14 @@ prfmodel.models.prf.DoG2DPRFModel
 
    The canonical DoG model follows the following steps [1]_:
 
-   1. The center and surround 2D Gaussian population receptive field response models make separate predictions for
-       the stimulus grid. The two response models have the same center but different sizes.
-   2. The encoding model encodes each response with the stimulus design.
-   3. An impulse model generates an impulse response.
-   4. Each encoded response is convolved with the impulse response.
-   5. The scaling model modifies the convolved response. By default it subtracts the surround from the center
-       response after multiplying the responses with separate amplitude parameters.
-   6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
-
-   Let :math:`p_{\text{center}}(t)` and :math:`p_{\text{surround}}(t)` be the predicted temporal
-   responses for the center and surround Gaussians. With :math:`a_c = \text{amplitude\_center}`,
-   :math:`a_s = \text{amplitude\_surround}`, and :math:`\beta = \text{baseline}`, the predicted
-   response is:
-
-   .. math::
-
-       y(t) = a_c \, p_{\text{center}}(t) + a_s \, p_{\text{surround}}(t) + \beta
+   1. The center and surround 2D Gaussian pRF response models make separate predictions for
+      the stimulus grid.
+   2. The encoding model encodes the responses with the stimulus design.
+   3. The encoded responses are scaled with separate amplitudes. The surround response is subtracted from the
+      center response yielding the combined response.
+   4. The combined response is convolved with an impulse response (optional).
+   5. The scaling model modifies the convolved response (optional).
+   6. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
 
    Using the default impulse and scaling models, the following columns are expected in the
    :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
@@ -92,7 +83,8 @@ prfmodel.models.prf.DoG2DPRFModel
         - Amplitude of the center response.
       * - ``amplitude_surround``
         - Scaling
-        - Amplitude of the surround response (typically negative).
+        - Amplitude of the surround response (positive; the surround is subtracted from the center, typically
+          with ``amplitude_surround < amplitude_center``).
       * - ``baseline``
         - Scaling
         - Additive constant.
@@ -122,7 +114,7 @@ prfmodel.models.prf.DoG2DPRFModel
    ...     "weight_deriv": [0.5, 0.5, 0.5],
    ...     # Scaling model parameters
    ...     "amplitude_center": [2.0, 1.2, 0.1],
-   ...     "amplitude_surround": [-0.5, -0.3, -0.1],
+   ...     "amplitude_surround": [0.5, 0.3, 0.05],
    ...     "baseline": [0.1, -0.1, 0.5],
    ... })
    >>> # Predict model response
@@ -133,10 +125,7 @@ prfmodel.models.prf.DoG2DPRFModel
 
    .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor
 
-      Predict the composite model response (considering Center and Surround responses).
-
-      Applies the temporal model to the stacked responses from predict_responses.
-      When scaling_model=None, returns a simple subtraction (response_center - response_surround)
+      Predict the combined model response to a stimulus.
 
       :param stimulus: Population receptive field stimulus object.
       :type stimulus: PRFStimulus
@@ -156,18 +145,13 @@ prfmodel.models.prf.DoG2DPRFModel
 
 
 
-   .. py:method:: predict_responses(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
-
-      Predict the each of the two responses before applying betas.
-
-      :returns: Stacked predictions of shape (num_units, 2, num_frames).
-      :rtype: :data:`prfmodel.typing.Tensor`
-
-
-
    .. py:property:: parameter_names
       :type: list[str]
 
 
-      A list with names of unique parameters used by the model.
+      Names of parameters used by the model.
+
+      Shared response model parameters appear once (no suffix). Non-shared parameters are suffixed with the two
+      response suffixes (e.g. ``_center``/``_surround``). The combination, encoding, impulse and scaling
+      parameters are appended.
 

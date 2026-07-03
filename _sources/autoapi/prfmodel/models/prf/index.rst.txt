@@ -89,8 +89,7 @@ Functions
 
    encode_prf_response </autoapi/prfmodel/models/prf/encode_prf_response>
    init_css_from_gaussian </autoapi/prfmodel/models/prf/init_css_from_gaussian>
-   init_dn_from_dog </autoapi/prfmodel/models/prf/init_dn_from_dog>
-   init_dn_from_gaussian </autoapi/prfmodel/models/prf/init_dn_from_gaussian>
+   init_div_norm_from_dog_css </autoapi/prfmodel/models/prf/init_div_norm_from_dog_css>
    init_dog_from_gaussian </autoapi/prfmodel/models/prf/init_dog_from_gaussian>
    predict_gaussian_response </autoapi/prfmodel/models/prf/predict_gaussian_response>
 
@@ -98,8 +97,7 @@ Functions
 
    prfmodel.models.prf.encode_prf_response
    prfmodel.models.prf.init_css_from_gaussian
-   prfmodel.models.prf.init_dn_from_dog
-   prfmodel.models.prf.init_dn_from_gaussian
+   prfmodel.models.prf.init_div_norm_from_dog_css
    prfmodel.models.prf.init_dog_from_gaussian
    prfmodel.models.prf.predict_gaussian_response
 

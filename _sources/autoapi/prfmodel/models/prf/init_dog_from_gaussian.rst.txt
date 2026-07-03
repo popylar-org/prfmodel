@@ -45,8 +45,8 @@ prfmodel.models.prf.init_dog_from_gaussian
 
    .. rubric:: Notes
 
-   ``amplitude_surround`` is initialized to ``0.0``, which is the boundary of the constraint
-   ``amplitude_surround < 0`` enforced by a :class:`~prfmodel.adapter.ParameterConstraint`
-   with ``upper=0.0``. The constraint transform maps ``amplitude_surround=0`` to optimizer
-   variable ``raw=-1.0`` (no NaN), so SGD starts cleanly near zero and moves negative.
+   ``amplitude_surround`` is initialized to ``0.0``, the boundary of the constraint
+   ``amplitude_surround > 0`` enforced by a :class:`~prfmodel.adapter.ParameterConstraint`
+   with ``lower=0.0``. The surround is subtracted from the center, so a positive
+   ``amplitude_surround`` yields a suppressive surround; SGD starts near zero and moves positive.
 

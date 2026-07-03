@@ -1,0 +1,21 @@
+<map id="inheritance41013c3c15" name="inheritance41013c3c15">
+<area shape="rect" id="node1" href="../autoapi/prfmodel/models/base/BaseCanonical.html#prfmodel.models.base.BaseCanonical" target="_top" title="Generic abstract base class for creating canonical models." alt="" coords="195,69,273,86"/>
+<area shape="rect" id="node7" href="../autoapi/prfmodel/models/cf/canonical/CanonicalCFModel.html#prfmodel.models.cf.canonical.CanonicalCFModel" target="_top" title="Canonical connective field model." alt="" coords="355,60,449,77"/>
+<area shape="rect" id="node8" href="../autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel.html#prfmodel.models.prf.canonical.CanonicalPRFModel" target="_top" title="Canonical population receptive field (pRF) model." alt="" coords="352,27,452,44"/>
+<area shape="rect" id="node2" href="../autoapi/prfmodel/utils/ModelProtocol.html#prfmodel.utils.ModelProtocol" target="_top" title="Protocol for model classes." alt="" coords="28,94,104,111"/>
+<area shape="rect" id="node4" href="../autoapi/prfmodel/models/base/BasePopulationResponse.html#prfmodel.models.base.BasePopulationResponse" target="_top" title="Generic abstract base class for neuron population response models." alt="" coords="172,110,296,127"/>
+<area shape="rect" id="node5" href="../autoapi/prfmodel/models/base/BaseStimulusEncoder.html#prfmodel.models.base.BaseStimulusEncoder" target="_top" title="Generic abstract base class for encoding model responses with a stimulus." alt="" coords="180,158,288,175"/>
+<area shape="rect" id="node3" href="https://docs.python.org/3/library/typing.html#typing.Generic" target="_top" title="Abstract base class for generic types." alt="" coords="42,127,90,143"/>
+<area shape="rect" id="node16" title="Two&#45;dimensional isotropic Gaussian neuron population receptive field response model." alt="" coords="340,126,465,142"/>
+<area shape="rect" id="node18" title="Gaussian connective field response model." alt="" coords="348,93,456,110"/>
+<area shape="rect" id="node6" title="Encoding model for connective field stimuli." alt="" coords="353,158,451,175"/>
+<area shape="rect" id="node10" href="../autoapi/prfmodel/models/compression/CompressiveEncoder.html#prfmodel.models.compression.CompressiveEncoder" target="_top" title="Compressive encoding model." alt="" coords="349,191,455,208"/>
+<area shape="rect" id="node19" title="Encoding model for population receptive field stimuli." alt="" coords="351,224,453,241"/>
+<area shape="rect" id="node17" title="Gaussian connective field model." alt="" coords="505,60,597,77"/>
+<area shape="rect" id="node15" title="Two&#45;dimensional isotropic Gaussian population receptive field (pRF) model." alt="" coords="496,27,606,44"/>
+<area shape="rect" id="node9" href="../autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel" target="_top" title="Center&#45;surround population receptive field (pRF) model." alt="" coords="4,36,128,53"/>
+<area shape="rect" id="node13" title="Two&#45;dimensional Difference of Gaussians (DoG) population receptive field (pRF) model." alt="" coords="190,36,278,53"/>
+<area shape="rect" id="node11" title="Divisive normalization population receptive field (pRF) model with isotropic 2D Gaussian responses." alt="" coords="160,4,308,20"/>
+<area shape="rect" id="node12" href="../autoapi/prfmodel/models/prf/canonical/DivNormPRFModel.html#prfmodel.models.prf.canonical.DivNormPRFModel" target="_top" title="Divisive normalization population receptive field (pRF) model." alt="" coords="18,4,114,20"/>
+<area shape="rect" id="node14" title="Two&#45;dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS)." alt="" coords="638,27,764,44"/>
+</map>

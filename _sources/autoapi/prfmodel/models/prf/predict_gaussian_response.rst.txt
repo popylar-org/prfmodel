@@ -3,7 +3,7 @@ prfmodel.models.prf.predict_gaussian_response
 
 .. py:function:: prfmodel.models.prf.predict_gaussian_response(grid: prfmodel.typing.Tensor, mu: prfmodel.typing.Tensor, sigma: prfmodel.typing.Tensor) -> prfmodel.typing.Tensor
 
-   Predict a isotropic Gaussian population receptive field response.
+   Predict an isotropic Gaussian population receptive field response.
 
    The dimensionality of the Gaussian depends on the number of dimensions of `grid` and `mu`. All dimensions have
    the same size `sigma`.

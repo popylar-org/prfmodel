@@ -123,7 +123,7 @@ prfmodel.models.prf.Gaussian2DCSSPRFModel
 
    .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor
 
-      Predict a simple population receptive field model response to a stimulus.
+      Predict the model response to a stimulus.
 
       :param stimulus: Population receptive field stimulus object.
       :type stimulus: PRFStimulus

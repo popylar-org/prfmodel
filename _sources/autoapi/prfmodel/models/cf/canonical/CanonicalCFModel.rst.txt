@@ -37,7 +37,7 @@ prfmodel.models.cf.canonical.CanonicalCFModel
 
    .. py:method:: __call__(stimulus: prfmodel.stimuli.CFStimulus, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor
 
-      Predict a simple connective field model response to a stimulus.
+      Predict a canonical connective field model response to a stimulus.
 
       :param stimulus: Connective field stimulus object.
       :type stimulus: CFStimulus

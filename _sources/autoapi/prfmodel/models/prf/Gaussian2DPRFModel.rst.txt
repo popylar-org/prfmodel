@@ -5,10 +5,9 @@ prfmodel.models.prf.Gaussian2DPRFModel
 
 
 
-   Two-dimensional isotropic Gaussian population receptive field model.
+   Two-dimensional isotropic Gaussian population receptive field (pRF) model.
 
-   This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
-   and scaling model response.
+   This class combines a 2D isotropic Gaussian pRF, impulse, scaling, and regressors model response.
 
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
                           The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
@@ -27,14 +26,13 @@ prfmodel.models.prf.Gaussian2DPRFModel
 
    .. rubric:: Notes
 
-   The canonical model follows the following steps: [1]_:
+   The canonical model follows the following steps [1]_:
 
-   1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
-   2. The encoding model encodes the neuron population response with the stimulus design.
-   3. An impulse model generates an impulse response.
-   4. The encoded neuron population response is convolved with the impulse response.
-   5. The scaling model modifies the convolved response.
-   6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
+   1. The 2D Gaussian pRF response model makes a prediction for the stimulus grid.
+   2. The encoding model encodes the response with the stimulus design.
+   3. The encoded response is convolved with an impulse response (optional).
+   4. The scaling model modifies the convolved response (optional).
+   5. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
 
    Using the default impulse and scaling models, the following columns are expected in the
    :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
@@ -114,7 +112,7 @@ prfmodel.models.prf.Gaussian2DPRFModel
 
    .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor
 
-      Predict a simple population receptive field model response to a stimulus.
+      Predict the model response to a stimulus.
 
       :param stimulus: Population receptive field stimulus object.
       :type stimulus: PRFStimulus

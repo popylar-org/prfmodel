@@ -1,0 +1,6 @@
+<map id="inheritancece32f9c195" name="inheritancece32f9c195">
+<area shape="rect" id="node1" href="../autoapi/prfmodel/scaling/base/BaseScaling.html#prfmodel.scaling.base.BaseScaling" target="_top" title="Abstract base class for scaling models." alt="" coords="168,31,269,56"/>
+<area shape="rect" id="node3" title="Additive baseline scaling model." alt="" coords="351,5,429,31"/>
+<area shape="rect" id="node4" title="Linear baseline and amplitude model." alt="" coords="317,55,463,80"/>
+<area shape="rect" id="node2" href="../autoapi/prfmodel/utils/ModelProtocol.html#prfmodel.utils.ModelProtocol" target="_top" title="Protocol for model classes." alt="" coords="5,31,120,56"/>
+</map>

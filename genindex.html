@@ -291,6 +291,7 @@
 <li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/prfmodel/models/prf/canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
+<li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/prf/canonical/DivNormPRFModel.html">DivNormPRFModel</a></li>
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/prf/DivNormGaussian2DPRFModel.html">DivNormGaussian2DPRFModel</a></li>
@@ -302,8 +303,7 @@
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/prf/PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/prf/encode_prf_response.html">encode_prf_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/prf/init_css_from_gaussian.html">init_css_from_gaussian</a></li>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/prf/init_dn_from_dog.html">init_dn_from_dog</a></li>
-<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/prf/init_dn_from_gaussian.html">init_dn_from_gaussian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/prf/init_div_norm_from_dog_css.html">init_div_norm_from_dog_css</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/prf/init_dog_from_gaussian.html">init_dog_from_gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/models/prf/predict_gaussian_response.html">predict_gaussian_response</a></li>
 </ul>
@@ -330,9 +330,8 @@
 <li class="toctree-l4"><a class="reference internal" href="autoapi/prfmodel/scaling/base/BaseScaling.html">BaseScaling</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/scaling/Baseline.html">Baseline</a></li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/scaling/BaselineAmplitude.html">BaselineAmplitude</a></li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/scaling/DivNormAmplitude.html">DivNormAmplitude</a></li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/scaling/DoGAmplitude.html">DoGAmplitude</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/prfmodel/stimuli/index.html">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -428,6 +427,8 @@
 </li>
           <li><a href="autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel.__call__">(prfmodel.models.prf.canonical.CenterSurroundPRFModel method)</a>
 </li>
+          <li><a href="autoapi/prfmodel/models/prf/canonical/DivNormPRFModel.html#prfmodel.models.prf.canonical.DivNormPRFModel.__call__">(prfmodel.models.prf.canonical.DivNormPRFModel method)</a>
+</li>
           <li><a href="autoapi/prfmodel/models/prf/DivNormGaussian2DPRFModel.html#prfmodel.models.prf.DivNormGaussian2DPRFModel.__call__">(prfmodel.models.prf.DivNormGaussian2DPRFModel method)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/prf/DivNormPRFModel.html#prfmodel.models.prf.DivNormPRFModel.__call__">(prfmodel.models.prf.DivNormPRFModel method)</a>
@@ -452,11 +453,9 @@
 </li>
           <li><a href="autoapi/prfmodel/scaling/base/BaseScaling.html#prfmodel.scaling.base.BaseScaling.__call__">(prfmodel.scaling.base.BaseScaling method)</a>
 </li>
+          <li><a href="autoapi/prfmodel/scaling/Baseline.html#prfmodel.scaling.Baseline.__call__">(prfmodel.scaling.Baseline method)</a>
+</li>
           <li><a href="autoapi/prfmodel/scaling/BaselineAmplitude.html#prfmodel.scaling.BaselineAmplitude.__call__">(prfmodel.scaling.BaselineAmplitude method)</a>
-</li>
-          <li><a href="autoapi/prfmodel/scaling/DivNormAmplitude.html#prfmodel.scaling.DivNormAmplitude.__call__">(prfmodel.scaling.DivNormAmplitude method)</a>
-</li>
-          <li><a href="autoapi/prfmodel/scaling/DoGAmplitude.html#prfmodel.scaling.DoGAmplitude.__call__">(prfmodel.scaling.DoGAmplitude method)</a>
 </li>
         </ul></li>
     </ul></td>
@@ -521,9 +520,7 @@
 </li>
           <li><a href="autoapi/prfmodel/models/prf/init_css_from_gaussian.html#prfmodel.models.prf.init_css_from_gaussian">prfmodel.models.prf.init_css_from_gaussian()</a>
 </li>
-          <li><a href="autoapi/prfmodel/models/prf/init_dn_from_dog.html#prfmodel.models.prf.init_dn_from_dog">prfmodel.models.prf.init_dn_from_dog()</a>
-</li>
-          <li><a href="autoapi/prfmodel/models/prf/init_dn_from_gaussian.html#prfmodel.models.prf.init_dn_from_gaussian">prfmodel.models.prf.init_dn_from_gaussian()</a>
+          <li><a href="autoapi/prfmodel/models/prf/init_div_norm_from_dog_css.html#prfmodel.models.prf.init_div_norm_from_dog_css">prfmodel.models.prf.init_div_norm_from_dog_css()</a>
 </li>
           <li><a href="autoapi/prfmodel/models/prf/init_dog_from_gaussian.html#prfmodel.models.prf.init_dog_from_gaussian">prfmodel.models.prf.init_dog_from_gaussian()</a>
 </li>
@@ -772,6 +769,8 @@
 </li>
           <li><a href="autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel.parameter_names">(prfmodel.models.prf.canonical.CenterSurroundPRFModel property)</a>
 </li>
+          <li><a href="autoapi/prfmodel/models/prf/canonical/DivNormPRFModel.html#prfmodel.models.prf.canonical.DivNormPRFModel.parameter_names">(prfmodel.models.prf.canonical.DivNormPRFModel property)</a>
+</li>
           <li><a href="autoapi/prfmodel/models/prf/DivNormGaussian2DPRFModel.html#prfmodel.models.prf.DivNormGaussian2DPRFModel.parameter_names">(prfmodel.models.prf.DivNormGaussian2DPRFModel property)</a>
 </li>
           <li><a href="autoapi/prfmodel/models/prf/DivNormPRFModel.html#prfmodel.models.prf.DivNormPRFModel.parameter_names">(prfmodel.models.prf.DivNormPRFModel property)</a>
@@ -796,25 +795,13 @@
 </li>
           <li><a href="autoapi/prfmodel/scaling/base/BaseScaling.html#prfmodel.scaling.base.BaseScaling.parameter_names">(prfmodel.scaling.base.BaseScaling property)</a>
 </li>
+          <li><a href="autoapi/prfmodel/scaling/Baseline.html#prfmodel.scaling.Baseline.parameter_names">(prfmodel.scaling.Baseline property)</a>
+</li>
           <li><a href="autoapi/prfmodel/scaling/BaselineAmplitude.html#prfmodel.scaling.BaselineAmplitude.parameter_names">(prfmodel.scaling.BaselineAmplitude property)</a>
-</li>
-          <li><a href="autoapi/prfmodel/scaling/DivNormAmplitude.html#prfmodel.scaling.DivNormAmplitude.parameter_names">(prfmodel.scaling.DivNormAmplitude property)</a>
-</li>
-          <li><a href="autoapi/prfmodel/scaling/DoGAmplitude.html#prfmodel.scaling.DoGAmplitude.parameter_names">(prfmodel.scaling.DoGAmplitude property)</a>
 </li>
           <li><a href="autoapi/prfmodel/utils/ModelProtocol.html#prfmodel.utils.ModelProtocol.parameter_names">(prfmodel.utils.ModelProtocol attribute)</a>
 </li>
           <li><a href="autoapi/prfmodel/utils/ModelProtocol.html#id0">(prfmodel.utils.ModelProtocol property)</a>
-</li>
-        </ul></li>
-        <li><a href="autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel.predict_responses">predict_responses() (prfmodel.models.prf.canonical.CenterSurroundPRFModel method)</a>
-
-        <ul>
-          <li><a href="autoapi/prfmodel/models/prf/DivNormGaussian2DPRFModel.html#prfmodel.models.prf.DivNormGaussian2DPRFModel.predict_responses">(prfmodel.models.prf.DivNormGaussian2DPRFModel method)</a>
-</li>
-          <li><a href="autoapi/prfmodel/models/prf/DivNormPRFModel.html#prfmodel.models.prf.DivNormPRFModel.predict_responses">(prfmodel.models.prf.DivNormPRFModel method)</a>
-</li>
-          <li><a href="autoapi/prfmodel/models/prf/DoG2DPRFModel.html#prfmodel.models.prf.DoG2DPRFModel.predict_responses">(prfmodel.models.prf.DoG2DPRFModel method)</a>
 </li>
         </ul></li>
         <li>
@@ -980,8 +967,6 @@
 </li>
         <li><a href="autoapi/prfmodel/impulse/TwoGammaImpulse.html#prfmodel.impulse.TwoGammaImpulse">prfmodel.impulse.TwoGammaImpulse (built-in class)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     prfmodel.models
 
@@ -989,6 +974,8 @@
           <li><a href="autoapi/prfmodel/models/index.html#module-prfmodel.models">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     prfmodel.models.base
 
@@ -1051,6 +1038,8 @@
 </li>
         <li><a href="autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel">prfmodel.models.prf.canonical.CenterSurroundPRFModel (built-in class)</a>
 </li>
+        <li><a href="autoapi/prfmodel/models/prf/canonical/DivNormPRFModel.html#prfmodel.models.prf.canonical.DivNormPRFModel">prfmodel.models.prf.canonical.DivNormPRFModel (built-in class)</a>
+</li>
         <li><a href="autoapi/prfmodel/models/prf/DivNormGaussian2DPRFModel.html#prfmodel.models.prf.DivNormGaussian2DPRFModel">prfmodel.models.prf.DivNormGaussian2DPRFModel (built-in class)</a>
 </li>
         <li><a href="autoapi/prfmodel/models/prf/DivNormPRFModel.html#prfmodel.models.prf.DivNormPRFModel">prfmodel.models.prf.DivNormPRFModel (built-in class)</a>
@@ -1078,17 +1067,10 @@
 </li>
         </ul></li>
         <li>
-    prfmodel.models.prf.init_dn_from_dog()
+    prfmodel.models.prf.init_div_norm_from_dog_css()
 
         <ul>
-          <li><a href="autoapi/prfmodel/models/prf/init_dn_from_dog.html#prfmodel.models.prf.init_dn_from_dog">built-in function</a>
-</li>
-        </ul></li>
-        <li>
-    prfmodel.models.prf.init_dn_from_gaussian()
-
-        <ul>
-          <li><a href="autoapi/prfmodel/models/prf/init_dn_from_gaussian.html#prfmodel.models.prf.init_dn_from_gaussian">built-in function</a>
+          <li><a href="autoapi/prfmodel/models/prf/init_div_norm_from_dog_css.html#prfmodel.models.prf.init_div_norm_from_dog_css">built-in function</a>
 </li>
         </ul></li>
         <li>
@@ -1168,11 +1150,9 @@
         </ul></li>
         <li><a href="autoapi/prfmodel/scaling/base/BaseScaling.html#prfmodel.scaling.base.BaseScaling">prfmodel.scaling.base.BaseScaling (built-in class)</a>
 </li>
+        <li><a href="autoapi/prfmodel/scaling/Baseline.html#prfmodel.scaling.Baseline">prfmodel.scaling.Baseline (built-in class)</a>
+</li>
         <li><a href="autoapi/prfmodel/scaling/BaselineAmplitude.html#prfmodel.scaling.BaselineAmplitude">prfmodel.scaling.BaselineAmplitude (built-in class)</a>
-</li>
-        <li><a href="autoapi/prfmodel/scaling/DivNormAmplitude.html#prfmodel.scaling.DivNormAmplitude">prfmodel.scaling.DivNormAmplitude (built-in class)</a>
-</li>
-        <li><a href="autoapi/prfmodel/scaling/DoGAmplitude.html#prfmodel.scaling.DoGAmplitude">prfmodel.scaling.DoGAmplitude (built-in class)</a>
 </li>
         <li>
     prfmodel.stimuli

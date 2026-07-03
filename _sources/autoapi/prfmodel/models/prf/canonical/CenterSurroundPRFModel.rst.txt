@@ -1,21 +1,21 @@
 prfmodel.models.prf.canonical.CenterSurroundPRFModel
 ====================================================
 
-.. py:class:: prfmodel.models.prf.canonical.CenterSurroundPRFModel(prf_model: prfmodel.models.base.BasePopulationResponse, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = DoGAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None, change_params: list[str] | None = None)
+.. py:class:: prfmodel.models.prf.canonical.CenterSurroundPRFModel(prf_model: prfmodel.models.base.BasePopulationResponse, shared_params: list[str] | None = None, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = Baseline, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
 
 
 
-   Center-surround composite population receptive field model.
+   Center-surround population receptive field (pRF) model.
 
-   This is a generic class that runs two PRF responses through stimulus encoding and impulse response convolution
-   independently, then combines them via a temporal model:
-   y(t) = p1(t) * amplitude_center + p2(t) * amplitude_surround + baseline
-
-   The two responses differ in the values of ``change_params``. Each parameter
-   ``p`` in that list is split into ``{p}_center`` and ``{p}_surround``.
+   This class combines the difference between a center pRF response and a surround pRF response with an
+   impulse and scaling model. Both the center and surround response come from the same model class, but their
+   parameters can differ.
 
    :param prf_model: A population receptive field response model instance.
    :type prf_model: BasePopulationResponse
+   :param shared_params: Names of parameters that are shared between the two pRF response models. All names must appear in
+                         ``prf_model.parameter_names``.
+   :type shared_params: list of str, optional
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
                           The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
    :type encoding_model: BaseStimulusEncoder or type, default=PRFStimulusEncoder
@@ -24,34 +24,29 @@ prfmodel.models.prf.canonical.CenterSurroundPRFModel
                          instance with default values.
    :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
    :param scaling_model: A scaling model class or instance. Model classes will be instantiated during initialization.
-                         The default creates a :class:`~prfmodel.scaling.BaselineAmplitude` instance.
-   :type scaling_model: BaseScaling or type or None, default=BaselineAmplitude, optional
+                         The default creates a :class:`~prfmodel.scaling.Baseline` instance.
+   :type scaling_model: BaseScaling or type or None, default=Baseline, optional
    :param regressors_model: A regressor model instance, a list of regressor model instances, or `None`. When a list is
                             provided, it is wrapped in a :class:`~prfmodel.regressors.RegressorsList` and its contributions
                             are summed. The regressor contribution is added after the scaling model.
    :type regressors_model: BaseRegressors or list of BaseRegressors or RegressorsList or None, default=None, optional
-   :param change_params: Names of the parameters that differ between the center and surround responses.
-                         All entries must be present in ``prf_model.parameter_names``.
-   :type change_params: list[str], default=["sigma"]
 
    .. rubric:: Notes
 
-   The center-surround composite model follows these steps:
+   The center-surround model follows these steps:
 
-   1. Two PRF response predictions are computed, one using ``{p}_center`` and one
-      using ``{p}_sorround`` for each ``p`` in ``change_params``.
-   2. The encoding model encodes each response with the stimulus design.
-   3. Each encoded response is optionally convolved with an impulse response.
-   4. The two responses are stacked and combined by the scaling model.
-   5. The regressors model (optional) adds a linear combination of fixed regressors to the combined response.
+   1. The two pRF response models make predictions for the stimulus grid.
+   2. The encoding model encodes the responses with the stimulus design.
+   3. The encoded responses are scaled with separate amplitudes. The surround response is subtracted from the
+      center response yielding the combined response.
+   4. The combined response is convolved with an impulse response (optional).
+   5. The scaling model modifies the convolved response (optional).
+   6. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
 
 
    .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor
 
-      Predict the composite model response (considering Center and Surround responses).
-
-      Applies the temporal model to the stacked responses from predict_responses.
-      When scaling_model=None, returns a simple subtraction (response_center - response_surround)
+      Predict the combined model response to a stimulus.
 
       :param stimulus: Population receptive field stimulus object.
       :type stimulus: PRFStimulus
@@ -71,18 +66,13 @@ prfmodel.models.prf.canonical.CenterSurroundPRFModel
 
 
 
-   .. py:method:: predict_responses(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
-
-      Predict the each of the two responses before applying betas.
-
-      :returns: Stacked predictions of shape (num_units, 2, num_frames).
-      :rtype: :data:`prfmodel.typing.Tensor`
-
-
-
    .. py:property:: parameter_names
       :type: list[str]
 
 
-      A list with names of unique parameters used by the model.
+      Names of parameters used by the model.
+
+      Shared response model parameters appear once (no suffix). Non-shared parameters are suffixed with the two
+      response suffixes (e.g. ``_center``/``_surround``). The combination, encoding, impulse and scaling
+      parameters are appended.
 

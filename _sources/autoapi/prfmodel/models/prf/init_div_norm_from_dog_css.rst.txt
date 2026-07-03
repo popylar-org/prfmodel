@@ -1,0 +1,53 @@
+prfmodel.models.prf.init_div_norm_from_dog_css
+==============================================
+
+.. py:function:: prfmodel.models.prf.init_div_norm_from_dog_css(dog_params: pandas.DataFrame, css_n: numpy.typing.ArrayLike = 0.5, stimulus: prfmodel.stimuli.PRFStimulus | None = None) -> pandas.DataFrame
+
+   Initialize divisive normalization model parameters.
+
+   Aims to provide good starting parameters for divisive normalization models by approximating
+   suppression from Difference of Gaussian (DoG) model parameters and compression from
+   compressive spatial summation (CSS) model parameters.
+
+   :param dog_params: Parameter estimates from a DoG model (e.g., :class:`~prfmodel.models.prf.DoG2DPRFModel`). Columns contain
+                      different parameters and rows parameter values for different units.
+   :type dog_params: pandas.DataFrame
+   :param css_n: Compression exponent from a CSS model (expected in the interval ``(0, 1)``).
+                 Smaller values give higher compression resulting from lower baseline normalization. Must be a scalar or of
+                 length equal to the rows in ``parameters``.
+   :type css_n: float or array_like, default=0.5
+   :param stimulus: Stimulus used to scale ``baseline_normalization`` to the actual normalization drive. When provided, the
+                    normalization Gaussian is encoded against the stimulus to obtain the peak normalization drive per row, and
+                    ``baseline_normalization`` is set so the local compression exponent of the divisive normalization response
+                    matches ``css_n`` (see Notes). When omitted, the cruder ``baseline_normalization = css_n * 100`` heuristic is
+                    used instead.
+   :type stimulus: prfmodel.stimuli.PRFStimulus, optional
+
+   :returns: Parameters required by divisive normalization models.
+   :rtype: pandas.DataFrame
+
+   .. seealso::
+
+      :py:obj:`DivNormGaussian2DPRFModel`
+          2D Gaussian divisive normalization pRF model.
+
+      :py:obj:`prfmodel.models.prf.canonical.DivNormPRFModel`
+          Generic divisive normalization pRF model.
+
+   .. rubric:: Notes
+
+   The divisive normalization parameters are computed as follows:
+
+   - ``sigma_activation = sigma_center``
+   - ``sigma_normalization = sigma_surround``
+   - ``amplitude_activation = 1.0``
+   - ``amplitude_normalization = 1.0``
+   - ``baseline_normalization = peak_normalization_drive * css_n / (1 - css_n)`` if ``stimulus`` is given, else
+     ``css_n * 100`` (``peak_normalization_drive`` is the maximum of the stimulus-encoded normalization response)
+   - ``baseline_activation = (amplitude_surround / amplitude_center) * baseline_normalization``
+
+   :Warns: **UserWarning** -- If ``sigma_surround / sigma_center`` is less than 1.0 (normalization field smaller than activation field),
+           if ``amplitude_center`` or ``amplitude_surround`` is negative (negative ``baseline_activation`` for positive
+           ``amplitude``), if ``css_n`` is negative (negative ``baseline_normalization``), or if ``css_n`` is greater
+           than or equal to 1.0 while ``stimulus`` is given (non-positive ``baseline_normalization``).
+
