@@ -134,7 +134,7 @@ class DelayedNormGaussian2DPRFModel(DelayedNormPRFModel):
     ... })
     >>> resp = model(stimulus, params)
     >>> print(resp.shape)  # (num_units, num_frames)
-    (2, 200)
+    (2, 170)
 
     """
 
