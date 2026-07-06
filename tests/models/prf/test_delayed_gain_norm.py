@@ -5,7 +5,7 @@ import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
-from prfmodel.models.prf import DelayedGainNormGaussian2DPRFModel
+from prfmodel.models.prf import DelayedNormGaussian2DPRFModel
 from prfmodel.models.prf import init_delayed_gain_norm_from_gaussian
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
@@ -17,7 +17,7 @@ class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
     @pytest.fixture
     def prf_model(self):
         """Model object."""
-        return DelayedGainNormGaussian2DPRFModel()
+        return DelayedNormGaussian2DPRFModel()
 
     @pytest.fixture
     def params(self):
@@ -34,14 +34,14 @@ class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
                 "ratio": [0.48, 0.48, 0.48],
                 "weight_deriv": [0.0, 0.0, 0.0],
                 "n": [2.0, 2.0, 2.0],
-                "tau_2": [0.1, 0.1, 0.1],
+                "dispersion_normalization": [0.1, 0.1, 0.1],
                 "sigma_saturation": [1.0, 1.0, 1.0],
                 "amplitude": [1.0, 1.0, 1.0],
                 "baseline": [0.0, 0.0, 0.0],
             },
         )
 
-    def test_parameter_names(self, prf_model: DelayedGainNormGaussian2DPRFModel):
+    def test_parameter_names(self, prf_model: DelayedNormGaussian2DPRFModel):
         """Test that parameter_names contains all expected parameters in order."""
         expected = [
             "mu_y",
@@ -54,7 +54,7 @@ class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
             "ratio",
             "weight_deriv",
             "n",
-            "tau_2",
+            "dispersion_normalization",
             "sigma_saturation",
             "amplitude",
             "baseline",
@@ -63,7 +63,7 @@ class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
 
     def test_predict_shape(
         self,
-        prf_model: DelayedGainNormGaussian2DPRFModel,
+        prf_model: DelayedNormGaussian2DPRFModel,
         stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
@@ -79,13 +79,13 @@ class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
         params: pd.DataFrame,
     ):
         """Test output shape for various impulse model combinations."""
-        model = DelayedGainNormGaussian2DPRFModel(impulse_model=impulse_model)
+        model = DelayedNormGaussian2DPRFModel(impulse_model=impulse_model)
         resp = model(stimulus, params)
         assert resp.shape == (params.shape[0], stimulus.design.shape[0])
 
     def test_n_less_than_1_raises(
         self,
-        prf_model: DelayedGainNormGaussian2DPRFModel,
+        prf_model: DelayedNormGaussian2DPRFModel,
         stimulus: PRFStimulus,
         params: pd.DataFrame,
     ):
@@ -104,7 +104,7 @@ class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
         params: pd.DataFrame,
     ):
         """Test that model prediction matches reference values."""
-        model = DelayedGainNormGaussian2DPRFModel(impulse_model=impulse_model)
+        model = DelayedNormGaussian2DPRFModel(impulse_model=impulse_model)
         resp = model(stimulus, params)
         num_regression.check(
             {f"response_{i}": x for i, x in enumerate(resp)},
@@ -135,22 +135,22 @@ class TestInitDelayedGainNormFromGaussian:
         )
 
     def test_output_columns(self, gaussian_params: pd.DataFrame):
-        """Result has all original columns plus the five new DGN parameters."""
+        """Result has all original columns plus the three new DGN parameters."""
         dgn_params = init_delayed_gain_norm_from_gaussian(gaussian_params)
-        new_cols = {"n", "tau_2", "sigma_saturation", "amplitude", "baseline"}
+        new_cols = {"n", "dispersion_normalization", "sigma_saturation"}
         assert new_cols.issubset(set(dgn_params.columns))
 
     def test_passthrough_columns(self, gaussian_params: pd.DataFrame):
-        """All original columns pass through unchanged."""
+        """All original columns pass through unchanged, including scaling parameters."""
         dgn_params = init_delayed_gain_norm_from_gaussian(gaussian_params)
-        for col in ["mu_x", "mu_y", "sigma", "delay", "dispersion"]:
+        for col in ["mu_x", "mu_y", "sigma", "delay", "dispersion", "amplitude", "baseline"]:
             assert list(dgn_params[col]) == list(gaussian_params[col])
 
     def test_paper_defaults(self, gaussian_params: pd.DataFrame):
         """Default arguments match paper-recommended values."""
         dgn_params = init_delayed_gain_norm_from_gaussian(gaussian_params)
         assert list(dgn_params["n"]) == [2.0, 2.0]
-        assert list(dgn_params["tau_2"]) == [0.1, 0.1]
+        assert list(dgn_params["dispersion_normalization"]) == [0.1, 0.1]
         assert list(dgn_params["sigma_saturation"]) == [1.0, 1.0]
 
     def test_custom_values(self, gaussian_params: pd.DataFrame):
@@ -158,13 +158,9 @@ class TestInitDelayedGainNormFromGaussian:
         dgn_params = init_delayed_gain_norm_from_gaussian(
             gaussian_params,
             n=3.0,
-            tau_2=0.2,
+            dispersion_normalization=0.2,
             sigma_saturation=0.5,
-            amplitude=2.0,
-            baseline=1.0,
         )
         assert list(dgn_params["n"]) == [3.0, 3.0]
-        assert list(dgn_params["tau_2"]) == [0.2, 0.2]
+        assert list(dgn_params["dispersion_normalization"]) == [0.2, 0.2]
         assert list(dgn_params["sigma_saturation"]) == [0.5, 0.5]
-        assert list(dgn_params["amplitude"]) == [2.0, 2.0]
-        assert list(dgn_params["baseline"]) == [1.0, 1.0]
