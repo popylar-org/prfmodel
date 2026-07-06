@@ -57,8 +57,6 @@ class LeastSquaresFitter:
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> from prfmodel.models.prf import Gaussian2DPRFModel
     >>> stimulus = load_2d_prf_bar_stimulus()
-    >>> print(stimulus)
-    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> # Only fit response and temporal model
     >>> model = Gaussian2DPRFModel(impulse_model=None)
     >>> # Define init parameters
@@ -67,7 +65,7 @@ class LeastSquaresFitter:
     ...     "baseline": [0.0], "amplitude": [0.0],
     ... })
     >>> # Create dummy data for a single unit
-    >>> data = np.zeros((1, 200))
+    >>> data = np.zeros((1, stimulus.design.shape[0]))
     >>> fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
     >>> # Fit model parameters
     >>> history, params_ls = fitter.fit(

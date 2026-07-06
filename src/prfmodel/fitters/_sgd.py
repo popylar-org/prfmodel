@@ -86,8 +86,6 @@ class SGDFitter(BackendSGDFitter):
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> from prfmodel.models.prf import Gaussian2DPRFModel
     >>> stimulus = load_2d_prf_bar_stimulus()
-    >>> print(stimulus)
-    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> # Only fit response model
     >>> model = Gaussian2DPRFModel(
     ...     impulse_model=None,
@@ -101,7 +99,7 @@ class SGDFitter(BackendSGDFitter):
     ...     "sigma": [1.0],
     ... })
     >>> # Create dummy data for a single unit
-    >>> data = np.zeros((1, 200))
+    >>> data = np.zeros((1, stimulus.design.shape[0]))
     >>> # Fit model parameters
     >>> history, params_sgd = fitter.fit(data, params_init, num_steps=5)
     >>> print(list(params_sgd.columns))

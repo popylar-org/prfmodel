@@ -79,7 +79,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus]):
         dtype: str | None = None,
     ) -> Tensor:
         """
-        Predict a simple connective field model response to a stimulus.
+        Predict a canonical connective field model response to a stimulus.
 
         Parameters
         ----------

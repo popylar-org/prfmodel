@@ -150,7 +150,7 @@ class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
                 "ratio": [0.48, 0.48, 0.48],
                 "weight_deriv": [0.5, 0.5, 0.5],
                 "amplitude_center": [1.1, 1.0, 0.9],
-                "amplitude_surround": [-0.5, -0.3, -0.1],
+                "amplitude_surround": [0.5, 0.3, 0.1],
                 "baseline": [0.0, 0.1, 0.2],
             },
         )

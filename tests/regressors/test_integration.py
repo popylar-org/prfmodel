@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 import pytest
-from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.cf import GaussianCFModel
 from prfmodel.models.prf import DoG2DPRFModel
@@ -12,17 +11,13 @@ from prfmodel.regressors import AdditiveRegressors
 from prfmodel.regressors import ConvolvedRegressors
 from prfmodel.stimuli import CFStimulus
 from prfmodel.stimuli import PRFStimulus
+from tests.conftest import PRFStimulusSetup
 
 
-class TestPRFIntegration:
+class TestPRFIntegration(PRFStimulusSetup):
     """Integration tests for regressors with Gaussian2DPRFModel."""
 
     num_units = 2
-
-    @pytest.fixture
-    def stimulus(self):
-        """2D bar pRF stimulus."""
-        return load_2d_prf_bar_stimulus()
 
     @pytest.fixture
     def impulse_model(self):
@@ -101,7 +96,7 @@ class TestPRFIntegration:
             },
         )
         confounds.loc[10, "task"] = 1.0
-        confounds.loc[40, "task"] = 1.0
+        confounds.loc[20, "task"] = 1.0
 
         model = Gaussian2DPRFModel(
             impulse_model=impulse_model,
@@ -159,15 +154,10 @@ class TestPRFIntegration:
             )
 
 
-class TestDoGIntegration:
+class TestDoGIntegration(PRFStimulusSetup):
     """Integration tests for regressors with the center-surround model."""
 
     num_units = 2
-
-    @pytest.fixture
-    def stimulus(self):
-        """2D bar pRF stimulus."""
-        return load_2d_prf_bar_stimulus()
 
     def test_additive_regressor_added(self, stimulus: PRFStimulus):
         """Adding an additive regressor shifts the DoG prediction by the regressor contribution."""
@@ -192,7 +182,7 @@ class TestDoGIntegration:
                 "ratio": [0.48, 0.48],
                 "weight_deriv": [0.5, 0.5],
                 "amplitude_center": [2.0, 1.2],
-                "amplitude_surround": [-0.5, -0.3],
+                "amplitude_surround": [0.5, 0.3],
                 "baseline": [0.1, -0.1],
             },
         )
@@ -208,7 +198,7 @@ class TestDoGIntegration:
         assert np.allclose(full_resp - baseline_resp, expected_contribution, atol=1e-4)
 
 
-class TestCFIntegration:
+class TestCFIntegration(PRFStimulusSetup):
     """Integration tests for regressors with GaussianCFModel."""
 
     num_source = 6

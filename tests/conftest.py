@@ -37,15 +37,15 @@ def pytest_collection_modifyitems(config: pytest.Config, items: dict) -> None:
 class PRFStimulusSetup:
     """Test setup for pRF stimulus object."""
 
-    start_frame: int = 40
-    end_frame: int = 65
+    start_frame: int = 25
+    end_frame: int = 75
 
     @pytest.fixture
     def stimulus(self):
         """2D bar prF stimulus object."""
         stimulus = load_2d_prf_bar_stimulus()
 
-        # Select subset of time frames that contain a single bar movement across screen
+        # Select subset of time frames that contain a single vertical and horizontal bar movement across screen
         design_sub = stimulus.design[self.start_frame : self.end_frame]
 
         # Stimulus is immutable so we need to recreated it

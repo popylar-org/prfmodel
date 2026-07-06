@@ -59,10 +59,8 @@ class CompressiveEncoder(BaseStimulusEncoder[S]):
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> from prfmodel.models.prf import PRFStimulusEncoder
     >>> stimulus = load_2d_prf_bar_stimulus()
-    >>> print(stimulus)
-    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> # Create dummy response as input for encdoder
-    >>> prf_response = np.ones((3, 101, 101))  # Must have same number of frames as stimulus
+    >>> prf_response = np.ones((3, 128, 128))  # Must have same number of frames as stimulus
     >>> model = CompressiveEncoder(
     ...     encoding_model=PRFStimulusEncoder(),
     ... )
@@ -75,7 +73,7 @@ class CompressiveEncoder(BaseStimulusEncoder[S]):
     >>> # Predict model response
     >>> resp = model(stimulus, prf_response, params)
     >>> print(resp.shape)  # (num_units, num_frames)
-    (3, 200)
+    (3, 170)
 
     """
 
