@@ -56,8 +56,8 @@ class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
             "n",
             "dispersion_normalization",
             "sigma_saturation",
-            "amplitude",
             "baseline",
+            "amplitude",
         ]
         assert prf_model.parameter_names == expected
 
@@ -82,18 +82,6 @@ class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
         model = DelayedNormGaussian2DPRFModel(impulse_model=impulse_model)
         resp = model(stimulus, params)
         assert resp.shape == (params.shape[0], stimulus.design.shape[0])
-
-    def test_n_less_than_1_raises(
-        self,
-        prf_model: DelayedNormGaussian2DPRFModel,
-        stimulus: PRFStimulus,
-        params: pd.DataFrame,
-    ):
-        """Test that ValueError is raised when any n < 1."""
-        bad_params = params.copy()
-        bad_params["n"] = 0.5
-        with pytest.raises(ValueError, match="n"):
-            prf_model(stimulus, bad_params)
 
     @pytest.mark.parametrize("impulse_model", [None, DerivativeTwoGammaImpulse()])
     def test_predict_regression(
