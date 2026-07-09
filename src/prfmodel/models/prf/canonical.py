@@ -8,6 +8,7 @@ from abc import abstractmethod
 from typing import ClassVar
 from typing import cast
 import pandas as pd
+from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
@@ -417,3 +418,143 @@ class DivNormPRFModel(_BaseDualPRFModel):
         response_normalization = c * self._predict_single_response(stimulus, parameters, "normalization", dtype) + d
 
         return response_activation / response_normalization - b / d
+
+
+class DelayedNormPRFModel(BaseCanonical[PRFStimulus]):
+    r"""
+    Delayed gain normalization population receptive field (pRF) model.
+
+    Combines a pRF response model, stimulus encoding, and an impulse response (h₁) with an
+    inline delayed normalization stage (h₂ = exponential decay) to form a complete DGN model.
+    The computation and all DGN-specific parameters (``n``, ``dispersion_normalization``, ``sigma_saturation``,
+    ``amplitude``, ``baseline``) live in this class; pRF-specific parameters come from
+    ``prf_model``.
+
+    Parameters
+    ----------
+    %(model_prf)s
+    %(model_encoding_prf)s
+    %(model_impulse)s
+    scaling_model : BaseScaling or type or None, default=BaselineAmplitude
+        Scaling model applied to R(t) after the nonlinear stage.  Model classes are
+        instantiated during initialisation.  Set to ``None`` to return R(t) unscaled.
+    %(model_regressors)s
+
+    Notes
+    -----
+    The delayed gain normalization model follows [1]_:
+
+      1. **Linear** — pRF response encoded with the stimulus design, then convolved with
+         the impulse response h₁ to produce L(t).
+      2. **Normalization** — L(t) is convolved with h₂ = exp(-t/τ₂) to produce g(t).
+      3. **Nonlinear** — ``R(t) = |L(t)|ⁿ / (sigmaⁿ + |g(t)|ⁿ)``.
+      4. **Output** — ``amplitude * R(t) + baseline``.
+
+    Paper-recommended starting values (Fig. 2): ``n=2``, ``dispersion_normalization=0.1``,
+    ``sigma_saturation=1``, ``delay=0.05`` (τ₁), ``weight_deriv=0``.
+
+    References
+    ----------
+    .. [1] Zhou J., Benson N.C., Kay K., Winawer J. (2019). Predicting neuronal dynamics with a
+        delayed gain control model. *PLOS Computational Biology*, 15(9).
+        https://doi.org/10.1371/journal.pcbi.1007484
+    """
+
+    def __init__(
+        self,
+        prf_model: BasePopulationResponse,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
+    ):
+        if encoding_model is not None and isinstance(encoding_model, type):
+            encoding_model = encoding_model()
+
+        if impulse_model is not None and isinstance(impulse_model, type):
+            impulse_model = impulse_model()
+
+        if scaling_model is not None and isinstance(scaling_model, type):
+            scaling_model = scaling_model()
+
+        regressors_model = _normalize_regressors_model(regressors_model)
+
+        super().__init__(
+            prf_model=prf_model,
+            encoding_model=encoding_model,
+            impulse_model=impulse_model,
+            scaling_model=scaling_model,
+            regressors_model=regressors_model,
+        )
+
+    @property
+    def parameter_names(self) -> list[str]:
+        """Names of parameters used by the model (pRF + h₁ impulse + DGN + scaling)."""
+        names: list[str] = []
+        for key, model in self.models.items():
+            if key != "scaling_model" and model is not None:
+                names.extend(model.parameter_names)
+        names.extend(["n", "dispersion_normalization", "sigma_saturation"])
+        if self.models["scaling_model"] is not None:
+            names.extend(self.models["scaling_model"].parameter_names)
+        return list(dict.fromkeys(names))
+
+    @doc
+    def __call__(
+        self,
+        stimulus: PRFStimulus,
+        parameters: pd.DataFrame,
+        regressors: pd.DataFrame | None = None,
+        dtype: str | None = None,
+    ) -> Tensor:
+        """
+        Predict the delayed gain normalization model response.
+
+        Returns
+        -------
+        %(predicted_response_2d)s
+
+        """
+        dtype = get_dtype(dtype)
+        _validate_regressors_argument(self.models["regressors_model"], regressors)
+
+        # pRF response + stimulus encoding
+        prf_model = cast("BasePopulationResponse", self.models["prf_model"])
+        response = prf_model(stimulus, parameters, dtype=dtype)
+        encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
+        response = encoding_model(stimulus, response, parameters, dtype=dtype)
+
+        impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+
+        # h₁ convolution → L(t)
+        if impulse_model is not None:
+            impulse_response = impulse_model(parameters, dtype=dtype)
+            response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
+
+        # DGN parameters
+        n = convert_parameters_to_tensor(parameters[["n"]], dtype=dtype)
+        dispersion_normalization = convert_parameters_to_tensor(parameters[["dispersion_normalization"]], dtype=dtype)
+        sigma_saturation = convert_parameters_to_tensor(parameters[["sigma_saturation"]], dtype=dtype)
+
+        # h₂ kernel → g(t) = L * h₂
+        if impulse_model is not None:
+            t = ops.cast(impulse_model.frames, dtype=dtype)
+            kernel = ops.exp(-t / dispersion_normalization)
+            g_t = convolve_prf_impulse_response(response, kernel)
+        else:
+            g_t = response
+
+        # R(t) = |L(t)|ⁿ / (sigmaⁿ + |g(t)|ⁿ)
+        r_ln = ops.power(ops.abs(response), n)
+        denominator = ops.power(sigma_saturation, n) + ops.power(ops.abs(g_t), n)
+        response = r_ln / denominator
+
+        if self.models["scaling_model"] is not None:
+            scaling_model = cast("BaseScaling", self.models["scaling_model"])
+            response = scaling_model(response, parameters, dtype=dtype)
+
+        if self.models["regressors_model"] is not None and regressors is not None:
+            regressors_model = cast("BaseRegressors", self.models["regressors_model"])
+            response = response + regressors_model(regressors, parameters, dtype=dtype)
+
+        return response
