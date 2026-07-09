@@ -1,4 +1,4 @@
-"""Tests for DelayedGainNormGaussian2DPRFModel and init_delayed_gain_norm_from_gaussian."""
+"""Tests for DelayedNormGaussian2DPRFModel and init_delayed_norm_from_gaussian."""
 
 import pandas as pd
 import pytest
@@ -6,13 +6,13 @@ from pytest_regressions.num_regression import NumericRegressionFixture
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.prf import DelayedNormGaussian2DPRFModel
-from prfmodel.models.prf import init_delayed_gain_norm_from_gaussian
+from prfmodel.models.prf import init_delayed_norm_from_gaussian
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 
 
-class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
-    """Tests for DelayedGainNormGaussian2DPRFModel."""
+class TestDelayedNormGaussian2DPRFModel(PRFStimulusSetup):
+    """Tests for DelayedNormGaussian2DPRFModel."""
 
     @pytest.fixture
     def prf_model(self):
@@ -61,16 +61,6 @@ class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
         ]
         assert prf_model.parameter_names == expected
 
-    def test_predict_shape(
-        self,
-        prf_model: DelayedNormGaussian2DPRFModel,
-        stimulus: PRFStimulus,
-        params: pd.DataFrame,
-    ):
-        """Test that prediction has shape (num_units, num_frames)."""
-        resp = prf_model(stimulus, params)
-        assert resp.shape == (params.shape[0], stimulus.design.shape[0])
-
     @pytest.mark.parametrize("impulse_model", [None, DerivativeTwoGammaImpulse(), DerivativeTwoGammaImpulse])
     def test_predict_shape_parametrized(
         self,
@@ -100,8 +90,8 @@ class TestDelayedGainNormGaussian2DPRFModel(PRFStimulusSetup):
         )
 
 
-class TestInitDelayedGainNormFromGaussian:
-    """Tests for init_delayed_gain_norm_from_gaussian."""
+class TestInitDelayedNormFromGaussian:
+    """Tests for init_delayed_norm_from_gaussian."""
 
     @pytest.fixture
     def gaussian_params(self):
@@ -124,26 +114,26 @@ class TestInitDelayedGainNormFromGaussian:
 
     def test_output_columns(self, gaussian_params: pd.DataFrame):
         """Result has all original columns plus the three new DGN parameters."""
-        dgn_params = init_delayed_gain_norm_from_gaussian(gaussian_params)
+        dgn_params = init_delayed_norm_from_gaussian(gaussian_params)
         new_cols = {"n", "dispersion_normalization", "sigma_saturation"}
         assert new_cols.issubset(set(dgn_params.columns))
 
     def test_passthrough_columns(self, gaussian_params: pd.DataFrame):
         """All original columns pass through unchanged, including scaling parameters."""
-        dgn_params = init_delayed_gain_norm_from_gaussian(gaussian_params)
+        dgn_params = init_delayed_norm_from_gaussian(gaussian_params)
         for col in ["mu_x", "mu_y", "sigma", "delay", "dispersion", "amplitude", "baseline"]:
             assert list(dgn_params[col]) == list(gaussian_params[col])
 
     def test_paper_defaults(self, gaussian_params: pd.DataFrame):
         """Default arguments match paper-recommended values."""
-        dgn_params = init_delayed_gain_norm_from_gaussian(gaussian_params)
+        dgn_params = init_delayed_norm_from_gaussian(gaussian_params)
         assert list(dgn_params["n"]) == [2.0, 2.0]
         assert list(dgn_params["dispersion_normalization"]) == [0.1, 0.1]
         assert list(dgn_params["sigma_saturation"]) == [1.0, 1.0]
 
     def test_custom_values(self, gaussian_params: pd.DataFrame):
         """Custom scalar arguments are broadcast to all rows."""
-        dgn_params = init_delayed_gain_norm_from_gaussian(
+        dgn_params = init_delayed_norm_from_gaussian(
             gaussian_params,
             n=3.0,
             dispersion_normalization=0.2,

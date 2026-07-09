@@ -1,4 +1,4 @@
-"""Delayed gain normalization population receptive field models."""
+"""Delayed normalization population receptive field models."""
 
 import pandas as pd
 from prfmodel.impulse import DerivativeTwoGammaImpulse
@@ -14,7 +14,7 @@ from .canonical import DelayedNormPRFModel
 
 class DelayedNormGaussian2DPRFModel(DelayedNormPRFModel):
     r"""
-    Delayed gain normalization pRF model with a 2D isotropic Gaussian response.
+    Delayed normalization pRF model with a 2D isotropic Gaussian response.
 
     Thin wrapper around :class:`DelayedNormPRFModel` that hardcodes
     :class:`~prfmodel.models.prf.Gaussian2DPRFResponse` as the pRF model.
@@ -32,7 +32,7 @@ class DelayedNormGaussian2DPRFModel(DelayedNormPRFModel):
     Paper-recommended starting values (Fig. 2): ``n=2``, ``dispersion_normalization=0.1`` (τ₂),
     ``sigma_saturation=1`` (sigma), ``delay=0.05`` (τ₁), ``weight_deriv=0`` (w).
 
-    Use :func:`init_delayed_gain_norm_from_gaussian` to seed these from a fitted Gaussian model.
+    Use :func:`init_delayed_norm_from_gaussian` to seed these from a fitted Gaussian model.
 
     Using the default impulse model, the following columns are expected in the
     :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
@@ -82,15 +82,15 @@ class DelayedNormGaussian2DPRFModel(DelayedNormPRFModel):
          - w (default 0)
          - Weight of the derivative component.
        * - ``n``
-         - DGN
+         - --
          - n (default 2)
          - Exponent for the nonlinear stage.
        * - ``dispersion_normalization``
-         - DGN
+         - --
          - τ₂ (default 0.1)
          - Time constant of the exponential low-pass kernel h₂ (seconds).
        * - ``sigma_saturation``
-         - DGN
+         - --
          - sigma (default 1)
          - Semi-saturation constant.
        * - ``amplitude``
@@ -154,26 +154,25 @@ class DelayedNormGaussian2DPRFModel(DelayedNormPRFModel):
         )
 
 
-def init_delayed_gain_norm_from_gaussian(
+def init_delayed_norm_from_gaussian(
     gaussian_params: pd.DataFrame,
     n: float = 2.0,
     dispersion_normalization: float = 0.1,
     sigma_saturation: float = 1.0,
 ) -> pd.DataFrame:
     """
-    Initialize delayed gain normalization parameters from fitted Gaussian parameters.
+    Initialize delayed normalization parameters from fitted Gaussian parameters.
 
     Converts the output of a fitted :class:`~prfmodel.models.prf.Gaussian2DPRFModel`
     into starting parameters for a :class:`DelayedNormGaussian2DPRFModel`, suitable
-    for subsequent SGD. All existing columns (pRF, impulse, and scaling parameters)
-    pass through unchanged. The three DGN-specific parameters are appended with their
+    for subsequent fitting with Stochastic Gradient Descent. All existing columns (pRF, impulse, and scaling parameters)
+    pass through unchanged. The three DelayedNorm-specific parameters are appended with their
     default values.
 
     Parameters
     ----------
     gaussian_params : pandas.DataFrame
         DataFrame of fitted parameters from a :class:`~prfmodel.models.prf.Gaussian2DPRFModel`.
-        Must already contain ``amplitude`` and ``baseline`` columns (from the scaling model).
     n : float, default=2.0
         Exponent for the nonlinear stage. Paper-recommended default.
     dispersion_normalization : float, default=0.1
@@ -193,6 +192,12 @@ def init_delayed_gain_norm_from_gaussian(
     in the impulse model. These are impulse parameters and should be set in the
     ``gaussian_params`` DataFrame before calling this function if desired.
 
+    References
+    ----------
+    .. [1] Zhou J., Benson N.C., Kay K., Winawer J. (2019). Predicting neuronal dynamics with a
+        delayed gain control model. *PLOS Computational Biology*, 15(9).
+        https://doi.org/10.1371/journal.pcbi.1007484
+
     Examples
     --------
     >>> import pandas as pd
@@ -203,7 +208,7 @@ def init_delayed_gain_norm_from_gaussian(
     ...     "baseline": [0.0, 0.1],
     ...     "amplitude": [1.0, -1.0],
     ... })
-    >>> dgn_params = init_delayed_gain_norm_from_gaussian(gaussian_params)
+    >>> dgn_params = init_delayed_norm_from_gaussian(gaussian_params)
     >>> print(sorted(dgn_params.columns.tolist()))
     ['amplitude', 'baseline', 'dispersion_normalization', 'mu_x', 'mu_y', 'n', 'sigma', 'sigma_saturation']
 

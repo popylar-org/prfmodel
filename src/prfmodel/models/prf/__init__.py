@@ -40,7 +40,7 @@ from ._css import Gaussian2DCSSPRFModel
 from ._css import init_css_from_gaussian
 from ._delayed_norm import DelayedNormGaussian2DPRFModel
 from ._delayed_norm import DelayedNormPRFModel
-from ._delayed_norm import init_delayed_gain_norm_from_gaussian
+from ._delayed_norm import init_delayed_norm_from_gaussian
 from ._div_norm import DivNormGaussian2DPRFModel
 from ._div_norm import DivNormPRFModel
 from ._div_norm import init_div_norm_from_dog_css
@@ -64,7 +64,7 @@ __all__ = [
     "PRFStimulusEncoder",
     "encode_prf_response",
     "init_css_from_gaussian",
-    "init_delayed_gain_norm_from_gaussian",
+    "init_delayed_norm_from_gaussian",
     "init_div_norm_from_dog_css",
     "init_dog_from_gaussian",
     "predict_gaussian_response",
