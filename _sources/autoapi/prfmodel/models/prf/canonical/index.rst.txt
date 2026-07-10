@@ -19,12 +19,14 @@ Classes
 
    CanonicalPRFModel </autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel>
    CenterSurroundPRFModel </autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel>
+   DelayedNormPRFModel </autoapi/prfmodel/models/prf/canonical/DelayedNormPRFModel>
    DivNormPRFModel </autoapi/prfmodel/models/prf/canonical/DivNormPRFModel>
 
 .. autoapisummary::
 
    prfmodel.models.prf.canonical.CanonicalPRFModel
    prfmodel.models.prf.canonical.CenterSurroundPRFModel
+   prfmodel.models.prf.canonical.DelayedNormPRFModel
    prfmodel.models.prf.canonical.DivNormPRFModel
 
 

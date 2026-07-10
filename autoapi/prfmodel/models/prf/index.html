@@ -293,9 +293,12 @@
 <li class="toctree-l4 has-children"><a class="reference internal" href="canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l5"><a class="reference internal" href="canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
+<li class="toctree-l5"><a class="reference internal" href="canonical/DelayedNormPRFModel.html">DelayedNormPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="canonical/DivNormPRFModel.html">DivNormPRFModel</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="DelayedNormGaussian2DPRFModel.html">DelayedNormGaussian2DPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="DelayedNormPRFModel.html">DelayedNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="DivNormGaussian2DPRFModel.html">DivNormGaussian2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="DivNormPRFModel.html">DivNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="DoG2DPRFModel.html">DoG2DPRFModel</a></li>
@@ -305,6 +308,7 @@
 <li class="toctree-l4"><a class="reference internal" href="PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="encode_prf_response.html">encode_prf_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="init_css_from_gaussian.html">init_css_from_gaussian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="init_delayed_norm_from_gaussian.html">init_delayed_norm_from_gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="init_div_norm_from_dog_css.html">init_div_norm_from_dog_css</a></li>
 <li class="toctree-l4"><a class="reference internal" href="init_dog_from_gaussian.html">init_dog_from_gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="predict_gaussian_response.html">predict_gaussian_response</a></li>
@@ -461,6 +465,12 @@ throughout the human visual hierarchy. <em>Proceedings of the National Academy o
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="DelayedNormGaussian2DPRFModel.html#prfmodel.models.prf.DelayedNormGaussian2DPRFModel" title="prfmodel.models.prf.DelayedNormGaussian2DPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DelayedNormGaussian2DPRFModel</span></code></a></p></td>
+<td><p>Delayed normalization pRF model with a 2D isotropic Gaussian response.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="DelayedNormPRFModel.html#prfmodel.models.prf.DelayedNormPRFModel" title="prfmodel.models.prf.DelayedNormPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DelayedNormPRFModel</span></code></a></p></td>
+<td><p>Delayed gain normalization population receptive field (pRF) model.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="DivNormGaussian2DPRFModel.html#prfmodel.models.prf.DivNormGaussian2DPRFModel" title="prfmodel.models.prf.DivNormGaussian2DPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DivNormGaussian2DPRFModel</span></code></a></p></td>
 <td><p>Divisive normalization population receptive field (pRF) model with isotropic 2D Gaussian responses.</p></td>
 </tr>
@@ -499,13 +509,16 @@ throughout the human visual hierarchy. <em>Proceedings of the National Academy o
 <tr class="row-even"><td><p><a class="reference internal" href="init_css_from_gaussian.html#prfmodel.models.prf.init_css_from_gaussian" title="prfmodel.models.prf.init_css_from_gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_css_from_gaussian</span></code></a>(→ pandas.DataFrame)</p></td>
 <td><p>Initialize compressive spatial summation parameters from fitted Gaussian parameters.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="init_div_norm_from_dog_css.html#prfmodel.models.prf.init_div_norm_from_dog_css" title="prfmodel.models.prf.init_div_norm_from_dog_css"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_div_norm_from_dog_css</span></code></a>(→ pandas.DataFrame)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="init_delayed_norm_from_gaussian.html#prfmodel.models.prf.init_delayed_norm_from_gaussian" title="prfmodel.models.prf.init_delayed_norm_from_gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_delayed_norm_from_gaussian</span></code></a>(→ pandas.DataFrame)</p></td>
+<td><p>Initialize delayed normalization parameters from fitted Gaussian parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="init_div_norm_from_dog_css.html#prfmodel.models.prf.init_div_norm_from_dog_css" title="prfmodel.models.prf.init_div_norm_from_dog_css"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_div_norm_from_dog_css</span></code></a>(→ pandas.DataFrame)</p></td>
 <td><p>Initialize divisive normalization model parameters.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="init_dog_from_gaussian.html#prfmodel.models.prf.init_dog_from_gaussian" title="prfmodel.models.prf.init_dog_from_gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_dog_from_gaussian</span></code></a>(→ pandas.DataFrame)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="init_dog_from_gaussian.html#prfmodel.models.prf.init_dog_from_gaussian" title="prfmodel.models.prf.init_dog_from_gaussian"><code class="xref py py-obj docutils literal notranslate"><span class="pre">init_dog_from_gaussian</span></code></a>(→ pandas.DataFrame)</p></td>
 <td><p>Initialize DoG model parameters from fitted Gaussian model parameters.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="predict_gaussian_response.html#prfmodel.models.prf.predict_gaussian_response" title="prfmodel.models.prf.predict_gaussian_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict_gaussian_response</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="predict_gaussian_response.html#prfmodel.models.prf.predict_gaussian_response" title="prfmodel.models.prf.predict_gaussian_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict_gaussian_response</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
 <td><p>Predict an isotropic Gaussian population receptive field response.</p></td>
 </tr>
 </tbody>

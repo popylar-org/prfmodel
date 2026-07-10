@@ -1,0 +1,23 @@
+<map id="inheritance41013c3c15" name="inheritance41013c3c15">
+<area shape="rect" id="node1" href="../autoapi/prfmodel/models/base/BaseCanonical.html#prfmodel.models.base.BaseCanonical" target="_top" title="Generic abstract base class for creating canonical models." alt="" coords="181,64,254,80"/>
+<area shape="rect" id="node7" href="../autoapi/prfmodel/models/cf/canonical/CanonicalCFModel.html#prfmodel.models.cf.canonical.CanonicalCFModel" target="_top" title="Canonical connective field model." alt="" coords="329,3,417,19"/>
+<area shape="rect" id="node8" href="../autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel.html#prfmodel.models.prf.canonical.CanonicalPRFModel" target="_top" title="Canonical population receptive field (pRF) model." alt="" coords="327,34,420,49"/>
+<area shape="rect" id="node12" href="../autoapi/prfmodel/models/prf/canonical/DelayedNormPRFModel.html#prfmodel.models.prf.canonical.DelayedNormPRFModel" target="_top" title="Delayed gain normalization population receptive field (pRF) model." alt="" coords="319,64,428,80"/>
+<area shape="rect" id="node2" href="../autoapi/prfmodel/utils/ModelProtocol.html#prfmodel.utils.ModelProtocol" target="_top" title="Protocol for model classes." alt="" coords="26,94,97,110"/>
+<area shape="rect" id="node4" href="../autoapi/prfmodel/models/base/BasePopulationResponse.html#prfmodel.models.base.BasePopulationResponse" target="_top" title="Generic abstract base class for neuron population response models." alt="" coords="160,109,275,125"/>
+<area shape="rect" id="node5" href="../autoapi/prfmodel/models/base/BaseStimulusEncoder.html#prfmodel.models.base.BaseStimulusEncoder" target="_top" title="Generic abstract base class for encoding model responses with a stimulus." alt="" coords="167,155,267,171"/>
+<area shape="rect" id="node3" href="https://docs.python.org/3/library/typing.html#typing.Generic" target="_top" title="Abstract base class for generic types." alt="" coords="39,125,83,140"/>
+<area shape="rect" id="node18" title="Two&#45;dimensional isotropic Gaussian neuron population receptive field response model." alt="" coords="315,94,431,110"/>
+<area shape="rect" id="node20" title="Gaussian connective field response model." alt="" coords="323,125,423,140"/>
+<area shape="rect" id="node6" title="Encoding model for connective field stimuli." alt="" coords="328,155,418,171"/>
+<area shape="rect" id="node10" href="../autoapi/prfmodel/models/compression/CompressiveEncoder.html#prfmodel.models.compression.CompressiveEncoder" target="_top" title="Compressive encoding model." alt="" coords="324,186,422,201"/>
+<area shape="rect" id="node21" title="Encoding model for population receptive field stimuli." alt="" coords="326,216,421,232"/>
+<area shape="rect" id="node19" title="Gaussian connective field model." alt="" coords="497,3,582,19"/>
+<area shape="rect" id="node17" title="Two&#45;dimensional isotropic Gaussian population receptive field (pRF) model." alt="" coords="488,34,590,49"/>
+<area shape="rect" id="node9" href="../autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel" target="_top" title="Center&#45;surround population receptive field (pRF) model." alt="" coords="3,34,119,49"/>
+<area shape="rect" id="node15" title="Two&#45;dimensional Difference of Gaussians (DoG) population receptive field (pRF) model." alt="" coords="176,34,258,49"/>
+<area shape="rect" id="node11" title="Delayed normalization pRF model with a 2D isotropic Gaussian response." alt="" coords="461,64,618,80"/>
+<area shape="rect" id="node13" title="Divisive normalization population receptive field (pRF) model with isotropic 2D Gaussian responses." alt="" coords="149,3,286,19"/>
+<area shape="rect" id="node14" href="../autoapi/prfmodel/models/prf/canonical/DivNormPRFModel.html#prfmodel.models.prf.canonical.DivNormPRFModel" target="_top" title="Divisive normalization population receptive field (pRF) model." alt="" coords="16,3,106,19"/>
+<area shape="rect" id="node16" title="Two&#45;dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS)." alt="" coords="647,34,765,49"/>
+</map>

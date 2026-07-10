@@ -293,9 +293,12 @@
 <li class="toctree-l4 has-children"><a class="reference internal" href="../autoapi/prfmodel/models/prf/canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l5"><a class="reference internal" href="../autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../autoapi/prfmodel/models/prf/canonical/DelayedNormPRFModel.html">DelayedNormPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../autoapi/prfmodel/models/prf/canonical/DivNormPRFModel.html">DivNormPRFModel</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/DelayedNormGaussian2DPRFModel.html">DelayedNormGaussian2DPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/DelayedNormPRFModel.html">DelayedNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/DivNormGaussian2DPRFModel.html">DivNormGaussian2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/DivNormPRFModel.html">DivNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/DoG2DPRFModel.html">DoG2DPRFModel</a></li>
@@ -305,6 +308,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/encode_prf_response.html">encode_prf_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/init_css_from_gaussian.html">init_css_from_gaussian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/init_delayed_norm_from_gaussian.html">init_delayed_norm_from_gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/init_div_norm_from_dog_css.html">init_div_norm_from_dog_css</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/init_dog_from_gaussian.html">init_dog_from_gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../autoapi/prfmodel/models/prf/predict_gaussian_response.html">predict_gaussian_response</a></li>
@@ -418,18 +422,19 @@ submodels or canonical models.</p></li>
 <p>To facilitate the development of the package and the creation of custom models, we provide an overview of the
 inhertiance structure of the three modules containing model classes.</p>
 <p>The inheritance diagram for <a class="reference internal" href="../autoapi/prfmodel/models/index.html#module-prfmodel.models" title="prfmodel.models"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.models</span></code></a>:</p>
-<div class="graphviz"><img src="../_images/inheritance-90e2316dc92ecdc480032e80cd3fb2ec5a779697.png" alt="Inheritance diagram of prfmodel.models.base, prfmodel.models.prf, prfmodel.models.cf, prfmodel.models.compression" usemap="#inheritance41013c3c15" class="inheritance graphviz" /></div>
+<div class="graphviz"><img src="../_images/inheritance-600bccb39e61ca31c866ed7689e76bba1698eca5.png" alt="Inheritance diagram of prfmodel.models.base, prfmodel.models.prf, prfmodel.models.cf, prfmodel.models.compression" usemap="#inheritance41013c3c15" class="inheritance graphviz" /></div>
 <map id="inheritance41013c3c15" name="inheritance41013c3c15">
-<area shape="rect" id="node1" href="../autoapi/prfmodel/models/base/BaseCanonical.html#prfmodel.models.base.BaseCanonical" target="_top" title="Generic abstract base class for creating canonical models." alt="" coords="195,69,273,86"/>
-<area shape="rect" id="node7" href="../autoapi/prfmodel/models/cf/canonical/CanonicalCFModel.html#prfmodel.models.cf.canonical.CanonicalCFModel" target="_top" title="Canonical connective field model." alt="" coords="355,60,449,77"/>
-<area shape="rect" id="node8" href="../autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel.html#prfmodel.models.prf.canonical.CanonicalPRFModel" target="_top" title="Canonical population receptive field (pRF) model." alt="" coords="352,27,452,44"/>
-<area shape="rect" id="node2" href="../autoapi/prfmodel/utils/ModelProtocol.html#prfmodel.utils.ModelProtocol" target="_top" title="Protocol for model classes." alt="" coords="28,94,104,111"/>
-<area shape="rect" id="node4" href="../autoapi/prfmodel/models/base/BasePopulationResponse.html#prfmodel.models.base.BasePopulationResponse" target="_top" title="Generic abstract base class for neuron population response models." alt="" coords="172,110,296,127"/>
-<area shape="rect" id="node5" href="../autoapi/prfmodel/models/base/BaseStimulusEncoder.html#prfmodel.models.base.BaseStimulusEncoder" target="_top" title="Generic abstract base class for encoding model responses with a stimulus." alt="" coords="180,158,288,175"/>
-<area shape="rect" id="node3" href="https://docs.python.org/3/library/typing.html#typing.Generic" target="_top" title="Abstract base class for generic types." alt="" coords="42,127,90,143"/>
-<area shape="rect" id="node10" href="../autoapi/prfmodel/models/compression/CompressiveEncoder.html#prfmodel.models.compression.CompressiveEncoder" target="_top" title="Compressive encoding model." alt="" coords="349,191,455,208"/>
-<area shape="rect" id="node9" href="../autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel" target="_top" title="Center&#45;surround population receptive field (pRF) model." alt="" coords="4,36,128,53"/>
-<area shape="rect" id="node12" href="../autoapi/prfmodel/models/prf/canonical/DivNormPRFModel.html#prfmodel.models.prf.canonical.DivNormPRFModel" target="_top" title="Divisive normalization population receptive field (pRF) model." alt="" coords="18,4,114,20"/>
+<area shape="rect" id="node1" href="../autoapi/prfmodel/models/base/BaseCanonical.html#prfmodel.models.base.BaseCanonical" target="_top" title="Generic abstract base class for creating canonical models." alt="" coords="181,64,254,80"/>
+<area shape="rect" id="node7" href="../autoapi/prfmodel/models/cf/canonical/CanonicalCFModel.html#prfmodel.models.cf.canonical.CanonicalCFModel" target="_top" title="Canonical connective field model." alt="" coords="329,3,417,19"/>
+<area shape="rect" id="node8" href="../autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel.html#prfmodel.models.prf.canonical.CanonicalPRFModel" target="_top" title="Canonical population receptive field (pRF) model." alt="" coords="327,34,420,49"/>
+<area shape="rect" id="node12" href="../autoapi/prfmodel/models/prf/canonical/DelayedNormPRFModel.html#prfmodel.models.prf.canonical.DelayedNormPRFModel" target="_top" title="Delayed gain normalization population receptive field (pRF) model." alt="" coords="319,64,428,80"/>
+<area shape="rect" id="node2" href="../autoapi/prfmodel/utils/ModelProtocol.html#prfmodel.utils.ModelProtocol" target="_top" title="Protocol for model classes." alt="" coords="26,94,97,110"/>
+<area shape="rect" id="node4" href="../autoapi/prfmodel/models/base/BasePopulationResponse.html#prfmodel.models.base.BasePopulationResponse" target="_top" title="Generic abstract base class for neuron population response models." alt="" coords="160,109,275,125"/>
+<area shape="rect" id="node5" href="../autoapi/prfmodel/models/base/BaseStimulusEncoder.html#prfmodel.models.base.BaseStimulusEncoder" target="_top" title="Generic abstract base class for encoding model responses with a stimulus." alt="" coords="167,155,267,171"/>
+<area shape="rect" id="node3" href="https://docs.python.org/3/library/typing.html#typing.Generic" target="_top" title="Abstract base class for generic types." alt="" coords="39,125,83,140"/>
+<area shape="rect" id="node10" href="../autoapi/prfmodel/models/compression/CompressiveEncoder.html#prfmodel.models.compression.CompressiveEncoder" target="_top" title="Compressive encoding model." alt="" coords="324,186,422,201"/>
+<area shape="rect" id="node9" href="../autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel" target="_top" title="Center&#45;surround population receptive field (pRF) model." alt="" coords="3,34,119,49"/>
+<area shape="rect" id="node14" href="../autoapi/prfmodel/models/prf/canonical/DivNormPRFModel.html#prfmodel.models.prf.canonical.DivNormPRFModel" target="_top" title="Divisive normalization population receptive field (pRF) model." alt="" coords="16,3,106,19"/>
 </map><p>The inheritance diagram for <a class="reference internal" href="../autoapi/prfmodel/impulse/index.html#module-prfmodel.impulse" title="prfmodel.impulse"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.impulse</span></code></a>:</p>
 <div class="graphviz"><img src="../_images/inheritance-4cd6b348323027e813b88ad664f8649f184b4de9.png" alt="Inheritance diagram of prfmodel.impulse.base" usemap="#inheritance939a8a3aff" class="inheritance graphviz" /></div>
 <map id="inheritance939a8a3aff" name="inheritance939a8a3aff">
