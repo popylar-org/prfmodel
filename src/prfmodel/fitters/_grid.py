@@ -50,7 +50,7 @@ class GridFitter:
     %(stimulus)s
     loss : keras.optimizers.Loss or Callable, optional
         Loss instance or function with the signature `f(y, y_pred)`, where `y` is the target data and `y_pred` are the
-        model predicitons. Default is `None` where a `keras.optimizers.MeanSquaredError` loss is used. Note that, when
+        model predicitons. Default is `None` where a `keras.losses.CosineSimilarity` loss is used. Note that, when
         a `keras.losses.Loss` instance is used, the argument `reduction` must be set to `"none"` to enable loss
         computation for all data batches.
     %(dtype)s
@@ -99,7 +99,7 @@ class GridFitter:
         self.stimulus = stimulus
 
         if loss is None:
-            loss = keras.losses.MeanSquaredError(reduction="none")
+            loss = keras.losses.CosineSimilarity(reduction="none")
 
         self.loss = loss
         self.dtype = dtype
