@@ -13,8 +13,13 @@ git clone git@github.com:popylar-org/prfmodel.git
 cd prfmodel
 ```
 
-We recommend installing prfmodel in a virtual environment to prevent conflicts with other packages,
-for example using [venv](https://docs.python.org/3/library/venv.html).
+We recommend installing prfmodel in a virtual environment to prevent conflicts with other packages, for example using
+[venv](https://docs.python.org/3/library/venv.html) with `pip`, or [uv](https://docs.astral.sh/uv/), a fast drop-in
+alternative to `pip` that we also support.
+
+``````````````{tab-set}
+
+`````````````{tab-item} pip
 
 ````````{tab-set}
 
@@ -44,31 +49,105 @@ To install the development version of prfmodel from the local clone of the repos
 
 ``````{tab-item} Tensorflow
 ```bash
-python -m pip install .[tensorflow]
+python -m pip install ".[tensorflow]"
 ```
 ``````
 
 ``````{tab-item} PyTorch
 ```bash
-python -m pip install .[torch]
+python -m pip install ".[torch]"
 ```
 ``````
 
 ``````{tab-item} JAX
 ```bash
-python -m pip install .[jax]
+python -m pip install ".[jax]"
 ```
 ``````
 
 ````````
 
+`````````````
+
+`````````````{tab-item} uv
+
+First, [install uv](https://docs.astral.sh/uv/getting-started/installation/) if you don't have it already.
+
+````````{tab-set}
+
+``````{tab-item} Windows
+```console
+uv venv my_venv # Create a virtual environment called 'my_venv'
+my_venv\Scripts\activate.bat # Activate the virtual environment
+```
+``````
+
+``````{tab-item} Unix (MacOS / Linux)
+```bash
+uv venv my_venv  # Create a virtual environment called 'my_venv'
+source my_venv/bin/activate  # Activate the virtual environment
+```
+``````
+
+````````
+
+prfmodel relies on [Keras](https://keras.io/) to enable users to use different backends for model fitting.
+Currently, users can choose between three backends: TensorFlow, PyTorch, and JAX. If you don't know which backend to
+choose, we recommend to start with TensorFlow.
+
+To install the development version of prfmodel from the local clone of the repository with a backend:
+
+````````{tab-set}
+
+``````{tab-item} Tensorflow
+```bash
+uv pip install ".[tensorflow]"
+```
+``````
+
+``````{tab-item} PyTorch
+```bash
+uv pip install ".[torch]"
+```
+``````
+
+``````{tab-item} JAX
+```bash
+uv pip install ".[jax]"
+```
+``````
+
+````````
+
+`````````````
+
+``````````````
+
 ## Installing dependencies for package development
 
 For those who want to contribute to the package development, you can make an editable install of the package and
-install all required additional dependencies via:
+install all required additional dependencies.
 
+``````{tab-set}
+
+`````{tab-item} pip
 ```bash
 git clone git@github.com:popylar-org/prfmodel.git
 cd prfmodel
-pip install -e .[dev]
+pip install -e ".[dev]"
 ```
+`````
+
+`````{tab-item} uv
+```bash
+git clone git@github.com:popylar-org/prfmodel.git
+cd prfmodel
+uv sync --extra dev
+```
+This creates and manages a `.venv` for you automatically (no separate venv-creation or activation step needed) and
+uses a `uv.lock` file to keep everyone's development environment reproducible. Prefix commands with `uv run`
+(e.g. `uv run pytest`) to run them inside this environment, or activate it as usual with `source .venv/bin/activate`
+(Unix) / `.venv\Scripts\activate.bat` (Windows).
+`````
+
+``````

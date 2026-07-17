@@ -45,6 +45,10 @@ To install the JAX backend, run:
 python -m pip install .[jax]
 ```
 
+We also support installing with [uv](https://docs.astral.sh/uv/) as a fast drop-in alternative to `pip`, e.g.
+`uv pip install '.[tensorflow]'`. See the [installation docs](https://popylar-org.github.io/prfmodel/installation.html)
+for the full set of pip- and uv-based instructions.
+
 ## Documentation
 
 The online documentation is available at: https://popylar-org.github.io/prfmodel/.
@@ -68,10 +72,22 @@ with development dependencies, run:
 python -m pip install -e .[dev]
 ```
 
+Or, with uv, which also manages the virtual environment and dependency locking for you:
+
+```console
+uv sync --extra dev
+```
+
 The test suite can be run with:
 
 ```console
 python -m pytest
+```
+
+or, in the uv-managed environment:
+
+```console
+uv run pytest
 ```
 
 ## Credits

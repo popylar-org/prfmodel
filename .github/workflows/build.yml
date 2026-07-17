@@ -74,6 +74,47 @@ jobs:
           KERAS_BACKEND: ${{ matrix.backend }}
           JAX_ENABLE_X64: "true"
 
+  uv-install:
+    name: Install with uv (${{ matrix.backend }}), as documented in docs/installation.md
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: ['tensorflow', 'torch', 'jax']
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.3.2
+        with:
+          python-version: '3.12'
+      - name: Create a venv and install prfmodel with uv, mirroring the docs
+        run: |
+          uv venv
+          uv pip install ".[${{ matrix.backend }}]"
+      - name: Verify the package installed correctly
+        run: |
+          source .venv/bin/activate
+          python -c "import prfmodel; from prfmodel.fitters import GridFitter"
+        env:
+          KERAS_BACKEND: ${{ matrix.backend }}
+          JAX_ENABLE_X64: "true"
+
+  uv-dev:
+    name: Set up dev environment with uv, as documented in README.md
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.3.2
+        with:
+          python-version: '3.12'
+      - name: Sync dev environment with uv (as documented; tensorflow added to enable running the test suite)
+        run: uv sync --extra dev --extra tensorflow
+      - name: Run unit tests in the uv-managed environment
+        run: uv run pytest -v
+        env:
+          KERAS_BACKEND: tensorflow
+
   mypy:
     name: Check types with mypy
     runs-on: 'ubuntu-latest'
