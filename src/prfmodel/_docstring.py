@@ -48,6 +48,7 @@ _PARAMS: dict[str, str] = {
         "    :func:`prfmodel.utils.get_dtype`."
     ),
     "model_cf": ("cf_model : BasePopulationResponse\n    A connective field response model instance."),
+    "model_csf": ("cfs_model : BasePopulationResponse\n    A contrast sensitivity function response model instance."),
     "model_encoding_cf": (
         "encoding_model : BaseStimulusEncoder or type, default=CFStimulusEncoder\n"
         "    An stimulus encoding model class or instance. Model classes will be instantiated during initialization.\n"
@@ -103,6 +104,7 @@ _PARAMS: dict[str, str] = {
     ),
     "stimulus": ("stimulus : Stimulus\n    Stimulus object."),
     "stimulus_cf": ("stimulus : CFStimulus\n    Connective field stimulus object."),
+    "stimulus_csf": ("stimulus : CSFStimulus\n    Contrast sensitivity function stimulus object."),
     "stimulus_prf": ("stimulus : PRFStimulus\n    Population receptive field stimulus object."),
 }
 

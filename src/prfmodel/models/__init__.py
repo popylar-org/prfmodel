@@ -1,9 +1,11 @@
 """Neural response models.
 
 This module contains models that map neural responses to input stimuli. These typically contain parameters of
-interest. Currently, it implements population receptive field (pRF) and connective field (CF) models.
+interest. Currently, it implements population receptive field (pRF), connective field (CF), and contrast sensitivity
+function (CSF) models.
 
-The :mod:`~prfmodel.models.base` submodule contains generic abstract base classes that pRF and CF models inherit from.
+The :mod:`~prfmodel.models.base` submodule contains generic abstract base classes that pRF, CF, and CSF models inherit
+from.
 
 The :mod:`~prfmodel.models.compression` submodule contains generic classes to (de-) compress stimulus-encoded model
 responses.
