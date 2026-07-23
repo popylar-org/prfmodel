@@ -379,17 +379,15 @@ The grid search will evaluate all possible combinations of the defined ranges an
 data best. Note that this is still a relatively small grid and we recommend specifying finer grids in practice.
 
 Let's construct the {py:class}`prfmodel.fitters.grid.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.grid.GridFitter`
-evaluate 20 parameter combinations at the same time (which saves us some memory). As the `loss` (i.e., the metric to minimize between model predictions and data), we use cosine similarity which ignores differences in scale between model predictions and observed data.
+evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is cosine similarity, which ignores differences in scale between model predictions and observed data.
 
 ```{code-cell} ipython3
-from keras.losses import CosineSimilarity
 from prfmodel.fitters import GridFitter
 
 # Create grid fitter object
 grid_fitter = GridFitter(
     model=cf_model,
     stimulus=stimulus,
-    loss=CosineSimilarity(reduction="none"),  # Grid fitter needs no aggregation of loss
 )
 
 # Run grid search

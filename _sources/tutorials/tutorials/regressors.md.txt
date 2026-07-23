@@ -145,10 +145,10 @@ fig.legend();
 We can see that the predicted neural response contains some "noise" coming from the two regressors.
 
 Our next goal is to fit the model back to its own predicted neural timecourse. We first use a grid search to optimize
-the center and size of the Gaussian pRF (i.e., `mu_x`, `mu_y`, `sigma`).
+the center and size of the Gaussian pRF (i.e., `mu_x`, `mu_y`, `sigma`). By default, the `GridFitter` uses a cosine
+similarity loss function that ignores differences in scale between model predictions and data.
 
 ```{code-cell} ipython3
-from keras.losses import CosineSimilarity
 from prfmodel.fitters import GridFitter
 
 param_grid = {
@@ -165,7 +165,6 @@ param_grid = {
 grid_fitter = GridFitter(
     model=prf_model,
     stimulus=stimulus,
-    loss=CosineSimilarity(reduction="none"),
 )
 
 _, grid_params = grid_fitter.fit(
