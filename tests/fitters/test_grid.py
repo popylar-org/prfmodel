@@ -52,7 +52,7 @@ class TestGridFitter(TestSetup):
     @parametrize_impulse_model
     @pytest.mark.parametrize(
         "loss",
-        [None, keras.losses.MeanSquaredError(reduction="none")],
+        [None, keras.losses.CosineSimilarity(reduction="none")],
     )
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
