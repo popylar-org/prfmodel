@@ -24,6 +24,7 @@ from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
+from prfmodel.utils import ParamsDict
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
 from ._stimulus_encoding import PRFStimulusEncoder
@@ -237,18 +238,23 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus]):
         Shared parameters are taken as-is; non-shared parameters are read from the ``{param}_{suffix}`` columns.
         Only the columns the pRF model consumes are gathered, avoiding a copy of the full parameter frame.
 
+        Gathered as a :class:`~prfmodel.utils.ParamsDict` rather than a :class:`pandas.DataFrame` so that, during SGD
+        fitting, the parameter tensors stay attached to the gradient tape instead of being materialized to numpy.
+
         """
         prf_model = cast("BasePopulationResponse", self.models["prf_model"])
         shared = set(self.shared_params)
 
-        params_single = pd.DataFrame(
+        params_single = ParamsDict(
             {
                 param: parameters[param if param in shared else f"{param}_{suffix}"]
                 for param in prf_model.parameter_names
             },
+            dtype=dtype,
         )
 
-        response = prf_model(stimulus, params_single, dtype=dtype)
+        # We ignore the arg type here because a ParamsDict is used internally (instead of pandas.DataFrame)
+        response = prf_model(stimulus, params_single, dtype=dtype)  # type: ignore[arg-type]
 
         encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
 
