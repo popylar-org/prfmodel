@@ -117,6 +117,9 @@ select = ["ALL"]
 ignore = [
     "ANN204", # Missing return type annotation for special (dunder) method
     "ANN003", # Missing type annotation for `**kwargs`
+    "CPY",    # Missing copyright notice at top of file (project uses a repo-level NOTICE/LICENSE instead)
+    "PLR0917", # Too many positional arguments (project already tolerates this via per-function PLR0913 noqas)
+    "RUF100", # Unused `noqa` directive (flags differ across ruff versions, since this repo's ruff dep is unpinned)
     "FBT",    # Using boolean function arguments
     "TD",     # TODOs
     "FIX001", # Resolve FIXMEs
