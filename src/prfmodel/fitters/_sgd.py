@@ -24,7 +24,9 @@ class SGDHistory:
     history : dict
         Dictionary with keys indicating metric names and values containing metric values for each step.
     step : list of int
-        List of step indices.
+        List of step indices. When fitting is split into data batches (see `batch_size` in :meth:`SGDFitter.fit`),
+        each batch is optimized independently but its steps continue counting up from where the previous batch left
+        off, so `step` and `history` simply grow longer rather than changing meaning.
 
     """
 
@@ -76,6 +78,10 @@ class SGDFitter(BackendSGDFitter):
     At each step during the fitting, the `model` makes a prediction for each batch in the target data
     given the `stimulus` and the current parameter values. The predictions are then compared to the target data and
     the parameter values are updated given the `optimizer` schedule.
+
+    When `batch_size` is set in :meth:`fit`, units are split into data batches that are each optimized independently
+    for `num_steps` steps, with freshly-initialized optimizer state per batch. This bounds memory use for large
+    datasets without changing the result for any given unit, since units do not share parameters or gradients.
 
     Examples
     --------
@@ -147,12 +153,13 @@ class SGDFitter(BackendSGDFitter):
     def _delete_variables(self) -> None:
         del self._parameter_variables
 
-    def fit(
+    def fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
         data: Tensor,
         init_parameters: pd.DataFrame,
         fixed_parameters: Sequence[str] | None = None,
         num_steps: int = 1000,
+        batch_size: int | None = None,
         regressors: pd.DataFrame | None = None,
     ) -> tuple[SGDHistory, pd.DataFrame]:
         """
@@ -171,6 +178,8 @@ class SGDFitter(BackendSGDFitter):
             during the fitting. If `None` (the default), all parameters are optimized during fitting.
         num_steps : int, default=1000
             Number of optimization steps.
+        batch_size : int, optional
+            Number of units to fit at the same time. If `None` (the default), all units are fit at once.
         regressors : pandas.DataFrame, optional
             Runtime regressor design data forwarded to every model prediction call. Must be provided when the model
             has a ``regressors_model`` configured.
@@ -186,8 +195,61 @@ class SGDFitter(BackendSGDFitter):
         if fixed_parameters is None:
             fixed_parameters = []
 
+        num_units = len(init_parameters)
+        if batch_size is None:
+            batch_size = num_units
+
+        history = SGDHistory()
+        param_batches = []
+        step_offset = 0
+
+        batch_starts = range(0, num_units, batch_size)
+        for start in tqdm(batch_starts, desc="Processing data batches", total=len(batch_starts)):
+            end = min(start + batch_size, num_units)
+
+            # Each batch is fit on a freshly-constructed instance rather than reusing 'self'. Reusing
+            # 'self' across batches would keep accumulating every previous batch's parameter variables
+            # onto this instance's trainable_variables.
+            batch_fitter = type(self)(
+                model=self.model,
+                stimulus=self.stimulus,
+                adapter=self.adapter,
+                optimizer=keras.optimizers.deserialize(keras.optimizers.serialize(self.optimizer)),
+                loss=self.loss,
+                dtype=self.dtype,
+            )
+            batch_history, batch_params = batch_fitter._fit_batch(  # noqa: SLF001 (private member access)
+                data[start:end],
+                init_parameters.iloc[start:end],
+                fixed_parameters,
+                num_steps,
+                regressors,
+            )
+
+            for step in batch_history.step:
+                history.step.append(step_offset + step)
+            for key, values in batch_history.history.items():
+                history.history.setdefault(key, []).extend(values)
+            step_offset += len(batch_history.step)
+
+            param_batches.append(batch_params)
+
+        new_parameters = pd.concat(param_batches, ignore_index=True)
+        new_parameters.index = init_parameters.index
+
+        return history, new_parameters
+
+    def _fit_batch(
+        self,
+        data_batch: Tensor,
+        init_parameters_batch: pd.DataFrame,
+        fixed_parameters: Sequence[str],
+        num_steps: int,
+        regressors: pd.DataFrame | None,
+    ) -> tuple[SGDHistory, pd.DataFrame]:
+        """Fit a single data batch and return its step history and final parameters."""
         # Initialize parameters on transformed scale
-        init_parameters_transformed = self.adapter.transform(init_parameters)
+        init_parameters_transformed = self.adapter.transform(init_parameters_batch)
 
         self._create_variables(init_parameters_transformed, fixed_parameters)
 
@@ -195,22 +257,18 @@ class SGDFitter(BackendSGDFitter):
 
         self.compile(optimizer=self.optimizer, loss=self.loss)
 
-        data = ops.convert_to_tensor(data, dtype=self.dtype)
+        data_batch = ops.convert_to_tensor(data_batch, dtype=self.dtype)
 
         state = self._get_state()
 
         history = SGDHistory()
 
-        with tqdm(range(num_steps)) as pbar:
+        with tqdm(range(num_steps), desc="Optimizing batch", leave=False) as pbar:
             for step in pbar:
-                logs, state = self._update_model_weights(self.stimulus, data, state, regressors)
+                logs, state = self._update_model_weights(self.stimulus, data_batch, state, regressors)
 
                 if logs:
-                    display_logs = {}
-                    for key, value in logs.items():
-                        display_logs[key] = float(value)
-
-                    pbar.set_postfix(display_logs)
+                    pbar.set_postfix({key: float(value) for key, value in logs.items()})
 
                 history.on_step_end(step, logs)
 
@@ -233,10 +291,9 @@ class SGDFitter(BackendSGDFitter):
             {v.name: ops.convert_to_numpy(v.value) for v in self.trainable_variables + self.non_trainable_variables},
         )
 
-        # Transform parameters back to natural scale
-        params = self.adapter.inverse(params)
+        # Transform parameters back to natural scale, sorted according to the initial parameter columns
+        params = self.adapter.inverse(params)[init_parameters_batch.columns]
 
         self._delete_variables()
 
-        # Sort result param columns according to initial parameter columns
-        return history, params[init_parameters.columns]
+        return history, params
