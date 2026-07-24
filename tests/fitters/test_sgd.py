@@ -184,13 +184,25 @@ class TestSGDFitter(TestSetup):
         """
         num_steps = 200
         num_batches = 3
+        fixed_parameters = ["delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv"]
 
         fitter = SGDFitter(model=model, stimulus=stimulus, dtype=dtype)
 
         observed = model(stimulus, params)
 
-        history_full, params_full = fitter.fit(observed, params, num_steps=num_steps)
-        history_batched, params_batched = fitter.fit(observed, params, num_steps=num_steps, batch_size=1)
+        history_full, params_full = fitter.fit(
+            observed,
+            params,
+            num_steps=num_steps,
+            fixed_parameters=fixed_parameters,
+        )
+        history_batched, params_batched = fitter.fit(
+            observed,
+            params,
+            num_steps=num_steps,
+            batch_size=1,
+            fixed_parameters=fixed_parameters,
+        )
 
         assert history_full.step == list(range(num_steps))
         assert history_batched.step == list(range(num_batches * num_steps))
