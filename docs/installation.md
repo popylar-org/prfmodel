@@ -2,7 +2,7 @@
 
 The prfmodel package is currently only available as a development version that must be installed from GitHub.
 Please note that this version is still under active development and subject to constant change.
-Installing prfmodel requires Python version >= 3.10 and <= 3.12.
+Installing prfmodel requires Python version >= 3.10 and <= 3.13.
 
 ## Installing the development version
 
