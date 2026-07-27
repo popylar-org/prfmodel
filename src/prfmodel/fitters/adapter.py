@@ -125,10 +125,15 @@ class ParameterTransform:
 
 
 class ParameterConstraint(ParameterTransform):
-    """
+    r"""
     Constrain parameters to lower or upper bounds.
 
-    Transforms parameter values to stay above or below a lower or upper bound. The transformation can be inverted.
+    Maps a bounded parameter onto an unbounded scale that a gradient-based optimizer can explore freely, and maps it
+    back onto the bounded scale to make model predictions. :meth:`transform` takes a value on the natural (bounded)
+    scale and returns its unbounded counterpart; :meth:`inverse` does the reverse. This is the same direction
+    convention as :class:`ParameterTransform`, and it is what makes the bound hold: because :meth:`inverse` is
+    applied before every model prediction, the model can only ever see values that satisfy the constraint, no matter
+    where the optimizer moves.
 
     Parameters
     ----------
@@ -150,8 +155,30 @@ class ParameterConstraint(ParameterTransform):
 
     Notes
     -----
-    Instances of this class can be used inside an :class:`~prfmodel.adapter.Adapter` object to constrain specific
-    parameters during model fitting using exponential transformation.
+    Instances of this class can be used inside an :class:`~prfmodel.fitters.adapter.Adapter` object to constrain
+    specific parameters during model fitting using an exponential transformation. With a lower bound :math:`L`, the
+    two directions are:
+
+    .. math::
+
+        \mathrm{transform}(x) = \log(x - L), \qquad \mathrm{inverse}(u) = e^{u} + L
+
+    and with an upper bound :math:`U`:
+
+    .. math::
+
+        \mathrm{transform}(x) = -\log(U - x), \qquad \mathrm{inverse}(u) = -e^{-u} + U
+
+    The bound is **open**: :meth:`transform` requires values that strictly satisfy the constraint and raises a
+    :class:`ValueError` otherwise, because a value sitting exactly on the bound has no finite counterpart on the
+    unbounded scale. Initial values must therefore be chosen strictly inside the bound, not on it.
+
+    :meth:`inverse` is total: every finite input maps to a value satisfying the bound, which is what lets an
+    optimizer explore freely without ever handing the model an invalid parameter. Note that in finite precision the
+    exponential eventually underflows relative to the bound, so a value far enough out rounds onto the bound exactly
+    rather than merely approaching it (beyond roughly 15 units for a bound of order 1 in `float32`). The bound is
+    never crossed, but a parameter can become numerically equal to it, so a lower bound of exactly ``0.0`` on a
+    parameter that is divided by, such as a Gaussian width, is better set to a small positive value.
 
     Examples
     --------
@@ -175,11 +202,18 @@ class ParameterConstraint(ParameterTransform):
 
     >>> constraint = ParameterConstraint(
     ...     parameter_names=["x"],
-    ...     lower=1.0,
+    ...     lower=0.0,
     ... )
     >>> params_transformed = constraint.transform(params)
     >>> params_inverse = constraint.inverse(params_transformed)
     >>> assert np.allclose(params_inverse["x"], params["x"])
+
+    The transformed values are unbounded, and mapping any of them back always satisfies the constraint. This is what
+    an optimizer relies on: it can propose any real number and still yield a valid parameter.
+
+    >>> anywhere = pd.DataFrame({"x": np.array([-50.0, 0.0, 50.0])})
+    >>> bool(np.all(constraint.inverse(anywhere)["x"] > 0.0))
+    True
 
     Constrain a parameter to be greater than the square of another parameter.
 
@@ -201,8 +235,10 @@ class ParameterConstraint(ParameterTransform):
         upper: str | float | None = None,
         bound_fun: Callable | None = None,
     ):
-        transform_fun = ops.exp
-        inverse_fun = ops.log
+        # 'transform' maps the natural (bounded) scale onto the unbounded scale the optimizer works on,
+        # 'inverse' maps back onto the natural scale that model predictions are made with
+        transform_fun = ops.log
+        inverse_fun = ops.exp
 
         super().__init__(parameter_names, transform_fun, inverse_fun)
 
@@ -227,6 +263,23 @@ class ParameterConstraint(ParameterTransform):
             msg = f"Parameters must contain the parameterized (dynamic) bound {bound}"
             raise ValueError(msg)
 
+    def _check_strictly_inside(self, param: str, distance: Tensor) -> None:
+        """Check that a parameter is strictly inside its bound before taking a logarithm.
+
+        `distance` is the signed gap to the bound, which must be positive. A value on the bound has no finite
+        counterpart on the unbounded scale, so this raises rather than silently producing an infinity that would
+        surface much later as a NaN loss.
+
+        """
+        if not ops.all(ops.convert_to_tensor(distance) > 0.0):
+            bound_name, bound = ("lower", self.lower) if self.lower is not None else ("upper", self.upper)
+            msg = (
+                f"Parameter '{param}' must be strictly {'greater' if bound_name == 'lower' else 'less'} than its "
+                f"{bound_name} bound {bound!r}, but at least one value lies on or beyond it. The bound is open, so "
+                f"choose starting values strictly inside it."
+            )
+            raise ValueError(msg)
+
     def _transform_lower(self, parameters: ParamsDict) -> ParamsDict:
         self._check_bound_name(self.lower, parameters)
         parameters = parameters.copy()
@@ -235,7 +288,9 @@ class ParameterConstraint(ParameterTransform):
         lower = self.bound_fun(lower)
 
         for param in self.parameter_names:
-            parameters[param] = self.transform_fun(parameters[param]) + lower
+            distance = parameters[param] - lower
+            self._check_strictly_inside(param, distance)
+            parameters[param] = self.transform_fun(distance)
 
         return parameters
 
@@ -247,7 +302,9 @@ class ParameterConstraint(ParameterTransform):
         upper = self.bound_fun(upper)
 
         for param in self.parameter_names:
-            parameters[param] = -self.transform_fun(-parameters[param]) + upper
+            distance = upper - parameters[param]
+            self._check_strictly_inside(param, distance)
+            parameters[param] = -self.transform_fun(distance)
 
         return parameters
 
@@ -259,7 +316,7 @@ class ParameterConstraint(ParameterTransform):
         lower = self.bound_fun(lower)
 
         for param in self.parameter_names:
-            parameters[param] = self.inverse_fun(parameters[param] - lower)
+            parameters[param] = self.inverse_fun(parameters[param]) + lower
 
         return parameters
 
@@ -271,16 +328,17 @@ class ParameterConstraint(ParameterTransform):
         upper = self.bound_fun(upper)
 
         for param in self.parameter_names:
-            parameters[param] = -self.inverse_fun(-parameters[param] + upper)
+            parameters[param] = -self.inverse_fun(-parameters[param]) + upper
 
         return parameters
 
     @doc
     def transform(self, parameters: P) -> P:
         """
-        Apply the constraint transformation.
+        Map bounded parameters onto the unbounded scale.
 
-        Transforms parameters by constraining them to be within specified bounds using exponential transformations.
+        Takes parameters on their natural scale, where the bound holds, and returns their counterparts on the
+        unbounded scale that a gradient-based optimizer works on. Use :meth:`inverse` for the reverse direction.
 
         Parameters
         ----------
@@ -289,8 +347,13 @@ class ParameterConstraint(ParameterTransform):
         Returns
         -------
         pd.DataFrame
-            Dataframe with the constraint transformation applied to the parameters specified in
-            `parameter_names`.
+            Dataframe with the parameters in `parameter_names` mapped onto the unbounded scale.
+
+        Raises
+        ------
+        ValueError
+            If a dynamic bound is not a column in `parameters`, or if any value in `parameter_names` lies on or
+            beyond its bound. The bound is open, so starting values must be strictly inside it.
 
         """
         if isinstance(parameters, pd.DataFrame):
@@ -308,9 +371,11 @@ class ParameterConstraint(ParameterTransform):
     @doc
     def inverse(self, parameters: P) -> P:
         """
-        Apply the inverse constraint transformation.
+        Map unbounded parameters back onto the bounded natural scale.
 
-        Transforms parameters back from the constrained space to the natural scale.
+        Takes parameters on the unbounded scale the optimizer works on and returns their counterparts on the natural
+        scale, where the bound is guaranteed to hold for any finite input. This is the direction applied before every
+        model prediction, which is what enforces the constraint during fitting.
 
         Parameters
         ----------
@@ -319,8 +384,12 @@ class ParameterConstraint(ParameterTransform):
         Returns
         -------
         pd.DataFrame
-            Dataframe with the inverse constraint transformation applied to the parameters specified in
-            `parameter_names`.
+            Dataframe with the parameters in `parameter_names` mapped onto the natural scale, satisfying the bound.
+
+        Raises
+        ------
+        ValueError
+            If a dynamic bound is not a column in `parameters`.
 
         """
         if isinstance(parameters, pd.DataFrame):

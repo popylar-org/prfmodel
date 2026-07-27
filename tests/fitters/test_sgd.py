@@ -16,6 +16,7 @@ from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
+from tests.conftest import PRFStimulusSetup
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model
 from .conftest import parametrize_dtype
@@ -401,3 +402,91 @@ class TestSGDDualResponse(_SGDGradientChecks, TestSetup):
 
         self._check_no_gradient_warnings(record)
         self._check_params_moved(sgd_params, div_norm_init_params, div_norm_moving_params)
+
+
+class TestSGDFitterConstraint(PRFStimulusSetup):
+    """Tests that a `ParameterConstraint` actually binds the parameter the model sees.
+
+    The constraint is enforced by the inverse transform applied before every prediction, so what
+    matters is the parameter on the natural scale, not the value of the underlying variable. These
+    tests drive the optimizer hard enough to push against the bound and check that it never gives.
+
+    Only the pRF response parameters are fitted, so that the behaviour under test is the constraint
+    itself rather than some other parameter diverging.
+
+    """
+
+    num_steps: int = 60
+    lower_bound: float = 0.75
+
+    @pytest.fixture
+    def response_model(self):
+        """Gaussian pRF model with no impulse or scaling stage."""
+        return Gaussian2DPRFModel(impulse_model=None, scaling_model=None)
+
+    @pytest.fixture
+    def response_params(self):
+        """Parameters for the response-only model."""
+        return pd.DataFrame({"mu_x": [-1.0, 1.0], "mu_y": [1.0, -1.0], "sigma": [1.5, 2.0]})
+
+    def test_constraint_holds_when_optimizer_pushes_against_bound(
+        self,
+        stimulus: PRFStimulus,
+        response_model: Gaussian2DPRFModel,
+        response_params: pd.DataFrame,
+    ):
+        """Test that a lower-bounded parameter stays above its bound and never becomes NaN.
+
+        `sigma` is started just inside a bound above its true value, so the descent direction points
+        straight at the bound, and a large learning rate makes the optimizer overshoot it.
+
+        """
+        adapter = Adapter([ParameterConstraint(["sigma"], lower=self.lower_bound)])
+
+        init_params = response_params.copy()
+        init_params["sigma"] = self.lower_bound + 0.05
+
+        fitter = SGDFitter(
+            model=response_model,
+            stimulus=stimulus,
+            adapter=adapter,
+            optimizer=keras.optimizers.Adam(learning_rate=0.5),
+        )
+
+        observed = response_model(stimulus, response_params)
+
+        _, sgd_params = fitter.fit(observed, init_params, num_steps=self.num_steps)
+
+        sigma = sgd_params["sigma"].to_numpy()
+
+        assert np.all(np.isfinite(sigma)), f"Constrained parameter became non-finite: {sigma}"
+        assert np.all(sigma >= self.lower_bound), (
+            f"Constrained parameter fell below its lower bound {self.lower_bound}: {sigma}"
+        )
+
+    def test_constraint_round_trips_through_the_fitter(
+        self,
+        stimulus: PRFStimulus,
+        response_model: Gaussian2DPRFModel,
+        response_params: pd.DataFrame,
+    ):
+        """Test that zero optimization steps return the starting values on the natural scale.
+
+        A direction error in the transform pair survives a round trip in isolation, but would show up
+        here as returned parameters that differ from the ones supplied.
+
+        """
+        adapter = Adapter([ParameterConstraint(["sigma"], lower=self.lower_bound)])
+
+        fitter = SGDFitter(model=response_model, stimulus=stimulus, adapter=adapter)
+
+        observed = response_model(stimulus, response_params)
+
+        _, sgd_params = fitter.fit(observed, response_params, num_steps=0)
+
+        np.testing.assert_allclose(
+            sgd_params["sigma"].to_numpy(),
+            response_params["sigma"].to_numpy(),
+            rtol=1e-5,
+            err_msg="Constrained parameter did not survive a round trip through the fitter",
+        )
