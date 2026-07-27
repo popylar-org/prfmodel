@@ -18,23 +18,23 @@ def _check_parameter_shape(param: Tensor, name: str) -> None:
 def _check_gamma_density_input(
     value: Tensor,
     shape: Tensor,
-    rate: Tensor,
+    scale: Tensor,
     shift: Tensor | None = None,
 ) -> None:
     _check_parameter_shape(shape, "Shape")
-    _check_parameter_shape(rate, "Rate")
+    _check_parameter_shape(scale, "Scale")
 
     if shift is not None:
         shift = ops.convert_to_tensor(shift)
         _check_parameter_shape(shift, "Shift")
 
-        if shape.shape != rate.shape:
-            raise ShapeMismatchError("shape", shape.shape, "rate", rate.shape)  # noqa: EM101 (exception literal)
+        if shape.shape != scale.shape:
+            raise ShapeMismatchError("shape", shape.shape, "scale", scale.shape)  # noqa: EM101 (exception literal)
         if shape.shape != shift.shape:
             raise ShapeMismatchError("shape", shape.shape, "shift", shift.shape)  # noqa: EM101 (exception literal)
     else:
-        if shape.shape != rate.shape:
-            raise ShapeMismatchError("shape", shape.shape, "rate", rate.shape)  # noqa: EM101 (exception literal)
+        if shape.shape != scale.shape:
+            raise ShapeMismatchError("shape", shape.shape, "scale", scale.shape)  # noqa: EM101 (exception literal)
 
         if (value.shape != () and len(value.shape) != _ARG_DIM) or (
             len(value.shape) == _ARG_DIM and value.shape[0] != 1
@@ -50,27 +50,27 @@ def _check_gamma_density_input(
         msg = "Shape parameter must be > 0"
         raise ValueError(msg)
 
-    if not ops.all(rate > 0.0):
-        msg = "Rate parameter must be > 0"
+    if not ops.all(scale > 0.0):
+        msg = "Scale parameter must be > 0"
         raise ValueError(msg)
 
 
-def _gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True) -> Tensor:
+def _gamma_density(value: Tensor, shape: Tensor, scale: Tensor, norm: bool = True) -> Tensor:
     # Calculate log density and then exponentiate
-    dens = (shape - 1) * ops.log(value) - rate * value
+    dens = (shape - 1) * ops.log(value) - value / scale
 
     if norm:
         # Normalize
-        return ops.exp(shape * ops.log(rate) + dens - gammaln(shape))
+        return ops.exp(dens - shape * ops.log(scale) - gammaln(shape))
 
     return ops.exp(dens)
 
 
-def gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True) -> Tensor:
+def gamma_density(value: Tensor, shape: Tensor, scale: Tensor, norm: bool = True) -> Tensor:
     r"""
     Calculate the density of a gamma distribution.
 
-    The distribution uses a shape and rate parameterization.
+    The distribution uses a shape and scale parameterization.
     Raises an error when evaluated at negative values.
 
     Parameters
@@ -79,8 +79,8 @@ def gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True)
         The values at which to evaluate the gamma distribution. Must be > 0 and scalar or with shape (1, m).
     shape : :data:`prfmodel.typing.Tensor`
         The shape parameter. Must be > 0 with shape () and scalar or with shape (n, 1).
-    rate : :data:`prfmodel.typing.Tensor`
-        The rate parameter. Must be > 0 and scalar or with shape (n, 1).
+    scale : :data:`prfmodel.typing.Tensor`
+        The scale parameter. Must be > 0 and scalar or with shape (n, 1).
     norm : bool, default=True
         Whether to compute the normalized density.
 
@@ -92,17 +92,17 @@ def gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True)
     Notes
     -----
     The unnormalized density of the gamma distribution
-    with `shape` :math:`\alpha` and `rate` :math:`\lambda` is given by:
+    with `shape` :math:`\alpha` and `scale` :math:`\theta` is given by:
 
     .. math::
 
-        f(x) = x^{\mathtt{\alpha} - 1} e^{-\mathtt{\lambda} x}.
+        f(x) = x^{\mathtt{\alpha} - 1} e^{-x / \mathtt{\theta}}.
 
     When `norm=True`, the density is multiplied with a normalizing constant:
 
     .. math::
 
-        f_{norm} = \frac{\mathtt{\lambda}^{\mathtt{\alpha}}}{\Gamma(\mathtt{\alpha})} * f(x).
+        f_{norm} = \frac{1}{\mathtt{\theta}^{\mathtt{\alpha}} \Gamma(\mathtt{\alpha})} * f(x).
 
     Examples
     --------
@@ -110,19 +110,19 @@ def gamma_density(value: Tensor, shape: Tensor, rate: Tensor, norm: bool = True)
     >>> from prfmodel.density import gamma_density
     >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
     >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
-    >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
-    >>> dens = gamma_density(t, shape, rate)
+    >>> scale = np.array([[1.0], [1.0]])    # shape (2, 1)
+    >>> dens = gamma_density(t, shape, scale)
     >>> print(dens.shape)
     (2, 3)
 
     """
     value = ops.convert_to_tensor(value)
     shape = ops.convert_to_tensor(shape)
-    rate = ops.convert_to_tensor(rate)
+    scale = ops.convert_to_tensor(scale)
 
-    _check_gamma_density_input(value, shape, rate)
+    _check_gamma_density_input(value, shape, scale)
 
-    return _gamma_density(value, shape, rate, norm)
+    return _gamma_density(value, shape, scale, norm)
 
 
 def _shift_density(
@@ -142,7 +142,7 @@ def _shift_density(
 def shifted_gamma_density(
     value: Tensor,
     shape: Tensor,
-    rate: Tensor,
+    scale: Tensor,
     shift: Tensor,
     norm: bool = True,
 ) -> Tensor:
@@ -157,8 +157,8 @@ def shifted_gamma_density(
         The values at which to evaluate the shifted gamma distribution. Must be scalar or with shape (1, m).
     shape : :data:`prfmodel.typing.Tensor`
         The shape parameter. Must be > 0 and scalar or with shape (n, 1).
-    rate : :data:`prfmodel.typing.Tensor`
-        The rate parameter. Must be > 0 and scalar or with shape (n, 1).
+    scale : :data:`prfmodel.typing.Tensor`
+        The scale parameter. Must be > 0 and scalar or with shape (n, 1).
     shift : :data:`prfmodel.typing.Tensor`
         The shift parameter. When > 0, shifts the distribution to the right.
     norm : bool, default=True
@@ -180,37 +180,37 @@ def shifted_gamma_density(
     >>> from prfmodel.density import shifted_gamma_density
     >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
     >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
-    >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
+    >>> scale = np.array([[1.0], [1.0]])    # shape (2, 1)
     >>> shift = np.array([[0.5], [0.0]])   # shape (2, 1)
-    >>> dens = shifted_gamma_density(t, shape, rate, shift)
+    >>> dens = shifted_gamma_density(t, shape, scale, shift)
     >>> print(dens.shape)
     (2, 3)
 
     """
     value = ops.convert_to_tensor(value)
     shape = ops.convert_to_tensor(shape)
-    rate = ops.convert_to_tensor(rate)
+    scale = ops.convert_to_tensor(scale)
     shift = ops.convert_to_tensor(shift)
 
-    _check_gamma_density_input(value, shape, rate, shift)
+    _check_gamma_density_input(value, shape, scale, shift)
 
-    return _shift_density(_gamma_density, value, shift, shape=shape, rate=rate, norm=norm)
+    return _shift_density(_gamma_density, value, shift, shape=shape, scale=scale, norm=norm)
 
 
-def _derivative_gamma_density(value: Tensor, shape: Tensor, rate: Tensor) -> Tensor:
-    dens = _gamma_density(value, shape, rate)
+def _derivative_gamma_density(value: Tensor, shape: Tensor, scale: Tensor) -> Tensor:
+    dens = _gamma_density(value, shape, scale)
 
     # We express the derivative in terms of the pdf
-    term_deriv = (shape - 1) / value - rate
+    term_deriv = (shape - 1) / value - 1 / scale
 
     return dens * term_deriv
 
 
-def derivative_gamma_density(value: Tensor, shape: Tensor, rate: Tensor) -> Tensor:
+def derivative_gamma_density(value: Tensor, shape: Tensor, scale: Tensor) -> Tensor:
     r"""
     Calculate the derivative density of a gamma distribution.
 
-    The distribution uses a shape and rate parameterization.
+    The distribution uses a shape and scale parameterization.
     Raises an error when evaluated at negative values.
 
     Parameters
@@ -219,8 +219,8 @@ def derivative_gamma_density(value: Tensor, shape: Tensor, rate: Tensor) -> Tens
         The values at which to evaluate the derivative gamma distribution. Must be > 0 and scalar or with shape (1, m).
     shape : :data:`prfmodel.typing.Tensor`
         The shape parameter. Must be > 0 and scalar or with shape (n, m).
-    rate : :data:`prfmodel.typing.Tensor`
-        The rate parameter. Must be > 0 and scalar or with shape (n, m).
+    scale : :data:`prfmodel.typing.Tensor`
+        The scale parameter. Must be > 0 and scalar or with shape (n, m).
 
     Returns
     -------
@@ -230,19 +230,19 @@ def derivative_gamma_density(value: Tensor, shape: Tensor, rate: Tensor) -> Tens
     Notes
     -----
     The density of the gamma distribution
-    with `shape` :math:`\alpha` and `rate` :math:`\lambda` is given by:
+    with `shape` :math:`\alpha` and `scale` :math:`\theta` is given by:
 
     .. math::
 
-        f(x) =  \frac{\mathtt{\lambda}^{\mathtt{\alpha}}}{\Gamma(\mathtt{\alpha})}
-        x^{\mathtt{\alpha} - 1} e^{\mathtt{\lambda} x}.
+        f(x) =  \frac{1}{\mathtt{\theta}^{\mathtt{\alpha}} \Gamma(\mathtt{\alpha})}
+        x^{\mathtt{\alpha} - 1} e^{-x / \mathtt{\theta}}.
 
     The derivative of the density with respect to :math:`x` can be defined as a function of the original density
     :math:`f(x)`:
 
     .. math::
 
-        f(x)' = f(x) \frac{(\alpha - 1)}{t} - \lambda
+        f(x)' = f(x) \frac{(\alpha - 1)}{t} - \frac{1}{\theta}
 
     See Also
     --------
@@ -254,16 +254,16 @@ def derivative_gamma_density(value: Tensor, shape: Tensor, rate: Tensor) -> Tens
     >>> from prfmodel.density import derivative_gamma_density
     >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
     >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
-    >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
-    >>> dens = derivative_gamma_density(t, shape, rate)
+    >>> scale = np.array([[1.0], [1.0]])    # shape (2, 1)
+    >>> dens = derivative_gamma_density(t, shape, scale)
     >>> print(dens.shape)
     (2, 3)
 
     """
     value = ops.convert_to_tensor(value)
     shape = ops.convert_to_tensor(shape)
-    rate = ops.convert_to_tensor(rate)
+    scale = ops.convert_to_tensor(scale)
 
-    _check_gamma_density_input(value, shape, rate)
+    _check_gamma_density_input(value, shape, scale)
 
-    return _derivative_gamma_density(value, shape, rate)
+    return _derivative_gamma_density(value, shape, scale)
