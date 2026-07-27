@@ -26,11 +26,11 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
-    "keras",
+    "keras>=3.5.0",
     "matplotlib",
     "more-itertools",
     "nilearn",
-    "numpy<2.0.0",
+    "numpy>=2.0.0",
     "pandas",
     "scipy",
     "tqdm"
