@@ -7,12 +7,42 @@ import pytest
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
+from prfmodel.utils import ModelProtocol
 from prfmodel.utils import ParamsDict
 from prfmodel.utils import UndefinedResponseWarning
 from prfmodel.utils import _get_norm_fun
 from prfmodel.utils import batched
 from prfmodel.utils import normalize_response
 from .conftest import TestSetup
+
+
+class _DummyModel(ModelProtocol):
+    @property
+    def parameter_names(self) -> list[str]:
+        return ["a"]
+
+
+def test_check_parameters_error():
+    """Test that _check_parameters raises error on missing required parameters."""
+    parameters = pd.DataFrame(
+        {
+            "b": [0, 1, 2],
+        },
+    )
+
+    with pytest.raises(ValueError, match=r"\['a'\]"):
+        _DummyModel()._check_parameters(parameters)  # noqa: SLF001 (testing the protected method directly)
+
+
+def test_check_parameters_no_error():
+    """Test that _check_parameters raises no error when no required parameters are missing."""
+    parameters = pd.DataFrame(
+        {
+            "a": [0, 1, 2],
+        },
+    )
+
+    _DummyModel()._check_parameters(parameters)  # noqa: SLF001 (testing the protected method directly)
 
 
 @pytest.mark.parametrize("norm", [None, "sum", "mean", "max", "norm"])

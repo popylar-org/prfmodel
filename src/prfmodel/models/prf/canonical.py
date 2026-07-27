@@ -105,7 +105,12 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
         -------
         %(predicted_response_2d)s
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
         dtype = get_dtype(dtype)
         _validate_regressors_argument(self.models["regressors_model"], regressors)
 
@@ -285,7 +290,12 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus]):
         -------
         %(predicted_response_2d)s
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
         dtype = get_dtype(dtype)
         _validate_regressors_argument(self.models["regressors_model"], regressors)
 
@@ -514,7 +524,12 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus]):
         -------
         %(predicted_response_2d)s
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
         dtype = get_dtype(dtype)
         _validate_regressors_argument(self.models["regressors_model"], regressors)
 

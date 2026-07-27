@@ -128,13 +128,8 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
         super().__init__(duration, offset, resolution, norm, default_parameters)
 
     @property
-    def parameter_names(self) -> list[str]:
-        """
-        Names of parameters used by the model.
-
-        Parameter names are: `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`, `weight_deriv`.
-
-        """
+    def _all_parameter_names(self) -> list[str]:
+        """Parameter names are: `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`, `weight_deriv`."""
         return ["delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv"]
 
     @doc
@@ -151,6 +146,10 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
         -------
         :data:`prfmodel.typing.Tensor`
             The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
+
+        Raises
+        ------
+        %(raises_missing_parameters)s
 
         """
         parameters = self._join_default_parameters(parameters)

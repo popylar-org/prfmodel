@@ -65,6 +65,12 @@ class ModelProtocol(Protocol):
     def parameter_names(self) -> list[str]:
         """A list with names of parameters that are used by the model."""
 
+    def _check_parameters(self, parameters: pd.DataFrame) -> None:
+        missing_params = [param for param in self.parameter_names if param not in parameters.columns]
+        if missing_params:
+            msg = f"Missing required parameter names: {missing_params}"
+            raise ValueError(msg)
+
 
 @doc
 def convert_parameters_to_tensor(parameters: pd.DataFrame, dtype: str) -> Tensor:

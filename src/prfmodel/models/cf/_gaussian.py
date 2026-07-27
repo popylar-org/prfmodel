@@ -76,7 +76,12 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus]):
             `num_units` is the number of rows in `parameters` and `num_rows` is the number of rows in the stimulus
             distance matrix.
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
         dtype = get_dtype(dtype)
         # Distance matrix is numpy array so we also create a numpy array to safely index
         # The dtype is only used for indexing so it can be hardcoded

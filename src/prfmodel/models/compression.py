@@ -114,7 +114,12 @@ class CompressiveEncoder(BaseStimulusEncoder[S]):
             The number of units is the number of rows in `parameters`. The number and size of other axes depends on
             the stimulus and the response.
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
         dtype = get_dtype(dtype=dtype)
         gain = convert_parameters_to_tensor(parameters[["gain"]], dtype)
         n = convert_parameters_to_tensor(parameters[["n"]], dtype)

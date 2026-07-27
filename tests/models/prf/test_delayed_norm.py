@@ -47,11 +47,8 @@ class TestDelayedNormGaussian2DPRFModel(PRFStimulusSetup):
             "mu_y",
             "mu_x",
             "sigma",
-            "delay",
-            "dispersion",
-            "undershoot",
-            "u_dispersion",
-            "ratio",
+            # delay, dispersion, undershoot, u_dispersion, and ratio are covered by the default
+            # DerivativeTwoGammaImpulse "glover_hrf" parameters, so they are excluded here.
             "weight_deriv",
             "n",
             "dispersion_normalization",

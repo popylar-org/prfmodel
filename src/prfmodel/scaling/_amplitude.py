@@ -60,7 +60,12 @@ class BaselineAmplitude(BaseScaling):
         -------
         %(predicted_response_2d)s
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
         dtype = get_dtype(dtype)
         inputs = ops.convert_to_tensor(inputs, dtype=dtype)
 

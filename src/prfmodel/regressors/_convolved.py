@@ -101,7 +101,13 @@ class ConvolvedRegressors(BaseRegressors):
         -------
         %(predicted_response_2d)s
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
+        beta_names = [f"beta_{name}" for name in self.names]
         dtype = get_dtype(dtype)
 
         design_df = _extract_design(regressors, self.names)
@@ -113,7 +119,6 @@ class ConvolvedRegressors(BaseRegressors):
         impulse = self.impulse_model(parameters, dtype=dtype)
         design = ops.convert_to_tensor(design_np, dtype=dtype)
 
-        beta_names = [f"beta_{name}" for name in self.names]
         betas = convert_parameters_to_tensor(parameters[beta_names], dtype=dtype)
 
         prediction = ops.zeros((num_units, num_frames), dtype=dtype)
