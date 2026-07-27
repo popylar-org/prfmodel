@@ -71,7 +71,10 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
         Centroid of the population receptive field. Must have at least two dimensions.
         The first dimension corresponds to the number of units.
         The second dimension corresponds to the number of grid dimensions and must match the size of the
-        last `grid` dimension.
+        last `grid` dimension. Its order must match the order of the last `grid` dimension, that is,
+        `mu[:, i]` is paired with `grid[..., i]`. For a 2D grid built as described in
+        :class:`~prfmodel.stimuli.PRFStimulus`, this means `mu[:, 0]` is the vertical (`y`) centre and
+        `mu[:, 1]` the horizontal (`x`) centre.
     sigma : :data:`prfmodel.typing.Tensor`
         Size of the population receptive field. Must have at least two dimensions.
         The first dimension corresponds to the number of units,
@@ -99,12 +102,12 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     Predict a 2D Gaussian response.
 
     >>> import numpy as np
-    >>> # Define a 2D grid
-    >>> num_x, num_y = 10, 10
+    >>> # Define a 2D grid; y comes first to match the row-major design axes
+    >>> num_x, num_y = 10, 6
     >>> x = np.linspace(-3, 3, num_x)
     >>> y = np.linspace(-4, 4, num_y)
     >>> xv, yv = np.meshgrid(x, y)
-    >>> grid = np.stack((xv, yv), axis=-1)  # shape (10, 10, 2)
+    >>> grid = np.stack((yv, xv), axis=-1)  # shape (6, 10, 2)
     >>> # Define 2D centroids of Gaussian for 3 units
     >>> mu = np.array([  # shape (3, 2), first column y, second column x
     ...     [0.0, 1.0],
@@ -115,7 +118,7 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     >>> sigma = np.array([[1.0], [1.5], [2.0]])  # shape (3, 1)
     >>> resp = predict_gaussian_response(grid, mu, sigma)
     >>> print(resp.shape)  # (num_units, num_y, num_x)
-    (3, 10, 10)
+    (3, 6, 10)
 
     """
     grid = ops.convert_to_tensor(grid)

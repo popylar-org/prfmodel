@@ -34,8 +34,10 @@ print(stimulus)
 ```
 
 When printing the `stimulus` object, we can see that it has three attributes. The `design` attribute defines how
-the visual field changes over time. It has shape `(num_frames, width, height)`, where width and hight define the number of pixels at which the visual field is recorded.
-The `grid` attribute maps each pixel to its xy-coordinate in the visual field (i.e., the degree of visual angle).
+the visual field changes over time. It has shape `(num_frames, height, width)`, where height and width define the number of pixels at which the visual field is recorded.
+The `grid` attribute maps each pixel to its coordinate in the visual field (i.e., the degree of visual angle). Its last
+axis follows the axes of the design, so `grid[..., 0]` holds the vertical (`y`) coordinate and `grid[..., 1]` the
+horizontal (`x`) coordinate.
 
 ## Defining the pRF model
 

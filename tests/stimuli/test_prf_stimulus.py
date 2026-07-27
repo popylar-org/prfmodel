@@ -34,7 +34,7 @@ def test_dimension_labels_error():
         _ = PRFStimulus(
             design=np.zeros((1, 2)),
             grid=np.zeros((2, 1)),
-            dimension_labels=["x", "y"],
+            dimension_labels=["y", "x"],
         )
 
 
@@ -44,7 +44,7 @@ def stimulus():
     return PRFStimulus(
         design=np.zeros((1, 2, 1)),
         grid=np.zeros((2, 1, 2)),
-        dimension_labels=["x", "y"],
+        dimension_labels=["y", "x"],
     )
 
 
@@ -67,7 +67,7 @@ def test_repr(stimulus: PRFStimulus):
 
 def test_str(stimulus: PRFStimulus):
     """Test human-readable string representation of PRFStimulus."""
-    assert str(stimulus) == "PRFStimulus(design=array[1, 2, 1], grid=array[2, 1, 2], dimension_labels=['x', 'y'])"
+    assert str(stimulus) == "PRFStimulus(design=array[1, 2, 1], grid=array[2, 1, 2], dimension_labels=['y', 'x'])"
 
 
 def test_eq(stimulus: PRFStimulus):
@@ -75,7 +75,7 @@ def test_eq(stimulus: PRFStimulus):
     stimulus_2 = PRFStimulus(
         design=np.zeros((1, 2, 1)),
         grid=np.zeros((2, 1, 2)),
-        dimension_labels=["x", "y"],
+        dimension_labels=["y", "x"],
     )
 
     assert stimulus == stimulus_2
@@ -86,7 +86,7 @@ def test_ne(stimulus: PRFStimulus):
     stimulus_3 = PRFStimulus(
         design=np.zeros((1, 2, 2)),
         grid=np.zeros((2, 2, 2)),
-        dimension_labels=["x", "y"],
+        dimension_labels=["y", "x"],
     )
 
     assert stimulus != stimulus_3
@@ -131,11 +131,11 @@ def test_rectangular_grid(dimensions: str, axis: str):
 
     match dimensions:
         case "2D":
-            design_shape = (num_frames, width, height)
-            grid_shape = (width, height, 2)
+            design_shape = (num_frames, height, width)
+            grid_shape = (height, width, 2)
         case "3D":
-            design_shape = (num_frames, width, height, depth)
-            grid_shape = (width, height, depth, 3)
+            design_shape = (num_frames, height, width, depth)
+            grid_shape = (height, width, depth, 3)
 
     design = np.zeros(design_shape)
     grid = np.zeros(grid_shape)

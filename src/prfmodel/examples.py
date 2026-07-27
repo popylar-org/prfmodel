@@ -41,9 +41,17 @@ def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[P
     transformed from a rectangular into a quadratic shape. The moving bar patterns is mirrored in the time axis
     which means that it can be split in two almost identical halfs.
 
+    The ``design`` is stored in screen pixel order while the ``grid`` holds visual field coordinates, which are
+    related by a horizontal flip because the participant viewed the screen through a mirror. The horizontal
+    coordinate therefore decreases across the design columns, so a bar in the leftmost columns falls in the right
+    visual hemifield (positive ``mu_x``). The vertical coordinate increases down the rows.
+    :meth:`~prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus` uses the same convention, so ``mu_x`` estimates are
+    directly comparable between the two.
+
     See Also
     --------
-    prfmodel.stimuli.prf.animate_2d_prf_stimulus : Create an animation for a two-dimensional stimulus.
+    prfmodel.plotting.animate_2d_prf_stimulus : Create an animation for a two-dimensional stimulus.
+    prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus : Create a two-dimensional bar stimulus.
 
     Examples
     --------

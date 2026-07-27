@@ -146,14 +146,21 @@ def plot_2d_prf_stimulus(
 def _get_grid_limits(grid: np.ndarray) -> tuple[float, float, float, float]:
     """From a 2D coordinate grid, return its coordinate limits.
 
+    The grid stores the vertical (`y`) coordinate in `grid[..., 0]` and the horizontal (`x`)
+    coordinate in `grid[..., 1]`, matching the row-major order of the design (see
+    :class:`~prfmodel.stimuli.PRFStimulus`). Rows therefore span `y` and columns span `x`.
+
     Output can be passed as `extent` argument to :class:`matlplotlib.axes.Axes.imshow`
 
     """
-    left = grid[0, 0, 0]
-    bottom = grid[0, 0, -1]
+    # x varies along columns (axis 1) and is stored in the last grid dimension
+    left = grid[0, 0, 1]
+    right = grid[0, -1, 1]
 
-    right = grid[0, -1, 0]
-    top = grid[-1, -1, -1]
+    # y varies along rows (axis 0) and is stored in the first grid dimension
+    bottom = grid[0, 0, 0]
+    top = grid[-1, 0, 0]
+
     return (left, right, bottom, top)
 
 

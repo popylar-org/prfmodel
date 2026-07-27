@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 from pytest_regressions.num_regression import NumericRegressionFixture
 from scipy import stats
+from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
@@ -279,3 +280,112 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
             {f"response_{i}": x for i, x in enumerate(resp)},
             default_tolerance={"atol": 1e-4},
         )
+
+
+class TestCoordinateConvention:
+    """Tests that `mu_x` and `mu_y` map onto the stimulus axes they are named after.
+
+    These tests deliberately avoid the simulate-with-the-model-then-fit-the-same-model pattern used
+    elsewhere: a swap of the two centre parameters is self-consistent and would pass such a test.
+    Instead they place stimulus energy at an independently known location and check which parameter
+    has to move to follow it.
+
+    """
+
+    num_pixels: int = 64
+    pixel_size: float = 0.1
+    bar_position: float = 2.0
+
+    # A pRF centred on the bar integrates a large fraction of it; one centred off it sees ~nothing
+    on_bar_min_response: float = 1.0
+    off_bar_max_response: float = 1e-3
+
+    def _make_bar_stimulus(self, axis: str) -> tuple[PRFStimulus, float]:
+        """Build a static bar at a known coordinate along `axis`, uniform along the other axis."""
+        size = self.num_pixels
+        coords = (np.arange(size) - (size - 1) / 2) * self.pixel_size
+        xv, yv = np.meshgrid(coords, coords)
+        grid = np.stack((yv, xv), axis=-1)
+
+        index = int(np.argmin(np.abs(coords - self.bar_position)))
+        design = np.zeros((4, size, size))
+
+        if axis == "x":
+            # A vertical bar at a fixed x, spanning every y
+            design[:, :, index - 2 : index + 3] = 1.0
+        else:
+            # A horizontal bar at a fixed y, spanning every x
+            design[:, index - 2 : index + 3, :] = 1.0
+
+        return PRFStimulus(design=design, grid=grid, dimension_labels=["y", "x"]), coords[index]
+
+    @pytest.mark.parametrize("axis", ["x", "y"])
+    def test_prf_responds_on_the_axis_it_is_named_after(self, axis: str):
+        """Test that a pRF offset along one axis only sees a bar placed on that same axis."""
+        stimulus, position = self._make_bar_stimulus(axis)
+
+        on_bar = {"mu_x": 0.0, "mu_y": 0.0, "sigma": 0.3}
+        on_bar[f"mu_{axis}"] = position
+
+        off_bar = {"mu_x": on_bar["mu_y"], "mu_y": on_bar["mu_x"], "sigma": 0.3}
+
+        params = pd.DataFrame([on_bar, off_bar])
+        resp = np.asarray(Gaussian2DPRFResponse()(stimulus, params))
+        encoded = np.asarray(PRFStimulusEncoder()(stimulus, resp, params))
+
+        assert encoded[0, 0] > self.on_bar_min_response, (
+            f"pRF at mu_{axis}={position} does not respond to a bar on the {axis} axis; "
+            f"mu_x and mu_y are swapped relative to the stimulus grid"
+        )
+        assert encoded[1, 0] < self.off_bar_max_response, (
+            f"pRF offset along the other axis should not see a bar on the {axis} axis"
+        )
+
+    @staticmethod
+    def _assert_grid_convention(grid: np.ndarray, name: str) -> None:
+        """Assert the shared axis-order and axis-sign convention of the built-in stimuli."""
+        # Component 0 (y) varies down the rows and is constant across columns
+        assert np.allclose(np.std(grid[..., 0], axis=1), 0.0), f"{name}: grid[..., 0] must be constant along columns"
+        assert grid[-1, 0, 0] > grid[0, 0, 0], f"{name}: grid[..., 0] (y) must increase down the rows"
+
+        # Component 1 (x) varies across the columns and is constant down the rows
+        assert np.allclose(np.std(grid[..., 1], axis=0), 0.0), f"{name}: grid[..., 1] must be constant along rows"
+        # x decreases because the design is in screen pixel order and the display is mirrored
+        assert grid[0, -1, 1] < grid[0, 0, 1], (
+            f"{name}: grid[..., 1] (x) must decrease across the columns; the design is stored in "
+            f"screen pixel order and the mirrored display flips the horizontal axis"
+        )
+
+    def test_bar_stimulus_grid_follows_convention(self):
+        """Test that `create_2d_bar_stimulus` uses the documented axis order and sign."""
+        stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=10, width=16, height=8, pixel_size=0.5)
+
+        assert stimulus.grid.shape == (8, 16, 2)
+        self._assert_grid_convention(stimulus.grid, "create_2d_bar_stimulus")
+
+    def test_packaged_example_grid_follows_convention(self):
+        """Test that the packaged example stimulus uses the documented axis order and sign."""
+        stimulus = load_2d_prf_bar_stimulus()
+
+        assert stimulus.grid.shape[:-1] == stimulus.design.shape[1:]
+        self._assert_grid_convention(stimulus.grid, "load_2d_prf_bar_stimulus")
+
+    def test_built_in_stimuli_agree_on_hemifield(self):
+        """Test that a bar in the leftmost columns falls in the same hemifield for both stimuli.
+
+        This is the property that makes `mu_x` estimates comparable across the two built-in
+        stimulus sources. It fails if either one flips its horizontal axis independently.
+
+        """
+        generated = PRFStimulus.create_2d_bar_stimulus(num_frames=10, width=32, height=32)
+        packaged = load_2d_prf_bar_stimulus()
+
+        for name, stimulus in [("create_2d_bar_stimulus", generated), ("load_2d_prf_bar_stimulus", packaged)]:
+            # x coordinate of the leftmost and rightmost design column
+            leftmost = stimulus.grid[0, 0, 1]
+            rightmost = stimulus.grid[0, -1, 1]
+
+            assert leftmost > 0.0 > rightmost, (
+                f"{name}: the leftmost design column must map to the right visual hemifield "
+                f"(positive x) and the rightmost column to the left hemifield"
+            )
