@@ -110,4 +110,8 @@ class BaseRegressors(ModelProtocol):
         -------
         %(predicted_response_2d)s
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """

@@ -79,7 +79,12 @@ class AdditiveRegressors(BaseRegressors):
         -------
         %(predicted_response_2d)s
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
         dtype = get_dtype(dtype)
 
         design_df = _extract_design(regressors, self.names)

@@ -97,6 +97,10 @@ class BasePopulationResponse(ModelProtocol, Generic[S]):
             Model predictions of shape `(num_units, ...)` and dtype `dtype`. The number of units is the
             number of rows in `parameters`. The number and size of other axes depends on the stimulus.
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
 
 
@@ -169,6 +173,10 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S]):
             The stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`. The number of units is
             the number of rows in :attr:`parameters`. The number and size of other axes depends on the stimulus and the
             response.
+
+        Raises
+        ------
+        %(raises_missing_parameters)s
 
         """
 
@@ -268,5 +276,9 @@ class BaseCanonical(ModelProtocol, Generic[S]):
         Returns
         -------
         %(predicted_response_2d)s
+
+        Raises
+        ------
+        %(raises_missing_parameters)s
 
         """

@@ -78,13 +78,8 @@ class ShiftedGammaImpulse(BaseImpulse):
     """
 
     @property
-    def parameter_names(self) -> list[str]:
-        """
-        Names of parameters used by the model.
-
-        Parameter names are: `delay`, `dispersion`, and `shift`.
-
-        """
+    def _all_parameter_names(self) -> list[str]:
+        """Parameter names are: `delay`, `dispersion`, and `shift`."""
         return ["delay", "dispersion", "shift"]
 
     @doc
@@ -101,6 +96,10 @@ class ShiftedGammaImpulse(BaseImpulse):
         -------
         :data:`prfmodel.typing.Tensor`
             The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
+
+        Raises
+        ------
+        %(raises_missing_parameters)s
 
         """
         parameters = self._join_default_parameters(parameters)

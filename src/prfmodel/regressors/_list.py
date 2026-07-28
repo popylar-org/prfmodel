@@ -99,7 +99,12 @@ class RegressorsList(BaseRegressors):
         -------
         %(predicted_response_2d)s
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
         prediction = self.regressors[0](regressors, parameters, dtype=dtype)
 
         for child in self.regressors[1:]:

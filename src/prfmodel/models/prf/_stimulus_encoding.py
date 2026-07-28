@@ -109,7 +109,7 @@ class PRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus]):
         self,
         stimulus: PRFStimulus,
         response: Tensor,
-        parameters: pd.DataFrame,  # noqa: ARG002 (unused method argument)
+        parameters: pd.DataFrame,
         dtype: str | None = None,
     ) -> Tensor:
         """Encode a population receptive field model response with a stimulus design.
@@ -126,7 +126,12 @@ class PRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus]):
         -------
         %(predicted_response_2d)s
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
         dtype = get_dtype(dtype)
         design = ops.convert_to_tensor(stimulus.design, dtype=dtype)
         return encode_prf_response(response, design, dtype=dtype)

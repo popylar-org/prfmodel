@@ -187,7 +187,12 @@ class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus]):
             `num_units` is the number of rows in `parameters` and `size_y` and `size_x` are the sizes of the
             x and y stimulus grid dimension.
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
         dtype = get_dtype(dtype)
         # Convention is y-dimension first
         mu = convert_parameters_to_tensor(parameters[["mu_y", "mu_x"]], dtype=dtype)

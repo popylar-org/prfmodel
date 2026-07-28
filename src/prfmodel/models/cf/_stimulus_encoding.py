@@ -28,7 +28,7 @@ class CFStimulusEncoder(BaseStimulusEncoder[CFStimulus]):
         self,
         stimulus: CFStimulus,
         response: Tensor,
-        parameters: pd.DataFrame,  # noqa: ARG002 (unused method argument)
+        parameters: pd.DataFrame,
         dtype: str | None = None,
     ) -> Tensor:
         """Encode a connective field model response with a source response.
@@ -45,7 +45,12 @@ class CFStimulusEncoder(BaseStimulusEncoder[CFStimulus]):
         -------
         %(predicted_response_2d)s
 
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
         """
+        self._check_parameters(parameters)
         dtype = get_dtype(dtype)
         response = ops.convert_to_tensor(response, dtype=dtype)
         source_response = ops.convert_to_tensor(stimulus.source_response, dtype=dtype)

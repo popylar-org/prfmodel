@@ -48,7 +48,7 @@ class BaseImpulse(ModelProtocol):
     Notes
     -----
     This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
-    models. Subclasses must override the abstract :attr:`parameter_names` and :meth:`__call__` method.
+    models. Subclasses must override the abstract :attr:`_all_parameter_names` and :meth:`__call__` method.
 
     """
 
@@ -73,7 +73,7 @@ class BaseImpulse(ModelProtocol):
         self.norm = norm
 
         if isinstance(default_parameters, dict):
-            if any(key not in self.parameter_names for key in default_parameters):
+            if any(key not in self._all_parameter_names for key in default_parameters):
                 msg = "Invalid default parameter name, please provide valid parameter default parameter names"
                 raise ValueError(msg)
 
@@ -111,12 +111,26 @@ class BaseImpulse(ModelProtocol):
                 if key not in parameters.columns:
                     parameters[key] = val
 
+        self._check_parameters(parameters)
+
         return parameters
 
     @property
     @abstractmethod
+    def _all_parameter_names(self) -> list[str]:
+        """Names of all parameters used by the model, including ones covered by `default_parameters`."""
+
+    @property
     def parameter_names(self) -> list[str]:
-        """A list with names of parameters that are used by the model."""
+        """
+        Names of parameters that must be supplied by the caller.
+
+        Excludes names covered by :attr:`default_parameters`; those may still be overridden by supplying the
+        corresponding column in ``parameters``.
+
+        """
+        default_names = set(self.default_parameters) if isinstance(self.default_parameters, dict) else set()
+        return [name for name in self._all_parameter_names if name not in default_names]
 
     @doc
     @abstractmethod
@@ -132,5 +146,9 @@ class BaseImpulse(ModelProtocol):
         Returns
         -------
         %(predicted_response_2d)s
+
+        Raises
+        ------
+        %(raises_missing_parameters)s
 
         """
