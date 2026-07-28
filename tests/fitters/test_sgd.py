@@ -20,6 +20,8 @@ from .conftest import parametrize_dtype
 from .conftest import skip_torch
 from .conftest import skip_windows
 
+_ATOL = 1e-3
+
 
 @skip_windows
 @skip_torch
@@ -159,3 +161,50 @@ class TestSGDFitter(TestSetup):
         self._check_history(history)
         self._check_sgd_params_shape(sgd_params, params)
         self._check_sgd_params_regression(sgd_params, dataframe_regression, dtype)
+
+    def test_fit_batch_size(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        dtype: str,
+    ):
+        """Test that fitting with batch_size produces the same final parameters as fitting all at once.
+
+        Uses more optimization steps than other tests in this file: with very few steps, the comparison is
+        dominated by floating-point summation-order noise between differently-shaped batches (the trajectories
+        have not converged yet, so tiny per-step differences compound). With enough steps to approach
+        convergence, that noise vanishes, which is what this test actually needs to verify.
+
+        Unlike `LeastSquaresFitter`, the step-wise loss history is not directly comparable between the full and
+        batched runs: a step's loss is an aggregate over whichever units are in that batch, so it means something
+        different depending on how units were grouped. What batching should preserve is the step *bookkeeping*
+        (steps keep counting up across batches) and the final per-unit parameters (checked below).
+
+        """
+        num_steps = 200
+        num_batches = 3
+        fixed_parameters = ["delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv"]
+
+        fitter = SGDFitter(model=model, stimulus=stimulus, dtype=dtype)
+
+        observed = model(stimulus, params)
+
+        history_full, params_full = fitter.fit(
+            observed,
+            params,
+            num_steps=num_steps,
+            fixed_parameters=fixed_parameters,
+        )
+        history_batched, params_batched = fitter.fit(
+            observed,
+            params,
+            num_steps=num_steps,
+            batch_size=1,
+            fixed_parameters=fixed_parameters,
+        )
+
+        assert history_full.step == list(range(num_steps))
+        assert history_batched.step == list(range(num_batches * num_steps))
+
+        pd.testing.assert_frame_equal(params_full, params_batched, atol=_ATOL)
