@@ -15,7 +15,9 @@ prfmodel.fitters.SGDHistory
 
    .. attribute:: step
 
-      List of step indices.
+      List of step indices. When fitting is split into data batches (see `batch_size` in :meth:`SGDFitter.fit`),
+      each batch is optimized independently but its steps continue counting up from where the previous batch left
+      off, so `step` and `history` simply grow longer rather than changing meaning.
 
       :type: list of int
 

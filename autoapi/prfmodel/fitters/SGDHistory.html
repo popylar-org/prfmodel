@@ -422,7 +422,9 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="prfmodel.fitters.SGDHistory.step">
 <span class="sig-name descname"><span class="pre">step</span></span><a class="headerlink" href="#prfmodel.fitters.SGDHistory.step" title="Link to this definition">¶</a></dt>
-<dd><p>List of step indices.</p>
+<dd><p>List of step indices. When fitting is split into data batches (see <cite>batch_size</cite> in <code class="xref py py-meth docutils literal notranslate"><span class="pre">SGDFitter.fit()</span></code>),
+each batch is optimized independently but its steps continue counting up from where the previous batch left
+off, so <cite>step</cite> and <cite>history</cite> simply grow longer rather than changing meaning.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
