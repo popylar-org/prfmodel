@@ -83,6 +83,8 @@ prfmodel.impulse.ShiftedGammaImpulse
       :returns: The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
       :rtype: :data:`prfmodel.typing.Tensor`
 
+      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
 
 
    .. py:property:: frames
@@ -105,7 +107,8 @@ prfmodel.impulse.ShiftedGammaImpulse
       :type: list[str]
 
 
-      Names of parameters used by the model.
+      Names of parameters that must be supplied by the caller.
 
-      Parameter names are: `delay`, `dispersion`, and `shift`.
+      Excludes names covered by :attr:`default_parameters`; those may still be overridden by supplying the
+      corresponding column in ``parameters``.
 

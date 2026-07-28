@@ -71,6 +71,8 @@ prfmodel.models.base.BasePopulationResponse
                 number of rows in `parameters`. The number and size of other axes depends on the stimulus.
       :rtype: :data:`prfmodel.typing.Tensor`
 
+      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
 
 
    .. py:property:: parameter_names

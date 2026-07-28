@@ -54,6 +54,8 @@ prfmodel.regressors.RegressorsList
       :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
       :rtype: Tensor
 
+      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
 
 
    .. py:property:: parameter_names

@@ -44,6 +44,8 @@ prfmodel.models.prf.Gaussian2DPRFResponse
                 x and y stimulus grid dimension.
       :rtype: Tensor
 
+      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
 
 
    .. py:property:: parameter_names

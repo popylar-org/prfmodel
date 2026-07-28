@@ -28,7 +28,7 @@ prfmodel.impulse.base.BaseImpulse
    .. rubric:: Notes
 
    This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
-   models. Subclasses must override the abstract :attr:`parameter_names` and :meth:`__call__` method.
+   models. Subclasses must override the abstract :attr:`_all_parameter_names` and :meth:`__call__` method.
 
 
    .. py:method:: __call__(parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
@@ -46,6 +46,8 @@ prfmodel.impulse.base.BaseImpulse
 
       :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
       :rtype: Tensor
+
+      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
 
 
 
@@ -68,8 +70,9 @@ prfmodel.impulse.base.BaseImpulse
    .. py:property:: parameter_names
       :type: list[str]
 
-      :abstractmethod:
 
+      Names of parameters that must be supplied by the caller.
 
-      A list with names of parameters that are used by the model.
+      Excludes names covered by :attr:`default_parameters`; those may still be overridden by supplying the
+      corresponding column in ``parameters``.
 
