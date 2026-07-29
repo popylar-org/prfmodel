@@ -1,15 +1,17 @@
 """Tests for stochastic gradient descent fitting."""
 
+import warnings
 import keras
 import numpy as np
 import pandas as pd
 import pytest
-from pytest_regressions.dataframe_regression import DataFrameRegressionFixture
 from prfmodel.fitters import SGDFitter
 from prfmodel.fitters import SGDHistory
 from prfmodel.fitters.adapter import Adapter
 from prfmodel.fitters.adapter import ParameterConstraint
 from prfmodel.fitters.adapter import ParameterTransform
+from prfmodel.models.prf import DivNormGaussian2DPRFModel
+from prfmodel.models.prf import DoG2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
@@ -23,10 +25,38 @@ from .conftest import skip_windows
 _ATOL = 1e-3
 
 
+class _SGDGradientChecks:
+    """Shared assertions for SGD fitting tests, reused across model architectures.
+
+    Both checks target the class of bug where a parameter is silently detached from the
+    gradient tape (e.g. by round-tripping through a :class:`pandas.DataFrame`): Keras then warns
+    that gradients don't exist for that variable, and the optimizer leaves it exactly at its
+    starting value instead of moving it.
+    """
+
+    def _check_no_gradient_warnings(self, record: list[warnings.WarningMessage]) -> None:
+        """Assert that fitting did not emit a 'Gradients do not exist' warning for any parameter."""
+        gradient_warnings = [w.message for w in record if "Gradients do not exist" in str(w.message)]
+        assert not gradient_warnings, f"Unexpected gradient warnings: {gradient_warnings}"
+
+    def _check_params_moved(
+        self,
+        result_params: pd.DataFrame,
+        init_params: pd.DataFrame,
+        moving_params: list[str],
+    ) -> None:
+        """Assert that each parameter in ``moving_params`` changed value during fitting."""
+        for param in moving_params:
+            assert not np.allclose(
+                result_params[param].to_numpy(),
+                init_params[param].to_numpy(),
+            ), f"{param!r} did not change during SGD fitting; gradients may not be flowing to it."
+
+
 @skip_windows
 @skip_torch
 @parametrize_dtype
-class TestSGDFitter(TestSetup):
+class TestSGDFitter(_SGDGradientChecks, TestSetup):
     """Tests for SGDFitter class.
 
     Uses a `Gaussian2DPRFModel` model with a `keras.optimizers.Adam` optimizer and `keras.losses.MeanSquaredError` loss
@@ -35,6 +65,23 @@ class TestSGDFitter(TestSetup):
     """
 
     num_steps: int = 10
+
+    @pytest.fixture
+    def true_params(self, params: pd.DataFrame) -> pd.DataFrame:
+        """Data-generating parameters, offset from ``params`` so that fitting has genuine, nonzero gradients."""
+        true_params = params.copy()
+        true_params["mu_x"] += 0.3
+        true_params["mu_y"] -= 0.3
+        true_params["sigma"] += 0.3
+        true_params["delay"] += 0.5
+        true_params["dispersion"] += 0.05
+        true_params["undershoot"] += 0.5
+        true_params["u_dispersion"] += 0.05
+        true_params["ratio"] += 0.02
+        true_params["weight_deriv"] += 0.1
+        true_params["baseline"] += 0.1
+        true_params["amplitude"] += 0.1
+        return true_params
 
     def _check_history(self, history: SGDHistory) -> None:
         assert isinstance(history, SGDHistory)
@@ -46,30 +93,18 @@ class TestSGDFitter(TestSetup):
         assert isinstance(result_params, pd.DataFrame)
         assert result_params.shape == params.shape
 
-    def _check_sgd_params_regression(
-        self,
-        result_params: pd.DataFrame,
-        dataframe_regression: DataFrameRegressionFixture,
-        dtype: str,
-    ) -> None:
-        if dtype != "float64":
-            dataframe_regression.check(
-                result_params,
-                default_tolerance={"atol": 1e-6},
-            )
-
     @pytest.mark.parametrize(
         ("optimizer", "loss"),
         [(None, None), (keras.optimizers.Adam, keras.losses.MeanSquaredError)],
     )
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
-        dataframe_regression: DataFrameRegressionFixture,
         stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         optimizer: type[keras.optimizers.Optimizer],
         loss: type[keras.losses.Loss],
         params: pd.DataFrame,
+        true_params: pd.DataFrame,
         dtype: str,
     ):
         """Test that fit returns parameters with the correct shape."""
@@ -88,20 +123,23 @@ class TestSGDFitter(TestSetup):
             dtype=dtype,
         )
 
-        observed = model(stimulus, params)
+        observed = model(stimulus, true_params)
 
-        history, sgd_params = fitter.fit(observed, params, num_steps=self.num_steps)
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            history, sgd_params = fitter.fit(observed, params, num_steps=self.num_steps)
 
         self._check_history(history)
         self._check_sgd_params_shape(sgd_params, params)
-        self._check_sgd_params_regression(sgd_params, dataframe_regression, dtype)
+        self._check_no_gradient_warnings(record)
+        self._check_params_moved(sgd_params, params, moving_params=list(params.columns))
 
     def test_fit_fixed_params(
         self,
-        dataframe_regression: DataFrameRegressionFixture,
         stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
+        true_params: pd.DataFrame,
         dtype: str,
     ):
         """Test that fit with fixed parameters returns parameters with the correct shape and fixed values."""
@@ -111,26 +149,29 @@ class TestSGDFitter(TestSetup):
             dtype=dtype,
         )
 
-        observed = model(stimulus, params)
+        observed = model(stimulus, true_params)
 
         fixed = ["baseline", "amplitude"]
 
-        history, sgd_params = fitter.fit(observed, params, fixed_parameters=fixed, num_steps=self.num_steps)
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            history, sgd_params = fitter.fit(observed, params, fixed_parameters=fixed, num_steps=self.num_steps)
 
         self._check_history(history)
         self._check_sgd_params_shape(sgd_params, params)
 
         assert np.all(sgd_params[fixed] == params[fixed].astype(get_dtype(dtype)))
 
-        self._check_sgd_params_regression(sgd_params, dataframe_regression, dtype)
+        self._check_no_gradient_warnings(record)
+        self._check_params_moved(sgd_params, params, moving_params=[c for c in params.columns if c not in fixed])
 
     @parametrize_impulse_model
     def test_fit_adapter(
         self,
-        dataframe_regression: DataFrameRegressionFixture,
         stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
+        true_params: pd.DataFrame,
         dtype: str,
     ):
         """Test that fit with an adapter returns parameters with the correct shape."""
@@ -148,7 +189,7 @@ class TestSGDFitter(TestSetup):
             dtype=dtype,
         )
 
-        observed = model(stimulus, params)
+        observed = model(stimulus, true_params)
 
         fixed_parameters = None
 
@@ -156,17 +197,30 @@ class TestSGDFitter(TestSetup):
         if model.models["impulse_model"].default_parameters is not None:
             fixed_parameters = model.models["impulse_model"].default_parameters.keys()
 
-        history, sgd_params = fitter.fit(observed, params, num_steps=self.num_steps, fixed_parameters=fixed_parameters)
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            history, sgd_params = fitter.fit(
+                observed,
+                params,
+                num_steps=self.num_steps,
+                fixed_parameters=fixed_parameters,
+            )
 
         self._check_history(history)
         self._check_sgd_params_shape(sgd_params, params)
-        self._check_sgd_params_regression(sgd_params, dataframe_regression, dtype)
+        self._check_no_gradient_warnings(record)
+        self._check_params_moved(
+            sgd_params,
+            params,
+            moving_params=[c for c in params.columns if c not in (fixed_parameters or [])],
+        )
 
     def test_fit_batch_size(
         self,
         stimulus: PRFStimulus,
         model: Gaussian2DPRFModel,
         params: pd.DataFrame,
+        true_params: pd.DataFrame,
         dtype: str,
     ):
         """Test that fitting with batch_size produces the same final parameters as fitting all at once.
@@ -188,23 +242,162 @@ class TestSGDFitter(TestSetup):
 
         fitter = SGDFitter(model=model, stimulus=stimulus, dtype=dtype)
 
-        observed = model(stimulus, params)
+        observed = model(stimulus, true_params)
 
-        history_full, params_full = fitter.fit(
-            observed,
-            params,
-            num_steps=num_steps,
-            fixed_parameters=fixed_parameters,
-        )
-        history_batched, params_batched = fitter.fit(
-            observed,
-            params,
-            num_steps=num_steps,
-            batch_size=1,
-            fixed_parameters=fixed_parameters,
-        )
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            history_full, params_full = fitter.fit(
+                observed,
+                params,
+                num_steps=num_steps,
+                fixed_parameters=fixed_parameters,
+            )
+            history_batched, params_batched = fitter.fit(
+                observed,
+                params,
+                num_steps=num_steps,
+                batch_size=1,
+                fixed_parameters=fixed_parameters,
+            )
 
         assert history_full.step == list(range(num_steps))
         assert history_batched.step == list(range(num_batches * num_steps))
+        self._check_sgd_params_shape(params_batched, params)
+        self._check_no_gradient_warnings(record)
+        self._check_params_moved(
+            params_batched,
+            params,
+            moving_params=[c for c in params.columns if c not in (fixed_parameters or [])],
+        )
 
         pd.testing.assert_frame_equal(params_full, params_batched, atol=_ATOL)
+
+
+@skip_windows
+@skip_torch
+@parametrize_dtype
+class TestSGDDualResponse(_SGDGradientChecks, TestSetup):
+    """Verify SGD updates shared and response-specific pRF parameters for DoG and DivNorm models."""
+
+    num_steps: int = 10
+
+    @pytest.fixture
+    def dog_model(self) -> DoG2DPRFModel:
+        """DoG (Difference of Gaussians) canonical pRF model."""
+        return DoG2DPRFModel()
+
+    @pytest.fixture
+    def dog_init_params(self) -> pd.DataFrame:
+        """Return starting parameters for DoG model passed to the fitter."""
+        return pd.DataFrame(
+            {
+                "mu_x": [0.0, 1.0],
+                "mu_y": [1.0, 0.0],
+                "sigma_center": [1.0, 1.5],
+                "sigma_surround": [2.0, 3.0],
+                "delay": [6.0, 7.0],
+                "dispersion": [0.9, 1.0],
+                "undershoot": [12.0, 11.0],
+                "u_dispersion": [0.9, 1.0],
+                "ratio": [0.48, 0.48],
+                "weight_deriv": [0.5, 0.5],
+                "amplitude_center": [1.1, 1.0],
+                "amplitude_surround": [0.5, 0.3],
+                "baseline": [0.0, 0.1],
+            },
+        )
+
+    @pytest.fixture
+    def dog_true_params(self, dog_init_params: pd.DataFrame) -> pd.DataFrame:
+        """Data-generating parameters for DoG model."""
+        true_params = dog_init_params.copy()
+        true_params["mu_x"] += 0.5
+        true_params["mu_y"] -= 0.5
+        true_params["sigma_center"] += 0.5
+        true_params["sigma_surround"] += 0.5
+        return true_params
+
+    @pytest.fixture
+    def dog_moving_params(self) -> list[str]:
+        """Return moving parameters for DoG model."""
+        return ["mu_x", "mu_y", "sigma_center", "sigma_surround"]
+
+    @pytest.fixture
+    def div_norm_model(self) -> DivNormGaussian2DPRFModel:
+        """DivNorm (divisive normalization) canonical pRF model."""
+        return DivNormGaussian2DPRFModel()
+
+    @pytest.fixture
+    def div_norm_init_params(self) -> pd.DataFrame:
+        """Return starting parameters for DivNorm model passed to the fitter."""
+        return pd.DataFrame(
+            {
+                "mu_x": [0.0, 1.0],
+                "mu_y": [1.0, 0.0],
+                "sigma_activation": [1.0, 1.5],
+                "sigma_normalization": [2.0, 3.0],
+                "weight_deriv": [-0.5, -0.5],
+                "amplitude_activation": [1.1, 1.0],
+                "baseline_activation": [0.0, 0.1],
+                "amplitude_normalization": [10.0, 5.0],
+                "baseline_normalization": [20.0, 10.0],
+                "baseline": [-0.5, 0.5],
+            },
+        )
+
+    @pytest.fixture
+    def div_norm_true_params(self, div_norm_init_params: pd.DataFrame) -> pd.DataFrame:
+        """Data-generating parameters for DivNorm model."""
+        true_params = div_norm_init_params.copy()
+        true_params["mu_x"] += 0.5
+        true_params["mu_y"] -= 0.5
+        true_params["sigma_activation"] += 0.5
+        true_params["sigma_normalization"] += 0.5
+        return true_params
+
+    @pytest.fixture
+    def div_norm_moving_params(self) -> list[str]:
+        """Return moving parameters for DivNorm model."""
+        return ["mu_x", "mu_y", "sigma_activation", "sigma_normalization"]
+
+    def test_sgd_moves_params_dog(  # noqa: PLR0913 (too many arguments in function definition)
+        self,
+        stimulus: PRFStimulus,
+        dog_model: DoG2DPRFModel,
+        dog_init_params: pd.DataFrame,
+        dog_true_params: pd.DataFrame,
+        dog_moving_params: list[str],
+        dtype: str,
+    ):
+        """Test that SGD udpates moving parameters for DoG model."""
+        fitter = SGDFitter(model=dog_model, stimulus=stimulus, dtype=dtype)
+
+        observed = dog_model(stimulus, dog_true_params)
+
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            _, sgd_params = fitter.fit(observed, dog_init_params, num_steps=self.num_steps)
+
+        self._check_no_gradient_warnings(record)
+        self._check_params_moved(sgd_params, dog_init_params, dog_moving_params)
+
+    def test_sgd_moves_params_div_norm(  # noqa: PLR0913 (too many arguments in function definition)
+        self,
+        stimulus: PRFStimulus,
+        div_norm_model: DivNormGaussian2DPRFModel,
+        div_norm_init_params: pd.DataFrame,
+        div_norm_true_params: pd.DataFrame,
+        div_norm_moving_params: list[str],
+        dtype: str,
+    ):
+        """Test that SGD udpates moving parameters for DivNorm model."""
+        fitter = SGDFitter(model=div_norm_model, stimulus=stimulus, dtype=dtype)
+
+        observed = div_norm_model(stimulus, div_norm_true_params)
+
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            _, sgd_params = fitter.fit(observed, div_norm_init_params, num_steps=self.num_steps)
+
+        self._check_no_gradient_warnings(record)
+        self._check_params_moved(sgd_params, div_norm_init_params, div_norm_moving_params)
