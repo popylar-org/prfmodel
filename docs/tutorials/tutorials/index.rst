@@ -11,5 +11,6 @@ Here you can find a list of tutorials:
    css_prf_simulated.md
    diff_gaussians_prf_simulated.md
    div_norm_prf_simulated.md
+   csf_simulated.md
    regressors.md
    custom_models.md
