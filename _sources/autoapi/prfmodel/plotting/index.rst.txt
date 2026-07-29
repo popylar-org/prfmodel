@@ -8,7 +8,7 @@ prfmodel.plotting
    Plotting functions.
 
    Contains miscallenous plotting and visualization functions. Currently, only functions for visualizing population
-   receptive field (pRF) stimuli are implemented.
+   receptive field (pRF) and contrast sensitivity function (CSF) stimuli are implemented.
 
 
 
@@ -20,10 +20,14 @@ Functions
 
    animate_2d_prf_stimulus </autoapi/prfmodel/plotting/animate_2d_prf_stimulus>
    plot_2d_prf_stimulus </autoapi/prfmodel/plotting/plot_2d_prf_stimulus>
+   plot_csf_stimulus_curve </autoapi/prfmodel/plotting/plot_csf_stimulus_curve>
+   plot_csf_stimulus_design </autoapi/prfmodel/plotting/plot_csf_stimulus_design>
 
 .. autoapisummary::
 
    prfmodel.plotting.animate_2d_prf_stimulus
    prfmodel.plotting.plot_2d_prf_stimulus
+   prfmodel.plotting.plot_csf_stimulus_curve
+   prfmodel.plotting.plot_csf_stimulus_design
 
 

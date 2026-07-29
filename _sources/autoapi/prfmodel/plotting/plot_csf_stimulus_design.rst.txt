@@ -1,0 +1,21 @@
+prfmodel.plotting.plot_csf_stimulus_design
+==========================================
+
+.. py:function:: prfmodel.plotting.plot_csf_stimulus_design(stimulus: prfmodel.stimuli.CSFStimulus, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Plot the design of a contrast sensitivity function (CSF) stimulus.
+
+   Plots the stimulus contrast over time with color indicating different spatial frequencies.
+
+   :param stimulus: Stimulus object with contrast and spatial frequencies.
+   :type stimulus: CSFStimulus
+   :param \*\*kwargs: Keyword arguments passed to :func:`~matplotlib.pyplot.subplots`.
+
+   :returns: * **fig** (*matplotlib.figure.Figure*) -- Figure object.
+             * **ax** (*matplotlib.axes.Axes*) -- Axes object.
+
+   .. seealso::
+
+      :py:obj:`plot_csf_stimulus_curve`
+          Contrast sensitivity curve on top of the stimulus design.
+

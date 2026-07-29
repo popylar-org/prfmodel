@@ -1,0 +1,41 @@
+prfmodel.models.csf.predict_contrast_sensitivity
+================================================
+
+.. py:function:: prfmodel.models.csf.predict_contrast_sensitivity(sf: prfmodel.typing.Tensor, cs_peak: prfmodel.typing.Tensor, sf_peak: prfmodel.typing.Tensor, width_l: float | prfmodel.typing.Tensor, width_r: prfmodel.typing.Tensor, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+   Predict a neural contrast sensitivity function response.
+
+   Computes the response using an asymmetric log-parabolic (aLP) contrast sensitivity function (CSF).
+
+   :param sf: Spatial frequency at each time frame, with shape ``(num_frames,)``.
+   :type sf: Tensor
+   :param cs_peak: Peak contrast sensitivity with shape ``(num_batches, 1)``.
+   :type cs_peak: Tensor
+   :param sf_peak: Peak spatial frequency with shape ``(num_batches, 1)``.
+   :type sf_peak: Tensor
+   :param width_l: Curvature of the left branch of the aLP CSF (for spatial frequencies below ``sf_peak``).
+                   Scalar or tensor broadcastable to ``(num_batches, num_frames)``.
+   :type width_l: float or Tensor
+   :param width_r: Curvature of the right branch of the aLP CSF (for spatial frequencies at or above ``sf_peak``),
+                   with shape ``(num_batches, 1)``.
+   :type width_r: Tensor
+   :param dtype: The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+   :returns: Predicted response with shape ``(num_batches, num_frames)`` and dtype ``dtype``.
+   :rtype: Tensor
+
+   .. rubric:: Notes
+
+   The asymmetric log-parabolic CSF :math:`S(f)` with `cs_peak` :math:`C_{sp}`, `sf_peak` :math:`f_p`,
+   `width_l` :math:`w_L`, and `width_r` :math:`w_R` is:
+
+   .. math::
+
+       S(f) =
+       \begin{cases}
+       10^{\log_{10}(C_{sp}) - (\log_{10}(f) - \log_{10}(f_p))^2 \cdot w_L^2} & \text{if } f < f_p \\
+       10^{\log_{10}(C_{sp}) - (\log_{10}(f) - \log_{10}(f_p))^2 \cdot w_R^2} & \text{if } f \geq f_p
+       \end{cases}
+

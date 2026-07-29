@@ -1,0 +1,23 @@
+prfmodel.plotting.plot_csf_stimulus_curve
+=========================================
+
+.. py:function:: prfmodel.plotting.plot_csf_stimulus_curve(stimulus: prfmodel.stimuli.CSFStimulus, csf: numpy.ndarray, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Plot a contrast sensitivity curve over a stimulus design.
+
+   Plots spatial frequency over contrast sensitivity (100/contrast) and draws a contrast sentitivity curve on top.
+
+   :param stimulus: Stimulus object with contrast and spatial frequencies.
+   :type stimulus: CSFStimulus
+   :param csf: Contrast sensitivity curve. Must match the number of frames in ``stimulus``.
+   :type csf: numpy.ndarray
+   :param \*\*kwargs: Keyword arguments passed to :func:`~matplotlib.pyplot.subplots`.
+
+   :returns: * **fig** (*matplotlib.figure.Figure*) -- Figure object.
+             * **ax** (*matplotlib.axes.Axes*) -- Axes object.
+
+   .. seealso::
+
+      :py:obj:`plot_csf_stimulus_design`
+          Stimulus contrast over time.
+

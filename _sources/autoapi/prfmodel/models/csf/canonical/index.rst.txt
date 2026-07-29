@@ -1,0 +1,26 @@
+prfmodel.models.csf.canonical
+=============================
+
+.. py:module:: prfmodel.models.csf.canonical
+
+.. autoapi-nested-parse::
+
+   Canonical contrast sensitivity function (CSF) models.
+
+   This module contains models that combine multiple exchangeable submodels in a way that is considered "canonical".
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   CanonicalCSFModel </autoapi/prfmodel/models/csf/canonical/CanonicalCSFModel>
+
+.. autoapisummary::
+
+   prfmodel.models.csf.canonical.CanonicalCSFModel
+
+

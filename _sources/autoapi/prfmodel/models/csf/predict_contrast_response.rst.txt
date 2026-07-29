@@ -1,0 +1,33 @@
+prfmodel.models.csf.predict_contrast_response
+=============================================
+
+.. py:function:: prfmodel.models.csf.predict_contrast_response(contrast: prfmodel.typing.Tensor, sensitivity: prfmodel.typing.Tensor, slope_crf: prfmodel.typing.Tensor, dtype: str | None = None, eps: float = 1e-10) -> prfmodel.typing.Tensor
+
+   Predict a neural contrast response from contrast sensitivity.
+
+   Computes the response using a contrast sensitivity function combined with a Naka-Rushton
+   contrast response function (CRF).
+
+   :param contrast: Contrast at each time frame, with shape ``(num_frames,)``.
+   :type contrast: Tensor
+   :param sensitivity: Contrast sensitivity for each voxel at each time frame, with shape ``(num_voxels, num_frames)``.
+   :type sensitivity: Tensor
+   :param slope_crf: Exponent :math:`q` of the Naka-Rushton CRF with shape ``(num_batches, 1)``.
+   :type slope_crf: Tensor
+   :param dtype: The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+   :param eps: Minimum contrast and sensitivity value to ensure numerical and gradient stability.
+   :type eps: float, default=1e-10
+
+   :returns: Predicted response with shape ``(num_batches, num_frames)`` and dtype ``dtype``.
+   :rtype: Tensor
+
+   .. rubric:: Notes
+
+   The Naka-Rushton CRF combines contrast :math:`C` with the threshold :math:`Q = 1 / S(f)` derived from the CSF S(f):
+
+   .. math::
+
+       R(t) = \frac{C(t)^q}{C(t)^q + Q(t)^q}
+

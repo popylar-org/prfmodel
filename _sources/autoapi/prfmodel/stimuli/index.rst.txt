@@ -32,12 +32,14 @@ Classes
    :hidden:
 
    CFStimulus </autoapi/prfmodel/stimuli/CFStimulus>
+   CSFStimulus </autoapi/prfmodel/stimuli/CSFStimulus>
    PRFStimulus </autoapi/prfmodel/stimuli/PRFStimulus>
    Stimulus </autoapi/prfmodel/stimuli/Stimulus>
 
 .. autoapisummary::
 
    prfmodel.stimuli.CFStimulus
+   prfmodel.stimuli.CSFStimulus
    prfmodel.stimuli.PRFStimulus
    prfmodel.stimuli.Stimulus
 

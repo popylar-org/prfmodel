@@ -1,0 +1,40 @@
+prfmodel.stimuli.CSFStimulus
+============================
+
+.. py:class:: prfmodel.stimuli.CSFStimulus
+
+
+
+   Container for a contrast sensitivity function stimulus.
+
+   :param sf: Spatial frequency at each time frame, with shape ``(num_frames,)``.
+   :type sf: numpy.ndarray
+   :param contrast: Contrast at each time frame, with shape ``(num_frames,)``.
+   :type contrast: numpy.ndarray
+
+   :raises CSFStimulusDimensionError: If ``sf`` or ``contrast`` is not one-dimensional.
+   :raises CSFStimulusShapeError: If ``sf`` and ``contrast`` do not have the same shape.
+
+   .. rubric:: Examples
+
+   Create a CSF stimulus with four frames:
+
+   >>> import numpy as np
+   >>> sf = np.array([1.0, 3.0, 6.0, 12.0])
+   >>> contrast = np.array([0.1, 0.2, 0.4, 0.8])
+   >>> stimulus = CSFStimulus(sf=sf, contrast=contrast)
+   >>> print(stimulus)
+   CSFStimulus(sf=array[4], contrast=array[4])
+
+
+   .. py:method:: __repr__() -> str
+
+      Create a round-trippable string representation of the stimulus object.
+
+
+
+   .. py:method:: __str__() -> str
+
+      Create a human-readable string representation of the stimulus object.
+
+

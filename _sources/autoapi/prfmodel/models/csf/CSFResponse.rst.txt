@@ -1,0 +1,68 @@
+prfmodel.models.csf.CSFResponse
+===============================
+
+.. py:class:: prfmodel.models.csf.CSFResponse(width_l: float = 0.68, eps: float = 1e-10)
+
+
+
+   Neural contrast sensitivity function response model.
+
+   Predicts the response to a contrast sensitivity function stimulus using
+   an asymmetric log-parabolic CSF combined with a Naka-Rushton contrast response function.
+
+   :param width_l: Curvature of the left branch of the asymmetric log-parabolic CSF (for spatial frequencies
+                   below the peak). Not a fitted parameter; fixed at construction time.
+   :type width_l: float, default=0.68
+   :param eps: Minimum contrast and sensitivity value to ensure numerical and gradient stability.
+   :type eps: float, default=1e-10
+
+   .. rubric:: Notes
+
+   The model has four fitted parameters:
+
+   ``cs_peak``
+       Peak contrast sensitivity.
+   ``sf_peak``
+       Peak spatial frequency (cycles/degree) at which sensitivity is maximal.
+   ``width_r``
+       Curvature of the right branch of the aLP CSF.
+   ``slope_crf``
+       Exponent :math:`q` of the Naka-Rushton CRF, controlling response steepness.
+
+   .. seealso::
+
+      :py:obj:`predict_contrast_sensitivity`
+          Predict a contrast sensitivity function.
+
+      :py:obj:`predict_contrast_response`
+          Predict a contrast response based on a contrast sensitivity function.
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.CSFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the model response for a CSF stimulus.
+
+      :param stimulus: Contrast sensitivity function stimulus object.
+      :type stimulus: CSFStimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different voxels. Must contain the columns ``cs_peak``, ``sf_peak``, ``width_r``, and ``slope_crf``.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape ``(num_voxels, num_frames)`` and dtype ``dtype``.
+                ``num_voxels`` is the number of rows in ``parameters`` and ``num_frames`` is the length of
+                the stimulus sf and contrast arrays.
+      :rtype: Tensor
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      ``cs_peak``, ``sf_peak``, ``width_r``, ``slope_crf``.
+
+      :type: Names of parameters used by the model
+
