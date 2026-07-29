@@ -1,0 +1,1052 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Examples" href="../examples/index.html"><link rel="prev" title="Adding regressors to a model" href="regressors.html">
+
+    <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
+        <title>Creating a custom model - prfmodel 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=7bdb33bb" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=ad54fe46" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Tutorials &amp; Examples</a><input aria-label="Toggle navigation of Tutorials &amp; Examples" checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="css_prf_simulated.html">How to fit a compressive spatial summation population receptive field model to simulated data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="diff_gaussians_prf_simulated.html">How to fit a Difference of Gaussians population receptive field model to simulated data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="div_norm_prf_simulated.html">How to fit a Divisive Normalization population receptive field model to simulated data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="regressors.html">Adding regressors to a model</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Creating a custom model</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../examples/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/cf_fmri_visual.html">Fitting a connective field model to fMRI data from a visual experiment</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../development/index.html">Development</a><input aria-label="Toggle navigation of Development" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../development/architecture.html">Architecture</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../autoapi/index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/density/index.html">prfmodel.density</a><input aria-label="Toggle navigation of prfmodel.density" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/density/derivative_gamma_density.html">derivative_gamma_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/density/gamma_density.html">gamma_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/density/shifted_gamma_density.html">shifted_gamma_density</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/examples/index.html">prfmodel.examples</a><input aria-label="Toggle navigation of prfmodel.examples" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/examples/load_2d_prf_bar_stimulus.html">load_2d_prf_bar_stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/examples/load_single_subject_fmri_data.html">load_single_subject_fmri_data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/examples/load_surface_mesh.html">load_surface_mesh</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/exceptions/ShapeError.html">ShapeError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/exceptions/ShapeMismatchError.html">ShapeMismatchError</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/fitters/index.html">prfmodel.fitters</a><input aria-label="Toggle navigation of prfmodel.fitters" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/fitters/adapter/index.html">prfmodel.fitters.adapter</a><input aria-label="Toggle navigation of prfmodel.fitters.adapter" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/fitters/adapter/Adapter.html">Adapter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/fitters/adapter/ParameterConstraint.html">ParameterConstraint</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/fitters/adapter/ParameterTransform.html">ParameterTransform</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/fitters/GridFitter.html">GridFitter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/fitters/GridHistory.html">GridHistory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/fitters/LeastSquaresFitter.html">LeastSquaresFitter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/fitters/LeastSquaresHistory.html">LeastSquaresHistory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/fitters/SGDFitter.html">SGDFitter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/fitters/SGDHistory.html">SGDHistory</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/impulse/index.html">prfmodel.impulse</a><input aria-label="Toggle navigation of prfmodel.impulse" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/impulse/base/index.html">prfmodel.impulse.base</a><input aria-label="Toggle navigation of prfmodel.impulse.base" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/impulse/base/BaseImpulse.html">BaseImpulse</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/impulse/defaults/index.html">prfmodel.impulse.defaults</a><input aria-label="Toggle navigation of prfmodel.impulse.defaults" class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/impulse/defaults/default_two_gamma_impulse_glover_hrf.html">default_two_gamma_impulse_glover_hrf</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/impulse/defaults/default_two_gamma_impulse_spm_hrf.html">default_two_gamma_impulse_spm_hrf</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/impulse/DerivativeTwoGammaImpulse.html">DerivativeTwoGammaImpulse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/impulse/ShiftedGammaImpulse.html">ShiftedGammaImpulse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/impulse/TwoGammaImpulse.html">TwoGammaImpulse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/impulse/convolve_prf_impulse_response.html">convolve_prf_impulse_response</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/models/base/index.html">prfmodel.models.base</a><input aria-label="Toggle navigation of prfmodel.models.base" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/base/BaseCanonical.html">BaseCanonical</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/base/BasePopulationResponse.html">BasePopulationResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/base/BaseStimulusEncoder.html">BaseStimulusEncoder</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/models/cf/index.html">prfmodel.models.cf</a><input aria-label="Toggle navigation of prfmodel.models.cf" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../autoapi/prfmodel/models/cf/canonical/index.html">prfmodel.models.cf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.cf.canonical" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/prfmodel/models/cf/canonical/CanonicalCFModel.html">CanonicalCFModel</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/cf/CFStimulusEncoder.html">CFStimulusEncoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/cf/GaussianCFModel.html">GaussianCFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/cf/GaussianCFResponse.html">GaussianCFResponse</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/models/compression/index.html">prfmodel.models.compression</a><input aria-label="Toggle navigation of prfmodel.models.compression" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/compression/CompressiveEncoder.html">CompressiveEncoder</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/index.html">prfmodel.models.prf</a><input aria-label="Toggle navigation of prfmodel.models.prf" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-20" name="toctree-checkbox-20" role="switch" type="checkbox"/><label for="toctree-checkbox-20"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/canonical/DelayedNormPRFModel.html">DelayedNormPRFModel</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/canonical/DivNormPRFModel.html">DivNormPRFModel</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/DelayedNormGaussian2DPRFModel.html">DelayedNormGaussian2DPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/DelayedNormPRFModel.html">DelayedNormPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/DivNormGaussian2DPRFModel.html">DivNormGaussian2DPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/DivNormPRFModel.html">DivNormPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/DoG2DPRFModel.html">DoG2DPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/Gaussian2DCSSPRFModel.html">Gaussian2DCSSPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/Gaussian2DPRFModel.html">Gaussian2DPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/Gaussian2DPRFResponse.html">Gaussian2DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/encode_prf_response.html">encode_prf_response</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/init_css_from_gaussian.html">init_css_from_gaussian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/init_delayed_norm_from_gaussian.html">init_delayed_norm_from_gaussian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/init_div_norm_from_dog_css.html">init_div_norm_from_dog_css</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/init_dog_from_gaussian.html">init_dog_from_gaussian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/models/prf/predict_gaussian_response.html">predict_gaussian_response</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/plotting/index.html">prfmodel.plotting</a><input aria-label="Toggle navigation of prfmodel.plotting" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/plotting/animate_2d_prf_stimulus.html">animate_2d_prf_stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/plotting/plot_2d_prf_stimulus.html">plot_2d_prf_stimulus</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/regressors/index.html">prfmodel.regressors</a><input aria-label="Toggle navigation of prfmodel.regressors" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/regressors/base/index.html">prfmodel.regressors.base</a><input aria-label="Toggle navigation of prfmodel.regressors.base" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/regressors/base/BaseRegressors.html">BaseRegressors</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/regressors/AdditiveRegressors.html">AdditiveRegressors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/regressors/ConvolvedRegressors.html">ConvolvedRegressors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/regressors/RegressorsList.html">RegressorsList</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/scaling/index.html">prfmodel.scaling</a><input aria-label="Toggle navigation of prfmodel.scaling" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/scaling/base/index.html">prfmodel.scaling.base</a><input aria-label="Toggle navigation of prfmodel.scaling.base" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/scaling/base/BaseScaling.html">BaseScaling</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/scaling/Baseline.html">Baseline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/scaling/BaselineAmplitude.html">BaselineAmplitude</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/stimuli/index.html">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../autoapi/prfmodel/stimuli/base/index.html">prfmodel.stimuli.base</a><input aria-label="Toggle navigation of prfmodel.stimuli.base" class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" role="switch" type="checkbox"/><label for="toctree-checkbox-27"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../autoapi/prfmodel/stimuli/base/Stimulus.html">Stimulus</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/stimuli/CFStimulus.html">CFStimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/stimuli/PRFStimulus.html">PRFStimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/stimuli/Stimulus.html">Stimulus</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../autoapi/prfmodel/typing/index.html">prfmodel.typing</a></li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../autoapi/prfmodel/utils/index.html">prfmodel.utils</a><input aria-label="Toggle navigation of prfmodel.utils" class="toctree-checkbox" id="toctree-checkbox-28" name="toctree-checkbox-28" role="switch" type="checkbox"/><label for="toctree-checkbox-28"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/utils/UndefinedResponseWarning.html">UndefinedResponseWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/utils/ModelProtocol.html">ModelProtocol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/utils/ParamsDict.html">ParamsDict</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/utils/batched.html">batched</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/utils/convert_parameters_to_tensor.html">convert_parameters_to_tensor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/utils/get_dtype.html">get_dtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../autoapi/prfmodel/utils/normalize_response.html">normalize_response</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="../../_sources/tutorials/tutorials/custom_models.md.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="creating-a-custom-model">
+<h1>Creating a custom model<a class="headerlink" href="#creating-a-custom-model" title="Link to this heading">¶</a></h1>
+<p><strong>Author</strong>: Malte Lüken (m.luken&#64;esciencecenter.nl)</p>
+<p><strong>Difficulty</strong>: Intermediate</p>
+<p>This tutorial explains how to create a custom model with prfmodel.</p>
+<section id="part-1-implementing-a-1d-gaussian-prf-model">
+<h2>Part 1: Implementing a 1D Gaussian pRF model<a class="headerlink" href="#part-1-implementing-a-1d-gaussian-prf-model" title="Link to this heading">¶</a></h2>
+<p>In the first part, I show how to implement a 1-dimensional Gaussian population receptive field (pRF) model analogous
+to the existing 2-dimensional model. The 1D model is often used to model neural responses to auditory or numerosity
+stimuli that lie on a single dimension (i.e., tone frequency or the displayed integer number).</p>
+<p>Because prfmodel uses Keras for model fitting, we need to make sure that a backend is installed before we begin.
+In this tutorial, we use the TensorFlow backend.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_spec</span>
+
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;KERAS_BACKEND&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;tensorflow&quot;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TF_CPP_MIN_LOG_LEVEL&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+
+<span class="k">if</span> <span class="n">find_spec</span><span class="p">(</span><span class="s2">&quot;tensorflow&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Could not find the tensorflow package. Please install tensorflow with &#39;pip install .[tensorflow]&#39;&quot;</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="creating-a-1d-stimulus">
+<h3>Creating a 1D stimulus<a class="headerlink" href="#creating-a-1d-stimulus" title="Link to this heading">¶</a></h3>
+<p>We start by creating a 1D <a class="reference internal" href="../../autoapi/prfmodel/stimuli/PRFStimulus.html#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><code class="xref py py-class docutils literal notranslate"><span class="pre">PRFStimulus</span></code></a>. In this example, we simulate a numerosity stimulus where different quantities of objects are consecutively presented on a screen. At each time frame, a different quantity (numerosity) is presented.</p>
+<p>The numerosity dimension is represented as a 1D grid, and the stimulus design is a binary matrix indicating which numerosity is active at each time frame. We repeat each numerosity for two consecutive frames and repeat all numerosities 10 times. Instead of the raw numerosity
+integers, we use the log of the integers as the stimulus grid. This means that the pRF model will also receive the log numerosity as input and it’s parameters will live in the log numerosity space.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimuli</span><span class="w"> </span><span class="kn">import</span> <span class="n">PRFStimulus</span>
+
+<span class="n">num_frames</span> <span class="o">=</span> <span class="mi">160</span>
+<span class="n">unique_numerosities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+<span class="n">unique_log_numerosities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">unique_numerosities</span><span class="p">)</span>
+<span class="n">num_numerosities</span> <span class="o">=</span> <span class="n">unique_numerosities</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># Create a 1D grid with unique log numerosities</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">unique_log_numerosities</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (num_numerosities, 1)</span>
+
+<span class="c1"># Create the design containing one-hot encoded numerosities displayed at each time frame</span>
+<span class="n">design</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_frames</span><span class="p">,</span> <span class="n">num_numerosities</span><span class="p">))</span>
+
+<span class="n">num_cycles</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="n">frame</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_cycles</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">cycle_frame</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_frames</span> <span class="o">//</span> <span class="n">num_cycles</span><span class="p">):</span>
+        <span class="n">numerosity_idx</span> <span class="o">=</span> <span class="n">cycle_frame</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="c1"># Insert a binary indicator for which numerosity is active</span>
+        <span class="n">design</span><span class="p">[</span><span class="n">frame</span><span class="p">,</span> <span class="n">numerosity_idx</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">frame</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1785325290.960631    4163 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1785325292.417051    4163 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can visualize the design matrix with the displayed numerosity at each time frame on the natural and log scale.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="n">num_frames</span><span class="o">/</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Time frame&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Numerosity (natural scale)&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_numerosities</span><span class="p">)))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">unique_numerosities</span><span class="p">)</span>
+
+<span class="n">secax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">secondary_yaxis</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+<span class="n">secax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Numerosity (log scale)&quot;</span><span class="p">)</span>
+<span class="n">secax</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_numerosities</span><span class="p">)))</span>
+<span class="n">secax</span><span class="o">.</span><span class="n">set_yticklabels</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">unique_log_numerosities</span><span class="p">,</span> <span class="mi">2</span><span class="p">));</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/9d149c258fe0b3913353fce491f129c8c605d8712e52cbe7d6dc74943d4738ec.png" src="../../_images/9d149c258fe0b3913353fce491f129c8c605d8712e52cbe7d6dc74943d4738ec.png" />
+</div>
+</div>
+<p>We can create a <code class="docutils literal notranslate"><span class="pre">PRFStimulus</span></code> object with the <code class="docutils literal notranslate"><span class="pre">design</span></code> and <code class="docutils literal notranslate"><span class="pre">grid</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">dimension_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;log_numerosity&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>PRFStimulus(design=array[160, 8], grid=array[8, 1], dimension_labels=[&#39;log_numerosity&#39;])
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="implementing-the-custom-response-model">
+<h3>Implementing the custom response model<a class="headerlink" href="#implementing-the-custom-response-model" title="Link to this heading">¶</a></h3>
+<p>Now we implement the 1D Gaussian response class by subclassing
+<a class="reference internal" href="../../autoapi/prfmodel/models/base/BasePopulationResponse.html#prfmodel.models.base.BasePopulationResponse" title="prfmodel.models.base.BasePopulationResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">BasePopulationResponse</span></code></a>. We first take a look at the docstring of the class:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">BasePopulationResponse</span>
+
+<span class="n">help</span><span class="p">(</span><span class="n">BasePopulationResponse</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Help on class BasePopulationResponse in module prfmodel.models.base:
+
+class BasePopulationResponse(prfmodel.utils.ModelProtocol, typing.Generic)
+ |  BasePopulationResponse(*args, **kwargs)
+ |
+ |  Generic abstract base class for neuron population response models.
+ |
+ |  A neuron population response model takes a stimulus and parameters as input and predicts a population response.
+ |
+ |  Notes
+ |  -----
+ |  This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
+ |  models. Subclasses must override the abstract :attr:`parameter_names` and :meth:`__call__` method.
+ |  They must be defined with a specific stimulus type. See :mod:`~prfmodel.models.base` for details.
+ |
+ |  Examples
+ |  --------
+ |  Reimplement a 2D isotropic Gaussian response model for a :class:`~prfmodel.stimuli.PRFStimulus`.
+ |
+ |  &gt;&gt;&gt; import pandas as pd
+ |  &gt;&gt;&gt; from prfmodel.examples import load_2d_prf_bar_stimulus
+ |  &gt;&gt;&gt; from prfmodel.stimuli import PRFStimulus
+ |  &gt;&gt;&gt; from prfmodel.models.prf import predict_gaussian_response
+ |  &gt;&gt;&gt; from prfmodel.utils import convert_parameters_to_tensor, get_dtype
+ |  &gt;&gt;&gt; from keras import ops
+ |  &gt;&gt;&gt; # Define custom child class
+ |  &gt;&gt;&gt; class CustomGaussian2DResponse(BasePopulationResponse[PRFStimulus]):
+ |  ...     @property
+ |  ...     def parameter_names(self):
+ |  ...         return [&quot;mu_y&quot;, &quot;mu_x&quot;, &quot;sigma&quot;]
+ |  ...     def __call__(self, stimulus, parameters, dtype=None):
+ |  ...         dtype = get_dtype(dtype)
+ |  ...         mu = convert_parameters_to_tensor(parameters[[&quot;mu_y&quot;, &quot;mu_x&quot;]], dtype=dtype)
+ |  ...         sigma = convert_parameters_to_tensor(parameters[[&quot;sigma&quot;]], dtype=dtype)
+ |  ...         grid = ops.convert_to_tensor(stimulus.grid, dtype=dtype)
+ |  ...         return predict_gaussian_response(grid, mu, sigma)
+ |  &gt;&gt;&gt; # Load example pRF stimulus
+ |  &gt;&gt;&gt; stimulus = load_2d_prf_bar_stimulus()
+ |  &gt;&gt;&gt; # Define parameters
+ |  &gt;&gt;&gt; params = pd.DataFrame({
+ |  ...     &quot;mu_y&quot;: [0.0, 1.0],
+ |  ...     &quot;mu_x&quot;: [1.0, 0.0],
+ |  ...     &quot;sigma&quot;: [1.0, 1.5],
+ |  ... })
+ |  &gt;&gt;&gt; # Create child model instance
+ |  &gt;&gt;&gt; model = CustomGaussian2DResponse()
+ |  &gt;&gt;&gt; # Make model prediction for example stimulus
+ |  &gt;&gt;&gt; resp = model(stimulus, params)
+ |  &gt;&gt;&gt; print(resp.shape)  # (num_units, num_y, num_x)
+ |  (2, 128, 128)
+ |
+ |  Method resolution order:
+ |      BasePopulationResponse
+ |      prfmodel.utils.ModelProtocol
+ |      typing.Protocol
+ |      typing.Generic
+ |      builtins.object
+ |
+ |  Methods defined here:
+ |
+ |  __call__(self, stimulus: ~S, parameters: pandas.DataFrame, dtype: str | None = None) -&gt; tensorflow.python.framework.tensor.Tensor
+ |      Predict the model response for a stimulus.
+ |
+ |      Parameters
+ |      ----------
+ |      stimulus : Stimulus
+ |          Stimulus object.
+ |      parameters : pandas.DataFrame
+ |          Dataframe with columns containing different model parameters and rows containing parameter values
+ |          for different units.
+ |      dtype : str, optional
+ |          The dtype of the prediction result. If `None` (the default), uses the dtype from
+ |          :func:`prfmodel.utils.get_dtype`.
+ |
+ |      Returns
+ |      -------
+ |      :data:`prfmodel.typing.Tensor`
+ |          Model predictions of shape `(num_units, ...)` and dtype `dtype`. The number of units is the
+ |          number of rows in `parameters`. The number and size of other axes depends on the stimulus.
+ |
+ |      Raises
+ |      ------
+ |      ValueError
+ |          If `parameters` is missing one or more of :attr:`parameter_names`.
+ |
+ |  ----------------------------------------------------------------------
+ |  Class methods defined here:
+ |
+ |  __subclasshook__ = _proto_hook(other) from typing
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes defined here:
+ |
+ |  __abstractmethods__ = frozenset({&#39;__call__&#39;, &#39;parameter_names&#39;})
+ |
+ |  __annotations__ = {}
+ |
+ |  __orig_bases__ = (&lt;class &#39;prfmodel.utils.ModelProtocol&#39;&gt;, typing.Gener...
+ |
+ |  __parameters__ = (~S,)
+ |
+ |  ----------------------------------------------------------------------
+ |  Methods inherited from prfmodel.utils.ModelProtocol:
+ |
+ |  __init__ = _no_init_or_replace_init(self, *args, **kwargs) from typing
+ |
+ |  ----------------------------------------------------------------------
+ |  Readonly properties inherited from prfmodel.utils.ModelProtocol:
+ |
+ |  parameter_names
+ |      A list with names of parameters that are used by the model.
+ |
+ |  ----------------------------------------------------------------------
+ |  Data descriptors inherited from prfmodel.utils.ModelProtocol:
+ |
+ |  __dict__
+ |      dictionary for instance variables
+ |
+ |  __weakref__
+ |      list of weak references to the object
+ |
+ |  ----------------------------------------------------------------------
+ |  Data and other attributes inherited from prfmodel.utils.ModelProtocol:
+ |
+ |  __non_callable_proto_members__ = {&#39;parameter_names&#39;}
+ |
+ |  __protocol_attrs__ = {&#39;_check_parameters&#39;, &#39;parameter_names&#39;}
+ |
+ |  ----------------------------------------------------------------------
+ |  Class methods inherited from typing.Protocol:
+ |
+ |  __init_subclass__(*args, **kwargs)
+ |      Function to initialize subclasses.
+ |
+ |  ----------------------------------------------------------------------
+ |  Class methods inherited from typing.Generic:
+ |
+ |  __class_getitem__(...)
+ |      Parameterizes a generic class.
+ |
+ |      At least, parameterizing a generic class is the *main* thing this
+ |      method does. For example, for some generic class `Foo`, this is called
+ |      when we do `Foo[int]` - there, with `cls=Foo` and `params=int`.
+ |
+ |      However, note that this method is also called when defining generic
+ |      classes in the first place with `class Foo[T]: ...`.
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can see that <code class="docutils literal notranslate"><span class="pre">BasePopulationResponse</span></code> has two abstract methods that must be overridden when subclassing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">__abstractmethods__</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">&#39;__call__&#39;</span><span class="p">,</span> <span class="s1">&#39;parameter_names&#39;</span><span class="p">})</span><span class="o">.</span>
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">parameter_names</span></code> property, which lists the parameter names the model expects.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method, which computes the pRF response for a given stimulus and parameter set. This method can implement an arbitrary response function, but here we re-use  from the Gaussian module, which is dimension-agnostic and works for any number of spatial dimensions.</p></li>
+</ol>
+<p>We can also see that <code class="docutils literal notranslate"><span class="pre">BasePopulationResponse</span></code> is a generic class with respect to the <code class="docutils literal notranslate"><span class="pre">stimulus</span></code> argument in the <code class="docutils literal notranslate"><span class="pre">__call__</span></code> method.
+This means we need to specify for which stimulus type the class is defined. In our case, this is the <a class="reference internal" href="../../autoapi/prfmodel/stimuli/PRFStimulus.html#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><code class="xref py py-class docutils literal notranslate"><span class="pre">PRFStimulus</span></code></a> class
+(for a connective field response model, this would be <a class="reference internal" href="../../autoapi/prfmodel/stimuli/CFStimulus.html#prfmodel.stimuli.CFStimulus" title="prfmodel.stimuli.CFStimulus"><code class="xref py py-class docutils literal notranslate"><span class="pre">CFStimulus</span></code></a>).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">keras</span><span class="w"> </span><span class="kn">import</span> <span class="n">ops</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">predict_gaussian_response</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimuli</span><span class="w"> </span><span class="kn">import</span> <span class="n">PRFStimulus</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_parameters_to_tensor</span><span class="p">,</span> <span class="n">get_dtype</span>
+
+<span class="c1"># Define the generic class for the concrete &#39;PRFStimulus&#39; type</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Gaussian1DPRFResponse</span><span class="p">(</span><span class="n">BasePopulationResponse</span><span class="p">[</span><span class="n">PRFStimulus</span><span class="p">]):</span>
+    <span class="c1"># &#39;parameter_names&#39; is a property so that it becomes &quot;immutable&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameter_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Names of parameters used by the model: `mu_x`, `sigma`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;mu_x&quot;</span><span class="p">,</span> <span class="s2">&quot;sigma&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="c1"># The &#39;stimulus&#39; argument must be the same type as the concrete type above</span>
+            <span class="n">stimulus</span><span class="p">:</span> <span class="n">PRFStimulus</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Predict the model response for a stimulus with a 1D grid.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        stimulus : PRFStimulus</span>
+<span class="sd">            Stimulus object.</span>
+<span class="sd">        parameters : pandas.DataFrame</span>
+<span class="sd">            Dataframe with columns containing different model parameters and rows containing parameter values</span>
+<span class="sd">            for different units.</span>
+<span class="sd">        dtype : str, optional</span>
+<span class="sd">            The dtype of the prediction result. If `None` (the default), uses the dtype from</span>
+<span class="sd">            :func:`prfmodel.utils.get_dtype`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Tensor</span>
+<span class="sd">            Model predictions of shape `(num_units, size_x)` and dtype `dtype`.</span>
+<span class="sd">            `num_units` is the number of rows in `parameters` and `size_x` is the size of the</span>
+<span class="sd">            stimulus grid dimension.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Explicit dtypes avoid dtype mismatch errors</span>
+        <span class="n">dtype</span> <span class="o">=</span> <span class="n">get_dtype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">mu</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;mu_x&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">convert_parameters_to_tensor</span><span class="p">(</span><span class="n">parameters</span><span class="p">[[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="c1"># Explicit tensor conversion avoids type mismatch errors</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">convert_to_tensor</span><span class="p">(</span><span class="n">stimulus</span><span class="o">.</span><span class="n">grid</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+        <span class="c1"># We can implement the Gaussian response from scratch</span>
+        <span class="c1"># import math</span>
+
+        <span class="c1"># grid = ops.expand_dims(grid, 0)</span>
+        <span class="c1"># mu = ops.expand_dims(mu, 1)</span>
+        <span class="c1"># sigma_squared = ops.square(sigma)</span>
+
+        <span class="c1"># # Gaussian response</span>
+        <span class="c1"># resp = ops.sum(ops.square(grid - mu), axis=-1)</span>
+        <span class="c1"># resp /= 2 * sigma_squared</span>
+
+        <span class="c1"># # Divide by volume to normalize</span>
+        <span class="c1"># volume = (2 * math.pi * sigma_squared) ** (1 / 2)</span>
+
+        <span class="c1"># return ops.exp(-resp) / volume</span>
+
+        <span class="c1"># Or we can use an existing function to predict a Gaussian response</span>
+        <span class="k">return</span> <span class="n">predict_gaussian_response</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">mu_x</span></code> parameter defines the preferred location on the stimulus dimension (here: preferred log numerosity) and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> defines the tuning width. Both <code class="docutils literal notranslate"><span class="pre">mu</span></code> and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> are converted from the <code class="docutils literal notranslate"><span class="pre">parameters</span></code> DataFrame to tensors with shapes <code class="docutils literal notranslate"><span class="pre">(num_units,</span> <span class="pre">1)</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">predict_gaussian_response</span></code> expects <code class="docutils literal notranslate"><span class="pre">mu</span></code> and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> to have at least two dimensions — the first for the number of units and the second for the number of spatial dimensions. The function then broadcasts these tensors against the stimulus <code class="docutils literal notranslate"><span class="pre">grid</span></code> to compute the Gaussian response for each unit.</p>
+</section>
+<section id="creating-the-model">
+<h3>Creating the model<a class="headerlink" href="#creating-the-model" title="Link to this heading">¶</a></h3>
+<p>With the <code class="docutils literal notranslate"><span class="pre">Gaussian1DPRFResponse</span></code> class defined, we pass it as the <code class="docutils literal notranslate"><span class="pre">prf_model</span></code> argument to <a class="reference internal" href="../../autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel.html#prfmodel.models.prf.canonical.CanonicalPRFModel" title="prfmodel.models.prf.canonical.CanonicalPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalPRFModel</span></code></a>. The canonical model handles stimulus encoding, impulse response convolution, and baseline amplitude scaling using default submodels.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.prf.canonical</span><span class="w"> </span><span class="kn">import</span> <span class="n">CanonicalPRFModel</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">CanonicalPRFModel</span><span class="p">(</span>
+    <span class="n">prf_model</span><span class="o">=</span><span class="n">Gaussian1DPRFResponse</span><span class="p">(),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can inspect all parameters required by the composite model through the <code class="docutils literal notranslate"><span class="pre">parameter_names</span></code> property.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">parameter_names</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;mu_x&#39;, &#39;sigma&#39;, &#39;weight_deriv&#39;, &#39;baseline&#39;, &#39;amplitude&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<p>The parameters <code class="docutils literal notranslate"><span class="pre">mu_x</span></code> and <code class="docutils literal notranslate"><span class="pre">sigma</span></code> come from our custom <code class="docutils literal notranslate"><span class="pre">Gaussian1DResponse</span></code>. The remaining parameters belong to the default impulse response model (<a class="reference internal" href="../../autoapi/prfmodel/impulse/DerivativeTwoGammaImpulse.html#prfmodel.impulse.DerivativeTwoGammaImpulse" title="prfmodel.impulse.DerivativeTwoGammaImpulse"><code class="xref py py-class docutils literal notranslate"><span class="pre">DerivativeTwoGammaImpulse</span></code></a>) and the scaling model (<a class="reference internal" href="../../autoapi/prfmodel/scaling/BaselineAmplitude.html#prfmodel.scaling.BaselineAmplitude" title="prfmodel.scaling.BaselineAmplitude"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaselineAmplitude</span></code></a>).</p>
+</section>
+<section id="simulating-a-neural-response">
+<h3>Simulating a neural response<a class="headerlink" href="#simulating-a-neural-response" title="Link to this heading">¶</a></h3>
+<p>Let’s simulate predicted neural responses for each unique numerosity while keeping the tuning width fixed to <code class="docutils literal notranslate"><span class="pre">sigma</span> <span class="pre">=</span> <span class="pre">1</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">num_units</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_numerosities</span><span class="p">)</span>
+
+<span class="n">params_mu_x</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;mu_x&quot;</span><span class="p">:</span> <span class="n">unique_log_numerosities</span><span class="p">,</span>  <span class="c1"># We need to specify the location of the Gaussian in log space</span>
+        <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_units</span><span class="p">,</span>  <span class="c1"># We keep the tuning width fixed</span>
+        <span class="s2">&quot;weight_deriv&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_units</span><span class="p">,</span>
+        <span class="s2">&quot;baseline&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_units</span><span class="p">,</span>
+        <span class="s2">&quot;amplitude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_units</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">prediction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">params_mu_x</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">prediction</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(8, 160)
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>E0000 00:00:1785325294.217583    4163 cuda_platform.cc:52] failed call to cuInit: INTERNAL: CUDA error: Failed call to cuInit: UNKNOWN ERROR (303)
+</pre></div>
+</div>
+</div>
+</div>
+<p>The output has shape <code class="docutils literal notranslate"><span class="pre">(8,</span> <span class="pre">num_frames)</span></code> – one predicted time course for each unique numerosity.</p>
+<p>We can visualize the predicted response over time.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">plotly.io</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.express</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">px</span>
+
+<span class="n">pio</span><span class="o">.</span><span class="n">renderers</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;notebook_connected&quot;</span>  <span class="c1"># Requires internet connection to work</span>
+<span class="n">pio</span><span class="o">.</span><span class="n">templates</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;simple_white&quot;</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="n">prediction</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+    <span class="n">animation_frame</span><span class="o">=</span><span class="s2">&quot;variable&quot;</span><span class="p">,</span>
+    <span class="n">range_x</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_frames</span><span class="p">),</span>
+    <span class="n">range_y</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">),</span>
+    <span class="n">labels</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;Time frame&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Predicted neural response&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;variable&quot;</span><span class="p">:</span> <span class="s2">&quot;Numerosity (natural scale)&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">450</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">        <script>
+        window.PlotlyConfig = {MathJaxConfig: 'local'};
+        if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}
+        </script>
+        <script type="module">import "https://cdn.plot.ly/plotly-3.7.0.min"</script>
+        </div><div class="output text_html"><div style="height:450px; width:100%;">            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG"></script><script>if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.7.0.min.js" integrity="sha256-jvTGqxNp8AGWEcvNLVuKr+8j5dGe9Yw51LQkmDH+IYA=" crossorigin="anonymous"></script>                <div id="2e8d9b77-4878-4359-b78c-65e5648a8d61" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("2e8d9b77-4878-4359-b78c-65e5648a8d61")) {                    Plotly.newPlot(                        "2e8d9b77-4878-4359-b78c-65e5648a8d61",                        [{"hovertemplate":"Numerosity (natural scale)=0\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"0","line":{"color":"#1F77B4","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"0","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"KkLMPipCzD4qQsw+cVPMPqY+zD4iH8o+G7TDPoLdtj71CaM+xSSJPlLvVj40bRk+2BO+PWHZLj1Ohvg6LNLqvDbISr2KyYO90ACZvVv\u002fgr2w52C8TdOVPRNfND7g\u002fok+BkarPou4uT7HCrY+evujPg68iD7Mz1I+JZUUPhaduT2l2zo9y0oOPPDrp7y9H8y84DJfPMEVvD2\u002fH0E+4SaOPoHrrT4BXrs+lAm3PluQpD5ZDok+qCJTPg+0FD4Wnbk9pds6PctKDjzw66e8vR\u002fMvOAyXzzBFbw9vx9BPuEmjj6B660+AV67PpQJtz5bkKQ+WQ6JPqgiUz4PtBQ+Fp25PaXbOj3LSg488OunvL0fzLzgMl88wRW8Pb8fQT7hJo4+geutPgFeuz6UCbc+W5CkPlkOiT6oIlM+D7QUPhaduT2l2zo9y0oOPPDrp7y9H8y84DJfPMEVvD2\u002fH0E+4SaOPoHrrT4BXrs+lAm3PluQpD5ZDok+qCJTPg+0FD4Wnbk9pds6PctKDjzw66e8vR\u002fMvOAyXzzBFbw9vx9BPuEmjj6B660+AV67PpQJtz5bkKQ+WQ6JPqgiUz4PtBQ+Fp25PaXbOj3LSg488OunvL0fzLzgMl88wRW8Pb8fQT7hJo4+geutPgFeuz6UCbc+W5CkPlkOiT6oIlM+D7QUPhaduT2l2zo9y0oOPPDrp7y9H8y84DJfPMEVvD2\u002fH0E+4SaOPoHrrT4BXrs+lAm3PluQpD5ZDok+qCJTPg+0FD4Wnbk9pds6PctKDjzw66e8vR\u002fMvOAyXzzBFbw9vx9BPuEmjj6B660+AV67PpQJtz5bkKQ+WQ6JPqgiUz4PtBQ+Fp25PQ=="},"yaxis":"y","type":"scatter"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"bar":[{"error_x":{"color":"rgb(36,36,36)"},"error_y":{"color":"rgb(36,36,36)"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"histogram":[{"marker":{"line":{"color":"white","width":0.6}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"carpet":[{"aaxis":{"endlinecolor":"rgb(36,36,36)","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"rgb(36,36,36)"},"baxis":{"endlinecolor":"rgb(36,36,36)","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"rgb(36,36,36)"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"rgb(237,237,237)"},"line":{"color":"white"}},"header":{"fill":{"color":"rgb(217,217,217)"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#1F77B4","#FF7F0E","#2CA02C","#D62728","#9467BD","#8C564B","#E377C2","#7F7F7F","#BCBD22","#17BECF"],"font":{"color":"rgb(36,36,36)"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"bgcolor":"white","angularaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"},"radialaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"}},"ternary":{"bgcolor":"white","aaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"},"baxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"},"caxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"}},"coloraxis":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"colorscale":{"sequential":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]],"sequentialminus":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]],"diverging":[[0.0,"rgb(103,0,31)"],[0.1,"rgb(178,24,43)"],[0.2,"rgb(214,96,77)"],[0.3,"rgb(244,165,130)"],[0.4,"rgb(253,219,199)"],[0.5,"rgb(247,247,247)"],[0.6,"rgb(209,229,240)"],[0.7,"rgb(146,197,222)"],[0.8,"rgb(67,147,195)"],[0.9,"rgb(33,102,172)"],[1.0,"rgb(5,48,97)"]]},"xaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside","title":{"standoff":15},"zerolinecolor":"rgb(36,36,36)","automargin":true,"zeroline":false},"yaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside","title":{"standoff":15},"zerolinecolor":"rgb(36,36,36)","automargin":true,"zeroline":false},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showbackground":true,"showgrid":false,"showline":true,"ticks":"outside","zerolinecolor":"rgb(36,36,36)","gridwidth":2,"zeroline":false},"yaxis":{"backgroundcolor":"white","gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showbackground":true,"showgrid":false,"showline":true,"ticks":"outside","zerolinecolor":"rgb(36,36,36)","gridwidth":2,"zeroline":false},"zaxis":{"backgroundcolor":"white","gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showbackground":true,"showgrid":false,"showline":true,"ticks":"outside","zerolinecolor":"rgb(36,36,36)","gridwidth":2,"zeroline":false}},"shapedefaults":{"fillcolor":"black","line":{"width":0},"opacity":0.3},"annotationdefaults":{"arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"white","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"Time frame"},"range":[0,160]},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"Predicted neural response"},"range":[-0.1,0.6]},"legend":{"title":{"text":"Numerosity (natural scale)"},"tracegroupgap":0},"margin":{"t":60},"updatemenus":[{"buttons":[{"args":[null,{"frame":{"duration":500,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":500,"easing":"linear"}}],"label":"&#9654;","method":"animate"},{"args":[[null],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"&#9724;","method":"animate"}],"direction":"left","pad":{"r":10,"t":70},"showactive":false,"type":"buttons","x":0.1,"xanchor":"right","y":0,"yanchor":"top"}],"sliders":[{"active":0,"currentvalue":{"prefix":"Numerosity (natural scale)="},"len":0.9,"pad":{"b":10,"t":60},"steps":[{"args":[["0"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"0","method":"animate"},{"args":[["1"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"1","method":"animate"},{"args":[["2"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"2","method":"animate"},{"args":[["3"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"3","method":"animate"},{"args":[["4"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"4","method":"animate"},{"args":[["5"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"5","method":"animate"},{"args":[["6"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"6","method":"animate"},{"args":[["7"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"7","method":"animate"}],"x":0.1,"xanchor":"left","y":0,"yanchor":"top"}],"showlegend":false,"height":450},                        {"responsive": true}                    ).then(function(){
+                            Plotly.addFrames('2e8d9b77-4878-4359-b78c-65e5648a8d61', [{"data":[{"hovertemplate":"Numerosity (natural scale)=0\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"0","line":{"color":"#1F77B4","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"0","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"KkLMPipCzD4qQsw+cVPMPqY+zD4iH8o+G7TDPoLdtj71CaM+xSSJPlLvVj40bRk+2BO+PWHZLj1Ohvg6LNLqvDbISr2KyYO90ACZvVv\u002fgr2w52C8TdOVPRNfND7g\u002fok+BkarPou4uT7HCrY+evujPg68iD7Mz1I+JZUUPhaduT2l2zo9y0oOPPDrp7y9H8y84DJfPMEVvD2\u002fH0E+4SaOPoHrrT4BXrs+lAm3PluQpD5ZDok+qCJTPg+0FD4Wnbk9pds6PctKDjzw66e8vR\u002fMvOAyXzzBFbw9vx9BPuEmjj6B660+AV67PpQJtz5bkKQ+WQ6JPqgiUz4PtBQ+Fp25PaXbOj3LSg488OunvL0fzLzgMl88wRW8Pb8fQT7hJo4+geutPgFeuz6UCbc+W5CkPlkOiT6oIlM+D7QUPhaduT2l2zo9y0oOPPDrp7y9H8y84DJfPMEVvD2\u002fH0E+4SaOPoHrrT4BXrs+lAm3PluQpD5ZDok+qCJTPg+0FD4Wnbk9pds6PctKDjzw66e8vR\u002fMvOAyXzzBFbw9vx9BPuEmjj6B660+AV67PpQJtz5bkKQ+WQ6JPqgiUz4PtBQ+Fp25PaXbOj3LSg488OunvL0fzLzgMl88wRW8Pb8fQT7hJo4+geutPgFeuz6UCbc+W5CkPlkOiT6oIlM+D7QUPhaduT2l2zo9y0oOPPDrp7y9H8y84DJfPMEVvD2\u002fH0E+4SaOPoHrrT4BXrs+lAm3PluQpD5ZDok+qCJTPg+0FD4Wnbk9pds6PctKDjzw66e8vR\u002fMvOAyXzzBFbw9vx9BPuEmjj6B660+AV67PpQJtz5bkKQ+WQ6JPqgiUz4PtBQ+Fp25PQ=="},"yaxis":"y","type":"scatter"}],"name":"0"},{"data":[{"hovertemplate":"Numerosity (natural scale)=1\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"1","line":{"color":"#FF7F0E","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"1","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"lqOgPpajoD6Wo6A+T5KgPhqnoD5i4KI+ZyypPsjTsj7ZGr0+ynPEPkZKxj6fWcE+RfK1Pu1OpT7mUZE+cul3PvJJTT7CCR8+aC3VPQCbez1UvkI9TBWWPVEuCj5RSF4+xhSaPvCUvT4WoNQ+rmbdPj302D617sk+y9uzPh89mj4Ee38+2sBGPjjRCD48Rao99BeBPaUbrD0bohE+qTZjPrKsmz4+l74+Yz\u002fVPonG3T5fK9k+swzKPvvmsz4fPZo+BHt\u002fPtrARj440Qg+PEWqPfQXgT2lG6w9G6IRPqk2Yz6yrJs+Ppe+PmM\u002f1T6Jxt0+XyvZPrMMyj775rM+Hz2aPgR7fz7awEY+ONEIPjxFqj30F4E9pRusPRuiET6pNmM+sqybPj6Xvj5jP9U+icbdPl8r2T6zDMo+++azPh89mj4Ee38+2sBGPjjRCD48Rao99BeBPaUbrD0bohE+qTZjPrKsmz4+l74+Yz\u002fVPonG3T5fK9k+swzKPvvmsz4fPZo+BHt\u002fPtrARj440Qg+PEWqPfQXgT2lG6w9G6IRPqk2Yz6yrJs+Ppe+PmM\u002f1T6Jxt0+XyvZPrMMyj775rM+Hz2aPgR7fz7awEY+ONEIPjxFqj30F4E9pRusPRuiET6pNmM+sqybPj6Xvj5jP9U+icbdPl8r2T6zDMo+++azPh89mj4Ee38+2sBGPjjRCD48Rao99BeBPaUbrD0bohE+qTZjPrKsmz4+l74+Yz\u002fVPonG3T5fK9k+swzKPvvmsz4fPZo+BHt\u002fPtrARj440Qg+PEWqPfQXgT2lG6w9G6IRPqk2Yz6yrJs+Ppe+PmM\u002f1T6Jxt0+XyvZPrMMyj775rM+Hz2aPg=="},"yaxis":"y","type":"scatter"}],"name":"1"},{"data":[{"hovertemplate":"Numerosity (natural scale)=2\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"2","line":{"color":"#2CA02C","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"2","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"0mtfPtJrXz7Sa18+Ry9fPiV4Xz71H2c+WFt9PqXEkT4JSao+97nDPiGs2T7hxOg+ZXDvPhGM7T5uPuQ+w2bVPvahwj5Pfak+Os6HPkiiRT6p5Ac+nODRPUAi4z13ER4+ZwFiPhTElj6JT7k+u57TPutG4z7z7+c+OPXiPtOi1j7nEsU+fUasPnFzij4AKEo+M4ELPl5c1z1AIuc9FXwfPjv7Yj7WGJc+1oe5PhjE0z4vX+M+8f\u002fnPjD74j7TotY+5xLFPn1GrD5xc4o+AChKPjOBCz5eXNc9QCLnPRV8Hz47+2I+1hiXPtaHuT4YxNM+L1\u002fjPvH\u002f5z4w++I+06LWPucSxT59Rqw+cXOKPgAoSj4zgQs+XlzXPUAi5z0VfB8+O\u002ftiPtYYlz7Wh7k+GMTTPi9f4z7x\u002f+c+MPviPtOi1j7nEsU+fUasPnFzij4AKEo+M4ELPl5c1z1AIuc9FXwfPjv7Yj7WGJc+1oe5PhjE0z4vX+M+8f\u002fnPjD74j7TotY+5xLFPn1GrD5xc4o+AChKPjOBCz5eXNc9QCLnPRV8Hz47+2I+1hiXPtaHuT4YxNM+L1\u002fjPvH\u002f5z4w++I+06LWPucSxT59Rqw+cXOKPgAoSj4zgQs+XlzXPUAi5z0VfB8+O\u002ftiPtYYlz7Wh7k+GMTTPi9f4z7x\u002f+c+MPviPtOi1j7nEsU+fUasPnFzij4AKEo+M4ELPl5c1z1AIuc9FXwfPjv7Yj7WGJc+1oe5PhjE0z4vX+M+8f\u002fnPjD74j7TotY+5xLFPn1GrD5xc4o+AChKPjOBCz5eXNc9QCLnPRV8Hz47+2I+1hiXPtaHuT4YxNM+L1\u002fjPvH\u002f5z4w++I+06LWPg=="},"yaxis":"y","type":"scatter"}],"name":"2"},{"data":[{"hovertemplate":"Numerosity (natural scale)=3\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"3","line":{"color":"#D62728","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"3","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"zUYcPs1GHD7NRhw+cwUcPhtUHD5miSQ+BZo8PsuRZz5E4pA+J3uxPt7m0D4eHes+IY\u002f9Ph6RAz\u002fFEgQ\u002fdvUAPxax9T43guA+rH+\u002fPpablT77DVU+1KIRPs4F4j1y4PA9ll4iPoCMYj4ddpU+Z363Pov+0j6yi+U+HqTuPlkz7z5wX+g+2krXPvhLuT7qiJE+M9dPPtlgDj7GD949FIvuPZC1IT7+MmI+1GCVPg53tz6+\u002ftI+QJDlPtKl7j5ZM+8+cF\u002foPtpK1z74S7k+6oiRPjPXTz7ZYA4+xg\u002fePRSL7j2QtSE+\u002fjJiPtRglT4Od7c+vv7SPkCQ5T7Spe4+WTPvPnBf6D7aStc++Eu5PuqIkT4z108+2WAOPsYP3j0Ui+49kLUhPv4yYj7UYJU+Dne3Pr7+0j5AkOU+0qXuPlkz7z5wX+g+2krXPvhLuT7qiJE+M9dPPtlgDj7GD949FIvuPZC1IT7+MmI+1GCVPg53tz6+\u002ftI+QJDlPtKl7j5ZM+8+cF\u002foPtpK1z74S7k+6oiRPjPXTz7ZYA4+xg\u002fePRSL7j2QtSE+\u002fjJiPtRglT4Od7c+vv7SPkCQ5T7Spe4+WTPvPnBf6D7aStc++Eu5PuqIkT4z108+2WAOPsYP3j0Ui+49kLUhPv4yYj7UYJU+Dne3Pr7+0j5AkOU+0qXuPlkz7z5wX+g+2krXPvhLuT7qiJE+M9dPPtlgDj7GD949FIvuPZC1IT7+MmI+1GCVPg53tz6+\u002ftI+QJDlPtKl7j5ZM+8+cF\u002foPtpK1z74S7k+6oiRPjPXTz7ZYA4+xg\u002fePRSL7j2QtSE+\u002fjJiPtRglT4Od7c+vv7SPkCQ5T7Spe4+WTPvPg=="},"yaxis":"y","type":"scatter"}],"name":"3"},{"data":[{"hovertemplate":"Numerosity (natural scale)=4\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"4","line":{"color":"#9467BD","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"4","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"VcDfPVXA3z1VwN89SUTfPZTZ3z3QW+89mY8OPiF2OD5WE3M+NtGbPh7Avj4cT94+xYv3PoBmBD+K3Qg\u002fQYsJP8XTBj+rQf4+o6XhPqOpuD6R5Ig+w6E5Puik+T2psc09MdzvPWLfJz51NGo+igaZPrdhuj7MfdU+BYDoPtgr8z7GwPU+FeLsPqde1T6hM7A+XzSDPpknMj6oC\u002fA9Ma3HPYUw7D06yiY+V5hpPvfdmD6jT7o+PnnVPlN+6D7YK\u002fM+xsD1PhXi7D6nXtU+oTOwPl80gz6ZJzI+qAvwPTGtxz2FMOw9OsomPleYaT733Zg+o0+6Pj551T5Tfug+2CvzPsbA9T4V4uw+p17VPqEzsD5fNIM+mScyPqgL8D0xrcc9hTDsPTrKJj5XmGk+992YPqNPuj4+edU+U37oPtgr8z7GwPU+FeLsPqde1T6hM7A+XzSDPpknMj6oC\u002fA9Ma3HPYUw7D06yiY+V5hpPvfdmD6jT7o+PnnVPlN+6D7YK\u002fM+xsD1PhXi7D6nXtU+oTOwPl80gz6ZJzI+qAvwPTGtxz2FMOw9OsomPleYaT733Zg+o0+6Pj551T5Tfug+2CvzPsbA9T4V4uw+p17VPqEzsD5fNIM+mScyPqgL8D0xrcc9hTDsPTrKJj5XmGk+992YPqNPuj4+edU+U37oPtgr8z7GwPU+FeLsPqde1T6hM7A+XzSDPpknMj6oC\u002fA9Ma3HPYUw7D06yiY+V5hpPvfdmD6jT7o+PnnVPlN+6D7YK\u002fM+xsD1PhXi7D6nXtU+oTOwPl80gz6ZJzI+qAvwPTGtxz2FMOw9OsomPleYaT733Zg+o0+6Pj551T5Tfug+2CvzPg=="},"yaxis":"y","type":"scatter"}],"name":"4"},{"data":[{"hovertemplate":"Numerosity (natural scale)=5\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"5","line":{"color":"#8C564B","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"5","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"vxmkPb8ZpD2\u002fGaQ9wqmjPYkwpD20I7I97oPbPZhjFD4gvUs+30GHPvGVqj6uH8w+a93oPrPh\u002fj6ZsQY\u002faFUKP3aMCj8xygU\u002fN8n0Pruvzz4nqJ8+SL5cPsmFDT5T1sI9SXu6PUIc+T0aAzU+jWF6PlepoD6eiMA+GQraPkgO7D4aGfY+46f0PjdT5D5XLMQ+Y86XPhBIUj7xtgY+2yy6PXEctT0I4PU9OBM0PpfeeT49iaA+vHzAPqoF2j5IDuw+Ghn2PuOn9D43U+Q+VyzEPmPOlz4QSFI+8bYGPtssuj1xHLU9COD1PTgTND6X3nk+PYmgPrx8wD6qBdo+SA7sPhoZ9j7jp\u002fQ+N1PkPlcsxD5jzpc+EEhSPvG2Bj7bLLo9cRy1PQjg9T04EzQ+l955Pj2JoD68fMA+qgXaPkgO7D4aGfY+46f0PjdT5D5XLMQ+Y86XPhBIUj7xtgY+2yy6PXEctT0I4PU9OBM0PpfeeT49iaA+vHzAPqoF2j5IDuw+Ghn2PuOn9D43U+Q+VyzEPmPOlz4QSFI+8bYGPtssuj1xHLU9COD1PTgTND6X3nk+PYmgPrx8wD6qBdo+SA7sPhoZ9j7jp\u002fQ+N1PkPlcsxD5jzpc+EEhSPvG2Bj7bLLo9cRy1PQjg9T04EzQ+l955Pj2JoD68fMA+qgXaPkgO7D4aGfY+46f0PjdT5D5XLMQ+Y86XPhBIUj7xtgY+2yy6PXEctT0I4PU9OBM0PpfeeT49iaA+vHzAPqoF2j5IDuw+Ghn2PuOn9D43U+Q+VyzEPmPOlz4QSFI+8bYGPtssuj1xHLU9COD1PTgTND6X3nk+PYmgPrx8wD6qBdo+SA7sPg=="},"yaxis":"y","type":"scatter"}],"name":"5"},{"data":[{"hovertemplate":"Numerosity (natural scale)=6\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"6","line":{"color":"#E377C2","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"6","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"bQ12PW0Ndj1tDXY9lkd1PbA1dj1lY4c9ffurPbBw8T1acys+OixqPnA8lz6p2Lg+6wXXPhzB7z7c\u002fAA\u002fEM8GP1lfCT+oRgc\u002fn9r9PhIB3j7vNLA+MPV5PswzHz6rqcU9AHmaPXd+uj0Oswo+m3VKPheXiD72sqo+TDLIPmxO3z5b\u002fO4+ItfzPlV\u002f6j6NWtA+p9OmPtZdbT4R8xY+ZRW7PRjckz0neLY9rIQJPt3MST4YbIg+H6GqPqQryD5sTt8+W\u002fzuPiLX8z5Vf+o+jVrQPqfTpj7WXW0+EfMWPmUVuz0Y3JM9J3i2PayECT7dzEk+GGyIPh+hqj6kK8g+bE7fPlv87j4i1\u002fM+VX\u002fqPo1a0D6n06Y+1l1tPhHzFj5lFbs9GNyTPSd4tj2shAk+3cxJPhhsiD4foao+pCvIPmxO3z5b\u002fO4+ItfzPlV\u002f6j6NWtA+p9OmPtZdbT4R8xY+ZRW7PRjckz0neLY9rIQJPt3MST4YbIg+H6GqPqQryD5sTt8+W\u002fzuPiLX8z5Vf+o+jVrQPqfTpj7WXW0+EfMWPmUVuz0Y3JM9J3i2PayECT7dzEk+GGyIPh+hqj6kK8g+bE7fPlv87j4i1\u002fM+VX\u002fqPo1a0D6n06Y+1l1tPhHzFj5lFbs9GNyTPSd4tj2shAk+3cxJPhhsiD4foao+pCvIPmxO3z5b\u002fO4+ItfzPlV\u002f6j6NWtA+p9OmPtZdbT4R8xY+ZRW7PRjckz0neLY9rIQJPt3MST4YbIg+H6GqPqQryD5sTt8+W\u002fzuPiLX8z5Vf+o+jVrQPqfTpj7WXW0+EfMWPmUVuz0Y3JM9J3i2PayECT7dzEk+GGyIPh+hqj6kK8g+bE7fPg=="},"yaxis":"y","type":"scatter"}],"name":"6"},{"data":[{"hovertemplate":"Numerosity (natural scale)=7\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"7","line":{"color":"#7F7F7F","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"7","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"vheTO74Xkzu+F5M7iuSRO0NWkzuVhLg7DqoVPN88iDxlJO48l6FAPVKPjz2axMc9KRADPmr\u002fIz7qK0U++UFlPnfzgT5PxJM+oQCqPovRuj44Qrk+8MihPl91dT4vhx0+OZ+dPUHRrjw+GwW8gaRBvNRqxTtIfiI9Ja2pPckVBT4MkTU+\u002fVpqPsL4kj6fB6o+el+tPsSWmT6dbmo+x0YWPglNlD2tXZc8rtYhvGHDUrxk9LE71DIhPVNvqT3JFQU+DJE1Pv1aaj7C+JI+nweqPnpfrT7Elpk+nW5qPsdGFj4JTZQ9rV2XPK7WIbxhw1K8ZPSxO9QyIT1Tb6k9yRUFPgyRNT79Wmo+wviSPp8Hqj56X60+xJaZPp1uaj7HRhY+CU2UPa1dlzyu1iG8YcNSvGT0sTvUMiE9U2+pPckVBT4MkTU+\u002fVpqPsL4kj6fB6o+el+tPsSWmT6dbmo+x0YWPglNlD2tXZc8rtYhvGHDUrxk9LE71DIhPVNvqT3JFQU+DJE1Pv1aaj7C+JI+nweqPnpfrT7Elpk+nW5qPsdGFj4JTZQ9rV2XPK7WIbxhw1K8ZPSxO9QyIT1Tb6k9yRUFPgyRNT79Wmo+wviSPp8Hqj56X60+xJaZPp1uaj7HRhY+CU2UPa1dlzyu1iG8YcNSvGT0sTvUMiE9U2+pPckVBT4MkTU+\u002fVpqPsL4kj6fB6o+el+tPsSWmT6dbmo+x0YWPglNlD2tXZc8rtYhvGHDUrxk9LE71DIhPVNvqT3JFQU+DJE1Pv1aaj7C+JI+nweqPnpfrT7Elpk+nW5qPsdGFj4JTZQ9rV2XPK7WIbxhw1K8ZPSxO9QyIT1Tb6k9yRUFPg=="},"yaxis":"y","type":"scatter"}],"name":"7"}]);
+                        }).then(function(){
+                            
+var gd = document.getElementById('2e8d9b77-4878-4359-b78c-65e5648a8d61');
+var x = new MutationObserver(function (mutations, observer) {{
+        var display = window.getComputedStyle(gd).display;
+        if (!display || display === 'none') {{
+            console.log([gd, 'removed!']);
+            Plotly.purge(gd);
+            observer.disconnect();
+        }}
+}});
+
+// Listen for the removal of the full notebook cells
+var notebookContainer = gd.closest('#notebook-container');
+if (notebookContainer) {{
+    x.observe(notebookContainer, {childList: true});
+}}
+
+// Listen for the clearing of the current output cell
+var outputEl = gd.closest('.output');
+if (outputEl) {{
+    x.observe(outputEl, {childList: true});
+}}
+
+                        })                };            </script>        </div></div></div>
+</div>
+<p>The predicted response peaks around the time frames at which the stimulus design passes through each units’s preferred frequency, and decays afterwards due to the impulse response convolution. This is exactly what we would expect from a 1D Gaussian pRF model.</p>
+<p>We can also simulate and visualize predicted timecourses for different tuning widths <code class="docutils literal notranslate"><span class="pre">sigma</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">num_units</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="n">params_sigma</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;mu_x&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">([</span><span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_units</span><span class="p">),</span>
+        <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="n">num_units</span><span class="p">),</span>
+        <span class="s2">&quot;weight_deriv&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_units</span><span class="p">,</span>
+        <span class="s2">&quot;baseline&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_units</span><span class="p">,</span>
+        <span class="s2">&quot;amplitude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="n">num_units</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">prediction</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">params_sigma</span><span class="p">))</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">px</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+    <span class="n">prediction</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+    <span class="n">animation_frame</span><span class="o">=</span><span class="s2">&quot;variable&quot;</span><span class="p">,</span>
+    <span class="n">range_x</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_frames</span><span class="p">),</span>
+    <span class="n">range_y</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">),</span>
+    <span class="n">labels</span><span class="o">=</span><span class="p">{</span>
+        <span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;Time frame&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;Predicted neural response&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;variable&quot;</span><span class="p">:</span> <span class="s2">&quot;pRF width (sigma)&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span><span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">450</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><div style="height:450px; width:100%;">            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG"></script><script>if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.7.0.min.js" integrity="sha256-jvTGqxNp8AGWEcvNLVuKr+8j5dGe9Yw51LQkmDH+IYA=" crossorigin="anonymous"></script>                <div id="ee6b97ac-d86c-481b-b5d4-5f3ed71e478f" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("ee6b97ac-d86c-481b-b5d4-5f3ed71e478f")) {                    Plotly.newPlot(                        "ee6b97ac-d86c-481b-b5d4-5f3ed71e478f",                        [{"hovertemplate":"pRF width (sigma)=0\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"0","line":{"color":"#1F77B4","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"0","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"AAAAAAAAAADVw6uGhnaVpGwecyPhQEq83KUkO\u002f6I1T6insc\u002fQBlEQMIoh0AAk5NADjmHQOwhVEA7iAtARK+IP4t0CD69Hg2\u002fNBB6v7V9lr9ovpm\u002fZMuPvzl7dL92Trq+iGlzPxriJkDwIXlAMR6MQNQcgkBvS01AjA4HQHjxgj8XEdc9fZgRvzrKfL84T5e\u002fkAyav2TLj785e3S\u002fdk66vohpcz8a4iZA8CF5QDEejEDUHIJAb0tNQIwOB0B48YI\u002fFxHXPX2YEb86yny\u002fOE+Xv5AMmr9ky4+\u002fOXt0v3ZOur6IaXM\u002fGuImQPAheUAxHoxA1ByCQG9LTUCMDgdAePGCPxcR1z19mBG\u002fOsp8vzhPl7+QDJq\u002fZMuPvzl7dL92Trq+iGlzPxriJkDwIXlAMR6MQNQcgkBvS01AjA4HQHjxgj8XEdc9fZgRvzrKfL84T5e\u002fkAyav2TLj785e3S\u002fdk66vohpcz8a4iZA8CF5QDEejEDUHIJAb0tNQIwOB0B48YI\u002fFxHXPX2YEb86yny\u002fOE+Xv5AMmr9ky4+\u002fOXt0v3ZOur6IaXM\u002fGuImQPAheUAxHoxA1ByCQG9LTUCMDgdAePGCPxcR1z19mBG\u002fOsp8vzhPl7+QDJq\u002fZMuPvzl7dL92Trq+iGlzPxriJkDwIXlAMR6MQNQcgkBvS01AjA4HQHjxgj8XEdc9fZgRvzrKfL84T5e\u002fkAyav2TLj785e3S\u002fdk66vohpcz8a4iZA8CF5QDEejEDUHIJAb0tNQIwOB0B48YI\u002fFxHXPX2YEb86yny\u002fOE+Xv5AMmr9ky4+\u002fOXt0v3ZOur6IaXM\u002fGuImQPAheUAxHoxA1ByCQG9LTUCMDgdAePGCPw=="},"yaxis":"y","type":"scatter"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"},"colorscale":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"bar":[{"error_x":{"color":"rgb(36,36,36)"},"error_y":{"color":"rgb(36,36,36)"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"histogram":[{"marker":{"line":{"color":"white","width":0.6}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}}}],"carpet":[{"aaxis":{"endlinecolor":"rgb(36,36,36)","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"rgb(36,36,36)"},"baxis":{"endlinecolor":"rgb(36,36,36)","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"rgb(36,36,36)"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"rgb(237,237,237)"},"line":{"color":"white"}},"header":{"fill":{"color":"rgb(217,217,217)"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#1F77B4","#FF7F0E","#2CA02C","#D62728","#9467BD","#8C564B","#E377C2","#7F7F7F","#BCBD22","#17BECF"],"font":{"color":"rgb(36,36,36)"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"bgcolor":"white","angularaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"},"radialaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"}},"ternary":{"bgcolor":"white","aaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"},"baxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"},"caxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside"}},"coloraxis":{"colorbar":{"outlinewidth":1,"tickcolor":"rgb(36,36,36)","ticks":"outside"}},"colorscale":{"sequential":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]],"sequentialminus":[[0.0,"#440154"],[0.1111111111111111,"#482878"],[0.2222222222222222,"#3e4989"],[0.3333333333333333,"#31688e"],[0.4444444444444444,"#26828e"],[0.5555555555555556,"#1f9e89"],[0.6666666666666666,"#35b779"],[0.7777777777777778,"#6ece58"],[0.8888888888888888,"#b5de2b"],[1.0,"#fde725"]],"diverging":[[0.0,"rgb(103,0,31)"],[0.1,"rgb(178,24,43)"],[0.2,"rgb(214,96,77)"],[0.3,"rgb(244,165,130)"],[0.4,"rgb(253,219,199)"],[0.5,"rgb(247,247,247)"],[0.6,"rgb(209,229,240)"],[0.7,"rgb(146,197,222)"],[0.8,"rgb(67,147,195)"],[0.9,"rgb(33,102,172)"],[1.0,"rgb(5,48,97)"]]},"xaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside","title":{"standoff":15},"zerolinecolor":"rgb(36,36,36)","automargin":true,"zeroline":false},"yaxis":{"gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showgrid":false,"showline":true,"ticks":"outside","title":{"standoff":15},"zerolinecolor":"rgb(36,36,36)","automargin":true,"zeroline":false},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showbackground":true,"showgrid":false,"showline":true,"ticks":"outside","zerolinecolor":"rgb(36,36,36)","gridwidth":2,"zeroline":false},"yaxis":{"backgroundcolor":"white","gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showbackground":true,"showgrid":false,"showline":true,"ticks":"outside","zerolinecolor":"rgb(36,36,36)","gridwidth":2,"zeroline":false},"zaxis":{"backgroundcolor":"white","gridcolor":"rgb(232,232,232)","linecolor":"rgb(36,36,36)","showbackground":true,"showgrid":false,"showline":true,"ticks":"outside","zerolinecolor":"rgb(36,36,36)","gridwidth":2,"zeroline":false}},"shapedefaults":{"fillcolor":"black","line":{"width":0},"opacity":0.3},"annotationdefaults":{"arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"white","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"Time frame"},"range":[0,160]},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"Predicted neural response"},"range":[-2.0,5.0]},"legend":{"title":{"text":"pRF width (sigma)"},"tracegroupgap":0},"margin":{"t":60},"updatemenus":[{"buttons":[{"args":[null,{"frame":{"duration":500,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":500,"easing":"linear"}}],"label":"&#9654;","method":"animate"},{"args":[[null],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"&#9724;","method":"animate"}],"direction":"left","pad":{"r":10,"t":70},"showactive":false,"type":"buttons","x":0.1,"xanchor":"right","y":0,"yanchor":"top"}],"sliders":[{"active":0,"currentvalue":{"prefix":"pRF width (sigma)="},"len":0.9,"pad":{"b":10,"t":60},"steps":[{"args":[["0"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"0","method":"animate"},{"args":[["1"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"1","method":"animate"},{"args":[["2"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"2","method":"animate"},{"args":[["3"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"3","method":"animate"},{"args":[["4"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"4","method":"animate"},{"args":[["5"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"5","method":"animate"},{"args":[["6"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"6","method":"animate"},{"args":[["7"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"7","method":"animate"},{"args":[["8"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"8","method":"animate"},{"args":[["9"],{"frame":{"duration":0,"redraw":false},"mode":"immediate","fromcurrent":true,"transition":{"duration":0,"easing":"linear"}}],"label":"9","method":"animate"}],"x":0.1,"xanchor":"left","y":0,"yanchor":"top"}],"showlegend":false,"height":450},                        {"responsive": true}                    ).then(function(){
+                            Plotly.addFrames('ee6b97ac-d86c-481b-b5d4-5f3ed71e478f', [{"data":[{"hovertemplate":"pRF width (sigma)=0\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"0","line":{"color":"#1F77B4","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"0","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"AAAAAAAAAADVw6uGhnaVpGwecyPhQEq83KUkO\u002f6I1T6insc\u002fQBlEQMIoh0AAk5NADjmHQOwhVEA7iAtARK+IP4t0CD69Hg2\u002fNBB6v7V9lr9ovpm\u002fZMuPvzl7dL92Trq+iGlzPxriJkDwIXlAMR6MQNQcgkBvS01AjA4HQHjxgj8XEdc9fZgRvzrKfL84T5e\u002fkAyav2TLj785e3S\u002fdk66vohpcz8a4iZA8CF5QDEejEDUHIJAb0tNQIwOB0B48YI\u002fFxHXPX2YEb86yny\u002fOE+Xv5AMmr9ky4+\u002fOXt0v3ZOur6IaXM\u002fGuImQPAheUAxHoxA1ByCQG9LTUCMDgdAePGCPxcR1z19mBG\u002fOsp8vzhPl7+QDJq\u002fZMuPvzl7dL92Trq+iGlzPxriJkDwIXlAMR6MQNQcgkBvS01AjA4HQHjxgj8XEdc9fZgRvzrKfL84T5e\u002fkAyav2TLj785e3S\u002fdk66vohpcz8a4iZA8CF5QDEejEDUHIJAb0tNQIwOB0B48YI\u002fFxHXPX2YEb86yny\u002fOE+Xv5AMmr9ky4+\u002fOXt0v3ZOur6IaXM\u002fGuImQPAheUAxHoxA1ByCQG9LTUCMDgdAePGCPxcR1z19mBG\u002fOsp8vzhPl7+QDJq\u002fZMuPvzl7dL92Trq+iGlzPxriJkDwIXlAMR6MQNQcgkBvS01AjA4HQHjxgj8XEdc9fZgRvzrKfL84T5e\u002fkAyav2TLj785e3S\u002fdk66vohpcz8a4iZA8CF5QDEejEDUHIJAb0tNQIwOB0B48YI\u002fFxHXPX2YEb86yny\u002fOE+Xv5AMmr9ky4+\u002fOXt0v3ZOur6IaXM\u002fGuImQPAheUAxHoxA1ByCQG9LTUCMDgdAePGCPw=="},"yaxis":"y","type":"scatter"}],"name":"0"},{"data":[{"hovertemplate":"pRF width (sigma)=1\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"1","line":{"color":"#FF7F0E","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"1","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"kCl8PJApfDyQKXw8FYFtPEMlfzyDQDQ9bNUDPh3QlD7rbwY\u002fWgNKP5cVgz+xfJY\u002fTnSbP9rHkT+Ulng\u002fv9Y+P6yK\u002fz76JIY+as1hPc2K3r05fWG+Hs6CvuR3Rb45nbK8AwV4PoroCz9NQ1M\u002fS2qCP0AojD+teYY\u002fzlZoP1F1Mz+e+e8+LHZ3Pv6eKz2Vw++9oL9mvsxZhL4oO0e+eRK6vC+Idz6q2gs\u002fND1TP49pgj88KIw\u002fFHqGPxxXaD9RdTM\u002fnvnvPix2dz7+nis9lcPvvaC\u002fZr7MWYS+KDtHvnkSurwviHc+qtoLPzQ9Uz+PaYI\u002fPCiMPxR6hj8cV2g\u002fUXUzP5757z4sdnc+\u002fp4rPZXD772gv2a+zFmEvig7R755Erq8L4h3PqraCz80PVM\u002fj2mCPzwojD8UeoY\u002fHFdoP1F1Mz+e+e8+LHZ3Pv6eKz2Vw++9oL9mvsxZhL4oO0e+eRK6vC+Idz6q2gs\u002fND1TP49pgj88KIw\u002fFHqGPxxXaD9RdTM\u002fnvnvPix2dz7+nis9lcPvvaC\u002fZr7MWYS+KDtHvnkSurwviHc+qtoLPzQ9Uz+PaYI\u002fPCiMPxR6hj8cV2g\u002fUXUzP5757z4sdnc+\u002fp4rPZXD772gv2a+zFmEvig7R755Erq8L4h3PqraCz80PVM\u002fj2mCPzwojD8UeoY\u002fHFdoP1F1Mz+e+e8+LHZ3Pv6eKz2Vw++9oL9mvsxZhL4oO0e+eRK6vC+Idz6q2gs\u002fND1TP49pgj88KIw\u002fFHqGPxxXaD9RdTM\u002fnvnvPix2dz7+nis9lcPvvaC\u002fZr7MWYS+KDtHvnkSurwviHc+qtoLPzQ9Uz+PaYI\u002fPCiMPxR6hj8cV2g\u002fUXUzPw=="},"yaxis":"y","type":"scatter"}],"name":"1"},{"data":[{"hovertemplate":"pRF width (sigma)=2\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"2","line":{"color":"#2CA02C","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"2","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"JkQsPiZELD4mRCw+9cUrPtRdLD5hSjw+8KpqPs6onT6rRNI+IsIEP9a3HD90Ci0\u002fF8QzP\u002fCsMD82IiU\u002foVsTP0xJ+z6R3cc+pjeMPtEBHz5qTms99wcBPCNQvjwoHs89az1kPh2quD7hu\u002fk+TGYVP0s2Iz\u002fNwyU\u002fLGkePxuLDz\u002f2bvc+70nGPqTriz5fph8+mspvPQf7EzzTt8Y8HNbQPcXlZD476bg+H+n5Pqp2FT+XQSM\u002f1sslPypsHj8biw8\u002f9m73Pu9Jxj6k64s+X6YfPprKbz0H+xM807fGPBzW0D3F5WQ+O+m4Ph\u002fp+T6qdhU\u002fl0EjP9bLJT8qbB4\u002fG4sPP\u002fZu9z7vScY+pOuLPl+mHz6aym89B\u002fsTPNO3xjwc1tA9xeVkPjvpuD4f6fk+qnYVP5dBIz\u002fWyyU\u002fKmwePxuLDz\u002f2bvc+70nGPqTriz5fph8+mspvPQf7EzzTt8Y8HNbQPcXlZD476bg+H+n5Pqp2FT+XQSM\u002f1sslPypsHj8biw8\u002f9m73Pu9Jxj6k64s+X6YfPprKbz0H+xM807fGPBzW0D3F5WQ+O+m4Ph\u002fp+T6qdhU\u002fl0EjP9bLJT8qbB4\u002fG4sPP\u002fZu9z7vScY+pOuLPl+mHz6aym89B\u002fsTPNO3xjwc1tA9xeVkPjvpuD4f6fk+qnYVP5dBIz\u002fWyyU\u002fKmwePxuLDz\u002f2bvc+70nGPqTriz5fph8+mspvPQf7EzzTt8Y8HNbQPcXlZD476bg+H+n5Pqp2FT+XQSM\u002f1sslPypsHj8biw8\u002f9m73Pu9Jxj6k64s+X6YfPprKbz0H+xM807fGPBzW0D3F5WQ+O+m4Ph\u002fp+T6qdhU\u002fl0EjP9bLJT8qbB4\u002fG4sPPw=="},"yaxis":"y","type":"scatter"}],"name":"2"},{"data":[{"hovertemplate":"pRF width (sigma)=3\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"3","line":{"color":"#D62728","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"3","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"MqhgPjKoYD4yqGA+MnBgPpizYD6SyGc+sFh8PjLRjz75dKY+7O69Pnst0j6nHOA+GkvmPgma5D7uF9w+UX3OPjI+vT5O5KU+t0KGPje1Rj60cAw++5rePZvv7j0nSCE+ZvVgPljRkz7fHbQ+UrnMPopp2z744N8+WGTbPv8W0D5y5r8+\u002fsuoPgL3iD5kR0s+LRAQPoET5D3x6PI9Fa8iPuzrYT62JJQ+F1W0PtjdzD4xgds+f\u002fDfPiJq2z7\u002fFtA+cua\u002fPv7LqD4C94g+ZEdLPi0QED6BE+Q98ejyPRWvIj7s62E+tiSUPhdVtD7Y3cw+MYHbPn\u002fw3z4iats+\u002fxbQPnLmvz7+y6g+AveIPmRHSz4tEBA+gRPkPfHo8j0VryI+7OthPrYklD4XVbQ+2N3MPjGB2z5\u002f8N8+ImrbPv8W0D5y5r8+\u002fsuoPgL3iD5kR0s+LRAQPoET5D3x6PI9Fa8iPuzrYT62JJQ+F1W0PtjdzD4xgds+f\u002fDfPiJq2z7\u002fFtA+cua\u002fPv7LqD4C94g+ZEdLPi0QED6BE+Q98ejyPRWvIj7s62E+tiSUPhdVtD7Y3cw+MYHbPn\u002fw3z4iats+\u002fxbQPnLmvz7+y6g+AveIPmRHSz4tEBA+gRPkPfHo8j0VryI+7OthPrYklD4XVbQ+2N3MPjGB2z5\u002f8N8+ImrbPv8W0D5y5r8+\u002fsuoPgL3iD5kR0s+LRAQPoET5D3x6PI9Fa8iPuzrYT62JJQ+F1W0PtjdzD4xgds+f\u002fDfPiJq2z7\u002fFtA+cua\u002fPv7LqD4C94g+ZEdLPi0QED6BE+Q98ejyPRWvIj7s62E+tiSUPhdVtD7Y3cw+MYHbPn\u002fw3z4iats+\u002fxbQPg=="},"yaxis":"y","type":"scatter"}],"name":"3"},{"data":[{"hovertemplate":"pRF width (sigma)=4\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"4","line":{"color":"#9467BD","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"4","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"87FYPvOxWD7zsVg+EJZYPqG3WD4iP1w+\u002fntmPmb6dz7GJoc+RK2SPmGYnD47cqM+jI+mPtzkpT5G86E+VY+bPo9Qkz5FQIc+o0hrPjU0Qz6lzyE+tHgRPqBeFj6E1C0+9OhQPrZndz63Lo0+soOaPm2coj6IYaU+WISjPqUmnj6HMpY+SPqJPnn7bz5z\u002fUY+p7YkPs6bEz405Bc+luIuPqKfUT5F4Xc+ZlaNPnidmj7erKI+G2ylPkqIoz6lJp4+hzKWPkj6iT55+28+c\u002f1GPqe2JD7OmxM+NOQXPpbiLj6in1E+ReF3PmZWjT54nZo+3qyiPhtspT5KiKM+pSaePocylj5I+ok+eftvPnP9Rj6ntiQ+zpsTPjTkFz6W4i4+op9RPkXhdz5mVo0+eJ2aPt6soj4bbKU+SoijPqUmnj6HMpY+SPqJPnn7bz5z\u002fUY+p7YkPs6bEz405Bc+luIuPqKfUT5F4Xc+ZlaNPnidmj7erKI+G2ylPkqIoz6lJp4+hzKWPkj6iT55+28+c\u002f1GPqe2JD7OmxM+NOQXPpbiLj6in1E+ReF3PmZWjT54nZo+3qyiPhtspT5KiKM+pSaePocylj5I+ok+eftvPnP9Rj6ntiQ+zpsTPjTkFz6W4i4+op9RPkXhdz5mVo0+eJ2aPt6soj4bbKU+SoijPqUmnj6HMpY+SPqJPnn7bz5z\u002fUY+p7YkPs6bEz405Bc+luIuPqKfUT5F4Xc+ZlaNPnidmj7erKI+G2ylPkqIoz6lJp4+hzKWPkj6iT55+28+c\u002f1GPqe2JD7OmxM+NOQXPpbiLj6in1E+ReF3PmZWjT54nZo+3qyiPhtspT5KiKM+pSaePg=="},"yaxis":"y","type":"scatter"}],"name":"4"},{"data":[{"hovertemplate":"pRF width (sigma)=5\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"5","line":{"color":"#8C564B","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"5","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"pMJDPqTCQz6kwkM+GLNDPs7FQz6ivUU+fHJLPu0tVT6MkWE+31VuPtlPeT76c4A+0TKCPiDfgT4Xf38+2JJ4PhuObz6AwWE+3dBMPvmjND7xiSA+G9YWPpTlGT7L7ic+hLQ8PqFbUz7X2mc+b3x3PgmGgD4YPYI+dkyBPgi6fD6b3XM+ybFlPmMjUD6vRzc+jIoiPn5MGD5l7ho+RaUoPkgvPT7XrFM+lQ9oPnOedz7SkIA++UOCPgZPgT4Iunw+m91zPsmxZT5jI1A+r0c3PoyKIj5+TBg+Ze4aPkWlKD5ILz0+16xTPpUPaD5znnc+0pCAPvlDgj4GT4E+CLp8Ppvdcz7JsWU+YyNQPq9HNz6MiiI+fkwYPmXuGj5FpSg+SC89PtesUz6VD2g+c553PtKQgD75Q4I+Bk+BPgi6fD6b3XM+ybFlPmMjUD6vRzc+jIoiPn5MGD5l7ho+RaUoPkgvPT7XrFM+lQ9oPnOedz7SkIA++UOCPgZPgT4Iunw+m91zPsmxZT5jI1A+r0c3PoyKIj5+TBg+Ze4aPkWlKD5ILz0+16xTPpUPaD5znnc+0pCAPvlDgj4GT4E+CLp8Ppvdcz7JsWU+YyNQPq9HNz6MiiI+fkwYPmXuGj5FpSg+SC89PtesUz6VD2g+c553PtKQgD75Q4I+Bk+BPgi6fD6b3XM+ybFlPmMjUD6vRzc+jIoiPn5MGD5l7ho+RaUoPkgvPT7XrFM+lQ9oPnOedz7SkIA++UOCPgZPgT4Iunw+m91zPsmxZT5jI1A+r0c3PoyKIj5+TBg+Ze4aPkWlKD5ILz0+16xTPpUPaD5znnc+0pCAPvlDgj4GT4E+CLp8Pg=="},"yaxis":"y","type":"scatter"}],"name":"5"},{"data":[{"hovertemplate":"pRF width (sigma)=6\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"6","line":{"color":"#E377C2","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"6","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"vaIuPr2iLj69oi4+R5kuPqmkLj481y8+808zPg06OT7xvkA+bnxIPiYjTz47vlM+f99VPjaBVT59+FI+m9NOPpllST7k20A+dZwzPmEyJD7cZRc+skURPrZEEz5KLxw+2UwpPvyMNz6takQ+3jlOPnM\u002fVD4DdlY+cmJVPlDYUT4Kckw+qppDPsXnNT4BAiY+5cMYPmFEEj5L+BM+raocPqWfKT6awzc+DY5EPptQTj7UTVQ+JH9WPtllVT5Q2FE+CnJMPqqaQz7F5zU+AQImPuXDGD5hRBI+S\u002fgTPq2qHD6lnyk+msM3Pg2ORD6bUE4+1E1UPiR\u002fVj7ZZVU+UNhRPgpyTD6qmkM+xec1PgECJj7lwxg+YUQSPkv4Ez6tqhw+pZ8pPprDNz4NjkQ+m1BOPtRNVD4kf1Y+2WVVPlDYUT4Kckw+qppDPsXnNT4BAiY+5cMYPmFEEj5L+BM+raocPqWfKT6awzc+DY5EPptQTj7UTVQ+JH9WPtllVT5Q2FE+CnJMPqqaQz7F5zU+AQImPuXDGD5hRBI+S\u002fgTPq2qHD6lnyk+msM3Pg2ORD6bUE4+1E1UPiR\u002fVj7ZZVU+UNhRPgpyTD6qmkM+xec1PgECJj7lwxg+YUQSPkv4Ez6tqhw+pZ8pPprDNz4NjkQ+m1BOPtRNVD4kf1Y+2WVVPlDYUT4Kckw+qppDPsXnNT4BAiY+5cMYPmFEEj5L+BM+raocPqWfKT6awzc+DY5EPptQTj7UTVQ+JH9WPtllVT5Q2FE+CnJMPqqaQz7F5zU+AQImPuXDGD5hRBI+S\u002fgTPq2qHD6lnyk+msM3Pg2ORD6bUE4+1E1UPiR\u002fVj7ZZVU+UNhRPg=="},"yaxis":"y","type":"scatter"}],"name":"6"},{"data":[{"hovertemplate":"pRF width (sigma)=7\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"7","line":{"color":"#7F7F7F","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"7","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"WSEcPlkhHD5ZIRw+MhscPpkiHD4D6hw+\u002fisfPhgEIz4u5ic+M+wsPvM8MT5cOjQ+m501Pj9jNT5PwjM+NRcxPt6ULT4q9yc+SCEfPhzNFD61Oww+pCcIPiuDCT6meQ8+azYYPi6vIT5POSo+s7swPtS8ND7kOjY+jI41Ph1EMz6Kvy8+yOYpPmW9ID5MERY+0i8NPuLYCD7t\u002fwk+O88PPsNvGD7z1CE+vFEqPl\u002fLMD64xjQ+KEE2PuKQNT4dRDM+ir8vPsjmKT5lvSA+TBEWPtIvDT7i2Ag+7f8JPjvPDz7Dbxg+89QhPrxRKj5fyzA+uMY0PihBNj7ikDU+HUQzPoq\u002fLz7I5ik+Zb0gPkwRFj7SLw0+4tgIPu3\u002fCT47zw8+w28YPvPUIT68USo+X8swPrjGND4oQTY+4pA1Ph1EMz6Kvy8+yOYpPmW9ID5MERY+0i8NPuLYCD7t\u002fwk+O88PPsNvGD7z1CE+vFEqPl\u002fLMD64xjQ+KEE2PuKQNT4dRDM+ir8vPsjmKT5lvSA+TBEWPtIvDT7i2Ag+7f8JPjvPDz7Dbxg+89QhPrxRKj5fyzA+uMY0PihBNj7ikDU+HUQzPoq\u002fLz7I5ik+Zb0gPkwRFj7SLw0+4tgIPu3\u002fCT47zw8+w28YPvPUIT68USo+X8swPrjGND4oQTY+4pA1Ph1EMz6Kvy8+yOYpPmW9ID5MERY+0i8NPuLYCD7t\u002fwk+O88PPsNvGD7z1CE+vFEqPl\u002fLMD64xjQ+KEE2PuKQNT4dRDM+ir8vPsjmKT5lvSA+TBEWPtIvDT7i2Ag+7f8JPjvPDz7Dbxg+89QhPrxRKj5fyzA+uMY0PihBNj7ikDU+HUQzPg=="},"yaxis":"y","type":"scatter"}],"name":"7"},{"data":[{"hovertemplate":"pRF width (sigma)=8\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"8","line":{"color":"#BCBD22","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"8","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"jnwMPo58DD6OfAw+WHgMPmp9DD4DBg0+5pEOPrEzET4qixQ+2foXPmPuGj4K+hw+pO0dPvzGHT6fqxw+zNoaPv11GD51lRQ+k20OPro1Bz7rOQE+6sb8PY2x\u002fj1EggM+k5cJPi8tED56GxY+nqAaPmZpHT5sdR4+egIePvpxHD4vCBo+K\u002fsVPhyWDz5\u002fHgg+6egBPrLE\u002fT39Y\u002f89aL8DPoLACT4dSBA+4CwWPsSrGj5scB0+3nkePiIEHj76cRw+LwgaPiv7FT4clg8+fx4IPunoAT6yxP09\u002fWP\u002fPWi\u002fAz6CwAk+HUgQPuAsFj7Eqxo+bHAdPt55Hj4iBB4++nEcPi8IGj4r+xU+HJYPPn8eCD7p6AE+ssT9Pf1j\u002fz1ovwM+gsAJPh1IED7gLBY+xKsaPmxwHT7eeR4+IgQePvpxHD4vCBo+K\u002fsVPhyWDz5\u002fHgg+6egBPrLE\u002fT39Y\u002f89aL8DPoLACT4dSBA+4CwWPsSrGj5scB0+3nkePiIEHj76cRw+LwgaPiv7FT4clg8+fx4IPunoAT6yxP09\u002fWP\u002fPWi\u002fAz6CwAk+HUgQPuAsFj7Eqxo+bHAdPt55Hj4iBB4++nEcPi8IGj4r+xU+HJYPPn8eCD7p6AE+ssT9Pf1j\u002fz1ovwM+gsAJPh1IED7gLBY+xKsaPmxwHT7eeR4+IgQePvpxHD4vCBo+K\u002fsVPhyWDz5\u002fHgg+6egBPrLE\u002fT39Y\u002f89aL8DPoLACT4dSBA+4CwWPsSrGj5scB0+3nkePiIEHj76cRw+LwgaPiv7FT4clg8+fx4IPunoAT6yxP09\u002fWP\u002fPWi\u002fAz6CwAk+HUgQPuAsFj7Eqxo+bHAdPt55Hj4iBB4++nEcPg=="},"yaxis":"y","type":"scatter"}],"name":"8"},{"data":[{"hovertemplate":"pRF width (sigma)=9\u003cbr\u003eTime frame=%{x}\u003cbr\u003ePredicted neural response=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"9","line":{"color":"#17BECF","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"9","orientation":"v","showlegend":true,"x":{"dtype":"i2","bdata":"AAABAAIAAwAEAAUABgAHAAgACQAKAAsADAANAA4ADwAQABEAEgATABQAFQAWABcAGAAZABoAGwAcAB0AHgAfACAAIQAiACMAJAAlACYAJwAoACkAKgArACwALQAuAC8AMAAxADIAMwA0ADUANgA3ADgAOQA6ADsAPAA9AD4APwBAAEEAQgBDAEQARQBGAEcASABJAEoASwBMAE0ATgBPAFAAUQBSAFMAVABVAFYAVwBYAFkAWgBbAFwAXQBeAF8AYABhAGIAYwBkAGUAZgBnAGgAaQBqAGsAbABtAG4AbwBwAHEAcgBzAHQAdQB2AHcAeAB5AHoAewB8AH0AfgB\u002fAIAAgQCCAIMAhACFAIYAhwCIAIkAigCLAIwAjQCOAI8AkACRAJIAkwCUAJUAlgCXAJgAmQCaAJsAnACdAJ4AnwA="},"xaxis":"x","y":{"dtype":"f4","bdata":"lK7+PZSu\u002fj2Urv49kKj+Pc2v\u002fj3Mcv898tMAPrO0Aj7dFgU+IYoHPsqkCT41Ggs+NMgLPkOtCz4b5Ao+4JkJPr3lBz5dHQU+EasAPhnj9j2jOu49NiLqPd+H6z0rjfE93lX6PZ7qAT7qMAY+zXIJPut0Cz5pNww+5+YLPpzJCj4pEAk++SUGPvqFAT5JOvg9XTzvPfDc6j0RC+w9A+fxPfqR+j1h\u002fgE+rT0GPvh6CT4Regs+qToMPh\u002foCz6cyQo+KRAJPvklBj76hQE+STr4PV087z3w3Oo9EQvsPQPn8T36kfo9Yf4BPq09Bj74egk+EXoLPqk6DD4f6As+nMkKPikQCT75JQY++oUBPkk6+D1dPO898NzqPREL7D0D5\u002fE9+pH6PWH+AT6tPQY++HoJPhF6Cz6pOgw+H+gLPpzJCj4pEAk++SUGPvqFAT5JOvg9XTzvPfDc6j0RC+w9A+fxPfqR+j1h\u002fgE+rT0GPvh6CT4Regs+qToMPh\u002foCz6cyQo+KRAJPvklBj76hQE+STr4PV087z3w3Oo9EQvsPQPn8T36kfo9Yf4BPq09Bj74egk+EXoLPqk6DD4f6As+nMkKPikQCT75JQY++oUBPkk6+D1dPO898NzqPREL7D0D5\u002fE9+pH6PWH+AT6tPQY++HoJPhF6Cz6pOgw+H+gLPpzJCj4pEAk++SUGPvqFAT5JOvg9XTzvPfDc6j0RC+w9A+fxPfqR+j1h\u002fgE+rT0GPvh6CT4Regs+qToMPh\u002foCz6cyQo+KRAJPvklBj76hQE+STr4PV087z3w3Oo9EQvsPQPn8T36kfo9Yf4BPq09Bj74egk+EXoLPqk6DD4f6As+nMkKPg=="},"yaxis":"y","type":"scatter"}],"name":"9"}]);
+                        }).then(function(){
+                            
+var gd = document.getElementById('ee6b97ac-d86c-481b-b5d4-5f3ed71e478f');
+var x = new MutationObserver(function (mutations, observer) {{
+        var display = window.getComputedStyle(gd).display;
+        if (!display || display === 'none') {{
+            console.log([gd, 'removed!']);
+            Plotly.purge(gd);
+            observer.disconnect();
+        }}
+}});
+
+// Listen for the removal of the full notebook cells
+var notebookContainer = gd.closest('#notebook-container');
+if (notebookContainer) {{
+    x.observe(notebookContainer, {childList: true});
+}}
+
+// Listen for the clearing of the current output cell
+var outputEl = gd.closest('.output');
+if (outputEl) {{
+    x.observe(outputEl, {childList: true});
+}}
+
+                        })                };            </script>        </div></div></div>
+</div>
+<p>We can see that the tuning width determines the sharpness of the predicted response peaks.</p>
+</section>
+</section>
+<section id="part-2-tbd">
+<h2>Part 2: TBD<a class="headerlink" href="#part-2-tbd" title="Link to this heading">¶</a></h2>
+<p>This part will be added in a future version.</p>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading">¶</a></h2>
+<p>In this tutorial, I showed how to create a custom 1D Gaussian pRF model for a fictional numerosity experiment. I first created a stimulus for the fictional experiment. Then, I created a custom pRF response model and inserted it into the default composite pRF model
+that combines the pRF response with an impulse and scaling model.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<p>Harvey, B. M., Klein, B. P., Petridou, N., &amp; Dumoulin, S. O. (2013). Topographic representation of numerosity in the human parietal cortex. <em>Science</em>, <em>341</em>(6150), 1123-1126. https://doi.org/10.1126/science.1239052</p>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../examples/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Examples</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="regressors.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Adding regressors to a model</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2025, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Creating a custom model</a><ul>
+<li><a class="reference internal" href="#part-1-implementing-a-1d-gaussian-prf-model">Part 1: Implementing a 1D Gaussian pRF model</a><ul>
+<li><a class="reference internal" href="#creating-a-1d-stimulus">Creating a 1D stimulus</a></li>
+<li><a class="reference internal" href="#implementing-the-custom-response-model">Implementing the custom response model</a></li>
+<li><a class="reference internal" href="#creating-the-model">Creating the model</a></li>
+<li><a class="reference internal" href="#simulating-a-neural-response">Simulating a neural response</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#part-2-tbd">Part 2: TBD</a></li>
+<li><a class="reference internal" href="#conclusion">Conclusion</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>
