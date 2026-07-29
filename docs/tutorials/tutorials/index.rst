@@ -12,3 +12,4 @@ Here you can find a list of tutorials:
    diff_gaussians_prf_simulated.md
    div_norm_prf_simulated.md
    regressors.md
+   custom_models.md
