@@ -103,6 +103,7 @@ def plot_surf_stat_map_helper(
         vmin: float | None = None,
         vmax: float | None = None,
         title: str | None = None,
+        cmap: str = "inferno",
     ) -> tuple[plt.Figure, plt.Axes]:
     """Helper function to plot a surface with a stat map."""
     fig, ax = plt.subplots(subplot_kw={"projection": "3d"}, figsize=(8, 6))
@@ -114,7 +115,7 @@ def plot_surf_stat_map_helper(
         vmax=vmax,
         hemi="both",
         view=SURF_VIEW,
-        cmap="inferno",
+        cmap=cmap,
         axes=ax,
         figure=fig,
         title=title,
@@ -226,18 +227,18 @@ num_grid_points = design_smooth_low_res.shape[1]
 
 x_min, y_min, x_max, y_max = -10.0, -10.0, 10.0, 10.0
 
-coordinates = np.stack(
+xv, yv = np.meshgrid(
     # Get all combinations of x- and y-coordinates
-    np.meshgrid(
-        np.linspace(x_min, x_max, num_grid_points),
-        np.linspace(y_min, y_max, num_grid_points),
-    ),
-    axis=-1,
+    np.linspace(x_min, x_max, num_grid_points),
+    np.linspace(y_min, y_max, num_grid_points),
 )
+
+# The y-coordinate is stacked first because it varies along the row axis of the design
+coordinates = np.stack((yv, xv), axis=-1)
 coordinates.shape
 ```
 
-The `coordinates` object contains the x- and y-coordinate for every screen pixel in the visual field. We combine the
+The `coordinates` object contains the y- and x-coordinate for every screen pixel in the visual field. We combine the
 final design and the coordinates in a {py:class}`prfmodel.stimuli.PRFStimulus` container that we will later use as input for our pRF model.
 
 ```{code-cell} ipython3
@@ -672,10 +673,22 @@ angle = np.full((response_psc.shape[0],), fill_value=np.nan)
 angle_valid = calc_angle(ls_params["mu_x"], ls_params["mu_y"])
 angle[response_is_valid] = np.where(is_above_threshold, angle_valid, np.nan)
 
-plot_surf_stat_map_helper(angle, vmin=-np.pi, vmax=np.pi, title="pRF center polar angle");
+# The polar angle is cyclic (-pi and +pi are the same direction), so we use a cyclic colormap
+plot_surf_stat_map_helper(angle, vmin=-np.pi, vmax=np.pi, title="pRF center polar angle", cmap="hsv");
 ```
 
-The surface plot shows that vertices in the left hemisphere have a positive pRF angle, meaning that their pRF center is on the right side of the screen. In contrast, vertices in the right hemisphere have negative pRF angle, thus, their pRF center is located on the left side of the screen.
+The polar angle runs counterclockwise from the right side of the screen: an angle of 0 means that the pRF center lies
+to the right of the center of the screen, an angle of $\pm\pi$ that it lies to the left. The sign of the angle
+distinguishes the upper (positive) from the lower (negative) half of the screen.
+
+The surface plot shows that vertices in the left hemisphere have angles around 0, meaning that their pRF center is on
+the right side of the screen. In contrast, vertices in the right hemisphere have angles around $\pm\pi$, thus, their
+pRF center is located on the left side of the screen. This is what we expect from the visual system: each hemisphere
+represents the opposite half of the visual field.
+
+Note that the angles around $\pm\pi$ in the right hemisphere wrap around: $-\pi$ and $+\pi$ point in the same
+direction, so the apparent jump between them is a property of the angle definition and not a discontinuity in the
+estimated pRF centers. The cyclic colormap gives both ends the same color, which keeps the transition smooth.
 
 We can also look at the eccentricity, that is, the distance of the pRF center from the center of the screen.
 

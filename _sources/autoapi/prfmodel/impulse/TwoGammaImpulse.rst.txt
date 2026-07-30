@@ -8,9 +8,9 @@ prfmodel.impulse.TwoGammaImpulse
    Weighted difference of two gamma distributions impulse model.
 
    Predicts an impulse response that is the weighted difference of two gamma distributions.
-   The model has five parameters: `delay` and `undershoot` refer to the positive and negative peaks of the response
-   while `dispersion` and `u_dispersion` refer to the rate parameters of the two gamma distributions. The `ratio`
-   parameter indicates the weight of the second gamma distribution.
+   The model has five parameters: `delay` and `undershoot` are the mean times (in seconds) of the positive and
+   negative components of the response, while `dispersion` and `u_dispersion` are the scale parameters of the two
+   gamma distributions. The `ratio` parameter indicates the weight of the second gamma distribution.
 
    :param duration: The duration of the impulse response (in seconds).
    :type duration: float, default=32.0
@@ -36,12 +36,16 @@ prfmodel.impulse.TwoGammaImpulse
    .. rubric:: Notes
 
    The predicted impulse response at time :math:`t` with :math:`\alpha_1 = delay / dispersion`,
-   :math:`\lambda_1 = dispersion`, :math:`\alpha_2  = undershoot / u\_dispersion`, :math:`\lambda_2 = u\_dispersion`,
-   and :math:`\omega = ratio` is:
+   :math:`\theta_1 = dispersion`, :math:`\alpha_2  = undershoot / u\_dispersion`,
+   :math:`\theta_2 = u\_dispersion`, and :math:`\omega = ratio` is:
 
    .. math::
 
-       f(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega f_{\text{gamma}}(t; \alpha_2, \lambda_2)
+       f(t) = f_{\text{gamma}}(t; \alpha_1, \theta_1) - \omega f_{\text{gamma}}(t; \alpha_2, \theta_2)
+
+   `dispersion` is the gamma **scale**, following the convention used by SPM, nilearn and Glover.
+   Consequently the mean of the first component is exactly `delay` seconds and that of the second exactly
+   `undershoot` seconds, and both parameters are directly comparable with values reported for other software.
 
    .. rubric:: References
 

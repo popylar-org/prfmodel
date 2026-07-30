@@ -428,10 +428,16 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>design</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>numpy.ndarray</em></a>) – The stimulus design array containing the stimulus value in one or more dimensions over different time frames.
 The first axis is assumed to be time frames. Additional axes represent design dimensions.</p></li>
-<li><p><strong>grid</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>numpy.ndarray</em></a>) – The coordinate system of the design. The last axis is the number of design dimensions
+<li><p><strong>grid</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>numpy.ndarray</em></a>) – <p>The coordinate system of the design. The last axis is the number of design dimensions
 excluding the time frame dimension. The shape excluding the last axis must match the shape
-of the design excluding the first axis.</p></li>
-<li><p><strong>dimension_labels</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] or </em><em>None</em><em>, </em><em>optional</em>) – Names of the grid dimensions (e.g., <cite>[“y”, “x”]</cite>). If given, the number of labels must match the last grid axis.</p></li>
+of the design excluding the first axis.</p>
+<p>The order of the last axis must follow the array axes of the design: <cite>grid[…, i]</cite> holds the
+coordinate that varies along design axis <cite>i + 1</cite>. For a 2D stimulus with a design of shape
+<cite>(num_frames, height, width)</cite> this means <cite>grid[…, 0]</cite> is the vertical (<cite>y</cite>) coordinate and
+<cite>grid[…, 1]</cite> is the horizontal (<cite>x</cite>) coordinate. See Notes.</p>
+</p></li>
+<li><p><strong>dimension_labels</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>] or </em><em>None</em><em>, </em><em>optional</em>) – Names of the grid dimensions (e.g., <cite>[“y”, “x”]</cite>). If given, the number of labels must match the last grid
+axis. Label <cite>i</cite> names the coordinate stored in <cite>grid[…, i]</cite>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -446,26 +452,38 @@ of the design excluding the first axis.</p></li>
 <p>The shapes of the design and grid must match according to <cite>design.shape[1:] == grid.shape[:-1]</cite>.
 That is, all design dimensions but the first must have the same size as the grid
 dimensions excluding the last grid dimension.</p>
+<p><strong>Coordinate order.</strong> The last grid axis is ordered to match the design’s array axes, so
+<cite>grid[…, i]</cite> is the coordinate that varies along design axis <cite>i + 1</cite>. Because NumPy uses
+row-major order, the first design axis after time is rows (height), which means the vertical
+(<cite>y</cite>) coordinate comes first and the horizontal (<cite>x</cite>) coordinate second.</p>
+<p>This is why response models read their centre parameters in the same order, for example
+<a class="reference internal" href="models/prf/Gaussian2DPRFResponse.html#prfmodel.models.prf.Gaussian2DPRFResponse" title="prfmodel.models.prf.Gaussian2DPRFResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFResponse</span></code></a> pairs <cite>mu_y</cite> with <cite>grid[…, 0]</cite> and <cite>mu_x</cite>
+with <cite>grid[…, 1]</cite>. Building a grid with <cite>numpy.meshgrid</cite> therefore requires stacking <cite>yv</cite>
+before <cite>xv</cite>, as in the example below.</p>
 <p class="rubric">Examples</p>
 <p>Create a population receptive field stimulus on a 2D grid.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">num_frames</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">design</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">num_frames</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pixel_size</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Deliberately different height and width so the axis order is unambiguous</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">num_frames</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">design</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">num_frames</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">width</span><span class="p">))</span>  <span class="c1"># time first, then rows, then columns</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pixel_size</span> <span class="o">=</span> <span class="mf">0.5</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">width</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">pixel_size</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">height</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">height</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">pixel_size</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (height, width, 2)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (height, width, 2)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The coordinates of the bottom-left corner:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># y comes first because design axis 1 is the row (height) axis</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">yv</span><span class="p">,</span> <span class="n">xv</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (height, width, 2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The (y, x) coordinates of the bottom-left corner:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
-<span class="go">array([-0.375, -0.375])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The coordinates of the top-right corner:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span><span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="p">:]</span>
-<span class="go">array([0.375, 0.375])</span>
+<span class="go">array([-1.75, -3.75])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># The (y, x) coordinates of the top-right corner:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="p">:]</span>
+<span class="go">array([1.75, 3.75])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Moving along the last column changes x only:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="p">:]</span>
+<span class="go">array([-1.75,  3.75])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">dimension_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
-<span class="go">PRFStimulus(design=array[10, 16, 16], grid=array[16, 16, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
+<span class="go">PRFStimulus(design=array[10, 8, 16], grid=array[8, 16, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
 </pre></div>
 </div>
 <dl class="py method">
@@ -506,10 +524,37 @@ dimensions excluding the last grid dimension.</p>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <cite>direction</cite> is not “horizontal” or “vertical”.</p>
 </dd>
 </dl>
+<p class="rubric">Notes</p>
+<p>The <cite>design</cite> is stored in <strong>screen pixel</strong> order, but the <cite>grid</cite> holds <strong>visual field</strong>
+coordinates in degrees of visual angle. These two spaces are related by a horizontal flip,
+because in a typical MRI setup the participant views the screen through a mirror that
+reverses left and right. The horizontal coordinate therefore <em>decreases</em> across the design
+columns: <cite>grid[0, 0, 1]</cite> is the largest (most positive) <cite>x</cite> and <cite>grid[0, -1, 1]</cite> the
+smallest. The vertical coordinate is unaffected and increases down the rows.</p>
+<p>Concretely, a bar drawn in the leftmost columns of <cite>design</cite> falls in the <strong>right</strong> visual
+hemifield (positive <cite>mu_x</cite>), and a bar in the rightmost columns falls in the left hemifield
+(negative <cite>mu_x</cite>). A <code class="docutils literal notranslate"><span class="pre">direction=&quot;horizontal&quot;</span></code> bar sweeps left-to-right across the screen,
+which is right-to-left (decreasing <cite>mu_x</cite>) through the visual field.</p>
+<p>This is the same convention as the packaged stimulus returned by
+<a class="reference internal" href="examples/load_2d_prf_bar_stimulus.html#prfmodel.examples.load_2d_prf_bar_stimulus" title="prfmodel.examples.load_2d_prf_bar_stimulus"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_2d_prf_bar_stimulus()</span></code></a>, so <cite>mu_x</cite> estimates are directly
+comparable between the two.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="o">.</span><span class="n">create_2d_bar_stimulus</span><span class="p">(</span><span class="n">num_frames</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
 <span class="go">PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
+</pre></div>
+</div>
+<p>The horizontal coordinate decreases across the columns, the vertical one increases down the
+rows:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="o">.</span><span class="n">create_2d_bar_stimulus</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">pixel_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span><span class="o">.</span><span class="n">grid</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># x, constant down each column</span>
+<span class="go">array([[ 2.,  1.,  0., -1., -2.],</span>
+<span class="go">       [ 2.,  1.,  0., -1., -2.],</span>
+<span class="go">       [ 2.,  1.,  0., -1., -2.]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span><span class="o">.</span><span class="n">grid</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># y, constant across each row</span>
+<span class="go">array([[-1., -1., -1., -1., -1.],</span>
+<span class="go">       [ 0.,  0.,  0.,  0.,  0.],</span>
+<span class="go">       [ 1.,  1.,  1.,  1.,  1.]])</span>
 </pre></div>
 </div>
 </dd></dl>

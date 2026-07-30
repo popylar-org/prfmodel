@@ -432,7 +432,10 @@ the same size <cite>sigma</cite>.</p>
 <li><p><strong>mu</strong> (<a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><code class="xref py py-data docutils literal notranslate"><span class="pre">prfmodel.typing.Tensor</span></code></a>) – Centroid of the population receptive field. Must have at least two dimensions.
 The first dimension corresponds to the number of units.
 The second dimension corresponds to the number of grid dimensions and must match the size of the
-last <cite>grid</cite> dimension.</p></li>
+last <cite>grid</cite> dimension. Its order must match the order of the last <cite>grid</cite> dimension, that is,
+<cite>mu[:, i]</cite> is paired with <cite>grid[…, i]</cite>. For a 2D grid built as described in
+<a class="reference internal" href="../../stimuli/PRFStimulus.html#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><code class="xref py py-class docutils literal notranslate"><span class="pre">PRFStimulus</span></code></a>, this means <cite>mu[:, 0]</cite> is the vertical (<cite>y</cite>) centre and
+<cite>mu[:, 1]</cite> the horizontal (<cite>x</cite>) centre.</p></li>
 <li><p><strong>sigma</strong> (<a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><code class="xref py py-data docutils literal notranslate"><span class="pre">prfmodel.typing.Tensor</span></code></a>) – Size of the population receptive field. Must have at least two dimensions.
 The first dimension corresponds to the number of units,
 and its size must match the size of the first <cite>mu</cite> dimension.
@@ -458,12 +461,12 @@ do not match.</p></li>
 <p class="rubric">Examples</p>
 <p>Predict a 2D Gaussian response.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define a 2D grid</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">num_x</span><span class="p">,</span> <span class="n">num_y</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define a 2D grid; y comes first to match the row-major design axes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">num_x</span><span class="p">,</span> <span class="n">num_y</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">6</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">num_x</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">num_y</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">xv</span><span class="p">,</span> <span class="n">yv</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (10, 10, 2)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">((</span><span class="n">yv</span><span class="p">,</span> <span class="n">xv</span><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (6, 10, 2)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define 2D centroids of Gaussian for 3 units</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>  <span class="c1"># shape (3, 2), first column y, second column x</span>
 <span class="gp">... </span>    <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
@@ -474,7 +477,7 @@ do not match.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">2.0</span><span class="p">]])</span>  <span class="c1"># shape (3, 1)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">resp</span> <span class="o">=</span> <span class="n">predict_gaussian_response</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (num_units, num_y, num_x)</span>
-<span class="go">(3, 10, 10)</span>
+<span class="go">(3, 6, 10)</span>
 </pre></div>
 </div>
 </dd></dl>

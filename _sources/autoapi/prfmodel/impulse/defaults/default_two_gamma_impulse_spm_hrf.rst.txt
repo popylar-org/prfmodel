@@ -15,6 +15,9 @@ prfmodel.impulse.defaults.default_two_gamma_impulse_spm_hrf
    The default values are adapted from
    `nilearn <https://github.com/nilearn/nilearn/blob/62934704a/nilearn/glm/first_level/hemodynamic_models.py>`_.
 
+   ``dispersion`` and ``u_dispersion`` are gamma **scale** parameters, the same convention nilearn and SPM use, so
+   these values reproduce nilearn's ``spm_hrf``. See :class:`~prfmodel.impulse.TwoGammaImpulse` for details.
+
    .. rubric:: References
 
    .. [1] https://www.fil.ion.ucl.ac.uk/spm/

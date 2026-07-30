@@ -61,7 +61,7 @@ print(stimulus)
 ```
 
 When printing the `stimulus` object, we can see that it has three attributes. The `design` attribute defines how
-the visual field changes over time. It has shape `(num_frames, width, height)`, where width and hight define the number of pixels at which the visual field is recorded. The `grid` attribute maps each pixel to its xy-coordinate in the visual field (i.e., the degree of visual angle).
+the visual field changes over time. It has shape `(num_frames, height, width)`, where height and width define the number of pixels at which the visual field is recorded. The `grid` attribute maps each pixel to its coordinate in the visual field (i.e., the degree of visual angle). Its last axis follows the axes of the design, so `grid[..., 0]` holds the vertical (`y`) coordinate and `grid[..., 1]` the horizontal (`x`) coordinate.
 
 +++
 
@@ -251,18 +251,14 @@ We now initialize a DoG model from the fitted Gaussian parameters.
 - `sigma_center = sigma`
 - `sigma_surround = 5 × sigma_center`
 - `amplitude_center = amplitude`
-- `amplitude_surround = 0`
+- `amplitude_surround` = a small positive value (`1e-3` by default)
 
 We then run SGD directly on the DoG model. To enforce the constraint that
-`amplitude_surround` must be positive we pass a `ParameterConstraint(lower=0.0)` adapter.
-Starting `amplitude_surround` near zero and with a large positive `amplitude_center` from the Gaussian fit
+`amplitude_surround` must be positive we pass a `ParameterTransform(transform_fun=ops.log, inverse_fun=ops.exp)`
+adapter. The adapter maps `amplitude_surround` onto an unbounded scale for the optimizer and maps it back before
+every prediction, so the model only ever sees a positive value no matter where the optimizer moves.
+Starting `amplitude_surround` near zero with a large positive `amplitude_center` from the Gaussian fit
 also ensures `amplitude_surround < amplitude_center` at initialization.
-
-> **Note — one-shot alternative:** It would be possible to skip the Gaussian
-> pre-fit and run a joint grid search over `sigma_center` and `sigma_surround` followed
-> by LeastSquares for both amplitudes, and then SGD. This one-shot approach
-> works but is slower, the `amplitude_surround > 0` constraint is not
-> automatically enforced, and could lead to non-interpretable amplitudes.
 
 ```{code-cell} ipython3
 from prfmodel.models.prf import init_dog_from_gaussian
@@ -274,12 +270,13 @@ dog_init_params
 ```
 
 ```{code-cell} ipython3
-from prfmodel.fitters.adapter import Adapter, ParameterConstraint
+from keras import ops
+from prfmodel.fitters.adapter import Adapter, ParameterTransform
 
 # Constrain amplitude_surround > 0 during SGD
 # (amplitude_surround < amplitude_center is satisfied by initializing amplitude_surround near 0)
 dog_adapter = Adapter(transforms=[
-    ParameterConstraint(["amplitude_surround"], lower=0.0),
+    ParameterTransform(["amplitude_surround"], transform_fun=ops.log, inverse_fun=ops.exp),
 ])
 
 sgd_fitter = SGDFitter(
@@ -319,9 +316,9 @@ two-step workflow.
 
 In **Step 1**, we fitted a plain Gaussian model with a grid search and least squares to efficiently locate the pRF center and size.
 
-In **Step 2**, we used `init_dog_from_gaussian` to seed the DoG model from the Gaussian fit. We set the surround size to five times the center size and initialized `amplitude_surround = 0`.
+In **Step 2**, we used `init_dog_from_gaussian` to seed the DoG model from the Gaussian fit. We set the surround size to five times the center size and initialized `amplitude_surround` to a small positive value.
 
-We then ran SGD with a `ParameterConstraint` that enforced `amplitude_surround > 0` throughout optimisation. At each stage, we compared the predicted model response against the original simulated response to check the quality of the fit.
+We then ran SGD with a `ParameterTransform` that enforced `amplitude_surround > 0` throughout optimisation. At each stage, we compared the predicted model response against the original simulated response to check the quality of the fit.
 
 +++
 

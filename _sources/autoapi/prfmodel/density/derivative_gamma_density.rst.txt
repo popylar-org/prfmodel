@@ -1,19 +1,19 @@
 prfmodel.density.derivative_gamma_density
 =========================================
 
-.. py:function:: prfmodel.density.derivative_gamma_density(value: prfmodel.typing.Tensor, shape: prfmodel.typing.Tensor, rate: prfmodel.typing.Tensor) -> prfmodel.typing.Tensor
+.. py:function:: prfmodel.density.derivative_gamma_density(value: prfmodel.typing.Tensor, shape: prfmodel.typing.Tensor, scale: prfmodel.typing.Tensor) -> prfmodel.typing.Tensor
 
    Calculate the derivative density of a gamma distribution.
 
-   The distribution uses a shape and rate parameterization.
+   The distribution uses a shape and scale parameterization.
    Raises an error when evaluated at negative values.
 
    :param value: The values at which to evaluate the derivative gamma distribution. Must be > 0 and scalar or with shape (1, m).
    :type value: :data:`prfmodel.typing.Tensor`
    :param shape: The shape parameter. Must be > 0 and scalar or with shape (n, m).
    :type shape: :data:`prfmodel.typing.Tensor`
-   :param rate: The rate parameter. Must be > 0 and scalar or with shape (n, m).
-   :type rate: :data:`prfmodel.typing.Tensor`
+   :param scale: The scale parameter. Must be > 0 and scalar or with shape (n, m).
+   :type scale: :data:`prfmodel.typing.Tensor`
 
    :returns: The derivative density of the gamma distribution at `value` as a scalar or with shape (n, m).
    :rtype: :data:`prfmodel.typing.Tensor`
@@ -21,19 +21,19 @@ prfmodel.density.derivative_gamma_density
    .. rubric:: Notes
 
    The density of the gamma distribution
-   with `shape` :math:`\alpha` and `rate` :math:`\lambda` is given by:
+   with `shape` :math:`\alpha` and `scale` :math:`\theta` is given by:
 
    .. math::
 
-       f(x) =  \frac{\mathtt{\lambda}^{\mathtt{\alpha}}}{\Gamma(\mathtt{\alpha})}
-       x^{\mathtt{\alpha} - 1} e^{\mathtt{\lambda} x}.
+       f(x) =  \frac{1}{\mathtt{\theta}^{\mathtt{\alpha}} \Gamma(\mathtt{\alpha})}
+       x^{\mathtt{\alpha} - 1} e^{-x / \mathtt{\theta}}.
 
    The derivative of the density with respect to :math:`x` can be defined as a function of the original density
    :math:`f(x)`:
 
    .. math::
 
-       f(x)' = f(x) \frac{(\alpha - 1)}{t} - \lambda
+       f(x)' = f(x) \frac{(\alpha - 1)}{t} - \frac{1}{\theta}
 
    .. seealso::
 
@@ -46,8 +46,8 @@ prfmodel.density.derivative_gamma_density
    >>> from prfmodel.density import derivative_gamma_density
    >>> t = np.array([[1.0, 2.0, 3.0]])   # shape (1, 3)
    >>> shape = np.array([[2.0], [4.0]])   # shape (2, 1)
-   >>> rate = np.array([[1.0], [1.0]])    # shape (2, 1)
-   >>> dens = derivative_gamma_density(t, shape, rate)
+   >>> scale = np.array([[1.0], [1.0]])    # shape (2, 1)
+   >>> dens = derivative_gamma_density(t, shape, scale)
    >>> print(dens.shape)
    (2, 3)
 

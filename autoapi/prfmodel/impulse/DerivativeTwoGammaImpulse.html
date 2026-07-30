@@ -425,10 +425,10 @@
 <dd><p>Weighted difference of two derivative gamma distributions impulse model.</p>
 <p>Predicts an impulse response that is the weighted derivative difference of two gamma distributions. This
 weighted derivative difference is added to the weighted difference of the two gamma distributions.
-The model has six parameters: <cite>delay</cite> and <cite>undershoot</cite> refer to the positive and negative peaks of the response
-while <cite>dispersion</cite> and <cite>u_dispersion</cite> refer to the rate parameters of the two gamma distributions. The <cite>ratio</cite>
-parameter indicates the weight of the second gamma distribution. The <cite>weight_deriv</cite> represents the weight of the
-derivative difference added to the standard difference.</p>
+The model has six parameters: <cite>delay</cite> and <cite>undershoot</cite> are the mean times (in seconds) of the positive and
+negative components of the response, while <cite>dispersion</cite> and <cite>u_dispersion</cite> are the scale parameters of the two
+gamma distributions. The <cite>ratio</cite> parameter indicates the weight of the second gamma distribution. The
+<cite>weight_deriv</cite> represents the weight of the derivative difference added to the standard difference.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -458,18 +458,22 @@ Dictionary keys must be valid parameter names. Default values can be overriden i
 </div>
 <p class="rubric">Notes</p>
 <p>The predicted impulse response at time <span class="math notranslate nohighlight">\(t\)</span> with <span class="math notranslate nohighlight">\(\alpha_1 = delay / dispersion\)</span>,
-<span class="math notranslate nohighlight">\(\lambda_1 = dispersion\)</span>, <span class="math notranslate nohighlight">\(\alpha_2  = undershoot / u\_dispersion\)</span>, <span class="math notranslate nohighlight">\(\lambda_2 = u\_dispersion\)</span>,
-<span class="math notranslate nohighlight">\(\omega = ratio\)</span>, and <span class="math notranslate nohighlight">\(\tau = weight\_deriv\)</span> is:</p>
+<span class="math notranslate nohighlight">\(\theta_1 = dispersion\)</span>, <span class="math notranslate nohighlight">\(\alpha_2  = undershoot / u\_dispersion\)</span>,
+<span class="math notranslate nohighlight">\(\theta_2 = u\_dispersion\)</span>, <span class="math notranslate nohighlight">\(\omega = ratio\)</span>, and <span class="math notranslate nohighlight">\(\tau = weight\_deriv\)</span> is:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[f(t) = f_{\text{diff}}(t) - \tau f'_{\text{diff}}(t)\]</div>
 </div>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[f_{\text{diff}}(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega
-    f_{\text{gamma}}(t; \alpha_2, \lambda_2)\]</div>
+\[f_{\text{diff}}(t) = f_{\text{gamma}}(t; \alpha_1, \theta_1) - \omega
+    f_{\text{gamma}}(t; \alpha_2, \theta_2)\]</div>
 </div>
 <p>Positive <cite>weight_deriv</cite> values shift the response to the right.</p>
+<p><cite>dispersion</cite> follows the convention used by SPM, nilearn and Glover, where it is the gamma <strong>scale</strong>.
+<a class="reference internal" href="../density/gamma_density.html#prfmodel.density.gamma_density" title="prfmodel.density.gamma_density"><code class="xref py py-func docutils literal notranslate"><span class="pre">gamma_density()</span></code></a> is parameterized by the rate, so the reciprocal is taken here.
+Consequently the mean of the first component is exactly <cite>delay</cite> seconds and that of the second exactly
+<cite>undershoot</cite> seconds, and both parameters are directly comparable with values reported for other software.</p>
 <p class="rubric">References</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id1" role="doc-footnote">

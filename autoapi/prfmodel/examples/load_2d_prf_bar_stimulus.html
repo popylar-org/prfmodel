@@ -445,10 +445,18 @@ with a <code class="docutils literal notranslate"><span class="pre">design</span
 approximately -4 to 4 degrees of visual angle vertically and horizontally. The stimulus coordinate grid has been
 transformed from a rectangular into a quadratic shape. The moving bar patterns is mirrored in the time axis
 which means that it can be split in two almost identical halfs.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">design</span></code> is stored in screen pixel order while the <code class="docutils literal notranslate"><span class="pre">grid</span></code> holds visual field coordinates, which are
+related by a horizontal flip because the participant viewed the screen through a mirror. The horizontal
+coordinate therefore decreases across the design columns, so a bar in the leftmost columns falls in the right
+visual hemifield (positive <code class="docutils literal notranslate"><span class="pre">mu_x</span></code>). The vertical coordinate increases down the rows.
+<a class="reference internal" href="../stimuli/PRFStimulus.html#prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus" title="prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_2d_bar_stimulus()</span></code></a> uses the same convention, so <code class="docutils literal notranslate"><span class="pre">mu_x</span></code> estimates are
+directly comparable between the two.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">prfmodel.stimuli.prf.animate_2d_prf_stimulus</span></code></dt><dd><p>Create an animation for a two-dimensional stimulus.</p>
+<dt><a class="reference internal" href="../plotting/animate_2d_prf_stimulus.html#prfmodel.plotting.animate_2d_prf_stimulus" title="prfmodel.plotting.animate_2d_prf_stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prfmodel.plotting.animate_2d_prf_stimulus</span></code></a></dt><dd><p>Create an animation for a two-dimensional stimulus.</p>
+</dd>
+<dt><a class="reference internal" href="../stimuli/PRFStimulus.html#prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus" title="prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus</span></code></a></dt><dd><p>Create a two-dimensional bar stimulus.</p>
 </dd>
 </dl>
 </div>
