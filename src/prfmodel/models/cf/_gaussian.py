@@ -96,7 +96,7 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus]):
         resp /= 2.0 * sigma_squared
 
         # Divide by volume to normalize (only two dimensions, so exponent cancels out)
-        volume = ops.sqrt(2.0 * math.pi * sigma_squared)
+        volume = 2.0 * math.pi * sigma_squared
 
         return ops.exp(-resp) / volume
 
