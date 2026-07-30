@@ -47,6 +47,7 @@ jobs:
           extras: dev,tensorflow
       - name: Cache jupyter-cache
         uses: actions/cache@v4
+        if: ${{ github.event_name == 'pull_request' }}
         with:
           path: docs/_build/.jupyter_cache
           key: ${{ runner.os }}-jupyter-cache-${{ hashFiles('docs/tutorials/**') }}
