@@ -19,10 +19,20 @@ def test__get_grid_limits():
     x = np.arange(-4, 4, 1)
     y = np.arange(-2, 6, 2)
     xv, yv = np.meshgrid(x, y)
-    grid = np.stack((xv, yv), axis=-1)
+    # y is stacked first because it varies along the row axis
+    grid = np.stack((yv, xv), axis=-1)
     result = _get_grid_limits(grid)
     expected = (-4.0, 3.0, -2.0, 4.0)
     assert result == expected, "Grid extent extracted incorrectly"
+
+
+def test__get_grid_limits_non_square():
+    """Test that x and y limits are not confused when the grid is not square."""
+    x = np.linspace(-10.0, 10.0, 5)  # 5 columns
+    y = np.linspace(-1.0, 1.0, 3)  # 3 rows
+    xv, yv = np.meshgrid(x, y)
+    grid = np.stack((yv, xv), axis=-1)
+    assert _get_grid_limits(grid) == (-10.0, 10.0, -1.0, 1.0), "Grid extent confuses the x and y axes"
 
 
 @pytest.fixture

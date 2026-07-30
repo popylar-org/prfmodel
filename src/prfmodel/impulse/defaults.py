@@ -16,6 +16,10 @@ def default_two_gamma_impulse_glover_hrf() -> dict[str, float]:
     The default values are adapted from
     `nilearn <https://github.com/nilearn/nilearn/blob/62934704a/nilearn/glm/first_level/hemodynamic_models.py>`_.
 
+    ``dispersion`` and ``u_dispersion`` are gamma **scale** parameters, the same convention nilearn and SPM use, so
+    these values reproduce nilearn's ``glover_hrf`` and ``delay`` and ``undershoot`` are the mean times of the two
+    components in seconds. See :class:`~prfmodel.impulse.TwoGammaImpulse` for details.
+
     References
     ----------
     .. [1] Glover, G. H. (1999). Deconvolution of impulse response in event-related BOLD fMRI. *NeuroImage*, 9(4),
@@ -50,6 +54,9 @@ def default_two_gamma_impulse_spm_hrf() -> dict[str, float]:
     -----
     The default values are adapted from
     `nilearn <https://github.com/nilearn/nilearn/blob/62934704a/nilearn/glm/first_level/hemodynamic_models.py>`_.
+
+    ``dispersion`` and ``u_dispersion`` are gamma **scale** parameters, the same convention nilearn and SPM use, so
+    these values reproduce nilearn's ``spm_hrf``. See :class:`~prfmodel.impulse.TwoGammaImpulse` for details.
 
     References
     ----------

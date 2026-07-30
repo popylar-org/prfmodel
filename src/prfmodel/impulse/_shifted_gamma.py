@@ -16,8 +16,8 @@ class ShiftedGammaImpulse(BaseImpulse):
     Shifted gamma distribution impulse model.
 
     Predicts an impulse response that is a shifted gamma distribution.
-    The model has three parameters: `delay` refers to the positive peak, `dispersion` to the
-    rate, and `shift` to the onset of the gamma distribution.
+    The model has three parameters: `delay` is the mean time (in seconds) of the gamma distribution, `dispersion`
+    its scale, and `shift` its onset.
 
     Parameters
     ----------
@@ -44,13 +44,16 @@ class ShiftedGammaImpulse(BaseImpulse):
     Notes
     -----
     The predicted impulse response at time :math:`t` with :math:`\alpha = delay / dispersion`,
-    :math:`\lambda = dispersion`, and :math:`\delta = shift` is:
+    :math:`\theta = dispersion`, and :math:`\delta = shift` is:
 
     .. math::
 
-        f(t) = f_{\text{gamma}}(t - \delta; \alpha, \lambda)
+        f(t) = f_{\text{gamma}}(t - \delta; \alpha, \theta)
 
     The response prior to the onset of the gamma distribution is set to zero.
+
+    `dispersion` is the gamma **scale**, following the convention used by SPM, nilearn and Glover.
+    Consequently the mean of the gamma distribution is exactly `delay` seconds after `shift`.
 
     References
     ----------

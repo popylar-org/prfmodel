@@ -29,7 +29,7 @@ class TestGammaDensitySetup:
 
     @pytest.fixture
     def parameter_range(self):
-        """Range of shape and rate parameters."""
+        """Range of shape and scale parameters."""
         return np.round(np.linspace(0.1, 5.0, 5), 2)
 
     @pytest.fixture
@@ -38,8 +38,8 @@ class TestGammaDensitySetup:
         return np.linspace(-5, 5, num=5)
 
     @staticmethod
-    def _calc_gamma_pdf(x: np.ndarray, shape: float, rate: float, shift: float = 0.0) -> np.ndarray:
-        return stats.gamma.pdf(x, a=shape, loc=shift, scale=1 / rate)
+    def _calc_gamma_pdf(x: np.ndarray, shape: float, scale: float, shift: float = 0.0) -> np.ndarray:
+        return stats.gamma.pdf(x, a=shape, loc=shift, scale=scale)
 
 
 class TestGammaDensity(TestGammaDensitySetup):
@@ -47,7 +47,7 @@ class TestGammaDensity(TestGammaDensitySetup):
 
     @pytest.fixture
     def parameters(self, parameter_range: np.ndarray):
-        """Shape and rate parameter combinations."""
+        """Shape and scale parameter combinations."""
         return np.array(list(product(parameter_range, parameter_range)))
 
     def test_gamma_density(self, frames: np.ndarray, parameters: np.ndarray):
@@ -55,16 +55,16 @@ class TestGammaDensity(TestGammaDensitySetup):
         Test that gamma density is the same as `scipy.stats.gamma.pdf`.
 
         Argument `parameters` is a two-dimensional array where the first column is the shape and the second column
-        the rate parameter of each parameter combination.
+        the scale parameter of each parameter combination.
 
         """
         # Parameters must have shape (n, 1)
         shape = np.expand_dims(parameters[:, 0], 1)
-        rate = np.expand_dims(parameters[:, 1], 1)
+        scale = np.expand_dims(parameters[:, 1], 1)
 
-        resp = np.asarray(gamma_density(frames, shape, rate))
+        resp = np.asarray(gamma_density(frames, shape, scale))
 
-        ref = self._calc_gamma_pdf(frames, shape, rate)
+        ref = self._calc_gamma_pdf(frames, shape, scale)
 
         assert np.all(np.isclose(resp, ref))
 
@@ -72,11 +72,11 @@ class TestGammaDensity(TestGammaDensitySetup):
         """Test that gamma density is the same as `scipy.stats.gamma.pdf` for scalar inputs."""
         frames = 1.0
         shape = 2.0
-        rate = 1.0
+        scale = 1.0
 
-        resp = np.asarray(gamma_density(frames, shape, rate))
+        resp = np.asarray(gamma_density(frames, shape, scale))
 
-        ref = self._calc_gamma_pdf(frames, shape, rate)
+        ref = self._calc_gamma_pdf(frames, shape, scale)
 
         assert np.all(np.isclose(resp, ref))
 
@@ -89,99 +89,99 @@ class TestGammaDensity(TestGammaDensitySetup):
     def test_gamma_density_unnormalized(self, frames: np.ndarray):
         """Test that the normalized density is equal to the unnormalized density times the normalizing constant."""
         shape = np.array([[2.0]])
-        rate = np.array([[1.0]])
-        dens_norm = np.asarray(gamma_density(frames, shape, rate))
-        dens_unnorm = np.asarray(gamma_density(frames, shape, rate, norm=False))
+        scale = np.array([[1.0]])
+        dens_norm = np.asarray(gamma_density(frames, shape, scale))
+        dens_unnorm = np.asarray(gamma_density(frames, shape, scale, norm=False))
 
-        assert np.all(dens_norm == dens_unnorm * (rate**shape / special.gamma(shape)))
+        assert np.all(dens_norm == dens_unnorm / (scale**shape * special.gamma(shape)))
 
     def test_values_shape_value_error(self):
         """Test that values with the wrong shape raise an error."""
         frames = np.ones((3,))
         shape = np.array([[1.0, 2.0]])
-        rate = np.array([[1.0, 1.0]])
+        scale = np.array([[1.0, 1.0]])
 
         with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
         frames = np.ones((3, 1))
 
         with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
         frames = np.ones((1, 3, 1))
 
         with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
     def test_values_negative_value_error(self, frames: np.ndarray):
         """Test that negative values raise an error."""
         shape = np.array([[1.0, 2.0]])
-        rate = np.array([[1.0, 1.0]])
+        scale = np.array([[1.0, 1.0]])
         frames[0] = -1.0
 
         with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
     def test_shape_shape_value_error(self, frames: np.ndarray):
         """Test that shape parameters with the wrong shape raise an error."""
         shape = np.ones((3,))
-        rate = np.ones((3, 1))
+        scale = np.ones((3, 1))
 
         with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
         shape = np.ones((1, 3))
 
         with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
         shape = np.ones((3, 1, 1))
 
         with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
     def test_shape_negative_value_error(self, frames: np.ndarray):
         """Test that negative shape parameters raise an error."""
         shape = np.array([[-1.0, 2.0]])
-        rate = np.array([[1.0, 1.0]])
+        scale = np.array([[1.0, 1.0]])
 
         with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
-    def test_rate_shape_value_error(self, frames: np.ndarray):
-        """Test that rate parameters with the wrong shape raise an error."""
+    def test_scale_shape_value_error(self, frames: np.ndarray):
+        """Test that scale parameters with the wrong shape raise an error."""
         shape = np.ones((3, 1))
-        rate = np.ones((3,))
+        scale = np.ones((3,))
 
         with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
-        rate = np.ones((1, 3))
-
-        with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
-
-        rate = np.ones((3, 1, 1))
+        scale = np.ones((1, 3))
 
         with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
-    def test_rate_negative_value_error(self, frames: np.ndarray):
-        """Test that negative rate parameters raise an error."""
+        scale = np.ones((3, 1, 1))
+
+        with pytest.raises(ValueError):
+            gamma_density(frames, shape, scale)
+
+    def test_scale_negative_value_error(self, frames: np.ndarray):
+        """Test that negative scale parameters raise an error."""
         shape = np.array([[1.0, 2.0]])
-        rate = np.array([[-1.0, 1.0]])
+        scale = np.array([[-1.0, 1.0]])
 
         with pytest.raises(ValueError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
     def test_heterogeneous_shape_error(self, frames: np.ndarray):
         """Test that parameters with different shapes raise an error."""
         shape = np.ones((3, 1))
-        rate = np.ones((2, 1))
+        scale = np.ones((2, 1))
 
         with pytest.raises(ShapeMismatchError):
-            gamma_density(frames, shape, rate)
+            gamma_density(frames, shape, scale)
 
 
 class TestShiftedGammaDensity(TestGammaDensitySetup):
@@ -189,7 +189,7 @@ class TestShiftedGammaDensity(TestGammaDensitySetup):
 
     @pytest.fixture
     def parameters(self, parameter_range: np.ndarray, shift_parameter_range: np.ndarray):
-        """Shape, rate, and shift parameter combinations."""
+        """Shape, scale, and shift parameter combinations."""
         return np.array(list(product(parameter_range, parameter_range, shift_parameter_range)))
 
     def test_shifted_gamma_density(self, frames: np.ndarray, parameters: np.ndarray):
@@ -197,17 +197,17 @@ class TestShiftedGammaDensity(TestGammaDensitySetup):
         Test that shifted gamma density is the same as `scipy.stats.gamma.pdf`.
 
         Argument `parameters` is a three-dimensional array where the first column is the shape, the second column
-        the rate parameter, and the third columnt the shift parameter of each parameter combination.
+        the scale parameter, and the third columnt the shift parameter of each parameter combination.
 
         """
         # Parameters must have shape (n, 1)
         shape = np.expand_dims(parameters[:, 0], 1)
-        rate = np.expand_dims(parameters[:, 1], 1)
+        scale = np.expand_dims(parameters[:, 1], 1)
         shift = np.expand_dims(parameters[:, 2], 1)
 
-        resp = np.asarray(shifted_gamma_density(frames, shape, rate, shift))
+        resp = np.asarray(shifted_gamma_density(frames, shape, scale, shift))
 
-        ref = self._calc_gamma_pdf(frames, shape, rate, shift)
+        ref = self._calc_gamma_pdf(frames, shape, scale, shift)
 
         assert np.all(np.isclose(resp, ref))
 
@@ -215,43 +215,43 @@ class TestShiftedGammaDensity(TestGammaDensitySetup):
         """Test that shifted gamma density is the same as `scipy.stats.gamma.pdf` for scalar inputs."""
         frames = 1.0
         shape = 2.0
-        rate = 1.0
+        scale = 1.0
         shift = 2.0
 
-        resp = np.asarray(shifted_gamma_density(frames, shape, rate, shift))
+        resp = np.asarray(shifted_gamma_density(frames, shape, scale, shift))
 
-        ref = self._calc_gamma_pdf(frames, shape, rate, shift)
+        ref = self._calc_gamma_pdf(frames, shape, scale, shift)
 
         assert np.all(np.isclose(resp, ref))
 
     def test_shift_shape_value_error(self, frames: np.ndarray):
         """Test that shift parameters with the wrong shape raise an error."""
         shape = np.ones((3, 1))
-        rate = np.ones((3, 1))
+        scale = np.ones((3, 1))
         shift = np.ones((3,))
 
         with pytest.raises(ValueError):
-            shifted_gamma_density(frames, shape, rate, shift)
+            shifted_gamma_density(frames, shape, scale, shift)
 
         shift = np.ones((1, 3))
 
         with pytest.raises(ValueError):
-            shifted_gamma_density(frames, shape, rate, shift)
+            shifted_gamma_density(frames, shape, scale, shift)
 
         shift = np.ones((3, 1, 1))
 
         with pytest.raises(ValueError):
-            shifted_gamma_density(frames, shape, rate, shift)
+            shifted_gamma_density(frames, shape, scale, shift)
 
     def test_heterogeneous_shape_error(self, frames: np.ndarray):
         """Test that parameters with different shapes raise an error."""
         shape = np.ones((3, 1))
         shape = np.ones((3, 1))
-        rate = np.ones((3, 1))
+        scale = np.ones((3, 1))
         shift = np.ones((2, 1))
 
         with pytest.raises(ShapeMismatchError):
-            shifted_gamma_density(frames, shape, rate, shift)
+            shifted_gamma_density(frames, shape, scale, shift)
 
 
 class TestDerivativeGammaDensity(TestGammaDensitySetup):
@@ -259,7 +259,7 @@ class TestDerivativeGammaDensity(TestGammaDensitySetup):
 
     @pytest.fixture
     def parameters(self, parameter_range: np.ndarray):
-        """Shape and rate parameter combinations."""
+        """Shape and scale parameter combinations."""
         return np.array(list(product(parameter_range, parameter_range)))
 
     def test_derivative_gamma_density(self, frames: np.ndarray, parameters: np.ndarray):
@@ -271,18 +271,18 @@ class TestDerivativeGammaDensity(TestGammaDensitySetup):
         """
         # Parameters must have shape (n, 1)
         shape = np.expand_dims(parameters[:, 0], 1)
-        rate = np.expand_dims(parameters[:, 1], 1)
+        scale = np.expand_dims(parameters[:, 1], 1)
 
         frames = frames[:, 1:]  # Don't compare at first frame because non-analytic derivative is not stable
 
-        resp = np.asarray(derivative_gamma_density(frames, shape, rate)).squeeze()
+        resp = np.asarray(derivative_gamma_density(frames, shape, scale)).squeeze()
 
         frames = frames.squeeze()  # Omit first dimension for approximate derivative
 
         # Calc the approximate derivative for each parameter combination
         ref = np.array(
             [
-                differentiate.derivative(partial(self._calc_gamma_pdf, shape=p[0], rate=p[1]), frames).df
+                differentiate.derivative(partial(self._calc_gamma_pdf, shape=p[0], scale=p[1]), frames).df
                 for p in parameters
             ],
         )

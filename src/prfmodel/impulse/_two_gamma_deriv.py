@@ -19,10 +19,10 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
 
     Predicts an impulse response that is the weighted derivative difference of two gamma distributions. This
     weighted derivative difference is added to the weighted difference of the two gamma distributions.
-    The model has six parameters: `delay` and `undershoot` refer to the positive and negative peaks of the response
-    while `dispersion` and `u_dispersion` refer to the rate parameters of the two gamma distributions. The `ratio`
-    parameter indicates the weight of the second gamma distribution. The `weight_deriv` represents the weight of the
-    derivative difference added to the standard difference.
+    The model has six parameters: `delay` and `undershoot` are the mean times (in seconds) of the positive and
+    negative components of the response, while `dispersion` and `u_dispersion` are the scale parameters of the two
+    gamma distributions. The `ratio` parameter indicates the weight of the second gamma distribution. The
+    `weight_deriv` represents the weight of the derivative difference added to the standard difference.
 
     Parameters
     ----------
@@ -51,8 +51,8 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
     Notes
     -----
     The predicted impulse response at time :math:`t` with :math:`\alpha_1 = delay / dispersion`,
-    :math:`\lambda_1 = dispersion`, :math:`\alpha_2  = undershoot / u\_dispersion`, :math:`\lambda_2 = u\_dispersion`,
-    :math:`\omega = ratio`, and :math:`\tau = weight\_deriv` is:
+    :math:`\theta_1 = dispersion`, :math:`\alpha_2  = undershoot / u\_dispersion`,
+    :math:`\theta_2 = u\_dispersion`, :math:`\omega = ratio`, and :math:`\tau = weight\_deriv` is:
 
     .. math::
 
@@ -60,10 +60,15 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
 
     .. math::
 
-        f_{\text{diff}}(t) = f_{\text{gamma}}(t; \alpha_1, \lambda_1) - \omega
-            f_{\text{gamma}}(t; \alpha_2, \lambda_2)
+        f_{\text{diff}}(t) = f_{\text{gamma}}(t; \alpha_1, \theta_1) - \omega
+            f_{\text{gamma}}(t; \alpha_2, \theta_2)
 
     Positive `weight_deriv` values shift the response to the right.
+
+    `dispersion` follows the convention used by SPM, nilearn and Glover, where it is the gamma **scale**.
+    :func:`~prfmodel.density.gamma_density` is parameterized by the rate, so the reciprocal is taken here.
+    Consequently the mean of the first component is exactly `delay` seconds and that of the second exactly
+    `undershoot` seconds, and both parameters are directly comparable with values reported for other software.
 
     References
     ----------
@@ -163,11 +168,14 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
         ratio = convert_parameters_to_tensor(parameters[["ratio"]], dtype=dtype)
         weight_deriv = convert_parameters_to_tensor(parameters[["weight_deriv"]], dtype=dtype)
 
-        dens_1 = gamma_density(frames, delay / dispersion, dispersion)
-        dens_2 = gamma_density(frames, undershoot / u_dispersion, u_dispersion)
+        shape_scale_1 = (delay / dispersion, dispersion)
+        shape_scale_2 = (undershoot / u_dispersion, u_dispersion)
 
-        dens_deriv_1 = derivative_gamma_density(frames, delay / dispersion, dispersion)
-        dens_deriv_2 = derivative_gamma_density(frames, undershoot / u_dispersion, u_dispersion)
+        dens_1 = gamma_density(frames, *shape_scale_1)
+        dens_2 = gamma_density(frames, *shape_scale_2)
+
+        dens_deriv_1 = derivative_gamma_density(frames, *shape_scale_1)
+        dens_deriv_2 = derivative_gamma_density(frames, *shape_scale_2)
 
         diff_dens = dens_1 - ratio * dens_2
         diff_dens_deriv = dens_deriv_1 - ratio * dens_deriv_2

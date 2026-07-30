@@ -3,6 +3,9 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
+from prfmodel.fitters.adapter import Adapter
+from prfmodel.fitters.adapter import ParameterTransform
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.prf import DoG2DPRFModel
@@ -179,10 +182,30 @@ class TestInitDogFromGaussian:
         assert list(dog_params["sigma_surround"]) == [10.0, 15.0]
 
     def test_amplitude_mapping(self, gaussian_params: pd.DataFrame):
-        """Amplitude is mapped to amplitude_center and amplitude_surround defaults to 0."""
+        """Amplitude is mapped to amplitude_center and amplitude_surround starts small but positive."""
         dog_params = init_dog_from_gaussian(gaussian_params)
         assert list(dog_params["amplitude_center"]) == [10.0, 7.0]
-        assert list(dog_params["amplitude_surround"]) == [0.0, 0.0]
+        assert list(dog_params["amplitude_surround"]) == [1e-3, 1e-3]
+
+    def test_amplitude_surround_override(self, gaussian_params: pd.DataFrame):
+        """The amplitude_surround starting value can be scaled to the amplitude of the data."""
+        dog_params = init_dog_from_gaussian(gaussian_params, amplitude_surround=0.05)
+        assert list(dog_params["amplitude_surround"]) == [0.05, 0.05]
+
+    @pytest.mark.parametrize("amplitude_surround", [0.0, -1.0])
+    def test_amplitude_surround_must_be_positive(self, gaussian_params: pd.DataFrame, amplitude_surround: float):
+        """A non-positive start sits on or outside the open ``amplitude_surround > 0`` constraint."""
+        with pytest.raises(ValueError, match="strictly positive"):
+            _ = init_dog_from_gaussian(gaussian_params, amplitude_surround=amplitude_surround)
+
+    def test_amplitude_surround_is_transformable(self, gaussian_params: pd.DataFrame):
+        """The default start must be accepted by the constraint it is designed to be used with."""
+        dog_params = init_dog_from_gaussian(gaussian_params)
+        adapter = Adapter([ParameterTransform(["amplitude_surround"], transform_fun=ops.log, inverse_fun=ops.exp)])
+
+        transformed = adapter.transform(dog_params)
+
+        assert np.all(np.isfinite(transformed["amplitude_surround"].to_numpy()))
 
     def test_passthrough_columns(self, gaussian_params: pd.DataFrame):
         """Non-sigma/amplitude columns pass through unchanged."""

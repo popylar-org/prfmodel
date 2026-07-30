@@ -148,6 +148,7 @@ def init_dog_from_gaussian(
     gaussian_params: pd.DataFrame,
     sigma_ratio: float = 5.0,
     sigma_surround: float | None = None,
+    amplitude_surround: float = 1e-3,
 ) -> pd.DataFrame:
     """
     Initialize DoG model parameters from fitted Gaussian model parameters.
@@ -167,19 +168,22 @@ def init_dog_from_gaussian(
     sigma_surround : float, optional
         Fixed surround size applied to all rows. Must be >= ``sigma`` for every row in
         ``gaussian_params``. When provided, overrides ``sigma_ratio``.
+    amplitude_surround : float, default=1e-3
+        Starting value for ``amplitude_surround``. Must be strictly positive; see Notes.
 
     Returns
     -------
     pandas.DataFrame
         DataFrame of DoG initial parameters with columns:
         ``sigma_center`` (= ``sigma``), ``sigma_surround``,
-        ``amplitude_center`` (= ``amplitude``), ``amplitude_surround`` (= 0.0),
+        ``amplitude_center`` (= ``amplitude``), ``amplitude_surround``,
         plus all shared columns unchanged.
 
     Raises
     ------
     ValueError
-        If ``sigma_surround`` is smaller than ``sigma`` for any row in ``gaussian_params``.
+        If ``sigma_surround`` is smaller than ``sigma`` for any row in ``gaussian_params``, or if
+        ``amplitude_surround`` is not strictly positive.
 
     Examples
     --------
@@ -199,12 +203,16 @@ def init_dog_from_gaussian(
 
     Notes
     -----
-    ``amplitude_surround`` is initialized to ``0.0``, the boundary of the constraint
-    ``amplitude_surround > 0`` enforced by a :class:`~prfmodel.adapter.ParameterConstraint`
-    with ``lower=0.0``. The surround is subtracted from the center, so a positive
-    ``amplitude_surround`` yields a suppressive surround; SGD starts near zero and moves positive.
+    The surround is subtracted from the center, so a positive ``amplitude_surround`` yields a
+    suppressive surround. It is therefore typically paired with a
+    :class:`~prfmodel.fitters.adapter.ParameterTransform` with ``transform_fun=keras.ops.log`` and
+    ``inverse_fun=keras.ops.exp``, which keeps it positive throughout SGD.
 
     """
+    if amplitude_surround <= 0.0:
+        msg = f"'amplitude_surround' must be strictly positive, but was {amplitude_surround}"
+        raise ValueError(msg)
+
     dog_params = gaussian_params.copy()
     dog_params["sigma_center"] = dog_params["sigma"]
 
@@ -221,5 +229,5 @@ def init_dog_from_gaussian(
         dog_params["sigma_surround"] = dog_params["sigma"] * sigma_ratio
 
     dog_params["amplitude_center"] = dog_params["amplitude"]
-    dog_params["amplitude_surround"] = 0.0
+    dog_params["amplitude_surround"] = amplitude_surround
     return dog_params.drop(columns=["sigma", "amplitude"])

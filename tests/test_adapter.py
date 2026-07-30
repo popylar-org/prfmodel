@@ -1,6 +1,5 @@
 """Tests for adapter and transformations."""
 
-from collections.abc import Callable
 import numpy as np
 import pandas as pd
 import pytest
@@ -73,60 +72,183 @@ def test_parameter_transform_inverse(params_wrapper: type, params: dict):
     np.testing.assert_allclose(np.asarray(result_inverse["z"]), np.asarray(params["z"]))
 
 
+@pytest.fixture
+def bounded_params(num_rows: int = 10):
+    """Parameters lying strictly inside the ``low``/``high`` bounds used by the constraint tests."""
+    return {
+        "x": np.linspace(2.0, 6.0, num_rows),
+        "low": np.linspace(0.0, 1.0, num_rows),
+        "high": np.linspace(7.0, 9.0, num_rows),
+    }
+
+
+@pytest.fixture
+def unbounded_params(num_rows: int = 10):
+    """Values on the unbounded (optimization) scale, over a range where float32 does not saturate.
+
+    Far enough from zero the exponential underflows relative to the bound and the natural-scale value
+    rounds onto the bound exactly (at negative values for a lower bound, positive for an upper one).
+    For bounds of this magnitude that happens beyond roughly +/-14, so the range stays inside it; the
+    saturating regime is covered by `unbounded_params_extreme`.
+
+    """
+    return {
+        "x": np.linspace(-12.0, 12.0, num_rows),
+        "low": np.linspace(0.0, 1.0, num_rows),
+        "high": np.linspace(7.0, 9.0, num_rows),
+    }
+
+
+@pytest.fixture
+def unbounded_params_extreme(num_rows: int = 10):
+    """Values on the unbounded scale far enough out that float32 saturates onto the bound."""
+    return {
+        "x": np.linspace(-60.0, 60.0, num_rows),
+        "low": np.linspace(0.0, 1.0, num_rows),
+        "high": np.linspace(7.0, 9.0, num_rows),
+    }
+
+
+# `transform` maps the natural (bounded) scale onto the unbounded scale the optimizer works on, and
+# `inverse` maps back. The bound is therefore enforced by `inverse`, not by `transform`.
+
+
 @parameterize_params_wrapper
-def test_parameter_constraint_lower(params_wrapper: type, params: dict):
-    """Test that lower constraint gives correct result."""
-    params = params_wrapper(params)
-    transform = ParameterConstraint(
-        parameter_names=["z"],
-        lower="x",
+@pytest.mark.parametrize(("bound_kwargs", "bound_key"), [({"lower": "low"}, "low"), ({"lower": 1.5}, None)])
+def test_parameter_constraint_lower_inverse_enforces_bound(
+    params_wrapper: type,
+    bound_kwargs: dict,
+    bound_key: str | None,
+    unbounded_params: dict,
+):
+    """Test that mapping any unbounded value back yields a value above the lower bound."""
+    params = params_wrapper(unbounded_params)
+    constraint = ParameterConstraint(parameter_names=["x"], **bound_kwargs)
+
+    result = constraint.inverse(params)
+
+    bound = np.asarray(result[bound_key]) if bound_key else bound_kwargs["lower"]
+    np.testing.assert_array_less(bound, np.asarray(result["x"]))
+
+
+@parameterize_params_wrapper
+@pytest.mark.parametrize(("bound_kwargs", "bound_key"), [({"upper": "high"}, "high"), ({"upper": 8.5}, None)])
+def test_parameter_constraint_upper_inverse_enforces_bound(
+    params_wrapper: type,
+    bound_kwargs: dict,
+    bound_key: str | None,
+    unbounded_params: dict,
+):
+    """Test that mapping any unbounded value back yields a value below the upper bound."""
+    params = params_wrapper(unbounded_params)
+    constraint = ParameterConstraint(parameter_names=["x"], **bound_kwargs)
+
+    result = constraint.inverse(params)
+
+    bound = np.asarray(result[bound_key]) if bound_key else bound_kwargs["upper"]
+    np.testing.assert_array_less(np.asarray(result["x"]), bound)
+
+
+@parameterize_params_wrapper
+@pytest.mark.parametrize(
+    ("bound_kwargs", "bound_key", "side"),
+    [
+        ({"lower": "low"}, "low", "lower"),
+        ({"lower": 1.5}, None, "lower"),
+        ({"upper": "high"}, "high", "upper"),
+        ({"upper": 8.5}, None, "upper"),
+    ],
+)
+def test_parameter_constraint_inverse_never_violates_bound(
+    params_wrapper: type,
+    bound_kwargs: dict,
+    bound_key: str | None,
+    side: str,
+    unbounded_params_extreme: dict,
+):
+    """Test that even extreme unbounded values never map to the wrong side of the bound.
+
+    This is the safety property an optimizer depends on: whatever it proposes, the model never sees a
+    value that violates the constraint, and never a NaN. Far from the bound the exponential underflows
+    in float32 and the result rounds onto the bound exactly, so the comparison is not strict here.
+
+    """
+    params = params_wrapper(unbounded_params_extreme)
+    constraint = ParameterConstraint(parameter_names=["x"], **bound_kwargs)
+
+    result = np.asarray(constraint.inverse(params)["x"])
+
+    assert np.all(np.isfinite(result)), "Inverse must never produce NaN or infinity"
+
+    bound = np.asarray(params_wrapper(dict(unbounded_params_extreme))[bound_key]) if bound_key else bound_kwargs[side]
+
+    if side == "lower":
+        assert np.all(result >= bound), "Inverse produced a value below the lower bound"
+    else:
+        assert np.all(result <= bound), "Inverse produced a value above the upper bound"
+
+
+@parameterize_params_wrapper
+@pytest.mark.parametrize(
+    "bound_kwargs",
+    [
+        {"lower": "low"},
+        {"lower": 1.5},
+        {"upper": "high"},
+        {"upper": 8.5},
+        {"lower": "low", "bound_fun": ops.square},
+        {"upper": "high", "bound_fun": ops.square},
+    ],
+)
+def test_parameter_constraint_round_trip(params_wrapper: type, bound_kwargs: dict, bounded_params: dict):
+    """Test that inverse(transform(input)) == input for values strictly inside the bound."""
+    params = params_wrapper(bounded_params)
+    constraint = ParameterConstraint(parameter_names=["x"], **bound_kwargs)
+
+    result = constraint.inverse(constraint.transform(params))
+
+    np.testing.assert_allclose(
+        np.asarray(result["x"]),
+        np.asarray(bounded_params["x"]),
+        # Loose enough for float32: a bound much larger than the value costs precision to cancellation
+        rtol=1e-5,
+        err_msg="Constraint does not round-trip",
     )
 
-    result_transformed = transform.transform(params)
 
-    np.testing.assert_array_less(np.asarray(result_transformed["x"]), np.asarray(result_transformed["z"]))
+@parameterize_params_wrapper
+@pytest.mark.parametrize(
+    "bound_kwargs",
+    [
+        pytest.param({"lower": 2.0}, id="on-lower-bound"),
+        pytest.param({"lower": 3.0}, id="below-lower-bound"),
+        pytest.param({"upper": 6.0}, id="on-upper-bound"),
+        pytest.param({"upper": 5.0}, id="above-upper-bound"),
+    ],
+)
+def test_parameter_constraint_transform_rejects_values_outside_bound(
+    params_wrapper: type,
+    bound_kwargs: dict,
+    bounded_params: dict,
+):
+    """Test that transforming a value on or beyond an open bound raises instead of returning an infinity."""
+    params = params_wrapper(bounded_params)
+    constraint = ParameterConstraint(parameter_names=["x"], **bound_kwargs)
+
+    with pytest.raises(ValueError, match="strictly"):
+        _ = constraint.transform(params)
 
 
 @parameterize_params_wrapper
-def test_parameter_constraint_lower_inverse(params_wrapper: type, params: dict):
-    """Test that transform(inverse(input)) == input."""
-    params = params_wrapper(params)
-    transform = ParameterConstraint(
-        parameter_names=["z"],
-        lower="x",
-    )
-    result_transformed = transform.transform(params)
-    result_inverse = transform.inverse(result_transformed)
+def test_parameter_constraint_bound_fun_applied(params_wrapper: type, bounded_params: dict):
+    """Test that `bound_fun` is applied to the bound before it is used."""
+    # low is in [0, 1], so low + 1 is in [1, 2] and x (in [2, 6]) is still strictly above it
+    params = params_wrapper(dict(bounded_params))
+    constraint = ParameterConstraint(parameter_names=["x"], lower="low", bound_fun=lambda b: b + 1.0)
 
-    np.testing.assert_allclose(np.asarray(result_inverse["z"]), np.asarray(params["z"]))
+    result = constraint.inverse(params)
 
-
-@parameterize_params_wrapper
-def test_parameter_constraint_upper(params_wrapper: type, params: dict):
-    """Test that upper constraint gives correct result."""
-    params = params_wrapper(params)
-    transform = ParameterConstraint(
-        parameter_names=["x"],
-        upper="z",
-    )
-
-    result_transformed = transform.transform(params)
-
-    np.testing.assert_array_less(np.asarray(result_transformed["x"]), np.asarray(result_transformed["z"]))
-
-
-@parameterize_params_wrapper
-def test_parameter_constraint_upper_inverse(params_wrapper: type, params: dict):
-    """Test that transform(inverse(input)) == input."""
-    params = params_wrapper(params)
-    transform = ParameterConstraint(
-        parameter_names=["x"],
-        lower="z",
-    )
-    result_transformed = transform.transform(params)
-    result_inverse = transform.inverse(result_transformed)
-
-    np.testing.assert_allclose(np.asarray(result_inverse["x"]), np.asarray(params["x"]), rtol=1e-6)
+    np.testing.assert_array_less(np.asarray(result["low"]) + 1.0, np.asarray(result["x"]))
 
 
 def test_parameter_constraint_lower_upper_error():
@@ -150,86 +272,46 @@ def test_parameter_constraint_value_error(params_wrapper: type, params: dict):
     )
     transform_upper = ParameterConstraint(
         parameter_names=["x"],
-        lower="bar",
+        upper="bar",
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="dynamic"):
         _ = transform_lower.transform(params)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="dynamic"):
         _ = transform_lower.inverse(params)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="dynamic"):
         _ = transform_upper.transform(params)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="dynamic"):
         _ = transform_upper.inverse(params)
 
 
 @parameterize_params_wrapper
-@pytest.mark.parametrize("transform_fun", [lambda x: x**2, ops.exp, ops.log])
-def test_parameter_constraint_upper_transform(params_wrapper: type, transform_fun: Callable, params: dict):
-    """Test that upper constraint with transform function gives correct result."""
-    params = params_wrapper(params)
-    transform = ParameterConstraint(
-        parameter_names=["x"],
-        upper="z",
-        bound_fun=transform_fun,
-    )
-
-    result_transformed = transform.transform(params)
-
-    np.testing.assert_array_less(
-        np.asarray(result_transformed["x"]),
-        transform_fun(np.asarray(result_transformed["z"])),
-    )
-
-
-@parameterize_params_wrapper
-def test_parameter_constraint_lower_fixed(params_wrapper: type, params: dict):
-    """Test that lower constraint with fixed value gives correct result."""
-    fixed = -3.0
-    params = params_wrapper(params)
-    transform = ParameterConstraint(
-        parameter_names=["x"],
-        lower=fixed,
-    )
-
-    result_transformed = transform.transform(params)
-
-    np.testing.assert_array_less(fixed, np.asarray(result_transformed["x"]))
-
-
-@parameterize_params_wrapper
-def test_parameter_constraint_upper_fixed(params_wrapper: type, params: dict):
-    """Test that upper constraint with fixed value gives correct result."""
-    fixed = 3.0
-    params = params_wrapper(params)
-    transform = ParameterConstraint(
-        parameter_names=["x"],
-        upper=fixed,
-    )
-
-    result_transformed = transform.transform(params)
-
-    np.testing.assert_array_less(np.asarray(result_transformed["x"]), fixed)
-
-
-@parameterize_params_wrapper
-def test_adapter(params_wrapper: type, params: dict):
-    """Test that Adapter returns the correct object type."""
+def test_adapter(params_wrapper: type, bounded_params: dict):
+    """Test that Adapter returns the correct object type and round-trips through mixed transforms."""
     adapter = Adapter(
         transforms=[
             ParameterTransform(["x"], ops.log, ops.exp),
-            ParameterTransform(["y"], ops.sqrt, ops.log),
-            ParameterConstraint(["x"], lower="z", bound_fun=ops.abs),
+            ParameterTransform(["high"], ops.sqrt, ops.square),
+            # Applied after the log above, so this constrains log(x), which stays above 'low'
+            ParameterConstraint(["x"], lower="low"),
         ],
     )
 
-    params = params_wrapper(params)
+    params = params_wrapper(dict(bounded_params))
 
     result_transformed = adapter.transform(params)
     result_inverse = adapter.inverse(result_transformed)
 
     assert isinstance(result_transformed, params_wrapper)
     assert isinstance(result_inverse, params_wrapper)
+
+    for name in ["x", "high"]:
+        np.testing.assert_allclose(
+            np.asarray(result_inverse[name]),
+            np.asarray(bounded_params[name]),
+            rtol=1e-6,
+            err_msg=f"Adapter does not round-trip '{name}'",
+        )
