@@ -19,6 +19,7 @@ from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
 from prfmodel.utils import ModelProtocol
 from prfmodel.utils import _get_norm_fun
+from prfmodel.utils import get_dtype
 
 
 class BaseImpulse(ModelProtocol):
@@ -83,7 +84,7 @@ class BaseImpulse(ModelProtocol):
 
         self.default_parameters = default_parameters
 
-        self._frames: Tensor | None = None
+        self._frames: dict[str, Tensor] = {}
 
     @property
     def num_frames(self) -> int:
@@ -95,13 +96,47 @@ class BaseImpulse(ModelProtocol):
         """
         The time frames at which the impulse response function is evaluated.
 
-        Time frames are linearly interpolated between `offset` and `duration` and have shape `(1, num_frames)`.
+        Time frames start at `offset` and are spaced `resolution` apart, with shape `(1, num_frames)`, at
+        :func:`keras.config.floatx` precision. Use :meth:`get_frames` to build them at another precision.
 
         """
-        if self._frames is None:
-            self._frames = ops.expand_dims(ops.linspace(self.offset, self.duration, self.num_frames), 0)
+        return self.get_frames()
 
-        return self._frames
+    def get_frames(self, dtype: str | None = None) -> Tensor:
+        """
+        Build the time frames at which the impulse response function is evaluated.
+
+        Parameters
+        ----------
+        %(dtype)s
+
+        Returns
+        -------
+        :data:`prfmodel.typing.Tensor`
+            Time frames of shape `(1, num_frames)` and dtype `dtype`, starting at `offset` and spaced
+            `resolution` apart.
+
+        Notes
+        -----
+        `duration` is an upper bound: the axis holds `num_frames = int(duration / resolution)` samples spaced
+        exactly `resolution` apart, so it ends at the last whole sample at or below `duration` rather than at
+        `duration` itself. At the defaults that is 32 samples from 0 to 31 seconds. Note that nilearn differs:
+        ``spm_hrf(time_length=32)`` spans 0 to 32 seconds in 32 samples, so its spacing is `32 / 31` seconds
+        rather than the requested 1.
+
+        The axis is built at the requested precision rather than cast from a cached one, so a `float64`
+        request carries `float64` time values and not widened `float32` ones. Results are cached per dtype.
+        The cache is not invalidated if `duration`, `offset` or `resolution` are reassigned after
+        construction.
+
+        """
+        dtype = get_dtype(dtype)
+
+        if dtype not in self._frames:
+            grid = ops.arange(self.num_frames, dtype=dtype) * self.resolution + self.offset
+            self._frames[dtype] = ops.expand_dims(grid, 0)
+
+        return self._frames[dtype]
 
     def _join_default_parameters(self, parameters: pd.DataFrame) -> pd.DataFrame:
         if isinstance(self.default_parameters, dict):

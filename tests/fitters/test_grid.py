@@ -11,6 +11,7 @@ from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model
+from tests.reference import _oracle
 from .conftest import parametrize_dtype
 
 
@@ -63,7 +64,18 @@ class TestGridFitter(TestSetup):
         param_ranges: dict[str, np.ndarray],
         dtype: str,
     ):
-        """Test that fit returns objects with the correct type and attributes."""
+        """Test that the grid search recovers the parameters an independent model generated data from.
+
+        The target comes from `tests.reference._oracle`, a plain NumPy/SciPy implementation of the
+        forward pipeline, rather than from `model` itself. Generating it with `model` would make the
+        recovery circular: any error in the forward model would appear in both the data and the
+        search, cancel exactly, and leave the true parameters at the optimum regardless.
+
+        A grid search is the most forgiving place to do this, because its output is discrete -- small
+        numerical differences between the two implementations cannot move the result off the correct
+        grid point.
+
+        """
         fitter = GridFitter(
             model=model,
             stimulus=stimulus,
@@ -71,7 +83,7 @@ class TestGridFitter(TestSetup):
             dtype=dtype,
         )
 
-        observed = model(stimulus, params)
+        observed = _oracle.predict(stimulus, params, frames=_oracle.impulse_frames())
 
         history, grid_params = fitter.fit(observed, param_ranges, batch_size=20)
 

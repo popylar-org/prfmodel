@@ -559,7 +559,7 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus]):
 
         # h₂ kernel → g(t) = L * h₂
         if impulse_model is not None:
-            t = ops.cast(impulse_model.frames, dtype=dtype)
+            t = impulse_model.get_frames(dtype)
             kernel = ops.exp(-t / dispersion_normalization)
             g_t = convolve_prf_impulse_response(response, kernel)
         else:

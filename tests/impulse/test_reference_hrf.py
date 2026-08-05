@@ -58,8 +58,7 @@ class TestGammaScaleConvention:
             observed,
             expected,
             # The density is evaluated in log space, which loses a little accuracy far out in the
-            # tail. This is still around five orders of magnitude tighter than the discrepancy a
-            # rate/scale mix-up produces, which is of order 1 in relative terms.
+            # tail.
             rtol=1e-5,
             atol=1e-12,
             err_msg="'dispersion' is not being used as the gamma scale",
@@ -171,3 +170,68 @@ class TestDefaultsMatchNilearn:
         """
         assert default_two_gamma_impulse_glover_hrf()["dispersion"] == pytest.approx(0.9)
         assert default_two_gamma_impulse_glover_hrf()["u_dispersion"] == pytest.approx(0.9)
+
+
+class TestKernelSampleSpacing:
+    """Tests that the impulse kernel is sampled at the requested `resolution`.
+
+    `resolution` is seconds per sample, so consecutive frames must be exactly that far apart. These
+    tests assert at the resolution a user actually gets; `TestDefaultsMatchNilearn` compares on a
+    heavily oversampled grid, where a spacing error is too small to see.
+
+    """
+
+    @pytest.mark.parametrize("dtype", ["float32", "float64"])
+    @pytest.mark.parametrize("resolution", [1.0, 1.5, 0.5])
+    def test_frame_spacing_equals_resolution(self, resolution: float, dtype: str):
+        """Test that consecutive impulse frames are exactly `resolution` seconds apart."""
+        model = TwoGammaImpulse(duration=DURATION, resolution=resolution)
+        frames = np.asarray(model.get_frames(dtype)).ravel()
+
+        spacing = np.diff(frames)
+
+        # float32 resolves the axis to ~1e-6 relative; float64 to machine precision.
+        rtol = 1e-5 if dtype == "float32" else 1e-12
+        np.testing.assert_allclose(spacing, resolution, rtol=rtol)
+
+    def test_frames_are_built_at_the_requested_precision(self):
+        """Test that a float64 axis carries float64 time values, not widened float32 ones.
+
+        Both dtypes are compared against the exact arithmetic grid, which distinguishes an axis built
+        at double precision from one built at single precision and cast up.
+
+        """
+        double_precision_limit = 1e-12
+        single_precision_floor = 1e-9
+
+        model = TwoGammaImpulse(duration=DURATION, resolution=0.5)
+        exact = np.arange(model.num_frames) * 0.5 + model.offset
+
+        as_32 = np.asarray(model.get_frames("float32")).ravel()
+        as_64 = np.asarray(model.get_frames("float64")).ravel()
+
+        assert np.abs(as_64 - exact).max() < double_precision_limit
+        # And the float32 axis is genuinely coarser, so the assertion above has content.
+        assert np.abs(as_32 - exact).max() > single_precision_floor
+
+    def test_kernel_matches_nilearn_at_native_resolution(self):
+        """Test that the default kernel reproduces nilearn's `spm_hrf` at 1 s sampling.
+
+        `TestDefaultsMatchNilearn` establishes this on a finely oversampled grid; here it is asserted
+        at the 1 s resolution a user gets by default. nilearn is evaluated oversampled and then
+        downsampled, because `oversampling=1` applies a `loc=1 s` shift unrelated to what is tested.
+
+        """
+        oversampling = 100
+        reference = spm_hrf(t_r=1.0, oversampling=oversampling, time_length=DURATION)[::oversampling]
+
+        model = TwoGammaImpulse(duration=DURATION, resolution=1.0, norm="sum", default_parameters="spm_hrf")
+        observed = np.asarray(model(pd.DataFrame(index=range(1)), dtype="float64"))[0]
+
+        num_samples = min(len(observed), len(reference))
+        observed, reference = _normalize(observed[:num_samples]), _normalize(reference[:num_samples])
+
+        # Tolerance sits between the two regimes: the correctly sampled kernel agrees to ~6e-3 of
+        # peak (nilearn's own time-axis layout, see validation/compare_prfpy.py), a kernel
+        # mis-sampled by one step is off by ~6e-2.
+        np.testing.assert_allclose(observed, reference, atol=2e-2)

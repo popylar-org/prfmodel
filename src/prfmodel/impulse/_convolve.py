@@ -26,10 +26,12 @@ def _prepare_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
         ops.transpose(prf_response_padded),
         0,
     )
-    # Transpose and flip impulse response on batch axis
-    impulse_response_transposed = ops.flip(  # shape (num_frames, num_units, 1)
-        ops.expand_dims(ops.transpose(impulse_response_flipped), -1),
-        axis=1,
+    # Transpose to meet shape requirements of depthwise convolution. Only the time axis is flipped,
+    # which happened above: flipping here as well would reverse `num_units`, pairing each unit's
+    # response with another unit's impulse response.
+    impulse_response_transposed = ops.expand_dims(  # shape (num_frames, num_units, 1)
+        ops.transpose(impulse_response_flipped),
+        -1,
     )
 
     return prf_response_transposed, impulse_response_transposed
@@ -94,7 +96,7 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
     # We perform 1D depthwise convolution
     response_conv = ops.depthwise_conv(
         prf_response_transposed,
-        impulse_response_transposed,  # Flip along time axis for convolution
+        impulse_response_transposed,  # Already flipped on the time axis by the call above
         padding="valid",
     )
 

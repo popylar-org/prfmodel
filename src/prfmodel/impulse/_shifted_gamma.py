@@ -1,7 +1,6 @@
 """Shifted gamma distribution impulse response."""
 
 import pandas as pd
-from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.density._gamma import shifted_gamma_density
 from prfmodel.typing import Tensor
@@ -107,7 +106,7 @@ class ShiftedGammaImpulse(BaseImpulse):
         """
         parameters = self._join_default_parameters(parameters)
         dtype = get_dtype(dtype)
-        frames = ops.cast(self.frames, dtype=dtype)
+        frames = self.get_frames(dtype)
         delay = convert_parameters_to_tensor(parameters[["delay"]], dtype=dtype)
         dispersion = convert_parameters_to_tensor(parameters[["dispersion"]], dtype=dtype)
         shift = convert_parameters_to_tensor(parameters[["shift"]], dtype=dtype)

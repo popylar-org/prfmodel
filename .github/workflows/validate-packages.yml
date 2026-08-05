@@ -1,8 +1,16 @@
 name: Validate external pRF packages
 
-# Run manually from the Actions tab.
-# Choose which external package and which model to compare against prfmodel.
+# Runs weekly, and on demand from the Actions tab.
+#
+# A manual run validates the single package chosen from the dropdown. A scheduled run supplies no
+# inputs, so it falls back to validating every supported package -- see the `package` matrix below.
+# These checks compare prfmodel against independent implementations and are the only thing in the
+# repository that can catch a convention diverging from the field; the in-repository test suite
+# cannot, because it verifies prfmodel against itself.
 on:
+  schedule:
+    # Mondays at 06:00 UTC.
+    - cron: '0 6 * * 1'
   workflow_dispatch:
     inputs:
       branch:
@@ -28,8 +36,16 @@ on:
 
 jobs:
   validate:
-    name: Validate ${{ inputs.model }} pRF against ${{ inputs.package }}
+    name: Validate ${{ inputs.model || 'gaussian-2d' }} pRF against ${{ matrix.package }}
     runs-on: ubuntu-latest
+
+    strategy:
+      # Report every package's result: one failing must not mask the others.
+      fail-fast: false
+      matrix:
+        # A manual run validates the chosen package; a scheduled run has no inputs and
+        # validates all of them.
+        package: ${{ fromJSON(inputs.package && format('["{0}"]', inputs.package) || '["prfpy", "braincoder"]') }}
 
     steps:
       - uses: actions/checkout@v4
@@ -42,16 +58,16 @@ jobs:
 
       # Package-specific installs
       - name: Install prfpy
-        if: inputs.package == 'prfpy'
+        if: matrix.package == 'prfpy'
         run: pip install git+https://github.com/VU-Cog-Sci/prfpy.git
 
       - name: Install braincoder (+ TensorFlow backend it requires)
-        if: inputs.package == 'braincoder'
+        if: matrix.package == 'braincoder'
         run: |
           pip install tensorflow "tensorflow-probability[tf]"
           pip install git+https://github.com/Gilles86/braincoder.git
 
       - name: Run validation
-        run: python validation/compare_${{ inputs.package }}.py
+        run: python validation/compare_${{ matrix.package }}.py
         env:
           KERAS_BACKEND: tensorflow
