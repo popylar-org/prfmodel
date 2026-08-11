@@ -19,6 +19,7 @@ from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
 from prfmodel.utils import ModelProtocol
 from prfmodel.utils import _get_norm_fun
+from prfmodel.utils import get_dtype
 
 
 class BaseImpulse(ModelProtocol):
@@ -32,9 +33,8 @@ class BaseImpulse(ModelProtocol):
     ----------
     duration : float, default=32.0
         The duration of the impulse response (in seconds).
-    offset : float, default=0.0001
-        The offset of the impulse response (in seconds). By default a very small offset is added to prevent infinite
-        response values at t = 0.
+    offset : float, default=0.0
+        The offset of the impulse response (in seconds).
     resolution : float, default=1.0
         The time resultion of the impulse response (in seconds), that is the number of points per second at which the
         impulse response function is evaluated.
@@ -50,21 +50,25 @@ class BaseImpulse(ModelProtocol):
     This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
     models. Subclasses must override the abstract :attr:`_all_parameter_names` and :meth:`__call__` method.
 
+    `duration`, `offset` and `resolution` are read-only: they define the time axis that
+    :meth:`get_frames` caches, so a model that needs a different axis is constructed anew rather than
+    modified in place.
+
     """
 
     def __init__(
         self,
         duration: float = 32.0,
-        offset: float = 0.0001,
+        offset: float = 0.0,
         resolution: float = 1.0,
         norm: str | None = "sum",
         default_parameters: dict[str, float] | str | None = None,
     ):
         super().__init__()
 
-        self.duration = duration
-        self.offset = offset
-        self.resolution = resolution
+        self._duration = duration
+        self._offset = offset
+        self._resolution = resolution
 
         # Check if norm arg is valid
         if norm is not None:
@@ -83,25 +87,61 @@ class BaseImpulse(ModelProtocol):
 
         self.default_parameters = default_parameters
 
-        self._frames: Tensor | None = None
+        self._frames: dict[str, Tensor] = {}
+
+    @property
+    def duration(self) -> float:
+        """The duration of the impulse response (in seconds). Read-only."""
+        return self._duration
+
+    @property
+    def offset(self) -> float:
+        """The offset of the impulse response (in seconds). Read-only."""
+        return self._offset
+
+    @property
+    def resolution(self) -> float:
+        """The time resolution of the impulse response (in seconds). Read-only."""
+        return self._resolution
 
     @property
     def num_frames(self) -> int:
         """The total number of time frames at which the impulse response function is evaluated."""
         return int(self.duration / self.resolution)
 
-    @property
-    def frames(self) -> Tensor:
+    def get_frames(self, dtype: str | None = None) -> Tensor:
         """
-        The time frames at which the impulse response function is evaluated.
+        Build the time frames at which the impulse response function is evaluated.
 
-        Time frames are linearly interpolated between `offset` and `duration` and have shape `(1, num_frames)`.
+        Parameters
+        ----------
+        %(dtype)s
+
+        Returns
+        -------
+        :data:`prfmodel.typing.Tensor`
+            Time frames of shape `(1, num_frames)` and dtype `dtype`. The first frame is at
+            `offset + resolution / 2` and frames are spaced `resolution` apart.
+
+        Notes
+        -----
+        Each frame is sampled at the centre of the interval it stands for, not at its leading edge: frame
+        `i` covers `[offset + i * resolution, offset + (i + 1) * resolution)` and is evaluated at its
+        midpoint, `offset + (i + 0.5) * resolution`. A sample represents the whole interval, and it keeps
+        `t = 0` off the axis. At the defaults that is 32 samples centred at 0.5, 1.5, ..., 31.5 seconds.
+
+        `duration` is an upper bound: the axis holds `num_frames = int(duration / resolution)` samples spaced
+        exactly `resolution` apart, so it ends at the last whole sample at or below `duration` rather than at
+        `duration` itself.
 
         """
-        if self._frames is None:
-            self._frames = ops.expand_dims(ops.linspace(self.offset, self.duration, self.num_frames), 0)
+        dtype = get_dtype(dtype)
 
-        return self._frames
+        if dtype not in self._frames:
+            steps: Tensor = ops.arange(self.num_frames, dtype=dtype)
+            self._frames[dtype] = ops.expand_dims(steps * self.resolution + self.resolution / 2 + self.offset, 0)
+
+        return self._frames[dtype]
 
     def _join_default_parameters(self, parameters: pd.DataFrame) -> pd.DataFrame:
         if isinstance(self.default_parameters, dict):

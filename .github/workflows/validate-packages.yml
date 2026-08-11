@@ -1,8 +1,20 @@
 name: Validate external pRF packages
 
-# Run manually from the Actions tab.
-# Choose which external package and which model to compare against prfmodel.
+# Runs on every pull request to main, and on demand from the Actions tab.
+#
+# A manual run validates the single package chosen from the dropdown. A pull request supplies no
+# inputs, so it falls back to validating every supported package -- see the `package` matrix below.
+# These checks compare prfmodel against independent implementations and are the only thing in the
+# repository that can catch a convention diverging from the field; the in-repository test suite
+# cannot, because it verifies prfmodel against itself.
+#
+# The external packages are pinned to fixed release tags, so a red check points at a change in this
+# repository rather than at upstream drift. Nothing validates against newer upstream releases until
+# the refs below are bumped by hand.
 on:
+  pull_request:
+    branches:
+    - main
   workflow_dispatch:
     inputs:
       branch:
@@ -26,10 +38,29 @@ on:
         options:
           - gaussian-2d
 
+# Superseded runs on the same branch are pointless once a newer commit exists.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Latest release of each package as of 2026-08-11. Neither is published on PyPI, so these are git
+  # tags rather than version specifiers.
+  PRFPY_REF: v0.1.0-alpha
+  BRAINCODER_REF: v0.5.1
+
 jobs:
   validate:
-    name: Validate ${{ inputs.model }} pRF against ${{ inputs.package }}
+    name: Validate ${{ inputs.model || 'gaussian-2d' }} pRF against ${{ matrix.package }}
     runs-on: ubuntu-latest
+
+    strategy:
+      # Report every package's result: one failing must not mask the others.
+      fail-fast: false
+      matrix:
+        # A manual run validates the chosen package; a pull request has no inputs and
+        # validates all of them.
+        package: ${{ fromJSON(inputs.package && format('["{0}"]', inputs.package) || '["prfpy", "braincoder"]') }}
 
     steps:
       - uses: actions/checkout@v4
@@ -42,16 +73,16 @@ jobs:
 
       # Package-specific installs
       - name: Install prfpy
-        if: inputs.package == 'prfpy'
-        run: pip install git+https://github.com/VU-Cog-Sci/prfpy.git
+        if: matrix.package == 'prfpy'
+        run: pip install "git+https://github.com/VU-Cog-Sci/prfpy.git@${PRFPY_REF}"
 
       - name: Install braincoder (+ TensorFlow backend it requires)
-        if: inputs.package == 'braincoder'
+        if: matrix.package == 'braincoder'
         run: |
           pip install tensorflow "tensorflow-probability[tf]"
-          pip install git+https://github.com/Gilles86/braincoder.git
+          pip install "git+https://github.com/Gilles86/braincoder.git@${BRAINCODER_REF}"
 
       - name: Run validation
-        run: python validation/compare_${{ inputs.package }}.py
+        run: python validation/compare_${{ matrix.package }}.py
         env:
           KERAS_BACKEND: tensorflow

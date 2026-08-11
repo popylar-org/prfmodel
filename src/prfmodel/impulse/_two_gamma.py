@@ -1,7 +1,6 @@
 """Weighted difference of two gamma distribution impulse response."""
 
 import pandas as pd
-from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.density._gamma import gamma_density
 from prfmodel.typing import Tensor
@@ -25,9 +24,8 @@ class TwoGammaImpulse(BaseImpulse):
     ----------
     duration : float, default=32.0
         The duration of the impulse response (in seconds).
-    offset : float, default=0.0001
-        The offset of the impulse response (in seconds). By default a very small offset is added to prevent infinite
-        response values at t = 0.
+    offset : float, default=0.0
+        The offset of the impulse response (in seconds).
     resolution : float, default=1.0
         The time resultion of the impulse response (in seconds), that is the number of points per second at which the
         impulse response function is evaluated.
@@ -110,7 +108,7 @@ class TwoGammaImpulse(BaseImpulse):
     def __init__(
         self,
         duration: float = 32.0,
-        offset: float = 0.0001,
+        offset: float = 0.0,
         resolution: float = 1.0,
         norm: str | None = "sum",
         default_parameters: dict[str, float] | str | None = "glover_hrf",
@@ -147,7 +145,7 @@ class TwoGammaImpulse(BaseImpulse):
         """
         parameters = self._join_default_parameters(parameters)
         dtype = get_dtype(dtype)
-        frames = ops.cast(self.frames, dtype=dtype)
+        frames = self.get_frames(dtype)
 
         delay = convert_parameters_to_tensor(parameters[["delay"]], dtype=dtype)
         dispersion = convert_parameters_to_tensor(parameters[["dispersion"]], dtype=dtype)

@@ -276,9 +276,16 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
 
         resp = prf_model(stimulus, params)
 
+        # `rtol` matches `test_div_norm` and `test_delayed_norm`. Without it, numpy's 1e-5 default
+        # applies, and the budget `atol + rtol * |value|` collapses to ~1e-4 wherever the response
+        # crosses near zero -- while the float32 error there is set by the series peak (~150 for
+        # these parameters), not by the local value, because the convolution mixes the frames. That
+        # left frame 23 of unit 0 at 88% of its budget, and Windows' libm put it over.
+        # This costs no detection power: the sampling bug these snapshots were regenerated for moves
+        # unit 0 by up to 40.8, and trips the same 44 of 50 frames at either rtol.
         num_regression.check(
             {f"response_{i}": x for i, x in enumerate(resp)},
-            default_tolerance={"atol": 1e-4},
+            default_tolerance={"atol": 1e-4, "rtol": 1e-3},
         )
 
 
