@@ -343,11 +343,9 @@ from prfmodel.models.prf import Gaussian2DPRFModel
 # Define repetition time (TR)
 tr = 1.5
 
-# Create custom impulse model
-impulse_model = DerivativeTwoGammaImpulse(
-    resolution=tr,
-    offset=tr / 2.0,
-)
+# Create custom impulse model. Each frame is sampled at the centre of the interval it
+# represents, so the first frame already sits at half a TR and no offset is needed.
+impulse_model = DerivativeTwoGammaImpulse(resolution=tr)
 ```
 
 We can visualize the predicted impulse response. The two-gamma parameters (`delay`, `dispersion`, `undershoot`,
