@@ -14,7 +14,7 @@ This is written from the definitions, not transcribed from `prfmodel`:
 - the receptive field is `scipy.stats.multivariate_normal.pdf` with an isotropic covariance;
 - the encoding is a sum over the spatial axes of the receptive field times the design;
 - the HRF gammas are `scipy.stats.gamma.pdf` with shape `delay / dispersion` and scale `dispersion`,
-  the SPM/nilearn convention pinned in `tests/impulse/test_reference_hrf.py`;
+  the SPM/nilearn convention pinned in `tests/reference/test_hrf.py`;
 - the convolution is `numpy.convolve`, causal, with the response's first sample repeated on the left.
 
 It is not a second source of truth on its own. The same forward path is checked against prfpy and
@@ -64,15 +64,17 @@ def hrf_kernel(frames: np.ndarray, params: pd.Series) -> np.ndarray:
     return kernel / kernel.sum()
 
 
-def impulse_frames(duration: float = 32.0, resolution: float = 1.0, offset: float = 1e-4) -> np.ndarray:
+def impulse_frames(duration: float = 32.0, resolution: float = 1.0, offset: float = 0.0) -> np.ndarray:
     """Return the time axis the HRF is sampled on, built independently of `BaseImpulse`.
 
-    Samples start at `offset` and are spaced exactly `resolution` apart, with `duration` acting as an
-    upper bound rounded down to whole samples. Deriving this here rather than reading it off the
-    impulse model means a regression in the model's sampling grid shows up in the recovery tests too,
-    not only in `tests/impulse/test_reference_hrf.py`.
+    Each sample sits at the centre of the `resolution`-wide bin it represents, so the axis starts at
+    `offset + resolution / 2` and is spaced exactly `resolution` apart, with `duration` acting as an
+    upper bound rounded down to whole samples. Sampling at bin centres rather than at their left edges
+    keeps `t = 0` off the axis, where the gamma density is undefined for shape parameters below one.
+    Deriving this here rather than reading it off the impulse model means a regression in the model's
+    sampling grid shows up in the recovery tests too, not only in `tests/reference/test_hrf.py`.
     """
-    return np.arange(int(duration / resolution)) * resolution + offset
+    return (np.arange(int(duration / resolution)) + 0.5) * resolution + offset
 
 
 def convolve(response: np.ndarray, kernel: np.ndarray) -> np.ndarray:

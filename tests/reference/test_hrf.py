@@ -39,7 +39,7 @@ class TestGammaScaleConvention:
 
         """
         model = TwoGammaImpulse(duration=DURATION, resolution=1.0, norm=None, default_parameters=None)
-        frames = np.asarray(model.frames)[0]
+        frames = np.asarray(model.get_frames())[0]
 
         parameters = pd.DataFrame(
             {
@@ -74,7 +74,7 @@ class TestGammaScaleConvention:
         """
         # A fine grid so the numerical integral is accurate out into the tail
         model = TwoGammaImpulse(duration=120.0, resolution=0.01, norm=None, default_parameters=None)
-        frames = np.asarray(model.frames)[0]
+        frames = np.asarray(model.get_frames())[0]
 
         parameters = pd.DataFrame(
             {
@@ -98,7 +98,7 @@ class TestGammaScaleConvention:
         delay, dispersion, shift = 6.0, 0.9, 2.0
 
         model = ShiftedGammaImpulse(duration=DURATION, resolution=1.0, norm=None)
-        frames = np.asarray(model.frames)[0]
+        frames = np.asarray(model.get_frames())[0]
 
         parameters = pd.DataFrame({"delay": [delay], "dispersion": [dispersion], "shift": [shift]})
 
@@ -204,8 +204,11 @@ class TestKernelSampleSpacing:
         double_precision_limit = 1e-12
         single_precision_floor = 1e-9
 
-        model = TwoGammaImpulse(duration=DURATION, resolution=0.5)
-        exact = np.arange(model.num_frames) * 0.5 + model.offset
+        # 0.1 s rather than a binary fraction: with `resolution=0.5` and no offset every bin centre
+        # (0.25, 0.75, ...) is exactly representable in float32, so the two dtypes agree and the
+        # second assertion below has nothing to catch.
+        model = TwoGammaImpulse(duration=DURATION, resolution=0.1)
+        exact = (np.arange(model.num_frames) + 0.5) * 0.1 + model.offset
 
         as_32 = np.asarray(model.get_frames("float32")).ravel()
         as_64 = np.asarray(model.get_frames("float64")).ravel()
@@ -223,7 +226,9 @@ class TestKernelSampleSpacing:
 
         """
         oversampling = 100
-        reference = spm_hrf(t_r=1.0, oversampling=oversampling, time_length=DURATION)[::oversampling]
+        # Taken from half a step in, so nilearn is read at the bin centres prfmodel samples at
+        # (0.5 s, 1.5 s, ...) rather than at the bin edges.
+        reference = spm_hrf(t_r=1.0, oversampling=oversampling, time_length=DURATION)[oversampling // 2 :: oversampling]
 
         model = TwoGammaImpulse(duration=DURATION, resolution=1.0, norm="sum", default_parameters="spm_hrf")
         observed = np.asarray(model(pd.DataFrame(index=range(1)), dtype="float64"))[0]

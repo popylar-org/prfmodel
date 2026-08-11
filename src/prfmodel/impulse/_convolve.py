@@ -42,7 +42,8 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
     """
     Convolve the encoded response from a population receptive field model with an impulse response.
 
-    Both responses must have the same number of units but can have different numbers of frames.
+    Both responses should be sampled at the same rate, must have the same number of units
+    but can have different numbers of frames.
 
     Parameters
     ----------

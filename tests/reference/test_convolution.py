@@ -15,17 +15,7 @@ never measured when frame 0 is non-zero, so it is asserted here rather than left
 import numpy as np
 import pytest
 from prfmodel.impulse._convolve import convolve_prf_impulse_response
-
-
-def _reference_convolve(response: np.ndarray, kernel: np.ndarray) -> np.ndarray:
-    """Causal convolution with edge padding, built from `numpy.convolve`.
-
-    Equivalent to `out[t] = sum_j kernel[j] * response[t - j]` with `response[i < 0]` taken to be
-    `response[0]`.
-    """
-    pad_len = kernel.size - 1
-    padded = np.pad(response, (pad_len, 0), mode="edge")
-    return np.convolve(padded, kernel)[pad_len : pad_len + response.size]
+from tests.reference._oracle import convolve
 
 
 @pytest.fixture
@@ -82,7 +72,7 @@ class TestAgainstNumpy:
             convolve_prf_impulse_response(response[None, :], kernel[None, :], dtype="float64"),
         ).ravel()
 
-        np.testing.assert_allclose(observed, _reference_convolve(response, kernel), rtol=1e-8)
+        np.testing.assert_allclose(observed, convolve(response, kernel), rtol=1e-8)
 
     @pytest.mark.parametrize("num_units", [2, 3, 5])
     def test_units_are_convolved_independently(self, response: np.ndarray, num_units: int):
@@ -98,7 +88,7 @@ class TestAgainstNumpy:
 
         observed = np.asarray(convolve_prf_impulse_response(responses, kernels, dtype="float64"))
 
-        expected = np.stack([_reference_convolve(responses[i], kernels[i]) for i in range(num_units)])
+        expected = np.stack([convolve(responses[i], kernels[i]) for i in range(num_units)])
 
         np.testing.assert_allclose(observed, expected, rtol=1e-8)
 
@@ -124,30 +114,3 @@ class TestAgainstNumpy:
         )
 
         np.testing.assert_allclose(batched, alone, rtol=1e-8)
-
-
-class TestPaddingConvention:
-    """Tests the edge-padding choice, which diverges from prfpy and braincoder."""
-
-    def test_padding_repeats_the_first_sample_rather_than_zero_padding(self, response: np.ndarray):
-        """Test that the left padding is the first sample repeated, not zeros.
-
-        Both conventions are defensible, and they agree whenever the response starts at zero. They
-        differ exactly when it does not -- which is the case for any design whose first frame already
-        shows a stimulus. Pinning this makes the divergence a decision rather than an accident.
-
-        """
-        kernel = np.zeros(6)
-        kernel[-1] = 1.0  # Reaches furthest back, so the padded region dominates the output.
-
-        observed = np.asarray(
-            convolve_prf_impulse_response(response[None, :], kernel[None, :], dtype="float64"),
-        ).ravel()
-
-        pad_len = kernel.size - 1
-        zero_padded = np.convolve(np.pad(response, (pad_len, 0)), kernel)[pad_len : pad_len + response.size]
-
-        np.testing.assert_allclose(observed, _reference_convolve(response, kernel), rtol=1e-10)
-
-        # And the two conventions genuinely disagree here, so the assertion above has content.
-        assert not np.allclose(observed, zero_padded)

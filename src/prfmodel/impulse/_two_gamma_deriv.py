@@ -27,8 +27,8 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
     ----------
     duration : float, default=32.0
         The duration of the impulse response (in seconds).
-    offset : float, default=0.0001
-        The offset of the impulse response (in seconds). By default a very small offset is added to prevent infinite
+    offset : float, default=0.0
+        The offset of the impulse response (in seconds).
         response values at t = 0.
     resolution : float, default=1.0
         The time resultion of the impulse response (in seconds), that is the number of points per second at which the
@@ -121,7 +121,7 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
     def __init__(
         self,
         duration: float = 32.0,
-        offset: float = 0.0001,
+        offset: float = 0.0,
         resolution: float = 1.0,
         norm: str | None = "sum",
         default_parameters: dict[str, float] | str | None = "glover_hrf",
