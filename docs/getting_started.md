@@ -111,6 +111,10 @@ Let's start with the grid search by defining ranges of `mu_x`, `mu_y`, and `sigm
 of parameter values from. For all other parameters, we only provide a single value so that they will stay constant
 across the entire grid.
 
+Note that we set `baseline` to `0.0` and `amplitude` to `1.0` even though we simulated the data with a `baseline` of
+`10.0`. This is difference is on purpose because, by default, the `GridFitter` minimizes the negative correlation between prediction and data, which is unaffected by the baseline and amplitude of the prediction. Any value works here, and we estimate
+both parameters properly with least squares in the next step.
+
 ```{code-cell} ipython3
 import numpy as np
 
@@ -128,7 +132,7 @@ For all three parameters, we defined ranges of 10 values that will be used to co
 grid search will evaluate all possible combinations of these values and return the combination that fits the simulated
 data best. This will result in a grid containing $10 \times 10 \times 10 = 1000$ parameter combinations.
 
-Let's construct the `GridFitter` and perform the grid search. Note that we set `chunk_size=20` to let the `GridFitter`
+Let's construct the `GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the `GridFitter`
 evaluate 20 parameter combinations at the same time (which saves us some memory).
 
 ```{code-cell} ipython3

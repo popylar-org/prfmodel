@@ -188,8 +188,7 @@ param_ranges_gaussian = {
 ```
 
 For all three parameters, we defined ranges of 10 values, giving the fitter $10 \times 10 \times 10 = 1000$
-parameter combinations to evaluate. Let's construct the `GridFitter` and run the grid search. By default, the
-`GridFitter` uses a cosine similarity loss function that ignores differences in scale between model predictions and data.
+parameter combinations to evaluate. Let's construct the `GridFitter` and run the grid search.
 
 ```{code-cell} ipython3
 from prfmodel.fitters import GridFitter
