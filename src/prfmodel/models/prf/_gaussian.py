@@ -148,11 +148,13 @@ class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus]):
     """
     Two-dimensional isotropic Gaussian neuron population receptive field response model.
 
-    Predicts a neuron population response to a stimulus grid.
+    Predicts a neuron population response to a 2D stimulus grid.
     The model has three parameters: `mu_y` and `mu_x` for the center and `sigma` for the width of the Gaussian.
 
     Examples
     --------
+    Predict a response for a 2D bar stimulus.
+
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> stimulus = load_2d_prf_bar_stimulus()
@@ -199,6 +201,67 @@ class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus]):
         dtype = get_dtype(dtype)
         # Convention is y-dimension first
         mu = convert_parameters_to_tensor(parameters[["mu_y", "mu_x"]], dtype=dtype)
+        sigma = convert_parameters_to_tensor(parameters[["sigma"]], dtype=dtype)
+        grid = ops.convert_to_tensor(stimulus.grid, dtype=dtype)
+
+        return predict_gaussian_response(grid, mu, sigma)
+
+
+class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus]):
+    """
+    One-dimensional Gaussian neuron population receptive field response model.
+
+    Predicts a neuron population response to a 1D stimulus grid.
+    The model has two parameters: `mu` for the location and `sigma` for the width of the Gaussian.
+
+    Examples
+    --------
+    Predict a response for a 1D log numerosity stimulus.
+
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
+    >>> stimulus = load_1d_prf_lognumerosity_stimulus()
+    >>> params = pd.DataFrame({
+    ...     "mu": [0.0, 1.0, 0.0],
+    ...     "sigma": [1.0, 1.5, 2.0],
+    ... })
+    >>> model = Gaussian1DPRFResponse()
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_coordinates)
+    (3, 8)
+    """
+
+    @property
+    def parameter_names(self) -> list[str]:
+        """Names of parameters used by the model: `mu` and `sigma`."""
+        return ["mu", "sigma"]
+
+    @doc
+    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+        """
+        Predict the model response for a stimulus with a 1D grid.
+
+        Parameters
+        ----------
+        %(stimulus_prf)s
+        %(parameters)s
+        %(dtype)s
+
+        Returns
+        -------
+        Tensor
+            Model predictions of shape `(num_units, num_coordinates)` and dtype `dtype`.
+            `num_units` is the number of rows in `parameters` and `num_coordinates` is the size of the
+            stimulus grid dimension.
+
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
+        """
+        self._check_parameters(parameters)
+        dtype = get_dtype(dtype)
+        mu = convert_parameters_to_tensor(parameters[["mu"]], dtype=dtype)
         sigma = convert_parameters_to_tensor(parameters[["sigma"]], dtype=dtype)
         grid = ops.convert_to_tensor(stimulus.grid, dtype=dtype)
 
@@ -279,7 +342,7 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
 
     Examples
     --------
-    Predict a model response for multiple units.
+    Predict a model response for a 2D bar stimulus.
 
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
@@ -314,6 +377,119 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
     ):
         super().__init__(
             prf_model=Gaussian2DPRFResponse(),
+            encoding_model=encoding_model,
+            impulse_model=impulse_model,
+            scaling_model=scaling_model,
+            regressors_model=regressors_model,
+        )
+
+
+class Gaussian1DPRFModel(CanonicalPRFModel):
+    """
+    One-dimensional Gaussian population receptive field (pRF) model.
+
+    This class combines a 1D Gaussian pRF, impulse, scaling, and regressors model response.
+
+    Parameters
+    ----------
+    %(model_encoding_prf)s
+    %(model_impulse)s
+    %(model_scaling)s
+    %(model_regressors)s
+
+    Notes
+    -----
+    The canonical model follows the following steps [1]_:
+
+    1. The 1D Gaussian pRF response model makes a prediction for the stimulus grid.
+    2. The encoding model encodes the response with the stimulus design.
+    3. The encoded response is convolved with an impulse response (optional).
+    4. The scaling model modifies the convolved response (optional).
+    5. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
+
+    Using the default impulse and scaling models, the following columns are expected in the
+    :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
+
+    .. list-table::
+       :header-rows: 1
+       :widths: 20 12 53
+
+       * - Parameter
+         - Model
+         - Description
+       * - ``mu``
+         - pRF
+         - Center of the Gaussian.
+       * - ``sigma``
+         - pRF
+         - Standard deviation of the Gaussian.
+       * - ``delay``
+         - Impulse
+         - Peak time of the positive gamma component (in seconds; optional).
+       * - ``dispersion``
+         - Impulse
+         - Rate parameter of the positive gamma component (optional).
+       * - ``undershoot``
+         - Impulse
+         - Peak time of the negative gamma component (in seconds; optional).
+       * - ``u_dispersion``
+         - Impulse
+         - Rate parameter of the negative gamma component (optional).
+       * - ``ratio``
+         - Impulse
+         - Weight of the negative gamma component (optional).
+       * - ``weight_deriv``
+         - Impulse
+         - Weight of the derivative component.
+       * - ``baseline``
+         - Scaling
+         - Additive constant.
+       * - ``amplitude``
+         - Scaling
+         - Multiplicative scale factor.
+
+    References
+    ----------
+    .. [1] Harvey, B. M., Klein, B. P., Petridou, N., & Dumoulin, S. O. (2013). Topographic representation of
+        numerosity in the human parietal cortex. *Science*, 341(6150), 1123-1126. https://doi.org/10.1126/science.1239052
+
+
+    Examples
+    --------
+    Predict a model response for a 1D log numerosity stimulus.
+
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
+    >>> stimulus = load_1d_prf_lognumerosity_stimulus()
+    >>> model = Gaussian1DPRFModel()
+    >>> # Define all model parameters for 3 units
+    >>> params = pd.DataFrame({
+    ...     # Gaussian parameters
+    ...     "mu": [0.0, 1.0, 0.0],
+    ...     "sigma": [1.0, 1.5, 2.0],
+    ...     # Impulse model parameters (delay, dispersion, undershoot, u_dispersion,
+    ...     # and ratio use the default Glover HRF parameters)
+    ...     "weight_deriv": [0.5, 0.5, 0.5],
+    ...     # Scaling model parameters
+    ...     "baseline": [0.1, -0.1, 0.5],
+    ...     "amplitude": [-2.0, 1.2, 0.1],
+    ... })
+    >>> # Predict model response
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 182)
+
+    """
+
+    def __init__(
+        self,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
+    ):
+        super().__init__(
+            prf_model=Gaussian1DPRFResponse(),
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             scaling_model=scaling_model,
