@@ -79,6 +79,13 @@ python -m pytest
 This package was created with [Copier](https://github.com/copier-org/copier) and the
 [NLeSC/python-template](https://github.com/NLeSC/python-template).
 
+The model fitting workflow in prfmodel was inspired by [braincoder](https://github.com/Gilles86/braincoder).
+
+## Generative AI usage
+
+Claude Code (Opus version 4.5 - 5.0) was used to partially generate and improve code in prfmodel. All improvements were
+manually evaluated and approved by the authors.
+
 ## Copyright
 
-2025, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience
+2026, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience

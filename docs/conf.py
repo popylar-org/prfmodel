@@ -16,7 +16,7 @@ from prfmodel._docstring import _PARAMS
 # -- Project information -----------------------------------------------------
 
 project = "prfmodel"
-copyright = "2025, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience"
+copyright = "2026, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience"
 author = "Malte Lüken, Flavio Hafner, Gilles de Hollander, Tomas Knapen"
 
 # The version info for the project you're documenting, acts as replacement for
