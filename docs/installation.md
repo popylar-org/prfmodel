@@ -36,7 +36,7 @@ source my_venv/bin/activate  # Activate the virtual environment
 
 prfmodel relies on [Keras](https://keras.io/) to enable users to use different backends for model fitting.
 Currently, users can choose between three backends: TensorFlow, PyTorch, and JAX. If you don't know which backend to
-choose, we recommend to start with TensorFlow.
+choose, we recommend to start with TensorFlow. At least one backend must be installed to use prfmodel.
 
 To install the development version of prfmodel from the local clone of the repository with a backend:
 
@@ -61,6 +61,20 @@ python -m pip install .[jax]
 ``````
 
 ````````
+
+The default backend in Keras is Tensorflow, but this can be changed by setting the `KERAS_BACKEND` environment
+variable, for example, at the beginning of a Python script or Jupyter notebook:
+
+```python
+import os
+
+os.environ["KERAS_BACKEND"] = "jax"
+
+import prfmodel
+```
+
+**Important**: The backend must be set before importing prfmodel or keras.
+See the [Keras](https://keras.io/getting_started/) documentation for details.
 
 ## Installing dependencies for package development
 
