@@ -6,7 +6,7 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.18.1
 kernelspec:
-  display_name: venv
+  display_name: venv (3.12.3.final.0)
   language: python
   name: python3
 ---
@@ -27,7 +27,7 @@ This tutorial explains how to create a custom model with prfmodel.
 
 In the first part, I show how to implement a 1-dimensional Gaussian population receptive field (pRF) model analogous
 to the existing 2-dimensional model. The 1D model is often used to model neural responses to auditory or numerosity
-stimuli that lie on a single dimension (i.e., tone frequency or the displayed integer number).
+stimuli that lie on a single dimension (i.e., tone frequency or displayed number of objects).
 
 +++
 
@@ -46,48 +46,29 @@ if find_spec("tensorflow") is None:
     raise ImportError(msg)
 ```
 
-### Creating a 1D stimulus
+### Loading a 1D stimulus
 
-We start by creating a 1D {py:class}`~prfmodel.stimuli.PRFStimulus`. In this example, we simulate a numerosity stimulus where different quantities of objects are consecutively presented on a screen. At each time frame, a different quantity (numerosity) is presented.
-
-The numerosity dimension is represented as a 1D grid, and the stimulus design is a binary matrix indicating which numerosity is active at each time frame. We repeat each numerosity for two consecutive frames and repeat all numerosities 10 times. Instead of the raw numerosity
-integers, we use the log of the integers as the stimulus grid. This means that the pRF model will also receive the log numerosity as input and it's parameters will live in the log numerosity space.
+We start by loading an example 1D {py:class}`~prfmodel.stimuli.PRFStimulus` from a numerosity experiment (for details, see {py:func}`load_1d_prf_lognumerosity_stimulus`).
 
 ```{code-cell} ipython3
-import numpy as np
-from prfmodel.stimuli import PRFStimulus
+from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
 
-num_frames = 160
-unique_numerosities = np.array([1, 2, 3, 4, 5, 6, 7, 20])
-unique_log_numerosities = np.log(unique_numerosities)
-num_numerosities = unique_numerosities.shape[0]
-
-# Create a 1D grid with unique log numerosities
-grid = np.expand_dims(unique_log_numerosities, 1)  # shape (num_numerosities, 1)
-
-# Create the design containing one-hot encoded numerosities displayed at each time frame
-design = np.zeros((num_frames, num_numerosities))
-
-num_cycles = 10
-
-frame = 0
-
-for cycle in range(num_cycles):
-    for cycle_frame in range(num_frames // num_cycles):
-        numerosity_idx = cycle_frame // 2
-        # Insert a binary indicator for which numerosity is active
-        design[frame, numerosity_idx] = 1
-        frame += 1
+stimulus = load_1d_prf_lognumerosity_stimulus()
+print(stimulus)
 ```
 
 We can visualize the design matrix with the displayed numerosity at each time frame on the natural and log scale.
 
 ```{code-cell} ipython3
 import matplotlib.pyplot as plt
+import numpy as np
+
+unique_log_numerosities = stimulus.grid[:, 0]
+unique_numerosities = np.round(np.exp(unique_log_numerosities))
 
 fig, ax = plt.subplots()
 
-ax.imshow(design.T, aspect=num_frames/16)
+ax.imshow(stimulus.design.T, aspect=stimulus.design.shape[0]/stimulus.design.shape[1])
 ax.set_xlabel("Time frame")
 ax.set_ylabel("Numerosity (natural scale)")
 ax.set_yticks(np.arange(len(unique_numerosities)))
@@ -99,17 +80,10 @@ secax.set_yticks(np.arange(len(unique_numerosities)))
 secax.set_yticklabels(np.round(unique_log_numerosities, 2));
 ```
 
-We can create a `PRFStimulus` object with the `design` and `grid`.
-
-```{code-cell} ipython3
-stimulus = PRFStimulus(design=design, grid=grid, dimension_labels=["log_numerosity"])
-print(stimulus)
-```
-
 ### Implementing the custom response model
 
 Now we implement the 1D Gaussian response class by subclassing
-{py:class}`~prfmodel.models.base.BasePopulationResponse`. We first take a look at the docstring of the class:
+{py:class}`~prfmodel.models.base.BasePopulationResponse` (note that the 1D Gaussian pRF response is already included in the package as {py:class}`~prfmodel.models.prf.Gaussian1DPRFResponse`). We first take a look at the docstring of the class:
 
 ```{code-cell} ipython3
 from prfmodel.models.base import BasePopulationResponse
@@ -143,8 +117,8 @@ class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus]):
     # 'parameter_names' is a property so that it becomes "immutable"
     @property
     def parameter_names(self) -> list[str]:
-        """Names of parameters used by the model: `mu_x`, `sigma`."""
-        return ["mu_x", "sigma"]
+        """Names of parameters used by the model: `mu`, `sigma`."""
+        return ["mu", "sigma"]
 
     def __call__(
             self,
@@ -169,14 +143,14 @@ class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus]):
         Returns
         -------
         Tensor
-            Model predictions of shape `(num_units, size_x)` and dtype `dtype`.
-            `num_units` is the number of rows in `parameters` and `size_x` is the size of the
+            Model predictions of shape `(num_units, num_coordinates)` and dtype `dtype`.
+            `num_units` is the number of rows in `parameters` and `num_coordinates` is the size of the
             stimulus grid dimension.
 
         """
         # Explicit dtypes avoid dtype mismatch errors
         dtype = get_dtype(dtype)
-        mu = convert_parameters_to_tensor(parameters[["mu_x"]], dtype=dtype)
+        mu = convert_parameters_to_tensor(parameters[["mu"]], dtype=dtype)
         sigma = convert_parameters_to_tensor(parameters[["sigma"]], dtype=dtype)
         # Explicit tensor conversion avoids type mismatch errors
         grid = ops.convert_to_tensor(stimulus.grid, dtype=dtype)
@@ -200,13 +174,13 @@ class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus]):
         return predict_gaussian_response(grid, mu, sigma)
 ```
 
-The `mu_x` parameter defines the preferred location on the stimulus dimension (here: preferred log numerosity) and `sigma` defines the tuning width. Both `mu` and `sigma` are converted from the `parameters` DataFrame to tensors with shapes `(num_units, 1)`.
+The `mu` parameter defines the preferred location on the stimulus dimension (here: preferred log numerosity) and `sigma` defines the tuning width. Both `mu` and `sigma` are converted from the `parameters` DataFrame to tensors with shapes `(num_units, 1)`.
 
 `predict_gaussian_response` expects `mu` and `sigma` to have at least two dimensions — the first for the number of units and the second for the number of spatial dimensions. The function then broadcasts these tensors against the stimulus `grid` to compute the Gaussian response for each unit.
 
 ### Creating the model
 
-With the `Gaussian1DPRFResponse` class defined, we pass it as the `prf_model` argument to {py:class}`~prfmodel.models.prf.canonical.CanonicalPRFModel`. The canonical model handles stimulus encoding, impulse response convolution, and baseline amplitude scaling using default submodels.
+With the `Gaussian1DPRFResponse` class defined, we pass it as the `prf_model` argument to {py:class}`~prfmodel.models.prf.canonical.CanonicalPRFModel`. The canonical model handles stimulus encoding, impulse response convolution, and baseline amplitude scaling using default submodels. Note that the 1D Gaussian pRF model is already included in the package as {py:class}`~prfmodel.models.prf.Gaussian1DPRFModel`.
 
 ```{code-cell} ipython3
 from prfmodel.models.prf.canonical import CanonicalPRFModel
@@ -222,7 +196,7 @@ We can inspect all parameters required by the composite model through the `param
 model.parameter_names
 ```
 
-The parameters `mu_x` and `sigma` come from our custom `Gaussian1DResponse`. The remaining parameters belong to the default impulse response model ({py:class}`~prfmodel.impulse.DerivativeTwoGammaImpulse`) and the scaling model ({py:class}`~prfmodel.scaling.BaselineAmplitude`).
+The parameters `mu` and `sigma` come from our custom `Gaussian1DPRFResponse`. The remaining parameters belong to the default impulse response model ({py:class}`~prfmodel.impulse.DerivativeTwoGammaImpulse`) and the scaling model ({py:class}`~prfmodel.scaling.BaselineAmplitude`).
 
 ### Simulating a neural response
 
@@ -231,9 +205,9 @@ Let's simulate predicted neural responses for each unique numerosity while keepi
 ```{code-cell} ipython3
 num_units = len(unique_numerosities)
 
-params_mu_x = pd.DataFrame(
+params_mu = pd.DataFrame(
     {
-        "mu_x": unique_log_numerosities,  # We need to specify the location of the Gaussian in log space
+        "mu": unique_log_numerosities,  # We need to specify the location of the Gaussian in log space
         "sigma": [1.0] * num_units,  # We keep the tuning width fixed
         "weight_deriv": [0.5] * num_units,
         "baseline": [0.0] * num_units,
@@ -241,7 +215,7 @@ params_mu_x = pd.DataFrame(
     }
 )
 
-prediction = np.asarray(model(stimulus, params_mu_x))
+prediction = np.asarray(model(stimulus, params_mu))
 print(prediction.shape)
 ```
 
@@ -258,11 +232,14 @@ import plotly.express as px
 pio.renderers.default = "notebook_connected"  # Requires internet connection to work
 pio.templates.default = "simple_white"
 
+# Name the columns after the numerosities so the animation slider shows them instead of the column index
+prediction_mu = pd.DataFrame(prediction.T, columns=unique_numerosities.astype(int))
+
 fig = px.line(
-    prediction.T,
+    prediction_mu,
     animation_frame="variable",
-    range_x=(0, num_frames),
-    range_y=(-0.1, 0.6),
+    range_x=(0, stimulus.design.shape[0]),
+    range_y=(-0.2, 0.6),
     labels={
         "index": "Time frame",
         "value": "Predicted neural response",
@@ -284,8 +261,8 @@ num_units = 10
 
 params_sigma = pd.DataFrame(
     {
-        "mu_x": np.log([3] * num_units),
-        "sigma": np.linspace(0.05, 3.0, num_units),
+        "mu": np.log([3] * num_units),
+        "sigma": np.linspace(0.5, 3.0, num_units),
         "weight_deriv": [0.5] * num_units,
         "baseline": [0.0] * num_units,
         "amplitude": [1.0] * num_units,
@@ -294,11 +271,16 @@ params_sigma = pd.DataFrame(
 
 prediction = np.asarray(model(stimulus, params_sigma))
 
-fig = px.line(
+# Name the columns after the tuning widths so the animation slider shows them instead of the column index
+prediction_sigma = pd.DataFrame(
     prediction.T,
+    columns=[f"{sigma:.2f}" for sigma in params_sigma["sigma"]],
+)
+
+fig = px.line(
+    prediction_sigma,
     animation_frame="variable",
-    range_x=(0, num_frames),
-    range_y=(-2.0, 5.0),
+    range_x=(0, stimulus.design.shape[0]),
     labels={
         "index": "Time frame",
         "value": "Predicted neural response",
