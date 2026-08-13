@@ -16,7 +16,7 @@ with prfmodel.
 
 ## Installation
 
-**Requirements**: prfmodel requires Python version >= 3.10 and <= 3.12.
+**Requirements**: prfmodel requires Python version >= 3.10 and <= 3.13.
 
 To install the development version of prfmodel from GitHub, run:
 
