@@ -20,6 +20,10 @@ prfmodel.fitters
    The :mod:`~prfmodel.fitters.adapter` submodule contains functionality to transform parameters during model fitting
    (e.g., to optimize a parameter on the log scale). Currently, this is only implemented for SGD.
 
+   The :mod:`~prfmodel.fitters.losses` submodule contains additional loss functions, such as
+   :class:`~prfmodel.fitters.losses.CorrelationLoss`, which is the default loss of
+   :class:`~prfmodel.fitters.GridFitter`.
+
 
 
 Submodules
@@ -29,10 +33,12 @@ Submodules
    :hidden:
 
    /autoapi/prfmodel/fitters/adapter/index
+   /autoapi/prfmodel/fitters/losses/index
 
 .. autoapisummary::
 
    prfmodel.fitters.adapter
+   prfmodel.fitters.losses
 
 
 Classes

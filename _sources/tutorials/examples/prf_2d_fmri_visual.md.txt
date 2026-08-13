@@ -455,7 +455,7 @@ grid search will evaluate all possible combinations of these values and return t
 data best. This will result in a grid containing $20 ^ 3 = 8000$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
 
 Let's construct the {py:class}`prfmodel.fitters.grid.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.grid.GridFitter`
-evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is cosine similarity, which ignores differences in scale between model predictions and observed data.
+evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is the negative correlation, which ignores differences in baseline and amplitude between model predictions and observed data. This means the data do not need to be demeaned or converted to percent signal change first, but also that `baseline` and `amplitude` cannot be estimated by the grid search itself. We fix them here and estimate them with least squares in the next step.
 
 ```{code-cell} ipython3
 from prfmodel.fitters import GridFitter

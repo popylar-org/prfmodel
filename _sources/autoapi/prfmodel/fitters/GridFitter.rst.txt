@@ -14,10 +14,12 @@ prfmodel.fitters.GridFitter
    :type model: BaseCanonical
    :param stimulus: Stimulus object.
    :type stimulus: Stimulus
-   :param loss: Loss instance or function with the signature `f(y, y_pred)`, where `y` is the target data and `y_pred` are the
-                model predicitons. Default is `None` where a `keras.losses.CosineSimilarity` loss is used. Note that, when
-                a `keras.losses.Loss` instance is used, the argument `reduction` must be set to `"none"` to enable loss
-                computation for all data batches.
+   :param loss: Loss instance or function with the signature `f(y_true, y_pred)`, where `y_true` is the target data and
+                `y_pred` are the model predicitons. Default is `None` where a
+                :class:`~prfmodel.fitters.losses.CorrelationLoss` loss is used. Note that, when a
+                :class:`keras.losses.Loss` instance is used, the argument `reduction` must be set to `"none"` to enable
+                loss computation for all data batches. When a function is used, it must return a loss value for every unit in
+                `y_true` and `y_pred`.
    :type loss: keras.optimizers.Loss or Callable, optional
    :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
                  :func:`prfmodel.utils.get_dtype`.
@@ -27,6 +29,14 @@ prfmodel.fitters.GridFitter
 
    Depending on the size of the parameter grid and the number of batches in the data, the search can be very
    memory-intensive. For this reason, the grid is first split into batches that are evaluated iteratively.
+
+   The default :class:`~prfmodel.fitters.losses.CorrelationLoss` is invariant to the baseline and amplitude of the
+   prediction, so the target data does not need to be demeaned or converted to percent signal change beforehand.
+   The flip side is that parameters which only shift or scale the prediction (typically `baseline` and `amplitude`)
+   are not identifiable: all their grid values yield the same loss, and the returned estimate is an arbitrary one
+   among them. Fix such parameters to a single placeholder value in the grid and estimate them afterwards with
+   :class:`~prfmodel.fitters.LeastSquaresFitter`, or pass a loss that is sensitive to scale (e.g.,
+   :class:`keras.losses.MeanSquaredError`) if they must be estimated by the grid search itself.
 
    .. rubric:: Examples
 

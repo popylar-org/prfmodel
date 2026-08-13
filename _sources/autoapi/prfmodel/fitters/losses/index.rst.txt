@@ -1,0 +1,27 @@
+prfmodel.fitters.losses
+=======================
+
+.. py:module:: prfmodel.fitters.losses
+
+.. autoapi-nested-parse::
+
+   Custom loss functions.
+
+   Contains additional loss functions that inherit from `keras.losses.Loss`. They can be used inside
+   :class:`~prfmodel.fitters.GridFitter` and :class:`~prfmodel.fitters.SGDFitter`.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   CorrelationLoss </autoapi/prfmodel/fitters/losses/CorrelationLoss>
+
+.. autoapisummary::
+
+   prfmodel.fitters.losses.CorrelationLoss
+
+

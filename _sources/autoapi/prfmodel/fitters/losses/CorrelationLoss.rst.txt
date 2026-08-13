@@ -1,0 +1,38 @@
+prfmodel.fitters.losses.CorrelationLoss
+=======================================
+
+.. py:class:: prfmodel.fitters.losses.CorrelationLoss(name=None, reduction='sum_over_batch_size', dtype=None)
+
+
+
+   Correlation loss.
+
+   Computes the negative Pearson correlation coefficient loss. This loss is agnostic to differences in baseline and
+   amplitude between true values and predictions. This makes it particularly useful for
+   :class:`~prfmodel.fitters.GridFitter` where it is the default loss.
+
+   Inherits all arguments from :class:`keras.losses.Loss`.
+
+   .. rubric:: Notes
+
+   Computes the loss by first subtracting the mean from true values and predictions and then computing their
+   cosine similarity. Different from the usual definition of the Pearson correlation coefficient, the loss is zero
+   when either ``y_true`` or ``y_pred`` are constant (instead of ``NaN``).
+
+   Because the loss is invariant to baseline and amplitude, parameters that only shift or scale the prediction
+   are not identifiable under it. See the notes of :class:`~prfmodel.fitters.GridFitter` for the consequences.
+
+
+   .. py:method:: call(y_true: prfmodel.typing.Tensor, y_pred: prfmodel.typing.Tensor) -> prfmodel.typing.Tensor
+
+      Compute the loss.
+
+      :param y_true: Tensor of true targets.
+      :type y_true: :data:`prfmodel.typing.Tensor`
+      :param y_pred: Tensor of predicted targets.
+      :type y_pred: :data:`prfmodel.typing.Tensor`
+
+      :returns: Correlation loss. Shape depends on the :attr:`reduction` argument in the class constructor.
+      :rtype: :data:`prfmodel.typing.Tensor`
+
+
