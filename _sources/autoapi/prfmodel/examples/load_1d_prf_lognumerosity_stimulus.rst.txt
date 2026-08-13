@@ -1,0 +1,33 @@
+prfmodel.examples.load_1d_prf_lognumerosity_stimulus
+====================================================
+
+.. py:function:: prfmodel.examples.load_1d_prf_lognumerosity_stimulus() -> prfmodel.stimuli.PRFStimulus
+
+   Load a one-dimensional population receptive field log numerosity stimulus.
+
+   Loads an example stimulus that includes a one-dimensional sequence of log integers (numerosities) from a numerosity
+   experiment [1]_.
+
+   :returns: A stimulus object with a ``design`` with shape ``(182, 8)`` that one-hot encodes which numerosity is shown at
+             each time frame and a ``grid`` with shape ``(8, 1)`` that contains the unique log integers.
+   :rtype: PRFStimulus
+
+   .. rubric:: Notes
+
+   The stimulus contains four cycles of the same sequence of unique numerosities 1, 2, 3, 4, 5, 6, 7, and 20.
+   Each numerosity is presented for two consecutive frames. The numerosities 1 to 7 first ascend in order followed by
+   numerosity 20 presented for eight frames and then descend in order followed by 20 for eight frames.
+   The first six frames also contain numerosity 20 and serve as a prescan interval in the experiment.
+
+   .. rubric:: References
+
+   .. [1] Hendrikx, E., Paul, J. M., van Ackooij, M., van der Stoep, N., & Harvey, B. M. (2024). Cortical quantity
+       representations of visual numerosity and timing overlap increasingly into superior cortices but remain
+       distinct. *NeuroImage*, 286, 120515. https://doi.org/10.1016/j.neuroimage.2024.120515
+
+   .. rubric:: Examples
+
+   >>> stimulus = load_1d_prf_lognumerosity_stimulus()
+   >>> print(stimulus)
+   PRFStimulus(design=array[182, 8], grid=array[8, 1], dimension_labels=['log_numerosity'])
+

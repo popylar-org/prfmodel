@@ -229,6 +229,7 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../examples/index.html">prfmodel.examples</a><input aria-label="Toggle navigation of prfmodel.examples" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../examples/load_1d_prf_lognumerosity_stimulus.html">load_1d_prf_lognumerosity_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../examples/load_2d_prf_bar_stimulus.html">load_2d_prf_bar_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../examples/load_single_subject_fmri_data.html">load_single_subject_fmri_data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../examples/load_surface_mesh.html">load_surface_mesh</a></li>
@@ -319,6 +320,8 @@
 <li class="toctree-l4"><a class="reference internal" href="DivNormGaussian2DPRFModel.html">DivNormGaussian2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="DivNormPRFModel.html">DivNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="DoG2DPRFModel.html">DoG2DPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Gaussian1DPRFModel.html">Gaussian1DPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="Gaussian1DPRFResponse.html">Gaussian1DPRFResponse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Gaussian2DCSSPRFModel.html">Gaussian2DCSSPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Gaussian2DPRFModel.html">Gaussian2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="Gaussian2DPRFResponse.html">Gaussian2DPRFResponse</a></li>
@@ -431,36 +434,42 @@
 <p>Finally, it
 contains multiple canonical models that combine a pRF response with a stimulus encoding model, an impulse response
 model from <a class="reference internal" href="../../impulse/index.html#module-prfmodel.impulse" title="prfmodel.impulse"><code class="xref py py-mod docutils literal notranslate"><span class="pre">impulse</span></code></a>, and a scaling model from <a class="reference internal" href="../../scaling/index.html#module-prfmodel.scaling" title="prfmodel.scaling"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scaling</span></code></a>. Currently, canonical Gaussian
-<a class="footnote-reference brackets" href="#id5" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, Compressive Spatial Summation (CSS) <a class="footnote-reference brackets" href="#id8" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>, Difference of Gaussian (DoG) <a class="footnote-reference brackets" href="#id11" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>, and
-Divisive Normalization (DivNorm; DN) <a class="footnote-reference brackets" href="#id14" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a> models are implemented. These models increase in complexity, with the
+<a class="footnote-reference brackets" href="#id6" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> <a class="footnote-reference brackets" href="#id9" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>, Compressive Spatial Summation (CSS) <a class="footnote-reference brackets" href="#id10" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>, Difference of Gaussian (DoG) <a class="footnote-reference brackets" href="#id13" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a>, and
+Divisive Normalization (DivNorm; DN) <a class="footnote-reference brackets" href="#id16" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a> models are implemented. These models increase in complexity, with the
 canonical Gaussian being the least and the DN model being the most complex model.</p>
 <p>There are also multiple helper functions that initialize starting parameters from parameter estimates obtained from a
 different model (e.g., <a class="reference internal" href="init_css_from_gaussian.html#prfmodel.models.prf.init_css_from_gaussian" title="prfmodel.models.prf.init_css_from_gaussian"><code class="xref py py-func docutils literal notranslate"><span class="pre">init_css_from_gaussian()</span></code></a>).</p>
 <p>The function <a class="reference internal" href="encode_prf_response.html#prfmodel.models.prf.encode_prf_response" title="prfmodel.models.prf.encode_prf_response"><code class="xref py py-func docutils literal notranslate"><span class="pre">encode_prf_response()</span></code></a> can be used to stimulus-encode a pRF response with arbitray dimensions. This
 function is also internally used by <a class="reference internal" href="PRFStimulusEncoder.html#prfmodel.models.prf.PRFStimulusEncoder" title="prfmodel.models.prf.PRFStimulusEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PRFStimulusEncoder</span></code></a>.</p>
 <p>The function <a class="reference internal" href="predict_gaussian_response.html#prfmodel.models.prf.predict_gaussian_response" title="prfmodel.models.prf.predict_gaussian_response"><code class="xref py py-func docutils literal notranslate"><span class="pre">predict_gaussian_response()</span></code></a> can be used to make Gaussian density predictions to stimulus grids with
-arbitrary dimensions. This function is also used internally by <a class="reference internal" href="Gaussian2DPRFResponse.html#prfmodel.models.prf.Gaussian2DPRFResponse" title="prfmodel.models.prf.Gaussian2DPRFResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFResponse</span></code></a>.</p>
+arbitrary dimensions. This function is also used internally by <a class="reference internal" href="Gaussian2DPRFResponse.html#prfmodel.models.prf.Gaussian2DPRFResponse" title="prfmodel.models.prf.Gaussian2DPRFResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFResponse</span></code></a> and
+<a class="reference internal" href="Gaussian1DPRFResponse.html#prfmodel.models.prf.Gaussian1DPRFResponse" title="prfmodel.models.prf.Gaussian1DPRFResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian1DPRFResponse</span></code></a>.</p>
 <p class="rubric">References</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id5" role="doc-footnote">
+<aside class="footnote brackets" id="id6" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
 <p>Dumoulin, S. O., &amp; Wandell, B. A. (2008). Population receptive field estimates in human visual cortex.
-<em>NeuroImage</em>, <a href="#id6"><span class="problematic" id="id7">*</span></a>39*(2), 647-660. <a class="reference external" href="https://doi.org/10.1016/j.neuroimage.2007.09.034">https://doi.org/10.1016/j.neuroimage.2007.09.034</a></p>
+<em>NeuroImage</em>, <a href="#id7"><span class="problematic" id="id8">*</span></a>39*(2), 647-660. <a class="reference external" href="https://doi.org/10.1016/j.neuroimage.2007.09.034">https://doi.org/10.1016/j.neuroimage.2007.09.034</a></p>
 </aside>
-<aside class="footnote brackets" id="id8" role="doc-footnote">
+<aside class="footnote brackets" id="id9" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
-<p>Kay, K. N., Winawer, J., Mezer, A., &amp; Wandell, B. A. (2013). Compressive spatial summation in human visual
-cortex. <em>Journal of Neurophysiology</em>, <a href="#id9"><span class="problematic" id="id10">*</span></a>110*(2), 481-494. <a class="reference external" href="https://doi.org/10.1152/jn.00105.2013">https://doi.org/10.1152/jn.00105.2013</a></p>
+<p>Harvey, B. M., Klein, B. P., Petridou, N., &amp; Dumoulin, S. O. (2013). Topographic representation of
+numerosity in the human parietal cortex. <em>Science</em>, 341(6150), 1123-1126. <a class="reference external" href="https://doi.org/10.1126/science.1239052">https://doi.org/10.1126/science.1239052</a></p>
 </aside>
-<aside class="footnote brackets" id="id11" role="doc-footnote">
+<aside class="footnote brackets" id="id10" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
-<p>Zuiderbaan, W., Harvey, B. M., &amp; Dumoulin, S. O. (2012). Modeling center-surround configurations in population
-receptive fields using fMRI. <em>Journal of Vision</em>, <a href="#id12"><span class="problematic" id="id13">*</span></a>12*(3), 10. <a class="reference external" href="https://doi.org/10.1167/12.3.10">https://doi.org/10.1167/12.3.10</a></p>
+<p>Kay, K. N., Winawer, J., Mezer, A., &amp; Wandell, B. A. (2013). Compressive spatial summation in human visual
+cortex. <em>Journal of Neurophysiology</em>, <a href="#id11"><span class="problematic" id="id12">*</span></a>110*(2), 481-494. <a class="reference external" href="https://doi.org/10.1152/jn.00105.2013">https://doi.org/10.1152/jn.00105.2013</a></p>
 </aside>
-<aside class="footnote brackets" id="id14" role="doc-footnote">
+<aside class="footnote brackets" id="id13" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">4</a><span class="fn-bracket">]</span></span>
+<p>Zuiderbaan, W., Harvey, B. M., &amp; Dumoulin, S. O. (2012). Modeling center-surround configurations in population
+receptive fields using fMRI. <em>Journal of Vision</em>, <a href="#id14"><span class="problematic" id="id15">*</span></a>12*(3), 10. <a class="reference external" href="https://doi.org/10.1167/12.3.10">https://doi.org/10.1167/12.3.10</a></p>
+</aside>
+<aside class="footnote brackets" id="id16" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">5</a><span class="fn-bracket">]</span></span>
 <p>Aqil, M., Knapen, T., &amp; Dumoulin, S. O. (2021). Divisive normalization unifies disparate response signatures
-throughout the human visual hierarchy. <em>Proceedings of the National Academy of Sciences</em>, <a href="#id15"><span class="problematic" id="id16">*</span></a>118*(46), e2108713118.
+throughout the human visual hierarchy. <em>Proceedings of the National Academy of Sciences</em>, <a href="#id17"><span class="problematic" id="id18">*</span></a>118*(46), e2108713118.
 <a class="reference external" href="https://doi.org/10.1073/pnas.2108713118">https://doi.org/10.1073/pnas.2108713118</a></p>
 </aside>
 </aside>
@@ -499,6 +508,12 @@ throughout the human visual hierarchy. <em>Proceedings of the National Academy o
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="DoG2DPRFModel.html#prfmodel.models.prf.DoG2DPRFModel" title="prfmodel.models.prf.DoG2DPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DoG2DPRFModel</span></code></a></p></td>
 <td><p>Two-dimensional Difference of Gaussians (DoG) population receptive field (pRF) model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="Gaussian1DPRFModel.html#prfmodel.models.prf.Gaussian1DPRFModel" title="prfmodel.models.prf.Gaussian1DPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gaussian1DPRFModel</span></code></a></p></td>
+<td><p>One-dimensional Gaussian population receptive field (pRF) model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="Gaussian1DPRFResponse.html#prfmodel.models.prf.Gaussian1DPRFResponse" title="prfmodel.models.prf.Gaussian1DPRFResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gaussian1DPRFResponse</span></code></a></p></td>
+<td><p>One-dimensional Gaussian neuron population receptive field response model.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="Gaussian2DCSSPRFModel.html#prfmodel.models.prf.Gaussian2DCSSPRFModel" title="prfmodel.models.prf.Gaussian2DCSSPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Gaussian2DCSSPRFModel</span></code></a></p></td>
 <td><p>Two-dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS).</p></td>

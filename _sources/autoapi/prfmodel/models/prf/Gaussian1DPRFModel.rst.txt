@@ -1,0 +1,138 @@
+prfmodel.models.prf.Gaussian1DPRFModel
+======================================
+
+.. py:class:: prfmodel.models.prf.Gaussian1DPRFModel(encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = BaselineAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
+
+
+
+   One-dimensional Gaussian population receptive field (pRF) model.
+
+   This class combines a 1D Gaussian pRF, impulse, scaling, and regressors model response.
+
+   :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
+                          The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
+   :type encoding_model: BaseStimulusEncoder or type, default=PRFStimulusEncoder
+   :param impulse_model: An impulse model class or instance. Model classes will be instantiated during
+                         initialization. The default creates a :class:`~prfmodel.impulse.DerivativeTwoGammaImpulse`
+                         instance with default values.
+   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
+   :param scaling_model: A scaling model class or instance. Model classes will be instantiated during initialization.
+                         The default creates a :class:`~prfmodel.scaling.BaselineAmplitude` instance.
+   :type scaling_model: BaseScaling or type or None, default=BaselineAmplitude, optional
+   :param regressors_model: A regressor model instance, a list of regressor model instances, or `None`. When a list is
+                            provided, it is wrapped in a :class:`~prfmodel.regressors.RegressorsList` and its contributions
+                            are summed. The regressor contribution is added after the scaling model.
+   :type regressors_model: BaseRegressors or list of BaseRegressors or RegressorsList or None, default=None, optional
+
+   .. rubric:: Notes
+
+   The canonical model follows the following steps [1]_:
+
+   1. The 1D Gaussian pRF response model makes a prediction for the stimulus grid.
+   2. The encoding model encodes the response with the stimulus design.
+   3. The encoded response is convolved with an impulse response (optional).
+   4. The scaling model modifies the convolved response (optional).
+   5. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
+
+   Using the default impulse and scaling models, the following columns are expected in the
+   :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
+
+   .. list-table::
+      :header-rows: 1
+      :widths: 20 12 53
+
+      * - Parameter
+        - Model
+        - Description
+      * - ``mu``
+        - pRF
+        - Center of the Gaussian.
+      * - ``sigma``
+        - pRF
+        - Standard deviation of the Gaussian.
+      * - ``delay``
+        - Impulse
+        - Peak time of the positive gamma component (in seconds; optional).
+      * - ``dispersion``
+        - Impulse
+        - Rate parameter of the positive gamma component (optional).
+      * - ``undershoot``
+        - Impulse
+        - Peak time of the negative gamma component (in seconds; optional).
+      * - ``u_dispersion``
+        - Impulse
+        - Rate parameter of the negative gamma component (optional).
+      * - ``ratio``
+        - Impulse
+        - Weight of the negative gamma component (optional).
+      * - ``weight_deriv``
+        - Impulse
+        - Weight of the derivative component.
+      * - ``baseline``
+        - Scaling
+        - Additive constant.
+      * - ``amplitude``
+        - Scaling
+        - Multiplicative scale factor.
+
+   .. rubric:: References
+
+   .. [1] Harvey, B. M., Klein, B. P., Petridou, N., & Dumoulin, S. O. (2013). Topographic representation of
+       numerosity in the human parietal cortex. *Science*, 341(6150), 1123-1126. https://doi.org/10.1126/science.1239052
+
+   .. rubric:: Examples
+
+   Predict a model response for a 1D log numerosity stimulus.
+
+   >>> import pandas as pd
+   >>> from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
+   >>> stimulus = load_1d_prf_lognumerosity_stimulus()
+   >>> model = Gaussian1DPRFModel()
+   >>> # Define all model parameters for 3 units
+   >>> params = pd.DataFrame({
+   ...     # Gaussian parameters
+   ...     "mu": [0.0, 1.0, 0.0],
+   ...     "sigma": [1.0, 1.5, 2.0],
+   ...     # Impulse model parameters (delay, dispersion, undershoot, u_dispersion,
+   ...     # and ratio use the default Glover HRF parameters)
+   ...     "weight_deriv": [0.5, 0.5, 0.5],
+   ...     # Scaling model parameters
+   ...     "baseline": [0.1, -0.1, 0.5],
+   ...     "amplitude": [-2.0, 1.2, 0.1],
+   ... })
+   >>> # Predict model response
+   >>> resp = model(stimulus, params)
+   >>> print(resp.shape)  # (num_units, num_frames)
+   (3, 182)
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the model response to a stimulus.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param regressors: Regressor design data. Required when the canonical model has a regressors model configured.
+                         A single data frame with shape `(num_frames, num_regressors)` whose columns cover the names
+                         required by every configured regressor model. Extra columns are ignored.
+      :type regressors: pandas.DataFrame, optional
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      A list with names of unique parameters that are used by the submodels.
+

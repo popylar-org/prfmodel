@@ -7,10 +7,12 @@ prfmodel.models.prf.Gaussian2DPRFResponse
 
    Two-dimensional isotropic Gaussian neuron population receptive field response model.
 
-   Predicts a neuron population response to a stimulus grid.
+   Predicts a neuron population response to a 2D stimulus grid.
    The model has three parameters: `mu_y` and `mu_x` for the center and `sigma` for the width of the Gaussian.
 
    .. rubric:: Examples
+
+   Predict a response for a 2D bar stimulus.
 
    >>> import pandas as pd
    >>> from prfmodel.examples import load_2d_prf_bar_stimulus

@@ -85,7 +85,7 @@ prfmodel.models.prf.Gaussian2DPRFModel
 
    .. rubric:: Examples
 
-   Predict a model response for multiple units.
+   Predict a model response for a 2D bar stimulus.
 
    >>> import pandas as pd
    >>> from prfmodel.examples import load_2d_prf_bar_stimulus

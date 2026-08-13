@@ -16,8 +16,8 @@ prfmodel.models.prf
    Finally, it
    contains multiple canonical models that combine a pRF response with a stimulus encoding model, an impulse response
    model from :mod:`~prfmodel.impulse`, and a scaling model from :mod:`~prfmodel.scaling`. Currently, canonical Gaussian
-   [1]_, Compressive Spatial Summation (CSS) [2]_, Difference of Gaussian (DoG) [3]_, and
-   Divisive Normalization (DivNorm; DN) [4]_ models are implemented. These models increase in complexity, with the
+   [1]_ [2]_, Compressive Spatial Summation (CSS) [3]_, Difference of Gaussian (DoG) [4]_, and
+   Divisive Normalization (DivNorm; DN) [5]_ models are implemented. These models increase in complexity, with the
    canonical Gaussian being the least and the DN model being the most complex model.
 
    There are also multiple helper functions that initialize starting parameters from parameter estimates obtained from a
@@ -27,17 +27,20 @@ prfmodel.models.prf
    function is also internally used by :class:`PRFStimulusEncoder`.
 
    The function :func:`predict_gaussian_response` can be used to make Gaussian density predictions to stimulus grids with
-   arbitrary dimensions. This function is also used internally by :class:`Gaussian2DPRFResponse`.
+   arbitrary dimensions. This function is also used internally by :class:`Gaussian2DPRFResponse` and
+   :class:`Gaussian1DPRFResponse`.
 
    .. rubric:: References
 
    .. [1] Dumoulin, S. O., & Wandell, B. A. (2008). Population receptive field estimates in human visual cortex.
        *NeuroImage*, *39*(2), 647-660. https://doi.org/10.1016/j.neuroimage.2007.09.034
-   .. [2] Kay, K. N., Winawer, J., Mezer, A., & Wandell, B. A. (2013). Compressive spatial summation in human visual
+   .. [2] Harvey, B. M., Klein, B. P., Petridou, N., & Dumoulin, S. O. (2013). Topographic representation of
+         numerosity in the human parietal cortex. *Science*, 341(6150), 1123-1126. https://doi.org/10.1126/science.1239052
+   .. [3] Kay, K. N., Winawer, J., Mezer, A., & Wandell, B. A. (2013). Compressive spatial summation in human visual
        cortex. *Journal of Neurophysiology*, *110*(2), 481-494. https://doi.org/10.1152/jn.00105.2013
-   .. [3] Zuiderbaan, W., Harvey, B. M., & Dumoulin, S. O. (2012). Modeling center-surround configurations in population
+   .. [4] Zuiderbaan, W., Harvey, B. M., & Dumoulin, S. O. (2012). Modeling center-surround configurations in population
        receptive fields using fMRI. *Journal of Vision*, *12*(3), 10. https://doi.org/10.1167/12.3.10
-   .. [4] Aqil, M., Knapen, T., & Dumoulin, S. O. (2021). Divisive normalization unifies disparate response signatures
+   .. [5] Aqil, M., Knapen, T., & Dumoulin, S. O. (2021). Divisive normalization unifies disparate response signatures
        throughout the human visual hierarchy. *Proceedings of the National Academy of Sciences*, *118*(46), e2108713118.
        https://doi.org/10.1073/pnas.2108713118
 
@@ -67,6 +70,8 @@ Classes
    DivNormGaussian2DPRFModel </autoapi/prfmodel/models/prf/DivNormGaussian2DPRFModel>
    DivNormPRFModel </autoapi/prfmodel/models/prf/DivNormPRFModel>
    DoG2DPRFModel </autoapi/prfmodel/models/prf/DoG2DPRFModel>
+   Gaussian1DPRFModel </autoapi/prfmodel/models/prf/Gaussian1DPRFModel>
+   Gaussian1DPRFResponse </autoapi/prfmodel/models/prf/Gaussian1DPRFResponse>
    Gaussian2DCSSPRFModel </autoapi/prfmodel/models/prf/Gaussian2DCSSPRFModel>
    Gaussian2DPRFModel </autoapi/prfmodel/models/prf/Gaussian2DPRFModel>
    Gaussian2DPRFResponse </autoapi/prfmodel/models/prf/Gaussian2DPRFResponse>
@@ -79,6 +84,8 @@ Classes
    prfmodel.models.prf.DivNormGaussian2DPRFModel
    prfmodel.models.prf.DivNormPRFModel
    prfmodel.models.prf.DoG2DPRFModel
+   prfmodel.models.prf.Gaussian1DPRFModel
+   prfmodel.models.prf.Gaussian1DPRFResponse
    prfmodel.models.prf.Gaussian2DCSSPRFModel
    prfmodel.models.prf.Gaussian2DPRFModel
    prfmodel.models.prf.Gaussian2DPRFResponse

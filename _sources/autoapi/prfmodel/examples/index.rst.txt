@@ -15,12 +15,14 @@ Functions
 .. toctree::
    :hidden:
 
+   load_1d_prf_lognumerosity_stimulus </autoapi/prfmodel/examples/load_1d_prf_lognumerosity_stimulus>
    load_2d_prf_bar_stimulus </autoapi/prfmodel/examples/load_2d_prf_bar_stimulus>
    load_single_subject_fmri_data </autoapi/prfmodel/examples/load_single_subject_fmri_data>
    load_surface_mesh </autoapi/prfmodel/examples/load_surface_mesh>
 
 .. autoapisummary::
 
+   prfmodel.examples.load_1d_prf_lognumerosity_stimulus
    prfmodel.examples.load_2d_prf_bar_stimulus
    prfmodel.examples.load_single_subject_fmri_data
    prfmodel.examples.load_surface_mesh

@@ -1,0 +1,59 @@
+prfmodel.models.prf.Gaussian1DPRFResponse
+=========================================
+
+.. py:class:: prfmodel.models.prf.Gaussian1DPRFResponse
+
+
+
+   One-dimensional Gaussian neuron population receptive field response model.
+
+   Predicts a neuron population response to a 1D stimulus grid.
+   The model has two parameters: `mu` for the location and `sigma` for the width of the Gaussian.
+
+   .. rubric:: Examples
+
+   Predict a response for a 1D log numerosity stimulus.
+
+   >>> import pandas as pd
+   >>> from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
+   >>> stimulus = load_1d_prf_lognumerosity_stimulus()
+   >>> params = pd.DataFrame({
+   ...     "mu": [0.0, 1.0, 0.0],
+   ...     "sigma": [1.0, 1.5, 2.0],
+   ... })
+   >>> model = Gaussian1DPRFResponse()
+   >>> resp = model(stimulus, params)
+   >>> print(resp.shape)  # (num_units, num_coordinates)
+   (3, 8)
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the model response for a stimulus with a 1D grid.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape `(num_units, num_coordinates)` and dtype `dtype`.
+                `num_units` is the number of rows in `parameters` and `num_coordinates` is the size of the
+                stimulus grid dimension.
+      :rtype: Tensor
+
+      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      `mu` and `sigma`.
+
+      :type: Names of parameters used by the model
+
