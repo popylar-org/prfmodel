@@ -8,6 +8,7 @@ This module contains functionality to transform parameters during model fitting
 from collections.abc import Callable
 from collections.abc import Sequence
 from typing import TypeVar
+from typing import cast
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
@@ -246,6 +247,10 @@ class ParameterConstraint(ParameterTransform):
             msg = "Lower and upper bound must not be provided at the same time"
             raise NotImplementedError(msg)
 
+        if lower is None and upper is None:
+            msg = "Either a lower or an upper bound must be provided"
+            raise ValueError(msg)
+
         self.lower = lower
         self.upper = upper
 
@@ -284,8 +289,10 @@ class ParameterConstraint(ParameterTransform):
         self._check_bound_name(self.lower, parameters)
         parameters = parameters.copy()
 
-        lower = parameters[self.lower] if isinstance(self.lower, str) else self.lower
-        lower = self.bound_fun(lower)
+        bound = parameters[self.lower] if isinstance(self.lower, str) else self.lower
+        # The bound cannot be None here: this method only runs when a lower bound was given, and
+        # `__init__` rejects a constraint with no bound at all. `cast` tells the type checker that.
+        lower = cast("Tensor | float", self.bound_fun(bound))
 
         for param in self.parameter_names:
             distance = parameters[param] - lower
@@ -298,8 +305,9 @@ class ParameterConstraint(ParameterTransform):
         self._check_bound_name(self.upper, parameters)
         parameters = parameters.copy()
 
-        upper = parameters[self.upper] if isinstance(self.upper, str) else self.upper
-        upper = self.bound_fun(upper)
+        bound = parameters[self.upper] if isinstance(self.upper, str) else self.upper
+        # Cast for the same reason as in `_transform_lower`: an upper bound is guaranteed here.
+        upper = cast("Tensor | float", self.bound_fun(bound))
 
         for param in self.parameter_names:
             distance = upper - parameters[param]
