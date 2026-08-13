@@ -11,6 +11,8 @@ from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.models.prf import Gaussian1DPRFModel
+from prfmodel.models.prf import Gaussian1DPRFResponse
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFResponse
 from prfmodel.models.prf import PRFStimulusEncoder
@@ -138,8 +140,7 @@ class TestGaussian2DPRFResponse(PRFStimulusSetup):
 
     def test_parameter_names(self, response_model: Gaussian2DPRFResponse):
         """Test that correct parameter names are returned."""
-        # Order of parameter names does not matter
-        assert set(response_model.parameter_names) & {"mu_y", "mu_x", "sigma"}
+        assert response_model.parameter_names == ["mu_y", "mu_x", "sigma"]
 
     @parametrize_dtype
     def test_predict(self, response_model: Gaussian2DPRFResponse, stimulus: PRFStimulus, dtype: str):
@@ -157,6 +158,46 @@ class TestGaussian2DPRFResponse(PRFStimulusSetup):
 
         # Check result shape (num_units, height, width)
         assert preds.shape == (params.shape[0], stimulus.design.shape[1], stimulus.design.shape[2])
+
+
+class TestGaussian1DPRFResponse:
+    """Tests for Gaussian1DResponse class."""
+
+    @pytest.fixture
+    def stimulus(self):
+        """1D pRF stimulus."""
+        grid = np.expand_dims(np.arange(4), 1)
+        design = np.eye(4, 4)
+
+        return PRFStimulus(
+            design=design,
+            grid=grid,
+        )
+
+    @pytest.fixture
+    def response_model(self):
+        """Response model object."""
+        return Gaussian1DPRFResponse()
+
+    def test_parameter_names(self, response_model: Gaussian1DPRFResponse):
+        """Test that correct parameter names are returned."""
+        assert response_model.parameter_names == ["mu", "sigma"]
+
+    @parametrize_dtype
+    def test_predict(self, response_model: Gaussian1DPRFResponse, stimulus: PRFStimulus, dtype: str):
+        """Test that response prediction returns correct shape."""
+        # 3 units
+        params = pd.DataFrame(
+            {
+                "mu": [0.0, 1.0, 0.0],
+                "sigma": [1.0, 2.0, 3.0],
+            },
+        )
+
+        preds = np.asarray(response_model(stimulus, params, dtype))
+
+        # Check result shape (num_units, num_coordinates)
+        assert preds.shape == (params.shape[0], stimulus.design.shape[1])
 
 
 class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
@@ -287,6 +328,93 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
             {f"response_{i}": x for i, x in enumerate(resp)},
             default_tolerance={"atol": 1e-4, "rtol": 1e-3},
         )
+
+
+class TestGaussian1DPRFModel(TestGaussian1DPRFResponse):
+    """Tests for the Gaussian1DPRFModel class.
+
+    Does not include regression tests because the class uses the same underlying functions as Gaussian2DPRFModel.
+
+    """
+
+    @pytest.fixture
+    def prf_model(self):
+        """PRF model object."""
+        return Gaussian1DPRFModel()
+
+    @pytest.fixture
+    def impulse_model(self):
+        """Impulse model object."""
+        return DerivativeTwoGammaImpulse()
+
+    @pytest.fixture
+    def temporal_model(self):
+        """Temporal model object."""
+        return BaselineAmplitude()
+
+    @pytest.fixture
+    def params(self):
+        """Dataframe with parameters."""
+        return pd.DataFrame(
+            {
+                "mu": [0.0, 1.0, 0.0],
+                "sigma": [1.0, 2.0, 3.0],
+                "delay": [6.0, 7.0, 5.0],
+                "dispersion": [0.9, 1.0, 0.8],
+                "undershoot": [12.0, 11.0, 13.0],
+                "u_dispersion": [0.9, 1.0, 0.8],
+                "ratio": [0.48, 0.48, 0.48],
+                "weight_deriv": [0.5, 0.5, 0.5],
+                "baseline": [0.0, 0.1, 0.2],
+                "amplitude": [1.1, 1.0, 0.9],
+            },
+        )
+
+    def test_parameter_names(
+        self,
+        prf_model: Gaussian1DPRFModel,
+        impulse_model: DerivativeTwoGammaImpulse,
+        temporal_model: BaselineAmplitude,
+        response_model: Gaussian1DPRFResponse,
+    ):
+        """Test that parameter names of composite model match parameter names of submodels."""
+        param_names = response_model.parameter_names
+        param_names.extend(impulse_model.parameter_names)
+        param_names.extend(temporal_model.parameter_names)
+
+        assert prf_model.parameter_names == list(dict.fromkeys(param_names))
+
+    @pytest.mark.parametrize(
+        "temporal_model",
+        [None, BaselineAmplitude, BaselineAmplitude()],
+    )
+    @pytest.mark.parametrize(
+        "impulse_model",
+        [None, DerivativeTwoGammaImpulse, DerivativeTwoGammaImpulse()],
+    )
+    @pytest.mark.parametrize("encoding_model", [PRFStimulusEncoder, PRFStimulusEncoder()])
+    def test_predict(
+        self,
+        encoding_model: BaseStimulusEncoder,
+        impulse_model: BaseImpulse,
+        temporal_model: BaseScaling,
+        stimulus: PRFStimulus,
+        params: pd.DataFrame,
+    ):
+        """Test that model prediction returns correct shape.
+
+        Tests model prediction shape for both classes and class instances.
+
+        """
+        prf_model = Gaussian1DPRFModel(
+            encoding_model=encoding_model,
+            impulse_model=impulse_model,
+            scaling_model=temporal_model,
+        )
+
+        resp = prf_model(stimulus, params)
+
+        assert resp.shape == (params.shape[0], stimulus.design.shape[0])
 
 
 class TestCoordinateConvention:

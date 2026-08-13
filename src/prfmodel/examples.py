@@ -75,7 +75,7 @@ def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[P
 
     design = archive["design"]
     grid = archive["grid"]
-    dimesion_labels = ["y", "x"]
+    dimension_labels = ["y", "x"]
 
     num_split = design.shape[0] // 2
     design_train = design[:num_split]
@@ -84,7 +84,7 @@ def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[P
     stimulus_train = PRFStimulus(
         design=design_train,
         grid=grid,
-        dimension_labels=dimesion_labels,
+        dimension_labels=dimension_labels,
     )
 
     if not return_test:
@@ -93,10 +93,58 @@ def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[P
     stimulus_test = PRFStimulus(
         design=design_test,
         grid=np.copy(grid),
-        dimension_labels=dimesion_labels.copy(),
+        dimension_labels=dimension_labels.copy(),
     )
 
     return stimulus_train, stimulus_test
+
+
+def load_1d_prf_lognumerosity_stimulus() -> PRFStimulus:
+    """Load a one-dimensional population receptive field log numerosity stimulus.
+
+    Loads an example stimulus that includes a one-dimensional sequence of log integers (numerosities) from a numerosity
+    experiment [1]_.
+
+    Returns
+    -------
+    PRFStimulus
+        A stimulus object with a ``design`` with shape ``(182, 8)`` that one-hot encodes which numerosity is shown at
+        each time frame and a ``grid`` with shape ``(8, 1)`` that contains the unique log integers.
+
+    Notes
+    -----
+    The stimulus contains four cycles of the same sequence of unique numerosities 1, 2, 3, 4, 5, 6, 7, and 20.
+    Each numerosity is presented for two consecutive frames. The numerosities 1 to 7 first ascend in order followed by
+    numerosity 20 presented for eight frames and then descend in order followed by 20 for eight frames.
+    The first six frames also contain numerosity 20 and serve as a prescan interval in the experiment.
+
+    References
+    ----------
+    .. [1] Hendrikx, E., Paul, J. M., van Ackooij, M., van der Stoep, N., & Harvey, B. M. (2024). Cortical quantity
+        representations of visual numerosity and timing overlap increasingly into superior cortices but remain
+        distinct. *NeuroImage*, 286, 120515. https://doi.org/10.1016/j.neuroimage.2024.120515
+
+    Examples
+    --------
+    >>> stimulus = load_1d_prf_lognumerosity_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[182, 8], grid=array[8, 1], dimension_labels=['log_numerosity'])
+
+    """
+    path = files("prfmodel.data.stimuli").joinpath("1d_lognumerosity_stimulus.npz")
+
+    archive = np.load(str(path))
+
+    design = archive["design"]
+    grid = archive["grid"]
+
+    dimension_labels = ["log_numerosity"]
+
+    return PRFStimulus(
+        design=design,
+        grid=grid,
+        dimension_labels=dimension_labels,
+    )
 
 
 def load_surface_mesh(
