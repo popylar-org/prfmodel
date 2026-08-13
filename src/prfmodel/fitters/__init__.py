@@ -13,6 +13,10 @@ Each fitting method returns a history object that stores final loss scores for a
 The :mod:`~prfmodel.fitters.adapter` submodule contains functionality to transform parameters during model fitting
 (e.g., to optimize a parameter on the log scale). Currently, this is only implemented for SGD.
 
+The :mod:`~prfmodel.fitters.losses` submodule contains additional loss functions, such as
+:class:`~prfmodel.fitters.losses.CorrelationLoss`, which is the default loss of
+:class:`~prfmodel.fitters.GridFitter`.
+
 """
 
 from ._grid import GridFitter

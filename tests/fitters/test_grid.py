@@ -7,6 +7,7 @@ import pytest
 from prfmodel.fitters import GridFitter
 from prfmodel.fitters import GridHistory
 from prfmodel.fitters._grid import InfiniteLossWarning
+from prfmodel.fitters.losses import CorrelationLoss
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import TestSetup
@@ -23,10 +24,10 @@ class TestGridFitter(TestSetup):
         assert isinstance(history.history, dict)
         assert isinstance(history.history["loss"], np.ndarray)
 
-    def _check_grid_params(self, result_params: pd.DataFrame, params: pd.DataFrame) -> None:
+    def _check_grid_params(self, result_params: pd.DataFrame, params: pd.DataFrame, check_params: list[str]) -> None:
         assert isinstance(result_params, pd.DataFrame)
         assert result_params.shape == params.shape
-        assert np.allclose(result_params, params, equal_nan=True)
+        assert np.allclose(result_params[check_params], params[check_params], equal_nan=True)
 
     @pytest.fixture
     def param_ranges(self):
@@ -52,8 +53,14 @@ class TestGridFitter(TestSetup):
     @parametrize_dtype
     @parametrize_impulse_model
     @pytest.mark.parametrize(
-        "loss",
-        [None, keras.losses.CosineSimilarity(reduction="none")],
+        ("loss", "check_params"),
+        [
+            # Correlation loss (default) ignores differences in baseline and amplitude
+            (None, ["mu_x", "mu_y", "sigma"]),
+            (CorrelationLoss(reduction="none"), ["mu_x", "mu_y", "sigma"]),
+            # MSE is sensitive to baseline and amplitude
+            (keras.losses.MeanSquaredError(reduction="none"), ["mu_x", "mu_y", "sigma", "baseline", "amplitude"]),
+        ],
     )
     def test_fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
@@ -62,6 +69,7 @@ class TestGridFitter(TestSetup):
         loss: keras.losses.Loss,
         params: pd.DataFrame,
         param_ranges: dict[str, np.ndarray],
+        check_params: list[str],
         dtype: str,
     ):
         """Test that the grid search recovers the parameters an independent model generated data from.
@@ -88,7 +96,32 @@ class TestGridFitter(TestSetup):
         history, grid_params = fitter.fit(observed, param_ranges, batch_size=20)
 
         self._check_history(history)
-        self._check_grid_params(grid_params, params)
+        self._check_grid_params(grid_params, params, check_params)
+
+    def test_fit_default_loss_is_offset_invariant(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        param_ranges: dict[str, np.ndarray],
+    ):
+        """Test that the default loss recovers the pRF from data with a baseline that is absent from the grid."""
+        fitter = GridFitter(
+            model=model,
+            stimulus=stimulus,
+        )
+
+        shifted_params = params.copy()
+        shifted_params["baseline"] += 10.0
+        observed = model(stimulus, shifted_params)
+
+        # The data baseline is far outside the grid, which only offers baselines close to zero
+        offset_ranges = {**param_ranges, "baseline": [0.0]}
+
+        history, grid_params = fitter.fit(observed, offset_ranges, batch_size=20)
+
+        self._check_history(history)
+        self._check_grid_params(grid_params, params, ["mu_x", "mu_y", "sigma"])
 
     def test_fit_infinite_loss_warning(
         self,
@@ -113,4 +146,4 @@ class TestGridFitter(TestSetup):
             history, grid_params = fitter.fit(observed, param_ranges, batch_size=20)
 
         self._check_history(history)
-        self._check_grid_params(grid_params, params_copy)
+        self._check_grid_params(grid_params, params_copy, ["mu_x", "mu_y", "sigma"])
