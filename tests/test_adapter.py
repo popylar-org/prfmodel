@@ -251,6 +251,12 @@ def test_parameter_constraint_bound_fun_applied(params_wrapper: type, bounded_pa
     np.testing.assert_array_less(np.asarray(result["low"]) + 1.0, np.asarray(result["x"]))
 
 
+def test_parameter_constraint_no_bound_error():
+    """Test that providing neither bound returns an error."""
+    with pytest.raises(ValueError, match="Either a lower or an upper bound"):
+        _ = ParameterConstraint(parameter_names=["x"])
+
+
 def test_parameter_constraint_lower_upper_error():
     """Test that providing lower and upper bound returns an error."""
     with pytest.raises(NotImplementedError):
