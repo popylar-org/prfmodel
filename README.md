@@ -26,8 +26,10 @@ cd prfmodel
 python -m pip install .
 ```
 
-The package relies on [Keras](https://keras.io/) for multi-backend model fitting. To install prfmodel with
-the Tensorflow backend, run:
+The package relies on [Keras](https://keras.io/) for multi-backend model fitting. At least one backend must be
+installed to use prfmodel.
+
+To install prfmodel with the Tensorflow backend, run:
 
 ```console
 python -m pip install .[tensorflow]
@@ -44,6 +46,20 @@ To install the JAX backend, run:
 ```console
 python -m pip install .[jax]
 ```
+
+The default backend in Keras is Tensorflow, but this can be changed by setting the `KERAS_BACKEND` environment
+variable, for example, at the beginning of a Python script or Jupyter notebook:
+
+```python
+import os
+
+os.environ["KERAS_BACKEND"] = "jax"
+
+import prfmodel
+```
+
+**Important**: The backend must be set before importing prfmodel or keras.
+See the [Keras](https://keras.io/getting_started/) documentation for details.
 
 ## Documentation
 
@@ -79,6 +95,13 @@ python -m pytest
 This package was created with [Copier](https://github.com/copier-org/copier) and the
 [NLeSC/python-template](https://github.com/NLeSC/python-template).
 
+The model fitting workflow in prfmodel was inspired by [braincoder](https://github.com/Gilles86/braincoder).
+
+## Generative AI usage
+
+Claude Code (Opus version 4.5 - 5.0) was used to partially generate and improve code in prfmodel. All improvements were
+manually evaluated and approved by the authors.
+
 ## Copyright
 
-2025, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience
+2026, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience
