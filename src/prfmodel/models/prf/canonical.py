@@ -397,6 +397,9 @@ class DivNormPRFModel(_BaseDualPRFModel):
         A scaling model class or instance. Model classes will be instantiated during initialization.
         The default creates a :class:`~prfmodel.scaling.Baseline` instance.
     %(model_regressors)s
+    min_response : float, default=1e-10
+        Lower bound applied to ``baseline_normalization`` before it is used.
+        Keeps the ``b / d`` offset term finite when ``baseline_normalization`` is zero.
 
     Notes
     -----
@@ -419,6 +422,27 @@ class DivNormPRFModel(_BaseDualPRFModel):
         "baseline_normalization",
     )
 
+    def __init__(  # noqa: PLR0913 (too many arguments)
+        self,
+        prf_model: BasePopulationResponse,
+        shared_params: list[str] | None = None,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
+        scaling_model: BaseScaling | type[BaseScaling] | None = Baseline,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
+        min_baseline_normalization: float = 1e-10,
+    ):
+        self.min_baseline_normalization = min_baseline_normalization
+
+        super().__init__(
+            prf_model=prf_model,
+            shared_params=shared_params,
+            encoding_model=encoding_model,
+            impulse_model=impulse_model,
+            scaling_model=scaling_model,
+            regressors_model=regressors_model,
+        )
+
     def _combine_responses(
         self,
         stimulus: PRFStimulus,
@@ -430,6 +454,7 @@ class DivNormPRFModel(_BaseDualPRFModel):
 
         b = convert_parameters_to_tensor(parameters[["baseline_activation"]], dtype=dtype)
         d = convert_parameters_to_tensor(parameters[["baseline_normalization"]], dtype=dtype)
+        d = ops.maximum(d, self.min_baseline_normalization)
 
         response_activation = a * self._predict_single_response(stimulus, parameters, "activation", dtype) + b
         response_normalization = c * self._predict_single_response(stimulus, parameters, "normalization", dtype) + d
