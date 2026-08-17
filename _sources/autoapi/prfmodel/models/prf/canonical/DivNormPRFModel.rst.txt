@@ -1,7 +1,7 @@
 prfmodel.models.prf.canonical.DivNormPRFModel
 =============================================
 
-.. py:class:: prfmodel.models.prf.canonical.DivNormPRFModel(prf_model: prfmodel.models.base.BasePopulationResponse, shared_params: list[str] | None = None, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = Baseline, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
+.. py:class:: prfmodel.models.prf.canonical.DivNormPRFModel(prf_model: prfmodel.models.base.BasePopulationResponse, shared_params: list[str] | None = None, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = Baseline, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None, min_baseline_normalization: float = 1e-10)
 
 
 
@@ -30,6 +30,9 @@ prfmodel.models.prf.canonical.DivNormPRFModel
                             provided, it is wrapped in a :class:`~prfmodel.regressors.RegressorsList` and its contributions
                             are summed. The regressor contribution is added after the scaling model.
    :type regressors_model: BaseRegressors or list of BaseRegressors or RegressorsList or None, default=None, optional
+   :param min_response: Lower bound applied to ``baseline_normalization`` before it is used.
+                        Keeps the ``b / d`` offset term finite when ``baseline_normalization`` is zero.
+   :type min_response: float, default=1e-10
 
    .. rubric:: Notes
 
