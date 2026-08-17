@@ -429,9 +429,9 @@ class DivNormPRFModel(_BaseDualPRFModel):
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = Baseline,
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
-        min_response: float = 1e-10,
+        min_baseline_normalization: float = 1e-10,
     ):
-        self.min_response = min_response
+        self.min_baseline_normalization = min_baseline_normalization
 
         super().__init__(
             prf_model=prf_model,
@@ -453,7 +453,7 @@ class DivNormPRFModel(_BaseDualPRFModel):
 
         b = convert_parameters_to_tensor(parameters[["baseline_activation"]], dtype=dtype)
         d = convert_parameters_to_tensor(parameters[["baseline_normalization"]], dtype=dtype)
-        d = ops.maximum(d, self.min_response)
+        d = ops.maximum(d, self.min_baseline_normalization)
 
         response_activation = a * self._predict_single_response(stimulus, parameters, "activation", dtype) + b
         response_normalization = c * self._predict_single_response(stimulus, parameters, "normalization", dtype) + d
