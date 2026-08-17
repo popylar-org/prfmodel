@@ -563,7 +563,7 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus]):
         # deliberately skipped and the model reduces to a static saturating nonlinearity.
         if impulse_model is not None:
             t = impulse_model.get_frames(dtype)
-            kernel = normalize_response(ops.exp(-t / dispersion_normalization))
+            kernel = normalize_response(ops.exp(-t / dispersion_normalization), impulse_model.norm)
             g_t = convolve_prf_impulse_response(response, kernel, dtype=dtype)
         else:
             g_t = response
