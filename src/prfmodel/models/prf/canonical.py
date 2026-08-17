@@ -27,6 +27,7 @@ from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
+from prfmodel.utils import normalize_response
 from ._stimulus_encoding import PRFStimulusEncoder
 
 
@@ -558,14 +559,18 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus]):
         sigma_saturation = convert_parameters_to_tensor(parameters[["sigma_saturation"]], dtype=dtype)
 
         # h₂ kernel → g(t) = L * h₂
+        # Without an impulse model there is no time axis to build h₂ on, so the normalization stage is
+        # deliberately skipped and the model reduces to a static saturating nonlinearity.
         if impulse_model is not None:
             t = impulse_model.get_frames(dtype)
-            kernel = ops.exp(-t / dispersion_normalization)
-            g_t = convolve_prf_impulse_response(response, kernel)
+            kernel = normalize_response(ops.exp(-t / dispersion_normalization), impulse_model.norm)
+            g_t = convolve_prf_impulse_response(response, kernel, dtype=dtype)
         else:
             g_t = response
 
         # R(t) = |L(t)|ⁿ / (sigmaⁿ + |g(t)|ⁿ)
+        # The absolute values follow Zhou et al. (2019) and are intentional: they keep the power law defined for
+        # non-integer n, at the cost of rectifying negative deflections of L(t) and g(t).
         r_ln = ops.power(ops.abs(response), n)
         denominator = ops.power(sigma_saturation, n) + ops.power(ops.abs(g_t), n)
         response = r_ln / denominator
