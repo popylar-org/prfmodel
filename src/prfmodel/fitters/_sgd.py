@@ -1,5 +1,6 @@
 """Stochastic gradient descent fitters."""
 
+import warnings
 from collections.abc import Callable
 from collections.abc import Sequence
 import keras
@@ -12,6 +13,10 @@ from prfmodel.fitters.adapter import Adapter
 from prfmodel.models.base import BaseCanonical
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
+
+
+class DiscreteParameterWarning(UserWarning):
+    """Warning for when discrete parameters are kept at their starting values instead of being optimized."""
 
 
 class SGDHistory:
@@ -150,6 +155,25 @@ class SGDFitter(BackendSGDFitter):
             for key, val in init_parameters.items()
         }
 
+    def _resolve_fixed_parameters(self, init_parameters: pd.DataFrame, fixed_parameters: Sequence[str]) -> list[str]:
+        """Return `fixed_parameters` extended with the discrete parameters of the model.
+
+        Discrete parameters (e.g., an index into a distance matrix) receive no gradient. Fixing them keeps them at
+        their starting values explicitly instead of handing the optimizer a variable it cannot move.
+
+        """
+        discrete = getattr(self.model, "discrete_parameter_names", [])
+        added = [param for param in discrete if param in init_parameters.columns and param not in fixed_parameters]
+
+        if added:
+            msg = (
+                f"Parameter(s) {added} are discrete and receive no gradient, so they are kept at their starting "
+                f"values. Fit them with 'GridFitter' to optimize them."
+            )
+            warnings.warn(message=msg, category=DiscreteParameterWarning, stacklevel=2)
+
+        return [*fixed_parameters, *added]
+
     def _delete_variables(self) -> None:
         del self._parameter_variables
 
@@ -191,9 +215,19 @@ class SGDFitter(BackendSGDFitter):
         pandas.DataFrame
             A dataframe with final model parameters.
 
+        Warns
+        -----
+        DiscreteParameterWarning
+            If a discrete model parameter (see
+            :attr:`~prfmodel.utils.ModelProtocol.discrete_parameter_names`) is not in `fixed_parameters`. Such
+            parameters receive no gradient, so they are added to `fixed_parameters` and kept at their starting
+            values. They can only be fit with :class:`~prfmodel.fitters.GridFitter`.
+
         """
         if fixed_parameters is None:
             fixed_parameters = []
+
+        fixed_parameters = self._resolve_fixed_parameters(init_parameters, fixed_parameters)
 
         num_units = len(init_parameters)
         if batch_size is None:

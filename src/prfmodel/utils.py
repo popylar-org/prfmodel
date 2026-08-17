@@ -65,6 +65,17 @@ class ModelProtocol(Protocol):
     def parameter_names(self) -> list[str]:
         """A list with names of parameters that are used by the model."""
 
+    @property
+    def discrete_parameter_names(self) -> list[str]:
+        """A list with names of parameters that are discrete and therefore cannot be optimized with gradients.
+
+        Models that consume a parameter as an index or any other non-differentiable quantity should override this
+        property so that gradient-based fitters (:class:`~prfmodel.fitters.SGDFitter`) hold it fixed and report it,
+        instead of appearing to optimize it. Defaults to an empty list, meaning all parameters are continuous.
+
+        """
+        return []
+
     def _check_parameters(self, parameters: pd.DataFrame) -> None:
         missing_params = [param for param in self.parameter_names if param not in parameters.columns]
         if missing_params:
