@@ -3,9 +3,32 @@
 from collections.abc import Sequence
 from dataclasses import dataclass
 import numpy as np
+from keras import ops
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
+from prfmodel.typing import Tensor
 from .base import Stimulus
+from .base import StimulusTensors
+
+
+@dataclass(frozen=True, eq=False)
+class PRFStimulusTensors(StimulusTensors):
+    """Tensor-holding counterpart of a :class:`~prfmodel.stimuli.PRFStimulus`.
+
+    Holds the population receptive field stimulus arrays as backend tensors. Should be created with
+    :meth:`PRFStimulus.to_tensors`.
+
+    Parameters
+    ----------
+    design : :data:`prfmodel.typing.Tensor`
+        The :attr:`PRFStimulus.design` array as a tensor.
+    grid : :data:`prfmodel.typing.Tensor`
+        The :attr:`PRFStimulus.grid` array as a tensor.
+
+    """
+
+    design: Tensor
+    grid: Tensor
 
 
 @dataclass(frozen=True, eq=False)
@@ -238,4 +261,34 @@ class PRFStimulus(Stimulus):
             design=design,
             grid=grid,
             dimension_labels=dimension_labels,
+        )
+
+    def to_tensors(self, dtype: str | None = None) -> PRFStimulusTensors:
+        """Convert the stimulus arrays into backend tensors.
+
+        Parameters
+        ----------
+        dtype : str, optional
+            The dtype to convert the stimulus arrays to. If `None` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        PRFStimulusTensors
+            The stimulus arrays as tensors.
+
+        Examples
+        --------
+        >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+        >>> stimulus = load_2d_prf_bar_stimulus()
+        >>> tensors = stimulus.to_tensors("float32")
+        >>> print(tuple(tensors.design.shape) == stimulus.design.shape)
+        True
+        >>> print(tuple(tensors.grid.shape) == stimulus.grid.shape)
+        True
+
+        """
+        return PRFStimulusTensors(
+            design=ops.convert_to_tensor(self.design, dtype=dtype),
+            grid=ops.convert_to_tensor(self.grid, dtype=dtype),
         )

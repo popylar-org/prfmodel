@@ -2,11 +2,34 @@
 
 from dataclasses import dataclass
 import numpy as np
+from keras import ops
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
+from prfmodel.typing import Tensor
 from .base import Stimulus
+from .base import StimulusTensors
 
 _DISTANCE_MATRIX_DIMENSIONS = 2
+
+
+@dataclass(frozen=True, eq=False)
+class CFStimulusTensors(StimulusTensors):
+    """Tensor-holding counterpart of a :class:`~prfmodel.stimuli.CFStimulus`.
+
+    Holds the connective field stimulus arrays as backend tensors. Should be created with
+    :meth:`CFStimulus.to_tensors`.
+
+    Parameters
+    ----------
+    distance_matrix : :data:`prfmodel.typing.Tensor`
+        The :attr:`CFStimulus.distance_matrix` array as a tensor.
+    source_response : :data:`prfmodel.typing.Tensor`
+        The :attr:`CFStimulus.source_response` array as a tensor.
+
+    """
+
+    distance_matrix: Tensor
+    source_response: Tensor
 
 
 @dataclass(frozen=True, eq=False)
@@ -67,3 +90,34 @@ class CFStimulus(Stimulus):
                 "source_response",
                 self.source_response.shape,
             )
+
+    def to_tensors(self, dtype: str | None = None) -> CFStimulusTensors:
+        """Convert the stimulus arrays into backend tensors.
+
+        Parameters
+        ----------
+        dtype : str, optional
+            The dtype to convert the stimulus arrays to. If `None` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        CFStimulusTensors
+            The stimulus arrays as tensors.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> stimulus = CFStimulus(
+        ...     distance_matrix=np.zeros((10, 10)),
+        ...     source_response=np.ones((10, 20)),
+        ... )
+        >>> tensors = stimulus.to_tensors("float32")
+        >>> print(tuple(tensors.source_response.shape))
+        (10, 20)
+
+        """
+        return CFStimulusTensors(
+            distance_matrix=ops.convert_to_tensor(self.distance_matrix, dtype=dtype),
+            source_response=ops.convert_to_tensor(self.source_response, dtype=dtype),
+        )

@@ -2,7 +2,10 @@
 
 from dataclasses import dataclass
 import numpy as np
+from keras import ops
+from prfmodel.typing import Tensor
 from .base import Stimulus
+from .base import StimulusTensors
 
 
 class CSFStimulusShapeError(Exception):
@@ -37,6 +40,26 @@ class CSFStimulusDimensionError(Exception):
 
     def __init__(self, arg_name: str, arg_shape: tuple[int, ...]):
         super().__init__(f"'{arg_name}' must be one-dimensional but has shape {arg_shape}")
+
+
+@dataclass(frozen=True, eq=False)
+class CSFStimulusTensors(StimulusTensors):
+    """Tensor-holding counterpart of a :class:`~prfmodel.stimuli.CSFStimulus`.
+
+    Holds the contrast sensitivity function stimulus arrays as backend tensors. Should be created with
+    :meth:`CSFStimulus.to_tensors`.
+
+    Parameters
+    ----------
+    sf : :data:`prfmodel.typing.Tensor`
+        The :attr:`CSFStimulus.sf` array as a tensor.
+    contrast : :data:`prfmodel.typing.Tensor`
+        The :attr:`CSFStimulus.contrast` array as a tensor.
+
+    """
+
+    sf: Tensor
+    contrast: Tensor
 
 
 @dataclass(frozen=True, eq=False)
@@ -89,3 +112,31 @@ class CSFStimulus(Stimulus):
     def _check_shapes(self) -> None:
         if self.sf.shape != self.contrast.shape:
             raise CSFStimulusShapeError(self.sf.shape, self.contrast.shape)
+
+    def to_tensors(self, dtype: str | None = None) -> CSFStimulusTensors:
+        """Convert the stimulus arrays into backend tensors.
+
+        Parameters
+        ----------
+        dtype : str, optional
+            The dtype to convert the stimulus arrays to. If `None` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        CSFStimulusTensors
+            The stimulus arrays as tensors.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> stimulus = CSFStimulus(sf=np.array([1.0, 3.0]), contrast=np.array([0.1, 0.2]))
+        >>> tensors = stimulus.to_tensors("float32")
+        >>> print(tuple(tensors.sf.shape))
+        (2,)
+
+        """
+        return CSFStimulusTensors(
+            sf=ops.convert_to_tensor(self.sf, dtype=dtype),
+            contrast=ops.convert_to_tensor(self.contrast, dtype=dtype),
+        )
