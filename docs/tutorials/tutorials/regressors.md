@@ -146,7 +146,9 @@ We can see that the predicted neural response contains some "noise" coming from 
 
 Our next goal is to fit the model back to its own predicted neural timecourse. We first use a grid search to optimize
 the center and size of the Gaussian pRF (i.e., `mu_x`, `mu_y`, `sigma`). By default, the `GridFitter` uses a
-correlation loss function that ignores differences in baseline and amplitude between model predictions and data.
+correlation loss function that ignores differences in baseline and amplitude between model predictions and data. Note
+that the beta weights of the regressors are set to zero in the grid search so that the regressors do not influence the
+grid estimates for `mu_x`, `mu_y`, and `sigma`. We will estimate the beta weights in the following least-squares step.
 
 ```{code-cell} ipython3
 from prfmodel.fitters import GridFitter
@@ -158,8 +160,8 @@ param_grid = {
     "weight_deriv": [0.5],
     "amplitude": [1.0],
     "baseline": [0.0],
-    "beta_reg_phys": [1.0],
-    "beta_reg_event": [1.0],
+    "beta_reg_phys": [0.0],
+    "beta_reg_event": [0.0],
 }
 
 grid_fitter = GridFitter(
