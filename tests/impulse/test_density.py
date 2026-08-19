@@ -114,14 +114,23 @@ class TestGammaDensity(TestGammaDensitySetup):
         with pytest.raises(ValueError):
             gamma_density(frames, shape, scale)
 
-    def test_values_negative_value_error(self, frames: np.ndarray):
-        """Test that negative values raise an error."""
-        shape = np.array([[1.0, 2.0]])
-        scale = np.array([[1.0, 1.0]])
-        frames[0] = -1.0
+    def test_values_outside_the_support_are_zero(self):
+        """Test that the density is zero at and below zero, as `scipy.stats.gamma.pdf` is.
 
-        with pytest.raises(ValueError):
-            gamma_density(frames, shape, scale)
+        The gamma distribution is supported on the positive reals, so the density is a total function
+        with a value of zero below its support. Evaluating the log-density naively gives NaN there
+        instead, which is why `_mask_nonpositive` substitutes and discards.
+
+        """
+        frames = np.array([[-3.0, -1.0, 0.0, 0.5, 2.0, 7.0]])
+        shape = np.array([[2.0], [4.0]])
+        scale = np.array([[1.0], [1.5]])
+
+        dens = np.asarray(gamma_density(frames, shape, scale))
+
+        np.testing.assert_allclose(dens, self._calc_gamma_pdf(frames, shape, scale), atol=1e-7)
+        assert not np.any(np.isnan(dens))
+        assert np.all(dens[:, :3] == 0.0)
 
     def test_shape_shape_value_error(self, frames: np.ndarray):
         """Test that shape parameters with the wrong shape raise an error."""
@@ -141,13 +150,22 @@ class TestGammaDensity(TestGammaDensitySetup):
         with pytest.raises(ValueError):
             gamma_density(frames, shape, scale)
 
-    def test_shape_negative_value_error(self, frames: np.ndarray):
-        """Test that negative shape parameters raise an error."""
-        shape = np.array([[-1.0, 2.0]])
-        scale = np.array([[1.0, 1.0]])
+    def test_shape_negative_is_finite_and_meaningless(self, frames: np.ndarray):
+        """Test that a negative shape parameter neither raises nor produces NaN.
 
-        with pytest.raises(ValueError):
-            gamma_density(frames, shape, scale)
+        Unlike a negative value or scale, a negative shape does not take a logarithm of a negative number:
+        the density evaluates to `exp((shape - 1) * log(value) - value / scale - gammaln(shape))`, which is
+        finite for a negative non-integer shape and zero at a pole. There is therefore nothing downstream
+        that can detect it, which is why `BaseImpulse._check_parameter_values` guards `delay` on the facade
+        rather than relying on a NaN surfacing in the loss.
+
+        """
+        shape = np.array([[-1.5], [2.0]])
+        scale = np.array([[1.0], [1.0]])
+
+        dens = np.asarray(gamma_density(frames, shape, scale))
+
+        assert np.all(np.isfinite(dens))
 
     def test_scale_shape_value_error(self, frames: np.ndarray):
         """Test that scale parameters with the wrong shape raise an error."""
@@ -167,13 +185,19 @@ class TestGammaDensity(TestGammaDensitySetup):
         with pytest.raises(ValueError):
             gamma_density(frames, shape, scale)
 
-    def test_scale_negative_value_error(self, frames: np.ndarray):
-        """Test that negative scale parameters raise an error."""
-        shape = np.array([[1.0, 2.0]])
-        scale = np.array([[-1.0, 1.0]])
+    def test_scale_negative_returns_nan(self, frames: np.ndarray):
+        """Test that negative scale parameters produce NaN rather than raising.
 
-        with pytest.raises(ValueError):
-            gamma_density(frames, shape, scale)
+        See `test_values_negative_returns_nan` for why the domain is not checked.
+
+        """
+        shape = np.array([[1.0], [2.0]])
+        scale = np.array([[-1.0], [1.0]])
+
+        dens = np.asarray(gamma_density(frames, shape, scale))
+
+        assert np.all(np.isnan(dens[0]))
+        assert not np.any(np.isnan(dens[1]))
 
     def test_heterogeneous_shape_error(self, frames: np.ndarray):
         """Test that parameters with different shapes raise an error."""
