@@ -6,30 +6,48 @@ Classes in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that 
 They are abstract base classes, meaning that they
 cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
 shared by all child classes. For example, :class:`~prfmodel.models.base.BasePopulationResponse` defines that all child
-classes must implement a :meth:`~prfmodel.models.base.BasePopulationResponse.__call__` method that takes a stimulus
-and set of parameters as input. However, it leaves it up to each child class to define how input stimulus and
-parameters are used to make model predictions.
+classes must implement a :meth:`~prfmodel.models.base.BasePopulationResponse.call` method that takes a tensor-holding
+stimulus and set of tensor parameters as input. However, it leaves it up to each child class to define how input
+stimulus and parameters are used to make model predictions.
 
-Classes in this module are also generic with respect to the input stimulus, that is, child classes can specify whether
-they take a :class:`~prfmodel.stimuli.PRFStimulus` or :class:`~prfmodel.stimuli.CFStimulus` as input. In the case of
-:meth:`~prfmodel.models.base.BasePopulationResponse`, child classes can choose the type of input stimulus in the
-signature of :meth:`~prfmodel.models.base.BasePopulationResponse.__call__`.
+All base classes have a concrete user-facing :meth:``__call__`` method
+(e.g., :meth:`~prfmodel.models.base.BasePopulationResponse.__call__`) that takes non-tensor arguments and
+performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
+class and only accepts tensor arguments to enable backend compilation.
+
+Classes in this module are also generic with respect to the input stimulus. This means that child classes must specify
+which user-facing and tensor-holding stimulus types :meth:`__call__` and :meth:`call` take as input.
 
 """
 
 from abc import abstractmethod
 from typing import Generic
 from typing import TypeVar
+from typing import cast
 import pandas as pd
+from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.stimuli import Stimulus
+from prfmodel.stimuli import StimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import ModelProtocol
+from prfmodel.utils import ParamsDict
+from prfmodel.utils import as_params
+from prfmodel.utils import get_dtype
 
 S = TypeVar("S", bound=Stimulus)
+"""User-facing stimulus type, e.g. :class:`~prfmodel.stimuli.PRFStimulus`."""
+
+T = TypeVar("T", bound=StimulusTensors)
+"""Tensor-holding stimulus type, e.g. :class:`~prfmodel.stimuli.PRFStimulusTensors`.
+
+'S.to_tensors()' always returns the matching 'T', e.g., 'PRFStimulus.to_tensors' returns a
+'PRFStimulusTensors'.
+"""
 
 
-class BasePopulationResponse(ModelProtocol, Generic[S]):
+class BasePopulationResponse(ModelProtocol, Generic[S, T]):
     """
     Generic abstract base class for neuron population response models.
 
@@ -38,8 +56,12 @@ class BasePopulationResponse(ModelProtocol, Generic[S]):
     Notes
     -----
     This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
-    models. Subclasses must override the abstract :attr:`parameter_names` and :meth:`__call__` method.
-    They must be defined with a specific stimulus type. See :mod:`~prfmodel.models.base` for details.
+    models. Subclasses must override the abstract :attr:`parameter_names` property and the :meth:`call` method,
+    and must be defined with a specific user-facing stimulus type and its matching tensor-holding type.
+    See :mod:`~prfmodel.models.base` for details.
+
+    Do not override :meth:`__call__`. It is the public facade that validates the parameters, resolves the dtype
+    and converts both the stimulus and the parameters to tensors before handing them to :meth:`call`.
 
     Examples
     --------
@@ -47,21 +69,17 @@ class BasePopulationResponse(ModelProtocol, Generic[S]):
 
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-    >>> from prfmodel.stimuli import PRFStimulus
+    >>> from prfmodel.stimuli import PRFStimulus, PRFStimulusTensors
     >>> from prfmodel.models.prf import predict_gaussian_response
-    >>> from prfmodel.utils import convert_parameters_to_tensor, get_dtype
-    >>> from keras import ops
     >>> # Define custom child class
-    >>> class CustomGaussian2DResponse(BasePopulationResponse[PRFStimulus]):
+    >>> class CustomGaussian2DResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTensors]):
     ...     @property
     ...     def parameter_names(self):
     ...         return ["mu_y", "mu_x", "sigma"]
-    ...     def __call__(self, stimulus, parameters, dtype=None):
-    ...         dtype = get_dtype(dtype)
-    ...         mu = convert_parameters_to_tensor(parameters[["mu_y", "mu_x"]], dtype=dtype)
-    ...         sigma = convert_parameters_to_tensor(parameters[["sigma"]], dtype=dtype)
-    ...         grid = ops.convert_to_tensor(stimulus.grid, dtype=dtype)
-    ...         return predict_gaussian_response(grid, mu, sigma)
+    ...     def call(self, stimulus, parameters):
+    ...         return predict_gaussian_response(
+    ...             stimulus.grid, parameters[["mu_y", "mu_x"]], parameters[["sigma"]]
+    ...         )
     >>> # Load example pRF stimulus
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> # Define parameters
@@ -80,10 +98,13 @@ class BasePopulationResponse(ModelProtocol, Generic[S]):
     """
 
     @doc
-    @abstractmethod
     def __call__(self, stimulus: S, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
         Predict the model response for a stimulus.
+
+        This is the public entry point. It accepts the user-facing types, validates them, converts them to
+        tensors and delegates the arithmetic to :meth:`call`. Subclasses implement :meth:`call`, not this
+        method.
 
         Parameters
         ----------
@@ -102,9 +123,38 @@ class BasePopulationResponse(ModelProtocol, Generic[S]):
         %(raises_missing_parameters)s
 
         """
+        dtype = get_dtype(dtype)
+        self._check_parameters(parameters)
+
+        return self.call(cast("T", stimulus.to_tensors(dtype)), as_params(parameters, dtype))
+
+    @doc
+    @abstractmethod
+    def call(self, stimulus: T, parameters: ParamsDict) -> Tensor:
+        """
+        Predict the model response from tensors.
+
+        Parameters
+        ----------
+        %(stimulus_tensors)s
+        %(parameters_tensors)s
+
+        Returns
+        -------
+        :data:`prfmodel.typing.Tensor`
+            Model predictions of shape `(num_units, ...)`.
+
+        Notes
+        -----
+        Implementations must be traceable by a backend compiler, because this is the method the fitters
+        wrap in ``tf.function`` or ``jax.jit``. In practice: use :mod:`keras.ops` only, never :mod:`numpy`
+        or :mod:`pandas`, and never branch on a tensor *value*. Branching on a tensor *shape* is fine, since shapes are
+        known at trace time. Checks that need concrete values belong in :meth:`__call__`.
+
+        """
 
 
-class BaseStimulusEncoder(ModelProtocol, Generic[S]):
+class BaseStimulusEncoder(ModelProtocol, Generic[S, T]):
     """
     Generic abstract base class for encoding model responses with a stimulus.
 
@@ -114,9 +164,12 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S]):
     -----
     Cannot be instantiated on its own.
     Can only be used as a parent class to create custom stimulus encoding models.
-    Subclasses must override the abstract :attr:`parameter_names` property and
-    :meth:`__call__` method and must be defined with a specific stimulus type.
+    Subclasses must override the abstract :attr:`parameter_names` property and the :meth:`call` method, and
+    must be defined with a specific stimulus type and its matching tensor-holding type.
     See :mod:`~prfmodel.models.base` for details.
+
+    Do not override :meth:`__call__`; it is the public facade that validates and converts before delegating
+    to :meth:`call`.
 
     Examples
     --------
@@ -126,18 +179,14 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S]):
     >>> import numpy as np
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-    >>> from prfmodel.stimuli import PRFStimulus
+    >>> from prfmodel.stimuli import PRFStimulus, PRFStimulusTensors
     >>> from prfmodel.models.prf import encode_prf_response
-    >>> from prfmodel.utils import get_dtype
-    >>> from keras import ops
-    >>> class CustomPRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus]):
+    >>> class CustomPRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus, PRFStimulusTensors]):
     ...     @property
     ...     def parameter_names(self):
     ...         return []
-    ...     def __call__(self, stimulus, response, parameters, dtype=None):
-    ...         dtype = get_dtype(dtype)
-    ...         design = ops.convert_to_tensor(stimulus.design, dtype=dtype)
-    ...         return encode_prf_response(response, design, dtype=dtype)
+    ...     def call(self, stimulus, response, parameters):
+    ...         return encode_prf_response(response, stimulus.design, dtype=parameters.dtype)
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> response = np.ones((3, 128, 128))  # dummy response of shape (num_units, num_y, num_x)
     >>> params = pd.DataFrame()
@@ -149,15 +198,16 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S]):
     """
 
     @doc
-    @abstractmethod
     def __call__(
         self,
         stimulus: S,
         response: Tensor,
         parameters: pd.DataFrame,
         dtype: str | None = None,
-    ):
+    ) -> Tensor:
         """Encode a model response with a stimulus.
+
+        This is the public entry point; subclasses implement :meth:`call` instead.
 
         Parameters
         ----------
@@ -179,9 +229,41 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S]):
         %(raises_missing_parameters)s
 
         """
+        dtype = get_dtype(dtype)
+        self._check_parameters(parameters)
+
+        return self.call(
+            cast("T", stimulus.to_tensors(dtype)),
+            ops.convert_to_tensor(response, dtype=dtype),
+            as_params(parameters, dtype),
+        )
+
+    @doc
+    @abstractmethod
+    def call(self, stimulus: T, response: Tensor, parameters: ParamsDict) -> Tensor:
+        """Encode a model response with a stimulus, from tensors.
+
+        Parameters
+        ----------
+        %(stimulus_tensors)s
+        response : :data:`prfmodel.typing.Tensor`
+            Model response.
+        %(parameters_tensors)s
+
+        Returns
+        -------
+        :data:`prfmodel.typing.Tensor`
+            The stimulus encoded model response with shape `(num_units, ...)`.
+
+        Notes
+        -----
+        Implementations must be traceable by a backend compiler. See
+        :meth:`BasePopulationResponse.call` for details.
+
+        """
 
 
-class BaseCanonical(ModelProtocol, Generic[S]):
+class BaseCanonical(ModelProtocol, Generic[S, T]):
     """
     Generic abstract base class for creating canonical models.
 
@@ -201,8 +283,11 @@ class BaseCanonical(ModelProtocol, Generic[S]):
     Notes
     -----
     Cannot be instantiated on its own. Can only be used as a parent class to create custom canonical models.
-    Subclasses must override the abstract :meth:`__call__` method and must be defined
-    with a specific stimulus type.
+    Subclasses must override the abstract :meth:`call` method and must be defined with a specific stimulus type
+    and its matching tensor-holding type. Do not override :meth:`__call__`.
+
+    Inside :meth:`call`, invoke submodels through *their* :meth:`call` as well, not through the user-facing
+    :meth:`__call__`.
 
     Examples
     --------
@@ -212,12 +297,12 @@ class BaseCanonical(ModelProtocol, Generic[S]):
 
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
-    >>> from prfmodel.stimuli import PRFStimulus
+    >>> from prfmodel.stimuli import PRFStimulus, PRFStimulusTensors
     >>> from prfmodel.models.prf import Gaussian2DPRFResponse, PRFStimulusEncoder
-    >>> class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
-    ...     def __call__(self, stimulus, parameters, dtype=None):
-    ...         response = self.models["prf_model"](stimulus, parameters, dtype=dtype)
-    ...         return self.models["encoding_model"](stimulus, response, parameters, dtype=dtype)
+    >>> class CanonicalPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
+    ...     def call(self, stimulus, parameters, regressors=None):
+    ...         response = self.models["prf_model"].call(stimulus, parameters)
+    ...         return self.models["encoding_model"].call(stimulus, response, parameters)
     >>> model = CanonicalPRFModel(
     ...     prf_model=Gaussian2DPRFResponse(),
     ...     encoding_model=PRFStimulusEncoder(),
@@ -255,7 +340,6 @@ class BaseCanonical(ModelProtocol, Generic[S]):
         return list(dict.fromkeys(param_names))
 
     @doc
-    @abstractmethod
     def __call__(
         self,
         stimulus: S,
@@ -265,6 +349,8 @@ class BaseCanonical(ModelProtocol, Generic[S]):
     ) -> Tensor:
         """
         Predict a canonical model response to a stimulus.
+
+        This is the public entry point; subclasses implement :meth:`call` instead.
 
         Parameters
         ----------
@@ -280,5 +366,37 @@ class BaseCanonical(ModelProtocol, Generic[S]):
         Raises
         ------
         %(raises_missing_parameters)s
+
+        """
+        dtype = get_dtype(dtype)
+        self._check_parameters(parameters)
+        _validate_regressors_argument(self.models.get("regressors_model"), regressors)
+
+        return self.call(
+            cast("T", stimulus.to_tensors(dtype)),
+            as_params(parameters, dtype),
+            None if regressors is None else as_params(regressors, dtype),
+        )
+
+    @doc
+    @abstractmethod
+    def call(self, stimulus: T, parameters: ParamsDict, regressors: ParamsDict | None = None) -> Tensor:
+        """
+        Predict a canonical model response from tensors.
+
+        Parameters
+        ----------
+        %(stimulus_tensors)s
+        %(parameters_tensors)s
+        %(regressors_tensors)s
+
+        Returns
+        -------
+        %(predicted_response_2d)s
+
+        Notes
+        -----
+        Implementations must be traceable by a backend compiler, and must reach submodels through their
+        :meth:`call` rather than through :meth:`__call__`. See :meth:`BasePopulationResponse.call`.
 
         """

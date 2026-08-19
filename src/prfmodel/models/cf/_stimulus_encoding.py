@@ -1,15 +1,15 @@
 """Connective field stimulus encoding."""
 
-import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.stimuli import CFStimulus
+from prfmodel.stimuli import CFStimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import ParamsDict
 
 
-class CFStimulusEncoder(BaseStimulusEncoder[CFStimulus]):
+class CFStimulusEncoder(BaseStimulusEncoder[CFStimulus, CFStimulusTensors]):
     """
     Encoding model for connective field stimuli.
 
@@ -24,36 +24,22 @@ class CFStimulusEncoder(BaseStimulusEncoder[CFStimulus]):
         return []
 
     @doc
-    def __call__(
-        self,
-        stimulus: CFStimulus,
-        response: Tensor,
-        parameters: pd.DataFrame,
-        dtype: str | None = None,
-    ) -> Tensor:
+    def call(self, stimulus: CFStimulusTensors, response: Tensor, parameters: ParamsDict) -> Tensor:  # noqa: ARG002 (this encoder has no parameters, but the signature is fixed by the base class)
         """Encode a connective field model response with a source response.
 
         Parameters
         ----------
-        %(stimulus_cf)s
+        %(stimulus_cf_tensors)
         response : Tensor
             Connective field response.
-        %(parameters)s
-        %(dtype)s
+        %(parameters_tensors)
 
         Returns
         -------
         %(predicted_response_2d)s
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        dtype = get_dtype(dtype)
-        response = ops.convert_to_tensor(response, dtype=dtype)
-        source_response = ops.convert_to_tensor(stimulus.source_response, dtype=dtype)
+        source_response = stimulus.source_response
 
         if response.shape[1] != source_response.shape[0]:
             msg = (

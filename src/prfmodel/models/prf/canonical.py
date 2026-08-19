@@ -8,7 +8,6 @@ import warnings
 from abc import abstractmethod
 from typing import ClassVar
 from typing import cast
-import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
@@ -21,21 +20,19 @@ from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.regressors.base import _normalize_regressors_model
-from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.scaling import Baseline
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
+from prfmodel.stimuli import PRFStimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import ModelProtocol
 from prfmodel.utils import ParamsDict
-from prfmodel.utils import convert_parameters_to_tensor
-from prfmodel.utils import get_dtype
 from prfmodel.utils import normalize_response
 from ._stimulus_encoding import PRFStimulusEncoder
 
 
-class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
+class CanonicalPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     """
     Canonical population receptive field (pRF) model.
 
@@ -90,58 +87,50 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus]):
         )
 
     @doc
-    def __call__(
+    def call(
         self,
-        stimulus: PRFStimulus,
-        parameters: pd.DataFrame,
-        regressors: pd.DataFrame | None = None,
-        dtype: str | None = None,
+        stimulus: PRFStimulusTensors,
+        parameters: ParamsDict,
+        regressors: ParamsDict | None = None,
     ) -> Tensor:
         """
         Predict the model response to a stimulus.
 
         Parameters
         ----------
-        %(stimulus_prf)s
-        %(parameters)s
-        %(regressors_canonical)s
-        %(dtype)s
+        %(stimulus_prf_tensors)
+        %(parameters_tensors)
+        %(regressors_tensors)
 
         Returns
         -------
         %(predicted_response_2d)s
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        dtype = get_dtype(dtype)
-        _validate_regressors_argument(self.models["regressors_model"], regressors)
+        dtype = parameters.dtype
 
         prf_model = cast("BasePopulationResponse", self.models["prf_model"])
-        response = prf_model(stimulus, parameters, dtype=dtype)
+        response = prf_model.call(stimulus, parameters)
         encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
-        response = encoding_model(stimulus, response, parameters, dtype=dtype)
+        response = encoding_model.call(stimulus, response, parameters)
 
         if self.models["impulse_model"] is not None:
             impulse_model = cast("BaseImpulse", self.models["impulse_model"])
-            impulse_response = impulse_model(parameters, dtype=dtype)
+            impulse_response = impulse_model.call(parameters)
             response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
 
         if self.models["scaling_model"] is not None:
             temporal_model = cast("BaseScaling", self.models["scaling_model"])
-            response = temporal_model(response, parameters, dtype=dtype)
+            response = temporal_model.call(response, parameters)
 
         if self.models["regressors_model"] is not None and regressors is not None:
             regressors_model = cast("BaseRegressors", self.models["regressors_model"])
-            response = response + regressors_model(regressors, parameters, dtype=dtype)
+            response = response + regressors_model.call(regressors, parameters)
 
         return response
 
 
-class _BaseDualPRFModel(BaseCanonical[PRFStimulus]):
+class _BaseDualPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     """Shared base for dual pRF models that combine two encoded pRF responses.
 
     Concrete subclasses run two pRF responses through stimulus encoding (via the shared
@@ -238,8 +227,8 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus]):
 
     def _predict_single_response(
         self,
-        stimulus: PRFStimulus,
-        parameters: pd.DataFrame,
+        stimulus: PRFStimulusTensors,
+        parameters: ParamsDict,
         suffix: str,
         dtype: str,
     ) -> Tensor:
@@ -248,8 +237,8 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus]):
         Shared parameters are taken as-is; non-shared parameters are read from the ``{param}_{suffix}`` columns.
         Only the columns the pRF model consumes are gathered, avoiding a copy of the full parameter frame.
 
-        Gathered as a :class:`~prfmodel.utils.ParamsDict` rather than a :class:`pandas.DataFrame` so that, during SGD
-        fitting, the parameter tensors stay attached to the gradient tape instead of being materialized to numpy.
+        Gathered into a fresh :class:`~prfmodel.utils.ParamsDict` because the pRF submodel expects its own
+        unsuffixed parameter names.
 
         """
         prf_model = cast("BasePopulationResponse", self.models["prf_model"])
@@ -263,67 +252,58 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus]):
             dtype=dtype,
         )
 
-        # We ignore the arg type here because a ParamsDict is used internally (instead of pandas.DataFrame)
-        response = prf_model(stimulus, params_single, dtype=dtype)  # type: ignore[arg-type]
+        response = prf_model.call(stimulus, params_single)
 
         encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
 
-        return encoding_model(stimulus, response, parameters, dtype=dtype)
+        return encoding_model.call(stimulus, response, parameters)
 
     @abstractmethod
     def _combine_responses(
         self,
-        stimulus: PRFStimulus,
-        parameters: pd.DataFrame,
+        stimulus: PRFStimulusTensors,
+        parameters: ParamsDict,
         dtype: str,
     ) -> Tensor:
         """Combine the two encoded pRF responses into a single response before the impulse/scaling tail."""
 
     @doc
-    def __call__(
+    def call(
         self,
-        stimulus: PRFStimulus,
-        parameters: pd.DataFrame,
-        regressors: pd.DataFrame | None = None,
-        dtype: str | None = None,
+        stimulus: PRFStimulusTensors,
+        parameters: ParamsDict,
+        regressors: ParamsDict | None = None,
     ) -> Tensor:
         """
         Predict the combined model response to a stimulus.
 
         Parameters
         ----------
-        %(stimulus_prf)s
-        %(parameters)s
-        %(regressors_canonical)s
-        %(dtype)s
+        %(stimulus_prf_tensors)
+        %(parameters_tensors)
+        %(regressors_tensors)
 
         Returns
         -------
         %(predicted_response_2d)s
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        dtype = get_dtype(dtype)
-        _validate_regressors_argument(self.models["regressors_model"], regressors)
+        dtype = parameters.dtype
 
         response = self._combine_responses(stimulus, parameters, dtype)
 
         if self.models["impulse_model"] is not None:
             impulse_model = cast("BaseImpulse", self.models["impulse_model"])
-            impulse_response = impulse_model(parameters, dtype=dtype)
+            impulse_response = impulse_model.call(parameters)
             response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
 
         if self.models["scaling_model"] is not None:
             scaling_model = cast("BaseScaling", self.models["scaling_model"])
-            response = scaling_model(response, parameters, dtype=dtype)
+            response = scaling_model.call(response, parameters)
 
         if self.models["regressors_model"] is not None and regressors is not None:
             regressors_model = cast("BaseRegressors", self.models["regressors_model"])
-            response = response + regressors_model(regressors, parameters, dtype=dtype)
+            response = response + regressors_model.call(regressors, parameters)
 
         return response
 
@@ -368,12 +348,12 @@ class CenterSurroundPRFModel(_BaseDualPRFModel):
 
     def _combine_responses(
         self,
-        stimulus: PRFStimulus,
-        parameters: pd.DataFrame,
+        stimulus: PRFStimulusTensors,
+        parameters: ParamsDict,
         dtype: str,
     ) -> Tensor:
-        amplitude_center = convert_parameters_to_tensor(parameters[["amplitude_center"]], dtype=dtype)
-        amplitude_surround = convert_parameters_to_tensor(parameters[["amplitude_surround"]], dtype=dtype)
+        amplitude_center = parameters[["amplitude_center"]]
+        amplitude_surround = parameters[["amplitude_surround"]]
 
         response_center = amplitude_center * self._predict_single_response(stimulus, parameters, "center", dtype)
         response_surround = amplitude_surround * self._predict_single_response(stimulus, parameters, "surround", dtype)
@@ -449,15 +429,15 @@ class DivNormPRFModel(_BaseDualPRFModel):
 
     def _combine_responses(
         self,
-        stimulus: PRFStimulus,
-        parameters: pd.DataFrame,
+        stimulus: PRFStimulusTensors,
+        parameters: ParamsDict,
         dtype: str,
     ) -> Tensor:
-        a = convert_parameters_to_tensor(parameters[["amplitude_activation"]], dtype=dtype)
-        c = convert_parameters_to_tensor(parameters[["amplitude_normalization"]], dtype=dtype)
+        a = parameters[["amplitude_activation"]]
+        c = parameters[["amplitude_normalization"]]
 
-        b = convert_parameters_to_tensor(parameters[["baseline_activation"]], dtype=dtype)
-        d = convert_parameters_to_tensor(parameters[["baseline_normalization"]], dtype=dtype)
+        b = parameters[["baseline_activation"]]
+        d = parameters[["baseline_normalization"]]
         d = ops.maximum(d, self.min_baseline_normalization)
 
         response_activation = a * self._predict_single_response(stimulus, parameters, "activation", dtype) + b
@@ -466,7 +446,7 @@ class DivNormPRFModel(_BaseDualPRFModel):
         return response_activation / response_normalization - b / d
 
 
-class DelayedNormPRFModel(BaseCanonical[PRFStimulus]):
+class DelayedNormPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     r"""
     Delayed gain normalization population receptive field (pRF) model.
 
@@ -546,46 +526,45 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus]):
         return list(dict.fromkeys(names))
 
     @doc
-    def __call__(
+    def call(
         self,
-        stimulus: PRFStimulus,
-        parameters: pd.DataFrame,
-        regressors: pd.DataFrame | None = None,
-        dtype: str | None = None,
+        stimulus: PRFStimulusTensors,
+        parameters: ParamsDict,
+        regressors: ParamsDict | None = None,
     ) -> Tensor:
         """
         Predict the delayed gain normalization model response.
+
+        Parameters
+        ----------
+        %(stimulus_prf_tensors)
+        %(parameters_tensors)
+        %(regressors_tensors)
 
         Returns
         -------
         %(predicted_response_2d)s
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        dtype = get_dtype(dtype)
-        _validate_regressors_argument(self.models["regressors_model"], regressors)
+        dtype = parameters.dtype
 
         # pRF response + stimulus encoding
         prf_model = cast("BasePopulationResponse", self.models["prf_model"])
-        response = prf_model(stimulus, parameters, dtype=dtype)
+        response = prf_model.call(stimulus, parameters)
         encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
-        response = encoding_model(stimulus, response, parameters, dtype=dtype)
+        response = encoding_model.call(stimulus, response, parameters)
 
         impulse_model = cast("BaseImpulse", self.models["impulse_model"])
 
         # h₁ convolution → L(t)
         if impulse_model is not None:
-            impulse_response = impulse_model(parameters, dtype=dtype)
+            impulse_response = impulse_model.call(parameters)
             response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
 
         # DGN parameters
-        n = convert_parameters_to_tensor(parameters[["n"]], dtype=dtype)
-        dispersion_normalization = convert_parameters_to_tensor(parameters[["dispersion_normalization"]], dtype=dtype)
-        sigma_saturation = convert_parameters_to_tensor(parameters[["sigma_saturation"]], dtype=dtype)
+        n = parameters[["n"]]
+        dispersion_normalization = parameters[["dispersion_normalization"]]
+        sigma_saturation = parameters[["sigma_saturation"]]
 
         # h₂ kernel → g(t) = L * h₂
         # Without an impulse model there is no time axis to build h₂ on, so the normalization stage is
@@ -606,11 +585,11 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus]):
 
         if self.models["scaling_model"] is not None:
             scaling_model = cast("BaseScaling", self.models["scaling_model"])
-            response = scaling_model(response, parameters, dtype=dtype)
+            response = scaling_model.call(response, parameters)
 
         if self.models["regressors_model"] is not None and regressors is not None:
             regressors_model = cast("BaseRegressors", self.models["regressors_model"])
-            response = response + regressors_model(regressors, parameters, dtype=dtype)
+            response = response + regressors_model.call(regressors, parameters)
 
         return response
 

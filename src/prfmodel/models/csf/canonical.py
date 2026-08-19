@@ -5,7 +5,6 @@ This module contains models that combine multiple exchangeable submodels in a wa
 """
 
 from typing import cast
-import pandas as pd
 from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
@@ -14,15 +13,15 @@ from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BasePopulationResponse
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.regressors.base import _normalize_regressors_model
-from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CSFStimulus
+from prfmodel.stimuli import CSFStimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import ParamsDict
 
 
-class CanonicalCSFModel(BaseCanonical[CSFStimulus]):
+class CanonicalCSFModel(BaseCanonical[CSFStimulus, CSFStimulusTensors]):
     """
     Simple composite contrast sensitivity function model.
 
@@ -71,45 +70,42 @@ class CanonicalCSFModel(BaseCanonical[CSFStimulus]):
         )
 
     @doc
-    def __call__(
+    def call(
         self,
-        stimulus: CSFStimulus,
-        parameters: pd.DataFrame,
-        regressors: pd.DataFrame | None = None,
-        dtype: str | None = None,
+        stimulus: CSFStimulusTensors,
+        parameters: ParamsDict,
+        regressors: ParamsDict | None = None,
     ) -> Tensor:
         """
         Predict a simple contrast sensitivity function model response to a stimulus.
 
         Parameters
         ----------
-        %(stimulus_csf)s
-        %(parameters)s
-        %(regressors_canonical)s
-        %(dtype)s
+        %(stimulus_csf_tensors)
+        %(parameters_tensors)
+        %(regressors_tensors)
 
         Returns
         -------
         %(predicted_response_2d)s
 
         """
-        dtype = get_dtype(dtype)
-        _validate_regressors_argument(self.models["regressors_model"], regressors)
+        dtype = parameters.dtype
 
         csf_model = cast("BasePopulationResponse", self.models["csf_model"])
-        response = csf_model(stimulus, parameters, dtype=dtype)
+        response = csf_model.call(stimulus, parameters)
 
         if self.models["impulse_model"] is not None:
             impulse_model = cast("BaseImpulse", self.models["impulse_model"])
-            impulse_response = impulse_model(parameters, dtype=dtype)
+            impulse_response = impulse_model.call(parameters)
             response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
 
         if self.models["scaling_model"] is not None:
             temporal_model = cast("BaseScaling", self.models["scaling_model"])
-            response = temporal_model(response, parameters, dtype=dtype)
+            response = temporal_model.call(response, parameters)
 
         if self.models["regressors_model"] is not None and regressors is not None:
             regressors_model = cast("BaseRegressors", self.models["regressors_model"])
-            response = response + regressors_model(regressors, parameters, dtype=dtype)
+            response = response + regressors_model.call(regressors, parameters)
 
         return response

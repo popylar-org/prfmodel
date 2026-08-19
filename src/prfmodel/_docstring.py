@@ -88,6 +88,10 @@ _PARAMS: dict[str, str] = {
         "    Dataframe with columns containing different model parameters and rows containing parameter values\n"
         "    for different units."
     ),
+    "parameters_tensors": (
+        "parameters : ParamsDict\n"
+        "    Model parameters as tensors, supporting the same column selection as a :class:`pandas.DataFrame`."
+    ),
     "predicted_response_2d": (
         "Tensor\n    The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`."
     ),
@@ -97,6 +101,10 @@ _PARAMS: dict[str, str] = {
         "    Regressor design with shape `(num_frames, num_regressors)`. Must contain a column for each name in\n"
         "    :attr:`names`; extra columns are ignored."
     ),
+    "regressors_tensors": (
+        "regressors : ParamsDict or None, optional"
+        "    Regressor design columns as tensors, supporting the same column selection as a :class:`pandas.DataFrame`."
+    ),
     "regressors_canonical": (
         "regressors : pandas.DataFrame, optional\n"
         "    Regressor design data. Required when the canonical model has a regressors model configured.\n"
@@ -104,9 +112,27 @@ _PARAMS: dict[str, str] = {
         "    required by every configured regressor model. Extra columns are ignored."
     ),
     "stimulus": ("stimulus : Stimulus\n    Stimulus object."),
+    "stimulus_tensor": (
+        "stimulus : StimulusTensors\n    The tensor-holding stimulus object, from :meth:`~prfmodel.stimuli.Stimulus.to_tensors`."  # noqa: E501 (line too long)
+    ),
     "stimulus_cf": ("stimulus : CFStimulus\n    Connective field stimulus object."),
+    "stimulus_cf_tensors": (
+        "stimulus : CFStimulus\n   "
+        "    Tensor-holding connective field stimulus object,\n"
+        "    from :meth:`~prfmodel.stimuli.CFStimulus.to_tensors`."
+    ),
     "stimulus_csf": ("stimulus : CSFStimulus\n    Contrast sensitivity function stimulus object."),
+    "stimulus_csf_tensors": (
+        "stimulus : CSFStimulus\n   "
+        "    Tensor-holding contrast sensitivity function stimulus object,\n"
+        "    from :meth:`~prfmodel.stimuli.CSFStimulus.to_tensors`."
+    ),
     "stimulus_prf": ("stimulus : PRFStimulus\n    Population receptive field stimulus object."),
+    "stimulus_prf_tensors": (
+        "stimulus : PRFStimulus\n   "
+        "    Tensor-holding population receptive field stimulus object,\n"
+        "    from :meth:`~prfmodel.stimuli.PRFStimulus.to_tensors`."
+    ),
 }
 
 doc = Substitution(**_PARAMS)

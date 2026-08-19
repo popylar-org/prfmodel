@@ -1,7 +1,6 @@
 """Contrast sensitivity function response models."""
 
 import math
-import pandas as pd
 from keras import ops
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
@@ -12,9 +11,10 @@ from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CSFStimulus
+from prfmodel.stimuli import CSFStimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
-from prfmodel.utils import convert_parameters_to_tensor
+from prfmodel.utils import ParamsDict
 from prfmodel.utils import get_dtype
 from .canonical import CanonicalCSFModel
 
@@ -178,7 +178,7 @@ def predict_contrast_response(
     return c_q / (c_q + q_q)
 
 
-class CSFResponse(BasePopulationResponse[CSFStimulus]):
+class CSFResponse(BasePopulationResponse[CSFStimulus, CSFStimulusTensors]):
     r"""
     Neural contrast sensitivity function response model.
 
@@ -222,36 +222,30 @@ class CSFResponse(BasePopulationResponse[CSFStimulus]):
         """Names of parameters used by the model: ``cs_peak``, ``sf_peak``, ``width_r``, ``slope_crf``."""
         return ["cs_peak", "sf_peak", "width_r", "slope_crf"]
 
-    def __call__(self, stimulus: CSFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def call(self, stimulus: CSFStimulusTensors, parameters: ParamsDict) -> Tensor:
         """
         Predict the model response for a CSF stimulus.
 
         Parameters
         ----------
-        stimulus : CSFStimulus
-            Contrast sensitivity function stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different voxels. Must contain the columns ``cs_peak``, ``sf_peak``, ``width_r``, and ``slope_crf``.
-        dtype : str, optional
-            The dtype of the prediction result. If ``None`` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        %(stimulus_csf_tensors)
+        %(parameters_tensors)
 
         Returns
         -------
         Tensor
-            Model predictions of shape ``(num_voxels, num_frames)`` and dtype ``dtype``.
+            Model predictions of shape ``(num_voxels, num_frames)``.
             ``num_voxels`` is the number of rows in ``parameters`` and ``num_frames`` is the length of
             the stimulus sf and contrast arrays.
 
         """
-        dtype = get_dtype(dtype)
-        sf = ops.convert_to_tensor(stimulus.sf, dtype=dtype)
-        contrast = ops.convert_to_tensor(stimulus.contrast, dtype=dtype)
-        cs_peak = convert_parameters_to_tensor(parameters[["cs_peak"]], dtype=dtype)
-        sf_peak = convert_parameters_to_tensor(parameters[["sf_peak"]], dtype=dtype)
-        width_r = convert_parameters_to_tensor(parameters[["width_r"]], dtype=dtype)
-        slope_crf = convert_parameters_to_tensor(parameters[["slope_crf"]], dtype=dtype)
+        dtype = parameters.dtype
+        sf = stimulus.sf
+        contrast = stimulus.contrast
+        cs_peak = parameters[["cs_peak"]]
+        sf_peak = parameters[["sf_peak"]]
+        width_r = parameters[["width_r"]]
+        slope_crf = parameters[["slope_crf"]]
 
         sensitivity = predict_contrast_sensitivity(
             sf=sf,
