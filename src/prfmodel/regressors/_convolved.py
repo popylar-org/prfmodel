@@ -1,5 +1,6 @@
 """Convolved regressor model."""
 
+import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.impulse._convolve import convolve_prf_impulse_response
@@ -66,6 +67,16 @@ class ConvolvedRegressors(BaseRegressors):
 
         self.names = list(names)
         self.impulse_model = impulse_model
+
+    def _check_parameter_values(self, parameters: pd.DataFrame) -> None:
+        """Forward the domain check to the impulse model.
+
+        `call` reaches the impulse model through its own `call`, which skips its facade, so the check
+        would otherwise never run for a convolved regressor.
+
+        """
+        super()._check_parameter_values(parameters)
+        self.impulse_model._check_parameter_values(parameters)  # noqa: SLF001 (submodel of the same protocol)
 
     @property
     def parameter_names(self) -> list[str]:

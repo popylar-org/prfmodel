@@ -136,6 +136,7 @@ class BaseRegressors(ModelProtocol):
         """
         dtype = get_dtype(dtype)
         self._check_parameters(parameters)
+        self._check_parameter_values(parameters)
         self._check_design(regressors)
 
         return self.call(as_params(regressors, dtype), as_params(parameters, dtype))

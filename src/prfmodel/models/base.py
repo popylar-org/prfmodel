@@ -15,6 +15,12 @@ All base classes have a concrete user-facing :meth:``__call__`` method
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
 
+Validation that has to read a value back to a Python `bool` belongs to `__call__` alone, because `call`
+may be traced. A model that holds submodels reaches them through their `call` methods, which bypasses
+their facades, so `__call__` also forwards
+:meth:`~prfmodel.utils.ModelProtocol._check_parameter_values` to every submodel. That is the only place
+a submodel's domain check runs once a fitter is driving the model.
+
 Classes in this module are also generic with respect to the input stimulus. This means that child classes must specify
 which user-facing and tensor-holding stimulus types :meth:`__call__` and :meth:`call` take as input.
 
@@ -339,6 +345,19 @@ class BaseCanonical(ModelProtocol, Generic[S, T]):
         # Make sure no duplicates are returned (preserve insertion order)
         return list(dict.fromkeys(param_names))
 
+    def _check_parameter_values(self, parameters: pd.DataFrame) -> None:
+        """Forward the domain check to every submodel.
+
+        A submodel is reached through its `call` method rather than through its facade once a composite
+        model is in play, so this is the only place a submodel's domain check runs for a composite.
+
+        """
+        super()._check_parameter_values(parameters)
+
+        for model in self.models.values():
+            if model is not None:
+                model._check_parameter_values(parameters)  # noqa: SLF001 (submodel of the same protocol)
+
     @doc
     def __call__(
         self,
@@ -370,6 +389,7 @@ class BaseCanonical(ModelProtocol, Generic[S, T]):
         """
         dtype = get_dtype(dtype)
         self._check_parameters(parameters)
+        self._check_parameter_values(parameters)
         _validate_regressors_argument(self.models.get("regressors_model"), regressors)
 
         return self.call(

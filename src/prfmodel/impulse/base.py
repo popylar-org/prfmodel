@@ -15,10 +15,15 @@ All base classes have a concrete user-facing :meth:``__call__`` method
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
 
+Validation that has to read a value back to a Python `bool` belongs to `__call__` alone, because `call`
+may be traced. A model that holds submodels reaches them through their `call` methods, which bypasses
+their facades, so `__call__` also forwards
+:meth:`~prfmodel.utils.ModelProtocol._check_parameter_values` to every submodel. That is the only place
+a submodel's domain check runs once a fitter is driving the model.
+
 """
 
 from abc import abstractmethod
-from typing import ClassVar
 from typing import TypeVar
 import numpy as np
 import pandas as pd
@@ -63,9 +68,21 @@ class BaseImpulse(ModelProtocol):
     This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
     models. Subclasses must override the abstract :attr:`_all_parameter_names` and :meth:`__call__` method.
 
-    `duration`, `offset` and `resolution` are read-only: they define the time axis that
-    :meth:`get_frames` caches, so a model that needs a different axis is constructed anew rather than
-    modified in place.
+    `duration` and `resolution` must be positive, checked once at construction. `offset` is
+    unconstrained and may be negative: the densities are zero below their support, so frames at or below
+    zero contribute zero. A negative `offset` therefore gives the kernel leading zeros, which delays the
+    convolved response by `-offset / resolution` frames without changing a `"sum"` normalization. Note
+    that `num_frames` is derived from `duration` alone, so a negative `offset` shifts the sampling
+    window rather than widening it, and the far tail of the response is truncated by the same amount.
+
+    Each frame is sampled at the centre of the interval it stands for, not at its leading edge: frame
+    `i` covers `[offset + i * resolution, offset + (i + 1) * resolution)` and is evaluated at its
+    midpoint, `offset + (i + 0.5) * resolution`. A sample represents the whole interval, and it keeps
+    `t = 0` off the axis. At the defaults that is 32 samples centred at 0.5, 1.5, ..., 31.5 seconds.
+
+    `duration` is an upper bound: the time frames array holds `num_frames = int(duration / resolution)` samples
+    spaced exactly `resolution` apart, so it ends at the last whole sample at or below `duration` rather than at
+    `duration` itself.
 
     """
 
@@ -78,6 +95,17 @@ class BaseImpulse(ModelProtocol):
         default_parameters: dict[str, float] | str | None = None,
     ):
         super().__init__()
+
+        # The time axis is fixed at construction, so it is checked once here rather than on every
+        # evaluation. 'offset' is deliberately unconstrained: the densities are zero below their
+        # support, so a frame at or below zero contributes zero rather than a 'NaN'.
+        if duration <= 0.0:
+            msg = f"Argument 'duration' must be > 0 but is {duration}"
+            raise ValueError(msg)
+
+        if resolution <= 0.0:
+            msg = f"Argument 'resolution' must be > 0 but is {resolution}"
+            raise ValueError(msg)
 
         self._duration = duration
         self._offset = offset
@@ -138,15 +166,6 @@ class BaseImpulse(ModelProtocol):
 
         Notes
         -----
-        Each frame is sampled at the centre of the interval it stands for, not at its leading edge: frame
-        `i` covers `[offset + i * resolution, offset + (i + 1) * resolution)` and is evaluated at its
-        midpoint, `offset + (i + 0.5) * resolution`. A sample represents the whole interval, and it keeps
-        `t = 0` off the axis. At the defaults that is 32 samples centred at 0.5, 1.5, ..., 31.5 seconds.
-
-        `duration` is an upper bound: the time frames array holds `num_frames = int(duration / resolution)` samples
-        spaced exactly `resolution` apart, so it ends at the last whole sample at or below `duration` rather than at
-        `duration` itself.
-
         The time frames are cached as a `numpy.ndarray` rather than as a backend tensor, and converted on every
         call.
 
@@ -221,22 +240,19 @@ class BaseImpulse(ModelProtocol):
 
         return self.call(as_params(parameters, dtype))
 
-    _positive_parameter_names: ClassVar[tuple[str, ...]] = ()
-    """Parameters that must be strictly positive for the impulse response to be defined."""
-
     def _check_parameter_values(self, parameters: pd.DataFrame) -> None:
         """Check that the parameter values lie inside the domain the impulse response is defined on.
 
-        Called from :meth:`__call__`, which is never traced, so the values here are always concrete and the
-        check always runs.
+        Merges :attr:`default_parameters` first, so that a default is checked too, then defers to
+        :meth:`~prfmodel.utils.ModelProtocol._check_parameter_values`.
 
-        Subclasses declare the parameters this applies to with :attr:`_positive_parameter_names`.
+        Called from :meth:`__call__` and, when this model is a submodel, from the enclosing model's
+        facade. Neither is ever traced, so the values here are always concrete and the check always runs.
+        It is the only thing that reports an out-of-domain parameter: the gamma densities do not check
+        their arguments, and a non-positive `delay` does not even produce a `NaN` to fall back on.
 
         """
-        for name in self._positive_parameter_names:
-            if name in parameters.columns and not (parameters[name].to_numpy() > 0.0).all():
-                msg = f"Parameter '{name}' must be > 0"
-                raise ValueError(msg)
+        super()._check_parameter_values(self._join_default_parameters(parameters))
 
     @doc
     @abstractmethod

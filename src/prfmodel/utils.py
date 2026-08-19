@@ -6,6 +6,7 @@ import re
 import warnings
 from abc import abstractmethod
 from collections.abc import Callable
+from typing import ClassVar
 from typing import Protocol
 from typing import runtime_checkable
 import numpy as np
@@ -70,6 +71,27 @@ class ModelProtocol(Protocol):
         if missing_params:
             msg = f"Missing required parameter names: {missing_params}"
             raise ValueError(msg)
+
+    _positive_parameter_names: ClassVar[tuple[str, ...]] = ()
+    """Parameters that must be strictly positive for the model to be defined."""
+
+    def _check_parameter_values(self, parameters: pd.DataFrame) -> None:
+        """Check that the parameter values lie inside the domain the model is defined on.
+
+        Called from the public facades, which are never traced, so this may read a value back to a Python
+        `bool` -- unlike anything reachable from `call`. A model that holds submodels overrides this to
+        forward the call to them, because a fitter reaches a submodel through `call` and would otherwise
+        bypass the check entirely.
+
+        Subclasses declare the parameters this applies to with :attr:`_positive_parameter_names`. Names
+        that are absent from `parameters` are skipped, so a parameter supplied by a default is only
+        checked once the defaults have been merged in.
+
+        """
+        for name in self._positive_parameter_names:
+            if name in parameters.columns and not (parameters[name].to_numpy() > 0.0).all():
+                msg = f"Parameter '{name}' must be > 0"
+                raise ValueError(msg)
 
 
 @doc
