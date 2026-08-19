@@ -3,6 +3,7 @@
 import pandas as pd
 from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
+from prfmodel.utils import ParamsDict
 from .base import BaseRegressors
 
 
@@ -77,37 +78,31 @@ class RegressorsList(BaseRegressors):
 
         return list(dict.fromkeys(names))
 
+    def _check_design(self, regressors: pd.DataFrame) -> None:
+        """Ask every child to check the shared design for the columns it needs."""
+        for child in self.regressors:
+            child._check_design(regressors)  # noqa: SLF001 (private member access on a sibling of the same base)
+
     @doc
-    def __call__(
-        self,
-        regressors: pd.DataFrame,
-        parameters: pd.DataFrame,
-        dtype: str | None = None,
-    ) -> Tensor:
+    def call(self, regressors: ParamsDict, parameters: ParamsDict) -> Tensor:
         """
         Compute the sum of predictions from all child regressor models.
 
         Parameters
         ----------
-        regressors : pandas.DataFrame
-            A single design data frame whose columns cover every child's required regressor names. It is passed to
-            each child, which slices the columns it needs by name; extra columns are ignored.
-        %(parameters)s
-        %(dtype)s
+        regressors : ParamsDict
+            A single design whose columns cover every child's required regressor names. It is passed to each
+            child, which slices the columns it needs by name; extra columns are ignored.
+        %(parameters_tensors)s
 
         Returns
         -------
         %(predicted_response_2d)s
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        prediction = self.regressors[0](regressors, parameters, dtype=dtype)
+        prediction = self.regressors[0].call(regressors, parameters)
 
         for child in self.regressors[1:]:
-            prediction = prediction + child(regressors, parameters, dtype=dtype)
+            prediction = prediction + child.call(regressors, parameters)
 
         return prediction
