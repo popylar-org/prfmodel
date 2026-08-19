@@ -3,7 +3,6 @@
 import functools
 import math
 import re
-import warnings
 from abc import abstractmethod
 from collections.abc import Callable
 from typing import ClassVar
@@ -26,10 +25,6 @@ Accepted dtypes for `prfmodel.typing.Tensor` objects.
 Accepted dtypes are: `"bfloat16"`, `"float16"`, `"float32"`, and `"float64"`.
 
 """
-
-
-class UndefinedResponseWarning(UserWarning):
-    """Warning for when a response is undefined and contains NaNs."""
 
 
 @runtime_checkable
@@ -268,7 +263,7 @@ def normalize_response(response: Tensor, norm: str | None = "sum") -> Tensor:
 
     Notes
     -----
-    A warning is raised when the normalization is zero which leads to an undefined normalized response.
+    Returns a non-finite response when the normalization is zero.
 
     Examples
     --------
@@ -296,12 +291,6 @@ def normalize_response(response: Tensor, norm: str | None = "sum") -> Tensor:
     norm_fun = _get_norm_fun(norm)
 
     response_norm = norm_fun(response, axis=1, keepdims=True)
-
-    norm_is_zero = response_norm == ops.cast(0, response.dtype)
-
-    if ops.any(norm_is_zero):
-        msg = "Response norm is zero leading to undefined normalized responses"
-        warnings.warn(message=msg, category=UndefinedResponseWarning)
 
     return response / response_norm
 

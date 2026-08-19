@@ -9,7 +9,6 @@ from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import ModelProtocol
 from prfmodel.utils import ParamsDict
-from prfmodel.utils import UndefinedResponseWarning
 from prfmodel.utils import _get_norm_fun
 from prfmodel.utils import batched
 from prfmodel.utils import normalize_response
@@ -78,16 +77,6 @@ def test_normalize_response_error():
 
     with pytest.raises(ValueError):
         normalize_response(response)
-
-
-def test_normalize_response_zero_norm():
-    """Test that normalize response raises a warning for zero norms."""
-    response = np.zeros((2, 10))
-
-    with pytest.warns(UndefinedResponseWarning):
-        response_norm = np.asarray(normalize_response(response))
-
-    assert np.all(np.isnan(response_norm))
 
 
 class TestParamsDict:
