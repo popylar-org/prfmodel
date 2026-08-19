@@ -288,35 +288,28 @@ class ParamsDict:
     """
     A dictionary-like object that supports dataframe-style column selection but returns Keras tensors.
 
-    Serves as an adapter during fitting to supply parameters to models while avoiding converting tensors into
-    actual dataframes.
+    This is the tensor-holding counterpart of the :class:`pandas.DataFrame` that models accept in their
+    :meth:`call` implementation. Use :func:`prfmodel.utils.as_params` to build one from a data frame.
 
     Parameters
     ----------
     data : dict
         Dictionary of parameter tensors to perform column style selection on.
-    dtype : str, optional
-        The dtype that parameter tensors are converted to. If `None` (the default), uses the dtype from
-        :func:`prfmodel.utils.get_dtype`.
+    %(dtype)s
 
     """
 
     def __init__(self, data: dict, dtype: str | None = None):
         dtype = get_dtype(dtype)
 
-        for key, val in data.items():
-            val_tensor = ops.convert_to_tensor(val, dtype=dtype)
+        # Build a new mapping rather than writing back into 'data'. Callers keep owning the dictionary they
+        # pass -- the fitters hand in the same parameter mapping on every optimization step -- so mutating
+        # the argument would leak tensors reshaped against an earlier call back to the caller.
+        reshaped = {key: self._reshape_item(key, ops.convert_to_tensor(val, dtype=dtype)) for key, val in data.items()}
 
-            val_tensor = self._reshape_item(key, val_tensor)
+        item_shape = _get_common_shape(reshaped)
 
-            data[key] = val_tensor
-
-        item_shape = _get_common_shape(data)
-
-        for key, val in data.items():
-            data[key] = ops.broadcast_to(val, item_shape)
-
-        self._data = data
+        self._data = {key: ops.broadcast_to(val, item_shape) for key, val in reshaped.items()}
         self._item_shape = item_shape
         self._dtype = dtype
 
@@ -340,25 +333,26 @@ class ParamsDict:
 
         return ops.stack([self._data[key] for key in key], axis=1)
 
-    def __setitem__(self, key: str | list[str], value: Tensor) -> None:
-        value = ops.convert_to_tensor(value, dtype=self._dtype)
+    def __setitem__(self, key: str | list[str], value: Tensor | float) -> None:
+        # A scalar is accepted so that a caller can fill a whole column with one value, which is how
+        # 'BaseImpulse' merges its default parameters.
+        item = ops.convert_to_tensor(value, dtype=self._dtype)
 
-        value_ndim = len(value.shape)
+        value_ndim = len(item.shape)
 
         if isinstance(key, str) and (
-            value_ndim < _EXPECTED_NDIM or (value_ndim == _EXPECTED_NDIM and value.shape[1] == 1)
+            value_ndim < _EXPECTED_NDIM or (value_ndim == _EXPECTED_NDIM and item.shape[1] == 1)
         ):
-            value = self._reshape_item(key, value)
-            self._data[key] = ops.broadcast_to(value, self._item_shape)
+            self._data[key] = ops.broadcast_to(self._reshape_item(key, item), self._item_shape)
 
         elif isinstance(key, list) and all(isinstance(k, str) for k in key) and value_ndim == _EXPECTED_NDIM:
-            value = ops.transpose(ops.broadcast_to(value, (self._item_shape[0], len(key))))
+            transposed = ops.transpose(ops.broadcast_to(item, (self._item_shape[0], len(key))))
 
-            for _key, _val in zip(key, value, strict=True):
+            for _key, _val in zip(key, transposed, strict=True):
                 self._data[_key] = _val
 
         else:
-            msg = f"Value shape {value.shape} did not match the expected shape {self.shape}"
+            msg = f"Value shape {item.shape} did not match the expected shape {self.shape}"
             raise ValueError(msg)
 
     @property
@@ -383,8 +377,51 @@ class ParamsDict:
 
     def copy(self) -> "ParamsDict":
         """Create a copy of the object."""
-        return ParamsDict(dict(self._data.items()))
+        return ParamsDict(self.to_dict(), dtype=self._dtype)
+
+    def to_dict(self) -> dict:
+        """Return the parameter tensors as a plain dictionary keyed by parameter name."""
+        return dict(self._data)
 
     def to_dataframe(self) -> pd.DataFrame:
         """Convert the object into a dataframe."""
         return pd.DataFrame(self._data)
+
+
+@doc
+def as_params(parameters: "pd.DataFrame | ParamsDict", dtype: str) -> ParamsDict:
+    """Convert user-supplied parameters into the tensor-holding representation.
+
+    This converts the parameters from a model's user-facing
+    :meth:`__call__` to its tensor-only :meth:`call` implementation.
+
+    Parameters
+    ----------
+    parameters : pandas.DataFrame or ParamsDict
+        Parameters to convert. A :class:`~prfmodel.utils.ParamsDict` is returned unchanged when it already
+        carries `dtype`, and rebuilt with `dtype` otherwise.
+    dtype : str
+        The dtype that parameter tensors are converted to.
+
+    Returns
+    -------
+    %(parameters_tensors)s
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from prfmodel.utils import as_params
+    >>> params = as_params(pd.DataFrame({"sigma": [1.0, 1.5]}), dtype="float32")
+    >>> print(params.shape)
+    (2, 1)
+    >>> as_params(params, dtype="float32") is params
+    True
+
+    """
+    if isinstance(parameters, ParamsDict):
+        if parameters.dtype == dtype:
+            return parameters
+
+        return ParamsDict(parameters.to_dict(), dtype=dtype)
+
+    return ParamsDict(parameters.to_dict(orient="list"), dtype=dtype)
