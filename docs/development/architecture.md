@@ -21,12 +21,16 @@ and {py:mod}`prfmodel.scaling`. We distinguish between three user profiles:
 To facilitate the development of the package and the creation of custom models, we provide an overview of the
 inhertiance structure of the three modules containing model classes.
 
+Private helper base classes are omitted from the diagrams; classes inheriting from them are shown as
+inheriting from the nearest public base class.
+
 The inheritance diagram for {py:mod}`prfmodel.models`:
 
 ```{eval-rst}
-.. inheritance-diagram:: prfmodel.models.base prfmodel.models.prf prfmodel.models.cf prfmodel.models.compression
+.. inheritance-diagram:: prfmodel.models.base prfmodel.models.prf prfmodel.models.cf prfmodel.models.csf prfmodel.models.compression
    :parts: 1
    :include-subclasses:
+   :private-bases:
    :top-classes: prfmodel.utils.ModelProtocol
 ```
 
@@ -36,6 +40,7 @@ The inheritance diagram for {py:mod}`prfmodel.impulse`:
 .. inheritance-diagram:: prfmodel.impulse.base
    :parts: 1
    :include-subclasses:
+   :private-bases:
    :top-classes: prfmodel.utils.ModelProtocol
 ```
 
@@ -45,6 +50,7 @@ The inheritance diagram for {py:mod}`prfmodel.scaling`:
 .. inheritance-diagram:: prfmodel.scaling.base
    :parts: 1
    :include-subclasses:
+   :private-bases:
    :top-classes: prfmodel.utils.ModelProtocol
 ```
 
