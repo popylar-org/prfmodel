@@ -105,6 +105,72 @@ class TestLeastSquaresFitter(TestSetup):
                 atol=_ATOL,
             )
 
+    def test_batched_solve_matches_per_unit_numpy_lstsq(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Test that solving every unit at once gives what solving them one at a time gives.
+
+        The units are solved together with a batched singular value decomposition, because
+        `keras.ops.lstsq` is not batched on every backend and the `keras.ops.map` loop it would need costs
+        an order of magnitude more than the predictions it solves for. This pins the batched coefficients
+        and the residual sums against a per-unit :func:`numpy.linalg.lstsq` reference.
+
+        """
+        rng = np.random.default_rng(0)
+        basis = np.asarray(model(stimulus, params.assign(baseline=0.0, amplitude=1.0)))
+        observed = 2.5 * basis + 0.75 + rng.normal(0.0, 0.05, basis.shape)
+
+        fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
+
+        history, ls_params = fitter.fit(observed, params, slope_name="amplitude", intercept_name="baseline")
+
+        for unit in range(len(params)):
+            design = np.stack([np.ones_like(basis[unit]), basis[unit]], axis=-1)
+            expected, *_ = np.linalg.lstsq(design, observed[unit], rcond=None)
+
+            np.testing.assert_allclose(ls_params["baseline"].to_numpy()[unit], expected[0], atol=1e-4)
+            np.testing.assert_allclose(ls_params["amplitude"].to_numpy()[unit], expected[1], atol=1e-4)
+            np.testing.assert_allclose(
+                history.history["loss"][unit],
+                np.sum((observed[unit] - design @ expected) ** 2),
+                rtol=1e-3,
+            )
+
+    def test_a_unit_outside_the_aperture_gets_the_minimum_norm_solution(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Test that a rank-deficient unit returns finite coefficients rather than an infinity.
+
+        A pRF centred far outside the aperture predicts a flat zero response, so its design matrix is an
+        intercept column beside a zero column and the fit has no unique solution. Solving that by
+        triangular substitution returns NaN; the singular value cutoff instead gives the minimum-norm
+        solution, which puts the mean in the intercept and leaves the slope at zero, exactly as
+        :func:`numpy.linalg.lstsq` does.
+
+        """
+        rng = np.random.default_rng(0)
+        far_params = params.copy()
+        far_params.loc[0, "mu_x"] = 1e3
+
+        basis = np.asarray(model(stimulus, far_params.assign(baseline=0.0, amplitude=1.0)))
+        assert not np.any(basis[0]), "The unit outside the aperture must predict a flat zero response"
+
+        observed = 2.5 * basis + 3.0 + rng.normal(0.0, 0.05, basis.shape)
+
+        fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
+
+        _, ls_params = fitter.fit(observed, far_params, slope_name="amplitude", intercept_name="baseline")
+
+        assert np.all(np.isfinite(ls_params.to_numpy()))
+        np.testing.assert_allclose(ls_params["amplitude"].to_numpy()[0], 0.0, atol=1e-6)
+        np.testing.assert_allclose(ls_params["baseline"].to_numpy()[0], observed[0].mean(), atol=1e-4)
+
     @skip_windows
     @skip_torch
     @parametrize_impulse_model
