@@ -64,9 +64,11 @@ class TestTransientImpulseShape:
         forward in time relative to the sustained channel.
 
         """
-        kwargs = {"duration": self.duration, "resolution": self.resolution, "norm": None}
-        transient = np.asarray(TransientImpulse(**kwargs)(parameters))[0]
-        sustained = np.asarray(SustainedImpulse(**kwargs)(parameters))[0]
+        transient_model = TransientImpulse(duration=self.duration, resolution=self.resolution, norm=None)
+        sustained_model = SustainedImpulse(duration=self.duration, resolution=self.resolution, norm=None)
+
+        transient = np.asarray(transient_model(parameters))[0]
+        sustained = np.asarray(sustained_model(parameters))[0]
 
         assert transient.argmax() < sustained.argmax()
 

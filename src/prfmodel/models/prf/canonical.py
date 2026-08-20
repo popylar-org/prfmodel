@@ -27,6 +27,7 @@ from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
+from prfmodel.utils import ModelProtocol
 from prfmodel.utils import ParamsDict
 from prfmodel.utils import convert_parameters_to_tensor
 from prfmodel.utils import get_dtype
@@ -725,10 +726,10 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
         """Names of parameters used by the model (pRF + encoding + channels + CST + impulse + scaling)."""
         names: list[str] = []
 
-        # The channel models cannot be None (enforced in __init__), unlike the models in the loop below
+        # These submodels cannot be None (the channel models are checked in __init__), unlike those below
         for key, model in self.models.items():
             if key in ("prf_model", "encoding_model", "sustained_model", "transient_model"):
-                names.extend(model.parameter_names)
+                names.extend(cast("ModelProtocol", model).parameter_names)
 
         names.extend(["n", "beta_sustained", "beta_transient"])
 

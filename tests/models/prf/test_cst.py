@@ -144,6 +144,13 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
         model's prediction is its absolute value. This pins the wiring: an off-transient built from anything
         other than the negated on-transient, or a channel convolved with the wrong kernel, breaks it.
 
+        The tolerances are loose for two independent reasons. The rectifier floors at `min_response` rather
+        than zero, so the prediction is `abs(channel) + min_response` and exactly `2 * min_response` where the
+        channel response is zero, which the absolute tolerance absorbs. The relative tolerance is set for
+        cross-backend portability: the two paths run the same convolution but reach it differently, and the
+        torch backend does not preserve float64 through it, so agreement is only to roughly single precision.
+        Both are far tighter than the errors this test exists to catch, which are order-one.
+
         """
         prf_model = Gaussian2DCSTPRFModel(impulse_model=None)
         params = params.assign(beta_sustained=0.0, beta_transient=1.0, n=1.0, baseline=0.0)
@@ -162,7 +169,7 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
 
         observed = np.asarray(prf_model(stimulus, params, dtype="float64"))
 
-        np.testing.assert_allclose(observed, np.abs(np.asarray(channel)), rtol=1e-8, atol=1e-9)
+        np.testing.assert_allclose(observed, np.abs(np.asarray(channel)), rtol=1e-6, atol=1e-9)
 
     def test_exponent_compresses_the_response(
         self,
@@ -194,8 +201,10 @@ class TestCSTPRFModelValidation:
         `parameter_names`, and only fails inside `__call__` with an unrelated `TypeError`.
 
         """
+        kwargs: dict[str, None] = {channel: None}
+
         with pytest.raises(ValueError, match="required"):
-            Gaussian2DCSTPRFModel(**{channel: None})
+            Gaussian2DCSTPRFModel(**kwargs)  # type: ignore[arg-type]  # the None is the point of the test
 
     def test_channel_resolution_mismatched_with_impulse_model_warns(self):
         """Test that channels sampled differently from the impulse response are reported.
