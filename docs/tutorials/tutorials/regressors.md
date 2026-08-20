@@ -167,6 +167,7 @@ param_grid = {
 grid_fitter = GridFitter(
     model=prf_model,
     stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 _, grid_params = grid_fitter.fit(
@@ -254,6 +255,7 @@ from prfmodel.fitters import SGDFitter
 sgd_fitter = SGDFitter(
     model=prf_model,
     stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 _, sgd_params = sgd_fitter.fit(

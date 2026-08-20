@@ -464,6 +464,7 @@ from prfmodel.fitters import GridFitter
 grid_fitter = GridFitter(
     model=prf_model,
     stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 # Run grid search

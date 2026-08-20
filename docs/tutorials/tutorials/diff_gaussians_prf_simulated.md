@@ -4,9 +4,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.1
+    jupytext_version: 1.18.1
 kernelspec:
-  display_name: .venv-prf
+  display_name: prfmodel (3.12.3.final.0)
   language: python
   name: python3
 ---
@@ -182,7 +182,11 @@ parameter combinations to evaluate. Let's construct the `GridFitter` and run the
 ```{code-cell} ipython3
 from prfmodel.fitters import GridFitter
 
-grid_fitter = GridFitter(model=gaussian_center_model, stimulus=stimulus)
+grid_fitter = GridFitter(
+    model=gaussian_center_model,
+    stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
+)
 
 grid_history, grid_params = grid_fitter.fit(
     data=simulated_response,
@@ -283,6 +287,7 @@ sgd_fitter = SGDFitter(
     model=prf_model,
     stimulus=stimulus,
     adapter=dog_adapter,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 sgd_history, sgd_params = sgd_fitter.fit(
