@@ -1,8 +1,7 @@
 """Tensorflow fitter implementations."""
 
-import pandas as pd
 import tensorflow as tf
-from prfmodel.stimuli import Stimulus
+from prfmodel.stimuli import StimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from .base import BaseSGDFitter
@@ -10,27 +9,36 @@ from .base import SGDState
 
 
 class TensorFlowSGDFitter(BaseSGDFitter):
-    """Tensorflow stochastic gradient descent fitter."""
+    """Tensorflow stochastic gradient descent fitter.
 
-    def __init__(self):
-        super().__init__()
+    Notes
+    -----
+    When `compile_step` is enabled, the optimization step is wrapped in ``tf.function`` to run it in graph
+    execution mode. The step reads and writes Keras variables in place, so the state passed in and out is
+    `None` and the traced function takes no tensor arguments at all. To force eager execution without changing
+    `compile_step`, use ``tf.config.run_functions_eagerly(True)``.
+
+    """
 
     def _get_state(self) -> SGDState:
         return None
 
     def _update_model_weights(
         self,
-        x: Stimulus,
+        x: StimulusTensors,
         y: Tensor,
         state: SGDState,
-        regressors: pd.DataFrame | None,
+        regressors: ParamsDict | None,
     ) -> tuple[dict, SGDState]:
         with tf.GradientTape() as tape:
             # Important to create this inside gradient tape because we transform keras variables
-            params = ParamsDict({v.name: v.value for v in self.trainable_variables + self.non_trainable_variables})
+            params = ParamsDict(
+                {v.name: v.value for v in self.trainable_variables + self.non_trainable_variables},
+                dtype=self.dtype,
+            )
             # Make model predictions with parameters on natural scale
             params = self.adapter.inverse(params)
-            y_pred = self.model(x, params, regressors=regressors, dtype=self.dtype)
+            y_pred = self.model.call(x, params, regressors=regressors)
             loss = self.compute_loss(y=y, y_pred=y_pred)
 
         gradients = tape.gradient(loss, self.trainable_variables)

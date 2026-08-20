@@ -3,8 +3,7 @@
 import jax
 import jax.numpy as jnp
 import keras
-import pandas as pd
-from prfmodel.stimuli import Stimulus
+from prfmodel.stimuli import StimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import ParamsDict
 from .base import BaseSGDFitter
@@ -12,15 +11,23 @@ from .base import SGDState
 
 
 class JAXSGDFitter(BaseSGDFitter):
-    """JAX stochastic gradient descent fitter."""
+    """JAX stochastic gradient descent fitter.
+
+    Notes
+    -----
+    When `compile_step` is enabled, the optimization step is wrapped in ``jax.jit`` for just-in-time
+    compilation. The state is a pytree of arrays, so it passes through ``jax.jit`` directly. The stimulus
+    and the regressors are captured in a closure and become compile-time constants.
+
+    """
 
     def _compute_loss_and_updates(  # noqa: PLR0913 (too many arguments)
         self,
         trainable_variables: list,
         non_trainable_variables: list,
-        x: Stimulus,
+        x: StimulusTensors,
         y: Tensor,
-        regressors: pd.DataFrame | None,
+        regressors: ParamsDict | None,
         dtype: str | None,
     ) -> tuple[Tensor, tuple[Tensor, list]]:
         state_mapping: list[tuple[str, Tensor]] = []
@@ -37,10 +44,11 @@ class JAXSGDFitter(BaseSGDFitter):
                         strict=False,
                     )
                 },
+                dtype=dtype,
             )
             # Make model predictions with parameters on natural scale
             params = self.adapter.inverse(params)
-            y_pred = self.model(x, params, regressors=regressors, dtype=dtype)
+            y_pred = self.model.call(x, params, regressors=regressors)
             loss = self.compute_loss(y=y, y_pred=y_pred)
 
         non_trainable_variables = [scope.get_current_value(v) for v in self.non_trainable_variables]
@@ -48,17 +56,24 @@ class JAXSGDFitter(BaseSGDFitter):
         return loss, (y_pred, non_trainable_variables)
 
     def _get_state(self) -> SGDState:
-        return self.trainable_variables, self.non_trainable_variables, self.optimizer.variables, self.metrics_variables
+        # Unwrap the Keras variables into plain arrays. A 'keras.Variable' is not a registered pytree
+        # node, so leaving them in place would make the state unusable as an argument to a jitted step.
+        return (
+            [v.value for v in self.trainable_variables],
+            [v.value for v in self.non_trainable_variables],
+            [v.value for v in self.optimizer.variables],
+            [v.value for v in self.metrics_variables],
+        )
 
     def _update_model_weights(
         self,
-        x: Stimulus,
+        x: StimulusTensors,
         y: Tensor,
         state: SGDState,
-        regressors: pd.DataFrame | None,
+        regressors: ParamsDict | None,
     ) -> tuple[dict, SGDState]:
         if state is None:
-            msg = "State must not be None when using JAX backend"
+            msg = "State must not be 'None' when using JAX backend"
             raise TypeError(msg)
 
         (

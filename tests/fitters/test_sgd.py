@@ -10,6 +10,9 @@ from prfmodel.fitters import SGDHistory
 from prfmodel.fitters.adapter import Adapter
 from prfmodel.fitters.adapter import ParameterConstraint
 from prfmodel.fitters.adapter import ParameterTransform
+from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.impulse import ShiftedGammaImpulse
+from prfmodel.impulse import TwoGammaImpulse
 from prfmodel.models.prf import DivNormGaussian2DPRFModel
 from prfmodel.models.prf import DoG2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFModel
@@ -490,3 +493,170 @@ class TestSGDFitterConstraint(PRFStimulusSetup):
             rtol=1e-5,
             err_msg="Constrained parameter did not survive a round trip through the fitter",
         )
+
+
+class TestSGDFitterCompiledStep(PRFStimulusSetup):
+    """Tests for compiling the optimization step.
+
+    Compiling changes how the step executes but must not change what it computes. The step also has to
+    stay traceable: any Python-level branch on a tensor value, or any tensor used where the backend
+    expects a Python integer, raises once the step is compiled but not while it runs eagerly.
+
+    """
+
+    num_steps: int = 10
+
+    @pytest.fixture
+    def response_model(self):
+        """Gaussian pRF model with no impulse or scaling stage."""
+        return Gaussian2DPRFModel(impulse_model=None, scaling_model=None)
+
+    @pytest.fixture
+    def init_params(self):
+        """Return starting values displaced from the values used to simulate the data."""
+        return pd.DataFrame({"mu_y": [0.5, -0.5], "mu_x": [-0.5, 0.5], "sigma": [1.0, 1.0]})
+
+    @pytest.fixture
+    def true_params(self):
+        """Parameters used to simulate the target data."""
+        return pd.DataFrame({"mu_y": [1.0, -1.0], "mu_x": [-1.0, 1.0], "sigma": [1.5, 2.0]})
+
+    def _fit(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        init_params: pd.DataFrame,
+        true_params: pd.DataFrame,
+        compile_step: bool,
+    ) -> pd.DataFrame:
+        keras.utils.set_random_seed(0)
+        fitter = SGDFitter(
+            model=model,
+            stimulus=stimulus,
+            optimizer=keras.optimizers.Adam(learning_rate=0.1),
+            compile_step=compile_step,
+        )
+        _, params = fitter.fit(model(stimulus, true_params), init_params, num_steps=self.num_steps)
+        return params
+
+    def test_the_step_runs_eagerly_by_default(self, stimulus: PRFStimulus, response_model: Gaussian2DPRFModel):
+        """Test that compilation is never switched on for the caller.
+
+        The eager path is the one that is debuggable, and whether compiling is faster depends on the backend
+        and the problem size, so it has to be asked for.
+
+        """
+        fitter = SGDFitter(model=response_model, stimulus=stimulus)
+
+        assert not fitter.compile_step
+
+    def test_compilation_can_be_switched_on(self, stimulus: PRFStimulus, response_model: Gaussian2DPRFModel):
+        """Test that every backend has a compilation primitive available."""
+        assert SGDFitter(model=response_model, stimulus=stimulus, compile_step=True).compile_step
+
+    def test_compiled_and_eager_fits_agree(
+        self,
+        stimulus: PRFStimulus,
+        response_model: Gaussian2DPRFModel,
+        init_params: pd.DataFrame,
+        true_params: pd.DataFrame,
+    ):
+        """Test that compiling the step does not change the parameters it arrives at.
+
+        This is the assertion that makes compilation safe to switch on. The two paths run the same
+        arithmetic in a different execution mode, so they agree to within float32 reassociation rather
+        than exactly.
+
+        """
+        compiled = self._fit(stimulus, response_model, init_params, true_params, compile_step=True)
+        eager = self._fit(stimulus, response_model, init_params, true_params, compile_step=False)
+
+        for param in init_params.columns:
+            np.testing.assert_allclose(
+                compiled[param].to_numpy(),
+                eager[param].to_numpy(),
+                rtol=1e-4,
+                atol=1e-5,
+                err_msg=f"Compiling the step changed the fitted value of {param!r}",
+            )
+
+    @pytest.mark.parametrize(
+        "impulse_model",
+        [DerivativeTwoGammaImpulse, ShiftedGammaImpulse, TwoGammaImpulse],
+    )
+    def test_full_pipeline_stays_traceable(self, stimulus: PRFStimulus, impulse_model: type):
+        """Test that a fit with each impulse model runs with the step compiled.
+
+        The impulse stage is where the density validation lives, and the encoding stage is where the
+        reduction axes are built. Both have raised under tracing in the past, and neither shows up in an
+        eager fit, so this runs the whole pipeline through the compiled path.
+
+        """
+        model = Gaussian2DPRFModel(impulse_model=impulse_model)
+
+        params = pd.DataFrame({"mu_y": [1.0], "mu_x": [-1.0], "sigma": [1.5], "baseline": [0.0], "amplitude": [1.0]})
+        params = params.assign(**{name: 0.5 for name in model.parameter_names if name not in params.columns})
+
+        fitter = SGDFitter(model=model, stimulus=stimulus, compile_step=True)
+
+        _, fitted = fitter.fit(model(stimulus, params), params, num_steps=2)
+
+        assert np.all(np.isfinite(fitted.to_numpy())), f"Fit produced non-finite parameters: {fitted}"
+
+    @pytest.mark.parametrize(
+        "impulse_model",
+        [DerivativeTwoGammaImpulse, ShiftedGammaImpulse, TwoGammaImpulse],
+    )
+    def test_a_negative_impulse_offset_fits_to_finite_parameters(
+        self,
+        stimulus: PRFStimulus,
+        impulse_model: type,
+    ):
+        """Test that frames outside the density's support do not poison the gradient.
+
+        A negative `offset` puts frames at or below zero on the time axis. The densities mask those to
+        zero with `ops.where`, which propagates the gradient of *both* branches -- so the masked branch
+        has to be evaluated on a substituted value rather than on the raw one, or the gradient would be
+        NaN even though the forward value is fine. Only a gradient reveals it, so this fits rather than
+        merely predicting.
+
+        The impulse parameters are supplied explicitly rather than left to `default_parameters`, because
+        a defaulted parameter is a constant that no gradient reaches -- which is exactly the case that
+        would not exercise this.
+
+        """
+        impulse = impulse_model(offset=-5.0)
+        model = Gaussian2DPRFModel(impulse_model=impulse)
+
+        params = pd.DataFrame({"mu_y": [1.0], "mu_x": [-1.0], "sigma": [1.5], "baseline": [0.0], "amplitude": [1.0]})
+        impulse_names = impulse._all_parameter_names  # noqa: SLF001 (the defaulted names are not public)
+        params = params.assign(**dict.fromkeys(impulse_names, 1.5))
+        params = params.assign(**{name: 0.5 for name in model.parameter_names if name not in params.columns})
+
+        fitter = SGDFitter(model=model, stimulus=stimulus, compile_step=True)
+
+        _, fitted = fitter.fit(model(stimulus, params), params, num_steps=5)
+
+        assert np.all(np.isfinite(fitted.to_numpy())), f"Fit produced non-finite parameters: {fitted}"
+
+    def test_invalid_starting_values_are_reported(self, stimulus: PRFStimulus):
+        """Test that starting values outside a model's domain raise before the loop starts.
+
+        Value validation skips itself under a trace so the step can be compiled, which would otherwise
+        turn this mistake into a silent NaN loss. The fitter makes one prediction before anything is
+        traced, so the model's own error message still reaches the user. This runs with the step compiled,
+        because that is the case in which the pre-loop prediction is the only thing that reports it.
+
+        """
+        model = Gaussian2DPRFModel()
+
+        params = pd.DataFrame({"mu_y": [1.0], "mu_x": [-1.0], "sigma": [1.5], "baseline": [0.0], "amplitude": [1.0]})
+        params = params.assign(**{name: 0.5 for name in model.parameter_names if name not in params.columns})
+        # A negative dispersion is outside the impulse model's domain, which 'BaseImpulse'
+        # reports from its facade via the composite model's '_check_parameter_values' fan-out
+        params["dispersion"] = -1.0
+
+        fitter = SGDFitter(model=model, stimulus=stimulus, compile_step=True)
+
+        with pytest.raises(ValueError, match="must be > 0"):
+            fitter.fit(np.zeros((1, stimulus.design.shape[0])), params, num_steps=5)

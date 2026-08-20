@@ -16,6 +16,27 @@ from tests.reference import _oracle
 from .conftest import parametrize_dtype
 
 
+def _param_ranges() -> dict[str, list]:
+    """Parameter ranges shared by the grid search test classes.
+
+    The data-generating parameters need to be included in the grid for the grid search to exactly recover them.
+
+    """
+    return {
+        "mu_x": list(range(-2, 3, 1)),
+        "mu_y": list(range(-2, 3, 1)),
+        "sigma": list(range(1, 4, 1)),
+        "delay": [6.0],
+        "dispersion": [0.9],
+        "undershoot": [12.0],
+        "u_dispersion": [0.9],
+        "ratio": [0.48],
+        "weight_deriv": [0.5],
+        "baseline": [0.1, -0.1, 0.5],
+        "amplitude": [-2.0, 1.2, 0.1],
+    }
+
+
 class TestGridFitter(TestSetup):
     """Tests for GridFitter class."""
 
@@ -31,24 +52,8 @@ class TestGridFitter(TestSetup):
 
     @pytest.fixture
     def param_ranges(self):
-        """Parameter ranges.
-
-        The data-generating parameters need to be included in the grid for the grid search to exactly recover them.
-
-        """
-        return {
-            "mu_x": list(range(-2, 3, 1)),
-            "mu_y": list(range(-2, 3, 1)),
-            "sigma": list(range(1, 4, 1)),
-            "delay": [6.0],
-            "dispersion": [0.9],
-            "undershoot": [12.0],
-            "u_dispersion": [0.9],
-            "ratio": [0.48],
-            "weight_deriv": [0.5],
-            "baseline": [0.1, -0.1, 0.5],
-            "amplitude": [-2.0, 1.2, 0.1],
-        }
+        """Parameter ranges."""
+        return _param_ranges()
 
     @parametrize_dtype
     @parametrize_impulse_model
@@ -147,3 +152,94 @@ class TestGridFitter(TestSetup):
 
         self._check_history(history)
         self._check_grid_params(grid_params, params_copy, ["mu_x", "mu_y", "sigma"])
+
+
+class TestGridFitterCompiledStep(TestSetup):
+    """Tests for compiling the evaluation of a parameter batch.
+
+    Compiling changes how a batch is evaluated but must not change which parameter combination wins.
+    The batch also has to stay traceable: any Python-level branch on a tensor value, or any tensor cached
+    across calls, raises once the evaluation is compiled but not while it runs eagerly.
+
+    """
+
+    @pytest.fixture
+    def param_ranges(self):
+        """Parameter ranges."""
+        return _param_ranges()
+
+    def test_the_batch_is_evaluated_eagerly_by_default(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+    ):
+        """Test that compilation is never switched on for the caller.
+
+        Unlike an optimization step, a parameter batch is evaluated once, so the trace is not amortized and
+        whether compiling is faster depends on the grid size. That is not something the fitter can know.
+
+        """
+        fitter = GridFitter(model=model, stimulus=stimulus)
+
+        assert not fitter.compile_step
+
+    def test_compilation_can_be_switched_on(self, stimulus: PRFStimulus, model: Gaussian2DPRFModel):
+        """Test that every backend has a compilation primitive available."""
+        assert GridFitter(model=model, stimulus=stimulus, compile_step=True).compile_step
+
+    @pytest.mark.parametrize("batch_size", [20, 7])
+    def test_compiled_and_eager_searches_agree(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        param_ranges: dict[str, np.ndarray],
+        batch_size: int,
+    ):
+        """Test that compiling the batch does not change the combination the search arrives at.
+
+        A `batch_size` that does not divide the grid size leaves a smaller final batch, which is traced a
+        second time. That second trace is the case in which a tensor cached during the first one would
+        surface, so it is exercised alongside the evenly divided case.
+
+        A mean squared error loss is used rather than the default
+        :class:`~prfmodel.fitters.losses.CorrelationLoss`, which leaves `baseline` and `amplitude`
+        non-identifiable: every one of their grid values then yields the same loss, and which one wins is
+        an arbitrary tie-break that float reassociation is free to decide differently.
+
+        """
+        observed = model(stimulus, params)
+        loss = keras.losses.MeanSquaredError(reduction="none")
+
+        _, compiled = GridFitter(model=model, stimulus=stimulus, loss=loss, compile_step=True).fit(
+            observed,
+            param_ranges,
+            batch_size=batch_size,
+        )
+        _, eager = GridFitter(model=model, stimulus=stimulus, loss=loss, compile_step=False).fit(
+            observed,
+            param_ranges,
+            batch_size=batch_size,
+        )
+
+        pd.testing.assert_frame_equal(compiled, eager)
+
+    def test_ragged_final_batch_recovers_the_data_generating_parameters(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        param_ranges: dict[str, np.ndarray],
+    ):
+        """Test that a smaller final batch does not let a stale trace win the search.
+
+        The final batch is not padded, because a padded combination could win the `argmin` and be
+        returned as the estimate. This asserts the true parameters are still recovered exactly.
+
+        """
+        fitter = GridFitter(model=model, stimulus=stimulus, compile_step=True)
+
+        _, grid_params = fitter.fit(model(stimulus, params), param_ranges, batch_size=7)
+
+        check_params = ["mu_x", "mu_y", "sigma"]
+        assert np.allclose(grid_params[check_params], params[check_params])
