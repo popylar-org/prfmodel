@@ -27,7 +27,7 @@ from prfmodel.stimuli import PRFStimulus
 from prfmodel.stimuli import PRFStimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import ModelProtocol
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import normalize_response
 from ._stimulus_encoding import PRFStimulusEncoder
 
@@ -90,8 +90,8 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     def call(
         self,
         stimulus: PRFStimulusTensors,
-        parameters: ParamsDict,
-        regressors: ParamsDict | None = None,
+        parameters: TensorFrame,
+        regressors: TensorFrame | None = None,
     ) -> Tensor:
         """
         Predict the model response to a stimulus.
@@ -228,7 +228,7 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     def _predict_single_response(
         self,
         stimulus: PRFStimulusTensors,
-        parameters: ParamsDict,
+        parameters: TensorFrame,
         suffix: str,
         dtype: str,
     ) -> Tensor:
@@ -237,14 +237,14 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
         Shared parameters are taken as-is; non-shared parameters are read from the ``{param}_{suffix}`` columns.
         Only the columns the pRF model consumes are gathered, avoiding a copy of the full parameter frame.
 
-        Gathered into a fresh :class:`~prfmodel.utils.ParamsDict` because the pRF submodel expects its own
+        Gathered into a fresh :class:`~prfmodel.utils.TensorFrame` because the pRF submodel expects its own
         unsuffixed parameter names.
 
         """
         prf_model = cast("BasePopulationResponse", self.models["prf_model"])
         shared = set(self.shared_params)
 
-        params_single = ParamsDict(
+        params_single = TensorFrame(
             {
                 param: parameters[param if param in shared else f"{param}_{suffix}"]
                 for param in prf_model.parameter_names
@@ -262,7 +262,7 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     def _combine_responses(
         self,
         stimulus: PRFStimulusTensors,
-        parameters: ParamsDict,
+        parameters: TensorFrame,
         dtype: str,
     ) -> Tensor:
         """Combine the two encoded pRF responses into a single response before the impulse/scaling tail."""
@@ -271,8 +271,8 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     def call(
         self,
         stimulus: PRFStimulusTensors,
-        parameters: ParamsDict,
-        regressors: ParamsDict | None = None,
+        parameters: TensorFrame,
+        regressors: TensorFrame | None = None,
     ) -> Tensor:
         """
         Predict the combined model response to a stimulus.
@@ -349,7 +349,7 @@ class CenterSurroundPRFModel(_BaseDualPRFModel):
     def _combine_responses(
         self,
         stimulus: PRFStimulusTensors,
-        parameters: ParamsDict,
+        parameters: TensorFrame,
         dtype: str,
     ) -> Tensor:
         amplitude_center = parameters[["amplitude_center"]]
@@ -430,7 +430,7 @@ class DivNormPRFModel(_BaseDualPRFModel):
     def _combine_responses(
         self,
         stimulus: PRFStimulusTensors,
-        parameters: ParamsDict,
+        parameters: TensorFrame,
         dtype: str,
     ) -> Tensor:
         a = parameters[["amplitude_activation"]]
@@ -529,8 +529,8 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     def call(
         self,
         stimulus: PRFStimulusTensors,
-        parameters: ParamsDict,
-        regressors: ParamsDict | None = None,
+        parameters: TensorFrame,
+        regressors: TensorFrame | None = None,
     ) -> Tensor:
         """
         Predict the delayed gain normalization model response.
@@ -728,12 +728,11 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
         return ops.power(ops.maximum(response, self.min_response), exponent)
 
     @doc
-    def __call__(
+    def call(
         self,
-        stimulus: PRFStimulus,
-        parameters: pd.DataFrame,
-        regressors: pd.DataFrame | None = None,
-        dtype: str | None = None,
+        stimulus: PRFStimulusTensors,
+        parameters: TensorFrame,
+        regressors: TensorFrame | None = None,
     ) -> Tensor:
         """
         Predict the compressive spatiotemporal model response to a stimulus.
@@ -754,9 +753,7 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
         %(raises_missing_parameters)s
 
         """
-        self._check_parameters(parameters)
-        dtype = get_dtype(dtype)
-        _validate_regressors_argument(self.models["regressors_model"], regressors)
+        dtype = parameters.dtype
 
         # Spatial stage: pRF response encoded with the stimulus design
         prf_model = cast("BasePopulationResponse", self.models["prf_model"])
@@ -772,14 +769,14 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
         response_transient = convolve_prf_impulse_response(response, transient_model(parameters, dtype), dtype=dtype)
 
         # Nonlinear stage
-        n = convert_parameters_to_tensor(parameters[["n"]], dtype=dtype)
+        n = parameters[["n"]]
         sustained = self._rectify_and_compress(response_sustained, n)
         transient_on = self._rectify_and_compress(response_transient, n)
         transient_off = self._rectify_and_compress(-response_transient, n)
 
         # Weighted combination of the sustained and transient channels, each convolved with the impulse response
-        amplitude_sustained = convert_parameters_to_tensor(parameters[["amplitude_sustained"]], dtype=dtype)
-        amplitude_transient = convert_parameters_to_tensor(parameters[["amplitude_transient"]], dtype=dtype)
+        amplitude_sustained = parameters[["amplitude_sustained"]]
+        amplitude_transient = parameters[["amplitude_transient"]]
 
         sustained = amplitude_sustained * sustained
         transient = amplitude_transient * (transient_on + transient_off)

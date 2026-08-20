@@ -3,7 +3,7 @@
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from .base import BaseRegressors
 
 
@@ -57,7 +57,7 @@ class AdditiveRegressors(BaseRegressors):
         return [f"beta_{name}" for name in self.names]
 
     @doc
-    def call(self, regressors: ParamsDict, parameters: ParamsDict) -> Tensor:
+    def call(self, regressors: TensorFrame, parameters: TensorFrame) -> Tensor:
         """
         Compute the additive regressor prediction.
 

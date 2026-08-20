@@ -18,7 +18,7 @@ from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.models.base import S
 from prfmodel.models.base import T
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 
 
 class CompressiveEncoder(BaseStimulusEncoder[S, T]):
@@ -86,7 +86,7 @@ class CompressiveEncoder(BaseStimulusEncoder[S, T]):
         return ["gain", "n"]
 
     @doc
-    def call(self, stimulus: T, response: Tensor, parameters: ParamsDict) -> Tensor:
+    def call(self, stimulus: T, response: Tensor, parameters: TensorFrame) -> Tensor:
         """Compress and encode a model response with a stimulus.
 
         Encodes the model response, then compresses and amplifies the encoded response.

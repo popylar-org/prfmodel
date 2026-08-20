@@ -3,7 +3,7 @@
 import pandas as pd
 from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from .base import BaseRegressors
 
 
@@ -84,13 +84,13 @@ class RegressorsList(BaseRegressors):
             child._check_design(regressors)  # noqa: SLF001 (private member access on a sibling of the same base)
 
     @doc
-    def call(self, regressors: ParamsDict, parameters: ParamsDict) -> Tensor:
+    def call(self, regressors: TensorFrame, parameters: TensorFrame) -> Tensor:
         """
         Compute the sum of predictions from all child regressor models.
 
         Parameters
         ----------
-        regressors : ParamsDict
+        regressors : TensorFrame
             A single design whose columns cover every child's required regressor names. It is passed to each
             child, which slices the columns it needs by name; extra columns are ignored.
         %(parameters_tensors)s

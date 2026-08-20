@@ -7,9 +7,9 @@ from keras import ops
 from prfmodel.fitters.adapter import Adapter
 from prfmodel.fitters.adapter import ParameterConstraint
 from prfmodel.fitters.adapter import ParameterTransform
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 
-parameterize_params_wrapper = pytest.mark.parametrize("params_wrapper", [pd.DataFrame, ParamsDict])
+parameterize_params_wrapper = pytest.mark.parametrize("params_wrapper", [pd.DataFrame, TensorFrame])
 
 
 @pytest.fixture

@@ -295,12 +295,12 @@ def normalize_response(response: Tensor, norm: str | None = "sum") -> Tensor:
     return response / response_norm
 
 
-class ParamsDict:
+class TensorFrame:
     """
     A dictionary-like object that supports dataframe-style column selection but returns Keras tensors.
 
     This is the tensor-holding counterpart of the :class:`pandas.DataFrame` that models accept in their
-    :meth:`call` implementation. Use :func:`prfmodel.utils.as_params` to build one from a data frame.
+    :meth:`call` implementation. Use :func:`prfmodel.utils.as_tensor_frame` to build one from a data frame.
 
     Parameters
     ----------
@@ -386,9 +386,9 @@ class ParamsDict:
         """
         return self._dtype
 
-    def copy(self) -> "ParamsDict":
+    def copy(self) -> "TensorFrame":
         """Create a copy of the object."""
-        return ParamsDict(self.to_dict(), dtype=self._dtype)
+        return TensorFrame(self.to_dict(), dtype=self._dtype)
 
     def to_dict(self) -> dict:
         """Return the parameter tensors as a plain dictionary keyed by parameter name."""
@@ -400,7 +400,7 @@ class ParamsDict:
 
 
 @doc
-def as_params(parameters: "pd.DataFrame | ParamsDict", dtype: str) -> ParamsDict:
+def as_tensor_frame(parameters: "pd.DataFrame | TensorFrame", dtype: str) -> TensorFrame:
     """Convert user-supplied parameters into the tensor-holding representation.
 
     This converts the parameters from a model's user-facing
@@ -408,8 +408,8 @@ def as_params(parameters: "pd.DataFrame | ParamsDict", dtype: str) -> ParamsDict
 
     Parameters
     ----------
-    parameters : pandas.DataFrame or ParamsDict
-        Parameters to convert. A :class:`~prfmodel.utils.ParamsDict` is returned unchanged when it already
+    parameters : pandas.DataFrame or TensorFrame
+        Parameters to convert. A :class:`~prfmodel.utils.TensorFrame` is returned unchanged when it already
         carries `dtype`, and rebuilt with `dtype` otherwise.
     dtype : str
         The dtype that parameter tensors are converted to.
@@ -421,18 +421,18 @@ def as_params(parameters: "pd.DataFrame | ParamsDict", dtype: str) -> ParamsDict
     Examples
     --------
     >>> import pandas as pd
-    >>> from prfmodel.utils import as_params
-    >>> params = as_params(pd.DataFrame({"sigma": [1.0, 1.5]}), dtype="float32")
+    >>> from prfmodel.utils import as_tensor_frame
+    >>> params = as_tensor_frame(pd.DataFrame({"sigma": [1.0, 1.5]}), dtype="float32")
     >>> print(params.shape)
     (2, 1)
-    >>> as_params(params, dtype="float32") is params
+    >>> as_tensor_frame(params, dtype="float32") is params
     True
 
     """
-    if isinstance(parameters, ParamsDict):
+    if isinstance(parameters, TensorFrame):
         if parameters.dtype == dtype:
             return parameters
 
-        return ParamsDict(parameters.to_dict(), dtype=dtype)
+        return TensorFrame(parameters.to_dict(), dtype=dtype)
 
-    return ParamsDict(parameters.to_dict(orient="list"), dtype=dtype)
+    return TensorFrame(parameters.to_dict(orient="list"), dtype=dtype)

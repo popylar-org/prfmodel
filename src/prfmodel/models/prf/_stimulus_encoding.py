@@ -7,7 +7,7 @@ from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.stimuli import PRFStimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import get_dtype
 
 
@@ -107,7 +107,7 @@ class PRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus, PRFStimulusTensors]):
         return []
 
     @doc
-    def call(self, stimulus: PRFStimulusTensors, response: Tensor, parameters: ParamsDict) -> Tensor:
+    def call(self, stimulus: PRFStimulusTensors, response: Tensor, parameters: TensorFrame) -> Tensor:
         """Encode a population receptive field model response with a stimulus design.
 
         Parameters

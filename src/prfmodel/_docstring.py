@@ -89,7 +89,7 @@ _PARAMS: dict[str, str] = {
         "    for different units."
     ),
     "parameters_tensors": (
-        "parameters : ParamsDict\n"
+        "parameters : TensorFrame\n"
         "    Model parameters as tensors, supporting the same column selection as a :class:`pandas.DataFrame`."
     ),
     "predicted_response_2d": (
@@ -102,7 +102,7 @@ _PARAMS: dict[str, str] = {
         "    :attr:`names`; extra columns are ignored."
     ),
     "regressors_tensors": (
-        "regressors : ParamsDict or None, optional"
+        "regressors : TensorFrame or None, optional"
         "    Regressor design columns as tensors, supporting the same column selection as a :class:`pandas.DataFrame`."
     ),
     "regressors_canonical": (

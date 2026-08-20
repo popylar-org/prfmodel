@@ -32,8 +32,8 @@ from prfmodel.scaling import BaselineAmplitude
 from prfmodel.stimuli import CFStimulus
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.utils import ModelProtocol
-from prfmodel.utils import ParamsDict
-from prfmodel.utils import as_params
+from prfmodel.utils import TensorFrame
+from prfmodel.utils import as_tensor_frame
 from tests.conftest import PRFStimulusSetup
 
 DTYPE = "float32"
@@ -139,7 +139,7 @@ class TestFacadeAndKernelAgree(PRFStimulusSetup):
             params["shift"] = 0.0
 
         facade = model(stimulus, params, dtype=DTYPE)
-        kernel = model.call(stimulus.to_tensors(DTYPE), as_params(params, DTYPE))
+        kernel = model.call(stimulus.to_tensors(DTYPE), as_tensor_frame(params, DTYPE))
 
         np.testing.assert_allclose(keras.ops.convert_to_numpy(facade), keras.ops.convert_to_numpy(kernel))
 
@@ -149,7 +149,7 @@ class TestFacadeAndKernelAgree(PRFStimulusSetup):
         params = _prf_params()[["mu_x", "mu_y", "sigma"]]
 
         facade = model(stimulus, params, dtype=DTYPE)
-        kernel = model.call(stimulus.to_tensors(DTYPE), as_params(params, DTYPE))
+        kernel = model.call(stimulus.to_tensors(DTYPE), as_tensor_frame(params, DTYPE))
 
         np.testing.assert_allclose(keras.ops.convert_to_numpy(facade), keras.ops.convert_to_numpy(kernel))
 
@@ -160,7 +160,7 @@ class TestFacadeAndKernelAgree(PRFStimulusSetup):
         response = Gaussian2DPRFResponse()(stimulus, params[["mu_x", "mu_y", "sigma"]], dtype=DTYPE)
 
         facade = encoder(stimulus, response, params, dtype=DTYPE)
-        kernel = encoder.call(stimulus.to_tensors(DTYPE), response, as_params(params, DTYPE))
+        kernel = encoder.call(stimulus.to_tensors(DTYPE), response, as_tensor_frame(params, DTYPE))
 
         np.testing.assert_allclose(keras.ops.convert_to_numpy(facade), keras.ops.convert_to_numpy(kernel))
 
@@ -170,7 +170,7 @@ class TestFacadeAndKernelAgree(PRFStimulusSetup):
         params = _prf_params()
 
         facade = impulse_model(params, dtype=DTYPE)
-        kernel = impulse_model.call(as_params(params, DTYPE))
+        kernel = impulse_model.call(as_tensor_frame(params, DTYPE))
 
         np.testing.assert_allclose(keras.ops.convert_to_numpy(facade), keras.ops.convert_to_numpy(kernel))
 
@@ -181,7 +181,7 @@ class TestFacadeAndKernelAgree(PRFStimulusSetup):
         inputs = np.ones((3, 10))
 
         facade = scaling_model(inputs, params, dtype=DTYPE)
-        kernel = scaling_model.call(keras.ops.convert_to_tensor(inputs, dtype=DTYPE), as_params(params, DTYPE))
+        kernel = scaling_model.call(keras.ops.convert_to_tensor(inputs, dtype=DTYPE), as_tensor_frame(params, DTYPE))
 
         np.testing.assert_allclose(keras.ops.convert_to_numpy(facade), keras.ops.convert_to_numpy(kernel))
 
@@ -202,7 +202,7 @@ class TestFacadeAndKernelAgree(PRFStimulusSetup):
         params = _params_for(model)
 
         facade = model(stimulus, params, dtype=DTYPE)
-        kernel = model.call(stimulus.to_tensors(DTYPE), as_params(params, DTYPE))
+        kernel = model.call(stimulus.to_tensors(DTYPE), as_tensor_frame(params, DTYPE))
 
         np.testing.assert_allclose(keras.ops.convert_to_numpy(facade), keras.ops.convert_to_numpy(kernel))
 
@@ -220,7 +220,7 @@ class TestFacadeAndKernelAgree(PRFStimulusSetup):
         )
 
         facade = model(stimulus, params, dtype=DTYPE)
-        kernel = model.call(stimulus.to_tensors(DTYPE), as_params(params, DTYPE))
+        kernel = model.call(stimulus.to_tensors(DTYPE), as_tensor_frame(params, DTYPE))
 
         np.testing.assert_allclose(keras.ops.convert_to_numpy(facade), keras.ops.convert_to_numpy(kernel))
 
@@ -279,14 +279,14 @@ class TestValidationLivesOnTheFacade(PRFStimulusSetup):
 class TestKernelTakesTensorsOnly(PRFStimulusSetup):
     """Test that the tensor side is reachable, and stays reachable, without pandas or numpy."""
 
-    def test_kernel_runs_from_a_hand_built_params_dict(self, stimulus: PRFStimulus):
-        """Test that a ParamsDict assembled from tensors is enough to drive a model.
+    def test_kernel_runs_from_a_hand_built_tensor_frame(self, stimulus: PRFStimulus):
+        """Test that a TensorFrame assembled from tensors is enough to drive a model.
 
         This is exactly what the fitters do: they hold parameters as backend variables and never
         materialize a data frame.
 
         """
-        params = ParamsDict(
+        params = TensorFrame(
             {name: keras.ops.convert_to_tensor(col.to_numpy()) for name, col in _prf_params().items()},
             dtype=DTYPE,
         )
@@ -315,7 +315,7 @@ class TestKernelTakesTensorsOnly(PRFStimulusSetup):
     def test_response_model_kernel_never_touches_the_stimulus_object(self, stimulus: PRFStimulus):
         """Test that `call` reads only the tensor bundle, by passing it one built independently."""
         tensors = stimulus.to_tensors(DTYPE)
-        params = as_params(_prf_params()[["mu_x", "mu_y", "sigma"]], DTYPE)
+        params = as_tensor_frame(_prf_params()[["mu_x", "mu_y", "sigma"]], DTYPE)
 
         prediction = Gaussian2DPRFResponse().call(tensors, params)
 

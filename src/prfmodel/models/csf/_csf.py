@@ -14,7 +14,7 @@ from prfmodel.stimuli import CSFStimulus
 from prfmodel.stimuli import CSFStimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import get_dtype
 from .canonical import CanonicalCSFModel
 
@@ -222,7 +222,7 @@ class CSFResponse(BasePopulationResponse[CSFStimulus, CSFStimulusTensors]):
         """Names of parameters used by the model: ``cs_peak``, ``sf_peak``, ``width_r``, ``slope_crf``."""
         return ["cs_peak", "sf_peak", "width_r", "slope_crf"]
 
-    def call(self, stimulus: CSFStimulusTensors, parameters: ParamsDict) -> Tensor:
+    def call(self, stimulus: CSFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
         Predict the model response for a CSF stimulus.
 

@@ -16,8 +16,8 @@ from prfmodel.fitters.losses import CorrelationLoss
 from prfmodel.models.base import BaseCanonical
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
-from prfmodel.utils import as_params
+from prfmodel.utils import TensorFrame
+from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
 
 
@@ -99,9 +99,9 @@ class GridFitter:
     >>> # Create dummy data for a single unit
     >>> data = np.zeros((1, stimulus.design.shape[0]))
     >>> # Define possible parameters in grid
-    >>> params_dict = {"mu_y": [0.0], "mu_x": [0.0], "sigma": [1.0]}
+    >>> param_values = {"mu_y": [0.0], "mu_x": [0.0], "sigma": [1.0]}
     >>> # Fit model parameters
-    >>> history, params_grid = fitter.fit(data, params_dict)
+    >>> history, params_grid = fitter.fit(data, param_values)
     >>> print(list(params_grid.columns))
     ['mu_y', 'mu_x', 'sigma']
     >>> print(params_grid.shape)
@@ -206,10 +206,10 @@ class GridFitter:
 
     def _make_evaluate_fun(self, data: Tensor, regressors: pd.DataFrame | None) -> Callable:
         stimulus = self.stimulus.to_tensors(self.dtype)
-        regressor_params = None if regressors is None else as_params(regressors, self.dtype)
+        regressor_params = None if regressors is None else as_tensor_frame(regressors, self.dtype)
 
         def evaluate(param_tensors: dict[str, Tensor]) -> tuple[Tensor, Tensor]:
-            params = ParamsDict(param_tensors, dtype=self.dtype)
+            params = TensorFrame(param_tensors, dtype=self.dtype)
             pred = ops.expand_dims(self.model.call(stimulus, params, regressors=regressor_params), 1)
             losses = self.loss(data, pred)
 

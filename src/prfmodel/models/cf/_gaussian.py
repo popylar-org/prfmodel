@@ -11,7 +11,7 @@ from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
 from prfmodel.stimuli import CFStimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from ._stimulus_encoding import CFStimulusEncoder
 from .canonical import CanonicalCFModel
 
@@ -57,7 +57,7 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus, CFStimulusTensors]):
         return ["center_index", "sigma"]
 
     @doc
-    def call(self, stimulus: CFStimulusTensors, parameters: ParamsDict) -> Tensor:
+    def call(self, stimulus: CFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
         Predict the model response for a stimulus with a distance matrix.
 

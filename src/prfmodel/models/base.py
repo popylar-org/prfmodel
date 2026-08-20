@@ -38,8 +38,8 @@ from prfmodel.stimuli import Stimulus
 from prfmodel.stimuli import StimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import ModelProtocol
-from prfmodel.utils import ParamsDict
-from prfmodel.utils import as_params
+from prfmodel.utils import TensorFrame
+from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
 
 S = TypeVar("S", bound=Stimulus)
@@ -132,11 +132,11 @@ class BasePopulationResponse(ModelProtocol, Generic[S, T]):
         dtype = get_dtype(dtype)
         self._check_parameters(parameters)
 
-        return self.call(cast("T", stimulus.to_tensors(dtype)), as_params(parameters, dtype))
+        return self.call(cast("T", stimulus.to_tensors(dtype)), as_tensor_frame(parameters, dtype))
 
     @doc
     @abstractmethod
-    def call(self, stimulus: T, parameters: ParamsDict) -> Tensor:
+    def call(self, stimulus: T, parameters: TensorFrame) -> Tensor:
         """
         Predict the model response from tensors.
 
@@ -241,12 +241,12 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S, T]):
         return self.call(
             cast("T", stimulus.to_tensors(dtype)),
             ops.convert_to_tensor(response, dtype=dtype),
-            as_params(parameters, dtype),
+            as_tensor_frame(parameters, dtype),
         )
 
     @doc
     @abstractmethod
-    def call(self, stimulus: T, response: Tensor, parameters: ParamsDict) -> Tensor:
+    def call(self, stimulus: T, response: Tensor, parameters: TensorFrame) -> Tensor:
         """Encode a model response with a stimulus, from tensors.
 
         Parameters
@@ -394,13 +394,13 @@ class BaseCanonical(ModelProtocol, Generic[S, T]):
 
         return self.call(
             cast("T", stimulus.to_tensors(dtype)),
-            as_params(parameters, dtype),
-            None if regressors is None else as_params(regressors, dtype),
+            as_tensor_frame(parameters, dtype),
+            None if regressors is None else as_tensor_frame(regressors, dtype),
         )
 
     @doc
     @abstractmethod
-    def call(self, stimulus: T, parameters: ParamsDict, regressors: ParamsDict | None = None) -> Tensor:
+    def call(self, stimulus: T, parameters: TensorFrame, regressors: TensorFrame | None = None) -> Tensor:
         """
         Predict a canonical model response from tensors.
 

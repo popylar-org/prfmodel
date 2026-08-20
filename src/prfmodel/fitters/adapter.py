@@ -13,9 +13,9 @@ import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 
-P = TypeVar("P", pd.DataFrame, ParamsDict)
+P = TypeVar("P", pd.DataFrame, TensorFrame)
 
 
 class ParameterTransform:
@@ -263,7 +263,7 @@ class ParameterConstraint(ParameterTransform):
 
         self.bound_fun = bound_fun
 
-    def _check_bound_name(self, bound: str | float | None, parameters: ParamsDict) -> None:
+    def _check_bound_name(self, bound: str | float | None, parameters: TensorFrame) -> None:
         if isinstance(bound, str) and bound not in parameters.columns:
             msg = f"Parameters must contain the parameterized (dynamic) bound {bound}"
             raise ValueError(msg)
@@ -285,7 +285,7 @@ class ParameterConstraint(ParameterTransform):
             )
             raise ValueError(msg)
 
-    def _transform_lower(self, parameters: ParamsDict) -> ParamsDict:
+    def _transform_lower(self, parameters: TensorFrame) -> TensorFrame:
         self._check_bound_name(self.lower, parameters)
         parameters = parameters.copy()
 
@@ -301,7 +301,7 @@ class ParameterConstraint(ParameterTransform):
 
         return parameters
 
-    def _transform_upper(self, parameters: ParamsDict) -> ParamsDict:
+    def _transform_upper(self, parameters: TensorFrame) -> TensorFrame:
         self._check_bound_name(self.upper, parameters)
         parameters = parameters.copy()
 
@@ -316,7 +316,7 @@ class ParameterConstraint(ParameterTransform):
 
         return parameters
 
-    def _inverse_lower(self, parameters: ParamsDict) -> ParamsDict:
+    def _inverse_lower(self, parameters: TensorFrame) -> TensorFrame:
         self._check_bound_name(self.lower, parameters)
         parameters = parameters.copy()
 
@@ -328,7 +328,7 @@ class ParameterConstraint(ParameterTransform):
 
         return parameters
 
-    def _inverse_upper(self, parameters: ParamsDict) -> ParamsDict:
+    def _inverse_upper(self, parameters: TensorFrame) -> TensorFrame:
         self._check_bound_name(self.upper, parameters)
         parameters = parameters.copy()
 
@@ -365,16 +365,18 @@ class ParameterConstraint(ParameterTransform):
 
         """
         if isinstance(parameters, pd.DataFrame):
-            param_dict = ParamsDict(parameters.to_dict(orient="list"))
+            tensor_frame = TensorFrame(parameters.to_dict(orient="list"))
         else:
-            param_dict = parameters
+            tensor_frame = parameters
 
-        param_dict = self._transform_lower(param_dict) if self.lower is not None else self._transform_upper(param_dict)
+        tensor_frame = (
+            self._transform_lower(tensor_frame) if self.lower is not None else self._transform_upper(tensor_frame)
+        )
 
         if isinstance(parameters, pd.DataFrame):
-            return param_dict.to_dataframe()
+            return tensor_frame.to_dataframe()
 
-        return param_dict
+        return tensor_frame
 
     @doc
     def inverse(self, parameters: P) -> P:
@@ -401,16 +403,18 @@ class ParameterConstraint(ParameterTransform):
 
         """
         if isinstance(parameters, pd.DataFrame):
-            param_dict = ParamsDict(parameters.to_dict(orient="list"))
+            tensor_frame = TensorFrame(parameters.to_dict(orient="list"))
         else:
-            param_dict = parameters
+            tensor_frame = parameters
 
-        param_dict = self._inverse_lower(param_dict) if self.lower is not None else self._inverse_upper(param_dict)
+        tensor_frame = (
+            self._inverse_lower(tensor_frame) if self.lower is not None else self._inverse_upper(tensor_frame)
+        )
 
         if isinstance(parameters, pd.DataFrame):
-            return param_dict.to_dataframe()
+            return tensor_frame.to_dataframe()
 
-        return param_dict
+        return tensor_frame
 
 
 class Adapter:

@@ -21,7 +21,7 @@ how the regressor design matrix is transformed before being weighted (e.g., whet
 impulse response).
 
 The regressor design data is supplied at call time as a :class:`pandas.DataFrame` or
-:class:`~prfmodel.utils.ParamsDict` whose columns include (at least) the regressor names.
+:class:`~prfmodel.utils.TensorFrame` whose columns include (at least) the regressor names.
 Column order is unimportant and extra columns are silently ignored.
 
 """
@@ -31,8 +31,8 @@ import pandas as pd
 from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
 from prfmodel.utils import ModelProtocol
-from prfmodel.utils import ParamsDict
-from prfmodel.utils import as_params
+from prfmodel.utils import TensorFrame
+from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
 
 
@@ -139,13 +139,13 @@ class BaseRegressors(ModelProtocol):
         self._check_parameter_values(parameters)
         self._check_design(regressors)
 
-        return self.call(as_params(regressors, dtype), as_params(parameters, dtype))
+        return self.call(as_tensor_frame(regressors, dtype), as_tensor_frame(parameters, dtype))
 
     def _check_design(self, regressors: pd.DataFrame) -> None:
         """Check that the design carries every regressor column this model needs.
 
         Runs in :meth:`__call__`, where the column names are still available. On the tensor side a
-        :class:`~prfmodel.utils.ParamsDict` selects columns by name too, but a missing one would surface as a
+        :class:`~prfmodel.utils.TensorFrame` selects columns by name too, but a missing one would surface as a
         `KeyError` from inside a trace rather than as a clear message.
 
         Subclasses that declare a `names` attribute get the check for free;
@@ -159,15 +159,15 @@ class BaseRegressors(ModelProtocol):
 
     @doc
     @abstractmethod
-    def call(self, regressors: ParamsDict, parameters: ParamsDict) -> Tensor:
+    def call(self, regressors: TensorFrame, parameters: TensorFrame) -> Tensor:
         """
         Compute the additive regressor contribution from tensors.
 
         Parameters
         ----------
-        regressors : ParamsDict
+        regressors : TensorFrame
             Regressor design columns as tensors, selectable by name.
-        parameters : ParamsDict
+        parameters : TensorFrame
             Model parameters as tensors.
 
         Returns

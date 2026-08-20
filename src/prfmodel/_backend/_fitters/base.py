@@ -9,8 +9,8 @@ from prfmodel._backend import compile_fun
 from prfmodel.stimuli import Stimulus
 from prfmodel.stimuli import StimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
-from prfmodel.utils import as_params
+from prfmodel.utils import TensorFrame
+from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
 
 SGDState: TypeAlias = tuple[list, list, list, list] | None
@@ -54,7 +54,7 @@ class BaseSGDFitter(keras.Model):
 
         """
         stimulus = x.to_tensors(self.dtype)
-        regressor_params = None if regressors is None else as_params(regressors, self.dtype)
+        regressor_params = None if regressors is None else as_tensor_frame(regressors, self.dtype)
 
         def step(state: SGDState) -> tuple[dict, SGDState]:
             return self._update_model_weights(stimulus, y, state, regressor_params)
@@ -71,6 +71,6 @@ class BaseSGDFitter(keras.Model):
         x: StimulusTensors,
         y: Tensor,
         state: SGDState,
-        regressors: ParamsDict | None,
+        regressors: TensorFrame | None,
     ) -> tuple[dict, SGDState]:
         pass

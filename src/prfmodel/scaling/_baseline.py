@@ -4,7 +4,7 @@ from prfmodel._docstring import doc
 from prfmodel.exceptions import ShapeError
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from .base import BaseScaling
 
 
@@ -41,7 +41,7 @@ class Baseline(BaseScaling):
         return ["baseline"]
 
     @doc
-    def call(self, inputs: Tensor, parameters: ParamsDict) -> Tensor:
+    def call(self, inputs: Tensor, parameters: TensorFrame) -> Tensor:
         """
         Predict the model response.
 

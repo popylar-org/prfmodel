@@ -16,7 +16,7 @@ from prfmodel.stimuli import PRFStimulus
 from prfmodel.stimuli import PRFStimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import CanonicalPRFModel
 
@@ -174,7 +174,7 @@ class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTenso
         return ["mu_y", "mu_x", "sigma"]
 
     @doc
-    def call(self, stimulus: PRFStimulusTensors, parameters: ParamsDict) -> Tensor:
+    def call(self, stimulus: PRFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
         Predict the model response for a stimulus with a 2D grid.
 
@@ -225,7 +225,7 @@ class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTenso
         return ["mu", "sigma"]
 
     @doc
-    def call(self, stimulus: PRFStimulusTensors, parameters: ParamsDict) -> Tensor:
+    def call(self, stimulus: PRFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
         Predict the model response for a stimulus with a 1D grid.
 

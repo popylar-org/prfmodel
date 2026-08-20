@@ -16,7 +16,7 @@ from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
 from prfmodel.stimuli import CFStimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from ._stimulus_encoding import CFStimulusEncoder
 
 
@@ -73,8 +73,8 @@ class CanonicalCFModel(BaseCanonical[CFStimulus, CFStimulusTensors]):
     def call(
         self,
         stimulus: CFStimulusTensors,
-        parameters: ParamsDict,
-        regressors: ParamsDict | None = None,
+        parameters: TensorFrame,
+        regressors: TensorFrame | None = None,
     ) -> Tensor:
         """
         Predict a canonical connective field model response to a stimulus.

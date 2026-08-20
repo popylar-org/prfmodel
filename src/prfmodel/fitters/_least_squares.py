@@ -9,7 +9,7 @@ from prfmodel.models.base import BaseCanonical
 from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
-from prfmodel.utils import as_params
+from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
 
 
@@ -215,13 +215,13 @@ class LeastSquaresFitter:
         _validate_regressors_argument(self.model.models.get("regressors_model"), regressors)
 
         stimulus = self.stimulus.to_tensors(self.dtype)
-        regressor_params = None if regressors is None else as_params(regressors, self.dtype)
+        regressor_params = None if regressors is None else as_tensor_frame(regressors, self.dtype)
 
         x_list = []
 
         for name in slope_names:
             parameter_batch[name] = 1.0
-            params = as_params(parameter_batch, self.dtype)
+            params = as_tensor_frame(parameter_batch, self.dtype)
             x_list.append(self.model.call(stimulus, params, regressors=regressor_params))
             parameter_batch[name] = 0.0
 

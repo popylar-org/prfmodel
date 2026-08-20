@@ -3,7 +3,7 @@
 import tensorflow as tf
 from prfmodel.stimuli import StimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from .base import BaseSGDFitter
 from .base import SGDState
 
@@ -28,11 +28,11 @@ class TensorFlowSGDFitter(BaseSGDFitter):
         x: StimulusTensors,
         y: Tensor,
         state: SGDState,
-        regressors: ParamsDict | None,
+        regressors: TensorFrame | None,
     ) -> tuple[dict, SGDState]:
         with tf.GradientTape() as tape:
             # Important to create this inside gradient tape because we transform keras variables
-            params = ParamsDict(
+            params = TensorFrame(
                 {v.name: v.value for v in self.trainable_variables + self.non_trainable_variables},
                 dtype=self.dtype,
             )

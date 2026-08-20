@@ -6,7 +6,7 @@ from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.stimuli import CFStimulus
 from prfmodel.stimuli import CFStimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 
 
 class CFStimulusEncoder(BaseStimulusEncoder[CFStimulus, CFStimulusTensors]):
@@ -24,7 +24,7 @@ class CFStimulusEncoder(BaseStimulusEncoder[CFStimulus, CFStimulusTensors]):
         return []
 
     @doc
-    def call(self, stimulus: CFStimulusTensors, response: Tensor, parameters: ParamsDict) -> Tensor:  # noqa: ARG002 (this encoder has no parameters, but the signature is fixed by the base class)
+    def call(self, stimulus: CFStimulusTensors, response: Tensor, parameters: TensorFrame) -> Tensor:  # noqa: ARG002 (this encoder has no parameters, but the signature is fixed by the base class)
         """Encode a connective field model response with a source response.
 
         Parameters

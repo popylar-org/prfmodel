@@ -18,7 +18,7 @@ from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CSFStimulus
 from prfmodel.stimuli import CSFStimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 
 
 class CanonicalCSFModel(BaseCanonical[CSFStimulus, CSFStimulusTensors]):
@@ -73,8 +73,8 @@ class CanonicalCSFModel(BaseCanonical[CSFStimulus, CSFStimulusTensors]):
     def call(
         self,
         stimulus: CSFStimulusTensors,
-        parameters: ParamsDict,
-        regressors: ParamsDict | None = None,
+        parameters: TensorFrame,
+        regressors: TensorFrame | None = None,
     ) -> Tensor:
         """
         Predict a simple contrast sensitivity function model response to a stimulus.

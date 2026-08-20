@@ -4,7 +4,7 @@ from typing import ClassVar
 from prfmodel._docstring import doc
 from prfmodel.density._gamma import gamma_density
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import normalize_response
 from .base import BaseImpulse
 from .defaults import _fetch_default
@@ -125,7 +125,7 @@ class TwoGammaImpulse(BaseImpulse):
         return ["delay", "dispersion", "undershoot", "u_dispersion", "ratio"]
 
     @doc
-    def call(self, parameters: ParamsDict) -> Tensor:
+    def call(self, parameters: TensorFrame) -> Tensor:
         """
         Predict the impulse response.
 

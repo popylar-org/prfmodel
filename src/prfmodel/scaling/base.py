@@ -23,8 +23,8 @@ from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
 from prfmodel.utils import ModelProtocol
-from prfmodel.utils import ParamsDict
-from prfmodel.utils import as_params
+from prfmodel.utils import TensorFrame
+from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
 
 
@@ -69,11 +69,11 @@ class BaseScaling(ModelProtocol):
         dtype = get_dtype(dtype)
         self._check_parameters(parameters)
 
-        return self.call(ops.convert_to_tensor(inputs, dtype=dtype), as_params(parameters, dtype))
+        return self.call(ops.convert_to_tensor(inputs, dtype=dtype), as_tensor_frame(parameters, dtype))
 
     @doc
     @abstractmethod
-    def call(self, inputs: Tensor, parameters: ParamsDict) -> Tensor:
+    def call(self, inputs: Tensor, parameters: TensorFrame) -> Tensor:
         """
         Make predictions with the scaling model, from tensors.
 

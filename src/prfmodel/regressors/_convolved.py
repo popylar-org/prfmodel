@@ -6,7 +6,7 @@ from prfmodel._docstring import doc
 from prfmodel.impulse._convolve import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from .base import BaseRegressors
 
 
@@ -90,7 +90,7 @@ class ConvolvedRegressors(BaseRegressors):
         return list(dict.fromkeys(beta_names + self.impulse_model.parameter_names))
 
     @doc
-    def call(self, regressors: ParamsDict, parameters: ParamsDict) -> Tensor:
+    def call(self, regressors: TensorFrame, parameters: TensorFrame) -> Tensor:
         """
         Compute the convolved regressor prediction.
 

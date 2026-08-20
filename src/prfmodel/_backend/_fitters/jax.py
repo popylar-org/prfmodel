@@ -5,7 +5,7 @@ import jax.numpy as jnp
 import keras
 from prfmodel.stimuli import StimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from .base import BaseSGDFitter
 from .base import SGDState
 
@@ -27,7 +27,7 @@ class JAXSGDFitter(BaseSGDFitter):
         non_trainable_variables: list,
         x: StimulusTensors,
         y: Tensor,
-        regressors: ParamsDict | None,
+        regressors: TensorFrame | None,
         dtype: str | None,
     ) -> tuple[Tensor, tuple[Tensor, list]]:
         state_mapping: list[tuple[str, Tensor]] = []
@@ -35,7 +35,7 @@ class JAXSGDFitter(BaseSGDFitter):
         state_mapping.extend(zip(self.non_trainable_variables, non_trainable_variables, strict=False))
 
         with keras.StatelessScope(state_mapping) as scope:
-            params = ParamsDict(
+            params = TensorFrame(
                 {
                     key.name: val
                     for key, val in zip(
@@ -70,7 +70,7 @@ class JAXSGDFitter(BaseSGDFitter):
         x: StimulusTensors,
         y: Tensor,
         state: SGDState,
-        regressors: ParamsDict | None,
+        regressors: TensorFrame | None,
     ) -> tuple[dict, SGDState]:
         if state is None:
             msg = "State must not be 'None' when using JAX backend"

@@ -4,7 +4,7 @@ from typing import ClassVar
 from prfmodel._docstring import doc
 from prfmodel.density._gamma import shifted_gamma_density
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import normalize_response
 from .base import BaseImpulse
 
@@ -86,7 +86,7 @@ class ShiftedGammaImpulse(BaseImpulse):
         return ["delay", "dispersion", "shift"]
 
     @doc
-    def call(self, parameters: ParamsDict) -> Tensor:
+    def call(self, parameters: TensorFrame) -> Tensor:
         """
         Predict the impulse response.
 

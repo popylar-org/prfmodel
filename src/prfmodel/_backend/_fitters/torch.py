@@ -3,7 +3,7 @@
 import torch
 from prfmodel.stimuli import StimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from .base import BaseSGDFitter
 from .base import SGDState
 
@@ -27,11 +27,11 @@ class TorchSGDFitter(BaseSGDFitter):
         x: StimulusTensors,
         y: Tensor,
         state: SGDState,
-        regressors: ParamsDict | None,
+        regressors: TensorFrame | None,
     ) -> tuple[dict, SGDState]:
         self.zero_grad()
 
-        params = ParamsDict(
+        params = TensorFrame(
             {v.name: v.value for v in self.trainable_variables + self.non_trainable_variables},
             dtype=self.dtype,
         )

@@ -31,12 +31,12 @@ from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
 from prfmodel.utils import ModelProtocol
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import _get_norm_fun
-from prfmodel.utils import as_params
+from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
 
-P = TypeVar("P", pd.DataFrame, ParamsDict)
+P = TypeVar("P", pd.DataFrame, TensorFrame)
 """Either representation of a parameter table: the user-facing data frame or its tensor-holding counterpart."""
 
 
@@ -238,7 +238,7 @@ class BaseImpulse(ModelProtocol):
         self._check_parameters(parameters)
         self._check_parameter_values(parameters)
 
-        return self.call(as_params(parameters, dtype))
+        return self.call(as_tensor_frame(parameters, dtype))
 
     def _check_parameter_values(self, parameters: pd.DataFrame) -> None:
         """Check that the parameter values lie inside the domain the impulse response is defined on.
@@ -256,7 +256,7 @@ class BaseImpulse(ModelProtocol):
 
     @doc
     @abstractmethod
-    def call(self, parameters: ParamsDict) -> Tensor:
+    def call(self, parameters: TensorFrame) -> Tensor:
         """
         Compute the impulse response from tensors.
 
