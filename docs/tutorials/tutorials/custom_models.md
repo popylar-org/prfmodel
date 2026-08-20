@@ -6,7 +6,7 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.18.1
 kernelspec:
-  display_name: venv (3.12.3.final.0)
+  display_name: prfmodel (3.12.3.final.0)
   language: python
   name: python3
 ---
@@ -94,70 +94,82 @@ help(BasePopulationResponse)
 We can see that `BasePopulationResponse` has two abstract methods that must be overridden when subclassing:
 
 ```
-__abstractmethods__ = frozenset({'__call__', 'parameter_names'}).
+__abstractmethods__ = frozenset({'call', 'parameter_names'}).
 ```
 
 1. The `parameter_names` property, which lists the parameter names the model expects.
-2. The `__call__` method, which computes the pRF response for a given stimulus and parameter set. This method can implement an arbitrary response function, but here we re-use {py:fun}`~prfmodel.models.prf.predict_gaussian_response` from the Gaussian module, which is dimension-agnostic and works for any number of spatial dimensions.
+2. The `call` method, which computes the pRF response for a given stimulus and parameter set. This method can implement an arbitrary response function, but here we re-use {py:fun}`~prfmodel.models.prf.predict_gaussian_response` from the Gaussian module, which is dimension-agnostic and works for any number of spatial dimensions.
 
-We can also see that `BasePopulationResponse` is a generic class with respect to the `stimulus` argument in the `__call__` method.
-This means we need to specify for which stimulus type the class is defined. In our case, this is the {py:class}`~prfmodel.stimuli.PRFStimulus` class
-(for a connective field response model, this would be {py:class}`~prfmodel.stimuli.CFStimulus`).
+Note that we implement `call`, not `__call__`. Model classes have two entry points:
+
+- `__call__` is the user-facing **public facade**. It takes the types users typically work with, e.g., a
+  {py:class}`~prfmodel.stimuli.PRFStimulus` holding NumPy arrays and a {py:class}`pandas.DataFrame` of
+  parameters. It checks that every required parameter is present, resolves the `dtype`, converts everything to
+  backend tensors, and then calls `call`. It is implemented once on the base class, and you should not
+  override it.
+- `call` is the **tensor-only kernel**. It receives a {py:class}`~prfmodel.stimuli.PRFStimulusTensors` (that only holds tensors)
+  and a {py:class}`~prfmodel.utils.TensorFrame` (the parameters as tensors,
+  which you select by column name exactly like a data frame). Because everything arriving here is already a
+  tensor and nothing needs validating, this is the method the fitters wrap in `tf.function`, `torch.compile`, or `jax.jit` to
+  run the optimization in graph mode.
+
+That division has one rule you have to respect when writing `call`: it must be **traceable**. Use
+{py:mod}`keras.ops` only, never NumPy or pandas, and never write an `if` that branches on a tensor *value*.
+While a graph is being built, a tensor holds no value to branch on, so a check like `if ops.all(sigma > 0)`
+raises. Branching on a tensor *shape* is fine because shapes are known while tracing. If you need to reject bad
+parameter values, do it where the values are still concrete, for example by overriding the `_check_parameter_values`
+method of the model class (more on that soon).
+
+We can also see that `BasePopulationResponse` is a generic class with respect to the stimulus.
+This means we need to specify for which stimulus type the class is defined, and which tensor type matches it.
+In our case, these are {py:class}`~prfmodel.stimuli.PRFStimulus` and
+{py:class}`~prfmodel.stimuli.PRFStimulusTensors` (for a connective field response model, these would be
+{py:class}`~prfmodel.stimuli.CFStimulus` and {py:class}`~prfmodel.stimuli.CFStimulusTensors`).
 
 ```{code-cell} ipython3
-import pandas as pd
-from keras import ops
-
 from prfmodel.models.prf import predict_gaussian_response
-from prfmodel.stimuli import PRFStimulus
-from prfmodel.utils import convert_parameters_to_tensor, get_dtype
+from prfmodel.stimuli import PRFStimulus, PRFStimulusTensors
+from prfmodel.utils import TensorFrame
 
-# Define the generic class for the concrete 'PRFStimulus' type
-class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus]):
+# Define the generic class for the concrete 'PRFStimulus' type and its matching tensor type
+class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTensors]):
     # 'parameter_names' is a property so that it becomes "immutable"
     @property
     def parameter_names(self) -> list[str]:
         """Names of parameters used by the model: `mu`, `sigma`."""
         return ["mu", "sigma"]
 
-    def __call__(
+    def call(
             self,
-            # The 'stimulus' argument must be the same type as the concrete type above
-            stimulus: PRFStimulus,
-            parameters: pd.DataFrame,
-            dtype: str | None = None,
+            # The 'stimulus' argument must be the tensor type from the concrete types above
+            stimulus: PRFStimulusTensors,
+            parameters: TensorFrame,
         ):
         """Predict the model response for a stimulus with a 1D grid.
 
         Parameters
         ----------
-        stimulus : PRFStimulus
-            Stimulus object.
-        parameters : pandas.DataFrame
-            Dataframe with columns containing different model parameters and rows containing parameter values
-            for different units.
-        dtype : str, optional
-            The dtype of the prediction result. If `None` (the default), uses the dtype from
-            :func:`prfmodel.utils.get_dtype`.
+        stimulus : PRFStimulusTensors
+            The stimulus arrays as tensors.
+        parameters : TensorFrame
+            Model parameters as tensors, selected by column name like a data frame.
 
         Returns
         -------
         Tensor
-            Model predictions of shape `(num_units, num_coordinates)` and dtype `dtype`.
+            Model predictions of shape `(num_units, num_coordinates)`.
             `num_units` is the number of rows in `parameters` and `num_coordinates` is the size of the
             stimulus grid dimension.
 
         """
-        # Explicit dtypes avoid dtype mismatch errors
-        dtype = get_dtype(dtype)
-        mu = convert_parameters_to_tensor(parameters[["mu"]], dtype=dtype)
-        sigma = convert_parameters_to_tensor(parameters[["sigma"]], dtype=dtype)
-        # Explicit tensor conversion avoids type mismatch errors
-        grid = ops.convert_to_tensor(stimulus.grid, dtype=dtype)
+        # No dtype handling and no tensor conversion here: '__call__' already did both, so 'stimulus.grid'
+        # is a tensor and 'parameters[["mu"]]' returns one.
+        mu = parameters[["mu"]]
+        sigma = parameters[["sigma"]]
         # We can implement the Gaussian response from scratch
         # import math
 
-        # grid = ops.expand_dims(grid, 0)
+        # grid = ops.expand_dims(stimulus.grid, 0)
         # mu = ops.expand_dims(mu, 1)
         # sigma_squared = ops.square(sigma)
 
@@ -171,10 +183,12 @@ class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus]):
         # return ops.exp(-resp) / volume
 
         # Or we can use an existing function to predict a Gaussian response
-        return predict_gaussian_response(grid, mu, sigma)
+        return predict_gaussian_response(stimulus.grid, mu, sigma)
 ```
 
-The `mu` parameter defines the preferred location on the stimulus dimension (here: preferred log numerosity) and `sigma` defines the tuning width. Both `mu` and `sigma` are converted from the `parameters` DataFrame to tensors with shapes `(num_units, 1)`.
+The `mu` parameter defines the preferred location on the stimulus dimension (here: preferred log numerosity) and `sigma` defines the tuning width. Selecting `parameters[["mu"]]` and `parameters[["sigma"]]` gives tensors with shapes `(num_units, 1)`.
+
+Even though we implemented `call`, we still *use* the model by calling it normally — `model(stimulus, parameters)` goes through the facade, which validates the parameters and converts them before reaching our `call`.
 
 `predict_gaussian_response` expects `mu` and `sigma` to have at least two dimensions — the first for the number of units and the second for the number of spatial dimensions. The function then broadcasts these tensors against the stimulus `grid` to compute the Gaussian response for each unit.
 
@@ -203,6 +217,8 @@ The parameters `mu` and `sigma` come from our custom `Gaussian1DPRFResponse`. Th
 Let's simulate predicted neural responses for each unique numerosity while keeping the tuning width fixed to `sigma = 1`.
 
 ```{code-cell} ipython3
+import pandas as pd
+
 num_units = len(unique_numerosities)
 
 params_mu = pd.DataFrame(
