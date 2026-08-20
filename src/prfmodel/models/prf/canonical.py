@@ -4,6 +4,7 @@ This module contains models that combine multiple exchangeable submodels in a wa
 
 """
 
+import warnings
 from abc import abstractmethod
 from typing import ClassVar
 from typing import cast
@@ -11,6 +12,8 @@ import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.impulse import SustainedImpulse
+from prfmodel.impulse import TransientImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseCanonical
@@ -609,3 +612,252 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus]):
             response = response + regressors_model(regressors, parameters, dtype=dtype)
 
         return response
+
+
+class ResolutionMismatchWarning(UserWarning):
+    """Warning for when submodels of a canonical model are sampled on time axes of different resolutions."""
+
+
+class CSTPRFModel(BaseCanonical[PRFStimulus]):
+    r"""
+    Compressive spatiotemporal (CST) population receptive field (pRF) model.
+
+    Combines a single pRF response model with three temporal channels that share one spatial receptive field:
+    a sustained channel, an on-transient channel, and an off-transient channel. Each channel response is
+    rectified and compressed, the channels are combined with separate weights, and the result is convolved with
+    an impulse response.
+
+    The compression and weighting parameters (``n``, ``beta_sustained``, ``beta_transient``) are owned by this
+    class. Every other parameter is contributed by a submodel and changes when that submodel is replaced:
+
+    - ``sustained_model`` and ``transient_model`` supply the channel timing parameter (``time_to_peak`` for the
+      default :class:`~prfmodel.impulse.SustainedImpulse` and :class:`~prfmodel.impulse.TransientImpulse`).
+    - ``prf_model`` supplies the spatial parameters (``mu_y``, ``mu_x`` and ``sigma`` for
+      :class:`~prfmodel.models.prf.Gaussian2DPRFResponse`).
+    - ``impulse_model`` and ``scaling_model`` supply the rest (``weight_deriv`` and ``baseline`` for the
+      defaults; the other impulse parameters are covered by its default parameter set).
+
+    Parameters
+    ----------
+    %(model_prf)s
+    %(model_encoding_prf)s
+    sustained_model : BaseImpulse or type, default=SustainedImpulse
+        Temporal channel model producing the sustained response h₁.
+    transient_model : BaseImpulse or type, default=TransientImpulse
+        Temporal channel model producing the on-transient response h₂. The off-transient h₃ is its negation.
+    %(model_impulse)s
+    scaling_model : BaseScaling or type or None, default=Baseline
+        Scaling model applied after the channels are combined. The channel weights already provide amplitudes,
+        so the default adds only an offset.
+    %(model_regressors)s
+    min_response : float, default=1e-10
+        Lower bound applied by the rectifier before compression. A small positive value rather than zero keeps
+        gradients of the power law finite when ``n < 1``.
+
+    Notes
+    -----
+    The compressive spatiotemporal model follows [1]_:
+
+      1. **Spatial** — the pRF response is encoded with the stimulus design, giving the linear response that the
+         reference writes as ``I(X, Y, t) · RF(X, Y)``.
+      2. **Temporal** — that response is convolved with each channel: ``r_i(t) = h_i(t) * [I . RF]`` for
+         ``i = 1, 2, 3``, where ``h_3 = -h_2``.
+      3. **Nonlinear Compression** — ``pᵢ(t) = [ReLU(rᵢ(t))]ⁿ`` with ``0.1 ≤ n ≤ 1``.
+      4. **Output** — each weighted channel group is convolved with the impulse response HRF and summed:
+         ``β_sus * (p₁(t) * HRF) + β_tran * ([p₂(t) + p₃(t)] * HRF)``.
+
+    ``time_to_peak`` is shared by both channel models, so it appears once in :attr:`parameter_names`, matching
+    the reference where the temporal and compression parameters are identical across channels.
+
+    References
+    ----------
+    .. [1] Kim, I., Kupers, E. R., Lerma-Usabiaga, G., & Grill-Spector, K. (2024). Characterizing spatiotemporal
+        population receptive fields in human visual cortex with fMRI. *The Journal of Neuroscience*, 44(2),
+        e0803232023. https://doi.org/10.1523/JNEUROSCI.0803-23.2023
+
+    """
+
+    def __init__(  # noqa: PLR0913 (too many arguments)
+        self,
+        prf_model: BasePopulationResponse,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
+        sustained_model: BaseImpulse | type[BaseImpulse] = SustainedImpulse,
+        transient_model: BaseImpulse | type[BaseImpulse] = TransientImpulse,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
+        scaling_model: BaseScaling | type[BaseScaling] | None = Baseline,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
+        min_response: float = 1e-10,
+    ):
+        if encoding_model is not None and isinstance(encoding_model, type):
+            encoding_model = encoding_model()
+
+        if isinstance(sustained_model, type):
+            sustained_model = sustained_model()
+
+        if isinstance(transient_model, type):
+            transient_model = transient_model()
+
+        if impulse_model is not None and isinstance(impulse_model, type):
+            impulse_model = impulse_model()
+
+        if scaling_model is not None and isinstance(scaling_model, type):
+            scaling_model = scaling_model()
+
+        regressors_model = _normalize_regressors_model(regressors_model)
+
+        _check_channel_models(sustained_model, transient_model)
+        _check_channel_resolution(sustained_model, transient_model, impulse_model)
+
+        self.min_response = min_response
+
+        super().__init__(
+            prf_model=prf_model,
+            encoding_model=encoding_model,
+            sustained_model=sustained_model,
+            transient_model=transient_model,
+            impulse_model=impulse_model,
+            scaling_model=scaling_model,
+            regressors_model=regressors_model,
+        )
+
+    @property
+    def parameter_names(self) -> list[str]:
+        """Names of parameters used by the model (pRF + encoding + channels + CST + impulse + scaling)."""
+        names: list[str] = []
+
+        # The channel models cannot be None (enforced in __init__), unlike the models in the loop below
+        for key, model in self.models.items():
+            if key in ("prf_model", "encoding_model", "sustained_model", "transient_model"):
+                names.extend(model.parameter_names)
+
+        names.extend(["n", "beta_sustained", "beta_transient"])
+
+        for key, model in self.models.items():
+            if key in ("impulse_model", "scaling_model", "regressors_model") and model is not None:
+                names.extend(model.parameter_names)
+
+        return list(dict.fromkeys(names))
+
+    def _rectify_and_compress(self, response: Tensor, exponent: Tensor) -> Tensor:
+        """Rectify a channel response and apply the compressive power law.
+
+        The rectifier floors at :attr:`min_response` rather than zero so that the gradient of the power law
+        stays finite for ``n < 1``, matching :class:`~prfmodel.models.compression.CompressiveEncoder`.
+
+        """
+        return ops.power(ops.maximum(response, self.min_response), exponent)
+
+    @doc
+    def __call__(
+        self,
+        stimulus: PRFStimulus,
+        parameters: pd.DataFrame,
+        regressors: pd.DataFrame | None = None,
+        dtype: str | None = None,
+    ) -> Tensor:
+        """
+        Predict the compressive spatiotemporal model response to a stimulus.
+
+        Parameters
+        ----------
+        %(stimulus_prf)s
+        %(parameters)s
+        %(regressors_canonical)s
+        %(dtype)s
+
+        Returns
+        -------
+        %(predicted_response_2d)s
+
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
+        """
+        self._check_parameters(parameters)
+        dtype = get_dtype(dtype)
+        _validate_regressors_argument(self.models["regressors_model"], regressors)
+
+        # Spatial stage: pRF response encoded with the stimulus design
+        prf_model = cast("BasePopulationResponse", self.models["prf_model"])
+        response = prf_model(stimulus, parameters, dtype=dtype)
+        encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
+        response = encoding_model(stimulus, response, parameters, dtype=dtype)
+
+        # Temporal stage: one convolution per channel. The off-transient is the negated on-transient.
+        sustained_model = cast("BaseImpulse", self.models["sustained_model"])
+        transient_model = cast("BaseImpulse", self.models["transient_model"])
+
+        response_sustained = convolve_prf_impulse_response(response, sustained_model(parameters, dtype), dtype=dtype)
+        response_transient = convolve_prf_impulse_response(response, transient_model(parameters, dtype), dtype=dtype)
+
+        # Nonlinear stage
+        n = convert_parameters_to_tensor(parameters[["n"]], dtype=dtype)
+        sustained = self._rectify_and_compress(response_sustained, n)
+        transient_on = self._rectify_and_compress(response_transient, n)
+        transient_off = self._rectify_and_compress(-response_transient, n)
+
+        # Weighted combination of the sustained and transient channels, each convolved with the impulse response
+        beta_sustained = convert_parameters_to_tensor(parameters[["beta_sustained"]], dtype=dtype)
+        beta_transient = convert_parameters_to_tensor(parameters[["beta_transient"]], dtype=dtype)
+
+        sustained = beta_sustained * sustained
+        transient = beta_transient * (transient_on + transient_off)
+
+        if self.models["impulse_model"] is not None:
+            impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+            impulse_response = impulse_model(parameters, dtype=dtype)
+
+            sustained = convolve_prf_impulse_response(sustained, impulse_response, dtype=dtype)
+            transient = convolve_prf_impulse_response(transient, impulse_response, dtype=dtype)
+
+        response = sustained + transient
+
+        if self.models["scaling_model"] is not None:
+            scaling_model = cast("BaseScaling", self.models["scaling_model"])
+            response = scaling_model(response, parameters, dtype=dtype)
+
+        if self.models["regressors_model"] is not None and regressors is not None:
+            regressors_model = cast("BaseRegressors", self.models["regressors_model"])
+            response = response + regressors_model(regressors, parameters, dtype=dtype)
+
+        return response
+
+
+def _check_channel_models(sustained_model: BaseImpulse | None, transient_model: BaseImpulse | None) -> None:
+    """Raise if a temporal channel model is missing.
+
+    The compressive spatiotemporal model is defined by its three channels, so omitting one has no meaning. A
+    channel is silenced by setting its weight to zero, which keeps the model differentiable in that weight.
+
+    """
+    for name, model in (("sustained_model", sustained_model), ("transient_model", transient_model)):
+        if model is None:
+            msg = f"'{name}' is required; set its channel weight to zero to silence a channel instead"
+            raise ValueError(msg)
+
+
+def _check_channel_resolution(
+    sustained_model: BaseImpulse,
+    transient_model: BaseImpulse,
+    impulse_model: BaseImpulse | None,
+) -> None:
+    """Warn if the channel models and the impulse model are sampled at different resolutions.
+
+    :func:`~prfmodel.impulse.convolve_prf_impulse_response` requires its inputs to be sampled at the same rate
+    but does not check it, so a mismatch yields a silently wrong prediction rather than an error. This is a
+    warning rather than an error because a deliberate mismatch is meaningful: a finer neural time axis than the
+    measurement axis is exactly how the reference computes its channels.
+
+    """
+    resolutions = {"sustained_model": sustained_model.resolution, "transient_model": transient_model.resolution}
+
+    if impulse_model is not None:
+        resolutions["impulse_model"] = impulse_model.resolution
+
+    if len(set(resolutions.values())) > 1:
+        msg = (
+            f"Submodels are sampled at different resolutions ({resolutions}). They are convolved with one "
+            f"another, so predictions are only meaningful when their time axes agree."
+        )
+        warnings.warn(message=msg, category=ResolutionMismatchWarning, stacklevel=3)

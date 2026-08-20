@@ -10,8 +10,10 @@ Finally, it
 contains multiple canonical models that combine a pRF response with a stimulus encoding model, an impulse response
 model from :mod:`~prfmodel.impulse`, and a scaling model from :mod:`~prfmodel.scaling`. Currently, canonical Gaussian
 [1]_ [2]_, Compressive Spatial Summation (CSS) [3]_, Difference of Gaussian (DoG) [4]_, and
-Divisive Normalization (DivNorm; DN) [5]_ models are implemented. These models increase in complexity, with the
-canonical Gaussian being the least and the DN model being the most complex model.
+Divisive Normalization (DivNorm; DN) [5]_, and Compressive Spatiotemporal (CST) [6]_ models are implemented.
+These models increase in complexity, with the canonical Gaussian being the least and the DN model being the most
+complex model. The CST model differs from the others in that it splits the response into a sustained and two
+transient temporal channels; see :class:`Gaussian2DCSTPRFModel` for its sampling limitations.
 
 There are also multiple helper functions that initialize starting parameters from parameter estimates obtained from a
 different model (e.g., :func:`init_css_from_gaussian`).
@@ -36,11 +38,17 @@ References
 .. [5] Aqil, M., Knapen, T., & Dumoulin, S. O. (2021). Divisive normalization unifies disparate response signatures
     throughout the human visual hierarchy. *Proceedings of the National Academy of Sciences*, *118*(46), e2108713118.
     https://doi.org/10.1073/pnas.2108713118
+.. [6] Kim, I., Kupers, E. R., Lerma-Usabiaga, G., & Grill-Spector, K. (2024). Characterizing spatiotemporal
+    population receptive fields in human visual cortex with fMRI. *The Journal of Neuroscience*, *44*(2),
+    e0803232023. https://doi.org/10.1523/JNEUROSCI.0803-23.2023
 
 """
 
 from ._css import Gaussian2DCSSPRFModel
 from ._css import init_css_from_gaussian
+from ._cst import CSTPRFModel
+from ._cst import Gaussian2DCSTPRFModel
+from ._cst import init_cst_from_gaussian
 from ._delayed_norm import DelayedNormGaussian2DPRFModel
 from ._delayed_norm import DelayedNormPRFModel
 from ._delayed_norm import init_delayed_norm_from_gaussian
@@ -58,6 +66,7 @@ from ._stimulus_encoding import PRFStimulusEncoder
 from ._stimulus_encoding import encode_prf_response
 
 __all__ = [
+    "CSTPRFModel",
     "DelayedNormGaussian2DPRFModel",
     "DelayedNormPRFModel",
     "DivNormGaussian2DPRFModel",
@@ -66,11 +75,13 @@ __all__ = [
     "Gaussian1DPRFModel",
     "Gaussian1DPRFResponse",
     "Gaussian2DCSSPRFModel",
+    "Gaussian2DCSTPRFModel",
     "Gaussian2DPRFModel",
     "Gaussian2DPRFResponse",
     "PRFStimulusEncoder",
     "encode_prf_response",
     "init_css_from_gaussian",
+    "init_cst_from_gaussian",
     "init_delayed_norm_from_gaussian",
     "init_div_norm_from_dog_css",
     "init_dog_from_gaussian",
