@@ -69,7 +69,7 @@ require gradients, such as {py:class}`prfmodel.fitters.SGDFitter`, interally onl
 However, because working with tensors is not very user-friendly (e.g., for data wrangling and plotting), users can
 instead call the less restrictive `__call__` method (e.g., to make a model prediction).
 
-Another requirement is that `call` methods must be traceable to enable backend-specific compilation (see TODO).
+Another requirement is that `call` methods must be traceable to enable backend-specific compilation (see [](backends.md)).
 This also requires inputs and outputs to be tensor objects, but also that the control flow inside `call` does not
 depend on the **values** of input arguments (but depending on input shapes is allowed).
 
