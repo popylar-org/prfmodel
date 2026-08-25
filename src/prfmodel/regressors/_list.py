@@ -83,6 +83,20 @@ class RegressorsList(BaseRegressors):
         for child in self.regressors:
             child._check_design(regressors)  # noqa: SLF001 (private member access on a sibling of the same base)
 
+    def _check_parameter_values(self, parameters: pd.DataFrame) -> None:
+        """Forward the domain check to every child.
+
+        A child is reached through its `call` method once it sits in a list, so this is the only place its domain
+        check runs. Without this, a child that owns a submodel of its own -- a
+        :class:`~prfmodel.regressors.ConvolvedRegressors` and its impulse model -- would never have that submodel
+        checked.
+
+        """
+        super()._check_parameter_values(parameters)
+
+        for child in self.regressors:
+            child._check_parameter_values(parameters)  # noqa: SLF001 (sibling of the same base)
+
     @doc
     def call(self, regressors: TensorFrame, parameters: TensorFrame) -> Tensor:
         """

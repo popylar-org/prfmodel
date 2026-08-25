@@ -71,14 +71,18 @@ def _validate_regressors_argument(
 ) -> None:
     """Validate the ``regressors`` argument against a model's configured ``regressors_model``.
 
-    Helper shared by canonical models to ensure that runtime regressor design data is supplied if (and only if) a
-    regressors model is configured.
+    Helper shared by canonical models and fitters to ensure that runtime regressor design data is supplied if (and
+    only if) a regressors model is configured, and that the design it carries covers the columns that model needs.
+
+    The design check runs here rather than only in :meth:`BaseRegressors.__call__` because a composite model and a
+    fitter both reach the regressors model through :meth:`BaseRegressors.call`, where a missing column would
+    surface as a ``KeyError`` from inside a trace instead of as a clear message.
 
     Raises
     ------
     ValueError
-        If ``regressors`` is provided without a configured ``regressors_model``, or if a ``regressors_model`` is
-        configured but ``regressors`` is not provided.
+        If ``regressors`` is provided without a configured ``regressors_model``, if a ``regressors_model`` is
+        configured but ``regressors`` is not provided, or if the design is missing a required column.
 
     """
     if regressors_model is None and regressors is not None:
@@ -87,6 +91,8 @@ def _validate_regressors_argument(
     if regressors_model is not None and regressors is None:
         msg = "'regressors' must be provided when 'regressors_model' is configured on this model"
         raise ValueError(msg)
+    if isinstance(regressors_model, BaseRegressors) and regressors is not None:
+        regressors_model._check_design(regressors)  # noqa: SLF001 (facade check on behalf of the caller)
 
 
 class BaseRegressors(ModelProtocol):
