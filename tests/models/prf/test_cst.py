@@ -37,8 +37,8 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
                 "sigma": [1.0, 1.5, 2.0],
                 "time_to_peak": [4.0, 5.0, 6.0],
                 "n": [0.5, 0.8, 1.0],
-                "beta_sustained": [1.0, 0.5, 2.0],
-                "beta_transient": [0.5, 1.0, 0.0],
+                "amplitude_sustained": [1.0, 0.5, 2.0],
+                "amplitude_transient": [0.5, 1.0, 0.0],
                 "delay": [6.0, 7.0, 5.0],
                 "dispersion": [0.9, 1.0, 0.8],
                 "undershoot": [12.0, 11.0, 13.0],
@@ -57,8 +57,8 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
             "sigma",
             "time_to_peak",
             "n",
-            "beta_sustained",
-            "beta_transient",
+            "amplitude_sustained",
+            "amplitude_transient",
             *DerivativeTwoGammaImpulse().parameter_names,
             *Baseline().parameter_names,
         ]
@@ -82,7 +82,7 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
         params: pd.DataFrame,
     ):
         """Test that both channels are switched off by their weights, leaving the scaling model's baseline."""
-        params = params.assign(beta_sustained=0.0, beta_transient=0.0)
+        params = params.assign(amplitude_sustained=0.0, amplitude_transient=0.0)
 
         resp = np.asarray(prf_model(stimulus, params))
 
@@ -95,8 +95,8 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
         params: pd.DataFrame,
     ):
         """Test that the transient channel contributes to the response rather than being discarded."""
-        resp_with = np.asarray(prf_model(stimulus, params.assign(beta_transient=1.0)))
-        resp_without = np.asarray(prf_model(stimulus, params.assign(beta_transient=0.0)))
+        resp_with = np.asarray(prf_model(stimulus, params.assign(amplitude_transient=1.0)))
+        resp_without = np.asarray(prf_model(stimulus, params.assign(amplitude_transient=0.0)))
 
         assert not np.allclose(resp_with, resp_without)
 
@@ -112,7 +112,7 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
 
         """
         prf_model = Gaussian2DCSTPRFModel(impulse_model=None)
-        params = params.assign(beta_sustained=0.0, beta_transient=1.0, n=1.0, baseline=0.0)
+        params = params.assign(amplitude_sustained=0.0, amplitude_transient=1.0, n=1.0, baseline=0.0)
 
         resp = np.asarray(prf_model(stimulus, params))
 
@@ -127,7 +127,7 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
     ):
         """Test that the rectified and compressed sustained channel never contributes a negative response."""
         prf_model = Gaussian2DCSTPRFModel(impulse_model=None)
-        params = params.assign(beta_sustained=1.0, beta_transient=0.0, baseline=0.0)
+        params = params.assign(amplitude_sustained=1.0, amplitude_transient=0.0, baseline=0.0)
 
         resp = np.asarray(prf_model(stimulus, params))
 
@@ -153,7 +153,7 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
 
         """
         prf_model = Gaussian2DCSTPRFModel(impulse_model=None)
-        params = params.assign(beta_sustained=0.0, beta_transient=1.0, n=1.0, baseline=0.0)
+        params = params.assign(amplitude_sustained=0.0, amplitude_transient=1.0, n=1.0, baseline=0.0)
 
         encoded = PRFStimulusEncoder()(
             stimulus,

@@ -25,9 +25,10 @@ class Gaussian2DCSTPRFModel(CSTPRFModel):
     ----------
     %(model_encoding_prf)s
     sustained_model : BaseImpulse or type, default=SustainedImpulse
-        Temporal channel model producing the sustained response h₁.
+        Temporal channel model producing the sustained response :math:`h_1`.
     transient_model : BaseImpulse or type, default=TransientImpulse
-        Temporal channel model producing the on-transient response h₂. The off-transient h₃ is its negation.
+        Temporal channel model producing the on-transient response :math:`h_2`. The off-transient :math:`h_3`
+        is its negation.
     %(model_impulse)s
     scaling_model : BaseScaling or type or None, default=Baseline
         Scaling model applied after the channels are combined.
@@ -54,7 +55,8 @@ class Gaussian2DCSTPRFModel(CSTPRFModel):
     - **Spatial normalization** — the reference uses an unnormalized 2D Gaussian, while
       :func:`~prfmodel.models.prf.predict_gaussian_response` divides by the Gaussian volume. The difference is a
       constant per unit that is absorbed into the channel weights, so predictions are equivalent up to
-      ``beta_sustained`` and ``beta_transient``, but fitted weights are not directly comparable to reported ones.
+      ``amplitude_sustained`` and ``amplitude_transient``, but fitted amplitudes are not directly comparable to
+      reported ones.
 
     The following columns are expected in the :class:`pandas.DataFrame` passed as the ``parameters`` argument to
     :meth:`__call__`:
@@ -80,22 +82,22 @@ class Gaussian2DCSTPRFModel(CSTPRFModel):
          - s
          - Standard deviation of the isotropic Gaussian, reported as the pRF size.
        * - ``time_to_peak``
-         - h₁, h₂
-         - τ
+         - :math:`h_1`, :math:`h_2`
+         - :math:`\tau`
          - Peak time of the sustained channel (in seconds). Shared by both channels. Bounds in the reference are
            0.04 to 1.0 s, with fitted values of roughly 0.05 to 0.23 s.
        * - ``n``
          - --
-         - n
+         - :math:`n`
          - Compressive exponent, shared by all three channels. Bounds in the reference are 0.1 to 1.
-       * - ``beta_sustained``
+       * - ``amplitude_sustained``
          - --
-         - β_sus
-         - Weight of the sustained channel.
-       * - ``beta_transient``
+         - :math:`\beta_{\text{sus}}`
+         - Amplitude of the sustained channel.
+       * - ``amplitude_transient``
          - --
-         - β_tran
-         - Weight of the summed on- and off-transient channels.
+         - :math:`\beta_{\text{tran}}`
+         - Amplitude of the summed on- and off-transient channels.
        * - ``delay``
          - Impulse
          - --
@@ -145,8 +147,8 @@ class Gaussian2DCSTPRFModel(CSTPRFModel):
     ...     "sigma": [1.0, 1.5],
     ...     "time_to_peak": [4.0, 5.0],
     ...     "n": [0.5, 0.8],
-    ...     "beta_sustained": [1.0, 0.5],
-    ...     "beta_transient": [0.5, 1.0],
+    ...     "amplitude_sustained": [1.0, 0.5],
+    ...     "amplitude_transient": [0.5, 1.0],
     ...     "delay": [6.0, 6.0],
     ...     "dispersion": [0.9, 0.9],
     ...     "undershoot": [12.0, 12.0],
@@ -185,8 +187,8 @@ def init_cst_from_gaussian(
     gaussian_params: pd.DataFrame,
     time_to_peak: float = 0.05,
     n: float = 0.5,
-    beta_sustained: float = 1.0,
-    beta_transient: float = 0.0,
+    amplitude_sustained: float = 1.0,
+    amplitude_transient: float = 0.0,
 ) -> pd.DataFrame:
     """
     Initialize compressive spatiotemporal parameters from fitted Gaussian parameters.
@@ -205,17 +207,17 @@ def init_cst_from_gaussian(
         reference (0.0493 s), which is also its reported V1 estimate.
     n : float, default=0.5
         Compressive exponent, in the middle of the reference bounds of 0.1 to 1.
-    beta_sustained : float, default=1.0
-        Weight of the sustained channel.
-    beta_transient : float, default=0.0
-        Weight of the transient channels. Defaults to zero so that the starting prediction is the sustained
-        channel alone, which is the closest match to the Gaussian model the parameters come from.
+    amplitude_sustained : float, default=1.0
+        Amplitude of the sustained channel.
+    amplitude_transient : float, default=0.0
+        Amplitude of the summed on- and off-transient channels. Defaults to zero so that the starting prediction
+        is the sustained channel alone, which is the closest match to the Gaussian model the parameters come from.
 
     Returns
     -------
     pandas.DataFrame
-        Copy of ``gaussian_params`` with four additional columns: ``time_to_peak``, ``n``, ``beta_sustained``,
-        ``beta_transient``.
+        Copy of ``gaussian_params`` with four additional columns: ``time_to_peak``, ``n``, ``amplitude_sustained``,
+        ``amplitude_transient``.
 
     Notes
     -----
@@ -236,13 +238,13 @@ def init_cst_from_gaussian(
     ... })
     >>> cst_params = init_cst_from_gaussian(gaussian_params)
     >>> print(sorted(cst_params.columns.tolist()))
-    ['baseline', 'beta_sustained', 'beta_transient', 'mu_x', 'mu_y', 'n', 'sigma', 'time_to_peak']
+    ['amplitude_sustained', 'amplitude_transient', 'baseline', 'mu_x', 'mu_y', 'n', 'sigma', 'time_to_peak']
 
     """
     cst_params = gaussian_params.copy()
     cst_params["time_to_peak"] = time_to_peak
     cst_params["n"] = n
-    cst_params["beta_sustained"] = beta_sustained
-    cst_params["beta_transient"] = beta_transient
+    cst_params["amplitude_sustained"] = amplitude_sustained
+    cst_params["amplitude_transient"] = amplitude_transient
 
     return cst_params

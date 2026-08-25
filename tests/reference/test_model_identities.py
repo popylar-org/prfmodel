@@ -131,11 +131,11 @@ class TestReductionToGaussian(PRFStimulusSetup):
     def test_cst_with_only_a_sustained_channel_is_gaussian(self, stimulus: PRFStimulus, reference: np.ndarray):
         """Test that the CST model with a pass-through sustained channel and no transient is a plain Gaussian.
 
-        Three stages are disabled at once. `beta_transient=0` removes both transient channels;
+        Three stages are disabled at once. `amplitude_transient=0` removes both transient channels;
         `n=1` makes the compressive exponent the identity; and a sustained channel whose time axis holds a
         single frame convolves with a unit-sum kernel of length one, which is an identity convolution. What
         remains is receptive field, stimulus encoding, HRF convolution, and an affine output, which is the
-        Gaussian model with `amplitude = beta_sustained`.
+        Gaussian model with `amplitude = amplitude_sustained`.
 
         As with CSS, the identity holds only up to the `min_response` floor that the rectifier substitutes
         for an exactly-zero encoded response, hence the absolute tolerance.
@@ -149,8 +149,8 @@ class TestReductionToGaussian(PRFStimulusSetup):
                 # Irrelevant here: a length-one kernel is a delta whatever its peak time would have been.
                 "time_to_peak": [4.0, 5.0],
                 "n": [1.0, 1.0],
-                "beta_sustained": AMPLITUDE,
-                "beta_transient": [0.0, 0.0],
+                "amplitude_sustained": AMPLITUDE,
+                "amplitude_transient": [0.0, 0.0],
                 **HRF_PARAMS,
                 "baseline": BASELINE,
             },
@@ -168,8 +168,8 @@ class TestReductionToGaussian(PRFStimulusSetup):
 
         `test_cst_with_only_a_sustained_channel_is_gaussian` pins the composition only at `n=1`, where the
         power law is the identity and a wrong exponent would go unnoticed. With a pass-through sustained
-        channel and no transient, CST computes `beta_sustained * maximum(encoded, eps) ** n`, which is exactly
-        what `CompressiveEncoder` computes with `gain = beta_sustained`. Asserting that at `n=0.4` pins the
+        channel and no transient, CST computes `amplitude_sustained * maximum(encoded, eps) ** n`, which is exactly
+        what `CompressiveEncoder` computes with `gain = amplitude_sustained`. Asserting that at `n=0.4` pins the
         rectifier floor, the exponent, and the weight all at once, against a model anchored externally.
 
         """
@@ -178,7 +178,7 @@ class TestReductionToGaussian(PRFStimulusSetup):
 
         css_params = pd.DataFrame({**shared, "gain": AMPLITUDE, "amplitude": [1.0, 1.0]})
         cst_params = pd.DataFrame(
-            {**shared, "time_to_peak": [4.0, 5.0], "beta_sustained": AMPLITUDE, "beta_transient": [0.0, 0.0]},
+            {**shared, "time_to_peak": [4.0, 5.0], "amplitude_sustained": AMPLITUDE, "amplitude_transient": [0.0, 0.0]},
         )
 
         prf_model = Gaussian2DCSTPRFModel(

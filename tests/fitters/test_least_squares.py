@@ -294,8 +294,8 @@ class TestLeastSquaresFitterCST(PRFStimulusSetup):
                 "u_dispersion": [0.9, 0.9, 0.9],
                 "ratio": [0.48, 0.48, 0.48],
                 "weight_deriv": [0.5, 0.5, 0.5],
-                "beta_sustained": [2.0, -1.5, 0.7],
-                "beta_transient": [-0.5, 3.0, 1.4],
+                "amplitude_sustained": [2.0, -1.5, 0.7],
+                "amplitude_transient": [-0.5, 3.0, 1.4],
                 "baseline": [0.3, -0.2, 0.0],
             },
         )
@@ -329,14 +329,14 @@ class TestLeastSquaresFitterCST(PRFStimulusSetup):
 
         observed = cst_model(stimulus, true_params)
 
-        init_params = true_params.assign(beta_sustained=0.0, beta_transient=0.0, baseline=0.0)
+        init_params = true_params.assign(amplitude_sustained=0.0, amplitude_transient=0.0, baseline=0.0)
 
         fitter = LeastSquaresFitter(model=cst_model, stimulus=stimulus)
 
         history, ls_params = fitter.fit(
             observed,
             init_params,
-            slope_name=["beta_sustained", "beta_transient"],
+            slope_name=["amplitude_sustained", "amplitude_transient"],
             intercept_name=intercept_name,
         )
 
@@ -344,7 +344,7 @@ class TestLeastSquaresFitterCST(PRFStimulusSetup):
         assert isinstance(ls_params, pd.DataFrame)
         assert ls_params.shape == true_params.shape
 
-        for name in ("beta_sustained", "beta_transient"):
+        for name in ("amplitude_sustained", "amplitude_transient"):
             np.testing.assert_allclose(
                 ls_params[name].to_numpy(),
                 true_params[name].to_numpy(),

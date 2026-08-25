@@ -628,7 +628,7 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
     rectified and compressed, the channels are combined with separate weights, and the result is convolved with
     an impulse response.
 
-    The compression and weighting parameters (``n``, ``beta_sustained``, ``beta_transient``) are owned by this
+    The compression and weighting parameters (``n``, ``amplitude_sustained``, ``amplitude_transient``) are owned by this
     class. Every other parameter is contributed by a submodel and changes when that submodel is replaced:
 
     - ``sustained_model`` and ``transient_model`` supply the channel timing parameter (``time_to_peak`` for the
@@ -731,7 +731,7 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
             if key in ("prf_model", "encoding_model", "sustained_model", "transient_model"):
                 names.extend(cast("ModelProtocol", model).parameter_names)
 
-        names.extend(["n", "beta_sustained", "beta_transient"])
+        names.extend(["n", "amplitude_sustained", "amplitude_transient"])
 
         for key, model in self.models.items():
             if key in ("impulse_model", "scaling_model", "regressors_model") and model is not None:
@@ -799,11 +799,11 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
         transient_off = self._rectify_and_compress(-response_transient, n)
 
         # Weighted combination of the sustained and transient channels, each convolved with the impulse response
-        beta_sustained = convert_parameters_to_tensor(parameters[["beta_sustained"]], dtype=dtype)
-        beta_transient = convert_parameters_to_tensor(parameters[["beta_transient"]], dtype=dtype)
+        amplitude_sustained = convert_parameters_to_tensor(parameters[["amplitude_sustained"]], dtype=dtype)
+        amplitude_transient = convert_parameters_to_tensor(parameters[["amplitude_transient"]], dtype=dtype)
 
-        sustained = beta_sustained * sustained
-        transient = beta_transient * (transient_on + transient_off)
+        sustained = amplitude_sustained * sustained
+        transient = amplitude_transient * (transient_on + transient_off)
 
         if self.models["impulse_model"] is not None:
             impulse_model = cast("BaseImpulse", self.models["impulse_model"])
