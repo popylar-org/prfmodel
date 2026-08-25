@@ -14,6 +14,7 @@ from prfmodel._backend import compile_fun
 from prfmodel._docstring import doc
 from prfmodel.fitters.losses import CorrelationLoss
 from prfmodel.models.base import BaseCanonical
+from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import TensorFrame
@@ -176,6 +177,9 @@ class GridFitter:
         arrays = [ops.convert_to_numpy(val) for val in parameter_values.values()]
         total_grid_size = int(np.prod([len(x) for x in arrays]))
 
+        _validate_regressors_argument(self.model.models.get("regressors_model"), regressors)
+        self._validate_grid(parameter_names, arrays)
+
         if batch_size is None:
             batch_size = total_grid_size
 
@@ -203,6 +207,24 @@ class GridFitter:
 
         best_params_df = pd.DataFrame(best_params.T, columns=parameter_names)
         return GridHistory({"loss": best_loss}), best_params_df
+
+    def _validate_grid(
+        self,
+        parameter_names: list[str],
+        arrays: list[np.ndarray],
+    ) -> None:
+        # The batches are evaluated through 'call', which must stay traceable and so validates nothing. These
+        # are the checks the public model facade would have run, before the loop. The grid is a
+        # cartesian product and every domain check is elementwise on a single parameter, so checking each axis
+        # once covers every combination the loop will evaluate. Each axis is tiled to a common length rather
+        # than expanded into the product, which keeps this proportional to the longest axis.
+        num_rows = max((len(array) for array in arrays), default=0)
+        grid = pd.DataFrame(
+            {name: np.resize(array, num_rows) for name, array in zip(parameter_names, arrays, strict=True)},
+        )
+
+        self.model._check_parameters(grid)  # noqa: SLF001 (fitter stands in for the model facade)
+        self.model._check_parameter_values(grid)  # noqa: SLF001 (fitter stands in for the model facade)
 
     def _make_evaluate_fun(self, data: Tensor, regressors: pd.DataFrame | None) -> Callable:
         stimulus = self.stimulus.to_tensors(self.dtype)

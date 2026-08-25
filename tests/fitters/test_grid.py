@@ -154,6 +154,117 @@ class TestGridFitter(TestSetup):
         self._check_grid_params(grid_params, params_copy, ["mu_x", "mu_y", "sigma"])
 
 
+class TestGridFitterValidation(TestSetup):
+    """Tests that the grid is validated before the search runs.
+
+    A batch is evaluated through :meth:`~prfmodel.models.base.BaseCanonical.call`, which stays traceable
+    and therefore validates nothing. The checks the public facade would have run are done before the
+    loop instead, so they have to be asserted here rather than relying on the model to raise.
+
+    """
+
+    @pytest.fixture
+    def param_ranges(self):
+        """Parameter ranges."""
+        return _param_ranges()
+
+    @pytest.fixture
+    def observed(self, stimulus: PRFStimulus):
+        """Target data of the right shape.
+
+        The values are irrelevant: every test in this class asserts the search raises before any
+        combination is evaluated.
+
+        """
+        return np.zeros((3, stimulus.design.shape[0]))
+
+    @pytest.mark.parametrize(
+        "delay_range",
+        [
+            # The offending value sits on an axis shorter than the longest one, so it is only reached if
+            # the axis is tiled out rather than truncated, and in either position within that axis.
+            [-1.0, 6.0],
+            [6.0, -1.0],
+            [0.0],
+        ],
+    )
+    def test_out_of_domain_parameter_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        param_ranges: dict[str, np.ndarray],
+        observed: np.ndarray,
+        delay_range: list[float],
+    ):
+        """Test that a grid sweeping a parameter outside the model domain raises rather than scoring it.
+
+        A non-positive `delay` leaves the gamma density undefined. Evaluated through `call` it yields a
+        finite but meaningless value that is free to win the `argmin`, so it has to be rejected up front.
+
+        """
+        fitter = GridFitter(model=model, stimulus=stimulus)
+
+        with pytest.raises(ValueError, match="must be > 0"):
+            fitter.fit(observed, {**param_ranges, "delay": delay_range})
+
+    def test_out_of_domain_value_on_the_longest_axis_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        param_ranges: dict[str, np.ndarray],
+        observed: np.ndarray,
+    ):
+        """Test that the offending value is still found when its axis is the one every other is tiled to."""
+        fitter = GridFitter(model=model, stimulus=stimulus)
+        longest = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, -1.0]
+
+        with pytest.raises(ValueError, match="must be > 0"):
+            fitter.fit(observed, {**param_ranges, "delay": longest})
+
+    def test_missing_parameter_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        param_ranges: dict[str, np.ndarray],
+        observed: np.ndarray,
+    ):
+        """Test that a grid that omits a required parameter names it instead of failing on a lookup."""
+        fitter = GridFitter(model=model, stimulus=stimulus)
+        incomplete = {name: values for name, values in param_ranges.items() if name != "sigma"}
+
+        with pytest.raises(ValueError, match=r"Missing required parameter names.*sigma"):
+            fitter.fit(observed, incomplete)
+
+    def test_regressors_without_a_regressors_model_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        param_ranges: dict[str, np.ndarray],
+        observed: np.ndarray,
+    ):
+        """Test that regressors supplied to a model without a regressors model raise rather than being ignored."""
+        fitter = GridFitter(model=model, stimulus=stimulus)
+        design = pd.DataFrame({"reg": np.zeros(stimulus.design.shape[0])})
+
+        with pytest.raises(ValueError, match="regressors_model"):
+            fitter.fit(observed, param_ranges, regressors=design)
+
+    def test_valid_grid_does_not_raise(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        param_ranges: dict[str, np.ndarray],
+    ):
+        """Test that the validation lets a grid the model is defined on through unchanged."""
+        fitter = GridFitter(model=model, stimulus=stimulus)
+
+        history, grid_params = fitter.fit(model(stimulus, params), param_ranges, batch_size=20)
+
+        assert np.isfinite(history.history["loss"]).all()
+        assert grid_params.shape == params.shape
+
+
 class TestGridFitterCompiledStep(TestSetup):
     """Tests for compiling the evaluation of a parameter batch.
 
