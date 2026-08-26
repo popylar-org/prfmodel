@@ -1,0 +1,9 @@
+prfmodel.models.prf.canonical.ResolutionMismatchWarning
+=======================================================
+
+.. py:exception:: prfmodel.models.prf.canonical.ResolutionMismatchWarning
+
+
+
+   Warning for when submodels of a canonical model are sampled on time axes of different resolutions.
+

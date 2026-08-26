@@ -1,7 +1,7 @@
 prfmodel.exceptions.ShapeMismatchError
 ======================================
 
-.. py:exception:: prfmodel.exceptions.ShapeMismatchError(arg1_name: str, arg1_shape: tuple[int, Ellipsis], arg2_name: str, arg2_shape: tuple[int, Ellipsis])
+.. py:exception:: prfmodel.exceptions.ShapeMismatchError(arg1_name: str, arg1_shape: tuple[int, ...], arg2_name: str, arg2_shape: tuple[int, ...])
 
 
 

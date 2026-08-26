@@ -44,12 +44,16 @@ Classes
 
    DerivativeTwoGammaImpulse </autoapi/prfmodel/impulse/DerivativeTwoGammaImpulse>
    ShiftedGammaImpulse </autoapi/prfmodel/impulse/ShiftedGammaImpulse>
+   SustainedImpulse </autoapi/prfmodel/impulse/SustainedImpulse>
+   TransientImpulse </autoapi/prfmodel/impulse/TransientImpulse>
    TwoGammaImpulse </autoapi/prfmodel/impulse/TwoGammaImpulse>
 
 .. autoapisummary::
 
    prfmodel.impulse.DerivativeTwoGammaImpulse
    prfmodel.impulse.ShiftedGammaImpulse
+   prfmodel.impulse.SustainedImpulse
+   prfmodel.impulse.TransientImpulse
    prfmodel.impulse.TwoGammaImpulse
 
 

@@ -1,0 +1,50 @@
+prfmodel.models.prf.init_cst_from_gaussian
+==========================================
+
+.. py:function:: prfmodel.models.prf.init_cst_from_gaussian(gaussian_params: pandas.DataFrame, time_to_peak: float = 0.05, n: float = 0.5, amplitude_sustained: float = 1.0, amplitude_transient: float = 0.0) -> pandas.DataFrame
+
+   Initialize compressive spatiotemporal parameters from fitted Gaussian parameters.
+
+   Converts the output of a fitted :class:`~prfmodel.models.prf.Gaussian2DPRFModel` into starting parameters for
+   a :class:`Gaussian2DCSTPRFModel`, suitable for subsequent fitting. All existing columns (pRF, impulse,
+   and scaling parameters) pass through unchanged. The four CST-specific parameters are appended with their
+   default values.
+
+   :param gaussian_params: DataFrame of fitted parameters from a :class:`~prfmodel.models.prf.Gaussian2DPRFModel`.
+   :type gaussian_params: pandas.DataFrame
+   :param time_to_peak: Peak time of the sustained channel (in seconds). The default is the grid search default of the
+                        reference (0.0493 s), which is also its reported V1 estimate.
+   :type time_to_peak: float, default=0.05
+   :param n: Compressive exponent, in the middle of the reference bounds of 0.1 to 1.
+   :type n: float, default=0.5
+   :param amplitude_sustained: Amplitude of the sustained channel.
+   :type amplitude_sustained: float, default=1.0
+   :param amplitude_transient: Amplitude of the summed on- and off-transient channels. Defaults to zero so that the starting prediction
+                               is the sustained channel alone, which is the closest match to the Gaussian model the parameters come from.
+   :type amplitude_transient: float, default=0.0
+
+   :returns: Copy of ``gaussian_params`` with four additional columns: ``time_to_peak``, ``n``, ``amplitude_sustained``,
+             ``amplitude_transient``.
+   :rtype: pandas.DataFrame
+
+   .. rubric:: Notes
+
+   ``amplitude`` is not consumed by :class:`Gaussian2DCSTPRFModel`, whose default scaling model is
+   :class:`~prfmodel.scaling.Baseline`; the channel weights take that role instead. Any ``amplitude`` column is
+   passed through untouched and ignored.
+
+   See the warning on :class:`Gaussian2DCSTPRFModel` before interpreting a fitted ``time_to_peak``.
+
+   .. rubric:: Examples
+
+   >>> import pandas as pd
+   >>> gaussian_params = pd.DataFrame({
+   ...     "mu_x": [0.0, 1.0],
+   ...     "mu_y": [0.0, -1.0],
+   ...     "sigma": [1.0, 2.0],
+   ...     "baseline": [0.0, 0.1],
+   ... })
+   >>> cst_params = init_cst_from_gaussian(gaussian_params)
+   >>> print(sorted(cst_params.columns.tolist()))
+   ['amplitude_sustained', 'amplitude_transient', 'baseline', 'mu_x', 'mu_y', 'n', 'sigma', 'time_to_peak']
+

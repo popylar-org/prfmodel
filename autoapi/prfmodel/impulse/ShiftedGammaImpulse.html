@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.impulse.TwoGammaImpulse" href="TwoGammaImpulse.html"><link rel="prev" title="prfmodel.impulse.DerivativeTwoGammaImpulse" href="DerivativeTwoGammaImpulse.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.impulse.SustainedImpulse" href="SustainedImpulse.html"><link rel="prev" title="prfmodel.impulse.DerivativeTwoGammaImpulse" href="DerivativeTwoGammaImpulse.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>prfmodel.impulse.ShiftedGammaImpulse - prfmodel 0.0.1 documentation</title>
@@ -271,6 +271,8 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="DerivativeTwoGammaImpulse.html">DerivativeTwoGammaImpulse</a></li>
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">ShiftedGammaImpulse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="SustainedImpulse.html">SustainedImpulse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="TransientImpulse.html">TransientImpulse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="TwoGammaImpulse.html">TwoGammaImpulse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="convolve_prf_impulse_response.html">convolve_prf_impulse_response</a></li>
 </ul>
@@ -309,12 +311,15 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../models/prf/index.html">prfmodel.models.prf</a><input aria-label="Toggle navigation of prfmodel.models.prf" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../models/prf/canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CSTPRFModel.html">CSTPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/DelayedNormPRFModel.html">DelayedNormPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/DivNormPRFModel.html">DivNormPRFModel</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="../models/prf/CSTPRFModel.html">CSTPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/DelayedNormGaussian2DPRFModel.html">DelayedNormGaussian2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/DelayedNormPRFModel.html">DelayedNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/DivNormGaussian2DPRFModel.html">DivNormGaussian2DPRFModel</a></li>
@@ -323,11 +328,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/Gaussian1DPRFModel.html">Gaussian1DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/Gaussian1DPRFResponse.html">Gaussian1DPRFResponse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/Gaussian2DCSSPRFModel.html">Gaussian2DCSSPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/prf/Gaussian2DCSTPRFModel.html">Gaussian2DCSTPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/Gaussian2DPRFModel.html">Gaussian2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/Gaussian2DPRFResponse.html">Gaussian2DPRFResponse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/encode_prf_response.html">encode_prf_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/init_css_from_gaussian.html">init_css_from_gaussian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/prf/init_cst_from_gaussian.html">init_cst_from_gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/init_delayed_norm_from_gaussian.html">init_delayed_norm_from_gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/init_div_norm_from_dog_css.html">init_div_norm_from_dog_css</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../models/prf/init_dog_from_gaussian.html">init_dog_from_gaussian</a></li>
@@ -592,12 +599,12 @@ corresponding column in <code class="docutils literal notranslate"><span class="
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="TwoGammaImpulse.html">
+          <a class="next-page" href="SustainedImpulse.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">prfmodel.impulse.TwoGammaImpulse</div>
+                <div class="title">prfmodel.impulse.SustainedImpulse</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

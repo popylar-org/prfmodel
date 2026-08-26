@@ -11,12 +11,26 @@ prfmodel.models.prf.canonical
 
 
 
+Exceptions
+----------
+
+.. toctree::
+   :hidden:
+
+   ResolutionMismatchWarning </autoapi/prfmodel/models/prf/canonical/ResolutionMismatchWarning>
+
+.. autoapisummary::
+
+   prfmodel.models.prf.canonical.ResolutionMismatchWarning
+
+
 Classes
 -------
 
 .. toctree::
    :hidden:
 
+   CSTPRFModel </autoapi/prfmodel/models/prf/canonical/CSTPRFModel>
    CanonicalPRFModel </autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel>
    CenterSurroundPRFModel </autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel>
    DelayedNormPRFModel </autoapi/prfmodel/models/prf/canonical/DelayedNormPRFModel>
@@ -24,6 +38,7 @@ Classes
 
 .. autoapisummary::
 
+   prfmodel.models.prf.canonical.CSTPRFModel
    prfmodel.models.prf.canonical.CanonicalPRFModel
    prfmodel.models.prf.canonical.CenterSurroundPRFModel
    prfmodel.models.prf.canonical.DelayedNormPRFModel

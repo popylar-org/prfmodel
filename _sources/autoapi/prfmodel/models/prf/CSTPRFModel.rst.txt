@@ -1,0 +1,100 @@
+prfmodel.models.prf.CSTPRFModel
+===============================
+
+.. py:class:: prfmodel.models.prf.CSTPRFModel(prf_model: prfmodel.models.base.BasePopulationResponse, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, sustained_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] = SustainedImpulse, transient_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] = TransientImpulse, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = Baseline, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None, min_response: float = 1e-10)
+
+
+
+   Compressive spatiotemporal (CST) population receptive field (pRF) model.
+
+   Combines a single pRF response model with three temporal channels that share one spatial receptive field:
+   a sustained channel, an on-transient channel, and an off-transient channel. Each channel response is
+   rectified and compressed, the channels are combined with separate weights, and the result is convolved with
+   an impulse response.
+
+   The compression and weighting parameters (``n``, ``amplitude_sustained``, ``amplitude_transient``) are owned by this
+   class. Every other parameter is contributed by a submodel and changes when that submodel is replaced:
+
+   - ``sustained_model`` and ``transient_model`` supply the channel timing parameter (``time_to_peak`` for the
+     default :class:`~prfmodel.impulse.SustainedImpulse` and :class:`~prfmodel.impulse.TransientImpulse`).
+   - ``prf_model`` supplies the spatial parameters (``mu_y``, ``mu_x`` and ``sigma`` for
+     :class:`~prfmodel.models.prf.Gaussian2DPRFResponse`).
+   - ``impulse_model`` and ``scaling_model`` supply the rest (``weight_deriv`` and ``baseline`` for the
+     defaults; the other impulse parameters are covered by its default parameter set).
+
+   :param prf_model: A population receptive field response model instance.
+   :type prf_model: BasePopulationResponse
+   :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
+                          The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
+   :type encoding_model: BaseStimulusEncoder or type, default=PRFStimulusEncoder
+   :param sustained_model: Temporal channel model producing the sustained response h₁.
+   :type sustained_model: BaseImpulse or type, default=SustainedImpulse
+   :param transient_model: Temporal channel model producing the on-transient response h₂. The off-transient h₃ is its negation.
+   :type transient_model: BaseImpulse or type, default=TransientImpulse
+   :param impulse_model: An impulse model class or instance. Model classes will be instantiated during
+                         initialization. The default creates a :class:`~prfmodel.impulse.DerivativeTwoGammaImpulse`
+                         instance with default values.
+   :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
+   :param scaling_model: Scaling model applied after the channels are combined. The channel weights already provide amplitudes,
+                         so the default adds only an offset.
+   :type scaling_model: BaseScaling or type or None, default=Baseline
+   :param regressors_model: A regressor model instance, a list of regressor model instances, or `None`. When a list is
+                            provided, it is wrapped in a :class:`~prfmodel.regressors.RegressorsList` and its contributions
+                            are summed. The regressor contribution is added after the scaling model.
+   :type regressors_model: BaseRegressors or list of BaseRegressors or RegressorsList or None, default=None, optional
+   :param min_response: Lower bound applied by the rectifier before compression. A small positive value rather than zero keeps
+                        gradients of the power law finite when ``n < 1``.
+   :type min_response: float, default=1e-10
+
+   .. rubric:: Notes
+
+   The compressive spatiotemporal model follows [1]_:
+
+     1. **Spatial** — the pRF response is encoded with the stimulus design, giving the linear response that the
+        reference writes as ``I(X, Y, t) · RF(X, Y)``.
+     2. **Temporal** — that response is convolved with each channel: ``r_i(t) = h_i(t) * [I . RF]`` for
+        ``i = 1, 2, 3``, where ``h_3 = -h_2``.
+     3. **Nonlinear Compression** — ``pᵢ(t) = [ReLU(rᵢ(t))]ⁿ`` with ``0.1 ≤ n ≤ 1``.
+     4. **Output** — each weighted channel group is convolved with the impulse response HRF and summed:
+        ``β_sus * (p₁(t) * HRF) + β_tran * ([p₂(t) + p₃(t)] * HRF)``.
+
+   ``time_to_peak`` is shared by both channel models, so it appears once in :attr:`parameter_names`, matching
+   the reference where the temporal and compression parameters are identical across channels.
+
+   .. rubric:: References
+
+   .. [1] Kim, I., Kupers, E. R., Lerma-Usabiaga, G., & Grill-Spector, K. (2024). Characterizing spatiotemporal
+       population receptive fields in human visual cortex with fMRI. *The Journal of Neuroscience*, 44(2),
+       e0803232023. https://doi.org/10.1523/JNEUROSCI.0803-23.2023
+
+
+   .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, parameters: pandas.DataFrame, regressors: pandas.DataFrame | None = None, dtype: str | None = None) -> prfmodel.typing.Tensor
+
+      Predict the compressive spatiotemporal model response to a stimulus.
+
+      :param stimulus: Population receptive field stimulus object.
+      :type stimulus: PRFStimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param regressors: Regressor design data. Required when the canonical model has a regressors model configured.
+                         A single data frame with shape `(num_frames, num_regressors)` whose columns cover the names
+                         required by every configured regressor model. Extra columns are ignored.
+      :type regressors: pandas.DataFrame, optional
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      Names of parameters used by the model (pRF + encoding + channels + CST + impulse + scaling).
+

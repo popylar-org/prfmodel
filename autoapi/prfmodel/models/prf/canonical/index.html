@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html"><link rel="next" title="prfmodel.models.prf.canonical.CanonicalPRFModel" href="CanonicalPRFModel.html"><link rel="prev" title="prfmodel.models.prf" href="../index.html">
+<link rel="index" title="Index" href="../../../../../genindex.html"><link rel="search" title="Search" href="../../../../../search.html"><link rel="next" title="prfmodel.models.prf.canonical.ResolutionMismatchWarning" href="ResolutionMismatchWarning.html"><link rel="prev" title="prfmodel.models.prf" href="../index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>prfmodel.models.prf.canonical - prfmodel 0.0.1 documentation</title>
@@ -271,6 +271,8 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../../../impulse/DerivativeTwoGammaImpulse.html">DerivativeTwoGammaImpulse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../impulse/ShiftedGammaImpulse.html">ShiftedGammaImpulse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../impulse/SustainedImpulse.html">SustainedImpulse</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../impulse/TransientImpulse.html">TransientImpulse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../impulse/TwoGammaImpulse.html">TwoGammaImpulse</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../impulse/convolve_prf_impulse_response.html">convolve_prf_impulse_response</a></li>
 </ul>
@@ -309,12 +311,15 @@
 </li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html">prfmodel.models.prf</a><input aria-label="Toggle navigation of prfmodel.models.prf" checked="" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l4 current has-children current-page"><a class="current reference internal" href="#">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" checked="" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
+<li class="toctree-l5"><a class="reference internal" href="CSTPRFModel.html">CSTPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="DelayedNormPRFModel.html">DelayedNormPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="DivNormPRFModel.html">DivNormPRFModel</a></li>
 </ul>
 </li>
+<li class="toctree-l4"><a class="reference internal" href="../CSTPRFModel.html">CSTPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../DelayedNormGaussian2DPRFModel.html">DelayedNormGaussian2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../DelayedNormPRFModel.html">DelayedNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../DivNormGaussian2DPRFModel.html">DivNormGaussian2DPRFModel</a></li>
@@ -323,11 +328,13 @@
 <li class="toctree-l4"><a class="reference internal" href="../Gaussian1DPRFModel.html">Gaussian1DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../Gaussian1DPRFResponse.html">Gaussian1DPRFResponse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../Gaussian2DCSSPRFModel.html">Gaussian2DCSSPRFModel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../Gaussian2DCSTPRFModel.html">Gaussian2DCSTPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../Gaussian2DPRFModel.html">Gaussian2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../Gaussian2DPRFResponse.html">Gaussian2DPRFResponse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../encode_prf_response.html">encode_prf_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../init_css_from_gaussian.html">init_css_from_gaussian</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../init_cst_from_gaussian.html">init_cst_from_gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../init_delayed_norm_from_gaussian.html">init_delayed_norm_from_gaussian</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../init_div_norm_from_dog_css.html">init_div_norm_from_dog_css</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../init_dog_from_gaussian.html">init_dog_from_gaussian</a></li>
@@ -428,6 +435,20 @@
 <span id="prfmodel-models-prf-canonical"></span><h1>prfmodel.models.prf.canonical<a class="headerlink" href="#module-prfmodel.models.prf.canonical" title="Link to this heading">¶</a></h1>
 <p>Canonical population receptive field (pRF) models.</p>
 <p>This module contains models that combine multiple exchangeable submodels in a way that is considered “canonical”.</p>
+<section id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="ResolutionMismatchWarning.html#prfmodel.models.prf.canonical.ResolutionMismatchWarning" title="prfmodel.models.prf.canonical.ResolutionMismatchWarning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ResolutionMismatchWarning</span></code></a></p></td>
+<td><p>Warning for when submodels of a canonical model are sampled on time axes of different resolutions.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -435,16 +456,19 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="CanonicalPRFModel.html#prfmodel.models.prf.canonical.CanonicalPRFModel" title="prfmodel.models.prf.canonical.CanonicalPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CanonicalPRFModel</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="CSTPRFModel.html#prfmodel.models.prf.canonical.CSTPRFModel" title="prfmodel.models.prf.canonical.CSTPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CSTPRFModel</span></code></a></p></td>
+<td><p>Compressive spatiotemporal (CST) population receptive field (pRF) model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="CanonicalPRFModel.html#prfmodel.models.prf.canonical.CanonicalPRFModel" title="prfmodel.models.prf.canonical.CanonicalPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CanonicalPRFModel</span></code></a></p></td>
 <td><p>Canonical population receptive field (pRF) model.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel" title="prfmodel.models.prf.canonical.CenterSurroundPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CenterSurroundPRFModel</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel" title="prfmodel.models.prf.canonical.CenterSurroundPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CenterSurroundPRFModel</span></code></a></p></td>
 <td><p>Center-surround population receptive field (pRF) model.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="DelayedNormPRFModel.html#prfmodel.models.prf.canonical.DelayedNormPRFModel" title="prfmodel.models.prf.canonical.DelayedNormPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DelayedNormPRFModel</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="DelayedNormPRFModel.html#prfmodel.models.prf.canonical.DelayedNormPRFModel" title="prfmodel.models.prf.canonical.DelayedNormPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DelayedNormPRFModel</span></code></a></p></td>
 <td><p>Delayed gain normalization population receptive field (pRF) model.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="DivNormPRFModel.html#prfmodel.models.prf.canonical.DivNormPRFModel" title="prfmodel.models.prf.canonical.DivNormPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DivNormPRFModel</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="DivNormPRFModel.html#prfmodel.models.prf.canonical.DivNormPRFModel" title="prfmodel.models.prf.canonical.DivNormPRFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DivNormPRFModel</span></code></a></p></td>
 <td><p>Divisive normalization population receptive field (pRF) model.</p></td>
 </tr>
 </tbody>
@@ -458,12 +482,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="CanonicalPRFModel.html">
+          <a class="next-page" href="ResolutionMismatchWarning.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">prfmodel.models.prf.canonical.CanonicalPRFModel</div>
+                <div class="title">prfmodel.models.prf.canonical.ResolutionMismatchWarning</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -509,6 +533,7 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">prfmodel.models.prf.canonical</a><ul>
+<li><a class="reference internal" href="#exceptions">Exceptions</a></li>
 <li><a class="reference internal" href="#classes">Classes</a></li>
 </ul>
 </li>

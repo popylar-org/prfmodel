@@ -1,0 +1,9 @@
+<map id="inheritance939a8a3aff" name="inheritance939a8a3aff">
+<area shape="rect" id="node1" href="../autoapi/prfmodel/impulse/base/BaseImpulse.html#prfmodel.impulse.base.BaseImpulse" target="_top" title="Abstract base class for impulse models." alt="" coords="168,104,275,129"/>
+<area shape="rect" id="node3" title="Weighted difference of two derivative gamma distributions impulse model." alt="" coords="323,5,541,31"/>
+<area shape="rect" id="node4" title="Shifted gamma distribution impulse model." alt="" coords="347,55,517,80"/>
+<area shape="rect" id="node5" title="Sustained temporal channel impulse model." alt="" coords="363,104,501,129"/>
+<area shape="rect" id="node6" title="Transient temporal channel impulse model." alt="" coords="365,153,499,179"/>
+<area shape="rect" id="node7" title="Weighted difference of two gamma distributions impulse model." alt="" coords="357,203,507,228"/>
+<area shape="rect" id="node2" href="../autoapi/prfmodel/utils/ModelProtocol.html#prfmodel.utils.ModelProtocol" target="_top" title="Protocol for model classes." alt="" coords="5,104,120,129"/>
+</map>

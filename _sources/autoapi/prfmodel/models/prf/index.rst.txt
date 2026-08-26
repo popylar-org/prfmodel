@@ -17,8 +17,10 @@ prfmodel.models.prf
    contains multiple canonical models that combine a pRF response with a stimulus encoding model, an impulse response
    model from :mod:`~prfmodel.impulse`, and a scaling model from :mod:`~prfmodel.scaling`. Currently, canonical Gaussian
    [1]_ [2]_, Compressive Spatial Summation (CSS) [3]_, Difference of Gaussian (DoG) [4]_, and
-   Divisive Normalization (DivNorm; DN) [5]_ models are implemented. These models increase in complexity, with the
-   canonical Gaussian being the least and the DN model being the most complex model.
+   Divisive Normalization (DivNorm; DN) [5]_, and Compressive Spatiotemporal (CST) [6]_ models are implemented.
+   These models increase in complexity, with the canonical Gaussian being the least and the DN model being the most
+   complex model. The CST model differs from the others in that it splits the response into a sustained and two
+   transient temporal channels; see :class:`Gaussian2DCSTPRFModel` for its sampling limitations.
 
    There are also multiple helper functions that initialize starting parameters from parameter estimates obtained from a
    different model (e.g., :func:`init_css_from_gaussian`).
@@ -43,6 +45,9 @@ prfmodel.models.prf
    .. [5] Aqil, M., Knapen, T., & Dumoulin, S. O. (2021). Divisive normalization unifies disparate response signatures
        throughout the human visual hierarchy. *Proceedings of the National Academy of Sciences*, *118*(46), e2108713118.
        https://doi.org/10.1073/pnas.2108713118
+   .. [6] Kim, I., Kupers, E. R., Lerma-Usabiaga, G., & Grill-Spector, K. (2024). Characterizing spatiotemporal
+       population receptive fields in human visual cortex with fMRI. *The Journal of Neuroscience*, *44*(2),
+       e0803232023. https://doi.org/10.1523/JNEUROSCI.0803-23.2023
 
 
 
@@ -65,6 +70,7 @@ Classes
 .. toctree::
    :hidden:
 
+   CSTPRFModel </autoapi/prfmodel/models/prf/CSTPRFModel>
    DelayedNormGaussian2DPRFModel </autoapi/prfmodel/models/prf/DelayedNormGaussian2DPRFModel>
    DelayedNormPRFModel </autoapi/prfmodel/models/prf/DelayedNormPRFModel>
    DivNormGaussian2DPRFModel </autoapi/prfmodel/models/prf/DivNormGaussian2DPRFModel>
@@ -73,12 +79,14 @@ Classes
    Gaussian1DPRFModel </autoapi/prfmodel/models/prf/Gaussian1DPRFModel>
    Gaussian1DPRFResponse </autoapi/prfmodel/models/prf/Gaussian1DPRFResponse>
    Gaussian2DCSSPRFModel </autoapi/prfmodel/models/prf/Gaussian2DCSSPRFModel>
+   Gaussian2DCSTPRFModel </autoapi/prfmodel/models/prf/Gaussian2DCSTPRFModel>
    Gaussian2DPRFModel </autoapi/prfmodel/models/prf/Gaussian2DPRFModel>
    Gaussian2DPRFResponse </autoapi/prfmodel/models/prf/Gaussian2DPRFResponse>
    PRFStimulusEncoder </autoapi/prfmodel/models/prf/PRFStimulusEncoder>
 
 .. autoapisummary::
 
+   prfmodel.models.prf.CSTPRFModel
    prfmodel.models.prf.DelayedNormGaussian2DPRFModel
    prfmodel.models.prf.DelayedNormPRFModel
    prfmodel.models.prf.DivNormGaussian2DPRFModel
@@ -87,6 +95,7 @@ Classes
    prfmodel.models.prf.Gaussian1DPRFModel
    prfmodel.models.prf.Gaussian1DPRFResponse
    prfmodel.models.prf.Gaussian2DCSSPRFModel
+   prfmodel.models.prf.Gaussian2DCSTPRFModel
    prfmodel.models.prf.Gaussian2DPRFModel
    prfmodel.models.prf.Gaussian2DPRFResponse
    prfmodel.models.prf.PRFStimulusEncoder
@@ -100,6 +109,7 @@ Functions
 
    encode_prf_response </autoapi/prfmodel/models/prf/encode_prf_response>
    init_css_from_gaussian </autoapi/prfmodel/models/prf/init_css_from_gaussian>
+   init_cst_from_gaussian </autoapi/prfmodel/models/prf/init_cst_from_gaussian>
    init_delayed_norm_from_gaussian </autoapi/prfmodel/models/prf/init_delayed_norm_from_gaussian>
    init_div_norm_from_dog_css </autoapi/prfmodel/models/prf/init_div_norm_from_dog_css>
    init_dog_from_gaussian </autoapi/prfmodel/models/prf/init_dog_from_gaussian>
@@ -109,6 +119,7 @@ Functions
 
    prfmodel.models.prf.encode_prf_response
    prfmodel.models.prf.init_css_from_gaussian
+   prfmodel.models.prf.init_cst_from_gaussian
    prfmodel.models.prf.init_delayed_norm_from_gaussian
    prfmodel.models.prf.init_div_norm_from_dog_css
    prfmodel.models.prf.init_dog_from_gaussian

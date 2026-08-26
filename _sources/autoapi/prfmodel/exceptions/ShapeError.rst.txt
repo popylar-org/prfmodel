@@ -1,7 +1,7 @@
 prfmodel.exceptions.ShapeError
 ==============================
 
-.. py:exception:: prfmodel.exceptions.ShapeError(arg_name: str, arg_shape: tuple[int, Ellipsis], requirement: str)
+.. py:exception:: prfmodel.exceptions.ShapeError(arg_name: str, arg_shape: tuple[int, ...], requirement: str)
 
 
 
