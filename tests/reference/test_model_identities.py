@@ -18,10 +18,12 @@ import pandas as pd
 import pytest
 from scipy import integrate
 from scipy import spatial
+from prfmodel.impulse import SustainedImpulse
 from prfmodel.models.cf._gaussian import GaussianCFResponse
 from prfmodel.models.prf import DivNormGaussian2DPRFModel
 from prfmodel.models.prf import DoG2DPRFModel
 from prfmodel.models.prf import Gaussian2DCSSPRFModel
+from prfmodel.models.prf import Gaussian2DCSTPRFModel
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.models.prf._gaussian import predict_gaussian_response
 from prfmodel.stimuli import CFStimulus
@@ -125,6 +127,68 @@ class TestReductionToGaussian(PRFStimulusSetup):
         observed = np.asarray(Gaussian2DCSSPRFModel()(stimulus, params, dtype="float64"))
 
         np.testing.assert_allclose(observed, reference, rtol=1e-8, atol=1e-9)
+
+    def test_cst_with_only_a_sustained_channel_is_gaussian(self, stimulus: PRFStimulus, reference: np.ndarray):
+        """Test that the CST model with a pass-through sustained channel and no transient is a plain Gaussian.
+
+        Three stages are disabled at once. `amplitude_transient=0` removes both transient channels;
+        `n=1` makes the compressive exponent the identity; and a sustained channel whose time axis holds a
+        single frame convolves with a unit-sum kernel of length one, which is an identity convolution. What
+        remains is receptive field, stimulus encoding, HRF convolution, and an affine output, which is the
+        Gaussian model with `amplitude = amplitude_sustained`.
+
+        As with CSS, the identity holds only up to the `min_response` floor that the rectifier substitutes
+        for an exactly-zero encoded response, hence the absolute tolerance.
+
+        """
+        params = pd.DataFrame(
+            {
+                "mu_y": MU_Y,
+                "mu_x": MU_X,
+                "sigma": SIGMA,
+                # Irrelevant here: a length-one kernel is a delta whatever its peak time would have been.
+                "time_to_peak": [4.0, 5.0],
+                "n": [1.0, 1.0],
+                "amplitude_sustained": AMPLITUDE,
+                "amplitude_transient": [0.0, 0.0],
+                **HRF_PARAMS,
+                "baseline": BASELINE,
+            },
+        )
+        prf_model = Gaussian2DCSTPRFModel(
+            sustained_model=SustainedImpulse(duration=1.0, resolution=1.0, norm="sum"),
+        )
+
+        observed = np.asarray(prf_model(stimulus, params, dtype="float64"))
+
+        np.testing.assert_allclose(observed, reference, rtol=1e-8, atol=1e-9)
+
+    def test_cst_sustained_channel_matches_css_at_any_exponent(self, stimulus: PRFStimulus):
+        """Test that the CST sustained channel is the CSS compressive stage, for a non-unit exponent.
+
+        `test_cst_with_only_a_sustained_channel_is_gaussian` pins the composition only at `n=1`, where the
+        power law is the identity and a wrong exponent would go unnoticed. With a pass-through sustained
+        channel and no transient, CST computes `amplitude_sustained * maximum(encoded, eps) ** n`, which is exactly
+        what `CompressiveEncoder` computes with `gain = amplitude_sustained`. Asserting that at `n=0.4` pins the
+        rectifier floor, the exponent, and the weight all at once, against a model anchored externally.
+
+        """
+        exponent = [0.4, 0.7]
+        shared = {"mu_y": MU_Y, "mu_x": MU_X, "sigma": SIGMA, "n": exponent, **HRF_PARAMS, "baseline": BASELINE}
+
+        css_params = pd.DataFrame({**shared, "gain": AMPLITUDE, "amplitude": [1.0, 1.0]})
+        cst_params = pd.DataFrame(
+            {**shared, "time_to_peak": [4.0, 5.0], "amplitude_sustained": AMPLITUDE, "amplitude_transient": [0.0, 0.0]},
+        )
+
+        prf_model = Gaussian2DCSTPRFModel(
+            sustained_model=SustainedImpulse(duration=1.0, resolution=1.0, norm="sum"),
+        )
+
+        observed = np.asarray(prf_model(stimulus, cst_params, dtype="float64"))
+        expected = np.asarray(Gaussian2DCSSPRFModel()(stimulus, css_params, dtype="float64"))
+
+        np.testing.assert_allclose(observed, expected, rtol=1e-10)
 
     def test_css_gain_scales_each_unit_by_its_own_value(self, stimulus: PRFStimulus):
         """Test that at `n=1` the CSS model is a Gaussian whose amplitude is scaled by `gain`.

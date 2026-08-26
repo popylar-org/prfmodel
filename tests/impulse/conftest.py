@@ -15,7 +15,7 @@ class TestImpulseSetup(ABC):
     duration = 32.0
     offset = 0.0001
     resolution = 1.0
-    norm = "sum"
+    norm: str | None = "sum"
 
     @pytest.fixture
     @abstractmethod
