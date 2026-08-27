@@ -1,5 +1,7 @@
 """Composite regressor model that aggregates multiple regressor models."""
 
+from collections.abc import Generator
+from typing import cast
 import pandas as pd
 from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
@@ -15,8 +17,8 @@ class RegressorsList(BaseRegressors):
     argument. The parameter names of all child regressor models are aggregated (preserving insertion order, removing
     duplicates).
 
-    At call time, the supplied design is a single :class:`pandas.DataFrame` that is passed to every child, each of
-    which slices the columns it needs by name.
+    At call time, the supplied design is a single :class:`pandas.DataFrame` or :class:`~prfmodel.utils.TensorFrame`
+    that is passed to every child, each of which slices the columns it needs by name.
 
     Parameters
     ----------
@@ -66,36 +68,36 @@ class RegressorsList(BaseRegressors):
                 raise ValueError(msg)
             beta_names.extend(name for name in regressor.parameter_names if name.startswith("beta_"))
 
-        self.regressors = list(regressors)
+        self.models = {f"regressor_{i}": model for i, model in enumerate(regressors)}
+
+    def _iter_models(self) -> Generator["BaseRegressors"]:
+        return cast("Generator[BaseRegressors]", super()._iter_models())
 
     @property
-    def parameter_names(self) -> list[str]:
-        """Names of parameters used by the model, aggregated from all child regressor models."""
+    def regressor_names(self) -> list[str]:
+        """Columns this model reads from the regressor design."""
         names: list[str] = []
 
-        for regressor in self.regressors:
-            names.extend(regressor.parameter_names)
+        for model in self._iter_models():
+            names.extend(model.regressor_names)
 
         return list(dict.fromkeys(names))
 
-    def _check_design(self, regressors: pd.DataFrame) -> None:
-        """Ask every child to check the shared design for the columns it needs."""
-        for child in self.regressors:
-            child._check_design(regressors)  # noqa: SLF001 (private member access on a sibling of the same base)
+    def check_regressor_names(self, regressors: pd.DataFrame) -> None:
+        """Check that required columns are supplied in the regressor design.
 
-    def _check_parameter_values(self, parameters: pd.DataFrame) -> None:
-        """Forward the domain check to every child.
+        Parameters
+        ----------
+        %(regressors)s
 
-        A child is reached through its `call` method once it sits in a list, so this is the only place its domain
-        check runs. Without this, a child that owns a submodel of its own -- a
-        :class:`~prfmodel.regressors.ConvolvedRegressors` and its impulse model -- would never have that submodel
-        checked.
+        Raises
+        ------
+        ValueError
+            When a column is missing in the regressor design.
 
         """
-        super()._check_parameter_values(parameters)
-
-        for child in self.regressors:
-            child._check_parameter_values(parameters)  # noqa: SLF001 (sibling of the same base)
+        for model in self._iter_models():
+            model.check_regressor_names(regressors)
 
     @doc
     def call(self, regressors: TensorFrame, parameters: TensorFrame) -> Tensor:
@@ -104,9 +106,7 @@ class RegressorsList(BaseRegressors):
 
         Parameters
         ----------
-        regressors : TensorFrame
-            A single design whose columns cover every child's required regressor names. It is passed to each
-            child, which slices the columns it needs by name; extra columns are ignored.
+        %(regressors_tensors)s
         %(parameters_tensors)s
 
         Returns
@@ -114,9 +114,10 @@ class RegressorsList(BaseRegressors):
         %(predicted_response_2d)s
 
         """
-        prediction = self.regressors[0].call(regressors, parameters)
+        first, *rest = self._iter_models()
+        prediction = first.call(regressors, parameters)
 
-        for child in self.regressors[1:]:
-            prediction = prediction + child.call(regressors, parameters)
+        for model in rest:
+            prediction = prediction + model.call(regressors, parameters)
 
         return prediction

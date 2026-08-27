@@ -34,7 +34,8 @@ class TwoGammaImpulse(BaseImpulse):
     default_parameters : dict of float or str, optional, default="glover_hrf"
         Dictionary with scalar default parameter values or name of default parameter set. Available default
         parameter sets are `glover_hrf` (default) and `spm_hrf`. See :mod:`~prfmodel.impulse.defaults` for details.
-        Dictionary keys must be valid parameter names. Default values can be overriden in the :meth:`__call__` method.
+        Dictionary keys must be valid parameter names.  Default values are overridden by user-supplied parameters in
+        the :meth:`__call__` method.
 
     See Also
     --------
@@ -120,7 +121,7 @@ class TwoGammaImpulse(BaseImpulse):
     _positive_parameter_names: ClassVar[tuple[str, ...]] = ("delay", "dispersion", "undershoot", "u_dispersion")
 
     @property
-    def _all_parameter_names(self) -> list[str]:
+    def parameter_names(self) -> list[str]:
         """Parameter names are: `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`."""
         return ["delay", "dispersion", "undershoot", "u_dispersion", "ratio"]
 

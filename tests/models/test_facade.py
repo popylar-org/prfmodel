@@ -27,6 +27,7 @@ from prfmodel.models.prf import Gaussian2DCSSPRFModel
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFResponse
 from prfmodel.models.prf import PRFStimulusEncoder
+from prfmodel.regressors import AdditiveRegressors
 from prfmodel.scaling import Baseline
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.stimuli import CFStimulus
@@ -274,6 +275,57 @@ class TestValidationLivesOnTheFacade(PRFStimulusSetup):
 
         with pytest.raises(ValueError, match="regressors_model"):
             model(stimulus, _prf_params(), regressors=pd.DataFrame({"reg": np.ones(50)}))
+
+
+class TestExtraColumnsAreIgnored(PRFStimulusSetup):
+    """Test the promise that a frame may carry columns no model reads.
+
+    Stated in the :mod:`prfmodel.regressors` module docstring and repeated on every `regressors` parameter:
+    "column order is unimportant and extra columns are silently ignored". A facade that converts a whole
+    frame to tensors silently narrows that to "extra numeric columns", because a label column then has to
+    survive `keras.ops.convert_to_tensor`. Each facade converts only the columns it reads instead.
+
+    """
+
+    def test_canonical_facade_ignores_a_label_column(self, stimulus: PRFStimulus):
+        """A canonical model tolerates a non-numeric column among the parameters."""
+        model = Gaussian2DPRFModel()
+        params = _prf_params().assign(roi=["V1", "V2", "V3"])
+
+        assert np.isfinite(np.asarray(model(stimulus, params))).all()
+
+    def test_response_facade_ignores_a_label_column(self, stimulus: PRFStimulus):
+        """A response model reads its own parameters only, so the rest need not be numeric."""
+        response = Gaussian2DPRFResponse()
+        params = _prf_params().assign(roi=["V1", "V2", "V3"])
+
+        assert np.isfinite(np.asarray(response(stimulus, params))).all()
+
+    def test_regressors_facade_ignores_an_extra_design_column(self):
+        """A design column outside :attr:`names` need not be numeric."""
+        regressors_model = AdditiveRegressors(names=["mx"])
+        num_frames = 8
+        design = pd.DataFrame({"mx": np.zeros(num_frames), "trial_type": ["rest"] * num_frames})
+
+        resp = regressors_model(design, pd.DataFrame({"beta_mx": [1.0]}))
+
+        assert np.asarray(resp).shape == (1, num_frames)
+
+    def test_a_defaulted_impulse_parameter_can_still_be_overridden(self):
+        """Test that narrowing the conversion does not drop an override of a defaulted parameter.
+
+        A defaulted name is absent from :attr:`parameter_names` but the impulse response still reads it, so
+        it has to survive the conversion. Filtering on the caller-facing names instead would silently ignore
+        the override and return the default response.
+
+        """
+        impulse_model = TwoGammaImpulse()
+        labels = {"roi": ["V1"]}
+
+        default = np.asarray(impulse_model(pd.DataFrame({"undershoot": [12.0], **labels})))
+        overridden = np.asarray(impulse_model(pd.DataFrame({"undershoot": [30.0], **labels})))
+
+        assert not np.allclose(default, overridden)
 
 
 class TestKernelTakesTensorsOnly(PRFStimulusSetup):

@@ -15,14 +15,15 @@ All base classes have a concrete user-facing :meth:``__call__`` method
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
 
-Validation that has to read a value back to a Python `bool` belongs to `__call__` alone, because `call`
-may be traced. A model that holds submodels reaches them through their `call` methods, which bypasses
-their facades, so `__call__` also forwards
-:meth:`~prfmodel.utils.ModelProtocol._check_parameter_values` to every submodel. That is the only place
-a submodel's domain check runs once a fitter is driving the model.
+Validation checks that read a value back to a Python `bool` are done in `__call__` only, because `call` may be traced.
 
 Classes in this module are also generic with respect to the input stimulus. This means that child classes must specify
 which user-facing and tensor-holding stimulus types :meth:`__call__` and :meth:`call` take as input.
+
+An exception is :class:`~prfmodel.models.base.BaseCanonical` which is a composite model class that is intended for
+holding and calling submodels that inherit from :class:`~prfmodel.utils.ModelProtocol`. Child classes must only define
+the :meth:`call` method and optionally the :attr`_additional_parameter_names` attribute. The composite model class
+collects the parameter names of all submodels and performs validation checks on them.
 
 """
 
@@ -33,10 +34,13 @@ from typing import cast
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.regressors.base import BaseRegressors
+from prfmodel.regressors.base import _extract_regressor_design
 from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.stimuli import Stimulus
 from prfmodel.stimuli import StimulusTensors
 from prfmodel.typing import Tensor
+from prfmodel.utils import CompositeModelProtocol
 from prfmodel.utils import ModelProtocol
 from prfmodel.utils import TensorFrame
 from prfmodel.utils import as_tensor_frame
@@ -130,9 +134,13 @@ class BasePopulationResponse(ModelProtocol, Generic[S, T]):
 
         """
         dtype = get_dtype(dtype)
-        self._check_parameters(parameters)
+        self.check_parameter_names(parameters)
+        self.check_parameter_values(parameters)
 
-        return self.call(cast("T", stimulus.to_tensors(dtype)), as_tensor_frame(parameters, dtype))
+        return self.call(
+            cast("T", stimulus.to_tensors(dtype)),
+            as_tensor_frame(parameters[self.parameter_names], dtype),
+        )
 
     @doc
     @abstractmethod
@@ -236,12 +244,13 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S, T]):
 
         """
         dtype = get_dtype(dtype)
-        self._check_parameters(parameters)
+        self.check_parameter_names(parameters)
+        self.check_parameter_values(parameters)
 
         return self.call(
             cast("T", stimulus.to_tensors(dtype)),
             ops.convert_to_tensor(response, dtype=dtype),
-            as_tensor_frame(parameters, dtype),
+            as_tensor_frame(parameters[self.parameter_names], dtype),
         )
 
     @doc
@@ -269,7 +278,7 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S, T]):
         """
 
 
-class BaseCanonical(ModelProtocol, Generic[S, T]):
+class BaseCanonical(CompositeModelProtocol, Generic[S, T]):
     """
     Generic abstract base class for creating canonical models.
 
@@ -326,37 +335,8 @@ class BaseCanonical(ModelProtocol, Generic[S, T]):
     def __init__(self, **models: ModelProtocol | None):
         super().__init__()
 
-        for model in models.values():
-            if model is not None and not isinstance(model, ModelProtocol):
-                msg = "Model instance must implement the 'parameter_names' property"
-                raise TypeError(msg)
-
-        self.models = models
-
-    @property
-    def parameter_names(self) -> list[str]:
-        """A list with names of unique parameters that are used by the submodels."""
-        param_names = []
-
-        for model in self.models.values():
-            if model is not None:
-                param_names.extend(model.parameter_names)
-
-        # Make sure no duplicates are returned (preserve insertion order)
-        return list(dict.fromkeys(param_names))
-
-    def _check_parameter_values(self, parameters: pd.DataFrame) -> None:
-        """Forward the domain check to every submodel.
-
-        A submodel is reached through its `call` method rather than through its facade once a composite
-        model is in play, so this is the only place a submodel's domain check runs for a composite.
-
-        """
-        super()._check_parameter_values(parameters)
-
-        for model in self.models.values():
-            if model is not None:
-                model._check_parameter_values(parameters)  # noqa: SLF001 (submodel of the same protocol)
+        if models:
+            self.models = models
 
     @doc
     def __call__(
@@ -388,14 +368,16 @@ class BaseCanonical(ModelProtocol, Generic[S, T]):
 
         """
         dtype = get_dtype(dtype)
-        self._check_parameters(parameters)
-        self._check_parameter_values(parameters)
-        _validate_regressors_argument(self.models.get("regressors_model"), regressors)
+        regressors_model = cast("BaseRegressors | None", self.models.get("regressors_model"))
+
+        self.check_parameter_names(parameters)
+        self.check_parameter_values(parameters)
+        _validate_regressors_argument(regressors_model, regressors)
 
         return self.call(
             cast("T", stimulus.to_tensors(dtype)),
-            as_tensor_frame(parameters, dtype),
-            None if regressors is None else as_tensor_frame(regressors, dtype),
+            as_tensor_frame(parameters[self.get_consumed_parameter_names(parameters)], dtype),
+            _extract_regressor_design(regressors_model, regressors, dtype),
         )
 
     @doc

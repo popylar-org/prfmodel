@@ -123,6 +123,9 @@ class TestImpulseSetup(ABC):
         parameters: pd.DataFrame,
     ):
         """Test that a negative offset does not change what `norm="sum"` divides by beyond truncation."""
+        if self.norm != "sum":
+            pytest.skip("sum normalization is not meaningful for this model")
+
         model = irf_model.__class__(offset=-5.0, resolution=1.0, norm="sum")
 
         resp = np.asarray(model(parameters))

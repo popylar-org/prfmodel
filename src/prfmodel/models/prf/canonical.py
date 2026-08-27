@@ -6,6 +6,7 @@ This module contains models that combine multiple exchangeable submodels in a wa
 
 import warnings
 from abc import abstractmethod
+from collections.abc import Generator
 from typing import ClassVar
 from typing import cast
 from keras import ops
@@ -187,6 +188,16 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
             )
             raise ValueError(msg)
 
+        shared = set(self.shared_params)
+        first, second = self._response_suffixes
+
+        suffixed = [p if p in shared else f"{p}_{first}" for p in prf_model.parameter_names]
+        suffixed.extend(f"{p}_{second}" for p in prf_model.parameter_names if p not in shared)
+
+        combine = list(self._combine_param_names)
+
+        self._additional_parameter_names = (*suffixed, *combine)
+
         super().__init__(
             prf_model=prf_model,
             encoding_model=encoding_model,
@@ -195,35 +206,10 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
             regressors_model=regressors_model,
         )
 
-    @property
-    def parameter_names(self) -> list[str]:
-        """
-        Names of parameters used by the model.
-
-        Shared response model parameters appear once (no suffix). Non-shared parameters are suffixed with the two
-        response suffixes (e.g. ``_center``/``_surround``). The combination, encoding, impulse and scaling
-        parameters are appended.
-
-        """
-        suffixed = self._suffixed_prf_param_names()
-        combine = list(self._combine_param_names)
-        param_names = [*suffixed, *combine]
-
-        for key, model in self.models.items():
-            if key != "prf_model" and model is not None:
-                param_names.extend(model.parameter_names)
-
-        return list(dict.fromkeys(param_names))
-
-    def _suffixed_prf_param_names(self) -> list[str]:
-        """Return pRF parameter names with shared params as-is and non-shared params expanded for both responses."""
-        prf_model = cast("BasePopulationResponse", self.models["prf_model"])
-        shared = set(self.shared_params)
-        first, second = self._response_suffixes
-
-        names = [p if p in shared else f"{p}_{first}" for p in prf_model.parameter_names]
-        names.extend(f"{p}_{second}" for p in prf_model.parameter_names if p not in shared)
-        return names
+    def _iter_models(self) -> Generator[ModelProtocol]:
+        for name, model in self.models.items():
+            if name != "prf_model" and model is not None:
+                yield model
 
     def _predict_single_response(
         self,
@@ -484,7 +470,10 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     .. [1] Zhou J., Benson N.C., Kay K., Winawer J. (2019). Predicting neuronal dynamics with a
         delayed gain control model. *PLOS Computational Biology*, 15(9).
         https://doi.org/10.1371/journal.pcbi.1007484
+
     """
+
+    _additional_parameter_names = ("n", "dispersion_normalization", "sigma_saturation")
 
     def __init__(
         self,
@@ -512,18 +501,6 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
             scaling_model=scaling_model,
             regressors_model=regressors_model,
         )
-
-    @property
-    def parameter_names(self) -> list[str]:
-        """Names of parameters used by the model (pRF + h₁ impulse + DGN + scaling)."""
-        names: list[str] = []
-        for key, model in self.models.items():
-            if key != "scaling_model" and model is not None:
-                names.extend(model.parameter_names)
-        names.extend(["n", "dispersion_normalization", "sigma_saturation"])
-        if self.models["scaling_model"] is not None:
-            names.extend(self.models["scaling_model"].parameter_names)
-        return list(dict.fromkeys(names))
 
     @doc
     def call(
@@ -598,7 +575,7 @@ class ResolutionMismatchWarning(UserWarning):
     """Warning for when submodels of a canonical model are sampled on time axes of different resolutions."""
 
 
-class CSTPRFModel(BaseCanonical[PRFStimulus]):
+class CSTPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     r"""
     Compressive spatiotemporal (CST) population receptive field (pRF) model.
 
@@ -657,6 +634,8 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
 
     """
 
+    _additional_parameter_names = ("n", "amplitude_sustained", "amplitude_transient")
+
     def __init__(  # noqa: PLR0913 (too many arguments)
         self,
         prf_model: BasePopulationResponse,
@@ -700,24 +679,6 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
             regressors_model=regressors_model,
         )
 
-    @property
-    def parameter_names(self) -> list[str]:
-        """Names of parameters used by the model (pRF + encoding + channels + CST + impulse + scaling)."""
-        names: list[str] = []
-
-        # These submodels cannot be None (the channel models are checked in __init__), unlike those below
-        for key, model in self.models.items():
-            if key in ("prf_model", "encoding_model", "sustained_model", "transient_model"):
-                names.extend(cast("ModelProtocol", model).parameter_names)
-
-        names.extend(["n", "amplitude_sustained", "amplitude_transient"])
-
-        for key, model in self.models.items():
-            if key in ("impulse_model", "scaling_model", "regressors_model") and model is not None:
-                names.extend(model.parameter_names)
-
-        return list(dict.fromkeys(names))
-
     def _rectify_and_compress(self, response: Tensor, exponent: Tensor) -> Tensor:
         """Rectify a channel response and apply the compressive power law.
 
@@ -739,10 +700,9 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
 
         Parameters
         ----------
-        %(stimulus_prf)s
-        %(parameters)s
-        %(regressors_canonical)s
-        %(dtype)s
+        %(stimulus_prf_tensors)
+        %(parameters_tensors)
+        %(regressors_tensors)
 
         Returns
         -------
@@ -757,16 +717,16 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
 
         # Spatial stage: pRF response encoded with the stimulus design
         prf_model = cast("BasePopulationResponse", self.models["prf_model"])
-        response = prf_model(stimulus, parameters, dtype=dtype)
+        response = prf_model.call(stimulus, parameters)
         encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
-        response = encoding_model(stimulus, response, parameters, dtype=dtype)
+        response = encoding_model.call(stimulus, response, parameters)
 
         # Temporal stage: one convolution per channel. The off-transient is the negated on-transient.
         sustained_model = cast("BaseImpulse", self.models["sustained_model"])
         transient_model = cast("BaseImpulse", self.models["transient_model"])
 
-        response_sustained = convolve_prf_impulse_response(response, sustained_model(parameters, dtype), dtype=dtype)
-        response_transient = convolve_prf_impulse_response(response, transient_model(parameters, dtype), dtype=dtype)
+        response_sustained = convolve_prf_impulse_response(response, sustained_model.call(parameters), dtype=dtype)
+        response_transient = convolve_prf_impulse_response(response, transient_model.call(parameters), dtype=dtype)
 
         # Nonlinear stage
         n = parameters[["n"]]
@@ -783,7 +743,7 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
 
         if self.models["impulse_model"] is not None:
             impulse_model = cast("BaseImpulse", self.models["impulse_model"])
-            impulse_response = impulse_model(parameters, dtype=dtype)
+            impulse_response = impulse_model.call(parameters)
 
             sustained = convolve_prf_impulse_response(sustained, impulse_response, dtype=dtype)
             transient = convolve_prf_impulse_response(transient, impulse_response, dtype=dtype)
@@ -792,11 +752,11 @@ class CSTPRFModel(BaseCanonical[PRFStimulus]):
 
         if self.models["scaling_model"] is not None:
             scaling_model = cast("BaseScaling", self.models["scaling_model"])
-            response = scaling_model(response, parameters, dtype=dtype)
+            response = scaling_model.call(response, parameters)
 
         if self.models["regressors_model"] is not None and regressors is not None:
             regressors_model = cast("BaseRegressors", self.models["regressors_model"])
-            response = response + regressors_model(regressors, parameters, dtype=dtype)
+            response = response + regressors_model.call(regressors, parameters)
 
         return response
 

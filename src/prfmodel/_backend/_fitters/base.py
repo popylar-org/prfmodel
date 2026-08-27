@@ -3,14 +3,16 @@
 from abc import abstractmethod
 from collections.abc import Callable
 from typing import TypeAlias
+from typing import cast
 import keras
 import pandas as pd
 from prfmodel._backend import compile_fun
+from prfmodel.regressors.base import BaseRegressors
+from prfmodel.regressors.base import _extract_regressor_design
 from prfmodel.stimuli import Stimulus
 from prfmodel.stimuli import StimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import TensorFrame
-from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
 
 SGDState: TypeAlias = tuple[list, list, list, list] | None
@@ -54,10 +56,11 @@ class BaseSGDFitter(keras.Model):
 
         """
         stimulus = x.to_tensors(self.dtype)
-        regressor_params = None if regressors is None else as_tensor_frame(regressors, self.dtype)
+        regressors_model = cast("BaseRegressors | None", self.model.models.get("regressors_model"))
+        regressors_consumed = _extract_regressor_design(regressors_model, regressors, self.dtype)
 
         def step(state: SGDState) -> tuple[dict, SGDState]:
-            return self._update_model_weights(stimulus, y, state, regressor_params)
+            return self._update_model_weights(stimulus, y, state, regressors_consumed)
 
         return compile_fun(step) if self.compile_step else step
 

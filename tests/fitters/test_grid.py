@@ -9,6 +9,7 @@ from prfmodel.fitters import GridHistory
 from prfmodel.fitters._grid import InfiniteLossWarning
 from prfmodel.fitters.losses import CorrelationLoss
 from prfmodel.models.prf import Gaussian2DPRFModel
+from prfmodel.regressors import AdditiveRegressors
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model
@@ -354,3 +355,25 @@ class TestGridFitterCompiledStep(TestSetup):
 
         check_params = ["mu_x", "mu_y", "sigma"]
         assert np.allclose(grid_params[check_params], params[check_params])
+
+
+class TestGridFitterIgnoresExtraColumns(TestSetup):
+    """Tests that a frame column no model reads passes through the fitter untouched."""
+
+    def test_ignores_extra_design_columns(
+        self,
+        stimulus: PRFStimulus,
+        params: pd.DataFrame,
+    ):
+        """A design column outside the regressor names does not have to be numeric."""
+        model = Gaussian2DPRFModel(regressors_model=AdditiveRegressors(names=["mx"]))
+        num_frames = stimulus.design.shape[0]
+        design = pd.DataFrame({"mx": np.zeros(num_frames), "trial_type": ["rest"] * num_frames})
+
+        grid = {name: np.array([float(params[name].iloc[0])]) for name in params.columns}
+        grid["beta_mx"] = np.array([1.0])
+
+        observed = np.zeros((len(params), num_frames))
+        _, grid_params = GridFitter(model=model, stimulus=stimulus).fit(observed, grid, regressors=design)
+
+        assert grid_params.shape == (len(params), len(grid))

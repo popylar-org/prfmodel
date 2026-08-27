@@ -30,23 +30,10 @@ from abc import abstractmethod
 import pandas as pd
 from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
-from prfmodel.utils import ModelProtocol
+from prfmodel.utils import CompositeModelProtocol
 from prfmodel.utils import TensorFrame
 from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
-
-
-def _extract_design(regressors: pd.DataFrame, names: list[str]) -> pd.DataFrame:
-    """Select the required regressor columns from a design DataFrame.
-
-    Raises a clear ``ValueError`` if any required column is missing.
-
-    """
-    missing = [name for name in names if name not in regressors.columns]
-    if missing:
-        msg = f"Regressor design is missing required column(s): {missing}"
-        raise ValueError(msg)
-    return regressors[names]
 
 
 def _normalize_regressors_model(
@@ -92,10 +79,28 @@ def _validate_regressors_argument(
         msg = "'regressors' must be provided when 'regressors_model' is configured on this model"
         raise ValueError(msg)
     if isinstance(regressors_model, BaseRegressors) and regressors is not None:
-        regressors_model._check_design(regressors)  # noqa: SLF001 (facade check on behalf of the caller)
+        regressors_model.check_regressor_names(regressors)
 
 
-class BaseRegressors(ModelProtocol):
+def _extract_regressor_design(
+    regressors_model: "BaseRegressors | None",
+    regressors: pd.DataFrame | None,
+    dtype: str,
+) -> "TensorFrame | None":
+    """Convert the design columns a regressors model reads into tensors.
+
+    Returns ``None`` when there is no design to convert. Columns outside the model's
+    :attr:`BaseRegressors.regressor_names` are left behind, so a caller may carry extra columns -- including
+    non-numeric ones -- alongside the design in the same frame.
+
+    """
+    if regressors is None or regressors_model is None:
+        return None
+
+    return as_tensor_frame(regressors[regressors_model.regressor_names], dtype)
+
+
+class BaseRegressors(CompositeModelProtocol):
     r"""
     Abstract base class for regressor models.
 
@@ -107,11 +112,38 @@ class BaseRegressors(ModelProtocol):
     Notes
     -----
     This class cannot be instantiated on its own. It can only be used as a parent class to create custom regressor
-    models. Subclasses must override the abstract :attr:`parameter_names` property and the :meth:`call` method.
-    Do not override :meth:`__call__`; it is the public facade that validates and converts before delegating to
-    :meth:`call`.
+    models. Subclasses must override the abstract :meth:`call` method. Child classes should either assign the
+    :attr:`_regressor_names` attribute during initialization or overwrite the :meth:`regressor_names` property and
+    the :meth:`check_regressor_names` method.
 
     """
+
+    _regressor_names: tuple[str, ...] = ()
+    """Design columns this model reads itself, on top of the ones its submodels read."""
+
+    @property
+    def regressor_names(self) -> list[str]:
+        """Columns this model reads from the regressor design."""
+        return list(self._regressor_names)
+
+    def check_regressor_names(self, regressors: pd.DataFrame) -> None:
+        """Check that required columns are supplied in the regressor design.
+
+        Parameters
+        ----------
+        %(regressors)s
+
+        Raises
+        ------
+        ValueError
+            When a column is missing in the regressor design.
+
+        """
+        missing = [name for name in self.regressor_names if name not in regressors.columns]
+
+        if missing:
+            msg = f"Regressor design is missing required column(s): {missing}"
+            raise ValueError(msg)
 
     @doc
     def __call__(
@@ -141,27 +173,14 @@ class BaseRegressors(ModelProtocol):
 
         """
         dtype = get_dtype(dtype)
-        self._check_parameters(parameters)
-        self._check_parameter_values(parameters)
-        self._check_design(regressors)
+        self.check_parameter_names(parameters)
+        self.check_parameter_values(parameters)
+        self.check_regressor_names(regressors)
 
-        return self.call(as_tensor_frame(regressors, dtype), as_tensor_frame(parameters, dtype))
-
-    def _check_design(self, regressors: pd.DataFrame) -> None:
-        """Check that the design carries every regressor column this model needs.
-
-        Runs in :meth:`__call__`, where the column names are still available. On the tensor side a
-        :class:`~prfmodel.utils.TensorFrame` selects columns by name too, but a missing one would surface as a
-        `KeyError` from inside a trace rather than as a clear message.
-
-        Subclasses that declare a `names` attribute get the check for free;
-        :class:`~prfmodel.regressors.RegressorsList` overrides it to ask its children instead.
-
-        """
-        names = getattr(self, "names", None)
-
-        if names is not None:
-            _extract_design(regressors, names)
+        return self.call(
+            as_tensor_frame(regressors[self.regressor_names], dtype),
+            as_tensor_frame(parameters[self.get_consumed_parameter_names(parameters)], dtype),
+        )
 
     @doc
     @abstractmethod
@@ -171,10 +190,8 @@ class BaseRegressors(ModelProtocol):
 
         Parameters
         ----------
-        regressors : TensorFrame
-            Regressor design columns as tensors, selectable by name.
-        parameters : TensorFrame
-            Model parameters as tensors.
+        %(regressors_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------

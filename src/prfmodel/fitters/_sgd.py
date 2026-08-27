@@ -161,9 +161,14 @@ class SGDFitter(BackendSGDFitter):
     def _create_variables(self, init_parameters: pd.DataFrame, fixed_parameters: Sequence[str]) -> None:
         # Keras automatically discovers variables stored in dicts and links to them in
         # 'self.trainable_variables' and 'self.non_trainable_variables'
+        #
+        # Only the columns the model reads become variables. A column no model consumes cannot move the
+        # prediction, so there is nothing to optimize, and requiring it to be numeric would break the
+        # contract that lets a caller carry a label alongside the parameters in one frame.
         self._parameter_variables = {
             str(key): keras.Variable(val, dtype=self.dtype, name=key, trainable=key not in fixed_parameters)
             for key, val in init_parameters.items()
+            if key in self.model.parameter_names
         }
 
     def _delete_variables(self) -> None:
@@ -328,8 +333,17 @@ class SGDFitter(BackendSGDFitter):
             {v.name: ops.convert_to_numpy(v.value) for v in self.trainable_variables + self.non_trainable_variables},
         )
 
-        # Transform parameters back to natural scale, sorted according to the initial parameter columns
-        params = self.adapter.inverse(params)[init_parameters_batch.columns]
+        # Transform parameters back to natural scale, sorted according to the initial parameter columns.
+        # Columns the model does not read never became variables, so they are carried over from the input
+        # unchanged instead of being looked up among the estimates. Values are taken as an array because the
+        # estimates carry a fresh index that need not line up with the batch's.
+        params = self.adapter.inverse(params)
+
+        for name in init_parameters_batch.columns:
+            if name not in params.columns:
+                params[name] = init_parameters_batch[name].to_numpy()
+
+        params = params[init_parameters_batch.columns]
 
         self._delete_variables()
 

@@ -67,9 +67,13 @@ class BaseScaling(ModelProtocol):
 
         """
         dtype = get_dtype(dtype)
-        self._check_parameters(parameters)
+        self.check_parameter_names(parameters)
+        self.check_parameter_values(parameters)
 
-        return self.call(ops.convert_to_tensor(inputs, dtype=dtype), as_tensor_frame(parameters, dtype))
+        return self.call(
+            ops.convert_to_tensor(inputs, dtype=dtype),
+            as_tensor_frame(parameters[self.parameter_names], dtype),
+        )
 
     @doc
     @abstractmethod

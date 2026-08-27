@@ -32,7 +32,8 @@ class ShiftedGammaImpulse(BaseImpulse):
         no normalization is performed.
     default_parameters : dict of float or str, optional
         Dictionary with scalar default parameter values or name of default parameter set.
-        Dictionary keys must be valid parameter names. Default values can be overriden in the :meth:`__call__` method.
+        Dictionary keys must be valid parameter names.  Default values are overridden by user-supplied parameters in
+        the :meth:`__call__` method.
 
     See Also
     --------
@@ -81,7 +82,7 @@ class ShiftedGammaImpulse(BaseImpulse):
     _positive_parameter_names: ClassVar[tuple[str, ...]] = ("delay", "dispersion")
 
     @property
-    def _all_parameter_names(self) -> list[str]:
+    def parameter_names(self) -> list[str]:
         """Parameter names are: `delay`, `dispersion`, and `shift`."""
         return ["delay", "dispersion", "shift"]
 

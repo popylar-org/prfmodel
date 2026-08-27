@@ -49,12 +49,8 @@ class AdditiveRegressors(BaseRegressors):
     def __init__(self, names: list[str]):
         super().__init__()
 
-        self.names = list(names)
-
-    @property
-    def parameter_names(self) -> list[str]:
-        """Names of parameters used by the model: ``beta_<name>`` for each regressor name."""
-        return [f"beta_{name}" for name in self.names]
+        self._regressor_names = tuple(names)
+        self._additional_parameter_names = tuple(f"beta_{name}" for name in self.regressor_names)
 
     @doc
     def call(self, regressors: TensorFrame, parameters: TensorFrame) -> Tensor:
@@ -71,7 +67,7 @@ class AdditiveRegressors(BaseRegressors):
         %(predicted_response_2d)s
 
         """
-        design = regressors[self.names]
+        design = regressors[self.regressor_names]
         betas = parameters[self.parameter_names]
 
         return ops.matmul(betas, ops.transpose(design))

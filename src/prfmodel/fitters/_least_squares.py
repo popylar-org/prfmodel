@@ -1,11 +1,14 @@
 """Least-squares fitters."""
 
+from typing import cast
 import numpy as np
 import pandas as pd
 from keras import ops
 from tqdm.auto import tqdm
 from prfmodel._docstring import doc
 from prfmodel.models.base import BaseCanonical
+from prfmodel.regressors.base import BaseRegressors
+from prfmodel.regressors.base import _extract_regressor_design
 from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
@@ -156,9 +159,16 @@ class LeastSquaresFitter:
                 msg = f"Slope name '{name}' must be a column in 'parameters'"
                 raise ValueError(msg)
 
-        if regressors is not None:
-            # Beta weights must be in slope names if regressors are present, otherwise estimates are biased
-            name_diff = {f"beta_{name}" for name in regressors.columns}.difference(set(slope_names))
+        regressors_model = cast("BaseRegressors | None", self.model.models.get("regressors_model"))
+
+        _validate_regressors_argument(regressors_model, regressors)
+
+        if regressors is not None and regressors_model is not None:
+            # Beta weights must be in slope names if regressors are present, otherwise estimates are biased.
+            # Only the columns the regressors model actually reads imply a beta weight; a column the caller
+            # carried along in the same frame has none and must not be demanded as a slope.
+            regressor_names = regressors_model.regressor_names
+            name_diff = {f"beta_{name}" for name in regressor_names}.difference(set(slope_names))
             if len(name_diff) > 0:
                 msg = f"No beta weight parameters found for regressors: {list(name_diff)}"
                 raise ValueError(msg)
@@ -212,17 +222,22 @@ class LeastSquaresFitter:
         # Build design matrix by isolating each basis function.
         # The stimulus is converted once and the model is entered through 'call', because this loop runs the
         # same model once per slope and the facade would re-validate and re-convert the stimulus every time.
-        _validate_regressors_argument(self.model.models.get("regressors_model"), regressors)
-
         stimulus = self.stimulus.to_tensors(self.dtype)
-        regressor_params = None if regressors is None else as_tensor_frame(regressors, self.dtype)
+        regressors_model = cast("BaseRegressors | None", self.model.models.get("regressors_model"))
+        regressors_consumed = _extract_regressor_design(regressors_model, regressors, self.dtype)
 
         x_list = []
 
         for name in slope_names:
             parameter_batch[name] = 1.0
-            params = as_tensor_frame(parameter_batch, self.dtype)
-            x_list.append(self.model.call(stimulus, params, regressors=regressor_params))
+            # Validate parameters outside of the models call method
+            self.model.check_parameter_names(parameter_batch)
+            self.model.check_parameter_values(parameter_batch)
+            params = as_tensor_frame(
+                parameter_batch[self.model.get_consumed_parameter_names(parameter_batch)],
+                self.dtype,
+            )
+            x_list.append(self.model.call(stimulus, params, regressors=regressors_consumed))
             parameter_batch[name] = 0.0
 
         if intercept_name is not None:

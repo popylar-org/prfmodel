@@ -15,11 +15,9 @@ All base classes have a concrete user-facing :meth:``__call__`` method
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
 
-Validation that has to read a value back to a Python `bool` belongs to `__call__` alone, because `call`
-may be traced. A model that holds submodels reaches them through their `call` methods, which bypasses
-their facades, so `__call__` also forwards
-:meth:`~prfmodel.utils.ModelProtocol._check_parameter_values` to every submodel. That is the only place
-a submodel's domain check runs once a fitter is driving the model.
+Impulse models can have default parameters that are defined during initialization. The default parameters are
+added to the user-supplied parameter dataframe (replicating the default value for each unit) in the `__call__`
+method if not already present.
 
 """
 
@@ -61,12 +59,14 @@ class BaseImpulse(ModelProtocol):
         If `None`, no normalization is performed.
     default_parameters : dict of float or str, optional
         Dictionary with scalar default parameter values or name of default parameter set.
-        Dictionary keys must be valid parameter names. Default values can be overriden in the :meth:`__call__` method.
+        Dictionary keys must be valid parameter names. Default values are overridden by user-supplied parameters in
+        the :meth:`__call__` method.
 
     Notes
     -----
     This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
-    models. Subclasses must override the abstract :attr:`_all_parameter_names` and :meth:`__call__` method.
+    models. Subclasses must override the abstract :attr:`parameter_names` property and the :meth:`call`
+    method.
 
     `duration` and `resolution` must be positive, checked once at construction. `offset` is
     unconstrained and may be negative: the densities are zero below their support, so frames at or below
@@ -118,7 +118,9 @@ class BaseImpulse(ModelProtocol):
         self.norm = norm
 
         if isinstance(default_parameters, dict):
-            if any(key not in self._all_parameter_names for key in default_parameters):
+            # Reads the subclass declaration directly, which is safe only because it is a literal:
+            # 'self.default_parameters' is not assigned until below, and 'parameter_names' would read it.
+            if any(key not in self.parameter_names for key in default_parameters):
                 msg = "Invalid default parameter name, please provide valid parameter default parameter names"
                 raise ValueError(msg)
 
@@ -194,23 +196,6 @@ class BaseImpulse(ModelProtocol):
 
         return parameters
 
-    @property
-    @abstractmethod
-    def _all_parameter_names(self) -> list[str]:
-        """Names of all parameters used by the model, including ones covered by `default_parameters`."""
-
-    @property
-    def parameter_names(self) -> list[str]:
-        """
-        Names of parameters that must be supplied by the caller.
-
-        Excludes names covered by :attr:`default_parameters`; those may still be overridden by supplying the
-        corresponding column in ``parameters``.
-
-        """
-        default_names = set(self.default_parameters) if isinstance(self.default_parameters, dict) else set()
-        return [name for name in self._all_parameter_names if name not in default_names]
-
     @doc
     def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
         """
@@ -235,24 +220,46 @@ class BaseImpulse(ModelProtocol):
         """
         dtype = get_dtype(dtype)
         parameters = self._join_default_parameters(parameters)
-        self._check_parameters(parameters)
-        self._check_parameter_values(parameters)
+        self.check_parameter_names(parameters)
+        self.check_parameter_values(parameters)
 
-        return self.call(as_tensor_frame(parameters, dtype))
+        return self.call(as_tensor_frame(parameters[self.parameter_names], dtype))
 
-    def _check_parameter_values(self, parameters: pd.DataFrame) -> None:
-        """Check that the parameter values lie inside the domain the impulse response is defined on.
+    @doc
+    def check_parameter_names(self, parameters: pd.DataFrame) -> None:
+        """Check that required parameter names are supplied.
 
-        Merges :attr:`default_parameters` first, so that a default is checked too, then defers to
-        :meth:`~prfmodel.utils.ModelProtocol._check_parameter_values`.
+        If not already present, adds default parameter columns to ``parameters``.
 
-        Called from :meth:`__call__` and, when this model is a submodel, from the enclosing model's
-        facade. Neither is ever traced, so the values here are always concrete and the check always runs.
-        It is the only thing that reports an out-of-domain parameter: the gamma densities do not check
-        their arguments, and a non-positive `delay` does not even produce a `NaN` to fall back on.
+        Parameters
+        ----------
+        %(parameters)s
+
+        Raises
+        ------
+        ValueError
+            When a parameter name in the :attr:`parameters_names` attribute is not a column in ``parameters``.
 
         """
-        super()._check_parameter_values(self._join_default_parameters(parameters))
+        super().check_parameter_names(self._join_default_parameters(parameters))
+
+    @doc
+    def check_parameter_values(self, parameters: pd.DataFrame) -> None:
+        """Check that the parameter values lie inside the domain the model is defined on.
+
+        If not already present, adds default parameter columns to ``parameters``.
+
+        Parameters
+        ----------
+        %(parameters)s
+
+        Raises
+        ------
+        ValueError
+            When a parameter that must be ``> 0`` is zero or negative.
+
+        """
+        super().check_parameter_values(self._join_default_parameters(parameters))
 
     @doc
     @abstractmethod

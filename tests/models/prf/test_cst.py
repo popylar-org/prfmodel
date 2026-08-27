@@ -32,13 +32,13 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
         """Dataframe with parameters."""
         return pd.DataFrame(
             {
+                "n": [0.5, 0.8, 1.0],
+                "amplitude_sustained": [1.0, 0.5, 2.0],
+                "amplitude_transient": [0.5, 1.0, 0.0],
                 "mu_x": [0.0, 1.0, 0.0],
                 "mu_y": [1.0, 0.0, 0.0],
                 "sigma": [1.0, 1.5, 2.0],
                 "time_to_peak": [4.0, 5.0, 6.0],
-                "n": [0.5, 0.8, 1.0],
-                "amplitude_sustained": [1.0, 0.5, 2.0],
-                "amplitude_transient": [0.5, 1.0, 0.0],
                 "delay": [6.0, 7.0, 5.0],
                 "dispersion": [0.9, 1.0, 0.8],
                 "undershoot": [12.0, 11.0, 13.0],
@@ -52,13 +52,13 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
     def test_parameter_names(self, prf_model: Gaussian2DCSTPRFModel):
         """Test that parameter names aggregate the submodels plus the CST-specific parameters."""
         expected = [
+            "n",
+            "amplitude_sustained",
+            "amplitude_transient",
             "mu_y",
             "mu_x",
             "sigma",
             "time_to_peak",
-            "n",
-            "amplitude_sustained",
-            "amplitude_transient",
             *DerivativeTwoGammaImpulse().parameter_names,
             *Baseline().parameter_names,
         ]

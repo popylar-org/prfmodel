@@ -12,16 +12,18 @@ that :meth:`call` takes as input (see also :mod:`~prfmodel.models.base`).
 
 """
 
+from typing import cast
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.models.base import S
 from prfmodel.models.base import T
 from prfmodel.typing import Tensor
+from prfmodel.utils import CompositeModelProtocol
 from prfmodel.utils import TensorFrame
 
 
-class CompressiveEncoder(BaseStimulusEncoder[S, T]):
+class CompressiveEncoder(CompositeModelProtocol, BaseStimulusEncoder[S, T]):
     r"""
     Compressive encoding model.
 
@@ -76,14 +78,11 @@ class CompressiveEncoder(BaseStimulusEncoder[S, T]):
 
     """
 
-    def __init__(self, encoding_model: BaseStimulusEncoder, min_response: float = 1e-10):
-        self.encoding_model = encoding_model
-        self.min_response = min_response
+    _additional_parameter_names = ("gain", "n")
 
-    @property
-    def parameter_names(self) -> list[str]:
-        """Names of parameters used by the model: `gain` and `n`."""
-        return ["gain", "n"]
+    def __init__(self, encoding_model: BaseStimulusEncoder, min_response: float = 1e-10):
+        self.models = {"encoding_model": encoding_model}
+        self.min_response = min_response
 
     @doc
     def call(self, stimulus: T, response: Tensor, parameters: TensorFrame) -> Tensor:
@@ -108,5 +107,6 @@ class CompressiveEncoder(BaseStimulusEncoder[S, T]):
         """
         gain = parameters[["gain"]]
         n = parameters[["n"]]
-        response = self.encoding_model.call(stimulus, response, parameters)
+        encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
+        response = encoding_model.call(stimulus, response, parameters)
         return gain * ops.power(ops.maximum(response, self.min_response), n)

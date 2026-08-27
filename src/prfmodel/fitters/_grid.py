@@ -4,6 +4,7 @@ import math
 import warnings
 from collections.abc import Callable
 from itertools import product
+from typing import cast
 import keras
 import numpy as np
 import pandas as pd
@@ -14,11 +15,12 @@ from prfmodel._backend import compile_fun
 from prfmodel._docstring import doc
 from prfmodel.fitters.losses import CorrelationLoss
 from prfmodel.models.base import BaseCanonical
+from prfmodel.regressors.base import BaseRegressors
+from prfmodel.regressors.base import _extract_regressor_design
 from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
 from prfmodel.utils import TensorFrame
-from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
 
 
@@ -223,16 +225,17 @@ class GridFitter:
             {name: np.resize(array, num_rows) for name, array in zip(parameter_names, arrays, strict=True)},
         )
 
-        self.model._check_parameters(grid)  # noqa: SLF001 (fitter stands in for the model facade)
-        self.model._check_parameter_values(grid)  # noqa: SLF001 (fitter stands in for the model facade)
+        self.model.check_parameter_names(grid)
+        self.model.check_parameter_values(grid)
 
     def _make_evaluate_fun(self, data: Tensor, regressors: pd.DataFrame | None) -> Callable:
         stimulus = self.stimulus.to_tensors(self.dtype)
-        regressor_params = None if regressors is None else as_tensor_frame(regressors, self.dtype)
+        regressors_model = cast("BaseRegressors | None", self.model.models.get("regressors_model"))
+        regressors_consumed = _extract_regressor_design(regressors_model, regressors, self.dtype)
 
         def evaluate(param_tensors: dict[str, Tensor]) -> tuple[Tensor, Tensor]:
             params = TensorFrame(param_tensors, dtype=self.dtype)
-            pred = ops.expand_dims(self.model.call(stimulus, params, regressors=regressor_params), 1)
+            pred = ops.expand_dims(self.model.call(stimulus, params, regressors=regressors_consumed), 1)
             losses = self.loss(data, pred)
 
             return ops.amin(losses, axis=0), ops.argmin(losses, axis=0)

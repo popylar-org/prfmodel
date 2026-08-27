@@ -630,7 +630,7 @@ class TestSGDFitterCompiledStep(PRFStimulusSetup):
         model = Gaussian2DPRFModel(impulse_model=impulse)
 
         params = pd.DataFrame({"mu_y": [1.0], "mu_x": [-1.0], "sigma": [1.5], "baseline": [0.0], "amplitude": [1.0]})
-        impulse_names = impulse._all_parameter_names  # noqa: SLF001 (the defaulted names are not public)
+        impulse_names = impulse.parameter_names
         params = params.assign(**dict.fromkeys(impulse_names, 1.5))
         params = params.assign(**{name: 0.5 for name in model.parameter_names if name not in params.columns})
 
@@ -661,3 +661,28 @@ class TestSGDFitterCompiledStep(PRFStimulusSetup):
 
         with pytest.raises(ValueError, match="must be > 0"):
             fitter.fit(np.zeros((1, stimulus.design.shape[0])), params, num_steps=5)
+
+
+class TestSGDFitterIgnoresExtraColumns(TestSetup):
+    """Tests that a frame column no model reads passes through the fitter untouched."""
+
+    num_steps: int = 2
+
+    def test_ignores_extra_columns(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """A label column becomes no optimization variable and is carried through to the estimates."""
+        labelled = params.assign(roi=["V1"] * len(params))
+        observed = np.asarray(model(stimulus, params))
+
+        _, fit_params = SGDFitter(model=model, stimulus=stimulus, adapter=Adapter()).fit(
+            observed,
+            labelled,
+            num_steps=self.num_steps,
+        )
+
+        assert list(fit_params.columns) == list(labelled.columns)
+        assert list(fit_params["roi"]) == list(labelled["roi"])

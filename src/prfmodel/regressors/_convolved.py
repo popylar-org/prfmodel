@@ -1,6 +1,6 @@
 """Convolved regressor model."""
 
-import pandas as pd
+from typing import cast
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.impulse._convolve import convolve_prf_impulse_response
@@ -65,29 +65,9 @@ class ConvolvedRegressors(BaseRegressors):
     def __init__(self, names: list[str], impulse_model: BaseImpulse):
         super().__init__()
 
-        self.names = list(names)
-        self.impulse_model = impulse_model
-
-    def _check_parameter_values(self, parameters: pd.DataFrame) -> None:
-        """Forward the domain check to the impulse model.
-
-        `call` reaches the impulse model through its own `call`, which skips its facade, so the check
-        would otherwise never run for a convolved regressor.
-
-        """
-        super()._check_parameter_values(parameters)
-        self.impulse_model._check_parameter_values(parameters)  # noqa: SLF001 (submodel of the same protocol)
-
-    @property
-    def parameter_names(self) -> list[str]:
-        """
-        Names of parameters used by the model.
-
-        Includes ``beta_<name>`` for each regressor name as well as the parameter names of the impulse model.
-
-        """
-        beta_names = [f"beta_{name}" for name in self.names]
-        return list(dict.fromkeys(beta_names + self.impulse_model.parameter_names))
+        self._regressor_names = tuple(names)
+        self._additional_parameter_names = tuple(f"beta_{name}" for name in self.regressor_names)
+        self.models = {"impulse_model": impulse_model}
 
     @doc
     def call(self, regressors: TensorFrame, parameters: TensorFrame) -> Tensor:
@@ -104,15 +84,18 @@ class ConvolvedRegressors(BaseRegressors):
         %(predicted_response_2d)s
 
         """
-        beta_names = [f"beta_{name}" for name in self.names]
+        # Rebuilt here rather than taken from 'parameter_names', which also carries the impulse model's
+        # names and would stack the wrong columns.
+        beta_names = [f"beta_{name}" for name in self.regressor_names]
         dtype = parameters.dtype
 
-        design = regressors[self.names]
+        design = regressors[self.regressor_names]
 
         num_units = parameters.shape[0]
         num_frames = design.shape[0]
 
-        impulse = self.impulse_model.call(parameters)
+        impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+        impulse = impulse_model.call(parameters)
 
         betas = parameters[beta_names]
 

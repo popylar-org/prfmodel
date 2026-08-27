@@ -8,6 +8,7 @@ from prfmodel.fitters import LeastSquaresHistory
 from prfmodel.models.prf import DoG2DPRFModel
 from prfmodel.models.prf import Gaussian2DCSTPRFModel
 from prfmodel.models.prf import Gaussian2DPRFModel
+from prfmodel.regressors import AdditiveRegressors
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 from tests.conftest import TestSetup
@@ -422,3 +423,49 @@ class TestLeastSquaresFitterCST(PRFStimulusSetup):
                 true_params[intercept_name].to_numpy(),
                 atol=_ATOL,
             )
+
+
+class TestLeastSquaresFitterIgnoresExtraColumns(TestSetup):
+    """Tests that a frame column no model reads passes through the fitter untouched."""
+
+    def test_ignores_extra_columns(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """A label column is neither converted nor mistaken for a parameter, and survives into the result."""
+        labelled = params.assign(roi=["V1"] * len(params))
+        observed = np.asarray(model(stimulus, params))
+
+        _, fit_params = LeastSquaresFitter(model=model, stimulus=stimulus).fit(
+            observed,
+            labelled,
+            slope_name="amplitude",
+            intercept_name="baseline",
+        )
+
+        assert list(fit_params["roi"]) == list(labelled["roi"])
+
+    def test_does_not_demand_a_beta_for_an_unread_design_column(
+        self,
+        stimulus: PRFStimulus,
+        params: pd.DataFrame,
+    ):
+        """An extra design column implies no beta weight, so it must not be required among the slope names."""
+        model = Gaussian2DPRFModel(regressors_model=AdditiveRegressors(names=["mx"]))
+        num_frames = stimulus.design.shape[0]
+        design = pd.DataFrame({"mx": np.zeros(num_frames), "trial_type": ["rest"] * num_frames})
+
+        init = params.assign(beta_mx=1.0)
+        observed = np.asarray(model(stimulus, init, regressors=design))
+
+        _, fit_params = LeastSquaresFitter(model=model, stimulus=stimulus).fit(
+            observed,
+            init,
+            slope_name=["amplitude", "beta_mx"],
+            intercept_name="baseline",
+            regressors=design,
+        )
+
+        assert np.isfinite(fit_params["beta_mx"]).all()

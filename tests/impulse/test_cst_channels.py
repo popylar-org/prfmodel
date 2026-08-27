@@ -163,7 +163,7 @@ class TestSustainedImpulse(TestImpulseSetup):
 class TestTransientImpulse(TestImpulseSetup):
     """Shared impulse model tests for TransientImpulse."""
 
-    norm = None
+    norm = None  # Skips tests for sum normalization
 
     @pytest.fixture
     def parameters(self):
