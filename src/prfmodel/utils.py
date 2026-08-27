@@ -20,11 +20,11 @@ from .typing import Tensor
 
 _EXPECTED_NDIM = 2
 
-DTYPES = {"bfloat16", "float16", "float32", "float64"}
+DTYPES = {"float16", "float32", "float64"}
 """
 Accepted dtypes for `prfmodel.typing.Tensor` objects.
 
-Accepted dtypes are: `"bfloat16"`, `"float16"`, `"float32"`, and `"float64"`.
+Accepted dtypes are: `"float16"`, `"float32"`, and `"float64"`.
 
 """
 
@@ -315,12 +315,12 @@ def convert_parameters_to_tensor(parameters: pd.DataFrame, dtype: str) -> Tensor
 def get_dtype(dtype: str | None) -> str:
     """Get the (default) dtype.
 
-    Utility function to pass through a dtype or get the default dtype set by `keras.config.floatx()`.
+    Utility function to pass through a dtype or get the default dtype set by :func:`keras.config.floatx()`.
 
     Parameters
     ----------
     dtype : str or None
-        The dtype to pass through. If `None`, returns `keras.config.floatx()`.
+        The dtype to pass through. If `None`, returns :func:`keras.config.floatx()`.
 
     Returns
     -------
@@ -330,13 +330,15 @@ def get_dtype(dtype: str | None) -> str:
     Raises
     ------
     ValueError
-        When `dtype` is not of the values defined in `DTYPES`.
+        When `dtype` is not of the values defined in :const:`DTYPES`. Keras' ``bfloat16`` is currently not supported,
+        so this also raises when `keras.config.floatx() == 'bfloat16'`.
 
     """
-    if dtype is not None and dtype not in DTYPES:
-        msg = f"Argument 'dtype' must be one of {DTYPES}"
+    dtype = dtype or floatx()
+    if dtype not in DTYPES:
+        msg = f"The requested dtype must be one of {DTYPES}"
         raise ValueError(msg)
-    return dtype or floatx()
+    return dtype
 
 
 def batched(fn: Callable) -> Callable:
