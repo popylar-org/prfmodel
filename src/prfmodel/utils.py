@@ -7,6 +7,7 @@ from abc import abstractmethod
 from collections.abc import Callable
 from collections.abc import Generator
 from collections.abc import Sequence
+from typing import TYPE_CHECKING
 from typing import ClassVar
 from typing import Protocol
 from typing import runtime_checkable
@@ -15,8 +16,11 @@ import pandas as pd
 from keras import ops
 from keras.config import floatx
 from ._docstring import doc
-from .stimuli import Stimulus
 from .typing import Tensor
+
+if TYPE_CHECKING:
+    # Imported for typing only: 'prfmodel.stimuli' imports 'get_dtype' from this module at runtime.
+    from .stimuli import Stimulus
 
 _EXPECTED_NDIM = 2
 
@@ -377,7 +381,7 @@ def batched(fn: Callable) -> Callable:
 
     @functools.wraps(fn)
     def wrapper(
-        stimulus: Stimulus,
+        stimulus: "Stimulus",
         parameters: pd.DataFrame,
         batch_size: int | None = None,
         **kwargs,

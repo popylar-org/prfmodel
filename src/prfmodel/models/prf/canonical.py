@@ -367,7 +367,7 @@ class DivNormPRFModel(_BaseDualPRFModel):
         A scaling model class or instance. Model classes will be instantiated during initialization.
         The default creates a :class:`~prfmodel.scaling.Baseline` instance.
     %(model_regressors)s
-    min_response : float, default=1e-10
+    min_baseline_normalization : float, default=1e-10
         Lower bound applied to ``baseline_normalization`` before it is used.
         Keeps the ``b / d`` offset term finite when ``baseline_normalization`` is zero.
 
