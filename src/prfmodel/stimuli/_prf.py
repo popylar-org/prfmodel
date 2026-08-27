@@ -7,6 +7,7 @@ from keras import ops
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.typing import Tensor
+from prfmodel.utils import get_dtype
 from .base import Stimulus
 from .base import StimulusTensors
 
@@ -288,6 +289,8 @@ class PRFStimulus(Stimulus):
         True
 
         """
+        dtype = get_dtype(dtype)
+
         return PRFStimulusTensors(
             design=ops.convert_to_tensor(self.design, dtype=dtype),
             grid=ops.convert_to_tensor(self.grid, dtype=dtype),

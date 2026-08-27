@@ -6,6 +6,7 @@ from keras import ops
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.typing import Tensor
+from prfmodel.utils import get_dtype
 from .base import Stimulus
 from .base import StimulusTensors
 
@@ -117,6 +118,8 @@ class CFStimulus(Stimulus):
         (10, 20)
 
         """
+        dtype = get_dtype(dtype)
+
         return CFStimulusTensors(
             distance_matrix=ops.convert_to_tensor(self.distance_matrix, dtype=dtype),
             source_response=ops.convert_to_tensor(self.source_response, dtype=dtype),

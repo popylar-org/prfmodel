@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 from keras import ops
 from prfmodel.typing import Tensor
+from prfmodel.utils import get_dtype
 from .base import Stimulus
 from .base import StimulusTensors
 
@@ -136,6 +137,8 @@ class CSFStimulus(Stimulus):
         (2,)
 
         """
+        dtype = get_dtype(dtype)
+
         return CSFStimulusTensors(
             sf=ops.convert_to_tensor(self.sf, dtype=dtype),
             contrast=ops.convert_to_tensor(self.contrast, dtype=dtype),
