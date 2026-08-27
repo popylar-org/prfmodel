@@ -1,6 +1,8 @@
 """Gaussian connective field response models."""
 
 import math
+import numpy as np
+import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.models.base import BasePopulationResponse
@@ -56,6 +58,31 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus, CFStimulusTensors]):
         """Names of parameters used by the model: `center_index`, `sigma`."""
         return ["center_index", "sigma"]
 
+    def check_parameter_values(self, parameters: pd.DataFrame) -> None:
+        """Check that the parameter values lie inside the domain the model is defined on.
+
+        Parameters
+        ----------
+        %(parameters)s
+
+        Raises
+        ------
+        ValueError
+            When a parameter that must be ``> 0`` is zero or negative or when `center_index` is a decimal or ``< 0``.
+
+        """
+        center_index = parameters["center_index"].to_numpy()
+
+        if not np.all(center_index == np.floor(center_index)):
+            msg = "Parameter 'center_index' must be a whole number because it indexes a row of the distance matrix"
+            raise ValueError(msg)
+
+        if (center_index < 0).any():
+            msg = "Parameter 'center_index' must be non-negative because it indexes a row of the distance matrix"
+            raise ValueError(msg)
+
+        super().check_parameter_values(parameters)
+
     @doc
     def call(self, stimulus: CFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
@@ -78,10 +105,8 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus, CFStimulusTensors]):
         # the selection also works when 'center_index' arrives as a tensor, which it does whenever this
         # runs inside a compiled function. Gathering by index still admits no gradient, so 'center_index'
         # remains estimable by grid search only.
-        center_index = ops.cast(parameters[["center_index"]], "int32")
+        center_index = ops.cast(ops.round(parameters[["center_index"]]), "int32")
         sigma = parameters[["sigma"]]
-        # FIXME: On the JAX backend ops.take can result in misleading results when center_index is outside of the
-        # distance matrix. Negative indices can also return misleading results
         distance_matrix = ops.take(stimulus.distance_matrix, ops.reshape(center_index, (-1,)), axis=0)
 
         sigma_squared = ops.square(sigma)
