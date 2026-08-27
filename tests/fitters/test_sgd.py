@@ -219,6 +219,7 @@ class TestSGDFitter(_SGDGradientChecks, TestSetup):
             moving_params=[c for c in params.columns if c not in (fixed_parameters or [])],
         )
 
+    @pytest.mark.heavy
     def test_fit_batch_size(
         self,
         stimulus: PRFStimulus,
