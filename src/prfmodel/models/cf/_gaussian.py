@@ -63,8 +63,8 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus, CFStimulusTensors]):
 
         Parameters
         ----------
-        %(stimulus_cf_tensors)
-        %(parameters_tensors)
+        %(stimulus_cf_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------
@@ -80,6 +80,8 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus, CFStimulusTensors]):
         # remains estimable by grid search only.
         center_index = ops.cast(parameters[["center_index"]], "int32")
         sigma = parameters[["sigma"]]
+        # FIXME: On the JAX backend ops.take can result in misleading results when center_index is outside of the
+        # distance matrix. Negative indices can also return misleading results
         distance_matrix = ops.take(stimulus.distance_matrix, ops.reshape(center_index, (-1,)), axis=0)
 
         sigma_squared = ops.square(sigma)
@@ -94,6 +96,7 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus, CFStimulusTensors]):
         return ops.exp(-resp) / volume
 
 
+@doc
 class GaussianCFModel(CanonicalCFModel):
     """
     Gaussian connective field model.

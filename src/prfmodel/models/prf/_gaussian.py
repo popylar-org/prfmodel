@@ -180,8 +180,8 @@ class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTenso
 
         Parameters
         ----------
-        %(stimulus_prf_tensors)
-        %(parameters_tensors)
+        %(stimulus_prf_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------
@@ -231,8 +231,8 @@ class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTenso
 
         Parameters
         ----------
-        %(stimulus_prf_tensors)
-        %(parameters_tensors)
+        %(stimulus_prf_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------
@@ -245,6 +245,7 @@ class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTenso
         return predict_gaussian_response(stimulus.grid, parameters[["mu"]], parameters[["sigma"]])
 
 
+@doc
 class Gaussian2DPRFModel(CanonicalPRFModel):
     """
     Two-dimensional isotropic Gaussian population receptive field (pRF) model.
@@ -361,6 +362,7 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
         )
 
 
+@doc
 class Gaussian1DPRFModel(CanonicalPRFModel):
     """
     One-dimensional Gaussian population receptive field (pRF) model.

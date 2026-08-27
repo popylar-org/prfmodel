@@ -126,6 +126,7 @@ class BaseRegressors(CompositeModelProtocol):
         """Columns this model reads from the regressor design."""
         return list(self._regressor_names)
 
+    @doc
     def check_regressor_names(self, regressors: pd.DataFrame) -> None:
         """Check that required columns are supplied in the regressor design.
 

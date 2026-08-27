@@ -112,10 +112,10 @@ class PRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus, PRFStimulusTensors]):
 
         Parameters
         ----------
-        %(stimulus_prf_tensors)
+        %(stimulus_prf_tensors)s
         response : Tensor
             Population receptive field response.
-        %(parameters_tensors)
+        %(parameters_tensors)s
 
         Returns
         -------

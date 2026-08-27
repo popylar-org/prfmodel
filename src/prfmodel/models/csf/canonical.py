@@ -21,6 +21,7 @@ from prfmodel.typing import Tensor
 from prfmodel.utils import TensorFrame
 
 
+@doc
 class CanonicalCSFModel(BaseCanonical[CSFStimulus, CSFStimulusTensors]):
     """
     Simple composite contrast sensitivity function model.
@@ -81,9 +82,9 @@ class CanonicalCSFModel(BaseCanonical[CSFStimulus, CSFStimulusTensors]):
 
         Parameters
         ----------
-        %(stimulus_csf_tensors)
-        %(parameters_tensors)
-        %(regressors_tensors)
+        %(stimulus_csf_tensors)s
+        %(parameters_tensors)s
+        %(regressors_tensors)s
 
         Returns
         -------

@@ -33,6 +33,7 @@ from prfmodel.utils import normalize_response
 from ._stimulus_encoding import PRFStimulusEncoder
 
 
+@doc
 class CanonicalPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     """
     Canonical population receptive field (pRF) model.
@@ -99,9 +100,9 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
 
         Parameters
         ----------
-        %(stimulus_prf_tensors)
-        %(parameters_tensors)
-        %(regressors_tensors)
+        %(stimulus_prf_tensors)s
+        %(parameters_tensors)s
+        %(regressors_tensors)s
 
         Returns
         -------
@@ -265,9 +266,9 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
 
         Parameters
         ----------
-        %(stimulus_prf_tensors)
-        %(parameters_tensors)
-        %(regressors_tensors)
+        %(stimulus_prf_tensors)s
+        %(parameters_tensors)s
+        %(regressors_tensors)s
 
         Returns
         -------
@@ -294,6 +295,7 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
         return response
 
 
+@doc
 class CenterSurroundPRFModel(_BaseDualPRFModel):
     """
     Center-surround population receptive field (pRF) model.
@@ -347,6 +349,7 @@ class CenterSurroundPRFModel(_BaseDualPRFModel):
         return response_center - response_surround
 
 
+@doc
 class DivNormPRFModel(_BaseDualPRFModel):
     r"""
     Divisive normalization population receptive field (pRF) model.
@@ -432,6 +435,7 @@ class DivNormPRFModel(_BaseDualPRFModel):
         return response_activation / response_normalization - b / d
 
 
+@doc
 class DelayedNormPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     r"""
     Delayed gain normalization population receptive field (pRF) model.
@@ -514,9 +518,9 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
 
         Parameters
         ----------
-        %(stimulus_prf_tensors)
-        %(parameters_tensors)
-        %(regressors_tensors)
+        %(stimulus_prf_tensors)s
+        %(parameters_tensors)s
+        %(regressors_tensors)s
 
         Returns
         -------

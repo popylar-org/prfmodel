@@ -20,6 +20,7 @@ from prfmodel.utils import TensorFrame
 from ._stimulus_encoding import CFStimulusEncoder
 
 
+@doc
 class CanonicalCFModel(BaseCanonical[CFStimulus, CFStimulusTensors]):
     """
     Canonical connective field model.
@@ -81,9 +82,9 @@ class CanonicalCFModel(BaseCanonical[CFStimulus, CFStimulusTensors]):
 
         Parameters
         ----------
-        %(stimulus_cf_tensors)
-        %(parameters_tensors)
-        %(regressors_tensors)
+        %(stimulus_cf_tensors)s
+        %(parameters_tensors)s
+        %(regressors_tensors)s
 
         Returns
         -------

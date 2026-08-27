@@ -485,6 +485,7 @@ def normalize_response(response: Tensor, norm: str | None = "sum") -> Tensor:
     return response / response_norm
 
 
+@doc
 class TensorFrame:
     """
     A dictionary-like object that supports dataframe-style column selection but returns Keras tensors.

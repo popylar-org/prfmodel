@@ -83,6 +83,7 @@ class RegressorsList(BaseRegressors):
 
         return list(dict.fromkeys(names))
 
+    @doc
     def check_regressor_names(self, regressors: pd.DataFrame) -> None:
         """Check that required columns are supplied in the regressor design.
 

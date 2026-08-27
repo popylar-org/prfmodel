@@ -92,10 +92,10 @@ class CompressiveEncoder(CompositeModelProtocol, BaseStimulusEncoder[S, T]):
 
         Parameters
         ----------
-        %(stimulus_tensors)
+        %(stimulus_tensors)s
         response : Tensor
             Model response.
-        %(parameters_tensors)
+        %(parameters_tensors)s
 
         Returns
         -------

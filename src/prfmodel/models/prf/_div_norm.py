@@ -5,6 +5,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseStimulusEncoder
@@ -18,6 +19,7 @@ from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import DivNormPRFModel
 
 
+@doc
 class DivNormGaussian2DPRFModel(DivNormPRFModel):
     r"""
     Divisive normalization population receptive field (pRF) model with isotropic 2D Gaussian responses.

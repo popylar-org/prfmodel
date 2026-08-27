@@ -152,6 +152,7 @@ class BaseImpulse(ModelProtocol):
         """The total number of time frames at which the impulse response function is evaluated."""
         return int(self.duration / self.resolution)
 
+    @doc
     def get_frames(self, dtype: str | None = None) -> Tensor:
         """
         Build the time frames at which the impulse response function is evaluated.

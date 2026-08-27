@@ -37,6 +37,7 @@ class LeastSquaresHistory:
         self.history = history
 
 
+@doc
 class LeastSquaresFitter:
     """Fit population receptive field models with least squares.
 

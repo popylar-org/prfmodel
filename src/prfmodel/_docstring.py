@@ -102,7 +102,7 @@ _PARAMS: dict[str, str] = {
         "    :attr:`names`; extra columns are ignored."
     ),
     "regressors_tensors": (
-        "regressors : TensorFrame or None, optional"
+        "regressors : TensorFrame or None, optional\n"
         "    Regressor design columns as tensors, supporting the same column selection as a :class:`pandas.DataFrame`."
     ),
     "regressors_canonical": (
@@ -112,24 +112,24 @@ _PARAMS: dict[str, str] = {
         "    required by every configured regressor model. Extra columns are ignored."
     ),
     "stimulus": ("stimulus : Stimulus\n    Stimulus object."),
-    "stimulus_tensor": (
+    "stimulus_tensors": (
         "stimulus : StimulusTensors\n    The tensor-holding stimulus object, from :meth:`~prfmodel.stimuli.Stimulus.to_tensors`."  # noqa: E501 (line too long)
     ),
     "stimulus_cf": ("stimulus : CFStimulus\n    Connective field stimulus object."),
     "stimulus_cf_tensors": (
-        "stimulus : CFStimulus\n   "
+        "stimulus : CFStimulusTensors\n"
         "    Tensor-holding connective field stimulus object,\n"
         "    from :meth:`~prfmodel.stimuli.CFStimulus.to_tensors`."
     ),
     "stimulus_csf": ("stimulus : CSFStimulus\n    Contrast sensitivity function stimulus object."),
     "stimulus_csf_tensors": (
-        "stimulus : CSFStimulus\n   "
+        "stimulus : CSFStimulusTensors\n"
         "    Tensor-holding contrast sensitivity function stimulus object,\n"
         "    from :meth:`~prfmodel.stimuli.CSFStimulus.to_tensors`."
     ),
     "stimulus_prf": ("stimulus : PRFStimulus\n    Population receptive field stimulus object."),
     "stimulus_prf_tensors": (
-        "stimulus : PRFStimulus\n   "
+        "stimulus : PRFStimulusTensors\n"
         "    Tensor-holding population receptive field stimulus object,\n"
         "    from :meth:`~prfmodel.stimuli.PRFStimulus.to_tensors`."
     ),

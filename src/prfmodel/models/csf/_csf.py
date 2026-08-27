@@ -2,6 +2,7 @@
 
 import math
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
@@ -222,14 +223,15 @@ class CSFResponse(BasePopulationResponse[CSFStimulus, CSFStimulusTensors]):
         """Names of parameters used by the model: ``cs_peak``, ``sf_peak``, ``width_r``, ``slope_crf``."""
         return ["cs_peak", "sf_peak", "width_r", "slope_crf"]
 
+    @doc
     def call(self, stimulus: CSFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
         Predict the model response for a CSF stimulus.
 
         Parameters
         ----------
-        %(stimulus_csf_tensors)
-        %(parameters_tensors)
+        %(stimulus_csf_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------
@@ -265,6 +267,7 @@ class CSFResponse(BasePopulationResponse[CSFStimulus, CSFStimulusTensors]):
         )
 
 
+@doc
 class CSFModel(CanonicalCSFModel):
     """
     Contrast sensitivity function model.

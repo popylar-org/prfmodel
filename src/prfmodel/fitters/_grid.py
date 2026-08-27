@@ -44,6 +44,7 @@ class GridHistory:
         self.history = history
 
 
+@doc
 class GridFitter:
     """Fit population receptive field models with grid search.
 

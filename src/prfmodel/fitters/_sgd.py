@@ -53,6 +53,7 @@ class SGDHistory:
             self.history.setdefault(k, []).append(v)
 
 
+@doc
 class SGDFitter(BackendSGDFitter):
     """
     Fit population receptive field models with stochastic gradient descent (SGD).

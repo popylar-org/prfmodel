@@ -29,10 +29,10 @@ class CFStimulusEncoder(BaseStimulusEncoder[CFStimulus, CFStimulusTensors]):
 
         Parameters
         ----------
-        %(stimulus_cf_tensors)
+        %(stimulus_cf_tensors)s
         response : Tensor
             Connective field response.
-        %(parameters_tensors)
+        %(parameters_tensors)s
 
         Returns
         -------
