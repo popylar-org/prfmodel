@@ -254,6 +254,18 @@ class BaseCanonical(ModelProtocol, Generic[S]):
         # Make sure no duplicates are returned (preserve insertion order)
         return list(dict.fromkeys(param_names))
 
+    @property
+    def discrete_parameter_names(self) -> list[str]:
+        """A list with names of unique discrete parameters that are used by the submodels."""
+        param_names = []
+
+        for model in self.models.values():
+            if model is not None:
+                param_names.extend(model.discrete_parameter_names)
+
+        # Make sure no duplicates are returned (preserve insertion order)
+        return list(dict.fromkeys(param_names))
+
     @doc
     @abstractmethod
     def __call__(

@@ -26,6 +26,12 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus]):
     The model has two parameters: `center_index` is the index of the row in the stimulus distance matrix that is the
     center of the Gaussian; `sigma` for the width of the Gaussian.
 
+    Notes
+    -----
+    `center_index` selects a row of the distance matrix, so it is discrete and has no gradient. It can only be fit
+    with a discrete search such as :class:`~prfmodel.fitters.GridFitter`. :class:`~prfmodel.fitters.SGDFitter`
+    keeps it at its starting value and warns.
+
     Examples
     --------
     >>> import numpy as np
@@ -57,6 +63,11 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus]):
     def parameter_names(self) -> list[str]:
         """Names of parameters used by the model: `center_index`, `sigma`."""
         return ["center_index", "sigma"]
+
+    @property
+    def discrete_parameter_names(self) -> list[str]:
+        """Names of discrete parameters used by the model: `center_index`."""
+        return ["center_index"]
 
     @doc
     def __call__(self, stimulus: CFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
