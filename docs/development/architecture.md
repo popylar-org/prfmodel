@@ -59,7 +59,7 @@ The inheritance diagram for {py:mod}`prfmodel.scaling`:
 All (sub-) model classes inherit from {py:class}`prfmodel.protocols.ModelProtocol`. This protocol requires subclasses to
 implement methods for accessing and checking parameter names.
 
-The modulse {py:mod}`prfmodel.models`, {py:mod}`prfmodel.impulse`, {py:mod}`prfmodel.scaling`, and
+The modules {py:mod}`prfmodel.models`, {py:mod}`prfmodel.impulse`, {py:mod}`prfmodel.scaling`, and
 {py:mod}`prfmodel.regressors` define abstract base classes (ABCs) that all subsequent models inherit from. These ABCs
 define abstract methods and attributes that subclasses must implement. For making model predictions, they use a
 "public facade" pattern: They implement a concrete user-facing `__call__` method that accepts NumPy arrays and pandas
