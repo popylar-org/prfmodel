@@ -6,7 +6,7 @@ from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
-from prfmodel.utils import ModelProtocol
+from prfmodel.protocols import ModelProtocol
 
 
 def test_parameter_shape_error():

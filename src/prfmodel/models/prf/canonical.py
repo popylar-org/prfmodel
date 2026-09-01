@@ -19,6 +19,7 @@ from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseCanonical
 from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.protocols import ModelProtocol
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.regressors.base import _normalize_regressors_model
 from prfmodel.scaling import Baseline
@@ -27,7 +28,6 @@ from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.stimuli import PRFStimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import ModelProtocol
 from prfmodel.utils import TensorFrame
 from prfmodel.utils import normalize_response
 from ._stimulus_encoding import PRFStimulusEncoder

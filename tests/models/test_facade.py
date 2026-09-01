@@ -27,12 +27,12 @@ from prfmodel.models.prf import Gaussian2DCSSPRFModel
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFResponse
 from prfmodel.models.prf import PRFStimulusEncoder
+from prfmodel.protocols import ModelProtocol
 from prfmodel.regressors import AdditiveRegressors
 from prfmodel.scaling import Baseline
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.stimuli import CFStimulus
 from prfmodel.stimuli import PRFStimulus
-from prfmodel.utils import ModelProtocol
 from prfmodel.utils import TensorFrame
 from prfmodel.utils import as_tensor_frame
 from tests.conftest import PRFStimulusSetup

@@ -31,7 +31,7 @@ The inheritance diagram for {py:mod}`prfmodel.models`:
    :parts: 1
    :include-subclasses:
    :private-bases:
-   :top-classes: prfmodel.utils.ModelProtocol
+   :top-classes: prfmodel.protocols.ModelProtocol
 ```
 
 The inheritance diagram for {py:mod}`prfmodel.impulse`:
@@ -41,7 +41,7 @@ The inheritance diagram for {py:mod}`prfmodel.impulse`:
    :parts: 1
    :include-subclasses:
    :private-bases:
-   :top-classes: prfmodel.utils.ModelProtocol
+   :top-classes: prfmodel.protocols.ModelProtocol
 ```
 
 The inheritance diagram for {py:mod}`prfmodel.scaling`:
@@ -51,12 +51,12 @@ The inheritance diagram for {py:mod}`prfmodel.scaling`:
    :parts: 1
    :include-subclasses:
    :private-bases:
-   :top-classes: prfmodel.utils.ModelProtocol
+   :top-classes: prfmodel.protocols.ModelProtocol
 ```
 
 ## Protocols and base classes
 
-All (sub-) model classes inherit from {py:class}`prfmodel.utils.ModelProtocol`. This protocol requires subclasses to
+All (sub-) model classes inherit from {py:class}`prfmodel.protocols.ModelProtocol`. This protocol requires subclasses to
 implement methods for accessing and checking parameter names.
 
 The modulse {py:mod}`prfmodel.models`, {py:mod}`prfmodel.impulse`, {py:mod}`prfmodel.scaling`, and
@@ -64,7 +64,7 @@ The modulse {py:mod}`prfmodel.models`, {py:mod}`prfmodel.impulse`, {py:mod}`prfm
 define abstract methods and attributes that subclasses must implement. For making model predictions, they use a
 "public facade" pattern: They implement a concrete user-facing `__call__` method that accepts NumPy arrays and pandas
 dataframe objects as arguments and performs input checks on these objects (e.g., by calling methods inherited from
-{py:class}`prfmodel.utils.ModelProtocol`). To perform actual computations, `__call__` converts all arguments to backend
+{py:class}`prfmodel.protocols.ModelProtocol`). To perform actual computations, `__call__` converts all arguments to backend
 specific tensor objects (i.e., {py:data}`prfmodel.typing.Tensor`) and forwards them to an abstract `call` method that
 each subclass must implement. Importantly, `call` must only use tensors as inputs and outputs and implement
 tensor operations via {py:mod}`keras.ops` or backend-specific operations (e.g., {py:mod}`tf.math` or

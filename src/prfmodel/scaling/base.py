@@ -1,7 +1,7 @@
 """Abstract base classes for scaling models.
 
-Classes in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that requires them to implement a
-:attr:`~prfmodel.utils.ModelProtocol.parameter_names` property.
+Classes in this module inherit from :class:`~prfmodel.protocols.ModelProtocol` that requires them to implement a
+:attr:`~prfmodel.protocols.ModelProtocol.parameter_names` property.
 
 They are abstract base classes, meaning that they
 cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
@@ -21,8 +21,8 @@ from abc import abstractmethod
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.protocols import ModelProtocol
 from prfmodel.typing import Tensor
-from prfmodel.utils import ModelProtocol
 from prfmodel.utils import TensorFrame
 from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype

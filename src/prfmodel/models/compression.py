@@ -18,8 +18,8 @@ from prfmodel._docstring import doc
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.models.base import S
 from prfmodel.models.base import T
+from prfmodel.protocols import CompositeModelProtocol
 from prfmodel.typing import Tensor
-from prfmodel.utils import CompositeModelProtocol
 from prfmodel.utils import TensorFrame
 
 

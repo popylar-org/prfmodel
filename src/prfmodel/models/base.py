@@ -1,7 +1,7 @@
 """Generic abstract base classes for response, stimulus encoder, and canonical models.
 
-Classes in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that requires them to implement a
-:attr:`~prfmodel.utils.ModelProtocol.parameter_names` property.
+Classes in this module inherit from :class:`~prfmodel.protocols.ModelProtocol` that requires them to implement a
+:attr:`~prfmodel.protocols.ModelProtocol.parameter_names` property.
 
 They are abstract base classes, meaning that they
 cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
@@ -21,9 +21,9 @@ Classes in this module are also generic with respect to the input stimulus. This
 which user-facing and tensor-holding stimulus types :meth:`__call__` and :meth:`call` take as input.
 
 An exception is :class:`~prfmodel.models.base.BaseCanonical` which is a composite model class that is intended for
-holding and calling submodels that inherit from :class:`~prfmodel.utils.ModelProtocol`. Child classes must only define
-the :meth:`call` method and optionally the :attr`_additional_parameter_names` attribute. The composite model class
-collects the parameter names of all submodels and performs validation checks on them.
+holding and calling submodels that inherit from :class:`~prfmodel.protocols.ModelProtocol`. Child classes must only
+define the :meth:`call` method and optionally the :attr`_additional_parameter_names` attribute. The composite model
+class collects the parameter names of all submodels and performs validation checks on them.
 
 """
 
@@ -34,14 +34,14 @@ from typing import cast
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.protocols import CompositeModelProtocol
+from prfmodel.protocols import ModelProtocol
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.regressors.base import _extract_regressor_design
 from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.stimuli import Stimulus
 from prfmodel.stimuli import StimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import CompositeModelProtocol
-from prfmodel.utils import ModelProtocol
 from prfmodel.utils import TensorFrame
 from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
@@ -288,12 +288,12 @@ class BaseCanonical(CompositeModelProtocol, Generic[S, T]):
     ----------
     **models
         Submodels to be combined into the canonical model. All submodel classes must inherit from
-        :class:`~prfmodel.utils.ModelProtocol`.
+        :class:`~prfmodel.protocols.ModelProtocol`.
 
     Raises
     ------
     TypeError
-        If submodel classes do not inherit from :class:`~prfmodel.utils.ModelProtocol`.
+        If submodel classes do not inherit from :class:`~prfmodel.protocols.ModelProtocol`.
 
     Notes
     -----
