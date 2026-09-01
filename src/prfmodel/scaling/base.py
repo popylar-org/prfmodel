@@ -15,9 +15,13 @@ All base classes have a concrete user-facing :meth:``__call__`` method
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
 
+The user-facing :meth:`__call__` returns a :class:`numpy.ndarray`, while ``call`` returns a backend tensor.
+Use ``call`` when a backend tensor is required, for example inside a fitter or another model's ``call``.
+
 """
 
 from abc import abstractmethod
+import numpy as np
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
@@ -39,27 +43,28 @@ class BaseScaling(ModelProtocol):
     This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
     models. Subclasses must override the abstract :attr:`parameter_names` property and the :meth:`call` method.
     Do not override :meth:`__call__`; it is the public facade that validates and converts before delegating to
-    :meth:`call`.
+    :meth:`call`, and returns a :class:`numpy.ndarray`.
 
     """
 
     @doc
-    def __call__(self, inputs: Tensor, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def __call__(self, inputs: Tensor | np.ndarray, parameters: pd.DataFrame, dtype: str | None = None) -> np.ndarray:
         """
         Make predictions with the scaling model.
 
-        This is the public entry point; subclasses implement :meth:`call` instead.
+        This is the public entry point; subclasses implement :meth:`call` instead. Use :meth:`call` when a
+        backend tensor is required.
 
         Parameters
         ----------
-        inputs : :data:`prfmodel.typing.Tensor`
+        inputs : :data:`prfmodel.typing.Tensor` or numpy.ndarray
             Input tensor with temporal response and shape (num_units, num_frames).
         %(parameters)s
         %(dtype)s
 
         Returns
         -------
-        %(predicted_response_2d)s
+        %(predicted_response_2d_array)s
 
         Raises
         ------
@@ -70,9 +75,11 @@ class BaseScaling(ModelProtocol):
         self.check_parameter_names(parameters)
         self.check_parameter_values(parameters)
 
-        return self.call(
-            ops.convert_to_tensor(inputs, dtype=dtype),
-            as_tensor_frame(parameters[self.parameter_names], dtype),
+        return ops.convert_to_numpy(
+            self.call(
+                ops.convert_to_tensor(inputs, dtype=dtype),
+                as_tensor_frame(parameters[self.parameter_names], dtype),
+            ),
         )
 
     @doc

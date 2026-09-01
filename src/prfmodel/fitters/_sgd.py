@@ -304,10 +304,15 @@ class SGDFitter(BackendSGDFitter):
 
         # One validated prediction before the loop, so that starting values outside a model's domain are
         # reported with the message the model raises rather than as a NaN loss thousands of steps later.
-        y_pred = self.model(
-            self.stimulus,
-            self.adapter.inverse(init_parameters_transformed, dtype=self.dtype),
-            regressors=regressors,
+        # The facade returns a 'numpy.ndarray'; convert back so that 'compute_loss' builds against a tensor
+        # of 'self.dtype' on the backend's device rather than against a host array.
+        y_pred = ops.convert_to_tensor(
+            self.model(
+                self.stimulus,
+                self.adapter.inverse(init_parameters_transformed, dtype=self.dtype),
+                regressors=regressors,
+                dtype=self.dtype,
+            ),
             dtype=self.dtype,
         )
 

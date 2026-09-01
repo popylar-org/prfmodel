@@ -15,6 +15,9 @@ All base classes have a concrete user-facing :meth:``__call__`` method
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
 
+The user-facing :meth:`__call__` returns a :class:`numpy.ndarray`, while ``call`` returns a backend tensor.
+Use ``call`` when a backend tensor is required, for example inside a fitter or another model's ``call``.
+
 Impulse models can have default parameters that are defined during initialization. The default parameters are
 added to the user-supplied parameter dataframe (replicating the default value for each unit) in the `__call__`
 method if not already present.
@@ -198,12 +201,14 @@ class BaseImpulse(ModelProtocol):
         return parameters
 
     @doc
-    def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> np.ndarray:
         """
         Compute the impulse response.
 
         This is the public entry point. It merges :attr:`default_parameters` into `parameters`, validates the
-        result, converts it to tensors and delegates to :meth:`call`. Subclasses implement :meth:`call`.
+        result, converts it to tensors and delegates to :meth:`call`, then returns the result as a
+        :class:`numpy.ndarray`. Subclasses implement :meth:`call`. Use :meth:`call` when a backend tensor is
+        required.
 
         Parameters
         ----------
@@ -212,7 +217,7 @@ class BaseImpulse(ModelProtocol):
 
         Returns
         -------
-        %(predicted_response_2d)s
+        %(predicted_response_2d_array)s
 
         Raises
         ------
@@ -224,7 +229,7 @@ class BaseImpulse(ModelProtocol):
         self.check_parameter_names(parameters)
         self.check_parameter_values(parameters)
 
-        return self.call(as_tensor_frame(parameters[self.parameter_names], dtype))
+        return ops.convert_to_numpy(self.call(as_tensor_frame(parameters[self.parameter_names], dtype)))
 
     @doc
     def check_parameter_names(self, parameters: pd.DataFrame) -> None:

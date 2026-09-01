@@ -15,6 +15,9 @@ All base classes have a concrete user-facing :meth:``__call__`` method
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
 
+The user-facing :meth:`__call__` returns a :class:`numpy.ndarray`, while ``call`` returns a backend tensor.
+Use ``call`` when a backend tensor is required, for example inside a fitter or another model's ``call``.
+
 Regressor models contribute an additive linear term to a canonical model prediction. Each regressor is a fixed
 time course (column of a design matrix) that is multiplied by a per-unit beta weight. Concrete subclasses define
 how the regressor design matrix is transformed before being weighted (e.g., whether it is convolved with an
@@ -27,7 +30,9 @@ Column order is unimportant and extra columns are silently ignored.
 """
 
 from abc import abstractmethod
+import numpy as np
 import pandas as pd
+from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.protocols import CompositeModelProtocol
 from prfmodel.typing import Tensor
@@ -152,11 +157,12 @@ class BaseRegressors(CompositeModelProtocol):
         regressors: pd.DataFrame,
         parameters: pd.DataFrame,
         dtype: str | None = None,
-    ) -> Tensor:
+    ) -> np.ndarray:
         """
         Compute the additive regressor contribution.
 
-        This is the public entry point; subclasses implement :meth:`call` instead.
+        This is the public entry point; subclasses implement :meth:`call` instead. Use :meth:`call` when a
+        backend tensor is required.
 
         Parameters
         ----------
@@ -166,7 +172,7 @@ class BaseRegressors(CompositeModelProtocol):
 
         Returns
         -------
-        %(predicted_response_2d)s
+        %(predicted_response_2d_array)s
 
         Raises
         ------
@@ -178,9 +184,11 @@ class BaseRegressors(CompositeModelProtocol):
         self.check_parameter_values(parameters)
         self.check_regressor_names(regressors)
 
-        return self.call(
-            as_tensor_frame(regressors[self.regressor_names], dtype),
-            as_tensor_frame(parameters[self.get_consumed_parameter_names(parameters)], dtype),
+        return ops.convert_to_numpy(
+            self.call(
+                as_tensor_frame(regressors[self.regressor_names], dtype),
+                as_tensor_frame(parameters[self.get_consumed_parameter_names(parameters)], dtype),
+            ),
         )
 
     @doc

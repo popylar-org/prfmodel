@@ -15,6 +15,13 @@ All base classes have a concrete user-facing :meth:``__call__`` method
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
 
+The user-facing :meth:`__call__` returns a :class:`numpy.ndarray`, while ``call`` returns a backend tensor.
+Backend tensors are an implementation detail below ``call``: converting the result keeps predictions usable with
+:mod:`numpy`, :mod:`matplotlib` and :mod:`scipy` without a manual conversion, and works on GPU for every backend.
+Because :meth:`__call__` validates a :class:`pandas.DataFrame` and reads values back to Python, it can never be part
+of a traced graph anyway. Code that needs a tensor, needs to stay differentiable, or runs inside a fitter must call
+``call`` directly.
+
 Validation checks that read a value back to a Python `bool` are done in `__call__` only, because `call` may be traced.
 
 Classes in this module are also generic with respect to the input stimulus. This means that child classes must specify
@@ -31,6 +38,7 @@ from abc import abstractmethod
 from typing import Generic
 from typing import TypeVar
 from typing import cast
+import numpy as np
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
@@ -71,7 +79,8 @@ class BasePopulationResponse(ModelProtocol, Generic[S, T]):
     See :mod:`~prfmodel.models.base` for details.
 
     Do not override :meth:`__call__`. It is the public facade that validates the parameters, resolves the dtype
-    and converts both the stimulus and the parameters to tensors before handing them to :meth:`call`.
+    and converts both the stimulus and the parameters to tensors before handing them to :meth:`call`, then
+    converts the result back to a :class:`numpy.ndarray`.
 
     Examples
     --------
@@ -108,13 +117,14 @@ class BasePopulationResponse(ModelProtocol, Generic[S, T]):
     """
 
     @doc
-    def __call__(self, stimulus: S, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def __call__(self, stimulus: S, parameters: pd.DataFrame, dtype: str | None = None) -> np.ndarray:
         """
         Predict the model response for a stimulus.
 
         This is the public entry point. It accepts the user-facing types, validates them, converts them to
-        tensors and delegates the arithmetic to :meth:`call`. Subclasses implement :meth:`call`, not this
-        method.
+        tensors and delegates the arithmetic to :meth:`call`, then returns the result as a
+        :class:`numpy.ndarray`. Subclasses implement :meth:`call`, not this method. Use :meth:`call` when a
+        backend tensor is required.
 
         Parameters
         ----------
@@ -124,7 +134,7 @@ class BasePopulationResponse(ModelProtocol, Generic[S, T]):
 
         Returns
         -------
-        :data:`prfmodel.typing.Tensor`
+        numpy.ndarray
             Model predictions of shape `(num_units, ...)` and dtype `dtype`. The number of units is the
             number of rows in `parameters`. The number and size of other axes depends on the stimulus.
 
@@ -137,9 +147,11 @@ class BasePopulationResponse(ModelProtocol, Generic[S, T]):
         self.check_parameter_names(parameters)
         self.check_parameter_values(parameters)
 
-        return self.call(
-            cast("T", stimulus.to_tensors(dtype)),
-            as_tensor_frame(parameters[self.parameter_names], dtype),
+        return ops.convert_to_numpy(
+            self.call(
+                cast("T", stimulus.to_tensors(dtype)),
+                as_tensor_frame(parameters[self.parameter_names], dtype),
+            ),
         )
 
     @doc
@@ -183,7 +195,7 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S, T]):
     See :mod:`~prfmodel.models.base` for details.
 
     Do not override :meth:`__call__`; it is the public facade that validates and converts before delegating
-    to :meth:`call`.
+    to :meth:`call`, and returns a :class:`numpy.ndarray`.
 
     Examples
     --------
@@ -215,25 +227,26 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S, T]):
     def __call__(
         self,
         stimulus: S,
-        response: Tensor,
+        response: Tensor | np.ndarray,
         parameters: pd.DataFrame,
         dtype: str | None = None,
-    ) -> Tensor:
+    ) -> np.ndarray:
         """Encode a model response with a stimulus.
 
-        This is the public entry point; subclasses implement :meth:`call` instead.
+        This is the public entry point; subclasses implement :meth:`call` instead. Use :meth:`call` when a
+        backend tensor is required.
 
         Parameters
         ----------
         %(stimulus)s
-        response : :data:`prfmodel.typing.Tensor`
+        response : :data:`prfmodel.typing.Tensor` or numpy.ndarray
             Model response.
         %(parameters)s
         %(dtype)s
 
         Returns
         -------
-        :data:`prfmodel.typing.Tensor`
+        numpy.ndarray
             The stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`. The number of units is
             the number of rows in :attr:`parameters`. The number and size of other axes depends on the stimulus and the
             response.
@@ -247,10 +260,12 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S, T]):
         self.check_parameter_names(parameters)
         self.check_parameter_values(parameters)
 
-        return self.call(
-            cast("T", stimulus.to_tensors(dtype)),
-            ops.convert_to_tensor(response, dtype=dtype),
-            as_tensor_frame(parameters[self.parameter_names], dtype),
+        return ops.convert_to_numpy(
+            self.call(
+                cast("T", stimulus.to_tensors(dtype)),
+                ops.convert_to_tensor(response, dtype=dtype),
+                as_tensor_frame(parameters[self.parameter_names], dtype),
+            ),
         )
 
     @doc
@@ -299,7 +314,8 @@ class BaseCanonical(CompositeModelProtocol, Generic[S, T]):
     -----
     Cannot be instantiated on its own. Can only be used as a parent class to create custom canonical models.
     Subclasses must override the abstract :meth:`call` method and must be defined with a specific stimulus type
-    and its matching tensor-holding type. Do not override :meth:`__call__`.
+    and its matching tensor-holding type. Do not override :meth:`__call__`; it returns a
+    :class:`numpy.ndarray`, while :meth:`call` returns a backend tensor.
 
     Inside :meth:`call`, invoke submodels through *their* :meth:`call` as well, not through the user-facing
     :meth:`__call__`.
@@ -345,11 +361,12 @@ class BaseCanonical(CompositeModelProtocol, Generic[S, T]):
         parameters: pd.DataFrame,
         regressors: pd.DataFrame | None = None,
         dtype: str | None = None,
-    ) -> Tensor:
+    ) -> np.ndarray:
         """
         Predict a canonical model response to a stimulus.
 
-        This is the public entry point; subclasses implement :meth:`call` instead.
+        This is the public entry point; subclasses implement :meth:`call` instead. Use :meth:`call` when a
+        backend tensor is required, for example inside a fitter or another model's :meth:`call`.
 
         Parameters
         ----------
@@ -360,7 +377,7 @@ class BaseCanonical(CompositeModelProtocol, Generic[S, T]):
 
         Returns
         -------
-        %(predicted_response_2d)s
+        %(predicted_response_2d_array)s
 
         Raises
         ------
@@ -374,10 +391,12 @@ class BaseCanonical(CompositeModelProtocol, Generic[S, T]):
         self.check_parameter_values(parameters)
         _validate_regressors_argument(regressors_model, regressors)
 
-        return self.call(
-            cast("T", stimulus.to_tensors(dtype)),
-            as_tensor_frame(parameters[self.get_consumed_parameter_names(parameters)], dtype),
-            _extract_regressor_design(regressors_model, regressors, dtype),
+        return ops.convert_to_numpy(
+            self.call(
+                cast("T", stimulus.to_tensors(dtype)),
+                as_tensor_frame(parameters[self.get_consumed_parameter_names(parameters)], dtype),
+                _extract_regressor_design(regressors_model, regressors, dtype),
+            ),
         )
 
     @doc

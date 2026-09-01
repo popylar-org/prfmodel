@@ -114,6 +114,12 @@ def batched(fn: Callable) -> Callable:
     callable
         Wrapped function with signature ``fn(stimulus, parameters, *, batch_size=None, **kwargs)``.
 
+    Notes
+    -----
+    The wrapper preserves the return type of `fn`: batches of :class:`numpy.ndarray` are concatenated with
+    :func:`numpy.concatenate` and batches of backend tensors with :func:`keras.ops.concatenate`. A wrapped
+    model facade therefore returns a :class:`numpy.ndarray` whether or not `batch_size` is given.
+
     Examples
     --------
     >>> from prfmodel.utils import batched
@@ -135,7 +141,7 @@ def batched(fn: Callable) -> Callable:
         parameters: pd.DataFrame,
         batch_size: int | None = None,
         **kwargs,
-    ) -> Tensor:
+    ) -> Tensor | np.ndarray:
         if batch_size is None:
             return fn(stimulus, parameters, **kwargs)
 
@@ -148,6 +154,11 @@ def batched(fn: Callable) -> Callable:
             end = min(start + batch_size, num_units)
             batch_parameters = parameters.iloc[start:end]
             results.append(fn(stimulus, batch_parameters, **kwargs))
+
+        # 'ops.concatenate' returns a backend tensor even for array inputs, which would make the return type
+        # of a wrapped model facade depend on whether 'batch_size' was given. Concatenate in kind instead.
+        if isinstance(results[0], np.ndarray):
+            return np.concatenate(results, axis=0)
 
         return ops.concatenate(results, axis=0)
 

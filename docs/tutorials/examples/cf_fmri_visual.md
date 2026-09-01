@@ -324,7 +324,7 @@ preview_params = pd.DataFrame({
     "baseline": 0.0,
     "amplitude": 1.0,
 })
-preview_predictions = np.asarray(cf_model(stimulus, preview_params))
+preview_predictions = cf_model(stimulus, preview_params)
 
 fig = px.line(
     preview_predictions.T,
@@ -444,7 +444,7 @@ from prfmodel.utils import batched
 predict_batched = batched(cf_model)
 
 # Make predictions with optimized parameters
-pred_response = np.asarray(predict_batched(stimulus, ls_params, batch_size=200))
+pred_response = predict_batched(stimulus, ls_params, batch_size=200)
 ```
 
 We can quantify how well the predictions align with the observed timecourses using the R-squared metric. This metric indicates the proportion of variance in the observed data explained by our model predictions.

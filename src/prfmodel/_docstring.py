@@ -95,6 +95,9 @@ _PARAMS: dict[str, str] = {
     "predicted_response_2d": (
         "Tensor\n    The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`."
     ),
+    "predicted_response_2d_array": (
+        "numpy.ndarray\n    The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`."
+    ),
     "raises_missing_parameters": ("ValueError\n    If `parameters` is missing one or more of :attr:`parameter_names`."),
     "regressors": (
         "regressors : pandas.DataFrame\n"

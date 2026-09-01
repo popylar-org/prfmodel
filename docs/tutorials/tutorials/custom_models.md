@@ -105,13 +105,19 @@ Note that we implement `call`, not `__call__`. Model classes have two entry poin
 - `__call__` is the user-facing **public facade**. It takes the types users typically work with, e.g., a
   {py:class}`~prfmodel.stimuli.PRFStimulus` holding NumPy arrays and a {py:class}`pandas.DataFrame` of
   parameters. It checks that every required parameter is present, resolves the `dtype`, converts everything to
-  backend tensors, and then calls `call`. It is implemented once on the base class, and you should not
-  override it.
+  backend tensors, calls `call`, and converts the result back to a {py:class}`numpy.ndarray`. It is implemented
+  once on the base class, and you should not override it.
 - `call` is the **tensor-only kernel**. It receives a {py:class}`~prfmodel.stimuli.PRFStimulusTensors` (that only holds tensors)
   and a {py:class}`~prfmodel.utils.TensorFrame` (the parameters as tensors,
-  which you select by column name exactly like a data frame). Because everything arriving here is already a
+  which you select by column name exactly like a data frame), and it returns a backend tensor. Because
+  everything arriving here is already a
   tensor and nothing needs validating, this is the method the fitters wrap in `tf.function`, `torch.compile`, or `jax.jit` to
   run the optimization in graph mode.
+
+So the NumPy arrays go in and NumPy arrays come out: a prediction from `__call__` can go straight into
+{py:mod}`matplotlib` or {py:mod}`scipy` with no conversion, and it works the same on GPU for every backend.
+Backend tensors stay an implementation detail below `call`. When you do need a tensor, for example inside your
+own `call`, call `call` directly rather than `__call__`.
 
 That division has one rule you have to respect when writing `call`: it must be **traceable**. Use
 {py:mod}`keras.ops` only, never NumPy or pandas, and never write an `if` statement that branches on a tensor *value*.
@@ -231,7 +237,7 @@ params_mu = pd.DataFrame(
     }
 )
 
-prediction = np.asarray(model(stimulus, params_mu))
+prediction = model(stimulus, params_mu)
 print(prediction.shape)
 ```
 
@@ -285,7 +291,7 @@ params_sigma = pd.DataFrame(
     }
 )
 
-prediction = np.asarray(model(stimulus, params_sigma))
+prediction = model(stimulus, params_sigma)
 
 # Name the columns after the tuning widths so the animation slider shows them instead of the column index
 prediction_sigma = pd.DataFrame(
