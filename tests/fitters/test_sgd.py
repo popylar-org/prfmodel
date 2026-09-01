@@ -97,6 +97,11 @@ class TestSGDFitter(_SGDGradientChecks, TestSetup):
         assert isinstance(result_params, pd.DataFrame)
         assert result_params.shape == params.shape
 
+    def _check_params_dtype(self, result_params: pd.DataFrame, param_names: list[str], dtype: str | None) -> None:
+        dtype = get_dtype(dtype)
+        for name in param_names:
+            assert result_params[name].dtype == dtype
+
     @pytest.mark.parametrize(
         ("optimizer", "loss"),
         [(None, None), (keras.optimizers.Adam, keras.losses.MeanSquaredError)],
@@ -135,6 +140,7 @@ class TestSGDFitter(_SGDGradientChecks, TestSetup):
 
         self._check_history(history)
         self._check_sgd_params_shape(sgd_params, params)
+        self._check_params_dtype(sgd_params, sgd_params.columns, dtype)
         self._check_no_gradient_warnings(record)
         self._check_params_moved(sgd_params, params, moving_params=list(params.columns))
 
@@ -163,6 +169,7 @@ class TestSGDFitter(_SGDGradientChecks, TestSetup):
 
         self._check_history(history)
         self._check_sgd_params_shape(sgd_params, params)
+        self._check_params_dtype(sgd_params, sgd_params.columns, dtype)
 
         assert np.all(sgd_params[fixed] == params[fixed].astype(get_dtype(dtype)))
 
@@ -212,12 +219,40 @@ class TestSGDFitter(_SGDGradientChecks, TestSetup):
 
         self._check_history(history)
         self._check_sgd_params_shape(sgd_params, params)
+        self._check_params_dtype(sgd_params, sgd_params.columns, dtype)
         self._check_no_gradient_warnings(record)
         self._check_params_moved(
             sgd_params,
             params,
             moving_params=[c for c in params.columns if c not in (fixed_parameters or [])],
         )
+
+    def test_extra_adapter_columns_are_nontrainable(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        dtype: str,
+    ):
+        """A label column becomes no optimization variable and is carried through to the estimates."""
+        params_extra = params.assign(min_sigma=[0.05] * len(params))
+        observed = np.asarray(model(stimulus, params))
+
+        adapter = Adapter([ParameterConstraint(["sigma"], lower="min_sigma")])
+
+        with warnings.catch_warnings(record=True) as record:
+            warnings.simplefilter("always")
+            _, fit_params = SGDFitter(model=model, stimulus=stimulus, adapter=adapter, dtype=dtype).fit(
+                observed,
+                params_extra,
+                num_steps=self.num_steps,
+            )
+
+        assert list(fit_params.columns) == list(params_extra.columns)
+        assert np.all(fit_params["min_sigma"] == params_extra["min_sigma"].astype(get_dtype(dtype)))
+
+        self._check_no_gradient_warnings(record)
+        self._check_params_moved(fit_params, params, moving_params=[c for c in params.columns if c != "min_sigma"])
 
     @pytest.mark.heavy
     def test_fit_batch_size(

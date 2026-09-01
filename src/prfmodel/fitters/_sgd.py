@@ -159,6 +159,15 @@ class SGDFitter(BackendSGDFitter):
         self.compile_step = compile_step
         self.dtype = dtype
 
+    def _is_trainable(self, parameter_name: str, fixed_parameters: Sequence[str]) -> bool:
+        return (
+            # Fixed parameters are not trainable
+            (parameter_name in fixed_parameters)
+            |
+            # Parameters that are required by the adapter but are not part of model are not trainable
+            ((parameter_name in self.adapter.parameter_names) & (parameter_name not in self.model.parameter_names))
+        )
+
     def _create_variables(self, init_parameters: pd.DataFrame, fixed_parameters: Sequence[str]) -> None:
         # Keras automatically discovers variables stored in dicts and links to them in
         # 'self.trainable_variables' and 'self.non_trainable_variables'
@@ -167,9 +176,14 @@ class SGDFitter(BackendSGDFitter):
         # prediction, so there is nothing to optimize, and requiring it to be numeric would break the
         # contract that lets a caller carry a label alongside the parameters in one frame.
         self._parameter_variables = {
-            str(key): keras.Variable(val, dtype=self.dtype, name=key, trainable=key not in fixed_parameters)
+            str(key): keras.Variable(
+                val,
+                dtype=self.dtype,
+                name=key,
+                trainable=not self._is_trainable(key, fixed_parameters),
+            )
             for key, val in init_parameters.items()
-            if key in self.model.parameter_names
+            if key in self.model.parameter_names + self.adapter.parameter_names
         }
 
     def _delete_variables(self) -> None:
