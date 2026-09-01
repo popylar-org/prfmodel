@@ -58,6 +58,7 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus, CFStimulusTensors]):
         """Names of parameters used by the model: `center_index`, `sigma`."""
         return ["center_index", "sigma"]
 
+    @doc
     def check_parameter_values(self, parameters: pd.DataFrame) -> None:
         """Check that the parameter values lie inside the domain the model is defined on.
 

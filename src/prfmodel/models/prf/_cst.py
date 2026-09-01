@@ -1,6 +1,7 @@
 """Compressive spatiotemporal (CST) population receptive field models."""
 
 import pandas as pd
+from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import SustainedImpulse
 from prfmodel.impulse import TransientImpulse
@@ -14,6 +15,7 @@ from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import CSTPRFModel
 
 
+@doc
 class Gaussian2DCSTPRFModel(CSTPRFModel):
     r"""
     Compressive spatiotemporal (CST) pRF model with a 2D isotropic Gaussian response.

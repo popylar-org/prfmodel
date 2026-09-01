@@ -579,6 +579,7 @@ class ResolutionMismatchWarning(UserWarning):
     """Warning for when submodels of a canonical model are sampled on time axes of different resolutions."""
 
 
+@doc
 class CSTPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     r"""
     Compressive spatiotemporal (CST) population receptive field (pRF) model.
@@ -704,9 +705,9 @@ class CSTPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
 
         Parameters
         ----------
-        %(stimulus_prf_tensors)
-        %(parameters_tensors)
-        %(regressors_tensors)
+        %(stimulus_prf_tensors)s
+        %(parameters_tensors)s
+        %(regressors_tensors)s
 
         Returns
         -------
