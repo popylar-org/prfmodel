@@ -53,9 +53,9 @@ class ModelProtocol(Protocol):
     Protocol for model classes.
 
     Cannot be instantiated on its own.
-    This protocol is intended to serve as the parent class for custom submodels within
-    :class:`CompositeModelProtocol`. Subclasses must override the abstract
-    :attr:`parameter_names` property.
+    This protocol is intended as the parent class for models that can be composed with
+    :class:`~prfmodel.utils.CompositeModelProtocol`.
+    Subclasses must override the abstract :attr:`parameter_names` property.
 
     Attributes
     ----------
@@ -64,7 +64,7 @@ class ModelProtocol(Protocol):
 
     Examples
     --------
-    Create a custom object class that inherits from the base class:
+    Create a custom model class that inherits from the protocol and overwrites the :attr:`parameter_names` property.
 
     >>> class CustomModel(ModelProtocol):
     ...     @property
@@ -143,8 +143,9 @@ class CompositeModelProtocol(ModelProtocol):
 
     Composite model classes contain one or multiple submodels that are stored as a dict ``{"name": model_instance}``
     in the private :attr:`_models` attribute. This class forwards parameter name and value checks to each submodel. It
-    is intended as a parent class for canonical models, e.g., `~prfmodel.models.base.BaseCanonical`. Child classes
-    should define how submodels are stored in :attr:`_models` by using the public setter method (see example).
+    is intended as a parent class for canonical models, e.g., :class:`~prfmodel.models.base.BaseCanonical`.
+    Child classes should define how submodels are stored in
+    :attr:`_models` by using the public setter method (see example).
 
     Optionally, child classes can define :attr:`_additional_parameter_names` to add parameters that are not part of
     any submodel but still required by the model.
@@ -162,7 +163,7 @@ class CompositeModelProtocol(ModelProtocol):
     ...         self.models = {"dummy_model": dummy_model}  # Use the public setter to store the submodels
     >>> model = DummyModel()
     >>> composite_model = CompositeDummyModel(dummy_model=model)
-    >>> composite_model.parameter_names
+    >>> composite_model.parameter_names  # The composite model collects the parameters of all submodels
     ['a']
 
     """

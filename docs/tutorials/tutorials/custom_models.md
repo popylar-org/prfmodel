@@ -48,7 +48,7 @@ if find_spec("tensorflow") is None:
 
 ### Loading a 1D stimulus
 
-We start by loading an example 1D {py:class}`~prfmodel.stimuli.PRFStimulus` from a numerosity experiment (for details, see {py:func}`load_1d_prf_lognumerosity_stimulus`).
+We start by loading an example 1D {py:class}`~prfmodel.stimuli.PRFStimulus` from a numerosity experiment (for details, see {py:func}`~prfmodel.examples.load_1d_prf_lognumerosity_stimulus`).
 
 ```{code-cell} ipython3
 from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
@@ -114,10 +114,10 @@ Note that we implement `call`, not `__call__`. Model classes have two entry poin
   run the optimization in graph mode.
 
 That division has one rule you have to respect when writing `call`: it must be **traceable**. Use
-{py:mod}`keras.ops` only, never NumPy or pandas, and never write an `if` that branches on a tensor *value*.
+{py:mod}`keras.ops` only, never NumPy or pandas, and never write an `if` statement that branches on a tensor *value*.
 While a graph is being built, a tensor holds no value to branch on, so a check like `if ops.all(sigma > 0)`
-raises. Branching on a tensor *shape* is fine because shapes are known while tracing. If you need to reject bad
-parameter values, do it where the values are still concrete, for example by overriding the `_check_parameter_values`
+raises an error. Branching on a tensor *shape* is fine because shapes are known while tracing. If you need to reject bad
+parameter values, do it where the values are still concrete, for example by overriding the {py:meth}`check_parameter_values`
 method of the model class (more on that soon).
 
 We can also see that `BasePopulationResponse` is a generic class with respect to the stimulus.
@@ -188,9 +188,9 @@ class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTenso
 
 The `mu` parameter defines the preferred location on the stimulus dimension (here: preferred log numerosity) and `sigma` defines the tuning width. Selecting `parameters[["mu"]]` and `parameters[["sigma"]]` gives tensors with shapes `(num_units, 1)`.
 
-Even though we implemented `call`, we still *use* the model by calling it normally — `model(stimulus, parameters)` goes through the facade, which validates the parameters and converts them before reaching our `call`.
+Even though we implemented `call`, we still *use* the model by calling it normally because `model(stimulus, parameters)` goes through the facade, which validates the parameters and converts them before reaching our `call`.
 
-`predict_gaussian_response` expects `mu` and `sigma` to have at least two dimensions — the first for the number of units and the second for the number of spatial dimensions. The function then broadcasts these tensors against the stimulus `grid` to compute the Gaussian response for each unit.
+`predict_gaussian_response` expects `mu` and `sigma` to have at least two dimensions: the first for the number of units and the second for the number of spatial dimensions. The function then broadcasts these tensors against the stimulus `grid` to compute the Gaussian response for each unit.
 
 ### Creating the model
 
