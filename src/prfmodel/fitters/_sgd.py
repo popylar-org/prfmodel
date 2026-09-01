@@ -271,8 +271,10 @@ class SGDFitter(BackendSGDFitter):
         regressors: pd.DataFrame | None,
     ) -> tuple[SGDHistory, pd.DataFrame]:
         """Fit a single data batch and return its step history and final parameters."""
-        # Initialize parameters on transformed scale
-        init_parameters_transformed = self.adapter.transform(init_parameters_batch)
+        # Initialize parameters on transformed scale. The adapter converts the frame into tensors, so it is
+        # given the dtype this fitter computes in: at its own default it would round every column to the
+        # backend's default float, losing precision the caller asked for with a wider dtype.
+        init_parameters_transformed = self.adapter.transform(init_parameters_batch, dtype=self.dtype)
 
         self._create_variables(init_parameters_transformed, fixed_parameters)
 
@@ -290,7 +292,7 @@ class SGDFitter(BackendSGDFitter):
         # reported with the message the model raises rather than as a NaN loss thousands of steps later.
         y_pred = self.model(
             self.stimulus,
-            self.adapter.inverse(init_parameters_transformed),
+            self.adapter.inverse(init_parameters_transformed, dtype=self.dtype),
             regressors=regressors,
             dtype=self.dtype,
         )
@@ -338,7 +340,7 @@ class SGDFitter(BackendSGDFitter):
         # Columns the model does not read never became variables, so they are carried over from the input
         # unchanged instead of being looked up among the estimates. Values are taken as an array because the
         # estimates carry a fresh index that need not line up with the batch's.
-        params = self.adapter.inverse(params)
+        params = self.adapter.inverse(params, dtype=self.dtype)
 
         for name in init_parameters_batch.columns:
             if name not in params.columns:

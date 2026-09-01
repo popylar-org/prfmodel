@@ -81,13 +81,17 @@ class ParameterTransform:
         self.inverse_fun = inverse_fun
 
     @doc
-    def transform(self, parameters: P) -> P:
+    def transform(self, parameters: P, dtype: str | None = None) -> P:  # noqa: ARG002 (unused argument)
         """
         Apply the transformation.
 
         Parameters
         ----------
         %(parameters)s
+        dtype : str, optional
+            Dtype to compute the transformation in. Unused here, because the transformation is applied to the
+            parameter values as they come in. Subclasses that convert the parameters into tensors use it to keep
+            that conversion at the caller's precision.
 
         Returns
         -------
@@ -103,13 +107,15 @@ class ParameterTransform:
         return parameters
 
     @doc
-    def inverse(self, parameters: P) -> P:
+    def inverse(self, parameters: P, dtype: str | None = None) -> P:  # noqa: ARG002 (unused argument)
         """
         Apply the inverse transformation.
 
         Parameters
         ----------
         %(parameters)s
+        dtype : str, optional
+            Dtype to compute the transformation in. Unused here, for the same reason as in :meth:`transform`.
 
         Returns
         -------
@@ -341,7 +347,7 @@ class ParameterConstraint(ParameterTransform):
         return parameters
 
     @doc
-    def transform(self, parameters: P) -> P:
+    def transform(self, parameters: P, dtype: str | None = None) -> P:
         """
         Map bounded parameters onto the unbounded scale.
 
@@ -351,6 +357,9 @@ class ParameterConstraint(ParameterTransform):
         Parameters
         ----------
         %(parameters)s
+        %(dtype)s A dataframe is converted column by column, so a dtype narrower than
+            its values rounds every column, including the ones this transformation leaves untouched. Pass the dtype
+            the caller computes in. Ignored for a :class:`~prfmodel.utils.TensorFrame`, which carries its own.
 
         Returns
         -------
@@ -365,7 +374,7 @@ class ParameterConstraint(ParameterTransform):
 
         """
         if isinstance(parameters, pd.DataFrame):
-            tensor_frame = TensorFrame(parameters.to_dict(orient="list"))
+            tensor_frame = TensorFrame(parameters.to_dict(orient="list"), dtype=dtype)
         else:
             tensor_frame = parameters
 
@@ -379,7 +388,7 @@ class ParameterConstraint(ParameterTransform):
         return tensor_frame
 
     @doc
-    def inverse(self, parameters: P) -> P:
+    def inverse(self, parameters: P, dtype: str | None = None) -> P:
         """
         Map unbounded parameters back onto the bounded natural scale.
 
@@ -390,6 +399,9 @@ class ParameterConstraint(ParameterTransform):
         Parameters
         ----------
         %(parameters)s
+        %(dtype)s A dataframe is converted column by column, so a dtype narrower than
+            its values rounds every column, including the ones this transformation leaves untouched. Pass the dtype
+            the caller computes in. Ignored for a :class:`~prfmodel.utils.TensorFrame`, which carries its own.
 
         Returns
         -------
@@ -403,7 +415,7 @@ class ParameterConstraint(ParameterTransform):
 
         """
         if isinstance(parameters, pd.DataFrame):
-            tensor_frame = TensorFrame(parameters.to_dict(orient="list"))
+            tensor_frame = TensorFrame(parameters.to_dict(orient="list"), dtype=dtype)
         else:
             tensor_frame = parameters
 
@@ -462,8 +474,23 @@ class Adapter:
 
         self.transforms = transforms
 
+    @property
+    def parameter_names(self) -> list[str]:
+        """Unique names of parameters used in the transformations."""
+        param_names: list[str] = []
+        for transform in self.transforms:
+            param_names.extend(transform.parameter_names)
+            # Only a dynamic bound names a parameter. A static bound is a number, which belongs in no
+            # parameter frame and must not be reported as a column a fitter has to supply.
+            param_names.extend(
+                bound
+                for bound in (getattr(transform, "lower", None), getattr(transform, "upper", None))
+                if isinstance(bound, str)
+            )
+        return list(dict.fromkeys(param_names))
+
     @doc
-    def transform(self, parameters: P) -> P:
+    def transform(self, parameters: P, dtype: str | None = None) -> P:
         """
         Apply the transformations sequentially.
 
@@ -472,6 +499,7 @@ class Adapter:
         Parameters
         ----------
         %(parameters)s
+        %(dtype)s
 
         Returns
         -------
@@ -480,12 +508,12 @@ class Adapter:
 
         """
         for transform in self.transforms:
-            parameters = transform.transform(parameters)
+            parameters = transform.transform(parameters, dtype=dtype)
 
         return parameters
 
     @doc
-    def inverse(self, parameters: P) -> P:
+    def inverse(self, parameters: P, dtype: str | None = None) -> P:
         """
         Apply the inverse transformations sequentially.
 
@@ -494,6 +522,7 @@ class Adapter:
         Parameters
         ----------
         %(parameters)s
+        %(dtype)s
 
         Returns
         -------
@@ -502,6 +531,6 @@ class Adapter:
 
         """
         for transform in reversed(self.transforms):
-            parameters = transform.inverse(parameters)
+            parameters = transform.inverse(parameters, dtype=dtype)
 
         return parameters
