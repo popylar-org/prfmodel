@@ -89,6 +89,18 @@ Some impulse models do not use any normalization by default because they are als
 population behavior. For example, the compressive spatio-temporal pRF models uses transient and
 sustained impulse models to describe temporal neuron activation patterns.
 
+## Before convolution, stimulus-encoded model responses are padded with their first frame
+
+To make sure that convolving stimulus-encoded model responses with impulse response returns model predictions for the
+same number of time frames as the stimulus design, we pad stimulus-encoded model responses with their first frame.
+Specifically, we first prepend the repeat the first stimulus-encoded response element for each element in the impulse
+response and then convolve both signals using discrete convolution.
+
+This choice rest on the assumption that the observed response at the first time frame is at baseline (i.e., resting
+state) which is commonly done in experiments by, for example, running dummy scans before real scans in fMRI
+experiments. Stimuli from previous runs in an experiment should not influence the recording of the response to the
+current stimulus.
+
 ## What if I want to deviate from these decisions?
 
 If you have good reasons to deviate from our decisions, you can implement your own models in prfmodel that use
