@@ -1,11 +1,10 @@
 """Weighted difference of two gamma distribution impulse response."""
 
-import pandas as pd
+from typing import ClassVar
 from prfmodel._docstring import doc
 from prfmodel.density._gamma import gamma_density
 from prfmodel.typing import Tensor
-from prfmodel.utils import convert_parameters_to_tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import normalize_response
 from .base import BaseImpulse
 from .defaults import _fetch_default
@@ -35,7 +34,8 @@ class TwoGammaImpulse(BaseImpulse):
     default_parameters : dict of float or str, optional, default="glover_hrf"
         Dictionary with scalar default parameter values or name of default parameter set. Available default
         parameter sets are `glover_hrf` (default) and `spm_hrf`. See :mod:`~prfmodel.impulse.defaults` for details.
-        Dictionary keys must be valid parameter names. Default values can be overriden in the :meth:`__call__` method.
+        Dictionary keys must be valid parameter names.  Default values are overridden by user-supplied parameters in
+        the :meth:`__call__` method.
 
     See Also
     --------
@@ -118,40 +118,38 @@ class TwoGammaImpulse(BaseImpulse):
 
         super().__init__(duration, offset, resolution, norm, default_parameters)
 
+    _positive_parameter_names: ClassVar[tuple[str, ...]] = ("delay", "dispersion", "undershoot", "u_dispersion")
+
     @property
-    def _all_parameter_names(self) -> list[str]:
+    def parameter_names(self) -> list[str]:
         """Parameter names are: `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`."""
         return ["delay", "dispersion", "undershoot", "u_dispersion", "ratio"]
 
     @doc
-    def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def call(self, parameters: TensorFrame) -> Tensor:
         """
         Predict the impulse response.
 
         Parameters
         ----------
-        %(parameters)s Parameter values override default parameters.
-        %(dtype)s
+        %(parameters_tensors)s :attr:`default_parameters` must already be merged in.
+
 
         Returns
         -------
         :data:`prfmodel.typing.Tensor`
-            The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
-
-        Raises
-        ------
-        %(raises_missing_parameters)s
+            The predicted impulse response with shape `(num_units, num_frames)`.
 
         """
         parameters = self._join_default_parameters(parameters)
-        dtype = get_dtype(dtype)
+        dtype = parameters.dtype
         frames = self.get_frames(dtype)
 
-        delay = convert_parameters_to_tensor(parameters[["delay"]], dtype=dtype)
-        dispersion = convert_parameters_to_tensor(parameters[["dispersion"]], dtype=dtype)
-        undershoot = convert_parameters_to_tensor(parameters[["undershoot"]], dtype=dtype)
-        u_dispersion = convert_parameters_to_tensor(parameters[["u_dispersion"]], dtype=dtype)
-        ratio = convert_parameters_to_tensor(parameters[["ratio"]], dtype=dtype)
+        delay = parameters[["delay"]]
+        dispersion = parameters[["dispersion"]]
+        undershoot = parameters[["undershoot"]]
+        u_dispersion = parameters[["u_dispersion"]]
+        ratio = parameters[["ratio"]]
 
         dens_1 = gamma_density(frames, delay / dispersion, dispersion)
         dens_2 = gamma_density(frames, undershoot / u_dispersion, u_dispersion)

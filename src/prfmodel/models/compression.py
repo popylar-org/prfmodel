@@ -7,22 +7,23 @@ Compressive models are intented to be used as encoding submodels within canonica
 
 Notes
 -----
-Classes in this module are generic, that is, they can take arbitrary stimuli as input (e.g., they work both
-for :class:`~prfmodel.stimuli.PRFStimulus` and :class:`~prfmodel.stimuli.CFStimulus`).
+Classes in this module are generic, that is, they must define the user-facing and tensor-holding stimulus types
+that :meth:`call` takes as input (see also :mod:`~prfmodel.models.base`).
 
 """
 
-import pandas as pd
+from typing import cast
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.models.base import S
+from prfmodel.models.base import T
+from prfmodel.protocols import CompositeModelProtocol
 from prfmodel.typing import Tensor
-from prfmodel.utils import convert_parameters_to_tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import TensorFrame
 
 
-class CompressiveEncoder(BaseStimulusEncoder[S]):
+class CompressiveEncoder(CompositeModelProtocol, BaseStimulusEncoder[S, T]):
     r"""
     Compressive encoding model.
 
@@ -77,56 +78,35 @@ class CompressiveEncoder(BaseStimulusEncoder[S]):
 
     """
 
+    _additional_parameter_names = ("gain", "n")
+
     def __init__(self, encoding_model: BaseStimulusEncoder, min_response: float = 1e-10):
-        self.encoding_model = encoding_model
+        self.models = {"encoding_model": encoding_model}
         self.min_response = min_response
 
-    @property
-    def parameter_names(self) -> list[str]:
-        """Names of parameters used by the model: `gain` and `n`."""
-        return ["gain", "n"]
-
     @doc
-    def __call__(
-        self,
-        stimulus: S,
-        response: Tensor,
-        parameters: pd.DataFrame,
-        dtype: str | None = None,
-    ) -> Tensor:
+    def call(self, stimulus: T, response: Tensor, parameters: TensorFrame) -> Tensor:
         """Compress and encode a model response with a stimulus.
 
         Encodes the model response, then compresses and amplifies the encoded response.
 
         Parameters
         ----------
-        %(stimulus)s The stimulus type must match the expected stimulus type of the wrapped encoding model instance
-            (i.e., :attr:`~CompressiveEncoder.encoding_model`).
+        %(stimulus_tensors)s
         response : Tensor
             Model response.
-        %(parameters)s
-        %(dtype)s
+        %(parameters_tensors)s
 
         Returns
         -------
         :data:`prfmodel.typing.Tensor`
-            The compressed and stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`.
+            The compressed and stimulus encoded model response with shape `(num_units, ...)`.
             The number of units is the number of rows in `parameters`. The number and size of other axes depends on
             the stimulus and the response.
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        dtype = get_dtype(dtype=dtype)
-        gain = convert_parameters_to_tensor(parameters[["gain"]], dtype)
-        n = convert_parameters_to_tensor(parameters[["n"]], dtype)
-        response = self.encoding_model(
-            stimulus=stimulus,
-            response=response,
-            parameters=parameters,
-            dtype=dtype,
-        )
+        gain = parameters[["gain"]]
+        n = parameters[["n"]]
+        encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
+        response = encoding_model.call(stimulus, response, parameters)
         return gain * ops.power(ops.maximum(response, self.min_response), n)

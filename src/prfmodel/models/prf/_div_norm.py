@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseStimulusEncoder
@@ -18,6 +18,7 @@ from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import DivNormPRFModel
 
 
+@doc
 class DivNormGaussian2DPRFModel(DivNormPRFModel):
     r"""
     Divisive normalization population receptive field (pRF) model with isotropic 2D Gaussian responses.
@@ -250,4 +251,4 @@ def _peak_normalization_drive(div_norm_params: pd.DataFrame, stimulus: PRFStimul
     norm_response = Gaussian2DPRFResponse()(stimulus, norm_params, dtype=dtype)
     norm_drive = PRFStimulusEncoder()(stimulus, norm_response, norm_params, dtype=dtype)
 
-    return np.asarray(ops.convert_to_numpy(ops.max(norm_drive, axis=1)))
+    return np.max(norm_drive, axis=1)

@@ -1,12 +1,11 @@
 """Temporal channel impulse responses of the compressive spatiotemporal (CST) model."""
 
-import pandas as pd
+from typing import ClassVar
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.density._gamma import gamma_density
 from prfmodel.typing import Tensor
-from prfmodel.utils import convert_parameters_to_tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import normalize_response
 from .base import BaseImpulse
 
@@ -33,7 +32,7 @@ class SustainedImpulse(BaseImpulse):
         its own normalizing constant, as in the reference implementation.
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Dictionary keys must be valid parameter names.
-        Default values can be overriden in the :meth:`__call__` method.
+        Default values are overridden by user-supplied parameters in the :meth:`__call__` method.
     shape : float, default=9.0
         Shape of the gamma distribution (:math:`m` in the reference). Fixed at 9 in [1]_.
 
@@ -77,6 +76,8 @@ class SustainedImpulse(BaseImpulse):
 
     """
 
+    _positive_parameter_names: ClassVar[tuple[str, ...]] = ("time_to_peak",)
+
     def __init__(  # noqa: PLR0913 (too many arguments)
         self,
         duration: float = 32.0,
@@ -91,34 +92,29 @@ class SustainedImpulse(BaseImpulse):
         super().__init__(duration, offset, resolution, norm, default_parameters)
 
     @property
-    def _all_parameter_names(self) -> list[str]:
+    def parameter_names(self) -> list[str]:
         """Parameter names are: `time_to_peak`."""
         return ["time_to_peak"]
 
     @doc
-    def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def call(self, parameters: TensorFrame) -> Tensor:
         """
         Predict the impulse response.
 
         Parameters
         ----------
-        %(parameters)s Parameter values override default parameters.
-        %(dtype)s
+        %(parameters_tensors)s :attr:`default_parameters` must already be merged in.
 
         Returns
         -------
         :data:`prfmodel.typing.Tensor`
-            The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
-
-        Raises
-        ------
-        %(raises_missing_parameters)s
+            The predicted impulse response with shape `(num_units, num_frames)`.
 
         """
         parameters = self._join_default_parameters(parameters)
-        dtype = get_dtype(dtype)
+        dtype = parameters.dtype
         frames = self.get_frames(dtype)
-        time_to_peak = convert_parameters_to_tensor(parameters[["time_to_peak"]], dtype=dtype)
+        time_to_peak = parameters[["time_to_peak"]]
 
         dens = _gamma_at_scale(frames, _reference_scale(time_to_peak, self.shape), self.shape)
 
@@ -151,7 +147,7 @@ class TransientImpulse(BaseImpulse):
         a biphasic response sums to approximately zero and `norm="sum"` divides by that near-zero value.
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Dictionary keys must be valid parameter names.
-        Default values can be overriden in the :meth:`__call__` method.
+        Default values are overridden by user-supplied parameters in the :meth:`__call__` method.
     shape : float, default=9.0
         Shape of the excitatory gamma distribution (:math:`m` in the reference). Fixed at 9 in [1]_.
     inhibitory_shape : float, default=10.0
@@ -195,6 +191,8 @@ class TransientImpulse(BaseImpulse):
 
     """
 
+    _positive_parameter_names: ClassVar[tuple[str, ...]] = ("time_to_peak",)
+
     def __init__(  # noqa: PLR0913 (too many arguments)
         self,
         duration: float = 32.0,
@@ -213,34 +211,29 @@ class TransientImpulse(BaseImpulse):
         super().__init__(duration, offset, resolution, norm, default_parameters)
 
     @property
-    def _all_parameter_names(self) -> list[str]:
+    def parameter_names(self) -> list[str]:
         """Parameter names are: `time_to_peak`."""
         return ["time_to_peak"]
 
     @doc
-    def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def call(self, parameters: TensorFrame) -> Tensor:
         """
         Predict the impulse response.
 
         Parameters
         ----------
-        %(parameters)s Parameter values override default parameters.
-        %(dtype)s
+        %(parameters_tensors)s :attr:`default_parameters` must already be merged in.
 
         Returns
         -------
         :data:`prfmodel.typing.Tensor`
-            The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
-
-        Raises
-        ------
-        %(raises_missing_parameters)s
+            The predicted impulse response with shape `(num_units, num_frames)`.
 
         """
         parameters = self._join_default_parameters(parameters)
-        dtype = get_dtype(dtype)
+        dtype = parameters.dtype
         frames = self.get_frames(dtype)
-        time_to_peak = convert_parameters_to_tensor(parameters[["time_to_peak"]], dtype=dtype)
+        time_to_peak = parameters[["time_to_peak"]]
 
         scale = _reference_scale(time_to_peak, self.shape)
 

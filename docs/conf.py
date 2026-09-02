@@ -9,6 +9,7 @@
 
 import pathlib
 import sys
+from sphinx.ext.inheritance_diagram import InheritanceGraph
 
 sys.path.insert(0, pathlib.Path("../src").resolve().as_posix())
 from prfmodel._docstring import _PARAMS
@@ -158,6 +159,53 @@ def _skip_external_inherited_members(  # noqa: PLR0913
         return True
 
     return None
+
+
+# -- Hide helper classes in inheritance diagrams
+
+_HIDDEN_INHERITANCE_CLASSES = frozenset({"typing.Generic", "typing.Protocol"})
+
+_original_class_info = InheritanceGraph._class_info  # noqa: SLF001
+
+
+def _is_hidden_class(full_name: str) -> bool:
+    return full_name in _HIDDEN_INHERITANCE_CLASSES or full_name.rsplit(".", 1)[-1].startswith("_")
+
+
+def _class_info_without_hidden_classes(
+    self: InheritanceGraph,
+    *args: object,
+    **kwargs: object,
+) -> list[tuple[str, str, tuple[str, ...], str | None]]:
+    """Remove hidden classes from an inheritance graph and reconnect their subclasses to their bases.
+
+    Sphinx drops private base classes from the graph without reconnecting their subclasses, which leaves those
+    subclasses without any edges (e.g., the dual pRF models, which share a private base class). Typing helpers such
+    as :class:`typing.Generic` add edges that carry no information about the model hierarchy. Both are removed here
+    while keeping the remaining edges intact.
+
+    """
+    class_info = _original_class_info(self, *args, **kwargs)
+    hidden_bases = {name: bases for name, full_name, bases, _ in class_info if _is_hidden_class(full_name)}
+
+    def resolve(base: str, seen: set[str]) -> list[str]:
+        if base not in hidden_bases:
+            return [base]
+        resolved = []
+        for parent in hidden_bases[base]:
+            if parent not in seen:
+                seen.add(parent)
+                resolved.extend(resolve(parent, seen))
+        return resolved
+
+    return [
+        (name, full_name, tuple(dict.fromkeys(b for base in bases for b in resolve(base, {name}))), tooltip)
+        for name, full_name, bases, tooltip in class_info
+        if not _is_hidden_class(full_name)
+    ]
+
+
+InheritanceGraph._class_info = _class_info_without_hidden_classes  # noqa: SLF001
 
 
 def setup(app: object) -> None:

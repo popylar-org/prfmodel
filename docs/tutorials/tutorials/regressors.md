@@ -120,11 +120,11 @@ regressors = pd.DataFrame({
     "reg_event": regressor_event,
 })
 
-true_response = np.asarray(prf_model(
+true_response = prf_model(
     stimulus=stimulus,
     parameters=true_params,
     regressors=regressors,
-))
+)
 ```
 
 We can plot the predicted response and the regressors.
@@ -167,6 +167,7 @@ param_grid = {
 grid_fitter = GridFitter(
     model=prf_model,
     stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 _, grid_params = grid_fitter.fit(
@@ -183,11 +184,11 @@ We can use the estimated parameters from the grid search to predict a neural res
 neural time course.
 
 ```{code-cell} ipython3
-grid_response = np.asarray(prf_model(
+grid_response = prf_model(
     stimulus=stimulus,
     parameters=grid_params,
     regressors=regressors,
-))
+)
 
 fig, ax = plt.subplots()
 
@@ -226,11 +227,11 @@ ls_params
 Again, we can make a prediction with the least squares parameters and compare it against the true timecourse.
 
 ```{code-cell} ipython3
-ls_response = np.asarray(prf_model(
+ls_response = prf_model(
     stimulus=stimulus,
     parameters=ls_params,
     regressors=regressors,
-))
+)
 
 fig, ax = plt.subplots()
 
@@ -254,6 +255,7 @@ from prfmodel.fitters import SGDFitter
 sgd_fitter = SGDFitter(
     model=prf_model,
     stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 _, sgd_params = sgd_fitter.fit(
@@ -267,11 +269,11 @@ _, sgd_params = sgd_fitter.fit(
 We compare predicted SGD timecourses against the true signal and see that they almost perfectly align.
 
 ```{code-cell} ipython3
-sgd_response = np.asarray(prf_model(
+sgd_response = prf_model(
     stimulus=stimulus,
     parameters=sgd_params,
     regressors=regressors,
-))
+)
 
 fig, ax = plt.subplots()
 

@@ -7,9 +7,9 @@ from keras import ops
 from prfmodel.fitters.adapter import Adapter
 from prfmodel.fitters.adapter import ParameterConstraint
 from prfmodel.fitters.adapter import ParameterTransform
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 
-parameterize_params_wrapper = pytest.mark.parametrize("params_wrapper", [pd.DataFrame, ParamsDict])
+parameterize_params_wrapper = pytest.mark.parametrize("params_wrapper", [pd.DataFrame, TensorFrame])
 
 
 @pytest.fixture
@@ -321,3 +321,28 @@ def test_adapter(params_wrapper: type, bounded_params: dict):
             rtol=1e-6,
             err_msg=f"Adapter does not round-trip '{name}'",
         )
+
+
+@pytest.mark.parametrize("dtype", ["float32", "float64"])
+def test_adapter_dtype_is_passed_through(dtype: str, bounded_params: dict):
+    """Test that the requested dtype, not the backend default, sets the precision of the returned frame."""
+    adapter = Adapter([ParameterConstraint(["x"], lower="low")])
+
+    params = pd.DataFrame(bounded_params).astype("float64")
+
+    result = adapter.transform(params, dtype=dtype)
+
+    assert all(result.dtypes == np.dtype(dtype))
+    # 'high' takes part in no transformation, so it must come back exactly as it went in when the caller
+    # asks for the dtype it holds its values in.
+    if dtype == "float64":
+        np.testing.assert_array_equal(result["high"].to_numpy(), bounded_params["high"])
+
+
+def test_adapter_parameter_names_lists_dynamic_bounds_only():
+    """Test that a dynamic bound is reported as a parameter name and a static (numeric) bound is not."""
+    dynamic = Adapter([ParameterConstraint(["x"], lower="low"), ParameterConstraint(["y"], upper="high")])
+    static = Adapter([ParameterConstraint(["x"], lower=1.5), ParameterConstraint(["y"], upper=8.5)])
+
+    assert dynamic.parameter_names == ["x", "low", "y", "high"]
+    assert static.parameter_names == ["x", "y"]

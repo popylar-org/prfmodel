@@ -177,7 +177,11 @@ parameter combinations to evaluate. Let's construct the `GridFitter` and run the
 ```{code-cell} ipython3
 from prfmodel.fitters import GridFitter
 
-grid_fitter = GridFitter(model=gaussian_model, stimulus=stimulus)
+grid_fitter = GridFitter(
+    model=gaussian_model,
+    stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
+)
 
 grid_history, grid_params = grid_fitter.fit(
     data=simulated_response,
@@ -267,6 +271,7 @@ sgd_fitter = SGDFitter(
     model=prf_model,
     stimulus=stimulus,
     adapter=css_adapter,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 # Add starting values for CSS parameters
@@ -307,6 +312,7 @@ sgd_fitter = SGDFitter(
     model=prf_model,
     stimulus=stimulus,
     adapter=css_adapter,
+    compile_step=True,
 )
 
 fixed_params.remove("n")  # Add 'n' to free parameters

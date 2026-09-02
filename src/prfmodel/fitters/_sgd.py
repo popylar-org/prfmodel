@@ -6,7 +6,7 @@ import keras
 import pandas as pd
 from keras import ops
 from tqdm.auto import tqdm
-from prfmodel._backend import BackendSGDFitter
+from prfmodel._backend._fitters import BackendSGDFitter
 from prfmodel._docstring import doc
 from prfmodel.fitters.adapter import Adapter
 from prfmodel.models.base import BaseCanonical
@@ -53,6 +53,7 @@ class SGDHistory:
             self.history.setdefault(k, []).append(v)
 
 
+@doc
 class SGDFitter(BackendSGDFitter):
     """
     Fit population receptive field models with stochastic gradient descent (SGD).
@@ -71,6 +72,12 @@ class SGDFitter(BackendSGDFitter):
     loss : keras.optimizers.Loss or Callable, optional
         Loss instance or function with the signatur `f(y, y_pred)`, where `y` are the target data and `y_pred` are the
         model predicitons. Default is `None` where a `keras.optimizers.MeanSquaredError` loss is used.
+    compile_step : bool, default=False
+        Whether to compile the optimization step with the backend's native primitive: `jax.jit` on JAX,
+        `tf.function` on TensorFlow and `torch.compile` on PyTorch. With `False` (the default) the step
+        runs eagerly, which is slower but makes the step inspectable and produces Python
+        tracebacks that point at the offending line. Whether compiling pays off depends on the backend
+        and on the problem size.
     %(dtype)s
 
     Notes
@@ -82,6 +89,14 @@ class SGDFitter(BackendSGDFitter):
     When `batch_size` is set in :meth:`fit`, units are split into data batches that are each optimized independently
     for `num_steps` steps, with freshly-initialized optimizer state per batch. This bounds memory use for large
     datasets without changing the result for any given unit, since units do not share parameters or gradients.
+
+    When `compile_step` is enabled, the optimization step is compiled once per data batch and then reused
+    for every step, so the cost of tracing is paid once rather than `num_steps` times. Compiling requires
+    that no tensor value is read back inside the step, since while the graph is being built there are no
+    values to read. Parameter checks therefore run before the loop: the initial parameters are passed
+    through one prediction while nothing is traced yet, so invalid starting values still raise with a
+    useful message. Values that only become invalid *during* the optimization are not reported and show
+    up as a `NaN` loss instead.
 
     Examples
     --------
@@ -121,6 +136,7 @@ class SGDFitter(BackendSGDFitter):
         adapter: Adapter | None = None,
         optimizer: keras.optimizers.Optimizer | None = None,
         loss: keras.losses.Loss | Callable | None = None,
+        compile_step: bool = False,
         dtype: str | None = None,
     ):
         super().__init__()
@@ -140,14 +156,34 @@ class SGDFitter(BackendSGDFitter):
         self.adapter = adapter
         self.optimizer = optimizer
         self.loss = loss
+        self.compile_step = compile_step
         self.dtype = dtype
+
+    def _is_trainable(self, parameter_name: str, fixed_parameters: Sequence[str]) -> bool:
+        return (
+            # Fixed parameters are not trainable
+            (parameter_name in fixed_parameters)
+            |
+            # Parameters that are required by the adapter but are not part of model are not trainable
+            ((parameter_name in self.adapter.parameter_names) & (parameter_name not in self.model.parameter_names))
+        )
 
     def _create_variables(self, init_parameters: pd.DataFrame, fixed_parameters: Sequence[str]) -> None:
         # Keras automatically discovers variables stored in dicts and links to them in
         # 'self.trainable_variables' and 'self.non_trainable_variables'
+        #
+        # Only the columns the model reads become variables. A column no model consumes cannot move the
+        # prediction, so there is nothing to optimize, and requiring it to be numeric would break the
+        # contract that lets a caller carry a label alongside the parameters in one frame.
         self._parameter_variables = {
-            str(key): keras.Variable(val, dtype=self.dtype, name=key, trainable=key not in fixed_parameters)
+            str(key): keras.Variable(
+                val,
+                dtype=self.dtype,
+                name=key,
+                trainable=not self._is_trainable(key, fixed_parameters),
+            )
             for key, val in init_parameters.items()
+            if key in self.model.parameter_names + self.adapter.parameter_names
         }
 
     def _delete_variables(self) -> None:
@@ -216,6 +252,7 @@ class SGDFitter(BackendSGDFitter):
                 adapter=self.adapter,
                 optimizer=keras.optimizers.deserialize(keras.optimizers.serialize(self.optimizer)),
                 loss=self.loss,
+                compile_step=self.compile_step,
                 dtype=self.dtype,
             )
             batch_history, batch_params = batch_fitter._fit_batch(  # noqa: SLF001 (private member access)
@@ -248,8 +285,10 @@ class SGDFitter(BackendSGDFitter):
         regressors: pd.DataFrame | None,
     ) -> tuple[SGDHistory, pd.DataFrame]:
         """Fit a single data batch and return its step history and final parameters."""
-        # Initialize parameters on transformed scale
-        init_parameters_transformed = self.adapter.transform(init_parameters_batch)
+        # Initialize parameters on transformed scale. The adapter converts the frame into tensors, so it is
+        # given the dtype this fitter computes in: at its own default it would round every column to the
+        # backend's default float, losing precision the caller asked for with a wider dtype.
+        init_parameters_transformed = self.adapter.transform(init_parameters_batch, dtype=self.dtype)
 
         self._create_variables(init_parameters_transformed, fixed_parameters)
 
@@ -263,11 +302,36 @@ class SGDFitter(BackendSGDFitter):
 
         history = SGDHistory()
 
+        # One validated prediction before the loop, so that starting values outside a model's domain are
+        # reported with the message the model raises rather than as a NaN loss thousands of steps later.
+        # The facade returns a 'numpy.ndarray'; convert back so that 'compute_loss' builds against a tensor
+        # of 'self.dtype' on the backend's device rather than against a host array.
+        y_pred = ops.convert_to_tensor(
+            self.model(
+                self.stimulus,
+                self.adapter.inverse(init_parameters_transformed, dtype=self.dtype),
+                regressors=regressors,
+                dtype=self.dtype,
+            ),
+            dtype=self.dtype,
+        )
+
+        # Keras builds the compiled loss on its first call. Doing that here rather than inside the step
+        # keeps the build out of the traced region, where TorchDynamo fails to rewrite it. The call has no
+        # side effect beyond the build: it updates no metric and touches no variable.
+        self.compute_loss(y=data_batch, y_pred=y_pred)
+
+        step_fun = self._make_step_fun(self.stimulus, data_batch, regressors)
+
+        # Reading a log value back from the device synchronizes with it, which would serialize the whole
+        # loop against the progress bar. Refreshing about a hundred times is enough for a progress bar.
+        postfix_every = max(1, num_steps // 100)
+
         with tqdm(range(num_steps), desc="Optimizing batch", leave=False) as pbar:
             for step in pbar:
-                logs, state = self._update_model_weights(self.stimulus, data_batch, state, regressors)
+                logs, state = step_fun(state)
 
-                if logs:
+                if logs and step % postfix_every == 0:
                     pbar.set_postfix({key: float(value) for key, value in logs.items()})
 
                 history.on_step_end(step, logs)
@@ -291,8 +355,17 @@ class SGDFitter(BackendSGDFitter):
             {v.name: ops.convert_to_numpy(v.value) for v in self.trainable_variables + self.non_trainable_variables},
         )
 
-        # Transform parameters back to natural scale, sorted according to the initial parameter columns
-        params = self.adapter.inverse(params)[init_parameters_batch.columns]
+        # Transform parameters back to natural scale, sorted according to the initial parameter columns.
+        # Columns the model does not read never became variables, so they are carried over from the input
+        # unchanged instead of being looked up among the estimates. Values are taken as an array because the
+        # estimates carry a fresh index that need not line up with the batch's.
+        params = self.adapter.inverse(params, dtype=self.dtype)
+
+        for name in init_parameters_batch.columns:
+            if name not in params.columns:
+                params[name] = init_parameters_batch[name].to_numpy()
+
+        params = params[init_parameters_batch.columns]
 
         self._delete_variables()
 

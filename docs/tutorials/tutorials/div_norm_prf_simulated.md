@@ -196,6 +196,7 @@ from prfmodel.fitters import GridFitter
 grid_fitter = GridFitter(
     model=gaussian_model,
     stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 grid_history, grid_params = grid_fitter.fit(
@@ -283,6 +284,7 @@ sgd_fitter = SGDFitter(
     model=dog_model,
     stimulus=stimulus,
     adapter=adapter,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 sgd_history, dog_params = sgd_fitter.fit(
@@ -337,6 +339,7 @@ sgd_fitter = SGDFitter(
     model=css_model,
     stimulus=stimulus,
     adapter=adapter,
+    compile_step=True,
 )
 
 sgd_history, css_params = sgd_fitter.fit(
@@ -427,6 +430,7 @@ sgd_fitter = SGDFitter(
     stimulus=stimulus,
     optimizer=Adam(learning_rate=0.01),
     adapter=adapter,
+    compile_step=True,
 )
 
 sgd_history, dn_params = sgd_fitter.fit(

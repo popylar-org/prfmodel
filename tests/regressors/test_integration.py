@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import pytest
 from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.impulse import ShiftedGammaImpulse
+from prfmodel.impulse import TwoGammaImpulse
 from prfmodel.models.cf import GaussianCFModel
 from prfmodel.models.prf import DoG2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFModel
@@ -152,6 +154,65 @@ class TestPRFIntegration(PRFStimulusSetup):
                 base_params,
                 regressors=pd.DataFrame({"mx": np.zeros(num_frames)}),
             )
+
+    def test_design_missing_a_required_column_raises(
+        self,
+        stimulus: PRFStimulus,
+        base_params: pd.DataFrame,
+        impulse_model: DerivativeTwoGammaImpulse,
+    ):
+        """A design that omits a required regressor column names it instead of failing on a lookup.
+
+        The canonical facade reaches its regressors model through `call`, which selects columns from a
+        :class:`~prfmodel.utils.TensorFrame` by name. Without the check the missing column surfaces as a bare
+        `KeyError` from inside a trace.
+
+        """
+        model = Gaussian2DPRFModel(
+            impulse_model=impulse_model,
+            regressors_model=AdditiveRegressors(names=["mx"]),
+        )
+        params = base_params.copy()
+        params["beta_mx"] = [0.0, 0.0]
+        num_frames = stimulus.design.shape[0]
+
+        with pytest.raises(ValueError, match=r"missing required column"):
+            model(stimulus, params, regressors=pd.DataFrame({"not_mx": np.zeros(num_frames)}))
+
+    def test_list_child_parameter_domain_is_checked(self, stimulus: PRFStimulus):
+        """A regressors model passed as a list still has its children's domain checks run.
+
+        A list is wrapped in a :class:`~prfmodel.regressors.RegressorsList`, which stands between the canonical
+        model and the child that owns the impulse model whose domain is violated here.
+
+        The two impulse models deliberately differ. Sharing one instance with the parent would leave the parent's
+        own submodel check catching the bad value first, so the test would pass whether or not the list forwards
+        anything. `undershoot` is a parameter only the regressor's :class:`~prfmodel.impulse.TwoGammaImpulse`
+        constrains, which leaves the list as the sole route to the check.
+
+        """
+        model = Gaussian2DPRFModel(
+            impulse_model=ShiftedGammaImpulse(),
+            regressors_model=[ConvolvedRegressors(names=["task"], impulse_model=TwoGammaImpulse())],
+        )
+        params = pd.DataFrame(
+            {
+                "mu_x": [0.0],
+                "mu_y": [1.0],
+                "sigma": [1.0],
+                "delay": [6.0],
+                "dispersion": [0.9],
+                "shift": [0.0],
+                "baseline": [0.1],
+                "amplitude": [-2.0],
+                "beta_task": [1.0],
+                "undershoot": [-1.0],
+            },
+        )
+        num_frames = stimulus.design.shape[0]
+
+        with pytest.raises(ValueError, match="must be > 0"):
+            model(stimulus, params, regressors=pd.DataFrame({"task": np.zeros(num_frames)}))
 
 
 class TestDoGIntegration(PRFStimulusSetup):

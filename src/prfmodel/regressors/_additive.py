@@ -1,13 +1,10 @@
 """Additive regressor model."""
 
-import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
-from prfmodel.utils import convert_parameters_to_tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import TensorFrame
 from .base import BaseRegressors
-from .base import _extract_design
 
 
 class AdditiveRegressors(BaseRegressors):
@@ -52,43 +49,25 @@ class AdditiveRegressors(BaseRegressors):
     def __init__(self, names: list[str]):
         super().__init__()
 
-        self.names = list(names)
-
-    @property
-    def parameter_names(self) -> list[str]:
-        """Names of parameters used by the model: ``beta_<name>`` for each regressor name."""
-        return [f"beta_{name}" for name in self.names]
+        self._regressor_names = tuple(names)
+        self._additional_parameter_names = tuple(f"beta_{name}" for name in self.regressor_names)
 
     @doc
-    def __call__(
-        self,
-        regressors: pd.DataFrame,
-        parameters: pd.DataFrame,
-        dtype: str | None = None,
-    ) -> Tensor:
+    def call(self, regressors: TensorFrame, parameters: TensorFrame) -> Tensor:
         """
         Compute the additive regressor prediction.
 
         Parameters
         ----------
-        %(regressors)s
-        %(parameters)s
-        %(dtype)s
+        %(regressors_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------
         %(predicted_response_2d)s
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        dtype = get_dtype(dtype)
-
-        design_df = _extract_design(regressors, self.names)
-        design = ops.convert_to_tensor(design_df.to_numpy(), dtype=dtype)
-        betas = convert_parameters_to_tensor(parameters[self.parameter_names], dtype=dtype)
+        design = regressors[self.regressor_names]
+        betas = parameters[self.parameter_names]
 
         return ops.matmul(betas, ops.transpose(design))

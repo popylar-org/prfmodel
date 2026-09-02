@@ -1,13 +1,10 @@
 """Baseline scaling model."""
 
-import pandas as pd
-from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.exceptions import ShapeError
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
-from prfmodel.utils import convert_parameters_to_tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import TensorFrame
 from .base import BaseScaling
 
 
@@ -44,7 +41,7 @@ class Baseline(BaseScaling):
         return ["baseline"]
 
     @doc
-    def __call__(self, inputs: Tensor, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def call(self, inputs: Tensor, parameters: TensorFrame) -> Tensor:
         """
         Predict the model response.
 
@@ -52,25 +49,16 @@ class Baseline(BaseScaling):
         ----------
         inputs : :data:`prfmodel.typing.Tensor`
             Input tensor with temporal response and shape (num_units, num_frames).
-        %(parameters)s
-        %(dtype)s
+        %(parameters_tensors)s
 
         Returns
         -------
         %(predicted_response_2d)s
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        dtype = get_dtype(dtype)
-        inputs = ops.convert_to_tensor(inputs, dtype=dtype)
-
         if len(inputs.shape) != _EXPECTED_NDIM:
             raise ShapeError("inputs", inputs.shape, f"must have exactly {_EXPECTED_NDIM} dimensions")  # noqa: EM101 (exception literal)
 
-        baseline = convert_parameters_to_tensor(parameters[["baseline"]], dtype=dtype)
+        baseline = parameters[["baseline"]]
 
         return inputs + baseline

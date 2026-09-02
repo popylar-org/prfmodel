@@ -12,7 +12,7 @@ responses.
 
 Notes
 -----
-All models in in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that requires them to implement a
-:attr:`~prfmodel.utils.ModelProtocol.parameter_names` property.
+All models in in this module inherit from :class:`~prfmodel.protocols.ModelProtocol` that requires them to implement a
+:attr:`~prfmodel.protocols.ModelProtocol.parameter_names` property.
 
 """

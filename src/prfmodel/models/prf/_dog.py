@@ -1,6 +1,7 @@
 """Difference of Gaussians population receptive field models."""
 
 import pandas as pd
+from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseStimulusEncoder
@@ -12,6 +13,7 @@ from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import CenterSurroundPRFModel
 
 
+@doc
 class DoG2DPRFModel(CenterSurroundPRFModel):
     r"""
     Two-dimensional Difference of Gaussians (DoG) population receptive field (pRF) model.

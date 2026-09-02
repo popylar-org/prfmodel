@@ -1,7 +1,6 @@
 """Gaussian response models."""
 
 import math
-import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.exceptions import ShapeError
@@ -14,10 +13,10 @@ from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
+from prfmodel.stimuli import PRFStimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
-from prfmodel.utils import convert_parameters_to_tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import TensorFrame
 from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import CanonicalPRFModel
 
@@ -144,7 +143,7 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     return ops.exp(-resp) / volume
 
 
-class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus]):
+class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTensors]):
     """
     Two-dimensional isotropic Gaussian neuron population receptive field response model.
 
@@ -175,15 +174,14 @@ class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus]):
         return ["mu_y", "mu_x", "sigma"]
 
     @doc
-    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def call(self, stimulus: PRFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
         Predict the model response for a stimulus with a 2D grid.
 
         Parameters
         ----------
-        %(stimulus_prf)s
-        %(parameters)s
-        %(dtype)s
+        %(stimulus_prf_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------
@@ -192,22 +190,12 @@ class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus]):
             `num_units` is the number of rows in `parameters` and `size_y` and `size_x` are the sizes of the
             x and y stimulus grid dimension.
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        dtype = get_dtype(dtype)
         # Convention is y-dimension first
-        mu = convert_parameters_to_tensor(parameters[["mu_y", "mu_x"]], dtype=dtype)
-        sigma = convert_parameters_to_tensor(parameters[["sigma"]], dtype=dtype)
-        grid = ops.convert_to_tensor(stimulus.grid, dtype=dtype)
-
-        return predict_gaussian_response(grid, mu, sigma)
+        return predict_gaussian_response(stimulus.grid, parameters[["mu_y", "mu_x"]], parameters[["sigma"]])
 
 
-class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus]):
+class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTensors]):
     """
     One-dimensional Gaussian neuron population receptive field response model.
 
@@ -237,15 +225,14 @@ class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus]):
         return ["mu", "sigma"]
 
     @doc
-    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def call(self, stimulus: PRFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
         Predict the model response for a stimulus with a 1D grid.
 
         Parameters
         ----------
-        %(stimulus_prf)s
-        %(parameters)s
-        %(dtype)s
+        %(stimulus_prf_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------
@@ -254,20 +241,11 @@ class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus]):
             `num_units` is the number of rows in `parameters` and `num_coordinates` is the size of the
             stimulus grid dimension.
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        dtype = get_dtype(dtype)
-        mu = convert_parameters_to_tensor(parameters[["mu"]], dtype=dtype)
-        sigma = convert_parameters_to_tensor(parameters[["sigma"]], dtype=dtype)
-        grid = ops.convert_to_tensor(stimulus.grid, dtype=dtype)
-
-        return predict_gaussian_response(grid, mu, sigma)
+        return predict_gaussian_response(stimulus.grid, parameters[["mu"]], parameters[["sigma"]])
 
 
+@doc
 class Gaussian2DPRFModel(CanonicalPRFModel):
     """
     Two-dimensional isotropic Gaussian population receptive field (pRF) model.
@@ -384,6 +362,7 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
         )
 
 
+@doc
 class Gaussian1DPRFModel(CanonicalPRFModel):
     """
     One-dimensional Gaussian population receptive field (pRF) model.

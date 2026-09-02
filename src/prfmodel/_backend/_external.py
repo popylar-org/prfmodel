@@ -13,3 +13,6 @@ match keras.backend.backend():
         from torch.special import gammaln
     case "jax":
         from jax.scipy.special import gammaln  # noqa: F401 (unused import)
+    case other:
+        msg = f"Backend '{other}' is not supported."
+        raise ValueError(msg)

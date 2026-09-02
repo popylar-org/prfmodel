@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
+from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.compression import CompressiveEncoder
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
     from prfmodel.models.base import BaseStimulusEncoder
 
 
+@doc
 class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     """
     Two-dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS).

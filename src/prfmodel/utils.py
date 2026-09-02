@@ -3,73 +3,28 @@
 import functools
 import math
 import re
-import warnings
-from abc import abstractmethod
 from collections.abc import Callable
-from typing import Protocol
-from typing import runtime_checkable
+from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 from keras import ops
 from keras.config import floatx
 from ._docstring import doc
-from .stimuli import Stimulus
 from .typing import Tensor
+
+if TYPE_CHECKING:
+    # Imported for typing only: 'prfmodel.stimuli' imports 'get_dtype' from this module at runtime.
+    from .stimuli import Stimulus
 
 _EXPECTED_NDIM = 2
 
-DTYPES = {"bfloat16", "float16", "float32", "float64"}
+DTYPES = {"float16", "float32", "float64"}
 """
 Accepted dtypes for `prfmodel.typing.Tensor` objects.
 
-Accepted dtypes are: `"bfloat16"`, `"float16"`, `"float32"`, and `"float64"`.
+Accepted dtypes are: `"float16"`, `"float32"`, and `"float64"`.
 
 """
-
-
-class UndefinedResponseWarning(UserWarning):
-    """Warning for when a response is undefined and contains NaNs."""
-
-
-@runtime_checkable
-class ModelProtocol(Protocol):
-    """
-    Protocol for model classes.
-
-    Cannot be instantiated on its own.
-    This protocol is intended to serve as the parent class for custom submodels within
-    :class:`~prfmodel.models.base.BaseComposite`. Subclasses must override the abstract
-    :attr:`parameter_names` property.
-
-    Attributes
-    ----------
-    parameter_names : list of str
-        Names of parameters used by the model class.
-
-    Examples
-    --------
-    Create a custom object class that inherits from the base class:
-
-    >>> class CustomModel(ModelProtocol):
-    ...     @property
-    ...     def parameter_names(self):
-    ...         return ["a", "b"]
-    >>> model = CustomModel()
-    >>> print(model.parameter_names)
-    ['a', 'b']
-
-    """
-
-    @property
-    @abstractmethod
-    def parameter_names(self) -> list[str]:
-        """A list with names of parameters that are used by the model."""
-
-    def _check_parameters(self, parameters: pd.DataFrame) -> None:
-        missing_params = [param for param in self.parameter_names if param not in parameters.columns]
-        if missing_params:
-            msg = f"Missing required parameter names: {missing_params}"
-            raise ValueError(msg)
 
 
 @doc
@@ -114,12 +69,12 @@ def convert_parameters_to_tensor(parameters: pd.DataFrame, dtype: str) -> Tensor
 def get_dtype(dtype: str | None) -> str:
     """Get the (default) dtype.
 
-    Utility function to pass through a dtype or get the default dtype set by `keras.config.floatx()`.
+    Utility function to pass through a dtype or get the default dtype set by :func:`keras.config.floatx()`.
 
     Parameters
     ----------
     dtype : str or None
-        The dtype to pass through. If `None`, returns `keras.config.floatx()`.
+        The dtype to pass through. If `None`, returns :func:`keras.config.floatx()`.
 
     Returns
     -------
@@ -129,13 +84,15 @@ def get_dtype(dtype: str | None) -> str:
     Raises
     ------
     ValueError
-        When `dtype` is not of the values defined in `DTYPES`.
+        When `dtype` is not of the values defined in :const:`DTYPES`. Keras' ``bfloat16`` is currently not supported,
+        so this also raises when `keras.config.floatx() == 'bfloat16'`.
 
     """
-    if dtype is not None and dtype not in DTYPES:
-        msg = f"Argument 'dtype' must be one of {DTYPES}"
+    dtype = dtype or floatx()
+    if dtype not in DTYPES:
+        msg = f"The requested dtype must be one of {DTYPES}"
         raise ValueError(msg)
-    return dtype or floatx()
+    return dtype
 
 
 def batched(fn: Callable) -> Callable:
@@ -157,6 +114,12 @@ def batched(fn: Callable) -> Callable:
     callable
         Wrapped function with signature ``fn(stimulus, parameters, *, batch_size=None, **kwargs)``.
 
+    Notes
+    -----
+    The wrapper preserves the return type of `fn`: batches of :class:`numpy.ndarray` are concatenated with
+    :func:`numpy.concatenate` and batches of backend tensors with :func:`keras.ops.concatenate`. A wrapped
+    model facade therefore returns a :class:`numpy.ndarray` whether or not `batch_size` is given.
+
     Examples
     --------
     >>> from prfmodel.utils import batched
@@ -174,11 +137,11 @@ def batched(fn: Callable) -> Callable:
 
     @functools.wraps(fn)
     def wrapper(
-        stimulus: Stimulus,
+        stimulus: "Stimulus",
         parameters: pd.DataFrame,
         batch_size: int | None = None,
         **kwargs,
-    ) -> Tensor:
+    ) -> Tensor | np.ndarray:
         if batch_size is None:
             return fn(stimulus, parameters, **kwargs)
 
@@ -191,6 +154,11 @@ def batched(fn: Callable) -> Callable:
             end = min(start + batch_size, num_units)
             batch_parameters = parameters.iloc[start:end]
             results.append(fn(stimulus, batch_parameters, **kwargs))
+
+        # 'ops.concatenate' returns a backend tensor even for array inputs, which would make the return type
+        # of a wrapped model facade depend on whether 'batch_size' was given. Concatenate in kind instead.
+        if isinstance(results[0], np.ndarray):
+            return np.concatenate(results, axis=0)
 
         return ops.concatenate(results, axis=0)
 
@@ -246,7 +214,7 @@ def normalize_response(response: Tensor, norm: str | None = "sum") -> Tensor:
 
     Notes
     -----
-    A warning is raised when the normalization is zero which leads to an undefined normalized response.
+    Returns a non-finite response when the normalization is zero.
 
     Examples
     --------
@@ -275,48 +243,36 @@ def normalize_response(response: Tensor, norm: str | None = "sum") -> Tensor:
 
     response_norm = norm_fun(response, axis=1, keepdims=True)
 
-    norm_is_zero = response_norm == ops.cast(0, response.dtype)
-
-    if ops.any(norm_is_zero):
-        msg = "Response norm is zero leading to undefined normalized responses"
-        warnings.warn(message=msg, category=UndefinedResponseWarning)
-
     return response / response_norm
 
 
-class ParamsDict:
+@doc
+class TensorFrame:
     """
     A dictionary-like object that supports dataframe-style column selection but returns Keras tensors.
 
-    Serves as an adapter during fitting to supply parameters to models while avoiding converting tensors into
-    actual dataframes.
+    This is the tensor-holding counterpart of the :class:`pandas.DataFrame` that models accept in their
+    :meth:`call` implementation. Use :func:`prfmodel.utils.as_tensor_frame` to build one from a data frame.
 
     Parameters
     ----------
     data : dict
         Dictionary of parameter tensors to perform column style selection on.
-    dtype : str, optional
-        The dtype that parameter tensors are converted to. If `None` (the default), uses the dtype from
-        :func:`prfmodel.utils.get_dtype`.
+    %(dtype)s
 
     """
 
     def __init__(self, data: dict, dtype: str | None = None):
         dtype = get_dtype(dtype)
 
-        for key, val in data.items():
-            val_tensor = ops.convert_to_tensor(val, dtype=dtype)
+        # Build a new mapping rather than writing back into 'data'. Callers keep owning the dictionary they
+        # pass -- the fitters hand in the same parameter mapping on every optimization step -- so mutating
+        # the argument would leak tensors reshaped against an earlier call back to the caller.
+        reshaped = {key: self._reshape_item(key, ops.convert_to_tensor(val, dtype=dtype)) for key, val in data.items()}
 
-            val_tensor = self._reshape_item(key, val_tensor)
+        item_shape = _get_common_shape(reshaped)
 
-            data[key] = val_tensor
-
-        item_shape = _get_common_shape(data)
-
-        for key, val in data.items():
-            data[key] = ops.broadcast_to(val, item_shape)
-
-        self._data = data
+        self._data = {key: ops.broadcast_to(val, item_shape) for key, val in reshaped.items()}
         self._item_shape = item_shape
         self._dtype = dtype
 
@@ -340,25 +296,26 @@ class ParamsDict:
 
         return ops.stack([self._data[key] for key in key], axis=1)
 
-    def __setitem__(self, key: str | list[str], value: Tensor) -> None:
-        value = ops.convert_to_tensor(value, dtype=self._dtype)
+    def __setitem__(self, key: str | list[str], value: Tensor | float) -> None:
+        # A scalar is accepted so that a caller can fill a whole column with one value, which is how
+        # 'BaseImpulse' merges its default parameters.
+        item = ops.convert_to_tensor(value, dtype=self._dtype)
 
-        value_ndim = len(value.shape)
+        value_ndim = len(item.shape)
 
         if isinstance(key, str) and (
-            value_ndim < _EXPECTED_NDIM or (value_ndim == _EXPECTED_NDIM and value.shape[1] == 1)
+            value_ndim < _EXPECTED_NDIM or (value_ndim == _EXPECTED_NDIM and item.shape[1] == 1)
         ):
-            value = self._reshape_item(key, value)
-            self._data[key] = ops.broadcast_to(value, self._item_shape)
+            self._data[key] = ops.broadcast_to(self._reshape_item(key, item), self._item_shape)
 
         elif isinstance(key, list) and all(isinstance(k, str) for k in key) and value_ndim == _EXPECTED_NDIM:
-            value = ops.transpose(ops.broadcast_to(value, (self._item_shape[0], len(key))))
+            transposed = ops.transpose(ops.broadcast_to(item, (self._item_shape[0], len(key))))
 
-            for _key, _val in zip(key, value, strict=True):
+            for _key, _val in zip(key, transposed, strict=True):
                 self._data[_key] = _val
 
         else:
-            msg = f"Value shape {value.shape} did not match the expected shape {self.shape}"
+            msg = f"Value shape {item.shape} did not match the expected shape {self.shape}"
             raise ValueError(msg)
 
     @property
@@ -381,10 +338,56 @@ class ParamsDict:
         """
         return self._dtype
 
-    def copy(self) -> "ParamsDict":
+    def copy(self) -> "TensorFrame":
         """Create a copy of the object."""
-        return ParamsDict(dict(self._data.items()))
+        return TensorFrame(self.to_dict(), dtype=self._dtype)
+
+    def to_dict(self) -> dict:
+        """Return the parameter tensors as a plain dictionary keyed by parameter name."""
+        return dict(self._data)
 
     def to_dataframe(self) -> pd.DataFrame:
         """Convert the object into a dataframe."""
         return pd.DataFrame(self._data)
+
+
+@doc
+def as_tensor_frame(
+    parameters: "pd.DataFrame | TensorFrame",
+    dtype: str,
+) -> TensorFrame:
+    """Convert user-supplied parameters into the tensor-holding representation.
+
+    This converts the parameters from a model's user-facing
+    :meth:`__call__` to its tensor-only :meth:`call` implementation.
+
+    Parameters
+    ----------
+    parameters : pandas.DataFrame or TensorFrame
+        Parameters to convert. A :class:`~prfmodel.utils.TensorFrame` is returned unchanged when it already
+        carries `dtype`, and rebuilt with `dtype` otherwise.
+    dtype : str
+        The dtype that parameter tensors are converted to.
+
+    Returns
+    -------
+    %(parameters_tensors)s
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from prfmodel.utils import as_tensor_frame
+    >>> params = as_tensor_frame(pd.DataFrame({"sigma": [1.0, 1.5]}), dtype="float32")
+    >>> print(params.shape)
+    (2, 1)
+    >>> as_tensor_frame(params, dtype="float32") is params
+    True
+
+    """
+    if isinstance(parameters, TensorFrame):
+        if parameters.dtype == dtype:
+            return parameters
+
+        return TensorFrame(parameters.to_dict(), dtype=dtype)
+
+    return TensorFrame(parameters.to_dict(orient="list"), dtype=dtype)

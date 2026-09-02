@@ -44,15 +44,18 @@ class TestDelayedNormGaussian2DPRFModel(PRFStimulusSetup):
     def test_parameter_names(self, prf_model: DelayedNormGaussian2DPRFModel):
         """Test that parameter_names contains all expected parameters in order."""
         expected = [
-            "mu_y",
-            "mu_x",
-            "sigma",
-            # delay, dispersion, undershoot, u_dispersion, and ratio are covered by the default
-            # DerivativeTwoGammaImpulse "glover_hrf" parameters, so they are excluded here.
-            "weight_deriv",
             "n",
             "dispersion_normalization",
             "sigma_saturation",
+            "mu_y",
+            "mu_x",
+            "sigma",
+            "delay",
+            "dispersion",
+            "undershoot",
+            "u_dispersion",
+            "ratio",
+            "weight_deriv",
             "baseline",
             "amplitude",
         ]

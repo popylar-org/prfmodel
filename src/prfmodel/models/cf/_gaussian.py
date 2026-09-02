@@ -11,14 +11,14 @@ from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
+from prfmodel.stimuli import CFStimulusTensors
 from prfmodel.typing import Tensor
-from prfmodel.utils import convert_parameters_to_tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import TensorFrame
 from ._stimulus_encoding import CFStimulusEncoder
 from .canonical import CanonicalCFModel
 
 
-class GaussianCFResponse(BasePopulationResponse[CFStimulus]):
+class GaussianCFResponse(BasePopulationResponse[CFStimulus, CFStimulusTensors]):
     """
     Gaussian connective field response model.
 
@@ -59,15 +59,40 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus]):
         return ["center_index", "sigma"]
 
     @doc
-    def __call__(self, stimulus: CFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def check_parameter_values(self, parameters: pd.DataFrame) -> None:
+        """Check that the parameter values lie inside the domain the model is defined on.
+
+        Parameters
+        ----------
+        %(parameters)s
+
+        Raises
+        ------
+        ValueError
+            When a parameter that must be ``> 0`` is zero or negative or when `center_index` is a decimal or ``< 0``.
+
+        """
+        center_index = parameters["center_index"].to_numpy()
+
+        if not np.all(center_index == np.floor(center_index)):
+            msg = "Parameter 'center_index' must be a whole number because it indexes a row of the distance matrix"
+            raise ValueError(msg)
+
+        if (center_index < 0).any():
+            msg = "Parameter 'center_index' must be non-negative because it indexes a row of the distance matrix"
+            raise ValueError(msg)
+
+        super().check_parameter_values(parameters)
+
+    @doc
+    def call(self, stimulus: CFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
         Predict the model response for a stimulus with a distance matrix.
 
         Parameters
         ----------
-        %(stimulus_cf)s
-        %(parameters)s
-        %(dtype)s
+        %(stimulus_cf_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------
@@ -76,18 +101,14 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus]):
             `num_units` is the number of rows in `parameters` and `num_rows` is the number of rows in the stimulus
             distance matrix.
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        dtype = get_dtype(dtype)
-        # Distance matrix is numpy array so we also create a numpy array to safely index
-        # The dtype is only used for indexing so it can be hardcoded
-        center_index = np.asarray(parameters[["center_index"]], dtype=np.int32)[:, 0]
-        sigma = convert_parameters_to_tensor(parameters[["sigma"]], dtype=dtype)
-        distance_matrix = ops.convert_to_tensor(stimulus.distance_matrix[center_index], dtype=dtype)
+        # The row is selected with 'ops.take' rather than by indexing the NumPy distance matrix, so that
+        # the selection also works when 'center_index' arrives as a tensor, which it does whenever this
+        # runs inside a compiled function. Gathering by index still admits no gradient, so 'center_index'
+        # remains estimable by grid search only.
+        center_index = ops.cast(ops.round(parameters[["center_index"]]), "int32")
+        sigma = parameters[["sigma"]]
+        distance_matrix = ops.take(stimulus.distance_matrix, ops.reshape(center_index, (-1,)), axis=0)
 
         sigma_squared = ops.square(sigma)
 
@@ -101,6 +122,7 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus]):
         return ops.exp(-resp) / volume
 
 
+@doc
 class GaussianCFModel(CanonicalCFModel):
     """
     Gaussian connective field model.
@@ -111,6 +133,7 @@ class GaussianCFModel(CanonicalCFModel):
     ----------
     %(model_encoding_cf)s
     %(model_scaling)s
+    %(model_regressors)s
 
     Notes
     -----

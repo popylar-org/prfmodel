@@ -1,6 +1,7 @@
 """Delayed normalization population receptive field models."""
 
 import pandas as pd
+from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseStimulusEncoder
@@ -12,6 +13,7 @@ from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import DelayedNormPRFModel
 
 
+@doc
 class DelayedNormGaussian2DPRFModel(DelayedNormPRFModel):
     r"""
     Delayed normalization pRF model with a 2D isotropic Gaussian response.

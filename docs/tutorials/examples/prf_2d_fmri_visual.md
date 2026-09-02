@@ -361,7 +361,7 @@ impulse_default_params = pd.DataFrame({
 })
 
 # Predict impulse response (two-gamma parameters use the default Glover HRF values)
-impulse_response = np.asarray(impulse_model(impulse_default_params))
+impulse_response = impulse_model(impulse_default_params)
 
 fig = px.line(
     pd.DataFrame({
@@ -400,7 +400,7 @@ start_params = pd.concat([pd.DataFrame(
 ), impulse_default_params], axis=1)
 
 # Make prediction with pRF model
-simulated_response = np.asarray(prf_model(stimulus, start_params))
+simulated_response = prf_model(stimulus, start_params)
 
 fig = px.line(
     pd.DataFrame({
@@ -464,6 +464,7 @@ from prfmodel.fitters import GridFitter
 grid_fitter = GridFitter(
     model=prf_model,
     stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 # Run grid search
@@ -522,7 +523,7 @@ from prfmodel.utils import batched
 predict_batched = batched(prf_model)
 
 # Make predictions with optimized parameters
-pred_response = np.asarray(predict_batched(stimulus, ls_params, batch_size=200))
+pred_response = predict_batched(stimulus, ls_params, batch_size=200)
 ```
 
 We can quantify how well the predictions align with the observed timecourses using the R-squared metric. This metric indicates the proportion of variance in the observed data explained by our model predictions.

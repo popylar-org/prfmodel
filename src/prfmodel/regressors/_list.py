@@ -1,8 +1,11 @@
 """Composite regressor model that aggregates multiple regressor models."""
 
+from collections.abc import Generator
+from typing import cast
 import pandas as pd
 from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
+from prfmodel.utils import TensorFrame
 from .base import BaseRegressors
 
 
@@ -14,8 +17,8 @@ class RegressorsList(BaseRegressors):
     argument. The parameter names of all child regressor models are aggregated (preserving insertion order, removing
     duplicates).
 
-    At call time, the supplied design is a single :class:`pandas.DataFrame` that is passed to every child, each of
-    which slices the columns it needs by name.
+    At call time, the supplied design is a single :class:`pandas.DataFrame` or :class:`~prfmodel.utils.TensorFrame`
+    that is passed to every child, each of which slices the columns it needs by name.
 
     Parameters
     ----------
@@ -65,49 +68,57 @@ class RegressorsList(BaseRegressors):
                 raise ValueError(msg)
             beta_names.extend(name for name in regressor.parameter_names if name.startswith("beta_"))
 
-        self.regressors = list(regressors)
+        self.models = {f"regressor_{i}": model for i, model in enumerate(regressors)}
+
+    def _iter_models(self) -> Generator["BaseRegressors"]:
+        return cast("Generator[BaseRegressors]", super()._iter_models())
 
     @property
-    def parameter_names(self) -> list[str]:
-        """Names of parameters used by the model, aggregated from all child regressor models."""
+    def regressor_names(self) -> list[str]:
+        """Columns this model reads from the regressor design."""
         names: list[str] = []
 
-        for regressor in self.regressors:
-            names.extend(regressor.parameter_names)
+        for model in self._iter_models():
+            names.extend(model.regressor_names)
 
         return list(dict.fromkeys(names))
 
     @doc
-    def __call__(
-        self,
-        regressors: pd.DataFrame,
-        parameters: pd.DataFrame,
-        dtype: str | None = None,
-    ) -> Tensor:
+    def check_regressor_names(self, regressors: pd.DataFrame) -> None:
+        """Check that required columns are supplied in the regressor design.
+
+        Parameters
+        ----------
+        %(regressors)s
+
+        Raises
+        ------
+        ValueError
+            When a column is missing in the regressor design.
+
+        """
+        for model in self._iter_models():
+            model.check_regressor_names(regressors)
+
+    @doc
+    def call(self, regressors: TensorFrame, parameters: TensorFrame) -> Tensor:
         """
         Compute the sum of predictions from all child regressor models.
 
         Parameters
         ----------
-        regressors : pandas.DataFrame
-            A single design data frame whose columns cover every child's required regressor names. It is passed to
-            each child, which slices the columns it needs by name; extra columns are ignored.
-        %(parameters)s
-        %(dtype)s
+        %(regressors_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------
         %(predicted_response_2d)s
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        prediction = self.regressors[0](regressors, parameters, dtype=dtype)
+        first, *rest = self._iter_models()
+        prediction = first.call(regressors, parameters)
 
-        for child in self.regressors[1:]:
-            prediction = prediction + child(regressors, parameters, dtype=dtype)
+        for model in rest:
+            prediction = prediction + model.call(regressors, parameters)
 
         return prediction

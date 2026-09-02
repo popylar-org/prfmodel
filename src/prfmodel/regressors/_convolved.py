@@ -1,15 +1,13 @@
 """Convolved regressor model."""
 
-import pandas as pd
+from typing import cast
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.impulse._convolve import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.typing import Tensor
-from prfmodel.utils import convert_parameters_to_tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import TensorFrame
 from .base import BaseRegressors
-from .base import _extract_design
 
 
 class ConvolvedRegressors(BaseRegressors):
@@ -67,63 +65,43 @@ class ConvolvedRegressors(BaseRegressors):
     def __init__(self, names: list[str], impulse_model: BaseImpulse):
         super().__init__()
 
-        self.names = list(names)
-        self.impulse_model = impulse_model
-
-    @property
-    def parameter_names(self) -> list[str]:
-        """
-        Names of parameters used by the model.
-
-        Includes ``beta_<name>`` for each regressor name as well as the parameter names of the impulse model.
-
-        """
-        beta_names = [f"beta_{name}" for name in self.names]
-        return list(dict.fromkeys(beta_names + self.impulse_model.parameter_names))
+        self._regressor_names = tuple(names)
+        self._additional_parameter_names = tuple(f"beta_{name}" for name in self.regressor_names)
+        self.models = {"impulse_model": impulse_model}
 
     @doc
-    def __call__(
-        self,
-        regressors: pd.DataFrame,
-        parameters: pd.DataFrame,
-        dtype: str | None = None,
-    ) -> Tensor:
+    def call(self, regressors: TensorFrame, parameters: TensorFrame) -> Tensor:
         """
         Compute the convolved regressor prediction.
 
         Parameters
         ----------
-        %(regressors)s
-        %(parameters)s
-        %(dtype)s
+        %(regressors_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------
         %(predicted_response_2d)s
 
-        Raises
-        ------
-        %(raises_missing_parameters)s
-
         """
-        self._check_parameters(parameters)
-        beta_names = [f"beta_{name}" for name in self.names]
-        dtype = get_dtype(dtype)
+        # Rebuilt here rather than taken from 'parameter_names', which also carries the impulse model's
+        # names and would stack the wrong columns.
+        beta_names = [f"beta_{name}" for name in self.regressor_names]
+        dtype = parameters.dtype
 
-        design_df = _extract_design(regressors, self.names)
-        design_np = design_df.to_numpy()
+        design = regressors[self.regressor_names]
 
         num_units = parameters.shape[0]
-        num_frames = design_np.shape[0]
+        num_frames = design.shape[0]
 
-        impulse = self.impulse_model(parameters, dtype=dtype)
-        design = ops.convert_to_tensor(design_np, dtype=dtype)
+        impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+        impulse = impulse_model.call(parameters)
 
-        betas = convert_parameters_to_tensor(parameters[beta_names], dtype=dtype)
+        betas = parameters[beta_names]
 
         prediction = ops.zeros((num_units, num_frames), dtype=dtype)
 
-        for idx in range(design_np.shape[1]):
+        for idx in range(design.shape[1]):
             reg = ops.broadcast_to(design[:, idx], (num_units, num_frames))
             convolved = convolve_prf_impulse_response(reg, impulse, dtype=dtype)
             prediction = prediction + convolved * ops.expand_dims(betas[:, idx], axis=-1)

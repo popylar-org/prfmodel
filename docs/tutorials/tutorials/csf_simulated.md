@@ -217,6 +217,7 @@ from prfmodel.fitters import GridFitter
 grid_fitter = GridFitter(
     model=csf_model,
     stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 grid_history, grid_params = grid_fitter.fit(
@@ -298,6 +299,7 @@ from prfmodel.fitters import SGDFitter
 sgd_fitter = SGDFitter(
     model=csf_model,
     stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 sgd_history, sgd_params = sgd_fitter.fit(
