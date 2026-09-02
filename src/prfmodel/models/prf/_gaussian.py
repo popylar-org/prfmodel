@@ -1,8 +1,8 @@
 """Gaussian response models."""
 
-import math
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.density import normal_density
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
@@ -124,23 +124,12 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     mu = ops.convert_to_tensor(mu)
     sigma = ops.convert_to_tensor(sigma)
 
-    num_dims = grid.shape[-1]
-
     _check_gaussian_args(grid, mu, sigma)
 
     # Expand axes to enable keras.ops autocasting
     grid, mu, sigma = _expand_gaussian_args(grid, mu, sigma)
 
-    sigma_squared = ops.square(sigma)
-
-    # Gaussian response
-    resp = ops.sum(ops.square(grid - mu), axis=-1)
-    resp /= 2 * sigma_squared
-
-    # Divide by volume to normalize
-    volume = (2 * math.pi * sigma_squared) ** (num_dims / 2)
-
-    return ops.exp(-resp) / volume
+    return normal_density(grid, mu, sigma)
 
 
 class Gaussian2DPRFTuning(BaseTuning[PRFStimulus, PRFStimulusTensors]):
