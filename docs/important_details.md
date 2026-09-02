@@ -22,7 +22,7 @@ The proper density has a peak amplitude of $\max(f(x)) = \frac{1}{V}$.
 
 The proper Gaussian density has the advantage that it decouples amplitude parameters from pRF size/tuning width
 parameters $\sigma$, making it easier to interpret (although amplitudes are often treated as nuisance parameters). It
-also leads to smaller amplitude estimates and stimulus-encoded model responses. However, it does **not** change the
+also leads to larger amplitude estimates and stimulus-encoded model responses. However, it does **not** change the
 identifiability of the model parameters.
 
 Using the proper Gaussian density implies that parameter estimates for amplitudes
@@ -65,7 +65,7 @@ grid cell size or meaningful normalizations, we decided **against** normalizing 
 We also do not want to tie our model implementations to the spatial domain.
 
 This decision means that amplitude parameters are not comparable between different spatial grid resolutions (e.g.,
-upsampling a $128^2$ to a $256^2$ grid while keeping the overall width and height would amplify amplitude estimates
+upsampling a $128^2$ to a $256^2$ grid while keeping the overall width and height would shrink amplitude estimates
 by 4). However, for regular-spaced grids, it is possible to divide amplitudes by the grid cell size to make them
 comparable cross grid resolutions. The normalization does **not** affect the identifiability of model parameters.
 
@@ -86,7 +86,7 @@ It is possible to convert impulse-sum-normalized into impulse-unnormalized ampli
 where $h(t)$ is the unnormalized impulse response.
 
 Some impulse models do not use any normalization by default because they are also used to describe neuron
-population behavior. For example, the compressive spatio-temporal pRF models uses transient and
+population behavior. For example, the compressive spatio-temporal pRF model uses transient and
 sustained impulse models to describe temporal neuron activation patterns.
 
 ## Before convolution, stimulus-encoded model responses are padded with their first frame
@@ -94,12 +94,41 @@ sustained impulse models to describe temporal neuron activation patterns.
 To make sure that convolving stimulus-encoded model responses with impulse response returns model predictions for the
 same number of time frames as the stimulus design, we pad stimulus-encoded model responses with their first frame.
 Specifically, we first prepend the repeat the first stimulus-encoded response element for each element in the impulse
-response and then convolve both signals using discrete convolution.
+response (minus 1) and then convolve both signals using discrete convolution.
 
-This choice rest on the assumption that the observed response at the first time frame is at baseline (i.e., resting
+This choice rests on the assumption that the observed response at the first time frame is at baseline (i.e., resting
 state) which is commonly done in experiments by, for example, running dummy scans before real scans in fMRI
 experiments. Stimuli from previous runs in an experiment should not influence the recording of the response to the
 current stimulus.
+
+## Impulse responses must have the same sampling rate as observed responses
+
+Discrete convolution assumes that the convolved signals have the same sampling rate. In prfmodel, the sampling rate
+of stimulus designs and observed neural responses is implicit. They are represented as series of time frames that
+contain a single TR (repetition time). To match the implicit sampling rate of observed responses, we need to provide
+the sampling rate explicitly to any impulse model that is convolved with stimulus-encoded model response so that the
+final model predictions that are compared against the observed neural responses have the same sampling rate. For
+a Gaussian 2D pRF model, this can be done by adding a custom impulse model:
+
+```python
+from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.models.prf import Gaussian2DPRFModel
+
+
+TR = 1.5  # in seconds
+
+# Create a custom impulse model with the TR as resolution
+impulse_model = DerivativeTwoGammaImpulse(resolution=TR)
+
+# Insert the custom impulse model into the canonical pRF model
+prf_model = Gaussian2DPRFModel(
+    impulse_model=impulse_model,
+)
+```
+
+This implementation might seem a bit cumbersome, however, it forces the user to think explicitly about the sampling
+rates used in the model and the experiment. It also becomes helpful as soon as different model components operate on
+different sampling rates that must be aligned with each other (e.g., in the compressive spatio-temporal pRF model).
 
 ## What if I want to deviate from these decisions?
 
