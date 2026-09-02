@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.cf.GaussianCFResponse" href="GaussianCFResponse.html"><link rel="prev" title="prfmodel.models.cf.CFStimulusEncoder" href="CFStimulusEncoder.html">
+<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.cf.GaussianCFTuning" href="GaussianCFTuning.html"><link rel="prev" title="prfmodel.models.cf.CFStimulusEncoder" href="CFStimulusEncoder.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>prfmodel.models.cf.GaussianCFModel - prfmodel 0.0.1 documentation</title>
@@ -281,8 +281,8 @@
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3 has-children"><a class="reference internal" href="../base/index.html">prfmodel.models.base</a><input aria-label="Toggle navigation of prfmodel.models.base" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../base/BaseCanonical.html">BaseCanonical</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../base/BasePopulationResponse.html">BasePopulationResponse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../base/BaseStimulusEncoder.html">BaseStimulusEncoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../base/BaseTuning.html">BaseTuning</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">prfmodel.models.cf</a><input aria-label="Toggle navigation of prfmodel.models.cf" checked="" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
@@ -292,7 +292,7 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="CFStimulusEncoder.html">CFStimulusEncoder</a></li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">GaussianCFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="GaussianCFResponse.html">GaussianCFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="GaussianCFTuning.html">GaussianCFTuning</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../compression/index.html">prfmodel.models.compression</a><input aria-label="Toggle navigation of prfmodel.models.compression" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -305,7 +305,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../csf/CSFModel.html">CSFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../csf/CSFResponse.html">CSFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../csf/CSFTuning.html">CSFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../csf/predict_contrast_response.html">predict_contrast_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../csf/predict_contrast_sensitivity.html">predict_contrast_sensitivity</a></li>
 </ul>
@@ -327,11 +327,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../prf/DivNormPRFModel.html">DivNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/DoG2DPRFModel.html">DoG2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFModel.html">Gaussian1DPRFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFResponse.html">Gaussian1DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFTuning.html">Gaussian1DPRFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DCSSPRFModel.html">Gaussian2DCSSPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DCSTPRFModel.html">Gaussian2DCSTPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFModel.html">Gaussian2DPRFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFResponse.html">Gaussian2DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFTuning.html">Gaussian2DPRFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/encode_prf_response.html">encode_prf_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/init_css_from_gaussian.html">init_css_from_gaussian</a></li>
@@ -464,8 +464,8 @@ are summed. The regressor contribution is added after the scaling model.</p></li
 <p class="rubric">Notes</p>
 <p>The canonical model follows the following steps <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>:</p>
 <ol class="arabic simple">
-<li><p>The Gaussian connective field response model makes a prediction for the stimulus distance matrix.</p></li>
-<li><p>The encoding model encodes the connective field response with the source response.</p></li>
+<li><p>The Gaussian connective field tuning model makes a prediction for the stimulus distance matrix.</p></li>
+<li><p>The encoding model encodes the connective field tuning profile with the source response.</p></li>
 <li><p>The scaling model modifies the encoded response.</p></li>
 <li><p>The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.</p></li>
 </ol>
@@ -673,12 +673,12 @@ for different units.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="GaussianCFResponse.html">
+          <a class="next-page" href="GaussianCFTuning.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">prfmodel.models.cf.GaussianCFResponse</div>
+                <div class="title">prfmodel.models.cf.GaussianCFTuning</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

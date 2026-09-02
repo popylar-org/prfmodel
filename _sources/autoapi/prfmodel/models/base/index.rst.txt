@@ -5,20 +5,20 @@ prfmodel.models.base
 
 .. autoapi-nested-parse::
 
-   Generic abstract base classes for response, stimulus encoder, and canonical models.
+   Generic abstract base classes for tuning, stimulus encoder, and canonical models.
 
    Classes in this module inherit from :class:`~prfmodel.protocols.ModelProtocol` that requires them to implement a
    :attr:`~prfmodel.protocols.ModelProtocol.parameter_names` property.
 
    They are abstract base classes, meaning that they
    cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
-   shared by all child classes. For example, :class:`~prfmodel.models.base.BasePopulationResponse` defines that all child
-   classes must implement a :meth:`~prfmodel.models.base.BasePopulationResponse.call` method that takes a tensor-holding
+   shared by all child classes. For example, :class:`~prfmodel.models.base.BaseTuning` defines that all child
+   classes must implement a :meth:`~prfmodel.models.base.BaseTuning.call` method that takes a tensor-holding
    stimulus and set of tensor parameters as input. However, it leaves it up to each child class to define how input
    stimulus and parameters are used to make model predictions.
 
    All base classes have a concrete user-facing :meth:``__call__`` method
-   (e.g., :meth:`~prfmodel.models.base.BasePopulationResponse.__call__`) that takes non-tensor arguments and
+   (e.g., :meth:`~prfmodel.models.base.BaseTuning.__call__`) that takes non-tensor arguments and
    performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
    class and only accepts tensor arguments to enable backend compilation.
 
@@ -50,14 +50,14 @@ Classes
    :hidden:
 
    BaseCanonical </autoapi/prfmodel/models/base/BaseCanonical>
-   BasePopulationResponse </autoapi/prfmodel/models/base/BasePopulationResponse>
    BaseStimulusEncoder </autoapi/prfmodel/models/base/BaseStimulusEncoder>
+   BaseTuning </autoapi/prfmodel/models/base/BaseTuning>
 
 .. autoapisummary::
 
    prfmodel.models.base.BaseCanonical
-   prfmodel.models.base.BasePopulationResponse
    prfmodel.models.base.BaseStimulusEncoder
+   prfmodel.models.base.BaseTuning
 
 
 Module Contents

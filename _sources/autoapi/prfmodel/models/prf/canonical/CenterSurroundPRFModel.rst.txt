@@ -1,19 +1,19 @@
 prfmodel.models.prf.canonical.CenterSurroundPRFModel
 ====================================================
 
-.. py:class:: prfmodel.models.prf.canonical.CenterSurroundPRFModel(prf_model: prfmodel.models.base.BasePopulationResponse, shared_params: list[str] | None = None, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = Baseline, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
+.. py:class:: prfmodel.models.prf.canonical.CenterSurroundPRFModel(prf_model: prfmodel.models.base.BaseTuning, shared_params: list[str] | None = None, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = Baseline, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
 
 
 
    Center-surround population receptive field (pRF) model.
 
-   This class combines the difference between a center pRF response and a surround pRF response with an
-   impulse and scaling model. Both the center and surround response come from the same model class, but their
+   This class combines the difference between a center and surround pRF tuning profile with an
+   impulse and scaling model. Both the center and surround tuning profile come from the same model class, but their
    parameters can differ.
 
-   :param prf_model: A population receptive field response model instance.
-   :type prf_model: BasePopulationResponse
-   :param shared_params: Names of parameters that are shared between the two pRF response models. All names must appear in
+   :param prf_model: A population receptive field tuning model instance.
+   :type prf_model: BaseTuning
+   :param shared_params: Names of parameters that are shared between the two pRF tuning models. All names must appear in
                          ``prf_model.parameter_names``.
    :type shared_params: list of str, optional
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
@@ -35,8 +35,8 @@ prfmodel.models.prf.canonical.CenterSurroundPRFModel
 
    The center-surround model follows these steps:
 
-   1. The two pRF response models make predictions for the stimulus grid.
-   2. The encoding model encodes the responses with the stimulus design.
+   1. The two pRF tuning models make predictions for the stimulus grid.
+   2. The encoding model encodes the tuning profiles with the stimulus design.
    3. The encoded responses are scaled with separate amplitudes. The surround response is subtracted from the
       center response yielding the combined response.
    4. The combined response is convolved with an impulse response (optional).

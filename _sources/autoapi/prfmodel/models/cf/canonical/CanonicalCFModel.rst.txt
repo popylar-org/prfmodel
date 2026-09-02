@@ -1,7 +1,7 @@
 prfmodel.models.cf.canonical.CanonicalCFModel
 =============================================
 
-.. py:class:: prfmodel.models.cf.canonical.CanonicalCFModel(cf_model: prfmodel.models.base.BasePopulationResponse, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = CFStimulusEncoder, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = BaselineAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
+.. py:class:: prfmodel.models.cf.canonical.CanonicalCFModel(cf_model: prfmodel.models.base.BaseTuning, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = CFStimulusEncoder, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = BaselineAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
 
 
 
@@ -9,8 +9,8 @@ prfmodel.models.cf.canonical.CanonicalCFModel
 
    This class combines a connective field and scaling model response.
 
-   :param cf_model: A connective field response model instance.
-   :type cf_model: BasePopulationResponse
+   :param cf_model: A connective field tuning model instance.
+   :type cf_model: BaseTuning
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
                           The default creates a :class:`~prfmodel.models.cf.CFStimulusEncoder` instance.
    :type encoding_model: BaseStimulusEncoder or type, default=CFStimulusEncoder
@@ -26,8 +26,8 @@ prfmodel.models.cf.canonical.CanonicalCFModel
 
    The canonical model follows the following steps:
 
-   1. The connective field response model makes a prediction for the stimulus distance matrix.
-   2. The connective field response is encoded with the source response.
+   1. The connective field tuning model makes a prediction for the stimulus distance matrix.
+   2. The connective field tuning profile is encoded with the source response.
    3. The scaling model modifies the encoded response.
    4. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 

@@ -8,7 +8,7 @@ prfmodel.models.prf.Gaussian2DCSTPRFModel
    Compressive spatiotemporal (CST) pRF model with a 2D isotropic Gaussian response.
 
    Thin wrapper around :class:`CSTPRFModel` that hardcodes
-   :class:`~prfmodel.models.prf.Gaussian2DPRFResponse` as the pRF model.
+   :class:`~prfmodel.models.prf.Gaussian2DPRFTuning` as the pRF model.
 
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
                           The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.

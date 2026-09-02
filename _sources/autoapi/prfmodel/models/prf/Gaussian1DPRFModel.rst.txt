@@ -28,8 +28,8 @@ prfmodel.models.prf.Gaussian1DPRFModel
 
    The canonical model follows the following steps [1]_:
 
-   1. The 1D Gaussian pRF response model makes a prediction for the stimulus grid.
-   2. The encoding model encodes the response with the stimulus design.
+   1. The 1D Gaussian pRF tuning model makes a prediction for the stimulus grid.
+   2. The encoding model encodes the tuning profile with the stimulus design.
    3. The encoded response is convolved with an impulse response (optional).
    4. The scaling model modifies the convolved response (optional).
    5. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).

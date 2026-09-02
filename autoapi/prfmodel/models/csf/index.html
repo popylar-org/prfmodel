@@ -281,8 +281,8 @@
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3 has-children"><a class="reference internal" href="../base/index.html">prfmodel.models.base</a><input aria-label="Toggle navigation of prfmodel.models.base" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../base/BaseCanonical.html">BaseCanonical</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../base/BasePopulationResponse.html">BasePopulationResponse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../base/BaseStimulusEncoder.html">BaseStimulusEncoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../base/BaseTuning.html">BaseTuning</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../cf/index.html">prfmodel.models.cf</a><input aria-label="Toggle navigation of prfmodel.models.cf" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -292,7 +292,7 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../cf/CFStimulusEncoder.html">CFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cf/GaussianCFModel.html">GaussianCFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../cf/GaussianCFResponse.html">GaussianCFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cf/GaussianCFTuning.html">GaussianCFTuning</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../compression/index.html">prfmodel.models.compression</a><input aria-label="Toggle navigation of prfmodel.models.compression" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -305,7 +305,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="CSFModel.html">CSFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="CSFResponse.html">CSFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CSFTuning.html">CSFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="predict_contrast_response.html">predict_contrast_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="predict_contrast_sensitivity.html">predict_contrast_sensitivity</a></li>
 </ul>
@@ -327,11 +327,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../prf/DivNormPRFModel.html">DivNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/DoG2DPRFModel.html">DoG2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFModel.html">Gaussian1DPRFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFResponse.html">Gaussian1DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFTuning.html">Gaussian1DPRFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DCSSPRFModel.html">Gaussian2DCSSPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DCSTPRFModel.html">Gaussian2DCSTPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFModel.html">Gaussian2DPRFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFResponse.html">Gaussian2DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFTuning.html">Gaussian2DPRFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/encode_prf_response.html">encode_prf_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/init_css_from_gaussian.html">init_css_from_gaussian</a></li>
@@ -444,12 +444,12 @@
           <section id="module-prfmodel.models.csf">
 <span id="prfmodel-models-csf"></span><h1>prfmodel.models.csf<a class="headerlink" href="#module-prfmodel.models.csf" title="Link to this heading">¶</a></h1>
 <p>Contrast sensitivity function (CSF) models.</p>
-<p>This module contain a CSF response model that predicts a response to a stimulus containing contrast and spatial
+<p>This module contain a CSF tuning model that predicts a tuning response to a stimulus containing contrast and spatial
 frequencies. Currently, only the asymmetric log-parabolic (aLP) CSF is implemented in
-<a class="reference internal" href="CSFResponse.html#prfmodel.models.csf.CSFResponse" title="prfmodel.models.csf.CSFResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">CSFResponse</span></code></a>.</p>
+<a class="reference internal" href="CSFTuning.html#prfmodel.models.csf.CSFTuning" title="prfmodel.models.csf.CSFTuning"><code class="xref py py-class docutils literal notranslate"><span class="pre">CSFTuning</span></code></a>.</p>
 <p>It also contains a canonical model that combines a CSF response with an impulse and a scaling model
 (<code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalCSFModel</span></code>) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>. In contrast to pRF and connective field models,
-canonical CSF models do not require stimulus encoding because the CSF response model already predicts a
+canonical CSF models do not require stimulus encoding because the CSF tuning model already predicts a
 temporal response.</p>
 <p>The function <a class="reference internal" href="predict_contrast_sensitivity.html#prfmodel.models.csf.predict_contrast_sensitivity" title="prfmodel.models.csf.predict_contrast_sensitivity"><code class="xref py py-func docutils literal notranslate"><span class="pre">predict_contrast_sensitivity()</span></code></a> can be used to predict a contrast sensitivity response to spatial
 frequencies (using the aLP CSF).</p>
@@ -488,8 +488,8 @@ contrast sensitivity functions in human visual cortex. <em>Imaging Neuroscience<
 <tr class="row-odd"><td><p><a class="reference internal" href="CSFModel.html#prfmodel.models.csf.CSFModel" title="prfmodel.models.csf.CSFModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CSFModel</span></code></a></p></td>
 <td><p>Contrast sensitivity function model.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="CSFResponse.html#prfmodel.models.csf.CSFResponse" title="prfmodel.models.csf.CSFResponse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CSFResponse</span></code></a></p></td>
-<td><p>Neural contrast sensitivity function response model.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="CSFTuning.html#prfmodel.models.csf.CSFTuning" title="prfmodel.models.csf.CSFTuning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CSFTuning</span></code></a></p></td>
+<td><p>Neural contrast sensitivity function tuning model.</p></td>
 </tr>
 </tbody>
 </table>

@@ -1,16 +1,16 @@
 prfmodel.models.prf.canonical.CanonicalPRFModel
 ===============================================
 
-.. py:class:: prfmodel.models.prf.canonical.CanonicalPRFModel(prf_model: prfmodel.models.base.BasePopulationResponse, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = BaselineAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
+.. py:class:: prfmodel.models.prf.canonical.CanonicalPRFModel(prf_model: prfmodel.models.base.BaseTuning, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = BaselineAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
 
 
 
    Canonical population receptive field (pRF) model.
 
-   This class combines a pRF response, impulse, scaling, and regressors model.
+   This class combines a pRF tuning, impulse, scaling, and regressors model.
 
-   :param prf_model: A population receptive field response model instance.
-   :type prf_model: BasePopulationResponse
+   :param prf_model: A population receptive field tuning model instance.
+   :type prf_model: BaseTuning
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
                           The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
    :type encoding_model: BaseStimulusEncoder or type, default=PRFStimulusEncoder
@@ -30,8 +30,8 @@ prfmodel.models.prf.canonical.CanonicalPRFModel
 
    The canonical model follows the following steps:
 
-   1. The pRF response model makes a prediction for the stimulus grid.
-   2. The encoding model encodes the response with the stimulus design.
+   1. The pRF tuning model makes a prediction for the stimulus grid.
+   2. The encoding model encodes the tuning profile with the stimulus design.
    3. The encoded response is convolved with an impulse response (optional).
    4. The scaling model modifies the convolved response (optional).
    5. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).

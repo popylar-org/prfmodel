@@ -26,20 +26,20 @@ prfmodel.models.base.BaseCanonical
 
    .. rubric:: Examples
 
-   Create a canonical model that combines a :class:`~prfmodel.models.prf.Gaussian2DPRFResponse` and a
+   Create a canonical model that combines a :class:`~prfmodel.models.prf.Gaussian2DPRFTuning` and a
    :class:`~prfmodel.models.prf.PRFStimulusEncoder`. The :attr:`parameter_names` property automatically
    aggregates the unique parameter names from all submodels.
 
    >>> import pandas as pd
    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
    >>> from prfmodel.stimuli import PRFStimulus, PRFStimulusTensors
-   >>> from prfmodel.models.prf import Gaussian2DPRFResponse, PRFStimulusEncoder
+   >>> from prfmodel.models.prf import Gaussian2DPRFTuning, PRFStimulusEncoder
    >>> class CanonicalPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
    ...     def call(self, stimulus, parameters, regressors=None):
    ...         response = self.models["prf_model"].call(stimulus, parameters)
    ...         return self.models["encoding_model"].call(stimulus, response, parameters)
    >>> model = CanonicalPRFModel(
-   ...     prf_model=Gaussian2DPRFResponse(),
+   ...     prf_model=Gaussian2DPRFTuning(),
    ...     encoding_model=PRFStimulusEncoder(),
    ... )
    >>> model.parameter_names
@@ -97,7 +97,7 @@ prfmodel.models.base.BaseCanonical
       .. rubric:: Notes
 
       Implementations must be traceable by a backend compiler, and must reach submodels through their
-      :meth:`call` rather than through :meth:`__call__`. See :meth:`BasePopulationResponse.call`.
+      :meth:`call` rather than through :meth:`__call__`. See :meth:`BaseTuning.call`.
 
 
 

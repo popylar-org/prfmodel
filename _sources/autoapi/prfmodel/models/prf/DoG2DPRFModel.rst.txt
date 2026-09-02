@@ -7,8 +7,9 @@ prfmodel.models.prf.DoG2DPRFModel
 
    Two-dimensional Difference of Gaussians (DoG) population receptive field (pRF) model.
 
-   This class combines the difference between two 2D Gaussian pRF responses (center and surround) with an impulse,
-   scaling, and regressors model. The two 2D Gaussian pRF models share the same center but have different sizes.
+   This class combines the difference between two 2D Gaussian pRF tuning models (center and surround) with an impulse,
+   scaling, and regressors model. The two 2D Gaussian pRF tuning models share the same center but have different
+   sizes.
 
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
                           The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
@@ -29,7 +30,7 @@ prfmodel.models.prf.DoG2DPRFModel
 
    The canonical DoG model follows the following steps [1]_:
 
-   1. The center and surround 2D Gaussian pRF response models make separate predictions for
+   1. The center and surround 2D Gaussian pRF tuning models make separate predictions for
       the stimulus grid.
    2. The encoding model encodes the responses with the stimulus design.
    3. The encoded responses are scaled with separate amplitudes. The surround response is subtracted from the

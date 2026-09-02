@@ -1,0 +1,30 @@
+<map id="inheritance83fa7c58b5" name="inheritance83fa7c58b5">
+<area shape="rect" id="node1" href="../autoapi/prfmodel/models/base/BaseCanonical.html#prfmodel.models.base.BaseCanonical" target="_top" title="Generic abstract base class for creating canonical models." alt="" coords="242,89,309,104"/>
+<area shape="rect" id="node8" href="../autoapi/prfmodel/models/csf/canonical/CanonicalCSFModel.html#prfmodel.models.csf.canonical.CanonicalCSFModel" target="_top" title="Simple composite contrast sensitivity function model." alt="" coords="361,4,447,18"/>
+<area shape="rect" id="node10" href="../autoapi/prfmodel/models/prf/canonical/CSTPRFModel.html#prfmodel.models.prf.canonical.CSTPRFModel" target="_top" title="Compressive spatiotemporal (CST) population receptive field (pRF) model." alt="" coords="372,32,436,46"/>
+<area shape="rect" id="node11" href="../autoapi/prfmodel/models/cf/canonical/CanonicalCFModel.html#prfmodel.models.cf.canonical.CanonicalCFModel" target="_top" title="Canonical connective field model." alt="" coords="363,61,444,75"/>
+<area shape="rect" id="node12" href="../autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel.html#prfmodel.models.prf.canonical.CanonicalPRFModel" target="_top" title="Canonical population receptive field (pRF) model." alt="" coords="361,89,447,104"/>
+<area shape="rect" id="node13" href="../autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html#prfmodel.models.prf.canonical.CenterSurroundPRFModel" target="_top" title="Center&#45;surround population receptive field (pRF) model." alt="" coords="350,119,457,133"/>
+<area shape="rect" id="node16" href="../autoapi/prfmodel/models/prf/canonical/DelayedNormPRFModel.html#prfmodel.models.prf.canonical.DelayedNormPRFModel" target="_top" title="Delayed gain normalization population receptive field (pRF) model." alt="" coords="353,151,454,165"/>
+<area shape="rect" id="node18" href="../autoapi/prfmodel/models/prf/canonical/DivNormPRFModel.html#prfmodel.models.prf.canonical.DivNormPRFModel" target="_top" title="Divisive normalization population receptive field (pRF) model." alt="" coords="362,186,445,200"/>
+<area shape="rect" id="node2" href="../autoapi/prfmodel/protocols/CompositeModelProtocol.html#prfmodel.protocols.CompositeModelProtocol" target="_top" title="Protocol for composite model classes." alt="" coords="96,118,201,132"/>
+<area shape="rect" id="node14" href="../autoapi/prfmodel/models/compression/CompressiveEncoder.html#prfmodel.models.compression.CompressiveEncoder" target="_top" title="Compressive encoding model." alt="" coords="230,118,321,132"/>
+<area shape="rect" id="node3" href="../autoapi/prfmodel/models/base/BaseStimulusEncoder.html#prfmodel.models.base.BaseStimulusEncoder" target="_top" title="Generic abstract base class for encoding model responses with a stimulus." alt="" coords="102,146,194,160"/>
+<area shape="rect" id="node6" title="Encoding model for connective field stimuli." alt="" coords="234,146,317,160"/>
+<area shape="rect" id="node28" title="Encoding model for population receptive field stimuli." alt="" coords="232,174,320,188"/>
+<area shape="rect" id="node4" href="../autoapi/prfmodel/protocols/ModelProtocol.html#prfmodel.protocols.ModelProtocol" target="_top" title="Protocol for model classes." alt="" coords="3,146,68,160"/>
+<area shape="rect" id="node5" href="../autoapi/prfmodel/models/base/BaseTuning.html#prfmodel.models.base.BaseTuning" target="_top" title="Generic abstract base class for neuron population tuning models." alt="" coords="121,230,176,244"/>
+<area shape="rect" id="node9" title="Neural contrast sensitivity function tuning model." alt="" coords="251,202,301,216"/>
+<area shape="rect" id="node21" title="One&#45;dimensional Gaussian neuron population receptive field tuning model." alt="" coords="228,230,323,244"/>
+<area shape="rect" id="node25" title="Two&#45;dimensional isotropic Gaussian neuron population receptive field tuning model." alt="" coords="228,258,323,272"/>
+<area shape="rect" id="node27" title="Gaussian connective field tuning model." alt="" coords="236,286,315,300"/>
+<area shape="rect" id="node7" title="Contrast sensitivity function model." alt="" coords="532,3,581,17"/>
+<area shape="rect" id="node24" title="Compressive spatiotemporal (CST) pRF model with a 2D isotropic Gaussian response." alt="" coords="503,31,611,45"/>
+<area shape="rect" id="node26" title="Gaussian connective field model." alt="" coords="517,59,596,74"/>
+<area shape="rect" id="node20" title="One&#45;dimensional Gaussian population receptive field (pRF) model." alt="" coords="510,87,604,102"/>
+<area shape="rect" id="node23" title="Two&#45;dimensional isotropic Gaussian population receptive field (pRF) model." alt="" coords="510,115,604,130"/>
+<area shape="rect" id="node19" title="Two&#45;dimensional Difference of Gaussians (DoG) population receptive field (pRF) model." alt="" coords="519,143,595,158"/>
+<area shape="rect" id="node15" title="Delayed normalization pRF model with a 2D isotropic Gaussian response." alt="" coords="484,171,629,186"/>
+<area shape="rect" id="node17" title="Divisive normalization population receptive field (pRF) model with isotropic 2D Gaussian tuning models." alt="" coords="494,199,620,214"/>
+<area shape="rect" id="node22" title="Two&#45;dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS)." alt="" coords="657,115,765,130"/>
+</map>

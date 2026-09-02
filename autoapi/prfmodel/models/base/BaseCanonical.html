@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.base.BasePopulationResponse" href="BasePopulationResponse.html"><link rel="prev" title="prfmodel.models.base" href="index.html">
+<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.base.BaseStimulusEncoder" href="BaseStimulusEncoder.html"><link rel="prev" title="prfmodel.models.base" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>prfmodel.models.base.BaseCanonical - prfmodel 0.0.1 documentation</title>
@@ -281,8 +281,8 @@
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">prfmodel.models.base</a><input aria-label="Toggle navigation of prfmodel.models.base" checked="" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">BaseCanonical</a></li>
-<li class="toctree-l4"><a class="reference internal" href="BasePopulationResponse.html">BasePopulationResponse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="BaseStimulusEncoder.html">BaseStimulusEncoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="BaseTuning.html">BaseTuning</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../cf/index.html">prfmodel.models.cf</a><input aria-label="Toggle navigation of prfmodel.models.cf" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -292,7 +292,7 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../cf/CFStimulusEncoder.html">CFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cf/GaussianCFModel.html">GaussianCFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../cf/GaussianCFResponse.html">GaussianCFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cf/GaussianCFTuning.html">GaussianCFTuning</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../compression/index.html">prfmodel.models.compression</a><input aria-label="Toggle navigation of prfmodel.models.compression" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -305,7 +305,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../csf/CSFModel.html">CSFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../csf/CSFResponse.html">CSFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../csf/CSFTuning.html">CSFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../csf/predict_contrast_response.html">predict_contrast_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../csf/predict_contrast_sensitivity.html">predict_contrast_sensitivity</a></li>
 </ul>
@@ -327,11 +327,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../prf/DivNormPRFModel.html">DivNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/DoG2DPRFModel.html">DoG2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFModel.html">Gaussian1DPRFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFResponse.html">Gaussian1DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFTuning.html">Gaussian1DPRFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DCSSPRFModel.html">Gaussian2DCSSPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DCSTPRFModel.html">Gaussian2DCSTPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFModel.html">Gaussian2DPRFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFResponse.html">Gaussian2DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFTuning.html">Gaussian2DPRFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/encode_prf_response.html">encode_prf_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/init_css_from_gaussian.html">init_css_from_gaussian</a></li>
@@ -465,19 +465,19 @@ and its matching tensor-holding type. Do not override <a class="reference intern
 <p>Inside <a class="reference internal" href="#prfmodel.models.base.BaseCanonical.call" title="prfmodel.models.base.BaseCanonical.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a>, invoke submodels through <em>their</em> <a class="reference internal" href="#prfmodel.models.base.BaseCanonical.call" title="prfmodel.models.base.BaseCanonical.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> as well, not through the user-facing
 <a class="reference internal" href="#prfmodel.models.base.BaseCanonical.__call__" title="prfmodel.models.base.BaseCanonical.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a>.</p>
 <p class="rubric">Examples</p>
-<p>Create a canonical model that combines a <a class="reference internal" href="../prf/Gaussian2DPRFResponse.html#prfmodel.models.prf.Gaussian2DPRFResponse" title="prfmodel.models.prf.Gaussian2DPRFResponse"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFResponse</span></code></a> and a
+<p>Create a canonical model that combines a <a class="reference internal" href="../prf/Gaussian2DPRFTuning.html#prfmodel.models.prf.Gaussian2DPRFTuning" title="prfmodel.models.prf.Gaussian2DPRFTuning"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFTuning</span></code></a> and a
 <a class="reference internal" href="../prf/PRFStimulusEncoder.html#prfmodel.models.prf.PRFStimulusEncoder" title="prfmodel.models.prf.PRFStimulusEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">PRFStimulusEncoder</span></code></a>. The <a class="reference internal" href="#prfmodel.models.base.BaseCanonical.parameter_names" title="prfmodel.models.base.BaseCanonical.parameter_names"><code class="xref py py-attr docutils literal notranslate"><span class="pre">parameter_names</span></code></a> property automatically
 aggregates the unique parameter names from all submodels.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.examples</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_2d_prf_bar_stimulus</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimuli</span><span class="w"> </span><span class="kn">import</span> <span class="n">PRFStimulus</span><span class="p">,</span> <span class="n">PRFStimulusTensors</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian2DPRFResponse</span><span class="p">,</span> <span class="n">PRFStimulusEncoder</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian2DPRFTuning</span><span class="p">,</span> <span class="n">PRFStimulusEncoder</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">CanonicalPRFModel</span><span class="p">(</span><span class="n">BaseCanonical</span><span class="p">[</span><span class="n">PRFStimulus</span><span class="p">,</span> <span class="n">PRFStimulusTensors</span><span class="p">]):</span>
 <span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stimulus</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">regressors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="gp">... </span>        <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">"prf_model"</span><span class="p">]</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
 <span class="gp">... </span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="s2">"encoding_model"</span><span class="p">]</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">CanonicalPRFModel</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="n">prf_model</span><span class="o">=</span><span class="n">Gaussian2DPRFResponse</span><span class="p">(),</span>
+<span class="gp">... </span>    <span class="n">prf_model</span><span class="o">=</span><span class="n">Gaussian2DPRFTuning</span><span class="p">(),</span>
 <span class="gp">... </span>    <span class="n">encoding_model</span><span class="o">=</span><span class="n">PRFStimulusEncoder</span><span class="p">(),</span>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">parameter_names</span>
@@ -541,7 +541,7 @@ required by every configured regressor model. Extra columns are ignored.</p></li
 </dl>
 <p class="rubric">Notes</p>
 <p>Implementations must be traceable by a backend compiler, and must reach submodels through their
-<a class="reference internal" href="#prfmodel.models.base.BaseCanonical.call" title="prfmodel.models.base.BaseCanonical.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> rather than through <a class="reference internal" href="#prfmodel.models.base.BaseCanonical.__call__" title="prfmodel.models.base.BaseCanonical.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a>. See <code class="xref py py-meth docutils literal notranslate"><span class="pre">BasePopulationResponse.call()</span></code>.</p>
+<a class="reference internal" href="#prfmodel.models.base.BaseCanonical.call" title="prfmodel.models.base.BaseCanonical.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a> rather than through <a class="reference internal" href="#prfmodel.models.base.BaseCanonical.__call__" title="prfmodel.models.base.BaseCanonical.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a>. See <code class="xref py py-meth docutils literal notranslate"><span class="pre">BaseTuning.call()</span></code>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -621,12 +621,12 @@ for different units.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="BasePopulationResponse.html">
+          <a class="next-page" href="BaseStimulusEncoder.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">prfmodel.models.base.BasePopulationResponse</div>
+                <div class="title">prfmodel.models.base.BaseStimulusEncoder</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

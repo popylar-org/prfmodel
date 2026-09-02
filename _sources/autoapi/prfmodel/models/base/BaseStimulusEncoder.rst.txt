@@ -91,7 +91,7 @@ prfmodel.models.base.BaseStimulusEncoder
       .. rubric:: Notes
 
       Implementations must be traceable by a backend compiler. See
-      :meth:`BasePopulationResponse.call` for details.
+      :meth:`BaseTuning.call` for details.
 
 
 

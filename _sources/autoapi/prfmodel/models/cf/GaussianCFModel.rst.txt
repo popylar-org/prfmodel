@@ -24,8 +24,8 @@ prfmodel.models.cf.GaussianCFModel
 
    The canonical model follows the following steps [1]_:
 
-   1. The Gaussian connective field response model makes a prediction for the stimulus distance matrix.
-   2. The encoding model encodes the connective field response with the source response.
+   1. The Gaussian connective field tuning model makes a prediction for the stimulus distance matrix.
+   2. The encoding model encodes the connective field tuning profile with the source response.
    3. The scaling model modifies the encoded response.
    4. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 

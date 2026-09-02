@@ -281,8 +281,8 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../models/index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../models/base/index.html">prfmodel.models.base</a><input aria-label="Toggle navigation of prfmodel.models.base" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../models/base/BaseCanonical.html">BaseCanonical</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../models/base/BasePopulationResponse.html">BasePopulationResponse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/base/BaseStimulusEncoder.html">BaseStimulusEncoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../models/base/BaseTuning.html">BaseTuning</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../models/cf/index.html">prfmodel.models.cf</a><input aria-label="Toggle navigation of prfmodel.models.cf" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -292,7 +292,7 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/cf/CFStimulusEncoder.html">CFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/cf/GaussianCFModel.html">GaussianCFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../models/cf/GaussianCFResponse.html">GaussianCFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../models/cf/GaussianCFTuning.html">GaussianCFTuning</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../models/compression/index.html">prfmodel.models.compression</a><input aria-label="Toggle navigation of prfmodel.models.compression" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -305,7 +305,7 @@
 </ul>
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/csf/CSFModel.html">CSFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../models/csf/CSFResponse.html">CSFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../models/csf/CSFTuning.html">CSFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/csf/predict_contrast_response.html">predict_contrast_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/csf/predict_contrast_sensitivity.html">predict_contrast_sensitivity</a></li>
 </ul>
@@ -327,11 +327,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../../models/prf/DivNormPRFModel.html">DivNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/prf/DoG2DPRFModel.html">DoG2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/prf/Gaussian1DPRFModel.html">Gaussian1DPRFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../models/prf/Gaussian1DPRFResponse.html">Gaussian1DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../models/prf/Gaussian1DPRFTuning.html">Gaussian1DPRFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/prf/Gaussian2DCSSPRFModel.html">Gaussian2DCSSPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/prf/Gaussian2DCSTPRFModel.html">Gaussian2DCSTPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/prf/Gaussian2DPRFModel.html">Gaussian2DPRFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../models/prf/Gaussian2DPRFResponse.html">Gaussian2DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../models/prf/Gaussian2DPRFTuning.html">Gaussian2DPRFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/prf/PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/prf/encode_prf_response.html">encode_prf_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../models/prf/init_css_from_gaussian.html">init_css_from_gaussian</a></li>
@@ -505,7 +505,7 @@ for different units.</p></li>
 </dl>
 <p class="rubric">Notes</p>
 <p>Implementations must be traceable by a backend compiler. See
-<a class="reference internal" href="../../models/base/BasePopulationResponse.html#prfmodel.models.base.BasePopulationResponse.call" title="prfmodel.models.base.BasePopulationResponse.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a>.</p>
+<a class="reference internal" href="../../models/base/BaseTuning.html#prfmodel.models.base.BaseTuning.call" title="prfmodel.models.base.BaseTuning.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py method">

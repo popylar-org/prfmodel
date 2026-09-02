@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.csf.CSFResponse" href="CSFResponse.html"><link rel="prev" title="prfmodel.models.csf.canonical.CanonicalCSFModel" href="canonical/CanonicalCSFModel.html">
+<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.csf.CSFTuning" href="CSFTuning.html"><link rel="prev" title="prfmodel.models.csf.canonical.CanonicalCSFModel" href="canonical/CanonicalCSFModel.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>prfmodel.models.csf.CSFModel - prfmodel 0.0.1 documentation</title>
@@ -281,8 +281,8 @@
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">prfmodel.models</a><input aria-label="Toggle navigation of prfmodel.models" checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3 has-children"><a class="reference internal" href="../base/index.html">prfmodel.models.base</a><input aria-label="Toggle navigation of prfmodel.models.base" class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../base/BaseCanonical.html">BaseCanonical</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../base/BasePopulationResponse.html">BasePopulationResponse</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../base/BaseStimulusEncoder.html">BaseStimulusEncoder</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../base/BaseTuning.html">BaseTuning</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../cf/index.html">prfmodel.models.cf</a><input aria-label="Toggle navigation of prfmodel.models.cf" class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -292,7 +292,7 @@
 </li>
 <li class="toctree-l4"><a class="reference internal" href="../cf/CFStimulusEncoder.html">CFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../cf/GaussianCFModel.html">GaussianCFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../cf/GaussianCFResponse.html">GaussianCFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../cf/GaussianCFTuning.html">GaussianCFTuning</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../compression/index.html">prfmodel.models.compression</a><input aria-label="Toggle navigation of prfmodel.models.compression" class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -305,7 +305,7 @@
 </ul>
 </li>
 <li class="toctree-l4 current current-page"><a class="current reference internal" href="#">CSFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="CSFResponse.html">CSFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="CSFTuning.html">CSFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="predict_contrast_response.html">predict_contrast_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="predict_contrast_sensitivity.html">predict_contrast_sensitivity</a></li>
 </ul>
@@ -327,11 +327,11 @@
 <li class="toctree-l4"><a class="reference internal" href="../prf/DivNormPRFModel.html">DivNormPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/DoG2DPRFModel.html">DoG2DPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFModel.html">Gaussian1DPRFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFResponse.html">Gaussian1DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian1DPRFTuning.html">Gaussian1DPRFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DCSSPRFModel.html">Gaussian2DCSSPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DCSTPRFModel.html">Gaussian2DCSTPRFModel</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFModel.html">Gaussian2DPRFModel</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFResponse.html">Gaussian2DPRFResponse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../prf/Gaussian2DPRFTuning.html">Gaussian2DPRFTuning</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/PRFStimulusEncoder.html">PRFStimulusEncoder</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/encode_prf_response.html">encode_prf_response</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../prf/init_css_from_gaussian.html">init_css_from_gaussian</a></li>
@@ -448,7 +448,7 @@
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.csf.</span></span><span class="sig-name descname"><span class="pre">CSFModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width_l</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.68</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impulse_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../impulse/base/BaseImpulse.html#prfmodel.impulse.base.BaseImpulse" title="prfmodel.impulse.base.BaseImpulse"><span class="pre">prfmodel.impulse.base.BaseImpulse</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../impulse/base/BaseImpulse.html#prfmodel.impulse.base.BaseImpulse" title="prfmodel.impulse.base.BaseImpulse"><span class="pre">prfmodel.impulse.base.BaseImpulse</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">DerivativeTwoGammaImpulse</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../scaling/base/BaseScaling.html#prfmodel.scaling.base.BaseScaling" title="prfmodel.scaling.base.BaseScaling"><span class="pre">prfmodel.scaling.base.BaseScaling</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.14)"><span class="pre">type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../scaling/base/BaseScaling.html#prfmodel.scaling.base.BaseScaling" title="prfmodel.scaling.base.BaseScaling"><span class="pre">prfmodel.scaling.base.BaseScaling</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">BaselineAmplitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regressors_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../regressors/base/BaseRegressors.html#prfmodel.regressors.base.BaseRegressors" title="prfmodel.regressors.base.BaseRegressors"><span class="pre">prfmodel.regressors.base.BaseRegressors</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../regressors/base/BaseRegressors.html#prfmodel.regressors.base.BaseRegressors" title="prfmodel.regressors.base.BaseRegressors"><span class="pre">prfmodel.regressors.base.BaseRegressors</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.models.csf.CSFModel" title="Link to this definition">¶</a></dt>
 <dd><p>Contrast sensitivity function model.</p>
 <p>Convenience wrapper around <a class="reference internal" href="canonical/CanonicalCSFModel.html#prfmodel.models.csf.canonical.CanonicalCSFModel" title="prfmodel.models.csf.canonical.CanonicalCSFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">CanonicalCSFModel</span></code></a> with a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">CSFResponse</span></code> as the CSF model.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">CSFTuning</span></code> as the CSF model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -466,9 +466,9 @@ are summed. The regressor contribution is added after the scaling model.</p></li
 </dl>
 <p class="rubric">Notes</p>
 <p>The model follows the following steps:</p>
-<p>1. The CSF response model predicts the temporal response from per-frame spatial frequency and contrast.
+<p>1. The CSF tuning model predicts the temporal tuning response from per-frame spatial frequency and contrast.
 3. The impulse model generates an impulse response.
-4. The CSF response is convolved with the impulse response.
+4. The CSF tuning response is convolved with the impulse response.
 5. The scaling model modifies the convolved response.
 6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.</p>
 <p>Using the default impulse and scaling models, the following columns are expected in the
@@ -708,12 +708,12 @@ for different units.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="CSFResponse.html">
+          <a class="next-page" href="CSFTuning.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">prfmodel.models.csf.CSFResponse</div>
+                <div class="title">prfmodel.models.csf.CSFTuning</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

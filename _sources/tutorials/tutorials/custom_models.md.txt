@@ -26,8 +26,8 @@ This tutorial explains how to create a custom model with prfmodel.
 ## Part 1: Implementing a 1D Gaussian pRF model
 
 In the first part, I show how to implement a 1-dimensional Gaussian population receptive field (pRF) model analogous
-to the existing 2-dimensional model. The 1D model is often used to model neural responses to auditory or numerosity
-stimuli that lie on a single dimension (i.e., tone frequency or displayed number of objects).
+to the canonical 2-dimensional model. The 1D model is often used to model neural responses to auditory or numerosity
+stimuli that lie on a single dimension (i.e., tone frequency or displayed number of objects; see Harvey et al., 2013).
 
 +++
 
@@ -80,18 +80,20 @@ secax.set_yticks(np.arange(len(unique_numerosities)))
 secax.set_yticklabels(np.round(unique_log_numerosities, 2));
 ```
 
-### Implementing the custom response model
+### Implementing the custom tuning model
 
-Now we implement the 1D Gaussian response class by subclassing
-{py:class}`~prfmodel.models.base.BasePopulationResponse` (note that the 1D Gaussian pRF response is already included in the package as {py:class}`~prfmodel.models.prf.Gaussian1DPRFResponse`). We first take a look at the docstring of the class:
+Now we implement the 1D Gaussian tuning class by subclassing
+{py:class}`~prfmodel.models.base.BaseTuning` (note that the 1D Gaussian pRF tuning model is already included in the package as {py:class}`~prfmodel.models.prf.Gaussian1DPRFTuning`).
+This class is called "tuning model" because it describes the sensitivity of a neuron population varies across the feature space in which the experimental stimulus is defined (here log numerosity).
+We first take a look at the docstring of the class:
 
 ```{code-cell} ipython3
-from prfmodel.models.base import BasePopulationResponse
+from prfmodel.models.base import BaseTuning
 
-help(BasePopulationResponse)
+help(BaseTuning)
 ```
 
-We can see that `BasePopulationResponse` has two abstract methods that must be overridden when subclassing:
+We can see that `BaseTuning` has two abstract methods that must be overridden when subclassing:
 
 ```
 __abstractmethods__ = frozenset({'call', 'parameter_names'}).
@@ -126,10 +128,10 @@ raises an error. Branching on a tensor *shape* is fine because shapes are known 
 parameter values, do it where the values are still concrete, for example by overriding the {py:meth}`check_parameter_values`
 method of the model class (more on that soon).
 
-We can also see that `BasePopulationResponse` is a generic class with respect to the stimulus.
+We can also see that `BaseTuning` is a generic class with respect to the stimulus.
 This means we need to specify for which stimulus type the class is defined, and which tensor type matches it.
 In our case, these are {py:class}`~prfmodel.stimuli.PRFStimulus` and
-{py:class}`~prfmodel.stimuli.PRFStimulusTensors` (for a connective field response model, these would be
+{py:class}`~prfmodel.stimuli.PRFStimulusTensors` (for a connective field tuning model, these would be
 {py:class}`~prfmodel.stimuli.CFStimulus` and {py:class}`~prfmodel.stimuli.CFStimulusTensors`).
 
 ```{code-cell} ipython3
@@ -138,7 +140,7 @@ from prfmodel.stimuli import PRFStimulus, PRFStimulusTensors
 from prfmodel.utils import TensorFrame
 
 # Define the generic class for the concrete 'PRFStimulus' type and its matching tensor type
-class Gaussian1DPRFResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTensors]):
+class Gaussian1DPRFTuning(BaseTuning[PRFStimulus, PRFStimulusTensors]):
     # 'parameter_names' is a property so that it becomes "immutable"
     @property
     def parameter_names(self) -> list[str]:
@@ -200,13 +202,13 @@ Even though we implemented `call`, we still *use* the model by calling it normal
 
 ### Creating the model
 
-With the `Gaussian1DPRFResponse` class defined, we pass it as the `prf_model` argument to {py:class}`~prfmodel.models.prf.canonical.CanonicalPRFModel`. The canonical model handles stimulus encoding, impulse response convolution, and baseline amplitude scaling using default submodels. Note that the 1D Gaussian pRF model is already included in the package as {py:class}`~prfmodel.models.prf.Gaussian1DPRFModel`.
+With the `Gaussian1DPRFTuning` class defined, we pass it as the `prf_model` argument to {py:class}`~prfmodel.models.prf.canonical.CanonicalPRFModel`. The canonical model handles stimulus encoding, impulse response convolution, and baseline amplitude scaling using default submodels. Note that the 1D Gaussian pRF model is already included in the package as {py:class}`~prfmodel.models.prf.Gaussian1DPRFModel`.
 
 ```{code-cell} ipython3
 from prfmodel.models.prf.canonical import CanonicalPRFModel
 
 model = CanonicalPRFModel(
-    prf_model=Gaussian1DPRFResponse(),
+    prf_model=Gaussian1DPRFTuning(),
 )
 ```
 
@@ -216,7 +218,7 @@ We can inspect all parameters required by the composite model through the `param
 model.parameter_names
 ```
 
-The parameters `mu` and `sigma` come from our custom `Gaussian1DPRFResponse`. The remaining parameters belong to the default impulse response model ({py:class}`~prfmodel.impulse.DerivativeTwoGammaImpulse`) and the scaling model ({py:class}`~prfmodel.scaling.BaselineAmplitude`).
+The parameters `mu` and `sigma` come from our custom `Gaussian1DPRFTuning`. The remaining parameters belong to the default impulse response model ({py:class}`~prfmodel.impulse.DerivativeTwoGammaImpulse`) and the scaling model ({py:class}`~prfmodel.scaling.BaselineAmplitude`).
 
 ### Simulating a neural response
 

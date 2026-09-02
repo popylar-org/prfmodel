@@ -1,0 +1,136 @@
+prfmodel.models.cf.GaussianCFTuning
+===================================
+
+.. py:class:: prfmodel.models.cf.GaussianCFTuning
+
+
+
+   Gaussian connective field tuning model.
+
+   Predicts a neuron population tuning profile to a stimulus distance matrix.
+   The model has two parameters: `center_index` is the index of the row in the stimulus distance matrix that is the
+   center of the Gaussian; `sigma` for the width of the Gaussian.
+
+   .. rubric:: Notes
+
+   Parameter `center_index` is a discrete integer parameter that is used as an index for the distrance matrix. It must
+   be non-negative and below the number of rows in the distance matrix. It must not be optimized with stochastic
+   gradient descent, use a grid search instead.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> from prfmodel.stimuli import CFStimulus
+   >>> num_source_units, num_frames = 10, 20
+   >>> distances = np.abs(
+   ...     np.arange(num_source_units, dtype=float)[:, None]
+   ...     - np.arange(num_source_units, dtype=float)[None, :]
+   ... )
+   >>> source_response = np.ones((num_source_units, num_frames))
+   >>> stimulus = CFStimulus(
+   ...     distance_matrix=distances,
+   ...     source_response=source_response
+   ... )
+   >>> # Define parameters for 2 target units
+   >>> params = pd.DataFrame({
+   ...     "center_index": [0, 5],
+   ...     "sigma": [1.0, 2.0]
+   ... })
+   >>> model = GaussianCFTuning()
+   >>> resp = model(stimulus, params)
+   >>> print(resp.shape)  # (num_units, num_source_units)
+   (2, 10)
+
+
+   .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, dtype: str | None = None) -> numpy.ndarray
+
+      Predict the model response for a stimulus.
+
+      This is the public entry point. It accepts the user-facing types, validates them, converts them to
+      tensors and delegates the arithmetic to :meth:`call`, then returns the result as a
+      :class:`numpy.ndarray`. Subclasses implement :meth:`call`, not this method. Use :meth:`call` when a
+      backend tensor is required.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape `(num_units, ...)` and dtype `dtype`. The number of units is the
+                number of rows in `parameters`. The number and size of other axes depends on the stimulus.
+      :rtype: numpy.ndarray
+
+      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
+
+
+   .. py:method:: call(stimulus: prfmodel.stimuli.CFStimulusTensors, parameters: prfmodel.utils.TensorFrame) -> prfmodel.typing.Tensor
+
+      Predict the tuning profile for a stimulus with a distance matrix.
+
+      :param stimulus: Tensor-holding connective field stimulus object,
+                       from :meth:`~prfmodel.stimuli.CFStimulus.to_tensors`.
+      :type stimulus: CFStimulusTensors
+      :param parameters: Model parameters as tensors, supporting the same column selection as a :class:`pandas.DataFrame`.
+      :type parameters: TensorFrame
+
+      :returns: Model predictions of shape `(num_units, num_rows)` and dtype `dtype`.
+                `num_units` is the number of rows in `parameters` and `num_rows` is the number of rows in the stimulus
+                distance matrix.
+      :rtype: Tensor
+
+
+
+   .. py:method:: check_parameter_names(parameters: pandas.DataFrame) -> None
+
+      Check that required parameter names are supplied.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :raises ValueError: When a parameter name in the :attr:`parameter_names` attribute is not a column in ``parameters``.
+
+
+
+   .. py:method:: check_parameter_values(parameters: pandas.DataFrame) -> None
+
+      Check that the parameter values lie inside the domain the model is defined on.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :raises ValueError: When a parameter that must be ``> 0`` is zero or negative or when `center_index` is a decimal or ``< 0``.
+
+
+
+   .. py:method:: get_consumed_parameter_names(parameters: pandas.DataFrame) -> list[str]
+
+      Return the parameter names the model reads from ``parameters``.
+
+      A name covered by :attr:`default_parameters` is only read when the caller supplies a column for it;
+      otherwise the default is merged in further down and the column would be absent here.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :returns: Names of the parameters the model reads from ``parameters``.
+      :rtype: list of str
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      `center_index`, `sigma`.
+
+      :type: Names of parameters used by the model
+

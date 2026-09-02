@@ -1,17 +1,17 @@
 prfmodel.models.csf.canonical.CanonicalCSFModel
 ===============================================
 
-.. py:class:: prfmodel.models.csf.canonical.CanonicalCSFModel(csf_model: prfmodel.models.base.BasePopulationResponse, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = BaselineAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
+.. py:class:: prfmodel.models.csf.canonical.CanonicalCSFModel(csf_model: prfmodel.models.base.BaseTuning, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = BaselineAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
 
 
 
    Simple composite contrast sensitivity function model.
 
-   This is a generic class that combines a contrast sensitivity function response, impulse, and
+   This is a generic class that combines a contrast sensitivity function tuning response, impulse, and
    temporal model response.
 
-   :param cfs_model: A contrast sensitivity function response model instance.
-   :type cfs_model: BasePopulationResponse
+   :param cfs_model: A contrast sensitivity function tuning model instance.
+   :type cfs_model: BaseTuning
    :param impulse_model: An impulse model class or instance. Model classes will be instantiated during
                          initialization. The default creates a :class:`~prfmodel.impulse.DerivativeTwoGammaImpulse`
                          instance with default values.
@@ -28,7 +28,7 @@ prfmodel.models.csf.canonical.CanonicalCSFModel
 
    The canonical model follows the following steps:
 
-   1. The CSF response model predicts the temporal response from per-frame spatial frequency and contrast.
+   1. The CSF tuning model predicts the temporal tuning response from per-frame spatial frequency and contrast.
    3. The impulse model generates an impulse response.
    4. The CSF response is convolved with the impulse response.
    5. The scaling model modifies the convolved response.

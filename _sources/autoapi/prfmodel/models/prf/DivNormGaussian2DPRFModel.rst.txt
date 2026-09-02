@@ -5,10 +5,11 @@ prfmodel.models.prf.DivNormGaussian2DPRFModel
 
 
 
-   Divisive normalization population receptive field (pRF) model with isotropic 2D Gaussian responses.
+   Divisive normalization population receptive field (pRF) model with isotropic 2D Gaussian tuning models.
 
-   This class combines a divisive normalization 2D Gaussian response with an impulse,
-   scaling, and regressors model. The two Gaussian 2D pRF models share the same center but have different sizes.
+   This class combines a divisive normalization 2D Gaussian tuning profile with an impulse,
+   scaling, and regressors model. The two Gaussian 2D pRF tuning models share the same center but have different
+   sizes.
 
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
                           The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
@@ -34,8 +35,8 @@ prfmodel.models.prf.DivNormGaussian2DPRFModel
 
    The divisive normalization model follows these steps [1]_:
 
-   1. The 2D Gaussian pRF response models make separate predictions for the stimulus grid.
-   2. The encoding model encodes the responses with the stimulus design.
+   1. The 2D Gaussian pRF tuning models make separate predictions for the stimulus grid.
+   2. The encoding model encodes the tuning profiles with the stimulus design.
    3. The two encoded responses are combined through divisive normalization.
    4. The combined response is convolved with an impulse response (optional).
    5. The scaling model modifies the convolved response (optional).

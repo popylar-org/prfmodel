@@ -29,7 +29,7 @@ prfmodel.stimuli.base.Stimulus
       :type dtype: str, optional
 
       :returns: The stimulus arrays as tensors, ready to be passed to a model's
-                :meth:`~prfmodel.models.base.BasePopulationResponse.call`.
+                :meth:`~prfmodel.models.base.BaseTuning.call`.
       :rtype: StimulusTensors
 
 

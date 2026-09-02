@@ -8,7 +8,7 @@ prfmodel.models.csf.CSFModel
    Contrast sensitivity function model.
 
    Convenience wrapper around :class:`~prfmodel.models.csf.canonical.CanonicalCSFModel` with a
-   :class:`CSFResponse` as the CSF model.
+   :class:`CSFTuning` as the CSF model.
 
    :param width_l: Curvature of the left branch of the asymmetric log-parabolic (aLP) CSF. Not fitted.
    :type width_l: float, default=0.68
@@ -28,9 +28,9 @@ prfmodel.models.csf.CSFModel
 
    The model follows the following steps:
 
-   1. The CSF response model predicts the temporal response from per-frame spatial frequency and contrast.
+   1. The CSF tuning model predicts the temporal tuning response from per-frame spatial frequency and contrast.
    3. The impulse model generates an impulse response.
-   4. The CSF response is convolved with the impulse response.
+   4. The CSF tuning response is convolved with the impulse response.
    5. The scaling model modifies the convolved response.
    6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 

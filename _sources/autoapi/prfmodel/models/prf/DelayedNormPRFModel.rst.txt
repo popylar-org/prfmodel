@@ -1,20 +1,20 @@
 prfmodel.models.prf.DelayedNormPRFModel
 =======================================
 
-.. py:class:: prfmodel.models.prf.DelayedNormPRFModel(prf_model: prfmodel.models.base.BasePopulationResponse, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = BaselineAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
+.. py:class:: prfmodel.models.prf.DelayedNormPRFModel(prf_model: prfmodel.models.base.BaseTuning, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = BaselineAmplitude, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None)
 
 
 
    Delayed gain normalization population receptive field (pRF) model.
 
-   Combines a pRF response model, stimulus encoding, and an impulse response (h₁) with an
+   Combines a pRF tuning model, stimulus encoding, and an impulse response (h₁) with an
    inline delayed normalization stage (h₂ = exponential decay) to form a complete DGN model.
    The computation and all DGN-specific parameters (``n``, ``dispersion_normalization``, ``sigma_saturation``,
-   ``amplitude``, ``baseline``) live in this class; pRF-specific parameters come from
+   ``amplitude``, ``baseline``) live in this class; pRF tuning-specific parameters come from
    ``prf_model``.
 
-   :param prf_model: A population receptive field response model instance.
-   :type prf_model: BasePopulationResponse
+   :param prf_model: A population receptive field tuning model instance.
+   :type prf_model: BaseTuning
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
                           The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
    :type encoding_model: BaseStimulusEncoder or type, default=PRFStimulusEncoder
@@ -34,7 +34,7 @@ prfmodel.models.prf.DelayedNormPRFModel
 
    The delayed gain normalization model follows [1]_:
 
-     1. **Linear** — pRF response encoded with the stimulus design, then convolved with
+     1. **Linear** — pRF tuning profile encoded with the stimulus design, then convolved with
         the impulse response h₁ to produce L(t).
      2. **Normalization** — L(t) is convolved with h₂ = exp(-t/τ₂) to produce g(t).
      3. **Nonlinear** — ``R(t) = |L(t)|ⁿ / (sigmaⁿ + |g(t)|ⁿ)``.

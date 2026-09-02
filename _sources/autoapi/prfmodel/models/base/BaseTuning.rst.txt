@@ -1,0 +1,156 @@
+prfmodel.models.base.BaseTuning
+===============================
+
+.. py:class:: prfmodel.models.base.BaseTuning
+
+
+
+   Generic abstract base class for neuron population tuning models.
+
+   A tuning model takes a stimulus and parameters as input and predicts how the sensitivity of a neuron population
+   varies across the feature space the stimulus is defined on. It returns a tuning profile conditional on its
+   parameters. The definition of the tuning profile varies between stimulus feature spaces. For example, for 2D
+   population receptive field (pRF) tuning models, the tuning profile is a Gaussian density defined over x- and y-
+   coordinates.
+
+   .. rubric:: Notes
+
+   This class cannot be instantiated on its own. It can only be used as a parent class to create custom tuning
+   models. Subclasses must override the abstract :attr:`parameter_names` property and the :meth:`call` method,
+   and must be defined with a specific user-facing stimulus type and its matching tensor-holding type.
+   See :mod:`~prfmodel.models.base` for details.
+
+   Do not override :meth:`__call__`. It is the public facade that validates the parameters, resolves the dtype
+   and converts both the stimulus and the parameters to tensors before handing them to :meth:`call`, then
+   converts the result back to a :class:`numpy.ndarray`.
+
+   .. rubric:: Examples
+
+   Reimplement a 2D isotropic Gaussian pRF tuning model for a :class:`~prfmodel.stimuli.PRFStimulus`.
+
+   >>> import pandas as pd
+   >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+   >>> from prfmodel.stimuli import PRFStimulus, PRFStimulusTensors
+   >>> from prfmodel.models.prf import predict_gaussian_response
+   >>> # Define custom child class
+   >>> class CustomGaussian2DTuning(BaseTuning[PRFStimulus, PRFStimulusTensors]):
+   ...     @property
+   ...     def parameter_names(self):
+   ...         return ["mu_y", "mu_x", "sigma"]
+   ...     def call(self, stimulus, parameters):
+   ...         return predict_gaussian_response(
+   ...             stimulus.grid, parameters[["mu_y", "mu_x"]], parameters[["sigma"]]
+   ...         )
+   >>> # Load example pRF stimulus
+   >>> stimulus = load_2d_prf_bar_stimulus()
+   >>> # Define parameters
+   >>> params = pd.DataFrame({
+   ...     "mu_y": [0.0, 1.0],
+   ...     "mu_x": [1.0, 0.0],
+   ...     "sigma": [1.0, 1.5],
+   ... })
+   >>> # Create child model instance
+   >>> model = CustomGaussian2DTuning()
+   >>> # Make model prediction for example stimulus
+   >>> resp = model(stimulus, params)
+   >>> print(resp.shape)  # (num_units, num_y, num_x)
+   (2, 128, 128)
+
+
+   .. py:method:: __call__(stimulus: S, parameters: pandas.DataFrame, dtype: str | None = None) -> numpy.ndarray
+
+      Predict the model response for a stimulus.
+
+      This is the public entry point. It accepts the user-facing types, validates them, converts them to
+      tensors and delegates the arithmetic to :meth:`call`, then returns the result as a
+      :class:`numpy.ndarray`. Subclasses implement :meth:`call`, not this method. Use :meth:`call` when a
+      backend tensor is required.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: Model predictions of shape `(num_units, ...)` and dtype `dtype`. The number of units is the
+                number of rows in `parameters`. The number and size of other axes depends on the stimulus.
+      :rtype: numpy.ndarray
+
+      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
+
+
+   .. py:method:: call(stimulus: T, parameters: prfmodel.utils.TensorFrame) -> prfmodel.typing.Tensor
+      :abstractmethod:
+
+
+      Predict the model response from tensors.
+
+      :param stimulus: The tensor-holding stimulus object, from :meth:`~prfmodel.stimuli.Stimulus.to_tensors`.
+      :type stimulus: StimulusTensors
+      :param parameters: Model parameters as tensors, supporting the same column selection as a :class:`pandas.DataFrame`.
+      :type parameters: TensorFrame
+
+      :returns: Model predictions of shape `(num_units, ...)`.
+      :rtype: :data:`prfmodel.typing.Tensor`
+
+      .. rubric:: Notes
+
+      Implementations must be traceable by a backend compiler, because this is the method the fitters
+      wrap in ``tf.function`` or ``jax.jit``. In practice: use :mod:`keras.ops` only, never :mod:`numpy`
+      or :mod:`pandas`, and never branch on a tensor *value*. Branching on a tensor *shape* is fine, since shapes are
+      known at trace time. Checks that need concrete values belong in :meth:`__call__`.
+
+
+
+   .. py:method:: check_parameter_names(parameters: pandas.DataFrame) -> None
+
+      Check that required parameter names are supplied.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :raises ValueError: When a parameter name in the :attr:`parameter_names` attribute is not a column in ``parameters``.
+
+
+
+   .. py:method:: check_parameter_values(parameters: pandas.DataFrame) -> None
+
+      Check that the parameter values lie inside the domain the model is defined on.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :raises ValueError: When a parameter that must be ``> 0`` is zero or negative.
+
+
+
+   .. py:method:: get_consumed_parameter_names(parameters: pandas.DataFrame) -> list[str]
+
+      Return the parameter names the model reads from ``parameters``.
+
+      A name covered by :attr:`default_parameters` is only read when the caller supplies a column for it;
+      otherwise the default is merged in further down and the column would be absent here.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :returns: Names of the parameters the model reads from ``parameters``.
+      :rtype: list of str
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
+

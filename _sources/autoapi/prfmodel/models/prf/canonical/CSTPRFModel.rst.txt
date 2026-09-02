@@ -1,29 +1,29 @@
 prfmodel.models.prf.canonical.CSTPRFModel
 =========================================
 
-.. py:class:: prfmodel.models.prf.canonical.CSTPRFModel(prf_model: prfmodel.models.base.BasePopulationResponse, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, sustained_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] = SustainedImpulse, transient_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] = TransientImpulse, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = Baseline, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None, min_response: float = 1e-10)
+.. py:class:: prfmodel.models.prf.canonical.CSTPRFModel(prf_model: prfmodel.models.base.BaseTuning, encoding_model: prfmodel.models.base.BaseStimulusEncoder | type[prfmodel.models.base.BaseStimulusEncoder] = PRFStimulusEncoder, sustained_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] = SustainedImpulse, transient_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] = TransientImpulse, impulse_model: prfmodel.impulse.base.BaseImpulse | type[prfmodel.impulse.base.BaseImpulse] | None = DerivativeTwoGammaImpulse, scaling_model: prfmodel.scaling.base.BaseScaling | type[prfmodel.scaling.base.BaseScaling] | None = Baseline, regressors_model: prfmodel.regressors.base.BaseRegressors | list[prfmodel.regressors.base.BaseRegressors] | None = None, min_response: float = 1e-10)
 
 
 
    Compressive spatiotemporal (CST) population receptive field (pRF) model.
 
-   Combines a single pRF response model with three temporal channels that share one spatial receptive field:
+   Combines a single pRF tuning model with three temporal channels that share one spatial receptive field:
    a sustained channel, an on-transient channel, and an off-transient channel. Each channel response is
    rectified and compressed, the channels are combined with separate weights, and the result is convolved with
    an impulse response.
 
-   The compression and weighting parameters (``n``, ``amplitude_sustained``, ``amplitude_transient``) are owned by this
-   class. Every other parameter is contributed by a submodel and changes when that submodel is replaced:
+   The compression and weighting parameters (``n``, ``amplitude_sustained``, ``amplitude_transient``) are owned by
+   this class. Every other parameter is contributed by a submodel and changes when that submodel is replaced:
 
    - ``sustained_model`` and ``transient_model`` supply the channel timing parameter (``time_to_peak`` for the
      default :class:`~prfmodel.impulse.SustainedImpulse` and :class:`~prfmodel.impulse.TransientImpulse`).
-   - ``prf_model`` supplies the spatial parameters (``mu_y``, ``mu_x`` and ``sigma`` for
-     :class:`~prfmodel.models.prf.Gaussian2DPRFResponse`).
+   - ``prf_model`` supplies the pRF tuning parameters (``mu_y``, ``mu_x`` and ``sigma`` for
+     :class:`~prfmodel.models.prf.Gaussian2DPRFTuning`).
    - ``impulse_model`` and ``scaling_model`` supply the rest (``weight_deriv`` and ``baseline`` for the
      defaults; the other impulse parameters are covered by its default parameter set).
 
-   :param prf_model: A population receptive field response model instance.
-   :type prf_model: BasePopulationResponse
+   :param prf_model: A population receptive field tuning model instance.
+   :type prf_model: BaseTuning
    :param encoding_model: An stimulus encoding model class or instance. Model classes will be instantiated during initialization.
                           The default creates a :class:`~prfmodel.models.prf.PRFStimulusEncoder` instance.
    :type encoding_model: BaseStimulusEncoder or type, default=PRFStimulusEncoder
@@ -50,7 +50,7 @@ prfmodel.models.prf.canonical.CSTPRFModel
 
    The compressive spatiotemporal model follows [1]_:
 
-     1. **Spatial** — the pRF response is encoded with the stimulus design, giving the linear response that the
+     1. **Spatial** — the pRF tuning profile is encoded with the stimulus design, giving the linear response that the
         reference writes as ``I(X, Y, t) · RF(X, Y)``.
      2. **Temporal** — that response is convolved with each channel: ``r_i(t) = h_i(t) * [I . RF]`` for
         ``i = 1, 2, 3``, where ``h_3 = -h_2``.

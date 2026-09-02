@@ -7,14 +7,15 @@ prfmodel.models.prf
 
    Population receptive field (pRF) models.
 
-   This module contains pRF response models that predict a pRF response to a stimulus grid
-   (e.g., :class:`Gaussian2DPRFResponse`).
+   This module contains pRF tuning models that predict a pRF tuning profile over a stimulus grid
+   (e.g., :class:`Gaussian2DPRFTuning`).
 
    It also contains the
    :class:`PRFStimulusEncoder` class that encodes a pRF response with a stimulus design.
 
    Finally, it
-   contains multiple canonical models that combine a pRF response with a stimulus encoding model, an impulse response
+   contains multiple canonical models that combine a pRF tuning profile with a stimulus encoding model, an impulse
+   response
    model from :mod:`~prfmodel.impulse`, and a scaling model from :mod:`~prfmodel.scaling`. Currently, canonical Gaussian
    [1]_ [2]_, Compressive Spatial Summation (CSS) [3]_, Difference of Gaussian (DoG) [4]_, and
    Divisive Normalization (DivNorm; DN) [5]_, and Compressive Spatiotemporal (CST) [6]_ models are implemented.
@@ -29,8 +30,8 @@ prfmodel.models.prf
    function is also internally used by :class:`PRFStimulusEncoder`.
 
    The function :func:`predict_gaussian_response` can be used to make Gaussian density predictions to stimulus grids with
-   arbitrary dimensions. This function is also used internally by :class:`Gaussian2DPRFResponse` and
-   :class:`Gaussian1DPRFResponse`.
+   arbitrary dimensions. This function is also used internally by :class:`Gaussian2DPRFTuning` and
+   :class:`Gaussian1DPRFTuning`.
 
    .. rubric:: References
 
@@ -77,11 +78,11 @@ Classes
    DivNormPRFModel </autoapi/prfmodel/models/prf/DivNormPRFModel>
    DoG2DPRFModel </autoapi/prfmodel/models/prf/DoG2DPRFModel>
    Gaussian1DPRFModel </autoapi/prfmodel/models/prf/Gaussian1DPRFModel>
-   Gaussian1DPRFResponse </autoapi/prfmodel/models/prf/Gaussian1DPRFResponse>
+   Gaussian1DPRFTuning </autoapi/prfmodel/models/prf/Gaussian1DPRFTuning>
    Gaussian2DCSSPRFModel </autoapi/prfmodel/models/prf/Gaussian2DCSSPRFModel>
    Gaussian2DCSTPRFModel </autoapi/prfmodel/models/prf/Gaussian2DCSTPRFModel>
    Gaussian2DPRFModel </autoapi/prfmodel/models/prf/Gaussian2DPRFModel>
-   Gaussian2DPRFResponse </autoapi/prfmodel/models/prf/Gaussian2DPRFResponse>
+   Gaussian2DPRFTuning </autoapi/prfmodel/models/prf/Gaussian2DPRFTuning>
    PRFStimulusEncoder </autoapi/prfmodel/models/prf/PRFStimulusEncoder>
 
 .. autoapisummary::
@@ -93,11 +94,11 @@ Classes
    prfmodel.models.prf.DivNormPRFModel
    prfmodel.models.prf.DoG2DPRFModel
    prfmodel.models.prf.Gaussian1DPRFModel
-   prfmodel.models.prf.Gaussian1DPRFResponse
+   prfmodel.models.prf.Gaussian1DPRFTuning
    prfmodel.models.prf.Gaussian2DCSSPRFModel
    prfmodel.models.prf.Gaussian2DCSTPRFModel
    prfmodel.models.prf.Gaussian2DPRFModel
-   prfmodel.models.prf.Gaussian2DPRFResponse
+   prfmodel.models.prf.Gaussian2DPRFTuning
    prfmodel.models.prf.PRFStimulusEncoder
 
 
