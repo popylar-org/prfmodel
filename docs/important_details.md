@@ -101,6 +101,35 @@ state) which is commonly done in experiments by, for example, running dummy scan
 experiments. Stimuli from previous runs in an experiment should not influence the recording of the response to the
 current stimulus.
 
+## Impulse responses must have the same sampling rate as observed responses
+
+Discrete convolution assumes that the convolved signals have the same sampling rate. In prfmodel, the sampling rate
+of stimulus designs and observed neural responses is implicit. They are represented as series of time frames that
+contain a single TR (repitition time). To match the implicit sampling rate of observed responses, we need to provide
+the sampling rate explicitly to any impulse model that is convolved with stimulus-encoded model response so that the
+final model predictions that are compared against the observed neural responses have the same sampling rate. For
+a Gaussian 2D pRF model, this can be done by adding a custom impulse model:
+
+```python
+from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.models import Gaussian2DPRFModel
+
+
+TR = 1.5  # in seconds
+
+# Create a custom impulse model with the TR as resolution
+impulse_model = DerivativeTwoGammaImpulse(resolution=TR)
+
+# Insert the custom impulse model into the canonical pRF model
+prf_model = Gaussian2DPRFModel(
+    impulse_model=impulse_model,
+)
+```
+
+This implementation might seem a bit cumbersome, however, it forces the user to think explicitly about the sampling
+rates used in the model and the experiment. It also becomes helpful as soon as different model components operate on
+different sampling rates that must be aligned with each other (e.g., in the compressive spatio-temporal pRF model).
+
 ## What if I want to deviate from these decisions?
 
 If you have good reasons to deviate from our decisions, you can implement your own models in prfmodel that use

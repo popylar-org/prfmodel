@@ -332,9 +332,10 @@ Gaussian shape in two-dimensional visual space. This response is convolved with 
 that follows the shape of the hemodynamic response in the brain. Finally, a baseline and amplitude parameter shift and scale
 our predicted response to match the observed BOLD response.
 
-The {py:class}`prfmodel.models.gaussian.Gaussian2DPRFModel` class performs all these steps to make a combined prediction. However, we need to add a custom impulse
-response model to account for the fact that each time frame is one TR (1.5 seconds; the default in prfmodel is 1.0 seconds). Thus, we set the resolution
-of our predicted impulse response to the TR.
+The {py:class}`prfmodel.models.gaussian.Gaussian2DPRFModel` class performs all these steps to make a combined prediction.
+
+**Important**: We need to add a custom impulse response model to account for the fact that each time frame in the observed timecourses is one TR (1.5 seconds; the default in prfmodel is 1.0 seconds). We set the resolution
+of our predicted impulse response to the TR so that the final predicted model response has the same sampling rate as the observed timecourses (see also the section [](important_details.md)).
 
 ```{code-cell} ipython3
 from prfmodel.impulse import DerivativeTwoGammaImpulse
