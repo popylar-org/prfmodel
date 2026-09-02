@@ -1,0 +1,81 @@
+prfmodel.protocols.ModelProtocol
+================================
+
+.. py:class:: prfmodel.protocols.ModelProtocol
+
+
+
+   Protocol for model classes.
+
+   Cannot be instantiated on its own.
+   This protocol is intended as the parent class for models that can be composed with
+   :class:`~prfmodel.protocols.CompositeModelProtocol`.
+   Subclasses must override the abstract :attr:`parameter_names` property.
+
+   .. attribute:: parameter_names
+
+      Names of parameters used by the model class.
+
+      :type: list of str
+
+   .. rubric:: Examples
+
+   Create a custom model class that inherits from the protocol and overwrites the :attr:`parameter_names` property.
+
+   >>> class CustomModel(ModelProtocol):
+   ...     @property
+   ...     def parameter_names(self):
+   ...         return ["a", "b"]
+   >>> model = CustomModel()
+   >>> print(model.parameter_names)
+   ['a', 'b']
+
+
+   .. py:method:: check_parameter_names(parameters: pandas.DataFrame) -> None
+
+      Check that required parameter names are supplied.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :raises ValueError: When a parameter name in the :attr:`parameter_names` attribute is not a column in ``parameters``.
+
+
+
+   .. py:method:: check_parameter_values(parameters: pandas.DataFrame) -> None
+
+      Check that the parameter values lie inside the domain the model is defined on.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :raises ValueError: When a parameter that must be ``> 0`` is zero or negative.
+
+
+
+   .. py:method:: get_consumed_parameter_names(parameters: pandas.DataFrame) -> list[str]
+
+      Return the parameter names the model reads from ``parameters``.
+
+      A name covered by :attr:`default_parameters` is only read when the caller supplies a column for it;
+      otherwise the default is merged in further down and the column would be absent here.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :returns: Names of the parameters the model reads from ``parameters``.
+      :rtype: list of str
+
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+      :abstractmethod:
+
+
+      A list with names of parameters that are used by the model.
+

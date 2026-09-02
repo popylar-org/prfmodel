@@ -17,7 +17,7 @@ prfmodel.utils.normalize_response
 
    .. rubric:: Notes
 
-   A warning is raised when the normalization is zero which leads to an undefined normalized response.
+   Returns a non-finite response when the normalization is zero.
 
    .. rubric:: Examples
 

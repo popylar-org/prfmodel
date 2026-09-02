@@ -16,9 +16,11 @@ Classes
    :hidden:
 
    Stimulus </autoapi/prfmodel/stimuli/base/Stimulus>
+   StimulusTensors </autoapi/prfmodel/stimuli/base/StimulusTensors>
 
 .. autoapisummary::
 
    prfmodel.stimuli.base.Stimulus
+   prfmodel.stimuli.base.StimulusTensors
 
 

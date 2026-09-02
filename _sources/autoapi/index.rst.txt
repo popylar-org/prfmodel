@@ -19,6 +19,7 @@ in the :py:mod:`~prfmodel.models`, :py:mod:`~prfmodel.fitters`, and :py:mod:`~pr
    /autoapi/prfmodel/impulse/index
    /autoapi/prfmodel/models/index
    /autoapi/prfmodel/plotting/index
+   /autoapi/prfmodel/protocols/index
    /autoapi/prfmodel/regressors/index
    /autoapi/prfmodel/scaling/index
    /autoapi/prfmodel/stimuli/index
@@ -34,6 +35,7 @@ in the :py:mod:`~prfmodel.models`, :py:mod:`~prfmodel.fitters`, and :py:mod:`~pr
    prfmodel.impulse
    prfmodel.models
    prfmodel.plotting
+   prfmodel.protocols
    prfmodel.regressors
    prfmodel.scaling
    prfmodel.stimuli

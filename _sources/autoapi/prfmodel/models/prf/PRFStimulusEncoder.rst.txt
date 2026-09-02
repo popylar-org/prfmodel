@@ -13,14 +13,17 @@ prfmodel.models.prf.PRFStimulusEncoder
    .. seealso:: :py:obj:`encode_prf_response`
 
 
-   .. py:method:: __call__(stimulus: prfmodel.stimuli.PRFStimulus, response: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+   .. py:method:: __call__(stimulus: S, response: prfmodel.typing.Tensor | numpy.ndarray, parameters: pandas.DataFrame, dtype: str | None = None) -> numpy.ndarray
 
-      Encode a population receptive field model response with a stimulus design.
+      Encode a model response with a stimulus.
 
-      :param stimulus: Population receptive field stimulus object.
-      :type stimulus: PRFStimulus
-      :param response: Population receptive field response.
-      :type response: Tensor
+      This is the public entry point; subclasses implement :meth:`call` instead. Use :meth:`call` when a
+      backend tensor is required.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+      :param response: Model response.
+      :type response: :data:`prfmodel.typing.Tensor` or numpy.ndarray
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different units.
       :type parameters: pandas.DataFrame
@@ -28,10 +31,69 @@ prfmodel.models.prf.PRFStimulusEncoder
                     :func:`prfmodel.utils.get_dtype`.
       :type dtype: str, optional
 
+      :returns: The stimulus encoded model response with shape `(num_units, ...)` dtype `dtype`. The number of units is
+                the number of rows in :attr:`parameters`. The number and size of other axes depends on the stimulus and the
+                response.
+      :rtype: numpy.ndarray
+
+      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
+
+
+   .. py:method:: call(stimulus: prfmodel.stimuli.PRFStimulusTensors, response: prfmodel.typing.Tensor, parameters: prfmodel.utils.TensorFrame) -> prfmodel.typing.Tensor
+
+      Encode a population receptive field model response with a stimulus design.
+
+      :param stimulus: Tensor-holding population receptive field stimulus object,
+                       from :meth:`~prfmodel.stimuli.PRFStimulus.to_tensors`.
+      :type stimulus: PRFStimulusTensors
+      :param response: Population receptive field response.
+      :type response: Tensor
+      :param parameters: Model parameters as tensors, supporting the same column selection as a :class:`pandas.DataFrame`.
+      :type parameters: TensorFrame
+
       :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
       :rtype: Tensor
 
-      :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
+
+   .. py:method:: check_parameter_names(parameters: pandas.DataFrame) -> None
+
+      Check that required parameter names are supplied.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :raises ValueError: When a parameter name in the :attr:`parameter_names` attribute is not a column in ``parameters``.
+
+
+
+   .. py:method:: check_parameter_values(parameters: pandas.DataFrame) -> None
+
+      Check that the parameter values lie inside the domain the model is defined on.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :raises ValueError: When a parameter that must be ``> 0`` is zero or negative.
+
+
+
+   .. py:method:: get_consumed_parameter_names(parameters: pandas.DataFrame) -> list[str]
+
+      Return the parameter names the model reads from ``parameters``.
+
+      A name covered by :attr:`default_parameters` is only read when the caller supplies a column for it;
+      otherwise the default is merged in further down and the column would be absent here.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :returns: Names of the parameters the model reads from ``parameters``.
+      :rtype: list of str
 
 
 

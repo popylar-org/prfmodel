@@ -24,7 +24,9 @@ prfmodel.fitters.LeastSquaresFitter
    slope names are given, each basis function is isolated by setting that slope to 1.0 and all others to 0.0, and
    the resulting design matrix is solved with least squares in one shot.
 
-   Internally, the fitter applies `keras.ops.lstsq` to each data batch.
+   Internally, each data batch is solved for all of its units at once with a batched singular value
+   decomposition, which gives the same coefficients as :func:`numpy.linalg.lstsq` per unit, including the
+   minimum-norm solution when a unit's design matrix is rank deficient.
 
    .. rubric:: Examples
 

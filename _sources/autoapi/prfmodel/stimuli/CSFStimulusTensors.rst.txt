@@ -1,0 +1,17 @@
+prfmodel.stimuli.CSFStimulusTensors
+===================================
+
+.. py:class:: prfmodel.stimuli.CSFStimulusTensors
+
+
+
+   Tensor-holding counterpart of a :class:`~prfmodel.stimuli.CSFStimulus`.
+
+   Holds the contrast sensitivity function stimulus arrays as backend tensors. Should be created with
+   :meth:`CSFStimulus.to_tensors`.
+
+   :param sf: The :attr:`CSFStimulus.sf` array as a tensor.
+   :type sf: :data:`prfmodel.typing.Tensor`
+   :param contrast: The :attr:`CSFStimulus.contrast` array as a tensor.
+   :type contrast: :data:`prfmodel.typing.Tensor`
+

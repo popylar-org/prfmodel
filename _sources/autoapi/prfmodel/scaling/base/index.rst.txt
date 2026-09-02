@@ -7,15 +7,23 @@ prfmodel.scaling.base
 
    Abstract base classes for scaling models.
 
-   Classes in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that requires them to implement a
-   :attr:`~prfmodel.utils.ModelProtocol.parameter_names` property.
+   Classes in this module inherit from :class:`~prfmodel.protocols.ModelProtocol` that requires them to implement a
+   :attr:`~prfmodel.protocols.ModelProtocol.parameter_names` property.
 
    They are abstract base classes, meaning that they
    cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
    shared by all child classes. For example, :class:`~prfmodel.models.base.BaseScaling` defines that all child classes
-   must implement a :meth:`~prfmodel.models.base.BaseScaling.__call__` method that takes a model response and a set of
+   must implement a :meth:`~prfmodel.models.base.BaseScaling.call` method that takes a model response and a set of
    parameters as input. However, it leaves it up to each child class to define how input response parameters are used to
    make model predictions.
+
+   All base classes have a concrete user-facing :meth:``__call__`` method
+   (e.g., :meth:`~prfmodel.scaling.base.BaseScaling.__call__`) that takes non-tensor arguments and
+   performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
+   class and only accepts tensor arguments to enable backend compilation.
+
+   The user-facing :meth:`__call__` returns a :class:`numpy.ndarray`, while ``call`` returns a backend tensor.
+   Use ``call`` when a backend tensor is required, for example inside a fitter or another model's ``call``.
 
 
 

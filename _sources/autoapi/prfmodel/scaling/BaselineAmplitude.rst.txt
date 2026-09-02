@@ -25,12 +25,15 @@ prfmodel.scaling.BaselineAmplitude
    (3, 10)
 
 
-   .. py:method:: __call__(inputs: prfmodel.typing.Tensor, parameters: pandas.DataFrame, dtype: str | None = None) -> prfmodel.typing.Tensor
+   .. py:method:: __call__(inputs: prfmodel.typing.Tensor | numpy.ndarray, parameters: pandas.DataFrame, dtype: str | None = None) -> numpy.ndarray
 
-      Predict the model response.
+      Make predictions with the scaling model.
+
+      This is the public entry point; subclasses implement :meth:`call` instead. Use :meth:`call` when a
+      backend tensor is required.
 
       :param inputs: Input tensor with temporal response and shape (num_units, num_frames).
-      :type inputs: :data:`prfmodel.typing.Tensor`
+      :type inputs: :data:`prfmodel.typing.Tensor` or numpy.ndarray
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different units.
       :type parameters: pandas.DataFrame
@@ -39,9 +42,63 @@ prfmodel.scaling.BaselineAmplitude
       :type dtype: str, optional
 
       :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
-      :rtype: Tensor
+      :rtype: numpy.ndarray
 
       :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
+
+
+
+   .. py:method:: call(inputs: prfmodel.typing.Tensor, parameters: prfmodel.utils.TensorFrame) -> prfmodel.typing.Tensor
+
+      Predict the model response.
+
+      :param inputs: Input tensor with temporal response and shape (num_units, num_frames).
+      :type inputs: :data:`prfmodel.typing.Tensor`
+      :param parameters: Model parameters as tensors, supporting the same column selection as a :class:`pandas.DataFrame`.
+      :type parameters: TensorFrame
+
+      :returns: The predicted model response with shape `(num_units, num_frames)` and dtype `dtype`.
+      :rtype: Tensor
+
+
+
+   .. py:method:: check_parameter_names(parameters: pandas.DataFrame) -> None
+
+      Check that required parameter names are supplied.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :raises ValueError: When a parameter name in the :attr:`parameter_names` attribute is not a column in ``parameters``.
+
+
+
+   .. py:method:: check_parameter_values(parameters: pandas.DataFrame) -> None
+
+      Check that the parameter values lie inside the domain the model is defined on.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :raises ValueError: When a parameter that must be ``> 0`` is zero or negative.
+
+
+
+   .. py:method:: get_consumed_parameter_names(parameters: pandas.DataFrame) -> list[str]
+
+      Return the parameter names the model reads from ``parameters``.
+
+      A name covered by :attr:`default_parameters` is only read when the caller supplies a column for it;
+      otherwise the default is merged in further down and the column would be absent here.
+
+      :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
+                         for different units.
+      :type parameters: pandas.DataFrame
+
+      :returns: Names of the parameters the model reads from ``parameters``.
+      :rtype: list of str
 
 
 

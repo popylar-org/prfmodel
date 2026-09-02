@@ -101,7 +101,7 @@ prfmodel.fitters.adapter.ParameterConstraint
    >>> assert np.allclose(params_inverse["x"], params["x"])
 
 
-   .. py:method:: inverse(parameters: P) -> P
+   .. py:method:: inverse(parameters: P, dtype: str | None = None) -> P
 
       Map unbounded parameters back onto the bounded natural scale.
 
@@ -112,6 +112,11 @@ prfmodel.fitters.adapter.ParameterConstraint
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different units.
       :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`. A dataframe is converted column by column, so a dtype narrower than
+                    its values rounds every column, including the ones this transformation leaves untouched. Pass the dtype
+                    the caller computes in. Ignored for a :class:`~prfmodel.utils.TensorFrame`, which carries its own.
+      :type dtype: str, optional
 
       :returns: Dataframe with the parameters in `parameter_names` mapped onto the natural scale, satisfying the bound.
       :rtype: pd.DataFrame
@@ -120,7 +125,7 @@ prfmodel.fitters.adapter.ParameterConstraint
 
 
 
-   .. py:method:: transform(parameters: P) -> P
+   .. py:method:: transform(parameters: P, dtype: str | None = None) -> P
 
       Map bounded parameters onto the unbounded scale.
 
@@ -130,6 +135,11 @@ prfmodel.fitters.adapter.ParameterConstraint
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different units.
       :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`. A dataframe is converted column by column, so a dtype narrower than
+                    its values rounds every column, including the ones this transformation leaves untouched. Pass the dtype
+                    the caller computes in. Ignored for a :class:`~prfmodel.utils.TensorFrame`, which carries its own.
+      :type dtype: str, optional
 
       :returns: Dataframe with the parameters in `parameter_names` mapped onto the unbounded scale.
       :rtype: pd.DataFrame

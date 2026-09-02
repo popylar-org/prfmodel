@@ -6,13 +6,13 @@ prfmodel.density.derivative_gamma_density
    Calculate the derivative density of a gamma distribution.
 
    The distribution uses a shape and scale parameterization.
-   Raises an error when evaluated at negative values.
 
-   :param value: The values at which to evaluate the derivative gamma distribution. Must be > 0 and scalar or with shape (1, m).
+   :param value: The values at which to evaluate the derivative gamma distribution. Must be scalar or with shape
+                 (1, m). Values at or below zero are allowed and give a derivative density of zero.
    :type value: :data:`prfmodel.typing.Tensor`
-   :param shape: The shape parameter. Must be > 0 and scalar or with shape (n, m).
+   :param shape: The shape parameter. Must be scalar or with shape (n, m).
    :type shape: :data:`prfmodel.typing.Tensor`
-   :param scale: The scale parameter. Must be > 0 and scalar or with shape (n, m).
+   :param scale: The scale parameter. Must be scalar or with shape (n, m).
    :type scale: :data:`prfmodel.typing.Tensor`
 
    :returns: The derivative density of the gamma distribution at `value` as a scalar or with shape (n, m).
@@ -34,6 +34,10 @@ prfmodel.density.derivative_gamma_density
    .. math::
 
        f(x)' = f(x) \frac{(\alpha - 1)}{t} - \frac{1}{\theta}
+
+   The derivative density is zero for values at and below zero, including at
+   exactly zero where the density is zero and the derivative term is infinite. Negative `shape` returns a
+   finite but meaningless number whereas negative `scale`returns NaN instead of raising an error.
 
    .. seealso::
 

@@ -1,7 +1,7 @@
 prfmodel.fitters.GridFitter
 ===========================
 
-.. py:class:: prfmodel.fitters.GridFitter(model: prfmodel.models.base.BaseCanonical, stimulus: prfmodel.stimuli.Stimulus, loss: keras.losses.Loss | collections.abc.Callable | None = None, dtype: str | None = None)
+.. py:class:: prfmodel.fitters.GridFitter(model: prfmodel.models.base.BaseCanonical, stimulus: prfmodel.stimuli.Stimulus, loss: keras.losses.Loss | collections.abc.Callable | None = None, compile_step: bool = False, dtype: str | None = None)
 
    Fit population receptive field models with grid search.
 
@@ -21,6 +21,13 @@ prfmodel.fitters.GridFitter
                 loss computation for all data batches. When a function is used, it must return a loss value for every unit in
                 `y_true` and `y_pred`.
    :type loss: keras.optimizers.Loss or Callable, optional
+   :param compile_step:
+                        Whether to compile the optimization step with the backend's native primitive: `jax.jit` on JAX,
+                                `tf.function` on TensorFlow and `torch.compile` on PyTorch. With `False` (the default) the step
+                                runs eagerly, which is slower but makes the step inspectable and produces Python
+                                tracebacks that point at the offending line. Whether compiling pays off depends on the backend
+                                and on the problem size.
+   :type compile_step: bool, default=False
    :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
                  :func:`prfmodel.utils.get_dtype`.
    :type dtype: str, optional
@@ -29,6 +36,9 @@ prfmodel.fitters.GridFitter
 
    Depending on the size of the parameter grid and the number of batches in the data, the search can be very
    memory-intensive. For this reason, the grid is first split into batches that are evaluated iteratively.
+
+   When `compile_step` is enabled, the batch evaluation is compiled once and reused for every batch. When the
+   grid size is not a multiple of `batch_size` the final batch is smaller and is traced a second time.
 
    The default :class:`~prfmodel.fitters.losses.CorrelationLoss` is invariant to the baseline and amplitude of the
    prediction, so the target data does not need to be demeaned or converted to percent signal change beforehand.
@@ -55,9 +65,9 @@ prfmodel.fitters.GridFitter
    >>> # Create dummy data for a single unit
    >>> data = np.zeros((1, stimulus.design.shape[0]))
    >>> # Define possible parameters in grid
-   >>> params_dict = {"mu_y": [0.0], "mu_x": [0.0], "sigma": [1.0]}
+   >>> param_values = {"mu_y": [0.0], "mu_x": [0.0], "sigma": [1.0]}
    >>> # Fit model parameters
-   >>> history, params_grid = fitter.fit(data, params_dict)
+   >>> history, params_grid = fitter.fit(data, param_values)
    >>> print(list(params_grid.columns))
    ['mu_y', 'mu_x', 'sigma']
    >>> print(params_grid.shape)

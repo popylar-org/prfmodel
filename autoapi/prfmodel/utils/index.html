@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.utils.UndefinedResponseWarning" href="UndefinedResponseWarning.html"><link rel="prev" title="prfmodel.typing" href="../typing/index.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.utils.TensorFrame" href="TensorFrame.html"><link rel="prev" title="prfmodel.typing" href="../typing/index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>prfmodel.utils - prfmodel 0.0.1 documentation</title>
@@ -219,6 +219,7 @@
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../development/index.html">Development</a><input aria-label="Toggle navigation of Development" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../development/architecture.html">Architecture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../development/backends.html">Backends</a></li>
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
@@ -350,8 +351,13 @@
 <li class="toctree-l3"><a class="reference internal" href="../plotting/plot_csf_stimulus_design.html">plot_csf_stimulus_design</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../regressors/index.html">prfmodel.regressors</a><input aria-label="Toggle navigation of prfmodel.regressors" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../regressors/base/index.html">prfmodel.regressors.base</a><input aria-label="Toggle navigation of prfmodel.regressors.base" class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../protocols/index.html">prfmodel.protocols</a><input aria-label="Toggle navigation of prfmodel.protocols" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../protocols/CompositeModelProtocol.html">CompositeModelProtocol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../protocols/ModelProtocol.html">ModelProtocol</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../regressors/index.html">prfmodel.regressors</a><input aria-label="Toggle navigation of prfmodel.regressors" class="toctree-checkbox" id="toctree-checkbox-26" name="toctree-checkbox-26" role="switch" type="checkbox"/><label for="toctree-checkbox-26"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../regressors/base/index.html">prfmodel.regressors.base</a><input aria-label="Toggle navigation of prfmodel.regressors.base" class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" role="switch" type="checkbox"/><label for="toctree-checkbox-27"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../regressors/base/BaseRegressors.html">BaseRegressors</a></li>
 </ul>
 </li>
@@ -360,8 +366,8 @@
 <li class="toctree-l3"><a class="reference internal" href="../regressors/RegressorsList.html">RegressorsList</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../scaling/index.html">prfmodel.scaling</a><input aria-label="Toggle navigation of prfmodel.scaling" class="toctree-checkbox" id="toctree-checkbox-27" name="toctree-checkbox-27" role="switch" type="checkbox"/><label for="toctree-checkbox-27"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../scaling/base/index.html">prfmodel.scaling.base</a><input aria-label="Toggle navigation of prfmodel.scaling.base" class="toctree-checkbox" id="toctree-checkbox-28" name="toctree-checkbox-28" role="switch" type="checkbox"/><label for="toctree-checkbox-28"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../scaling/index.html">prfmodel.scaling</a><input aria-label="Toggle navigation of prfmodel.scaling" class="toctree-checkbox" id="toctree-checkbox-28" name="toctree-checkbox-28" role="switch" type="checkbox"/><label for="toctree-checkbox-28"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../scaling/base/index.html">prfmodel.scaling.base</a><input aria-label="Toggle navigation of prfmodel.scaling.base" class="toctree-checkbox" id="toctree-checkbox-29" name="toctree-checkbox-29" role="switch" type="checkbox"/><label for="toctree-checkbox-29"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../scaling/base/BaseScaling.html">BaseScaling</a></li>
 </ul>
 </li>
@@ -369,22 +375,26 @@
 <li class="toctree-l3"><a class="reference internal" href="../scaling/BaselineAmplitude.html">BaselineAmplitude</a></li>
 </ul>
 </li>
-<li class="toctree-l2 has-children"><a class="reference internal" href="../stimuli/index.html">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" class="toctree-checkbox" id="toctree-checkbox-29" name="toctree-checkbox-29" role="switch" type="checkbox"/><label for="toctree-checkbox-29"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3 has-children"><a class="reference internal" href="../stimuli/base/index.html">prfmodel.stimuli.base</a><input aria-label="Toggle navigation of prfmodel.stimuli.base" class="toctree-checkbox" id="toctree-checkbox-30" name="toctree-checkbox-30" role="switch" type="checkbox"/><label for="toctree-checkbox-30"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../stimuli/index.html">prfmodel.stimuli</a><input aria-label="Toggle navigation of prfmodel.stimuli" class="toctree-checkbox" id="toctree-checkbox-30" name="toctree-checkbox-30" role="switch" type="checkbox"/><label for="toctree-checkbox-30"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../stimuli/base/index.html">prfmodel.stimuli.base</a><input aria-label="Toggle navigation of prfmodel.stimuli.base" class="toctree-checkbox" id="toctree-checkbox-31" name="toctree-checkbox-31" role="switch" type="checkbox"/><label for="toctree-checkbox-31"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../stimuli/base/Stimulus.html">Stimulus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../stimuli/base/StimulusTensors.html">StimulusTensors</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="../stimuli/CFStimulus.html">CFStimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stimuli/CFStimulusTensors.html">CFStimulusTensors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stimuli/CSFStimulus.html">CSFStimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stimuli/CSFStimulusTensors.html">CSFStimulusTensors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stimuli/PRFStimulus.html">PRFStimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stimuli/PRFStimulusTensors.html">PRFStimulusTensors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../stimuli/Stimulus.html">Stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../stimuli/StimulusTensors.html">StimulusTensors</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../typing/index.html">prfmodel.typing</a></li>
-<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">prfmodel.utils</a><input aria-label="Toggle navigation of prfmodel.utils" checked="" class="toctree-checkbox" id="toctree-checkbox-31" name="toctree-checkbox-31" role="switch" type="checkbox"/><label for="toctree-checkbox-31"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="UndefinedResponseWarning.html">UndefinedResponseWarning</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ModelProtocol.html">ModelProtocol</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ParamsDict.html">ParamsDict</a></li>
+<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">prfmodel.utils</a><input aria-label="Toggle navigation of prfmodel.utils" checked="" class="toctree-checkbox" id="toctree-checkbox-32" name="toctree-checkbox-32" role="switch" type="checkbox"/><label for="toctree-checkbox-32"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="TensorFrame.html">TensorFrame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="as_tensor_frame.html">as_tensor_frame</a></li>
 <li class="toctree-l3"><a class="reference internal" href="batched.html">batched</a></li>
 <li class="toctree-l3"><a class="reference internal" href="convert_parameters_to_tensor.html">convert_parameters_to_tensor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="get_dtype.html">get_dtype</a></li>
@@ -434,20 +444,6 @@
           <section id="module-prfmodel.utils">
 <span id="prfmodel-utils"></span><h1>prfmodel.utils<a class="headerlink" href="#module-prfmodel.utils" title="Link to this heading">¶</a></h1>
 <p>Utility functions.</p>
-<section id="exceptions">
-<h2>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
-<div class="toctree-wrapper compound">
-</div>
-<div class="table-wrapper autosummary longtable docutils container">
-<table class="autosummary longtable docutils align-default">
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="UndefinedResponseWarning.html#prfmodel.utils.UndefinedResponseWarning" title="prfmodel.utils.UndefinedResponseWarning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UndefinedResponseWarning</span></code></a></p></td>
-<td><p>Warning for when a response is undefined and contains NaNs.</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-</section>
 <section id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -455,10 +451,7 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="ModelProtocol.html#prfmodel.utils.ModelProtocol" title="prfmodel.utils.ModelProtocol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ModelProtocol</span></code></a></p></td>
-<td><p>Protocol for model classes.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="ParamsDict.html#prfmodel.utils.ParamsDict" title="prfmodel.utils.ParamsDict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParamsDict</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="TensorFrame.html#prfmodel.utils.TensorFrame" title="prfmodel.utils.TensorFrame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TensorFrame</span></code></a></p></td>
 <td><p>A dictionary-like object that supports dataframe-style column selection but returns Keras tensors.</p></td>
 </tr>
 </tbody>
@@ -472,16 +465,19 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="batched.html#prfmodel.utils.batched" title="prfmodel.utils.batched"><code class="xref py py-obj docutils literal notranslate"><span class="pre">batched</span></code></a>(→ collections.abc.Callable)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="as_tensor_frame.html#prfmodel.utils.as_tensor_frame" title="prfmodel.utils.as_tensor_frame"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_tensor_frame</span></code></a>(→ TensorFrame)</p></td>
+<td><p>Convert user-supplied parameters into the tensor-holding representation.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="batched.html#prfmodel.utils.batched" title="prfmodel.utils.batched"><code class="xref py py-obj docutils literal notranslate"><span class="pre">batched</span></code></a>(→ collections.abc.Callable)</p></td>
 <td><p>Decorate a model prediction function to make batched predictions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="convert_parameters_to_tensor.html#prfmodel.utils.convert_parameters_to_tensor" title="prfmodel.utils.convert_parameters_to_tensor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_parameters_to_tensor</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="convert_parameters_to_tensor.html#prfmodel.utils.convert_parameters_to_tensor" title="prfmodel.utils.convert_parameters_to_tensor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_parameters_to_tensor</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
 <td><p>Convert model parameters in a dataframe into a tensor.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="get_dtype.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dtype</span></code></a>(→ str)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="get_dtype.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dtype</span></code></a>(→ str)</p></td>
 <td><p>Get the (default) dtype.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="normalize_response.html#prfmodel.utils.normalize_response" title="prfmodel.utils.normalize_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_response</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="normalize_response.html#prfmodel.utils.normalize_response" title="prfmodel.utils.normalize_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_response</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
 <td><p>Normalize a response.</p></td>
 </tr>
 </tbody>
@@ -494,7 +490,7 @@
 <dt class="sig sig-object py" id="prfmodel.utils.DTYPES">
 <span class="sig-prename descclassname"><span class="pre">prfmodel.utils.</span></span><span class="sig-name descname"><span class="pre">DTYPES</span></span><a class="headerlink" href="#prfmodel.utils.DTYPES" title="Link to this definition">¶</a></dt>
 <dd><p>Accepted dtypes for <cite>prfmodel.typing.Tensor</cite> objects.</p>
-<p>Accepted dtypes are: <cite>“bfloat16”</cite>, <cite>“float16”</cite>, <cite>“float32”</cite>, and <cite>“float64”</cite>.</p>
+<p>Accepted dtypes are: <cite>“float16”</cite>, <cite>“float32”</cite>, and <cite>“float64”</cite>.</p>
 </dd></dl>
 
 </section>
@@ -505,12 +501,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="UndefinedResponseWarning.html">
+          <a class="next-page" href="TensorFrame.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">prfmodel.utils.UndefinedResponseWarning</div>
+                <div class="title">prfmodel.utils.TensorFrame</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -556,7 +552,6 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">prfmodel.utils</a><ul>
-<li><a class="reference internal" href="#exceptions">Exceptions</a></li>
 <li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>

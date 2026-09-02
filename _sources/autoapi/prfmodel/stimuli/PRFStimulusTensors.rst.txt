@@ -1,0 +1,17 @@
+prfmodel.stimuli.PRFStimulusTensors
+===================================
+
+.. py:class:: prfmodel.stimuli.PRFStimulusTensors
+
+
+
+   Tensor-holding counterpart of a :class:`~prfmodel.stimuli.PRFStimulus`.
+
+   Holds the population receptive field stimulus arrays as backend tensors. Should be created with
+   :meth:`PRFStimulus.to_tensors`.
+
+   :param design: The :attr:`PRFStimulus.design` array as a tensor.
+   :type design: :data:`prfmodel.typing.Tensor`
+   :param grid: The :attr:`PRFStimulus.grid` array as a tensor.
+   :type grid: :data:`prfmodel.typing.Tensor`
+

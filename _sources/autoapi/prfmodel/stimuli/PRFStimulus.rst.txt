@@ -147,3 +147,26 @@ prfmodel.stimuli.PRFStimulus
              [ 1.,  1.,  1.,  1.,  1.]])
 
 
+
+   .. py:method:: to_tensors(dtype: str | None = None) -> PRFStimulusTensors
+
+      Convert the stimulus arrays into backend tensors.
+
+      :param dtype: The dtype to convert the stimulus arrays to. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The stimulus arrays as tensors.
+      :rtype: PRFStimulusTensors
+
+      .. rubric:: Examples
+
+      >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+      >>> stimulus = load_2d_prf_bar_stimulus()
+      >>> tensors = stimulus.to_tensors("float32")
+      >>> print(tuple(tensors.design.shape) == stimulus.design.shape)
+      True
+      >>> print(tuple(tensors.grid.shape) == stimulus.grid.shape)
+      True
+
+

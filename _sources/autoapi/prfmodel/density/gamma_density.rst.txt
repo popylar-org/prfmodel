@@ -6,13 +6,13 @@ prfmodel.density.gamma_density
    Calculate the density of a gamma distribution.
 
    The distribution uses a shape and scale parameterization.
-   Raises an error when evaluated at negative values.
 
-   :param value: The values at which to evaluate the gamma distribution. Must be > 0 and scalar or with shape (1, m).
+   :param value: The values at which to evaluate the gamma distribution. Must be scalar or with shape ``(1, m)``.
+                 Values at or below zero are allowed and give a density of zero.
    :type value: :data:`prfmodel.typing.Tensor`
-   :param shape: The shape parameter. Must be > 0 with shape () and scalar or with shape (n, 1).
+   :param shape: The shape parameter. Must be scalar or with shape ``(n, 1)``.
    :type shape: :data:`prfmodel.typing.Tensor`
-   :param scale: The scale parameter. Must be > 0 and scalar or with shape (n, 1).
+   :param scale: The scale parameter. Must be scalar or with shape ``(n, 1)``.
    :type scale: :data:`prfmodel.typing.Tensor`
    :param norm: Whether to compute the normalized density.
    :type norm: bool, default=True
@@ -34,6 +34,9 @@ prfmodel.density.gamma_density
    .. math::
 
        f_{norm} = \frac{1}{\mathtt{\theta}^{\mathtt{\alpha}} \Gamma(\mathtt{\alpha})} * f(x).
+
+   The density is zero at and below values of zero, matching `scipy.stats.gamma.pdf`. Negative `shape` returns a
+   finite but meaningless number whereas negative `scale`returns NaN instead of raising an error.
 
    .. rubric:: Examples
 

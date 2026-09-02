@@ -17,3 +17,19 @@ prfmodel.stimuli.Stimulus
       Create a human-readable string representation of the stimulus object.
 
 
+
+   .. py:method:: to_tensors(dtype: str | None = None) -> StimulusTensors
+      :abstractmethod:
+
+
+      Convert the stimulus arrays into backend tensors.
+
+      :param dtype: The dtype to convert the stimulus arrays to. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The stimulus arrays as tensors, ready to be passed to a model's
+                :meth:`~prfmodel.models.base.BasePopulationResponse.call`.
+      :rtype: StimulusTensors
+
+

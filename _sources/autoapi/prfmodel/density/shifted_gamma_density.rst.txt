@@ -8,10 +8,11 @@ prfmodel.density.shifted_gamma_density
    The gamma distribution is shifted by `shift` and padded with zeros if necessary.
 
    :param value: The values at which to evaluate the shifted gamma distribution. Must be scalar or with shape (1, m).
+                 Values at or below `shift` are allowed and give a density of zero.
    :type value: :data:`prfmodel.typing.Tensor`
-   :param shape: The shape parameter. Must be > 0 and scalar or with shape (n, 1).
+   :param shape: The shape parameter. Must be scalar or with shape (n, 1).
    :type shape: :data:`prfmodel.typing.Tensor`
-   :param scale: The scale parameter. Must be > 0 and scalar or with shape (n, 1).
+   :param scale: The scale parameter. Must be scalar or with shape (n, 1).
    :type scale: :data:`prfmodel.typing.Tensor`
    :param shift: The shift parameter. When > 0, shifts the distribution to the right.
    :type shift: :data:`prfmodel.typing.Tensor`
@@ -26,6 +27,11 @@ prfmodel.density.shifted_gamma_density
 
       :py:obj:`gamma_density`
           The (unshifted) gamma distribution density.
+
+   .. rubric:: Notes
+
+   The density is zero for values at and below `shift`, matching `scipy.stats.gamma.pdf`. Negative `shape` returns
+   a finite but meaningless number whereas negative `scale`returns NaN instead of raising an error.
 
    .. rubric:: Examples
 

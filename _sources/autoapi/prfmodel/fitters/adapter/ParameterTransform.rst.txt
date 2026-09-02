@@ -55,26 +55,32 @@ prfmodel.fitters.adapter.ParameterTransform
    >>> assert all(params_inverse == params)
 
 
-   .. py:method:: inverse(parameters: P) -> P
+   .. py:method:: inverse(parameters: P, dtype: str | None = None) -> P
 
       Apply the inverse transformation.
 
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different units.
       :type parameters: pandas.DataFrame
+      :param dtype: Dtype to compute the transformation in. Unused here, for the same reason as in :meth:`transform`.
+      :type dtype: str, optional
 
       :returns: Dataframe with the inverse transformation applied to the parameters specified in `parameter_names`.
       :rtype: pd.DataFrame
 
 
 
-   .. py:method:: transform(parameters: P) -> P
+   .. py:method:: transform(parameters: P, dtype: str | None = None) -> P
 
       Apply the transformation.
 
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different units.
       :type parameters: pandas.DataFrame
+      :param dtype: Dtype to compute the transformation in. Unused here, because the transformation is applied to the
+                    parameter values as they come in. Subclasses that convert the parameters into tensors use it to keep
+                    that conversion at the caller's precision.
+      :type dtype: str, optional
 
       :returns: Dataframe with the transformation applied to the parameters specified in `parameter_names`.
       :rtype: pd.DataFrame

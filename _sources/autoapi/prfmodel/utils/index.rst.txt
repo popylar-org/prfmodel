@@ -11,32 +11,17 @@ prfmodel.utils
 
 
 
-Exceptions
-----------
-
-.. toctree::
-   :hidden:
-
-   UndefinedResponseWarning </autoapi/prfmodel/utils/UndefinedResponseWarning>
-
-.. autoapisummary::
-
-   prfmodel.utils.UndefinedResponseWarning
-
-
 Classes
 -------
 
 .. toctree::
    :hidden:
 
-   ModelProtocol </autoapi/prfmodel/utils/ModelProtocol>
-   ParamsDict </autoapi/prfmodel/utils/ParamsDict>
+   TensorFrame </autoapi/prfmodel/utils/TensorFrame>
 
 .. autoapisummary::
 
-   prfmodel.utils.ModelProtocol
-   prfmodel.utils.ParamsDict
+   prfmodel.utils.TensorFrame
 
 
 Functions
@@ -45,6 +30,7 @@ Functions
 .. toctree::
    :hidden:
 
+   as_tensor_frame </autoapi/prfmodel/utils/as_tensor_frame>
    batched </autoapi/prfmodel/utils/batched>
    convert_parameters_to_tensor </autoapi/prfmodel/utils/convert_parameters_to_tensor>
    get_dtype </autoapi/prfmodel/utils/get_dtype>
@@ -52,6 +38,7 @@ Functions
 
 .. autoapisummary::
 
+   prfmodel.utils.as_tensor_frame
    prfmodel.utils.batched
    prfmodel.utils.convert_parameters_to_tensor
    prfmodel.utils.get_dtype
@@ -65,5 +52,5 @@ Module Contents
 
    Accepted dtypes for `prfmodel.typing.Tensor` objects.
 
-   Accepted dtypes are: `"bfloat16"`, `"float16"`, `"float32"`, and `"float64"`.
+   Accepted dtypes are: `"float16"`, `"float32"`, and `"float64"`.
 

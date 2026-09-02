@@ -17,6 +17,12 @@ prfmodel.utils.batched
    :returns: Wrapped function with signature ``fn(stimulus, parameters, *, batch_size=None, **kwargs)``.
    :rtype: callable
 
+   .. rubric:: Notes
+
+   The wrapper preserves the return type of `fn`: batches of :class:`numpy.ndarray` are concatenated with
+   :func:`numpy.concatenate` and batches of backend tensors with :func:`keras.ops.concatenate`. A wrapped
+   model facade therefore returns a :class:`numpy.ndarray` whether or not `batch_size` is given.
+
    .. rubric:: Examples
 
    >>> from prfmodel.utils import batched

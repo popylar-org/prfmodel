@@ -14,8 +14,8 @@ prfmodel.models.compression
 
    .. rubric:: Notes
 
-   Classes in this module are generic, that is, they can take arbitrary stimuli as input (e.g., they work both
-   for :class:`~prfmodel.stimuli.PRFStimulus` and :class:`~prfmodel.stimuli.CFStimulus`).
+   Classes in this module are generic, that is, they must define the user-facing and tensor-holding stimulus types
+   that :meth:`call` takes as input (see also :mod:`~prfmodel.models.base`).
 
 
 

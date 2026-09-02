@@ -1,0 +1,31 @@
+prfmodel.protocols
+==================
+
+.. py:module:: prfmodel.protocols
+
+.. autoapi-nested-parse::
+
+   Protocol classes for models and composite models.
+
+   Classes in this module define the interface that all model classes share: a
+   :attr:`~prfmodel.protocols.ModelProtocol.parameter_names` property and the validation checks that are performed on
+   user-supplied parameters. :class:`~prfmodel.protocols.CompositeModelProtocol` extends this interface to models that
+   are composed of named submodels and forwards the validation checks to each of them.
+
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   CompositeModelProtocol </autoapi/prfmodel/protocols/CompositeModelProtocol>
+   ModelProtocol </autoapi/prfmodel/protocols/ModelProtocol>
+
+.. autoapisummary::
+
+   prfmodel.protocols.CompositeModelProtocol
+   prfmodel.protocols.ModelProtocol
+
+

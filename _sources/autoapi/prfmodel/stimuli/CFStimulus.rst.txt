@@ -42,3 +42,27 @@ prfmodel.stimuli.CFStimulus
       Create a human-readable string representation of the stimulus object.
 
 
+
+   .. py:method:: to_tensors(dtype: str | None = None) -> CFStimulusTensors
+
+      Convert the stimulus arrays into backend tensors.
+
+      :param dtype: The dtype to convert the stimulus arrays to. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
+
+      :returns: The stimulus arrays as tensors.
+      :rtype: CFStimulusTensors
+
+      .. rubric:: Examples
+
+      >>> import numpy as np
+      >>> stimulus = CFStimulus(
+      ...     distance_matrix=np.zeros((10, 10)),
+      ...     source_response=np.ones((10, 20)),
+      ... )
+      >>> tensors = stimulus.to_tensors("float32")
+      >>> print(tuple(tensors.source_response.shape))
+      (10, 20)
+
+

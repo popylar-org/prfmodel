@@ -8,7 +8,16 @@ prfmodel.stimuli
    Containers that contain stimuli information as model input.
 
    This module contains stimuli classes that serve as input for models. Currently, only stimuli for population receptive
-   field (pRF) models and connective field (CF) models are implemented.
+   field (pRF) models, connective field (CF), and contrast sensitivity function (CSF) models are implemented.
+
+   Each stimulus type has a user-facing class (i.e., :class:``PRFStimulus``, :class:``CFStimulus``, and ``CSFStimulus``)
+   that holds :class:``numpy.array`` objects. Internally, these are converted to counterparts that hold backend tensor
+   objects to enable backend-specific optimization (i.e., :class:``PRFStimulusTensors``, :class:``CFStimulusTensors``,
+   and ``CSFStimulusTensors``).
+
+   :class:``Stimulus`` is an abstract base class that the user-facing stimulus classes inherit
+   from. Subclasses must implement the abstract :meth:``Stimulus.to_tensors`` method to determine how non-tensor
+   objects are converted to tensors.
 
 
 
@@ -32,15 +41,23 @@ Classes
    :hidden:
 
    CFStimulus </autoapi/prfmodel/stimuli/CFStimulus>
+   CFStimulusTensors </autoapi/prfmodel/stimuli/CFStimulusTensors>
    CSFStimulus </autoapi/prfmodel/stimuli/CSFStimulus>
+   CSFStimulusTensors </autoapi/prfmodel/stimuli/CSFStimulusTensors>
    PRFStimulus </autoapi/prfmodel/stimuli/PRFStimulus>
+   PRFStimulusTensors </autoapi/prfmodel/stimuli/PRFStimulusTensors>
    Stimulus </autoapi/prfmodel/stimuli/Stimulus>
+   StimulusTensors </autoapi/prfmodel/stimuli/StimulusTensors>
 
 .. autoapisummary::
 
    prfmodel.stimuli.CFStimulus
+   prfmodel.stimuli.CFStimulusTensors
    prfmodel.stimuli.CSFStimulus
+   prfmodel.stimuli.CSFStimulusTensors
    prfmodel.stimuli.PRFStimulus
+   prfmodel.stimuli.PRFStimulusTensors
    prfmodel.stimuli.Stimulus
+   prfmodel.stimuli.StimulusTensors
 
 

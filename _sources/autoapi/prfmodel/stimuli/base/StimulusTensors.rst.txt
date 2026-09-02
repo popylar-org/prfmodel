@@ -1,0 +1,25 @@
+prfmodel.stimuli.base.StimulusTensors
+=====================================
+
+.. py:class:: prfmodel.stimuli.base.StimulusTensors
+
+   Base class for the tensor-side counterpart of a :class:`~prfmodel.stimuli.Stimulus`.
+
+   A :class:`~prfmodel.stimuli.Stimulus` holds :class:`numpy.ndarray` fields and validates them; it is what
+   users build and what plotting and I/O work with. A `StimulusTensors` holds the same fields converted to
+   backend tensors and validates nothing. It is what a model's tensor-only
+   :meth:`~prfmodel.models.base.BasePopulationResponse.call` receives, so that the method touches no
+   :mod:`numpy` and can be traced by a backend compiler.
+
+   Build one with :meth:`~prfmodel.stimuli.Stimulus.to_tensors`. Subclasses declare the array fields of the
+   stimulus they mirror; fields that no model reads, such as
+   :attr:`~prfmodel.stimuli.PRFStimulus.dimension_labels`, are deliberately left out.
+
+   .. rubric:: Notes
+
+   A `StimulusTensors` is built fresh by every :meth:`~prfmodel.stimuli.Stimulus.to_tensors` call and must
+   not be cached on the stimulus it came from. A tensor created while a function is being traced belongs to
+   that trace and cannot be read from a later one, so a cached bundle would leak the first trace into every
+   subsequent one. Callers that want to pay the conversion once should hoist `to_tensors` themselves, outside
+   the region being compiled, which is what the fitters do.
+

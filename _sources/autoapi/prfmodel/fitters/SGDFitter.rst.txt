@@ -1,7 +1,7 @@
 prfmodel.fitters.SGDFitter
 ==========================
 
-.. py:class:: prfmodel.fitters.SGDFitter(model: prfmodel.models.base.BaseCanonical, stimulus: prfmodel.stimuli.Stimulus, adapter: prfmodel.fitters.adapter.Adapter | None = None, optimizer: keras.optimizers.Optimizer | None = None, loss: keras.losses.Loss | collections.abc.Callable | None = None, dtype: str | None = None)
+.. py:class:: prfmodel.fitters.SGDFitter(model: prfmodel.models.base.BaseCanonical, stimulus: prfmodel.stimuli.Stimulus, adapter: prfmodel.fitters.adapter.Adapter | None = None, optimizer: keras.optimizers.Optimizer | None = None, loss: keras.losses.Loss | collections.abc.Callable | None = None, compile_step: bool = False, dtype: str | None = None)
 
 
 
@@ -23,6 +23,12 @@ prfmodel.fitters.SGDFitter
    :param loss: Loss instance or function with the signatur `f(y, y_pred)`, where `y` are the target data and `y_pred` are the
                 model predicitons. Default is `None` where a `keras.optimizers.MeanSquaredError` loss is used.
    :type loss: keras.optimizers.Loss or Callable, optional
+   :param compile_step: Whether to compile the optimization step with the backend's native primitive: `jax.jit` on JAX,
+                        `tf.function` on TensorFlow and `torch.compile` on PyTorch. With `False` (the default) the step
+                        runs eagerly, which is slower but makes the step inspectable and produces Python
+                        tracebacks that point at the offending line. Whether compiling pays off depends on the backend
+                        and on the problem size.
+   :type compile_step: bool, default=False
    :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
                  :func:`prfmodel.utils.get_dtype`.
    :type dtype: str, optional
@@ -36,6 +42,14 @@ prfmodel.fitters.SGDFitter
    When `batch_size` is set in :meth:`fit`, units are split into data batches that are each optimized independently
    for `num_steps` steps, with freshly-initialized optimizer state per batch. This bounds memory use for large
    datasets without changing the result for any given unit, since units do not share parameters or gradients.
+
+   When `compile_step` is enabled, the optimization step is compiled once per data batch and then reused
+   for every step, so the cost of tracing is paid once rather than `num_steps` times. Compiling requires
+   that no tensor value is read back inside the step, since while the graph is being built there are no
+   values to read. Parameter checks therefore run before the loop: the initial parameters are passed
+   through one prediction while nothing is traced yet, so invalid starting values still raise with a
+   useful message. Values that only become invalid *during* the optimization are not reported and show
+   up as a `NaN` loss instead.
 
    .. rubric:: Examples
 
@@ -90,6 +104,13 @@ prfmodel.fitters.SGDFitter
       :returns: * *SGDHistory* -- A history object that contains loss and metric values for each optimization step.
                 * *pandas.DataFrame* -- A dataframe with final model parameters.
 
+
+
+   .. py:attribute:: compile_step
+      :value: False
+
+
+      Whether the optimization step is compiled.
 
 
    .. py:attribute:: dtype

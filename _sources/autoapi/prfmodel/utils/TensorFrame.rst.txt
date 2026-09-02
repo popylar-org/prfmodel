@@ -1,0 +1,58 @@
+prfmodel.utils.TensorFrame
+==========================
+
+.. py:class:: prfmodel.utils.TensorFrame(data: dict, dtype: str | None = None)
+
+   A dictionary-like object that supports dataframe-style column selection but returns Keras tensors.
+
+   This is the tensor-holding counterpart of the :class:`pandas.DataFrame` that models accept in their
+   :meth:`call` implementation. Use :func:`prfmodel.utils.as_tensor_frame` to build one from a data frame.
+
+   :param data: Dictionary of parameter tensors to perform column style selection on.
+   :type data: dict
+   :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                 :func:`prfmodel.utils.get_dtype`.
+   :type dtype: str, optional
+
+
+   .. py:method:: copy() -> TensorFrame
+
+      Create a copy of the object.
+
+
+
+   .. py:method:: to_dataframe() -> pandas.DataFrame
+
+      Convert the object into a dataframe.
+
+
+
+   .. py:method:: to_dict() -> dict
+
+      Return the parameter tensors as a plain dictionary keyed by parameter name.
+
+
+
+   .. py:property:: columns
+      :type: list[str]
+
+
+      Names of parameter columns.
+
+
+   .. py:property:: dtype
+      :type: str
+
+
+      The dtype of the parameters.
+
+      If `None`, uses `keras.config.floatx()` which defaults
+      to `float32`.
+
+
+   .. py:property:: shape
+      :type: tuple[int, int]
+
+
+      Shape of the parameters (rows, columns).
+

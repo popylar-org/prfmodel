@@ -38,7 +38,7 @@ prfmodel.fitters.adapter.Adapter
    >>> assert all(params_inverse == params)
 
 
-   .. py:method:: inverse(parameters: P) -> P
+   .. py:method:: inverse(parameters: P, dtype: str | None = None) -> P
 
       Apply the inverse transformations sequentially.
 
@@ -47,13 +47,16 @@ prfmodel.fitters.adapter.Adapter
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different units.
       :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
 
       :returns: Transformed parameters after applying all inverse transformations in reverse order.
       :rtype: pd.DataFrame
 
 
 
-   .. py:method:: transform(parameters: P) -> P
+   .. py:method:: transform(parameters: P, dtype: str | None = None) -> P
 
       Apply the transformations sequentially.
 
@@ -62,8 +65,18 @@ prfmodel.fitters.adapter.Adapter
       :param parameters: Dataframe with columns containing different model parameters and rows containing parameter values
                          for different units.
       :type parameters: pandas.DataFrame
+      :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
+                    :func:`prfmodel.utils.get_dtype`.
+      :type dtype: str, optional
 
       :returns: Transformed parameters after applying all transformations.
       :rtype: pd.DataFrame
 
+
+
+   .. py:property:: parameter_names
+      :type: list[str]
+
+
+      Unique names of parameters used in the transformations.
 

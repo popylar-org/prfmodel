@@ -1,0 +1,17 @@
+prfmodel.stimuli.CFStimulusTensors
+==================================
+
+.. py:class:: prfmodel.stimuli.CFStimulusTensors
+
+
+
+   Tensor-holding counterpart of a :class:`~prfmodel.stimuli.CFStimulus`.
+
+   Holds the connective field stimulus arrays as backend tensors. Should be created with
+   :meth:`CFStimulus.to_tensors`.
+
+   :param distance_matrix: The :attr:`CFStimulus.distance_matrix` array as a tensor.
+   :type distance_matrix: :data:`prfmodel.typing.Tensor`
+   :param source_response: The :attr:`CFStimulus.source_response` array as a tensor.
+   :type source_response: :data:`prfmodel.typing.Tensor`
+
