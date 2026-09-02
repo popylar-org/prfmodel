@@ -12,7 +12,7 @@ class StimulusTensors:
     A :class:`~prfmodel.stimuli.Stimulus` holds :class:`numpy.ndarray` fields and validates them; it is what
     users build and what plotting and I/O work with. A `StimulusTensors` holds the same fields converted to
     backend tensors and validates nothing. It is what a model's tensor-only
-    :meth:`~prfmodel.models.base.BasePopulationResponse.call` receives, so that the method touches no
+    :meth:`~prfmodel.models.base.BaseTuning.call` receives, so that the method touches no
     :mod:`numpy` and can be traced by a backend compiler.
 
     Build one with :meth:`~prfmodel.stimuli.Stimulus.to_tensors`. Subclasses declare the array fields of the
@@ -54,7 +54,7 @@ class Stimulus:
         -------
         StimulusTensors
             The stimulus arrays as tensors, ready to be passed to a model's
-            :meth:`~prfmodel.models.base.BasePopulationResponse.call`.
+            :meth:`~prfmodel.models.base.BaseTuning.call`.
 
         """
 

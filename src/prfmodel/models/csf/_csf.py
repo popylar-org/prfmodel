@@ -7,7 +7,7 @@ from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
-from prfmodel.models.base import BasePopulationResponse
+from prfmodel.models.base import BaseTuning
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
@@ -179,11 +179,11 @@ def predict_contrast_response(
     return c_q / (c_q + q_q)
 
 
-class CSFResponse(BasePopulationResponse[CSFStimulus, CSFStimulusTensors]):
+class CSFTuning(BaseTuning[CSFStimulus, CSFStimulusTensors]):
     r"""
-    Neural contrast sensitivity function response model.
+    Neural contrast sensitivity function tuning model.
 
-    Predicts the response to a contrast sensitivity function stimulus using
+    Predicts the tuning response to a contrast sensitivity function stimulus using
     an asymmetric log-parabolic CSF combined with a Naka-Rushton contrast response function.
 
     Parameters
@@ -226,7 +226,7 @@ class CSFResponse(BasePopulationResponse[CSFStimulus, CSFStimulusTensors]):
     @doc
     def call(self, stimulus: CSFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
-        Predict the model response for a CSF stimulus.
+        Predict the tuning response for a CSF stimulus.
 
         Parameters
         ----------
@@ -273,7 +273,7 @@ class CSFModel(CanonicalCSFModel):
     Contrast sensitivity function model.
 
     Convenience wrapper around :class:`~prfmodel.models.csf.canonical.CanonicalCSFModel` with a
-    :class:`CSFResponse` as the CSF model.
+    :class:`CSFTuning` as the CSF model.
 
     Parameters
     ----------
@@ -287,9 +287,9 @@ class CSFModel(CanonicalCSFModel):
     -----
     The model follows the following steps:
 
-    1. The CSF response model predicts the temporal response from per-frame spatial frequency and contrast.
+    1. The CSF tuning model predicts the temporal tuning response from per-frame spatial frequency and contrast.
     3. The impulse model generates an impulse response.
-    4. The CSF response is convolved with the impulse response.
+    4. The CSF tuning response is convolved with the impulse response.
     5. The scaling model modifies the convolved response.
     6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 
@@ -388,7 +388,7 @@ class CSFModel(CanonicalCSFModel):
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
-            csf_model=CSFResponse(width_l=width_l),
+            csf_model=CSFTuning(width_l=width_l),
             impulse_model=impulse_model,
             scaling_model=scaling_model,
             regressors_model=regressors_model,

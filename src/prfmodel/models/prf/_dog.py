@@ -8,7 +8,7 @@ from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import Baseline
 from prfmodel.scaling.base import BaseScaling
-from ._gaussian import Gaussian2DPRFResponse
+from ._gaussian import Gaussian2DPRFTuning
 from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import CenterSurroundPRFModel
 
@@ -18,8 +18,9 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     r"""
     Two-dimensional Difference of Gaussians (DoG) population receptive field (pRF) model.
 
-    This class combines the difference between two 2D Gaussian pRF responses (center and surround) with an impulse,
-    scaling, and regressors model. The two 2D Gaussian pRF models share the same center but have different sizes.
+    This class combines the difference between two 2D Gaussian pRF tuning models (center and surround) with an impulse,
+    scaling, and regressors model. The two 2D Gaussian pRF tuning models share the same center but have different
+    sizes.
 
     Parameters
     ----------
@@ -34,7 +35,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     -----
     The canonical DoG model follows the following steps [1]_:
 
-    1. The center and surround 2D Gaussian pRF response models make separate predictions for
+    1. The center and surround 2D Gaussian pRF tuning models make separate predictions for
        the stimulus grid.
     2. The encoding model encodes the responses with the stimulus design.
     3. The encoded responses are scaled with separate amplitudes. The surround response is subtracted from the
@@ -137,7 +138,7 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
-            prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFTuning(),
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             scaling_model=scaling_model,

@@ -1,12 +1,12 @@
 """Contrast sensitivity function (CSF) models.
 
-This module contain a CSF response model that predicts a response to a stimulus containing contrast and spatial
+This module contain a CSF tuning model that predicts a tuning response to a stimulus containing contrast and spatial
 frequencies. Currently, only the asymmetric log-parabolic (aLP) CSF is implemented in
-:class:`CSFResponse`.
+:class:`CSFTuning`.
 
 It also contains a canonical model that combines a CSF response with an impulse and a scaling model
 (:class:`CanonicalCSFModel`) [1]_. In contrast to pRF and connective field models,
-canonical CSF models do not require stimulus encoding because the CSF response model already predicts a
+canonical CSF models do not require stimulus encoding because the CSF tuning model already predicts a
 temporal response.
 
 The function :func:`predict_contrast_sensitivity` can be used to predict a contrast sensitivity response to spatial
@@ -25,13 +25,13 @@ References
 """
 
 from ._csf import CSFModel
-from ._csf import CSFResponse
+from ._csf import CSFTuning
 from ._csf import predict_contrast_response
 from ._csf import predict_contrast_sensitivity
 
 __all__ = [
     "CSFModel",
-    "CSFResponse",
+    "CSFTuning",
     "predict_contrast_response",
     "predict_contrast_sensitivity",
 ]

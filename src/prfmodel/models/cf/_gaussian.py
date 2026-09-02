@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
-from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.models.base import BaseTuning
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
@@ -18,13 +18,19 @@ from ._stimulus_encoding import CFStimulusEncoder
 from .canonical import CanonicalCFModel
 
 
-class GaussianCFResponse(BasePopulationResponse[CFStimulus, CFStimulusTensors]):
+class GaussianCFTuning(BaseTuning[CFStimulus, CFStimulusTensors]):
     """
-    Gaussian connective field response model.
+    Gaussian connective field tuning model.
 
-    Predicts a neuron population response to a stimulus distance matrix.
+    Predicts a neuron population tuning profile to a stimulus distance matrix.
     The model has two parameters: `center_index` is the index of the row in the stimulus distance matrix that is the
     center of the Gaussian; `sigma` for the width of the Gaussian.
+
+    Notes
+    -----
+    Parameter `center_index` is a discrete integer parameter that is used as an index for the distrance matrix. It must
+    be non-negative and below the number of rows in the distance matrix. It must not be optimized with stochastic
+    gradient descent, use a grid search instead.
 
     Examples
     --------
@@ -46,7 +52,7 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus, CFStimulusTensors]):
     ...     "center_index": [0, 5],
     ...     "sigma": [1.0, 2.0]
     ... })
-    >>> model = GaussianCFResponse()
+    >>> model = GaussianCFTuning()
     >>> resp = model(stimulus, params)
     >>> print(resp.shape)  # (num_units, num_source_units)
     (2, 10)
@@ -87,7 +93,7 @@ class GaussianCFResponse(BasePopulationResponse[CFStimulus, CFStimulusTensors]):
     @doc
     def call(self, stimulus: CFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
-        Predict the model response for a stimulus with a distance matrix.
+        Predict the tuning profile for a stimulus with a distance matrix.
 
         Parameters
         ----------
@@ -139,8 +145,8 @@ class GaussianCFModel(CanonicalCFModel):
     -----
     The canonical model follows the following steps [1]_:
 
-    1. The Gaussian connective field response model makes a prediction for the stimulus distance matrix.
-    2. The encoding model encodes the connective field response with the source response.
+    1. The Gaussian connective field tuning model makes a prediction for the stimulus distance matrix.
+    2. The encoding model encodes the connective field tuning profile with the source response.
     3. The scaling model modifies the encoded response.
     4. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 
@@ -214,7 +220,7 @@ class GaussianCFModel(CanonicalCFModel):
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
-            cf_model=GaussianCFResponse(),
+            cf_model=GaussianCFTuning(),
             encoding_model=encoding_model,
             scaling_model=scaling_model,
             regressors_model=regressors_model,

@@ -1,17 +1,17 @@
-"""Generic abstract base classes for response, stimulus encoder, and canonical models.
+"""Generic abstract base classes for tuning, stimulus encoder, and canonical models.
 
 Classes in this module inherit from :class:`~prfmodel.protocols.ModelProtocol` that requires them to implement a
 :attr:`~prfmodel.protocols.ModelProtocol.parameter_names` property.
 
 They are abstract base classes, meaning that they
 cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
-shared by all child classes. For example, :class:`~prfmodel.models.base.BasePopulationResponse` defines that all child
-classes must implement a :meth:`~prfmodel.models.base.BasePopulationResponse.call` method that takes a tensor-holding
+shared by all child classes. For example, :class:`~prfmodel.models.base.BaseTuning` defines that all child
+classes must implement a :meth:`~prfmodel.models.base.BaseTuning.call` method that takes a tensor-holding
 stimulus and set of tensor parameters as input. However, it leaves it up to each child class to define how input
 stimulus and parameters are used to make model predictions.
 
 All base classes have a concrete user-facing :meth:``__call__`` method
-(e.g., :meth:`~prfmodel.models.base.BasePopulationResponse.__call__`) that takes non-tensor arguments and
+(e.g., :meth:`~prfmodel.models.base.BaseTuning.__call__`) that takes non-tensor arguments and
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
 
@@ -65,15 +65,19 @@ T = TypeVar("T", bound=StimulusTensors)
 """
 
 
-class BasePopulationResponse(ModelProtocol, Generic[S, T]):
+class BaseTuning(ModelProtocol, Generic[S, T]):
     """
-    Generic abstract base class for neuron population response models.
+    Generic abstract base class for neuron population tuning models.
 
-    A neuron population response model takes a stimulus and parameters as input and predicts a population response.
+    A tuning model takes a stimulus and parameters as input and predicts how the sensitivity of a neuron population
+    varies across the feature space the stimulus is defined on. It returns a tuning profile conditional on its
+    parameters. The definition of the tuning profile varies between stimulus feature spaces. For example, for 2D
+    population receptive field (pRF) tuning models, the tuning profile is a Gaussian density defined over x- and y-
+    coordinates.
 
     Notes
     -----
-    This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
+    This class cannot be instantiated on its own. It can only be used as a parent class to create custom tuning
     models. Subclasses must override the abstract :attr:`parameter_names` property and the :meth:`call` method,
     and must be defined with a specific user-facing stimulus type and its matching tensor-holding type.
     See :mod:`~prfmodel.models.base` for details.
@@ -84,14 +88,14 @@ class BasePopulationResponse(ModelProtocol, Generic[S, T]):
 
     Examples
     --------
-    Reimplement a 2D isotropic Gaussian response model for a :class:`~prfmodel.stimuli.PRFStimulus`.
+    Reimplement a 2D isotropic Gaussian pRF tuning model for a :class:`~prfmodel.stimuli.PRFStimulus`.
 
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> from prfmodel.stimuli import PRFStimulus, PRFStimulusTensors
     >>> from prfmodel.models.prf import predict_gaussian_response
     >>> # Define custom child class
-    >>> class CustomGaussian2DResponse(BasePopulationResponse[PRFStimulus, PRFStimulusTensors]):
+    >>> class CustomGaussian2DTuning(BaseTuning[PRFStimulus, PRFStimulusTensors]):
     ...     @property
     ...     def parameter_names(self):
     ...         return ["mu_y", "mu_x", "sigma"]
@@ -108,7 +112,7 @@ class BasePopulationResponse(ModelProtocol, Generic[S, T]):
     ...     "sigma": [1.0, 1.5],
     ... })
     >>> # Create child model instance
-    >>> model = CustomGaussian2DResponse()
+    >>> model = CustomGaussian2DTuning()
     >>> # Make model prediction for example stimulus
     >>> resp = model(stimulus, params)
     >>> print(resp.shape)  # (num_units, num_y, num_x)
@@ -288,7 +292,7 @@ class BaseStimulusEncoder(ModelProtocol, Generic[S, T]):
         Notes
         -----
         Implementations must be traceable by a backend compiler. See
-        :meth:`BasePopulationResponse.call` for details.
+        :meth:`BaseTuning.call` for details.
 
         """
 
@@ -322,20 +326,20 @@ class BaseCanonical(CompositeModelProtocol, Generic[S, T]):
 
     Examples
     --------
-    Create a canonical model that combines a :class:`~prfmodel.models.prf.Gaussian2DPRFResponse` and a
+    Create a canonical model that combines a :class:`~prfmodel.models.prf.Gaussian2DPRFTuning` and a
     :class:`~prfmodel.models.prf.PRFStimulusEncoder`. The :attr:`parameter_names` property automatically
     aggregates the unique parameter names from all submodels.
 
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> from prfmodel.stimuli import PRFStimulus, PRFStimulusTensors
-    >>> from prfmodel.models.prf import Gaussian2DPRFResponse, PRFStimulusEncoder
+    >>> from prfmodel.models.prf import Gaussian2DPRFTuning, PRFStimulusEncoder
     >>> class CanonicalPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
     ...     def call(self, stimulus, parameters, regressors=None):
     ...         response = self.models["prf_model"].call(stimulus, parameters)
     ...         return self.models["encoding_model"].call(stimulus, response, parameters)
     >>> model = CanonicalPRFModel(
-    ...     prf_model=Gaussian2DPRFResponse(),
+    ...     prf_model=Gaussian2DPRFTuning(),
     ...     encoding_model=PRFStimulusEncoder(),
     ... )
     >>> model.parameter_names
@@ -418,6 +422,6 @@ class BaseCanonical(CompositeModelProtocol, Generic[S, T]):
         Notes
         -----
         Implementations must be traceable by a backend compiler, and must reach submodels through their
-        :meth:`call` rather than through :meth:`__call__`. See :meth:`BasePopulationResponse.call`.
+        :meth:`call` rather than through :meth:`__call__`. See :meth:`BaseTuning.call`.
 
         """

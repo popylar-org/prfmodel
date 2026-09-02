@@ -10,7 +10,7 @@ from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import Baseline
 from prfmodel.scaling.base import BaseScaling
-from ._gaussian import Gaussian2DPRFResponse
+from ._gaussian import Gaussian2DPRFTuning
 from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import CSTPRFModel
 
@@ -21,7 +21,7 @@ class Gaussian2DCSTPRFModel(CSTPRFModel):
     Compressive spatiotemporal (CST) pRF model with a 2D isotropic Gaussian response.
 
     Thin wrapper around :class:`CSTPRFModel` that hardcodes
-    :class:`~prfmodel.models.prf.Gaussian2DPRFResponse` as the pRF model.
+    :class:`~prfmodel.models.prf.Gaussian2DPRFTuning` as the pRF model.
 
     Parameters
     ----------
@@ -175,7 +175,7 @@ class Gaussian2DCSTPRFModel(CSTPRFModel):
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
-            prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFTuning(),
             encoding_model=encoding_model,
             sustained_model=sustained_model,
             transient_model=transient_model,

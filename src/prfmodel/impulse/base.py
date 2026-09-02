@@ -287,6 +287,6 @@ class BaseImpulse(ModelProtocol):
         reaches its impulse submodel through this method rather than through :meth:`__call__`.
 
         Implementations must also be traceable by a backend compiler. See
-        :meth:`~prfmodel.models.base.BasePopulationResponse.call`.
+        :meth:`~prfmodel.models.base.BaseTuning.call`.
 
         """

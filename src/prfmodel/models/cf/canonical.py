@@ -7,8 +7,8 @@ This module contains models that combine multiple exchangeable submodels in a wa
 from typing import cast
 from prfmodel._docstring import doc
 from prfmodel.models.base import BaseCanonical
-from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.models.base import BaseTuning
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.regressors.base import _normalize_regressors_model
 from prfmodel.scaling import BaselineAmplitude
@@ -38,8 +38,8 @@ class CanonicalCFModel(BaseCanonical[CFStimulus, CFStimulusTensors]):
     -----
     The canonical model follows the following steps:
 
-    1. The connective field response model makes a prediction for the stimulus distance matrix.
-    2. The connective field response is encoded with the source response.
+    1. The connective field tuning model makes a prediction for the stimulus distance matrix.
+    2. The connective field tuning profile is encoded with the source response.
     3. The scaling model modifies the encoded response.
     4. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 
@@ -50,7 +50,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus, CFStimulusTensors]):
 
     def __init__(
         self,
-        cf_model: BasePopulationResponse,
+        cf_model: BaseTuning,
         encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = CFStimulusEncoder,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
@@ -93,7 +93,7 @@ class CanonicalCFModel(BaseCanonical[CFStimulus, CFStimulusTensors]):
         """
         regressors_model = self.models["regressors_model"]
 
-        cf_model = cast("BasePopulationResponse", self.models["cf_model"])
+        cf_model = cast("BaseTuning", self.models["cf_model"])
         response = cf_model.call(stimulus, parameters)
         encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
         response = encoding_model.call(stimulus, response, parameters)

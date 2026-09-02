@@ -1,13 +1,13 @@
 """Connective field (CF) models.
 
-This module contains CF response models that predict a CF response to a stimulus source distance matrix.
-(e.g., :class:`GaussianCFResponse`). Because the source distance matrix is always two-dimensional
-in the canonical CF model formulation, CF response models always operate on two spatial dimensions.
+This module contains CF tuning models that predict a CF tuning profile over a stimulus source distance matrix
+(e.g., :class:`GaussianCFTuning`). Because the source distance matrix is always two-dimensional
+in the canonical CF model formulation, CF tuning models always operate on two spatial dimensions.
 
 The module also contains the
-:class:`CFStimulusEncoder` class that encodes a CF response with a stimulus source response.
+:class:`CFStimulusEncoder` class that encodes a CF tuning profile with a stimulus source response.
 
-It also contains a canonical model that combines a CF response with a stimulus encoding model and a scaling model
+It also contains a canonical model that combines a CF tuning profile with a stimulus encoding model and a scaling model
 from :mod:`~prfmodel.scaling`. In contrast to pRF models, canonical CF models do not require an impulse response
 model because the source response already exhibits the physiological shape of the target neural signal.
 
@@ -22,11 +22,11 @@ References
 """
 
 from ._gaussian import GaussianCFModel
-from ._gaussian import GaussianCFResponse
+from ._gaussian import GaussianCFTuning
 from ._stimulus_encoding import CFStimulusEncoder
 
 __all__ = [
     "CFStimulusEncoder",
     "GaussianCFModel",
-    "GaussianCFResponse",
+    "GaussianCFTuning",
 ]

@@ -10,7 +10,7 @@ from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseCanonical
-from prfmodel.models.base import BasePopulationResponse
+from prfmodel.models.base import BaseTuning
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.regressors.base import _normalize_regressors_model
 from prfmodel.scaling import BaselineAmplitude
@@ -26,7 +26,7 @@ class CanonicalCSFModel(BaseCanonical[CSFStimulus, CSFStimulusTensors]):
     """
     Simple composite contrast sensitivity function model.
 
-    This is a generic class that combines a contrast sensitivity function response, impulse, and
+    This is a generic class that combines a contrast sensitivity function tuning response, impulse, and
     temporal model response.
 
     Parameters
@@ -40,7 +40,7 @@ class CanonicalCSFModel(BaseCanonical[CSFStimulus, CSFStimulusTensors]):
     -----
     The canonical model follows the following steps:
 
-    1. The CSF response model predicts the temporal response from per-frame spatial frequency and contrast.
+    1. The CSF tuning model predicts the temporal tuning response from per-frame spatial frequency and contrast.
     3. The impulse model generates an impulse response.
     4. The CSF response is convolved with the impulse response.
     5. The scaling model modifies the convolved response.
@@ -50,7 +50,7 @@ class CanonicalCSFModel(BaseCanonical[CSFStimulus, CSFStimulusTensors]):
 
     def __init__(
         self,
-        csf_model: BasePopulationResponse,
+        csf_model: BaseTuning,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
         scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
@@ -93,7 +93,7 @@ class CanonicalCSFModel(BaseCanonical[CSFStimulus, CSFStimulusTensors]):
         """
         dtype = parameters.dtype
 
-        csf_model = cast("BasePopulationResponse", self.models["csf_model"])
+        csf_model = cast("BaseTuning", self.models["csf_model"])
         response = csf_model.call(stimulus, parameters)
 
         if self.models["impulse_model"] is not None:
