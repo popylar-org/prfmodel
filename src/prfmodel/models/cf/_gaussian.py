@@ -32,6 +32,9 @@ class GaussianCFTuning(BaseTuning[CFStimulus, CFStimulusTensors]):
     be non-negative and below the number of rows in the distance matrix. It must not be optimized with stochastic
     gradient descent, use a grid search instead.
 
+    This model predicts a proper Gaussian density that is normalized by its volume (so that it integrates to one).
+    This differs from other Gaussian pRF model implementations. See :doc:`Important details </important_details>`.
+
     Examples
     --------
     >>> import numpy as np
@@ -143,6 +146,8 @@ class GaussianCFModel(CanonicalCFModel):
 
     Notes
     -----
+    %(gaussian_norm_note)s
+
     The canonical model follows the following steps [1]_:
 
     1. The Gaussian connective field tuning model makes a prediction for the stimulus distance matrix.

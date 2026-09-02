@@ -51,6 +51,8 @@ class Gaussian2DCSTPRFModel(CSTPRFModel):
 
     Notes
     -----
+    %(gaussian_norm_note)s
+
     Two deliberate differences from the reference:
 
     - **Sampling** — see the warning above.

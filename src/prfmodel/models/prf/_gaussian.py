@@ -57,7 +57,7 @@ def _expand_gaussian_args(grid: Tensor, mu: Tensor, sigma: Tensor) -> tuple[Tens
 
 def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor:
     """
-    Predict an isotropic Gaussian population receptive field response.
+    Predict an isotropic Gaussian population receptive field (pRF) response.
 
     The dimensionality of the Gaussian depends on the number of dimensions of `grid` and `mu`. All dimensions have
     the same size `sigma`.
@@ -83,8 +83,14 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     Returns
     -------
     :data:`prfmodel.typing.Tensor`
-        The predicted Gaussian population receptive field response with shape (num_units, ...)
+        The predicted Gaussian pRF response with shape (num_units, ...)
         where `...` corresponds to the dimensions of the Gaussian.
+
+    Notes
+    -----
+    This function predicts a proper Gaussian density that is normalized by its volume.
+    This differs from other Gaussian pRF model implementations. See :doc:`Important details </important_details>`
+    for details.
 
     Raises
     ------
@@ -139,6 +145,11 @@ class Gaussian2DPRFTuning(BaseTuning[PRFStimulus, PRFStimulusTensors]):
     Predicts a neuron population tuning profile to a 2D stimulus grid.
     The model has three parameters: `mu_y` and `mu_x` for the center and `sigma` for the width of the Gaussian.
 
+    Notes
+    -----
+    This model predicts a proper Gaussian density that is normalized by its volume (so that it integrates to one).
+    This differs from other Gaussian pRF model implementations. See :doc:`Important details </important_details>`.
+
     Examples
     --------
     Predict a tuning profile for a 2D stimulus grid.
@@ -190,6 +201,11 @@ class Gaussian1DPRFTuning(BaseTuning[PRFStimulus, PRFStimulusTensors]):
 
     Predicts a neuron population tuning profile to a 1D stimulus grid.
     The model has two parameters: `mu` for the location and `sigma` for the width of the Gaussian.
+
+    Notes
+    -----
+    This model predicts a proper Gaussian density that is normalized by its volume (so that it integrates to one).
+    This differs from other Gaussian pRF model implementations. See :doc:`Important details </important_details>`.
 
     Examples
     --------
@@ -250,6 +266,8 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
 
     Notes
     -----
+    %(gaussian_norm_note)s
+
     The canonical model follows the following steps [1]_:
 
     1. The 2D Gaussian pRF tuning model makes a prediction for the stimulus grid.
@@ -367,6 +385,8 @@ class Gaussian1DPRFModel(CanonicalPRFModel):
 
     Notes
     -----
+    %(gaussian_norm_note)s
+
     The canonical model follows the following steps [1]_:
 
     1. The 1D Gaussian pRF tuning model makes a prediction for the stimulus grid.

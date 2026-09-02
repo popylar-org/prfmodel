@@ -42,6 +42,8 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
 
     Notes
     -----
+    %(gaussian_norm_note)s
+
     The divisive normalization model follows these steps [1]_:
 
     1. The 2D Gaussian pRF tuning models make separate predictions for the stimulus grid.

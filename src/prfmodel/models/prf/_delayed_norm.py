@@ -31,6 +31,8 @@ class DelayedNormGaussian2DPRFModel(DelayedNormPRFModel):
 
     Notes
     -----
+    %(gaussian_norm_note)s
+
     Paper-recommended starting values (Fig. 2): ``n=2``, ``dispersion_normalization=0.1`` (τ₂),
     ``sigma_saturation=1`` (sigma), ``delay=0.05`` (τ₁), ``weight_deriv=0`` (w).
 
