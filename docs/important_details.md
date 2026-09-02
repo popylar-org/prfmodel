@@ -69,6 +69,26 @@ upsampling a $128^2$ to a $256^2$ grid while keeping the overall width and heigh
 by 4). However, for regular-spaced grids, it is possible to divide amplitudes by the grid cell size to make them
 comparable cross grid resolutions. The normalization does **not** affect the identifiability of model parameters.
 
+## Impulse responses are normalized when they describe measurements
+
+The predicted responses of some impulse models (see {py:mod}`prfmodel.impulse`) are normalized in prfmodel
+(sum-normalized by default, but other functions are possible [^3]). This is
+because they are used to describe the typical shape of the measurement of a neural response (e.g., the BOLD
+response in fMRI). These impulse responses are convolved with the response of a model that describes the behavior of a
+neuron population (e.g., a stimulus-encoded pRF response). Here, the sum-normalization decouples amplitude parameters
+from impulse response parameters (e.g., the shape of the gamma distribution), but it does **not** affect the
+identifiability of model parameters.
+
+It is possible to convert impulse-sum-normalized into impulse-unnormalized amplitudes:
+\begin{equation}
+\beta_\text{unnorm} = \beta_\text{norm} / \sum_t h_\text{unnorm}(t),
+\end{equation}
+where $h(t)$ is the unnormalized impulse response.
+
+Some impulse models do not use any normalization by default because they are also used to describe neuron
+population behavior. For example, the compressive spatio-temporal pRF models uses transient and
+sustained impulse models to describe temporal neuron activation patterns.
+
 ## What if I want to deviate from these decisions?
 
 If you have good reasons to deviate from our decisions, you can implement your own models in prfmodel that use
@@ -79,3 +99,6 @@ more problems.
 
 [^2]: It is also possible to normalize the stimulus-encoded response which couples amplitudes to the stimulus
 design instead of the grid. This comes with similar problems as normalizing the RF.
+
+[^3]: Normalizing by the L2 norm is actually numerically more stable (because it is never zero for signed impulse
+responses) but it also couples amplitudes to impulse model parameters.

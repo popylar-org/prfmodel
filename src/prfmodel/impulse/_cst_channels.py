@@ -30,6 +30,7 @@ class SustainedImpulse(BaseImpulse):
         The normalization of the response. Can be `"sum"`, `"mean"`, `"max"`, `"norm"`, or `None` (default).
         If `None`, no normalization is performed. The default is `None` because the gamma density already carries
         its own normalizing constant, as in the reference implementation.
+        See :doc:`Important details </important_details>`.
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Dictionary keys must be valid parameter names.
         Default values are overridden by user-supplied parameters in the :meth:`__call__` method.
@@ -145,6 +146,7 @@ class TransientImpulse(BaseImpulse):
         The normalization of the response. Can be `"sum"`, `"mean"`, `"max"`, `"norm"`, or `None` (default).
         If `None`, no normalization is performed. Leave this at `None`: the two components each integrate to one, so
         a biphasic response sums to approximately zero and `norm="sum"` divides by that near-zero value.
+        See :doc:`Important details </important_details>`.
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Dictionary keys must be valid parameter names.
         Default values are overridden by user-supplied parameters in the :meth:`__call__` method.
