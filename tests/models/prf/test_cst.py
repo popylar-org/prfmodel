@@ -9,7 +9,7 @@ from prfmodel.impulse import SustainedImpulse
 from prfmodel.impulse import TransientImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.models.prf import Gaussian2DCSTPRFModel
-from prfmodel.models.prf import Gaussian2DPRFResponse
+from prfmodel.models.prf import Gaussian2DPRFTuning
 from prfmodel.models.prf import PRFStimulusEncoder
 from prfmodel.models.prf.canonical import ResolutionMismatchWarning
 from prfmodel.scaling import Baseline
@@ -157,7 +157,7 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
 
         encoded = PRFStimulusEncoder()(
             stimulus,
-            Gaussian2DPRFResponse()(stimulus, params, dtype="float64"),
+            Gaussian2DPRFTuning()(stimulus, params, dtype="float64"),
             params,
             dtype="float64",
         )

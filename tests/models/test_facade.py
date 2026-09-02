@@ -19,13 +19,13 @@ from prfmodel.impulse import ShiftedGammaImpulse
 from prfmodel.impulse import TwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.cf import GaussianCFModel
-from prfmodel.models.cf import GaussianCFResponse
+from prfmodel.models.cf import GaussianCFTuning
 from prfmodel.models.prf import DelayedNormGaussian2DPRFModel
 from prfmodel.models.prf import DivNormGaussian2DPRFModel
 from prfmodel.models.prf import DoG2DPRFModel
 from prfmodel.models.prf import Gaussian2DCSSPRFModel
 from prfmodel.models.prf import Gaussian2DPRFModel
-from prfmodel.models.prf import Gaussian2DPRFResponse
+from prfmodel.models.prf import Gaussian2DPRFTuning
 from prfmodel.models.prf import PRFStimulusEncoder
 from prfmodel.protocols import ModelProtocol
 from prfmodel.regressors import AdditiveRegressors
@@ -146,7 +146,7 @@ class TestFacadeAndKernelAgree(PRFStimulusSetup):
 
     def test_response_submodel(self, stimulus: PRFStimulus):
         """Test agreement for a leaf response model, which has no submodels of its own."""
-        model = Gaussian2DPRFResponse()
+        model = Gaussian2DPRFTuning()
         params = _prf_params()[["mu_x", "mu_y", "sigma"]]
 
         facade = model(stimulus, params, dtype=DTYPE)
@@ -158,7 +158,7 @@ class TestFacadeAndKernelAgree(PRFStimulusSetup):
         """Test agreement for an encoder, whose kernel takes a response tensor as well as the stimulus."""
         encoder = PRFStimulusEncoder()
         params = _prf_params()
-        response = Gaussian2DPRFResponse()(stimulus, params[["mu_x", "mu_y", "sigma"]], dtype=DTYPE)
+        response = Gaussian2DPRFTuning()(stimulus, params[["mu_x", "mu_y", "sigma"]], dtype=DTYPE)
 
         facade = encoder(stimulus, response, params, dtype=DTYPE)
         kernel = encoder.call(stimulus.to_tensors(DTYPE), response, as_tensor_frame(params, DTYPE))
@@ -237,7 +237,7 @@ class TestValidationLivesOnTheFacade(PRFStimulusSetup):
 
     def test_missing_parameter_is_reported_by_the_facade(self, stimulus: PRFStimulus):
         """Test that a missing parameter column raises before any arithmetic happens."""
-        model = Gaussian2DPRFResponse()
+        model = Gaussian2DPRFTuning()
 
         with pytest.raises(ValueError, match="Missing required parameter names"):
             model(stimulus, pd.DataFrame({"mu_x": [0.0], "mu_y": [0.0]}))
@@ -296,7 +296,7 @@ class TestExtraColumnsAreIgnored(PRFStimulusSetup):
 
     def test_response_facade_ignores_a_label_column(self, stimulus: PRFStimulus):
         """A response model reads its own parameters only, so the rest need not be numeric."""
-        response = Gaussian2DPRFResponse()
+        response = Gaussian2DPRFTuning()
         params = _prf_params().assign(roi=["V1", "V2", "V3"])
 
         assert np.isfinite(np.asarray(response(stimulus, params))).all()
@@ -369,7 +369,7 @@ class TestKernelTakesTensorsOnly(PRFStimulusSetup):
         tensors = stimulus.to_tensors(DTYPE)
         params = as_tensor_frame(_prf_params()[["mu_x", "mu_y", "sigma"]], DTYPE)
 
-        prediction = Gaussian2DPRFResponse().call(tensors, params)
+        prediction = Gaussian2DPRFTuning().call(tensors, params)
 
         assert keras.ops.shape(prediction) == (3, *stimulus.grid.shape[:-1])
 
@@ -379,7 +379,7 @@ class TestSubclassesImplementTheKernel:
 
     @pytest.mark.parametrize(
         "model_class",
-        [Gaussian2DPRFResponse, GaussianCFResponse, PRFStimulusEncoder, DerivativeTwoGammaImpulse, Baseline],
+        [Gaussian2DPRFTuning, GaussianCFTuning, PRFStimulusEncoder, DerivativeTwoGammaImpulse, Baseline],
     )
     def test_concrete_models_define_call_and_inherit_the_facade(self, model_class: type):
         """Test that a model defines `call` itself and takes `__call__` from its base class.

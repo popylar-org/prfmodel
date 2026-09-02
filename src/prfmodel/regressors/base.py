@@ -209,6 +209,6 @@ class BaseRegressors(CompositeModelProtocol):
         Notes
         -----
         Implementations must be traceable by a backend compiler. See
-        :meth:`~prfmodel.models.base.BasePopulationResponse.call`.
+        :meth:`~prfmodel.models.base.BaseTuning.call`.
 
         """

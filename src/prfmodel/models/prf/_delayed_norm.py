@@ -8,7 +8,7 @@ from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
-from ._gaussian import Gaussian2DPRFResponse
+from ._gaussian import Gaussian2DPRFTuning
 from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import DelayedNormPRFModel
 
@@ -19,7 +19,7 @@ class DelayedNormGaussian2DPRFModel(DelayedNormPRFModel):
     Delayed normalization pRF model with a 2D isotropic Gaussian response.
 
     Thin wrapper around :class:`DelayedNormPRFModel` that hardcodes
-    :class:`~prfmodel.models.prf.Gaussian2DPRFResponse` as the pRF model.
+    :class:`~prfmodel.models.prf.Gaussian2DPRFTuning` as the pRF model.
 
     Parameters
     ----------
@@ -148,7 +148,7 @@ class DelayedNormGaussian2DPRFModel(DelayedNormPRFModel):
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
-            prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFTuning(),
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             scaling_model=scaling_model,

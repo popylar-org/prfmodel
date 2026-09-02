@@ -1,13 +1,14 @@
 """Population receptive field (pRF) models.
 
-This module contains pRF response models that predict a pRF response to a stimulus grid
-(e.g., :class:`Gaussian2DPRFResponse`).
+This module contains pRF tuning models that predict a pRF tuning profile over a stimulus grid
+(e.g., :class:`Gaussian2DPRFTuning`).
 
 It also contains the
 :class:`PRFStimulusEncoder` class that encodes a pRF response with a stimulus design.
 
 Finally, it
-contains multiple canonical models that combine a pRF response with a stimulus encoding model, an impulse response
+contains multiple canonical models that combine a pRF tuning profile with a stimulus encoding model, an impulse
+response
 model from :mod:`~prfmodel.impulse`, and a scaling model from :mod:`~prfmodel.scaling`. Currently, canonical Gaussian
 [1]_ [2]_, Compressive Spatial Summation (CSS) [3]_, Difference of Gaussian (DoG) [4]_, and
 Divisive Normalization (DivNorm; DN) [5]_, and Compressive Spatiotemporal (CST) [6]_ models are implemented.
@@ -22,8 +23,8 @@ The function :func:`encode_prf_response` can be used to stimulus-encode a pRF re
 function is also internally used by :class:`PRFStimulusEncoder`.
 
 The function :func:`predict_gaussian_response` can be used to make Gaussian density predictions to stimulus grids with
-arbitrary dimensions. This function is also used internally by :class:`Gaussian2DPRFResponse` and
-:class:`Gaussian1DPRFResponse`.
+arbitrary dimensions. This function is also used internally by :class:`Gaussian2DPRFTuning` and
+:class:`Gaussian1DPRFTuning`.
 
 References
 ----------
@@ -58,9 +59,9 @@ from ._div_norm import init_div_norm_from_dog_css
 from ._dog import DoG2DPRFModel
 from ._dog import init_dog_from_gaussian
 from ._gaussian import Gaussian1DPRFModel
-from ._gaussian import Gaussian1DPRFResponse
+from ._gaussian import Gaussian1DPRFTuning
 from ._gaussian import Gaussian2DPRFModel
-from ._gaussian import Gaussian2DPRFResponse
+from ._gaussian import Gaussian2DPRFTuning
 from ._gaussian import predict_gaussian_response
 from ._stimulus_encoding import PRFStimulusEncoder
 from ._stimulus_encoding import encode_prf_response
@@ -73,11 +74,11 @@ __all__ = [
     "DivNormPRFModel",
     "DoG2DPRFModel",
     "Gaussian1DPRFModel",
-    "Gaussian1DPRFResponse",
+    "Gaussian1DPRFTuning",
     "Gaussian2DCSSPRFModel",
     "Gaussian2DCSTPRFModel",
     "Gaussian2DPRFModel",
-    "Gaussian2DPRFResponse",
+    "Gaussian2DPRFTuning",
     "PRFStimulusEncoder",
     "encode_prf_response",
     "init_css_from_gaussian",

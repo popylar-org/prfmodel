@@ -12,9 +12,9 @@ from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.models.prf import Gaussian1DPRFModel
-from prfmodel.models.prf import Gaussian1DPRFResponse
+from prfmodel.models.prf import Gaussian1DPRFTuning
 from prfmodel.models.prf import Gaussian2DPRFModel
-from prfmodel.models.prf import Gaussian2DPRFResponse
+from prfmodel.models.prf import Gaussian2DPRFTuning
 from prfmodel.models.prf import PRFStimulusEncoder
 from prfmodel.models.prf import predict_gaussian_response
 from prfmodel.models.prf._gaussian import _check_gaussian_args
@@ -130,20 +130,20 @@ class TestPredictGaussianResponse(TestSetup):
         self._validate_gaussian(preds, grid, mu, sigma)
 
 
-class TestGaussian2DPRFResponse(PRFStimulusSetup):
+class TestGaussian2DPRFTuning(PRFStimulusSetup):
     """Tests for Gaussian2DResponse class."""
 
     @pytest.fixture
     def response_model(self):
         """Response model object."""
-        return Gaussian2DPRFResponse()
+        return Gaussian2DPRFTuning()
 
-    def test_parameter_names(self, response_model: Gaussian2DPRFResponse):
+    def test_parameter_names(self, response_model: Gaussian2DPRFTuning):
         """Test that correct parameter names are returned."""
         assert response_model.parameter_names == ["mu_y", "mu_x", "sigma"]
 
     @parametrize_dtype
-    def test_predict(self, response_model: Gaussian2DPRFResponse, stimulus: PRFStimulus, dtype: str):
+    def test_predict(self, response_model: Gaussian2DPRFTuning, stimulus: PRFStimulus, dtype: str):
         """Test that response prediction returns correct shape."""
         # 3 units
         params = pd.DataFrame(
@@ -160,7 +160,7 @@ class TestGaussian2DPRFResponse(PRFStimulusSetup):
         assert preds.shape == (params.shape[0], stimulus.design.shape[1], stimulus.design.shape[2])
 
 
-class TestGaussian1DPRFResponse:
+class TestGaussian1DPRFTuning:
     """Tests for Gaussian1DResponse class."""
 
     @pytest.fixture
@@ -177,14 +177,14 @@ class TestGaussian1DPRFResponse:
     @pytest.fixture
     def response_model(self):
         """Response model object."""
-        return Gaussian1DPRFResponse()
+        return Gaussian1DPRFTuning()
 
-    def test_parameter_names(self, response_model: Gaussian1DPRFResponse):
+    def test_parameter_names(self, response_model: Gaussian1DPRFTuning):
         """Test that correct parameter names are returned."""
         assert response_model.parameter_names == ["mu", "sigma"]
 
     @parametrize_dtype
-    def test_predict(self, response_model: Gaussian1DPRFResponse, stimulus: PRFStimulus, dtype: str):
+    def test_predict(self, response_model: Gaussian1DPRFTuning, stimulus: PRFStimulus, dtype: str):
         """Test that response prediction returns correct shape."""
         # 3 units
         params = pd.DataFrame(
@@ -200,7 +200,7 @@ class TestGaussian1DPRFResponse:
         assert preds.shape == (params.shape[0], stimulus.design.shape[1])
 
 
-class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
+class TestGaussian2DPRFModel(TestGaussian2DPRFTuning):
     """Tests for the Gaussian2DPRFModel class."""
 
     @pytest.fixture
@@ -250,7 +250,7 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
         prf_model: Gaussian2DPRFModel,
         impulse_model: DerivativeTwoGammaImpulse,
         temporal_model: BaselineAmplitude,
-        response_model: Gaussian2DPRFResponse,
+        response_model: Gaussian2DPRFTuning,
     ):
         """Test that parameter names of composite model match parameter names of submodels."""
         param_names = response_model.parameter_names
@@ -330,7 +330,7 @@ class TestGaussian2DPRFModel(TestGaussian2DPRFResponse):
         )
 
 
-class TestGaussian1DPRFModel(TestGaussian1DPRFResponse):
+class TestGaussian1DPRFModel(TestGaussian1DPRFTuning):
     """Tests for the Gaussian1DPRFModel class.
 
     Does not include regression tests because the class uses the same underlying functions as Gaussian2DPRFModel.
@@ -375,7 +375,7 @@ class TestGaussian1DPRFModel(TestGaussian1DPRFResponse):
         prf_model: Gaussian1DPRFModel,
         impulse_model: DerivativeTwoGammaImpulse,
         temporal_model: BaselineAmplitude,
-        response_model: Gaussian1DPRFResponse,
+        response_model: Gaussian1DPRFTuning,
     ):
         """Test that parameter names of composite model match parameter names of submodels."""
         param_names = response_model.parameter_names
@@ -465,7 +465,7 @@ class TestCoordinateConvention:
         off_bar = {"mu_x": on_bar["mu_y"], "mu_y": on_bar["mu_x"], "sigma": 0.3}
 
         params = pd.DataFrame([on_bar, off_bar])
-        resp = np.asarray(Gaussian2DPRFResponse()(stimulus, params))
+        resp = np.asarray(Gaussian2DPRFTuning()(stimulus, params))
         encoded = np.asarray(PRFStimulusEncoder()(stimulus, resp, params))
 
         assert encoded[0, 0] > self.on_bar_min_response, (

@@ -9,7 +9,7 @@ from prfmodel.fitters.adapter import ParameterTransform
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.prf import DoG2DPRFModel
-from prfmodel.models.prf import Gaussian2DPRFResponse
+from prfmodel.models.prf import Gaussian2DPRFTuning
 from prfmodel.models.prf import init_dog_from_gaussian
 from prfmodel.models.prf.canonical import CenterSurroundPRFModel
 from prfmodel.scaling import Baseline
@@ -107,14 +107,14 @@ class TestCenterSurroundPRFModel:
         """Any param not in prf_model.parameter_names raises ValueError."""
         with pytest.raises(ValueError, match="not_a_param"):
             CenterSurroundPRFModel(
-                prf_model=Gaussian2DPRFResponse(),
+                prf_model=Gaussian2DPRFTuning(),
                 shared_params=["not_a_param"],
             )
 
     def test_non_default_change_params_parameter_names(self):
         """change_params=['mu_x'] splits mu_x into mu_x_center and mu_x_surround."""
         model = CenterSurroundPRFModel(
-            prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFTuning(),
             shared_params=["mu_x"],
         )
         assert "mu_x_center" not in model.parameter_names
@@ -124,7 +124,7 @@ class TestCenterSurroundPRFModel:
     def test_multiple_change_params_parameter_names(self):
         """Multiple change_params each split into center/surround variants."""
         model = CenterSurroundPRFModel(
-            prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFTuning(),
             shared_params=["mu_x", "sigma"],
         )
         for param in ("mu_x", "sigma"):

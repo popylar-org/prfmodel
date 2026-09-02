@@ -13,7 +13,7 @@ from prfmodel.scaling import Baseline
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.utils import get_dtype
-from ._gaussian import Gaussian2DPRFResponse
+from ._gaussian import Gaussian2DPRFTuning
 from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import DivNormPRFModel
 
@@ -21,10 +21,11 @@ from .canonical import DivNormPRFModel
 @doc
 class DivNormGaussian2DPRFModel(DivNormPRFModel):
     r"""
-    Divisive normalization population receptive field (pRF) model with isotropic 2D Gaussian responses.
+    Divisive normalization population receptive field (pRF) model with isotropic 2D Gaussian tuning models.
 
-    This class combines a divisive normalization 2D Gaussian response with an impulse,
-    scaling, and regressors model. The two Gaussian 2D pRF models share the same center but have different sizes.
+    This class combines a divisive normalization 2D Gaussian tuning profile with an impulse,
+    scaling, and regressors model. The two Gaussian 2D pRF tuning models share the same center but have different
+    sizes.
 
     Parameters
     ----------
@@ -43,8 +44,8 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
     -----
     The divisive normalization model follows these steps [1]_:
 
-    1. The 2D Gaussian pRF response models make separate predictions for the stimulus grid.
-    2. The encoding model encodes the responses with the stimulus design.
+    1. The 2D Gaussian pRF tuning models make separate predictions for the stimulus grid.
+    2. The encoding model encodes the tuning profiles with the stimulus design.
     3. The two encoded responses are combined through divisive normalization.
     4. The combined response is convolved with an impulse response (optional).
     5. The scaling model modifies the convolved response (optional).
@@ -119,7 +120,7 @@ class DivNormGaussian2DPRFModel(DivNormPRFModel):
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
-            prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFTuning(),
             shared_params=["mu_x", "mu_y"],
             encoding_model=encoding_model,
             impulse_model=impulse_model,
@@ -248,7 +249,7 @@ def _peak_normalization_drive(div_norm_params: pd.DataFrame, stimulus: PRFStimul
     norm_params["sigma"] = div_norm_params["sigma_normalization"]
 
     dtype = get_dtype(None)
-    norm_response = Gaussian2DPRFResponse()(stimulus, norm_params, dtype=dtype)
+    norm_response = Gaussian2DPRFTuning()(stimulus, norm_params, dtype=dtype)
     norm_drive = PRFStimulusEncoder()(stimulus, norm_response, norm_params, dtype=dtype)
 
     return np.max(norm_drive, axis=1)

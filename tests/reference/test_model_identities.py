@@ -19,7 +19,7 @@ import pytest
 from scipy import integrate
 from scipy import spatial
 from prfmodel.impulse import SustainedImpulse
-from prfmodel.models.cf._gaussian import GaussianCFResponse
+from prfmodel.models.cf._gaussian import GaussianCFTuning
 from prfmodel.models.prf import DivNormGaussian2DPRFModel
 from prfmodel.models.prf import DoG2DPRFModel
 from prfmodel.models.prf import Gaussian2DCSSPRFModel
@@ -315,7 +315,7 @@ class TestGaussianNormalization:
         centre = int(np.argmin(np.linalg.norm(vertices, axis=1)))
         params = pd.DataFrame({"center_index": [centre], "sigma": [sigma]})
 
-        response = np.asarray(GaussianCFResponse()(stimulus, params, dtype="float64"))[0]
+        response = np.asarray(GaussianCFTuning()(stimulus, params, dtype="float64"))[0]
 
         # Rectangle rule: each vertex stands for a square patch of side `spacing`. It converges
         # very quickly for a Gaussian, so the tolerance is dominated by the truncated tail.

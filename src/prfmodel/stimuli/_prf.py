@@ -76,7 +76,7 @@ class PRFStimulus(Stimulus):
     (`y`) coordinate comes first and the horizontal (`x`) coordinate second.
 
     This is why response models read their centre parameters in the same order, for example
-    :class:`~prfmodel.models.prf.Gaussian2DPRFResponse` pairs `mu_y` with `grid[..., 0]` and `mu_x`
+    :class:`~prfmodel.models.prf.Gaussian2DPRFTuning` pairs `mu_y` with `grid[..., 0]` and `mu_x`
     with `grid[..., 1]`. Building a grid with `numpy.meshgrid` therefore requires stacking `yv`
     before `xv`, as in the example below.
 

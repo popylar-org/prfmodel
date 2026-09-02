@@ -4,8 +4,8 @@ import pytest
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.models.base import BaseCanonical
-from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.models.base import BaseTuning
 from prfmodel.protocols import ModelProtocol
 
 
@@ -49,10 +49,10 @@ class TestBaseModel:
 
 
 # Inherit all checks from TestBaseModel
-class TestBasePopulationResponse(TestBaseModel):
-    """Tests for BasePopulationResponse class."""
+class TestBaseTuning(TestBaseModel):
+    """Tests for BaseTuning class."""
 
-    model_class = BasePopulationResponse
+    model_class = BaseTuning
 
 
 class TestBaseStimulusEncoder(TestBaseModel):

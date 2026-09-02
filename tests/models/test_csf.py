@@ -6,7 +6,7 @@ import pytest
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.models.csf import CSFModel
-from prfmodel.models.csf import CSFResponse
+from prfmodel.models.csf import CSFTuning
 from prfmodel.models.csf import predict_contrast_response
 from prfmodel.models.csf import predict_contrast_sensitivity
 from prfmodel.models.csf.canonical import CanonicalCSFModel
@@ -190,8 +190,8 @@ class TestPredictContrastResponse(TestSetup):
         assert np.allclose(result, expected)
 
 
-class TestCSFResponse(TestSetup):
-    """Tests for CSFResponse class."""
+class TestCSFTuning(TestSetup):
+    """Tests for CSFTuning class."""
 
     @pytest.fixture
     def params(self) -> pd.DataFrame:
@@ -207,13 +207,13 @@ class TestCSFResponse(TestSetup):
 
     def test_parameter_names(self) -> None:
         """Test that parameter names are correct."""
-        model = CSFResponse()
+        model = CSFTuning()
         assert model.parameter_names == ["cs_peak", "sf_peak", "width_r", "slope_crf"]
 
     @parametrize_dtype
     def test_predict(self, stimulus: CSFStimulus, params: pd.DataFrame, dtype: str) -> None:
         """Test that response prediction returns correct shape."""
-        model = CSFResponse()
+        model = CSFTuning()
         result = model(stimulus, params, dtype=dtype)
         assert result.shape == (self.num_voxels, self.num_frames)
 
@@ -268,7 +268,7 @@ class TestCSFModel(TestSetup):
 
     @parametrize_dtype
     def test_canonical_csf_model_predict(self, stimulus: CSFStimulus, params: pd.DataFrame, dtype: str) -> None:
-        """Test that SimpleCSFModel with CSFResponse returns correct shape."""
-        model = CanonicalCSFModel(csf_model=CSFResponse())
+        """Test that SimpleCSFModel with CSFTuning returns correct shape."""
+        model = CanonicalCSFModel(csf_model=CSFTuning())
         result = model(stimulus, params, dtype=dtype)
         assert result.shape == (self.num_voxels, self.num_frames)

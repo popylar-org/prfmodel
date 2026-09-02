@@ -47,8 +47,8 @@ _PARAMS: dict[str, str] = {
         "    The dtype of the prediction result. If `None` (the default), uses the dtype from\n"
         "    :func:`prfmodel.utils.get_dtype`."
     ),
-    "model_cf": ("cf_model : BasePopulationResponse\n    A connective field response model instance."),
-    "model_csf": ("cfs_model : BasePopulationResponse\n    A contrast sensitivity function response model instance."),
+    "model_cf": ("cf_model : BaseTuning\n    A connective field tuning model instance."),
+    "model_csf": ("cfs_model : BaseTuning\n    A contrast sensitivity function tuning model instance."),
     "model_encoding_cf": (
         "encoding_model : BaseStimulusEncoder or type, default=CFStimulusEncoder\n"
         "    An stimulus encoding model class or instance. Model classes will be instantiated during initialization.\n"
@@ -71,7 +71,7 @@ _PARAMS: dict[str, str] = {
         "    initialization. The default creates a :class:`~prfmodel.impulse.DerivativeTwoGammaImpulse`\n"
         "    instance with default values."
     ),
-    "model_prf": ("prf_model : BasePopulationResponse\n    A population receptive field response model instance."),
+    "model_prf": ("prf_model : BaseTuning\n    A population receptive field tuning model instance."),
     "model_scaling": (
         "scaling_model : BaseScaling or type or None, default=BaselineAmplitude, optional\n"
         "    A scaling model class or instance. Model classes will be instantiated during initialization.\n"
