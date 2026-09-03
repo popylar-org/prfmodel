@@ -63,6 +63,7 @@ def convolve_prf_impulse_response(prf_response: Tensor, impulse_response: Tensor
     Before convolving both responses, the `prf_response` is padded on the left side in the
     `num_frames` dimension by repeating the first value of each unit. This ensures that the output of the convolution
     has the same shape as `prf_response` and the `impulse_response` starts at every frame of the `prf_response`.
+    See :doc:`Important details </important_details>`.
 
     Raises
     ------

@@ -39,6 +39,11 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
     ShapeMismatchError
         If the shape of the model response and the stimulus design do not match.
 
+    Notes
+    -----
+    This function does **not** normalize the stimulus-encoded response by the cell size of the stimulus grid.
+    See :doc:`Important details </important_details>`.
+
     Examples
     --------
     Encode a 1D model response:
@@ -94,6 +99,11 @@ class PRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus, PRFStimulusTensors]):
 
     Multiplies a stimulus design with a population receptive field model response along the
     stimulus dimensions and sums over them.
+
+    Notes
+    -----
+    This encoding model does **not** normalize the stimulus-encoded response by the cell size of the stimulus grid.
+    See :doc:`Important details </important_details>`.
 
     See Also
     --------

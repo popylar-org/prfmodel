@@ -77,6 +77,7 @@ autoapi_options = [
 
 myst_enable_extensions = [
     "dollarmath",
+    "amsmath",
 ]
 
 nb_merge_streams = True

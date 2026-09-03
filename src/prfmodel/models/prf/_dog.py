@@ -33,6 +33,8 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
 
     Notes
     -----
+    %(gaussian_norm_note)s
+
     The canonical DoG model follows the following steps [1]_:
 
     1. The center and surround 2D Gaussian pRF tuning models make separate predictions for
