@@ -47,6 +47,11 @@ _PARAMS: dict[str, str] = {
         "    The dtype of the prediction result. If `None` (the default), uses the dtype from\n"
         "    :func:`prfmodel.utils.get_dtype`."
     ),
+    "gaussian_norm_note": (
+        "This model uses a proper Gaussian density that is normalized by its volume.\n"
+        "This differs from other Gaussian pRF model implementations. See\n"
+        ":doc:`Important details </important_details>`."
+    ),
     "model_cf": ("cf_model : BaseTuning\n    A connective field tuning model instance."),
     "model_csf": ("cfs_model : BaseTuning\n    A contrast sensitivity function tuning model instance."),
     "model_encoding_cf": (

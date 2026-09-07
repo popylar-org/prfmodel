@@ -29,7 +29,7 @@ class ShiftedGammaImpulse(BaseImpulse):
         impulse response function is evaluated.
     norm : str, optional, default="sum"
         The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
-        no normalization is performed.
+        no normalization is performed. See :doc:`Important details </important_details>`.
     default_parameters : dict of float or str, optional
         Dictionary with scalar default parameter values or name of default parameter set.
         Dictionary keys must be valid parameter names.  Default values are overridden by user-supplied parameters in

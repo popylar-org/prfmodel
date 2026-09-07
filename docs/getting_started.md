@@ -47,6 +47,8 @@ by Dumoulin and Wandell (2008).
 
 The `Gaussian2DPRFModel` class performs all these steps to make a combined prediction.
 
+**Important**: In prfmodel, we often need to add a custom impulse response model to match the sampling rate of predicted impulse responses to the sampling rate (i.e., TR) of observed data (the default in prfmodel is 1.0 seconds; see also the section [](important_details.md)).
+
 ```{code-cell} ipython3
 from prfmodel.models.prf import Gaussian2DPRFModel
 

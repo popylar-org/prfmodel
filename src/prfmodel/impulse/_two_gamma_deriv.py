@@ -34,7 +34,7 @@ class DerivativeTwoGammaImpulse(BaseImpulse):
         impulse response function is evaluated.
     norm : str, optional, default="sum"
         The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
-        no normalization is performed.
+        no normalization is performed. See :doc:`Important details </important_details>`.
     default_parameters : dict of float or str, optional, default="glover_hrf"
         Dictionary with scalar default parameter values or name of default parameter set. Available default
         parameter sets are `glover_hrf` (default) and `spm_hrf`. See :mod:`~prfmodel.impulse.defaults` for details.

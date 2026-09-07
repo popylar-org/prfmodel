@@ -35,6 +35,8 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
 
     Notes
     -----
+    %(gaussian_norm_note)s
+
     The canonical CSS model follows the following steps [1]_:
 
     1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
