@@ -24,6 +24,7 @@ prfmodel.impulse.TransientImpulse
    :param norm: The normalization of the response. Can be `"sum"`, `"mean"`, `"max"`, `"norm"`, or `None` (default).
                 If `None`, no normalization is performed. Leave this at `None`: the two components each integrate to one, so
                 a biphasic response sums to approximately zero and `norm="sum"` divides by that near-zero value.
+                See :doc:`Important details </important_details>`.
    :type norm: str, optional, default=None
    :param default_parameters: Dictionary with scalar default parameter values. Dictionary keys must be valid parameter names.
                               Default values are overridden by user-supplied parameters in the :meth:`__call__` method.

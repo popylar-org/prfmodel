@@ -200,6 +200,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../important_details.html">Important details</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../tutorials/index.html">Tutorials &amp; Examples</a><input aria-label="Toggle navigation of Tutorials &amp; Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../tutorials/tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../tutorials/tutorials/css_prf_simulated.html">How to fit a compressive spatial summation population receptive field model to simulated data</a></li>
@@ -226,6 +227,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../density/index.html">prfmodel.density</a><input aria-label="Toggle navigation of prfmodel.density" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../density/derivative_gamma_density.html">derivative_gamma_density</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../density/gamma_density.html">gamma_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../density/normal_density.html">normal_density</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../density/shifted_gamma_density.html">shifted_gamma_density</a></li>
 </ul>
 </li>
@@ -474,6 +476,9 @@ are summed. The regressor contribution is added after the scaling model.</p></li
 </dl>
 </div>
 <p class="rubric">Notes</p>
+<p>This model uses a proper Gaussian density that is normalized by its volume.
+This differs from other Gaussian pRF model implementations. See
+<a class="reference internal" href="../../../../important_details.html"><span class="doc">Important details</span></a>.</p>
 <p>The divisive normalization model follows these steps <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>:</p>
 <ol class="arabic simple">
 <li><p>The 2D Gaussian pRF tuning models make separate predictions for the stimulus grid.</p></li>

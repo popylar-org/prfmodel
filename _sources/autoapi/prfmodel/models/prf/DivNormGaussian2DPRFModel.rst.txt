@@ -33,6 +33,10 @@ prfmodel.models.prf.DivNormGaussian2DPRFModel
 
    .. rubric:: Notes
 
+   This model uses a proper Gaussian density that is normalized by its volume.
+   This differs from other Gaussian pRF model implementations. See
+   :doc:`Important details </important_details>`.
+
    The divisive normalization model follows these steps [1]_:
 
    1. The 2D Gaussian pRF tuning models make separate predictions for the stimulus grid.

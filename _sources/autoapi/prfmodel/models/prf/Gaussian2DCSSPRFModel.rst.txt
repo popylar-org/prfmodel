@@ -26,6 +26,10 @@ prfmodel.models.prf.Gaussian2DCSSPRFModel
 
    .. rubric:: Notes
 
+   This model uses a proper Gaussian density that is normalized by its volume.
+   This differs from other Gaussian pRF model implementations. See
+   :doc:`Important details </important_details>`.
+
    The canonical CSS model follows the following steps [1]_:
 
    1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.

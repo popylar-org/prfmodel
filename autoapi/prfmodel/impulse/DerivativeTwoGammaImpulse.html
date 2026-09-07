@@ -200,6 +200,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../important_details.html">Important details</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorials/index.html">Tutorials &amp; Examples</a><input aria-label="Toggle navigation of Tutorials &amp; Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../tutorials/tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/tutorials/css_prf_simulated.html">How to fit a compressive spatial summation population receptive field model to simulated data</a></li>
@@ -226,6 +227,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../density/index.html">prfmodel.density</a><input aria-label="Toggle navigation of prfmodel.density" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../density/derivative_gamma_density.html">derivative_gamma_density</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../density/gamma_density.html">gamma_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../density/normal_density.html">normal_density</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../density/shifted_gamma_density.html">shifted_gamma_density</a></li>
 </ul>
 </li>
@@ -462,7 +464,7 @@ response values at t = 0.</p></li>
 <li><p><strong>resolution</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default=1.0</em>) – The time resultion of the impulse response (in seconds), that is the number of points per second at which the
 impulse response function is evaluated.</p></li>
 <li><p><strong>norm</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em><em>, </em><em>default=&quot;sum&quot;</em>) – The normalization of the response. Can be <cite>“sum”</cite> (default), <cite>“mean”</cite>, <cite>“max”</cite>, <cite>“norm”</cite>, or <cite>None</cite>. If <cite>None</cite>,
-no normalization is performed.</p></li>
+no normalization is performed. See <a class="reference internal" href="../../../important_details.html"><span class="doc">Important details</span></a>.</p></li>
 <li><p><strong>default_parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em><em>, </em><em>default=&quot;glover_hrf&quot;</em>) – Dictionary with scalar default parameter values or name of default parameter set. Available default
 parameter sets are <cite>glover_hrf</cite> (default) and <cite>spm_hrf</cite>. See <a class="reference internal" href="defaults/index.html#module-prfmodel.impulse.defaults" title="prfmodel.impulse.defaults"><code class="xref py py-mod docutils literal notranslate"><span class="pre">defaults</span></code></a> for details.
 Dictionary keys must be valid parameter names.  Default values are overridden by user-supplied parameters in

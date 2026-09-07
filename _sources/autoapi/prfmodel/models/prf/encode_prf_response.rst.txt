@@ -23,6 +23,11 @@ prfmodel.models.prf.encode_prf_response
 
    :raises ShapeMismatchError: If the shape of the model response and the stimulus design do not match.
 
+   .. rubric:: Notes
+
+   This function does **not** normalize the stimulus-encoded response by the cell size of the stimulus grid.
+   See :doc:`Important details </important_details>`.
+
    .. rubric:: Examples
 
    Encode a 1D model response:

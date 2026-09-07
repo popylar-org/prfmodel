@@ -200,6 +200,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../important_details.html">Important details</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../tutorials/index.html">Tutorials &amp; Examples</a><input aria-label="Toggle navigation of Tutorials &amp; Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../tutorials/tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../tutorials/tutorials/css_prf_simulated.html">How to fit a compressive spatial summation population receptive field model to simulated data</a></li>
@@ -226,6 +227,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../density/index.html">prfmodel.density</a><input aria-label="Toggle navigation of prfmodel.density" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../density/derivative_gamma_density.html">derivative_gamma_density</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../density/gamma_density.html">gamma_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../density/normal_density.html">normal_density</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../density/shifted_gamma_density.html">shifted_gamma_density</a></li>
 </ul>
 </li>
@@ -446,7 +448,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="prfmodel.models.prf.predict_gaussian_response">
 <span class="sig-prename descclassname"><span class="pre">prfmodel.models.prf.</span></span><span class="sig-name descname"><span class="pre">predict_gaussian_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="headerlink" href="#prfmodel.models.prf.predict_gaussian_response" title="Link to this definition">¶</a></dt>
-<dd><p>Predict an isotropic Gaussian population receptive field response.</p>
+<dd><p>Predict an isotropic Gaussian population receptive field (pRF) response.</p>
 <p>The dimensionality of the Gaussian depends on the number of dimensions of <cite>grid</cite> and <cite>mu</cite>. All dimensions have
 the same size <cite>sigma</cite>.</p>
 <dl class="field-list simple">
@@ -467,14 +469,20 @@ The second dimension must have size one (because all Gaussian dimensions have th
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The predicted Gaussian population receptive field response with shape (num_units, …)
+<dd class="field-even"><p>The predicted Gaussian pRF response with shape (num_units, …)
 where <cite>…</cite> corresponds to the dimensions of the Gaussian.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><code class="xref py py-data docutils literal notranslate"><span class="pre">prfmodel.typing.Tensor</span></code></a></p>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
+</dl>
+<p class="rubric">Notes</p>
+<p>This function predicts a proper Gaussian density that is normalized by its volume.
+This differs from other Gaussian pRF model implementations. See <a class="reference internal" href="../../../../important_details.html"><span class="doc">Important details</span></a>
+for details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
 <li><p><a class="reference internal" href="../../exceptions/ShapeMismatchError.html#prfmodel.exceptions.ShapeMismatchError" title="prfmodel.exceptions.ShapeMismatchError"><strong>ShapeMismatchError</strong></a> – If <cite>mu</cite> and <cite>sigma</cite> have batch (first) dimensions with different sizes, or if the grid and mu dimensions
 do not match.</p></li>
 <li><p><a class="reference internal" href="../../exceptions/ShapeError.html#prfmodel.exceptions.ShapeError" title="prfmodel.exceptions.ShapeError"><strong>ShapeError</strong></a> – If <cite>mu</cite> or <cite>sigma</cite> have less than two dimensions.</p></li>

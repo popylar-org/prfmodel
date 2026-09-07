@@ -18,7 +18,7 @@ prfmodel.impulse.base.BaseImpulse
                       impulse response function is evaluated.
    :type resolution: float, default=1.0
    :param norm: The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`.
-                If `None`, no normalization is performed.
+                If `None`, no normalization is performed. See :doc:`Important details </important_details>`.
    :type norm: str, optional, default="sum"
    :param default_parameters: Dictionary with scalar default parameter values or name of default parameter set.
                               Dictionary keys must be valid parameter names. Default values are overridden by user-supplied parameters in

@@ -28,6 +28,10 @@ prfmodel.models.prf.DoG2DPRFModel
 
    .. rubric:: Notes
 
+   This model uses a proper Gaussian density that is normalized by its volume.
+   This differs from other Gaussian pRF model implementations. See
+   :doc:`Important details </important_details>`.
+
    The canonical DoG model follows the following steps [1]_:
 
    1. The center and surround 2D Gaussian pRF tuning models make separate predictions for

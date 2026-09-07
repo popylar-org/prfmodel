@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.utils" href="../utils/index.html"><link rel="prev" title="prfmodel.stimuli.StimulusTensors" href="../stimuli/StimulusTensors.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.density.shifted_gamma_density" href="shifted_gamma_density.html"><link rel="prev" title="prfmodel.density.gamma_density" href="gamma_density.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>prfmodel.typing - prfmodel 0.0.1 documentation</title>
+        <title>prfmodel.density.normal_density - prfmodel 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -224,11 +224,11 @@
 </ul>
 </li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../../index.html">API Reference</a><input aria-label="Toggle navigation of API Reference" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l2 has-children"><a class="reference internal" href="../density/index.html">prfmodel.density</a><input aria-label="Toggle navigation of prfmodel.density" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l3"><a class="reference internal" href="../density/derivative_gamma_density.html">derivative_gamma_density</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../density/gamma_density.html">gamma_density</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../density/normal_density.html">normal_density</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../density/shifted_gamma_density.html">shifted_gamma_density</a></li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">prfmodel.density</a><input aria-label="Toggle navigation of prfmodel.density" checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="derivative_gamma_density.html">derivative_gamma_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="gamma_density.html">gamma_density</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">normal_density</a></li>
+<li class="toctree-l3"><a class="reference internal" href="shifted_gamma_density.html">shifted_gamma_density</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../examples/index.html">prfmodel.examples</a><input aria-label="Toggle navigation of prfmodel.examples" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -393,7 +393,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../stimuli/StimulusTensors.html">StimulusTensors</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">prfmodel.typing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../typing/index.html">prfmodel.typing</a></li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../utils/index.html">prfmodel.utils</a><input aria-label="Toggle navigation of prfmodel.utils" class="toctree-checkbox" id="toctree-checkbox-32" name="toctree-checkbox-32" role="switch" type="checkbox"/><label for="toctree-checkbox-32"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../utils/TensorFrame.html">TensorFrame</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utils/as_tensor_frame.html">as_tensor_frame</a></li>
@@ -425,7 +425,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../../_sources/autoapi/prfmodel/typing/index.rst.txt" title="View this page">
+  <a class="muted-link" href="../../../_sources/autoapi/prfmodel/density/normal_density.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -443,22 +443,51 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-prfmodel.typing">
-<span id="prfmodel-typing"></span><h1>prfmodel.typing<a class="headerlink" href="#module-prfmodel.typing" title="Link to this heading">¶</a></h1>
-<p>Multi-backend variable types.</p>
-<p>This module contains package specific types that are used by static type checkers (e.g., mypy).</p>
-<section id="module-contents">
-<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
-<dl class="py type">
-<dt class="sig sig-object py" id="prfmodel.typing.Tensor">
-<span class="property"><span class="k"><span class="pre">type</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.typing.</span></span><span class="sig-name descname"><span class="pre">Tensor</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">BackendTensor</span></span><a class="reference internal" href="../../../_modules/tensorflow/python/framework/tensor.html#Tensor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#prfmodel.typing.Tensor" title="Link to this definition">¶</a></dt>
-<dd><p>Backend-specific tensor type.</p>
-<p>This is a type alias (<code class="xref py py-class docutils literal notranslate"><span class="pre">typing.TypeAlias</span></code>). Depending on the Keras backend the alias refers to a different type.
-For the TensorFlow backend, it refers to <code class="xref py py-class docutils literal notranslate"><span class="pre">tensorflow.Tensor</span></code>. For the PyTorch backend, it refers to
-<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>. For the JAX backend, it refers to <code class="xref py py-class docutils literal notranslate"><span class="pre">jax.Array</span></code>.</p>
+          <section id="prfmodel-density-normal-density">
+<h1>prfmodel.density.normal_density<a class="headerlink" href="#prfmodel-density-normal-density" title="Link to this heading">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="prfmodel.density.normal_density">
+<span class="sig-prename descclassname"><span class="pre">prfmodel.density.</span></span><span class="sig-name descname"><span class="pre">normal_density</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="headerlink" href="#prfmodel.density.normal_density" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the density of an isotropic multivariate normal distribution.</p>
+<p>The multivariate normal distribution has a diagonal covariance matrix with <span class="math notranslate nohighlight">\(\mathtt{sigma}^2\)</span> on the
+diagonal (i.e., all dimensions have the same standard deviation <cite>sigma</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<a class="reference internal" href="../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><code class="xref py py-data docutils literal notranslate"><span class="pre">prfmodel.typing.Tensor</span></code></a>) – Values at which to evaluate the normal distribution. The last axis indexes the dimensions of the
+distribution.</p></li>
+<li><p><strong>mu</strong> (<a class="reference internal" href="../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><code class="xref py py-data docutils literal notranslate"><span class="pre">prfmodel.typing.Tensor</span></code></a>) – Mean of the normal distribution. Must be broadcastable to the shape of <cite>value</cite>.</p></li>
+<li><p><strong>sigma</strong> (<a class="reference internal" href="../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><code class="xref py py-data docutils literal notranslate"><span class="pre">prfmodel.typing.Tensor</span></code></a>) – Standard deviation of the normal distribution. Because the distribution is isotropic, <cite>sigma</cite> does not
+have a dimension axis and must be broadcastable to the shape of <cite>value</cite> without its last axis.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The normal density at <cite>value</cite> with the shape of <cite>value</cite> without its last axis.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><code class="xref py py-data docutils literal notranslate"><span class="pre">prfmodel.typing.Tensor</span></code></a></p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>The density of the isotropic multivariate normal distribution with mean <span class="math notranslate nohighlight">\(\mu\)</span> and standard deviation
+<span class="math notranslate nohighlight">\(\sigma\)</span> in <span class="math notranslate nohighlight">\(k\)</span> dimensions is given by:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[f(x) = \frac{1}{(2 \pi \sigma^2)^{k / 2}} e^{-\frac{\lVert x - \mu \rVert^2}{2 \sigma^2}}.\]</div>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.density</span><span class="w"> </span><span class="kn">import</span> <span class="n">normal_density</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>   <span class="c1"># 4 x 3 points in 2 dimensions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>   <span class="c1"># shape (2,)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">1.0</span><span class="p">]])</span>   <span class="c1"># shape (1, 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dens</span> <span class="o">=</span> <span class="n">normal_density</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">dens</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="go">(4, 3)</span>
+</pre></div>
+</div>
 </dd></dl>
 
-</section>
 </section>
 
         </article>
@@ -466,23 +495,23 @@ For the TensorFlow backend, it refers to <code class="xref py py-class docutils 
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../utils/index.html">
+          <a class="next-page" href="shifted_gamma_density.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">prfmodel.utils</div>
+                <div class="title">prfmodel.density.shifted_gamma_density</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../stimuli/StimulusTensors.html">
+          <a class="prev-page" href="gamma_density.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">prfmodel.stimuli.StimulusTensors</div>
+                <div class="title">prfmodel.density.gamma_density</div>
                 
               </div>
             </a>
@@ -516,11 +545,8 @@ For the TensorFlow backend, it refers to <code class="xref py py-class docutils 
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">prfmodel.typing</a><ul>
-<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#prfmodel.typing.Tensor"><code class="docutils literal notranslate"><span class="pre">Tensor</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#">prfmodel.density.normal_density</a><ul>
+<li><a class="reference internal" href="#prfmodel.density.normal_density"><code class="docutils literal notranslate"><span class="pre">prfmodel.density.normal_density()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -539,5 +565,7 @@ For the TensorFlow backend, it refers to <code class="xref py py-class docutils 
     <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     </body>
 </html>

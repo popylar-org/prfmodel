@@ -3,10 +3,10 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Getting started" href="getting_started.html"><link rel="prev" title="Introduction" href="introduction.html">
+<link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Tutorials &amp; Examples" href="tutorials/index.html"><link rel="prev" title="Getting started" href="getting_started.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Installation - prfmodel 0.0.1 documentation</title>
+        <title>Important details - prfmodel 0.0.1 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -198,9 +198,9 @@
   <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="important_details.html">Important details</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Important details</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="tutorials/index.html">Tutorials &amp; Examples</a><input aria-label="Toggle navigation of Tutorials &amp; Examples" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2 has-children"><a class="reference internal" href="tutorials/tutorials/index.html">Tutorials</a><input aria-label="Toggle navigation of Tutorials" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="tutorials/tutorials/css_prf_simulated.html">How to fit a compressive spatial summation population receptive field model to simulated data</a></li>
@@ -425,7 +425,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="_sources/installation.md.txt" title="View this page">
+  <a class="muted-link" href="_sources/important_details.md.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -443,111 +443,187 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section class="tex2jax_ignore mathjax_ignore" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
-<p>The prfmodel package is currently only available as a development version that must be installed from GitHub.
-Please note that this version is still under active development and subject to constant change.
-Installing prfmodel requires Python version &gt;= 3.10 and &lt;= 3.13.</p>
-<section id="installing-the-development-version">
-<h2>Installing the development version<a class="headerlink" href="#installing-the-development-version" title="Link to this heading">¶</a></h2>
-<p>To clone the development version of prfmodel from the GitHub repository:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:popylar-org/prfmodel.git
-<span class="nb">cd</span><span class="w"> </span>prfmodel
-</pre></div>
+          <section class="tex2jax_ignore mathjax_ignore" id="important-details">
+<h1>Important details<a class="headerlink" href="#important-details" title="Link to this heading">¶</a></h1>
+<p>When developing prfmodel, we made certain decisions for the design and implementation of different features.
+While the decisions concerning the development of prfmodel are covered in <a class="reference internal" href="development/index.html"><span class="std std-doc">Development</span></a> (e.g., architecture),
+we describe the choices that affect <strong>users</strong> directly in this section.</p>
+<section id="gaussian-models-use-proper-probability-densities">
+<h2>Gaussian models use proper probability densities<a class="headerlink" href="#gaussian-models-use-proper-probability-densities" title="Link to this heading">¶</a></h2>
+<p>Some software packages that implement Gaussian population receptive field (pRF) models use unnormalized Gaussian
+densities to predict tuning profiles. That is, they use the density:</p>
+<div class="math-wrapper amsmath docutils container" id="equation-f8503fe0-37fe-45ad-9819-820e56fc8cec">
+<div class="amsmath math notranslate nohighlight" id="equation-f8503fe0-37fe-45ad-9819-820e56fc8cec">
+<span class="eqno">(1)<a class="headerlink" href="#equation-f8503fe0-37fe-45ad-9819-820e56fc8cec" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+f(x) = e^{-\frac{\lVert x - \mu \rVert^2}{2 \sigma^2}},
+\end{equation}\]</div>
 </div>
-<p>We recommend installing prfmodel in a virtual environment to prevent conflicts with other packages,
-for example using <a class="reference external" href="https://docs.python.org/3/library/venv.html">venv</a>.</p>
-<div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-0">
-Windows</label><div class="sd-tab-content docutils">
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python -m venv my_venv # Create a virtual environment called 'my_venv'</span>
-<span class="go">my_venv\Scripts\activate.bat # Activate the virtual environment</span>
-</pre></div>
+<p>that has a peak amplitude of <span class="math notranslate nohighlight">\(\max(f(x)) = 1\)</span>. Although this parameterization has advantages in some situations,
+we decided that all Gaussian models in prfmodel use proper densities that are normalized by their
+volume (see <a class="reference internal" href="autoapi/prfmodel/density/normal_density.html#prfmodel.density.normal_density" title="prfmodel.density.normal_density"><code class="xref py py-func docutils literal notranslate"><span class="pre">normal_density()</span></code></a>):</p>
+<div class="math-wrapper amsmath docutils container" id="equation-4adf6c77-e599-42ca-9ef1-e758778faf1d">
+<div class="amsmath math notranslate nohighlight" id="equation-4adf6c77-e599-42ca-9ef1-e758778faf1d">
+<span class="eqno">(2)<a class="headerlink" href="#equation-4adf6c77-e599-42ca-9ef1-e758778faf1d" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+f(x) = \frac{1}{V} e^{-\frac{\lVert x - \mu \rVert^2}{2 \sigma^2}},
+\end{equation}\]</div>
 </div>
+<p>where <span class="math notranslate nohighlight">\(V = (2 \pi \sigma^2)^{k / 2}\)</span> is the volume and <span class="math notranslate nohighlight">\(k\)</span> is the number of dimensions of the tuning profile.
+The proper density has a peak amplitude of <span class="math notranslate nohighlight">\(\max(f(x)) = \frac{1}{V}\)</span>.</p>
+<p>The proper Gaussian density has the advantage that it decouples amplitude parameters from pRF size/tuning width
+parameters <span class="math notranslate nohighlight">\(\sigma\)</span>, making it easier to interpret (although amplitudes are often treated as nuisance parameters). It
+also leads to larger amplitude estimates and stimulus-encoded model responses. However, it does <strong>not</strong> change the
+identifiability of the model parameters.</p>
+<p>Using the proper Gaussian density implies that parameter estimates for amplitudes
+cannot be directly compared to the estimates from software that uses the unnormalized density. This does not only hold
+for the Gaussian 1D and 2D pRF models but also for difference of Gaussian and Gaussian divisive normalization pRF
+models as well as Gaussian connective field models.</p>
+<p>It is possible to convert the amplitudes estimated with the proper density into those estimated with unnormalized
+density by dividing by the volume:</p>
+<div class="math-wrapper amsmath docutils container" id="equation-76ad6663-4aa3-4969-9f86-b1067d332fa3">
+<div class="amsmath math notranslate nohighlight" id="equation-76ad6663-4aa3-4969-9f86-b1067d332fa3">
+<span class="eqno">(3)<a class="headerlink" href="#equation-76ad6663-4aa3-4969-9f86-b1067d332fa3" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+\beta_\text{unnorm} = \beta_\text{norm} / V.
+\end{equation}\]</div>
 </div>
-<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-1">
-Unix (MacOS / Linux)</label><div class="sd-tab-content docutils">
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>my_venv<span class="w">  </span><span class="c1"># Create a virtual environment called 'my_venv'</span>
-<span class="nb">source</span><span class="w"> </span>my_venv/bin/activate<span class="w">  </span><span class="c1"># Activate the virtual environment</span>
-</pre></div>
+<p>Importantly, this conversion assumes that the models for which the amplitudes have been estimated are otherwise equal.</p>
+<p>Note that you can implement your own Gaussian models in prfmodel that use unnormalized densities
+(see the tutorial on <a class="reference internal" href="tutorials/tutorials/custom_models.html"><span class="std std-doc">custom models</span></a>).</p>
+</section>
+<section id="spatial-receptive-fields-are-not-normalized">
+<h2>Spatial receptive fields are not normalized<a class="headerlink" href="#spatial-receptive-fields-are-not-normalized" title="Link to this heading">¶</a></h2>
+<p>Some software packages normalize stimulus-encoded model responses of spatial models by the
+size of the cells in the spatial grid. For example, for the Gaussian 2D pRF model in visual space, the stimulus-encoded
+response can be normalized as follows:</p>
+<div class="math-wrapper amsmath docutils container" id="equation-ddda9be5-16f8-4ade-883b-d6fdb0936aad">
+<div class="amsmath math notranslate nohighlight" id="equation-ddda9be5-16f8-4ade-883b-d6fdb0936aad">
+<span class="eqno">(4)<a class="headerlink" href="#equation-ddda9be5-16f8-4ade-883b-d6fdb0936aad" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+r(t) = \sum_{xy} g(x, y) \cdot S(t, x, y) dA,
+\end{equation}\]</div>
 </div>
+<p>where <span class="math notranslate nohighlight">\(g(x, y)\)</span> is the Gaussian pRF tuning profile, <span class="math notranslate nohighlight">\(S(t, x, y)\)</span> is the stimulus design, and  <span class="math notranslate nohighlight">\(dA = dx dy\)</span> is the
+size of each cell in the grid. This normalization changes
+the scale and the interpretation of amplitude parameters, making them comparable across spatial grid resolutions.</p>
+<p>An alternative convention adopted by some software packages is to normalize spatial RFs (called tuning
+profiles in prfmodel) by their sum <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>. This makes the conflict between volume-normalized vs -unnormalized densities
+irrelevant and amplitudes comparable across grid cell sizes. Instead it ties amplitudes to the sizes of the spatial
+grid dimensions (e.g., width and height)<a class="footnote-reference brackets" href="#id5" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.</p>
+<p>However, normalization also leads to numerical issues when RFs are not covered by the
+stimulus grid because then their sum is zero. Moreover, because some spatial models have irregular-spaced
+one-hot-encoded grids (e.g., the Gaussian 1D pRF model in log numerosity space) and non-spatial models
+(e.g., the Gaussian connective field model) do not have an equivalent
+grid cell size or meaningful normalizations, we decided <strong>against</strong> normalizing spatial models in prfmodel.
+We also do not want to tie our model implementations to the spatial domain.</p>
+<p>This decision means that amplitude parameters are not comparable between different spatial grid resolutions (e.g.,
+upsampling a <span class="math notranslate nohighlight">\(128^2\)</span> to a <span class="math notranslate nohighlight">\(256^2\)</span> grid while keeping the overall width and height would shrink amplitude estimates
+by 4). However, for regular-spaced grids, it is possible to divide amplitudes by the grid cell size to make them
+comparable cross grid resolutions. The normalization does <strong>not</strong> affect the identifiability of model parameters.</p>
+</section>
+<section id="impulse-responses-are-normalized-when-they-describe-measurements">
+<h2>Impulse responses are normalized when they describe measurements<a class="headerlink" href="#impulse-responses-are-normalized-when-they-describe-measurements" title="Link to this heading">¶</a></h2>
+<p>The predicted responses of some impulse models (see <a class="reference internal" href="autoapi/prfmodel/impulse/index.html#module-prfmodel.impulse" title="prfmodel.impulse"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.impulse</span></code></a>) are normalized in prfmodel
+(sum-normalized by default, but other functions are possible <a class="footnote-reference brackets" href="#id6" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>). This is
+because they are used to describe the typical shape of the measurement of a neural response (e.g., the BOLD
+response in fMRI). These impulse responses are convolved with the response of a model that describes the behavior of a
+neuron population (e.g., a stimulus-encoded pRF response). Here, the sum-normalization decouples amplitude parameters
+from impulse response parameters (e.g., the shape of the gamma distribution), but it does <strong>not</strong> affect the
+identifiability of model parameters.</p>
+<p>It is possible to convert impulse-sum-normalized into impulse-unnormalized amplitudes:</p>
+<div class="math-wrapper amsmath docutils container" id="equation-aa7a5823-ea93-495c-8371-6d260798f156">
+<div class="amsmath math notranslate nohighlight" id="equation-aa7a5823-ea93-495c-8371-6d260798f156">
+<span class="eqno">(5)<a class="headerlink" href="#equation-aa7a5823-ea93-495c-8371-6d260798f156" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+\beta_\text{unnorm} = \beta_\text{norm} / \sum_t h_\text{unnorm}(t),
+\end{equation}\]</div>
 </div>
-</div>
-<p>prfmodel relies on <a class="reference external" href="https://keras.io/">Keras</a> to enable users to use different backends for model fitting.
-Currently, users can choose between three backends: TensorFlow, PyTorch, and JAX. If you don’t know which backend to
-choose, we recommend to start with TensorFlow. At least one backend must be installed to use prfmodel.</p>
-<p>To install the development version of prfmodel from the local clone of the repository with a backend:</p>
-<div class="sd-tab-set docutils">
-<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-2">
-Tensorflow</label><div class="sd-tab-content docutils">
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.<span class="o">[</span>tensorflow<span class="o">]</span>
-</pre></div>
-</div>
-</div>
-<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-3">
-PyTorch</label><div class="sd-tab-content docutils">
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.<span class="o">[</span>torch<span class="o">]</span>
-</pre></div>
-</div>
-</div>
-<input id="sd-tab-item-4" name="sd-tab-set-1" type="radio">
-<label class="sd-tab-label" for="sd-tab-item-4">
-JAX</label><div class="sd-tab-content docutils">
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>.<span class="o">[</span>jax<span class="o">]</span>
-</pre></div>
-</div>
-</div>
-</div>
-<p>The default backend in Keras is Tensorflow, but this can be changed by setting the <code class="docutils literal notranslate"><span class="pre">KERAS_BACKEND</span></code> environment
-variable, for example, at the beginning of a Python script or Jupyter notebook:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<p>where <span class="math notranslate nohighlight">\(h(t)\)</span> is the unnormalized impulse response.</p>
+<p>Some impulse models do not use any normalization by default because they are also used to describe neuron
+population behavior. For example, the compressive spatio-temporal pRF model uses transient and
+sustained impulse models to describe temporal neuron activation patterns.</p>
+</section>
+<section id="before-convolution-stimulus-encoded-model-responses-are-padded-with-their-first-frame">
+<h2>Before convolution, stimulus-encoded model responses are padded with their first frame<a class="headerlink" href="#before-convolution-stimulus-encoded-model-responses-are-padded-with-their-first-frame" title="Link to this heading">¶</a></h2>
+<p>To make sure that convolving stimulus-encoded model responses with impulse response returns model predictions for the
+same number of time frames as the stimulus design, we pad stimulus-encoded model responses with their first frame.
+Specifically, we first prepend the repeat the first stimulus-encoded response element for each element in the impulse
+response (minus 1) and then convolve both signals using discrete convolution.</p>
+<p>This choice rests on the assumption that the observed response at the first time frame is at baseline (i.e., resting
+state) which is commonly done in experiments by, for example, running dummy scans before real scans in fMRI
+experiments. Stimuli from previous runs in an experiment should not influence the recording of the response to the
+current stimulus.</p>
+</section>
+<section id="impulse-responses-must-have-the-same-sampling-rate-as-observed-responses">
+<h2>Impulse responses must have the same sampling rate as observed responses<a class="headerlink" href="#impulse-responses-must-have-the-same-sampling-rate-as-observed-responses" title="Link to this heading">¶</a></h2>
+<p>Discrete convolution assumes that the convolved signals have the same sampling rate. In prfmodel, the sampling rate
+of stimulus designs and observed neural responses is implicit. They are represented as series of time frames that
+contain a single TR (repetition time). To match the implicit sampling rate of observed responses, we need to provide
+the sampling rate explicitly to any impulse model that is convolved with stimulus-encoded model response so that the
+final model predictions that are compared against the observed neural responses have the same sampling rate. For
+a Gaussian 2D pRF model, this can be done by adding a custom impulse model:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.impulse</span><span class="w"> </span><span class="kn">import</span> <span class="n">DerivativeTwoGammaImpulse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian2DPRFModel</span>
 
-<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"KERAS_BACKEND"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"jax"</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">prfmodel</span>
+<span class="n">TR</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c1"># in seconds</span>
+
+<span class="c1"># Create a custom impulse model with the TR as resolution</span>
+<span class="n">impulse_model</span> <span class="o">=</span> <span class="n">DerivativeTwoGammaImpulse</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="n">TR</span><span class="p">)</span>
+
+<span class="c1"># Insert the custom impulse model into the canonical pRF model</span>
+<span class="n">prf_model</span> <span class="o">=</span> <span class="n">Gaussian2DPRFModel</span><span class="p">(</span>
+    <span class="n">impulse_model</span><span class="o">=</span><span class="n">impulse_model</span><span class="p">,</span>
+<span class="p">)</span>
 </pre></div>
 </div>
-<p><strong>Important</strong>: The backend must be set before importing prfmodel or keras.
-See the <a class="reference external" href="https://keras.io/getting_started/">Keras</a> documentation for details.</p>
+<p>This implementation might seem a bit cumbersome, however, it forces the user to think explicitly about the sampling
+rates used in the model and the experiment. It also becomes helpful as soon as different model components operate on
+different sampling rates that must be aligned with each other (e.g., in the compressive spatio-temporal pRF model).</p>
 </section>
-<section id="installing-dependencies-for-package-development">
-<h2>Installing dependencies for package development<a class="headerlink" href="#installing-dependencies-for-package-development" title="Link to this heading">¶</a></h2>
-<p>For those who want to contribute to the package development, you can make an editable install of the package and
-install all required additional dependencies via:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:popylar-org/prfmodel.git
-<span class="nb">cd</span><span class="w"> </span>prfmodel
-pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>dev<span class="o">]</span>
-</pre></div>
-</div>
+<section id="what-if-i-want-to-deviate-from-these-decisions">
+<h2>What if I want to deviate from these decisions?<a class="headerlink" href="#what-if-i-want-to-deviate-from-these-decisions" title="Link to this heading">¶</a></h2>
+<p>If you have good reasons to deviate from our decisions, you can implement your own models in prfmodel that use
+different conventions (see the tutorial on <a class="reference internal" href="tutorials/tutorials/custom_models.html"><span class="std std-doc">custom models</span></a>).</p>
 </section>
 </section>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="id4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Alternative spatial normalization functions (e.g., L2 norm) are possible but bring similar and sometimes even
+more problems.</p>
+</aside>
+<aside class="footnote brackets" id="id5" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>It is also possible to normalize the stimulus-encoded response which couples amplitudes to the stimulus
+design instead of the grid. This comes with similar problems as normalizing the RF.</p>
+</aside>
+<aside class="footnote brackets" id="id6" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
+<p>Normalizing by the L2 norm is actually numerically more stable (because it is never zero for signed impulse
+responses) but it also couples amplitudes to impulse model parameters.</p>
+</aside>
+</aside>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="getting_started.html">
+          <a class="next-page" href="tutorials/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Getting started</div>
+                <div class="title">Tutorials &amp; Examples</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="introduction.html">
+          <a class="prev-page" href="getting_started.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Introduction</div>
+                <div class="title">Getting started</div>
                 
               </div>
             </a>
@@ -581,9 +657,13 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Installation</a><ul>
-<li><a class="reference internal" href="#installing-the-development-version">Installing the development version</a></li>
-<li><a class="reference internal" href="#installing-dependencies-for-package-development">Installing dependencies for package development</a></li>
+<li><a class="reference internal" href="#">Important details</a><ul>
+<li><a class="reference internal" href="#gaussian-models-use-proper-probability-densities">Gaussian models use proper probability densities</a></li>
+<li><a class="reference internal" href="#spatial-receptive-fields-are-not-normalized">Spatial receptive fields are not normalized</a></li>
+<li><a class="reference internal" href="#impulse-responses-are-normalized-when-they-describe-measurements">Impulse responses are normalized when they describe measurements</a></li>
+<li><a class="reference internal" href="#before-convolution-stimulus-encoded-model-responses-are-padded-with-their-first-frame">Before convolution, stimulus-encoded model responses are padded with their first frame</a></li>
+<li><a class="reference internal" href="#impulse-responses-must-have-the-same-sampling-rate-as-observed-responses">Impulse responses must have the same sampling rate as observed responses</a></li>
+<li><a class="reference internal" href="#what-if-i-want-to-deviate-from-these-decisions">What if I want to deviate from these decisions?</a></li>
 </ul>
 </li>
 </ul>
@@ -602,5 +682,7 @@ pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </s
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=f281be69"></script>
     <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     </body>
 </html>

@@ -300,7 +300,7 @@ It assumes that the stimulus (a vertex in the distance matrix) elicits a respons
 Gaussian shape in two-dimensional cortical space. A baseline and amplitude parameter shift and scale
 the predicted response to match the observed BOLD response.
 
-The {py:class}`prfmodel.models.gaussian.GaussianCFModel` class performs these steps to make a combined prediction.
+The {py:class}`prfmodel.models.prf.GaussianCFModel` class performs these steps to make a combined prediction.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -309,7 +309,7 @@ from prfmodel.models.cf import GaussianCFModel
 cf_model = GaussianCFModel()
 ```
 
-The {py:class}`prfmodel.models.gaussian.GaussianCFModel` class requires two core parameters: `center_index` indicates the location of the CF in the
+The {py:class}`prfmodel.models.prf.GaussianCFModel` class requires two core parameters: `center_index` indicates the location of the CF in the
 source region. With the current CF implementation in prfmodel, this must be a vertex index in the distance matrix/source
 region. This means that the center of a CF must be a vertex on the surface mesh (i.e., it cannot be in between vertices).
 

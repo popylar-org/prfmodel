@@ -10,6 +10,11 @@ prfmodel.models.prf.Gaussian2DPRFTuning
    Predicts a neuron population tuning profile to a 2D stimulus grid.
    The model has three parameters: `mu_y` and `mu_x` for the center and `sigma` for the width of the Gaussian.
 
+   .. rubric:: Notes
+
+   This model predicts a proper Gaussian density that is normalized by its volume (so that it integrates to one).
+   This differs from other Gaussian pRF model implementations. See :doc:`Important details </important_details>`.
+
    .. rubric:: Examples
 
    Predict a tuning profile for a 2D stimulus grid.

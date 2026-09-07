@@ -44,6 +44,10 @@ prfmodel.models.prf.Gaussian2DCSTPRFModel
 
    .. rubric:: Notes
 
+   This model uses a proper Gaussian density that is normalized by its volume.
+   This differs from other Gaussian pRF model implementations. See
+   :doc:`Important details </important_details>`.
+
    Two deliberate differences from the reference:
 
    - **Sampling** — see the warning above.

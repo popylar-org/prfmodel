@@ -10,6 +10,11 @@ prfmodel.models.prf.PRFStimulusEncoder
    Multiplies a stimulus design with a population receptive field model response along the
    stimulus dimensions and sums over them.
 
+   .. rubric:: Notes
+
+   This encoding model does **not** normalize the stimulus-encoded response by the cell size of the stimulus grid.
+   See :doc:`Important details </important_details>`.
+
    .. seealso:: :py:obj:`encode_prf_response`
 
 
