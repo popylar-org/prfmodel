@@ -204,11 +204,11 @@ class TestKernelSampleSpacing:
         double_precision_limit = 1e-12
         single_precision_floor = 1e-9
 
-        # 0.1 s rather than a binary fraction: with `resolution=0.5` and no offset every bin centre
-        # (0.25, 0.75, ...) is exactly representable in float32, so the two dtypes agree and the
+        # 0.1 s rather than a binary fraction: with `resolution=0.5` and no offset every frame time
+        # (0.0, 0.5, 1.0, ...) is exactly representable in float32, so the two dtypes agree and the
         # second assertion below has nothing to catch.
         model = TwoGammaImpulse(duration=DURATION, resolution=0.1)
-        exact = (np.arange(model.num_frames) + 0.5) * 0.1 + model.offset
+        exact = np.arange(model.num_frames) * 0.1 + model.offset
 
         as_32 = np.asarray(model.get_frames("float32")).ravel()
         as_64 = np.asarray(model.get_frames("float64")).ravel()
@@ -226,9 +226,9 @@ class TestKernelSampleSpacing:
 
         """
         oversampling = 100
-        # Taken from half a step in, so nilearn is read at the bin centres prfmodel samples at
-        # (0.5 s, 1.5 s, ...) rather than at the bin edges.
-        reference = spm_hrf(t_r=1.0, oversampling=oversampling, time_length=DURATION)[oversampling // 2 :: oversampling]
+        # Taken from index 0, because both libraries sample the leading edge of each frame
+        # (0 s, 1 s, ...). nilearn's first sample is exactly zero, as prfmodel's is.
+        reference = spm_hrf(t_r=1.0, oversampling=oversampling, time_length=DURATION)[::oversampling]
 
         model = TwoGammaImpulse(duration=DURATION, resolution=1.0, norm="sum", default_parameters="spm_hrf")
         observed = np.asarray(model(pd.DataFrame(index=range(1)), dtype="float64"))[0]
@@ -236,7 +236,7 @@ class TestKernelSampleSpacing:
         num_samples = min(len(observed), len(reference))
         observed, reference = _normalize(observed[:num_samples]), _normalize(reference[:num_samples])
 
-        # Tolerance sits between the two regimes: the correctly sampled kernel agrees to ~6e-3 of
+        # Tolerance sits between the two regimes: the correctly sampled kernel agrees to ~3.5e-3 of
         # peak (nilearn's own time-axis layout, see validation/compare_prfpy.py), a kernel
         # mis-sampled by one step is off by ~6e-2.
         np.testing.assert_allclose(observed, reference, atol=2e-2)

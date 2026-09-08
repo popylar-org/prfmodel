@@ -60,6 +60,17 @@ def _gaussian_params() -> pd.DataFrame:
     )
 
 
+def _pass_through_sustained_channel() -> SustainedImpulse:
+    """Return a sustained channel that convolves to a delta, so CST reduces to its compressive stage.
+
+    A length-one kernel is a delta once it is sum-normalized, whatever its single value. The `offset`
+    is what makes it non-zero: frames are sampled at their leading edge, so without it the only frame
+    would sit at `t = 0`, where the gamma density is zero and the normalization would divide by zero.
+
+    """
+    return SustainedImpulse(duration=1.0, offset=1.0, resolution=1.0, norm="sum")
+
+
 class TestReductionToGaussian(PRFStimulusSetup):
     """Tests that each derived model reduces to the plain Gaussian when its extra stage is disabled.
 
@@ -146,7 +157,8 @@ class TestReductionToGaussian(PRFStimulusSetup):
                 "mu_y": MU_Y,
                 "mu_x": MU_X,
                 "sigma": SIGMA,
-                # Irrelevant here: a length-one kernel is a delta whatever its peak time would have been.
+                # Irrelevant here: a length-one sum-normalized kernel is a delta whatever its peak
+                # time would have been.
                 "time_to_peak": [4.0, 5.0],
                 "n": [1.0, 1.0],
                 "amplitude_sustained": AMPLITUDE,
@@ -156,7 +168,7 @@ class TestReductionToGaussian(PRFStimulusSetup):
             },
         )
         prf_model = Gaussian2DCSTPRFModel(
-            sustained_model=SustainedImpulse(duration=1.0, resolution=1.0, norm="sum"),
+            sustained_model=_pass_through_sustained_channel(),
         )
 
         observed = np.asarray(prf_model(stimulus, params, dtype="float64"))
@@ -182,7 +194,7 @@ class TestReductionToGaussian(PRFStimulusSetup):
         )
 
         prf_model = Gaussian2DCSTPRFModel(
-            sustained_model=SustainedImpulse(duration=1.0, resolution=1.0, norm="sum"),
+            sustained_model=_pass_through_sustained_channel(),
         )
 
         observed = np.asarray(prf_model(stimulus, cst_params, dtype="float64"))

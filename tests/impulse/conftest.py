@@ -74,6 +74,25 @@ class TestImpulseSetup(ABC):
         with pytest.raises(ValueError, match=match):
             irf_model.__class__(**kwargs)
 
+    def test_response_is_zero_at_time_zero(self, irf_model: BaseImpulse, parameters: pd.DataFrame):
+        """Test that the kernel carries no instantaneous response at lag 0.
+
+        The support starts at zero, except for a model with a `shift` parameter, which moves it -- a
+        negative `shift` legitimately puts mass at `t = 0`, so those units are excluded.
+
+        """
+        model = irf_model.__class__(offset=0.0, resolution=self.resolution, norm=None)
+
+        assert np.asarray(model.get_frames())[0, 0] == 0.0
+
+        causal = (
+            (parameters["shift"].to_numpy() >= 0.0) if "shift" in parameters.columns else np.ones(len(parameters), bool)
+        )
+        resp = np.asarray(model(parameters))
+
+        assert causal.any(), "at least one unit should have its support at or above zero"
+        assert np.all(resp[causal, 0] == 0.0)
+
     def test_negative_offset_is_allowed(self, irf_model: BaseImpulse, parameters: pd.DataFrame):
         """Test that a negative offset is accepted and produces a finite response.
 
@@ -83,7 +102,7 @@ class TestImpulseSetup(ABC):
         """
         model = irf_model.__class__(offset=-5.0, resolution=1.0, norm=None)
 
-        assert np.asarray(model.get_frames())[0, 0] == pytest.approx(-4.5)
+        assert np.asarray(model.get_frames())[0, 0] == pytest.approx(-5.0)
 
         resp = np.asarray(model(parameters))
 

@@ -71,21 +71,17 @@ class BaseImpulse(ModelProtocol):
     models. Subclasses must override the abstract :attr:`parameter_names` property and the :meth:`call`
     method.
 
-    `duration` and `resolution` must be positive, checked once at construction. `offset` is
-    unconstrained and may be negative: the densities are zero below their support, so frames at or below
-    zero contribute zero. A negative `offset` therefore gives the kernel leading zeros, which delays the
-    convolved response by `-offset / resolution` frames without changing a `"sum"` normalization. Note
-    that `num_frames` is derived from `duration` alone, so a negative `offset` shifts the sampling
-    window rather than widening it, and the far tail of the response is truncated by the same amount.
-
-    Each frame is sampled at the centre of the interval it stands for, not at its leading edge: frame
-    `i` covers `[offset + i * resolution, offset + (i + 1) * resolution)` and is evaluated at its
-    midpoint, `offset + (i + 0.5) * resolution`. A sample represents the whole interval, and it keeps
-    `t = 0` off the axis. At the defaults that is 32 samples centred at 0.5, 1.5, ..., 31.5 seconds.
+    Each frame is sampled at its leading edge: frame `i` is the point sample `offset + i * resolution`.
+    At the defaults that is 32 samples at t = 0, 1, ..., 31 seconds. See :doc:`Important details </important_details>`.
 
     `duration` is an upper bound: the time frames array holds `num_frames = int(duration / resolution)` samples
     spaced exactly `resolution` apart, so it ends at the last whole sample at or below `duration` rather than at
     `duration` itself.
+
+    `duration` and `resolution` must be positive, checked once at construction. `offset` is
+    unconstrained and may be negative. Note that `num_frames` is derived from `duration` alone,
+    so a negative `offset` shifts the sampling window rather than widening it, and the far tail of the
+    response is truncated by the same amount.
 
     """
 
@@ -168,7 +164,7 @@ class BaseImpulse(ModelProtocol):
         -------
         :data:`prfmodel.typing.Tensor`
             Time frames of shape `(1, num_frames)` and dtype `dtype`. The first frame is at
-            `offset + resolution / 2` and frames are spaced `resolution` apart.
+            `offset` and frames are spaced `resolution` apart.
 
         Notes
         -----
@@ -180,7 +176,7 @@ class BaseImpulse(ModelProtocol):
 
         if dtype not in self._frames:
             steps = np.arange(self.num_frames, dtype=dtype)
-            self._frames[dtype] = np.expand_dims(steps * self.resolution + self.resolution / 2 + self.offset, 0)
+            self._frames[dtype] = np.expand_dims(steps * self.resolution + self.offset, 0)
 
         return ops.convert_to_tensor(self._frames[dtype], dtype=dtype)
 

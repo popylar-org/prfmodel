@@ -89,18 +89,6 @@ Some impulse models do not use any normalization by default because they are als
 population behavior. For example, the compressive spatio-temporal pRF model uses transient and
 sustained impulse models to describe temporal neuron activation patterns.
 
-## Before convolution, stimulus-encoded model responses are padded with their first frame
-
-To make sure that convolving stimulus-encoded model responses with impulse response returns model predictions for the
-same number of time frames as the stimulus design, we pad stimulus-encoded model responses with their first frame.
-Specifically, we first prepend the repeat the first stimulus-encoded response element for each element in the impulse
-response (minus 1) and then convolve both signals using discrete convolution.
-
-This choice rests on the assumption that the observed response at the first time frame is at baseline (i.e., resting
-state) which is commonly done in experiments by, for example, running dummy scans before real scans in fMRI
-experiments. Stimuli from previous runs in an experiment should not influence the recording of the response to the
-current stimulus.
-
 ## Impulse responses must have the same sampling rate as observed responses
 
 Discrete convolution assumes that the convolved signals have the same sampling rate. In prfmodel, the sampling rate
@@ -129,6 +117,53 @@ prf_model = Gaussian2DPRFModel(
 This implementation might seem a bit cumbersome, however, it forces the user to think explicitly about the sampling
 rates used in the model and the experiment. It also becomes helpful as soon as different model components operate on
 different sampling rates that must be aligned with each other (e.g., in the compressive spatio-temporal pRF model).
+
+## Impulse responses are sampled at the leading edge of each time frame
+
+prfmodel assumes that the TR of observed neural timecourses is **locked to the onset of a stimulus design frame**
+(e.g., BOLD measurements in fMRI have been slice-time corrected). This implies that time frames of
+observed neural timecourses represent instantaneous measurements of brain activity at each TR
+(not averages over an interval).
+
+Without any up- or downsampling, stimulus design frame $i$, observed sample $i$ and impulse response frame $i$ all
+refer to the time $i \cdot \text{TR}$. We therefore sample impulse responses at the **leading edge** of each frame.
+
+With the default `offset` of zero, the first sample of the kernel is at $t=0$, and the default impulse model
+{py:class}`~prfmodel.impulseDerivativeTwoGammaImpulse` returns exactly zero there. Discrete convolution in prfmodel
+treats the first frame of the impulse response as lag 0, so an impulse response of zero means that a stimulus cannot
+contribute to the observed neural response during its exact onset (which is biologically plausible).
+
+The leading-edge sampling assumption can be changed by setting a positive offset in the impulse model. For example, for
+mid-frame sampling (i.e., response measurements align with the *center* of a stimulus design frame), specify the
+offset as `TR/2.0`:
+
+```python
+from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.models.prf import Gaussian2DPRFModel
+
+
+TR = 1.5  # in seconds
+
+# Create a custom impulse model with the TR as resolution and a positive offset
+impulse_model = DerivativeTwoGammaImpulse(resolution=TR, offset=TR / 2.0)
+
+# Insert the custom impulse model into the canonical pRF model
+prf_model = Gaussian2DPRFModel(
+    impulse_model=impulse_model,
+)
+```
+
+## Before convolution, stimulus-encoded model responses are padded with their first frame
+
+To make sure that convolving stimulus-encoded model responses with impulse response returns model predictions for the
+same number of time frames as the stimulus design, we pad stimulus-encoded model responses with their first frame.
+Specifically, we first prepend the repeat the first stimulus-encoded response element for each element in the impulse
+response (minus 1) and then convolve both signals using discrete convolution.
+
+This choice rests on the assumption that the observed response at the first time frame is at baseline (i.e., resting
+state) which is commonly done in experiments by, for example, running dummy scans before real scans in fMRI
+experiments. Stimuli from previous runs in an experiment should not influence the recording of the response to the
+current stimulus.
 
 ## What if I want to deviate from these decisions?
 
