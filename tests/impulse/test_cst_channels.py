@@ -15,7 +15,7 @@ class TestSustainedImpulsePeak:
     def test_response_peaks_at_time_to_peak(self, time_to_peak: float):
         """Test that the sustained response peaks at `time_to_peak` seconds."""
         resolution = 0.001
-        irf_model = SustainedImpulse(duration=2.0, resolution=resolution, norm=None)
+        irf_model = SustainedImpulse(duration=2.0, resolution=resolution)
 
         resp = np.asarray(irf_model(pd.DataFrame({"time_to_peak": [time_to_peak]})))
         peak_time = np.asarray(irf_model.get_frames())[0, resp.argmax()]
@@ -38,7 +38,7 @@ class TestTransientImpulseShape:
     @pytest.fixture
     def transient(self, parameters: pd.DataFrame):
         """Transient impulse response of a single unit."""
-        irf_model = TransientImpulse(duration=self.duration, resolution=self.resolution, norm=None)
+        irf_model = TransientImpulse(duration=self.duration, resolution=self.resolution)
 
         return np.asarray(irf_model(parameters))[0]
 
@@ -64,8 +64,8 @@ class TestTransientImpulseShape:
         forward in time relative to the sustained channel.
 
         """
-        transient_model = TransientImpulse(duration=self.duration, resolution=self.resolution, norm=None)
-        sustained_model = SustainedImpulse(duration=self.duration, resolution=self.resolution, norm=None)
+        transient_model = TransientImpulse(duration=self.duration, resolution=self.resolution)
+        sustained_model = SustainedImpulse(duration=self.duration, resolution=self.resolution)
 
         transient = np.asarray(transient_model(parameters))[0]
         sustained = np.asarray(sustained_model(parameters))[0]
@@ -74,7 +74,7 @@ class TestTransientImpulseShape:
 
     def test_inhibitory_component_peaks_later_than_excitatory(self, parameters: pd.DataFrame):
         """Test that the inhibitory lobe peaks at the ratio the reference prescribes."""
-        irf_model = TransientImpulse(duration=self.duration, resolution=self.resolution, norm=None)
+        irf_model = TransientImpulse(duration=self.duration, resolution=self.resolution)
         frames = np.asarray(irf_model.get_frames())[0]
         transient = np.asarray(irf_model(parameters))[0]
 
@@ -87,23 +87,6 @@ class TestTransientImpulseShape:
 
 class TestTransientImpulseNormalization:
     """`norm` must be left at None for the transient channel."""
-
-    def test_sum_normalization_silently_amplifies_the_kernel(self):
-        """Test that `norm="sum"` blows the transient kernel up instead of raising or warning.
-
-        The two gamma components each integrate to one, so their difference sums to a value near zero that is
-        not exactly zero. `normalize_response` only warns when the norm is exactly zero, so dividing by that
-        residual passes silently while scaling the kernel by orders of magnitude. This is the reason `norm`
-        defaults to None here, and the reason this behaviour is pinned rather than left to be rediscovered.
-
-        """
-        parameters = pd.DataFrame({"time_to_peak": [5.0]})
-
-        unnormalized = np.asarray(TransientImpulse(norm=None)(parameters))
-        normalized = np.asarray(TransientImpulse(norm="sum")(parameters))
-
-        assert unnormalized.sum() != 0.0
-        assert np.abs(normalized).max() > 100 * np.abs(unnormalized).max()
 
     def test_default_norm_is_none(self):
         """Test that the transient channel is unnormalized by default."""
@@ -124,7 +107,7 @@ class TestChannelsAreUnitWise:
 
         """
         time_to_peak = [4.0, 6.0, 8.0]
-        irf_model = impulse_class(duration=32.0, resolution=0.5, norm=None)
+        irf_model = impulse_class(duration=32.0, resolution=0.5)
 
         resp = np.asarray(irf_model(pd.DataFrame({"time_to_peak": time_to_peak})))
 
@@ -137,7 +120,7 @@ class TestChannelsAreUnitWise:
 class TestSustainedImpulse(TestImpulseSetup):
     """Shared impulse model tests for SustainedImpulse."""
 
-    norm = "sum"
+    norm = None
 
     @pytest.fixture
     def parameters(self):
@@ -152,12 +135,12 @@ class TestSustainedImpulse(TestImpulseSetup):
     @pytest.fixture
     def irf_model(self):
         """Impulse model object."""
-        return SustainedImpulse(self.duration, self.offset, self.resolution, self.norm)
+        return SustainedImpulse(self.duration, self.offset, self.resolution)
 
     @pytest.fixture
     def irf_model_default(self):
         """Impulse model object with default parameters."""
-        return SustainedImpulse(self.duration, self.offset, self.resolution, self.norm, {"time_to_peak": 6.0})
+        return SustainedImpulse(self.duration, self.offset, self.resolution, {"time_to_peak": 6.0})
 
 
 class TestTransientImpulse(TestImpulseSetup):
@@ -173,9 +156,9 @@ class TestTransientImpulse(TestImpulseSetup):
     @pytest.fixture
     def irf_model(self):
         """Impulse model object."""
-        return TransientImpulse(self.duration, self.offset, self.resolution, self.norm)
+        return TransientImpulse(self.duration, self.offset, self.resolution)
 
     @pytest.fixture
     def irf_model_default(self):
         """Impulse model object with default parameters."""
-        return TransientImpulse(self.duration, self.offset, self.resolution, self.norm, {"time_to_peak": 6.0})
+        return TransientImpulse(self.duration, self.offset, self.resolution, {"time_to_peak": 6.0})

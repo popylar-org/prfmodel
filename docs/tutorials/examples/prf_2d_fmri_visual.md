@@ -344,8 +344,8 @@ from prfmodel.models.prf import Gaussian2DPRFModel
 # Define repetition time (TR)
 tr = 1.5
 
-# Create custom impulse model. Each frame is sampled at the centre of the interval it
-# represents, so the first frame already sits at half a TR and no offset is needed.
+# Create custom impulse model. Each frame is sampled at its leading edge, so the first
+# frame sits at t = 0 (where the response is zero) and no offset is needed.
 impulse_model = DerivativeTwoGammaImpulse(resolution=tr)
 ```
 

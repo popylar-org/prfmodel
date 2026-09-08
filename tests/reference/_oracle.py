@@ -42,6 +42,20 @@ def encode(receptive_field: np.ndarray, design: np.ndarray) -> np.ndarray:
     return np.einsum("hw,thw->t", receptive_field, design)
 
 
+def _gamma_derivative(density: np.ndarray, frames: np.ndarray, shape: float, scale: float) -> np.ndarray:
+    """Return `d/dt gamma.pdf(t)`, which is zero at or below zero where the density is.
+
+    The analytic form divides by `t`, so the frame at `t = 0` -- which leading-edge sampling always
+    puts on the axis -- would give `0 * inf`. The density is zero off its support, so the derivative
+    is too; the division is evaluated on a substituted value and then discarded.
+
+    """
+    on_support = frames > 0.0
+    safe_frames = np.where(on_support, frames, 1.0)
+
+    return np.where(on_support, density * ((shape - 1.0) / safe_frames - 1.0 / scale), 0.0)
+
+
 def hrf_kernel(frames: np.ndarray, params: pd.Series) -> np.ndarray:
     """Return the derivative-of-two-gammas HRF, normalized to unit sum.
 
@@ -54,8 +68,8 @@ def hrf_kernel(frames: np.ndarray, params: pd.Series) -> np.ndarray:
     density_1 = stats.gamma.pdf(frames, a=shape_1, scale=scale_1)
     density_2 = stats.gamma.pdf(frames, a=shape_2, scale=scale_2)
 
-    derivative_1 = density_1 * ((shape_1 - 1.0) / frames - 1.0 / scale_1)
-    derivative_2 = density_2 * ((shape_2 - 1.0) / frames - 1.0 / scale_2)
+    derivative_1 = _gamma_derivative(density_1, frames, shape_1, scale_1)
+    derivative_2 = _gamma_derivative(density_2, frames, shape_2, scale_2)
 
     kernel = (density_1 - params["ratio"] * density_2) - params["weight_deriv"] * (
         derivative_1 - params["ratio"] * derivative_2
@@ -67,14 +81,15 @@ def hrf_kernel(frames: np.ndarray, params: pd.Series) -> np.ndarray:
 def impulse_frames(duration: float = 32.0, resolution: float = 1.0, offset: float = 0.0) -> np.ndarray:
     """Return the time axis the HRF is sampled on, built independently of `BaseImpulse`.
 
-    Each sample sits at the centre of the `resolution`-wide bin it represents, so the axis starts at
-    `offset + resolution / 2` and is spaced exactly `resolution` apart, with `duration` acting as an
-    upper bound rounded down to whole samples. Sampling at bin centres rather than at their left edges
-    keeps `t = 0` off the axis, where the gamma density is undefined for shape parameters below one.
-    Deriving this here rather than reading it off the impulse model means a regression in the model's
-    sampling grid shows up in the recovery tests too, not only in `tests/reference/test_hrf.py`.
+    Each sample sits at the leading edge of the `resolution`-wide frame it represents, so the axis
+    starts at `offset` and is spaced exactly `resolution` apart, with `duration` acting as an upper
+    bound rounded down to whole samples. Leading-edge sampling is what the package assumes throughout:
+    the data are slice-time corrected and each TR is locked to a stimulus design frame onset, so the
+    kernel starts at `h(0) = 0` and is causal. Deriving this here rather than reading it off the
+    impulse model means a regression in the model's sampling grid shows up in the recovery tests too,
+    not only in `tests/reference/test_hrf.py`.
     """
-    return (np.arange(int(duration / resolution)) + 0.5) * resolution + offset
+    return np.arange(int(duration / resolution)) * resolution + offset
 
 
 def convolve(response: np.ndarray, kernel: np.ndarray) -> np.ndarray:
