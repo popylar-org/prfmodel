@@ -470,19 +470,15 @@ the <a class="reference internal" href="#prfmodel.impulse.base.BaseImpulse.__cal
 <p>This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
 models. Subclasses must override the abstract <a class="reference internal" href="#prfmodel.impulse.base.BaseImpulse.parameter_names" title="prfmodel.impulse.base.BaseImpulse.parameter_names"><code class="xref py py-attr docutils literal notranslate"><span class="pre">parameter_names</span></code></a> property and the <a class="reference internal" href="#prfmodel.impulse.base.BaseImpulse.call" title="prfmodel.impulse.base.BaseImpulse.call"><code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code></a>
 method.</p>
-<p><cite>duration</cite> and <cite>resolution</cite> must be positive, checked once at construction. <cite>offset</cite> is
-unconstrained and may be negative: the densities are zero below their support, so frames at or below
-zero contribute zero. A negative <cite>offset</cite> therefore gives the kernel leading zeros, which delays the
-convolved response by <cite>-offset / resolution</cite> frames without changing a <cite>“sum”</cite> normalization. Note
-that <cite>num_frames</cite> is derived from <cite>duration</cite> alone, so a negative <cite>offset</cite> shifts the sampling
-window rather than widening it, and the far tail of the response is truncated by the same amount.</p>
-<p>Each frame is sampled at the centre of the interval it stands for, not at its leading edge: frame
-<cite>i</cite> covers <cite>[offset + i * resolution, offset + (i + 1) * resolution)</cite> and is evaluated at its
-midpoint, <cite>offset + (i + 0.5) * resolution</cite>. A sample represents the whole interval, and it keeps
-<cite>t = 0</cite> off the axis. At the defaults that is 32 samples centred at 0.5, 1.5, …, 31.5 seconds.</p>
+<p>Each frame is sampled at its leading edge: frame <cite>i</cite> is the point sample <cite>offset + i * resolution</cite>.
+At the defaults that is 32 samples at t = 0, 1, …, 31 seconds. See <a class="reference internal" href="../../../../important_details.html"><span class="doc">Important details</span></a>.</p>
 <p><cite>duration</cite> is an upper bound: the time frames array holds <cite>num_frames = int(duration / resolution)</cite> samples
 spaced exactly <cite>resolution</cite> apart, so it ends at the last whole sample at or below <cite>duration</cite> rather than at
 <cite>duration</cite> itself.</p>
+<p><cite>duration</cite> and <cite>resolution</cite> must be positive, checked once at construction. <cite>offset</cite> is
+unconstrained and may be negative. Note that <cite>num_frames</cite> is derived from <cite>duration</cite> alone,
+so a negative <cite>offset</cite> shifts the sampling window rather than widening it, and the far tail of the
+response is truncated by the same amount.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="prfmodel.impulse.base.BaseImpulse.__call__">
 <span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.5)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">numpy.ndarray</span></a></span></span><a class="headerlink" href="#prfmodel.impulse.base.BaseImpulse.__call__" title="Link to this definition">¶</a></dt>
@@ -597,7 +593,7 @@ for different units.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Time frames of shape <cite>(1, num_frames)</cite> and dtype <cite>dtype</cite>. The first frame is at
-<cite>offset + resolution / 2</cite> and frames are spaced <cite>resolution</cite> apart.</p>
+<cite>offset</cite> and frames are spaced <cite>resolution</cite> apart.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><code class="xref py py-data docutils literal notranslate"><span class="pre">prfmodel.typing.Tensor</span></code></a></p>

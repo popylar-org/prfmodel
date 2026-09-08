@@ -161,7 +161,7 @@ prfmodel.impulse.ShiftedGammaImpulse
       :type dtype: str, optional
 
       :returns: Time frames of shape `(1, num_frames)` and dtype `dtype`. The first frame is at
-                `offset + resolution / 2` and frames are spaced `resolution` apart.
+                `offset` and frames are spaced `resolution` apart.
       :rtype: :data:`prfmodel.typing.Tensor`
 
       .. rubric:: Notes

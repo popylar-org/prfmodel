@@ -452,23 +452,23 @@ we describe the choices that affect <strong>users</strong> directly in this sect
 <h2>Gaussian models use proper probability densities<a class="headerlink" href="#gaussian-models-use-proper-probability-densities" title="Link to this heading">¶</a></h2>
 <p>Some software packages that implement Gaussian population receptive field (pRF) models use unnormalized Gaussian
 densities to predict tuning profiles. That is, they use the density:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-f8503fe0-37fe-45ad-9819-820e56fc8cec">
-<div class="amsmath math notranslate nohighlight" id="equation-f8503fe0-37fe-45ad-9819-820e56fc8cec">
-<span class="eqno">(1)<a class="headerlink" href="#equation-f8503fe0-37fe-45ad-9819-820e56fc8cec" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-8dce0d85-c0cf-44e5-bd81-6ee5516154d4">
+<div class="amsmath math notranslate nohighlight" id="equation-8dce0d85-c0cf-44e5-bd81-6ee5516154d4">
+<span class="eqno">(1)<a class="headerlink" href="#equation-8dce0d85-c0cf-44e5-bd81-6ee5516154d4" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 f(x) = e^{-\frac{\lVert x - \mu \rVert^2}{2 \sigma^2}},
 \end{equation}\]</div>
 </div>
 <p>that has a peak amplitude of <span class="math notranslate nohighlight">\(\max(f(x)) = 1\)</span>. Although this parameterization has advantages in some situations,
 we decided that all Gaussian models in prfmodel use proper densities that are normalized by their
 volume (see <a class="reference internal" href="autoapi/prfmodel/density/normal_density.html#prfmodel.density.normal_density" title="prfmodel.density.normal_density"><code class="xref py py-func docutils literal notranslate"><span class="pre">normal_density()</span></code></a>):</p>
-<div class="math-wrapper amsmath docutils container" id="equation-4adf6c77-e599-42ca-9ef1-e758778faf1d">
-<div class="amsmath math notranslate nohighlight" id="equation-4adf6c77-e599-42ca-9ef1-e758778faf1d">
-<span class="eqno">(2)<a class="headerlink" href="#equation-4adf6c77-e599-42ca-9ef1-e758778faf1d" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-4176de4e-c7ce-42f6-a7bd-363f0e8511d4">
+<div class="amsmath math notranslate nohighlight" id="equation-4176de4e-c7ce-42f6-a7bd-363f0e8511d4">
+<span class="eqno">(2)<a class="headerlink" href="#equation-4176de4e-c7ce-42f6-a7bd-363f0e8511d4" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 f(x) = \frac{1}{V} e^{-\frac{\lVert x - \mu \rVert^2}{2 \sigma^2}},
 \end{equation}\]</div>
 </div>
 <p>where <span class="math notranslate nohighlight">\(V = (2 \pi \sigma^2)^{k / 2}\)</span> is the volume and <span class="math notranslate nohighlight">\(k\)</span> is the number of dimensions of the tuning profile.
-The proper density has a peak amplitude of <span class="math notranslate nohighlight">\(\max(f(x)) = \frac{1}{V}\)</span>.</p>
+The proper density has a peak amplitude of <span class="math notranslate nohighlight">\(\max(f(x)) = 1/V\)</span>.</p>
 <p>The proper Gaussian density has the advantage that it decouples amplitude parameters from pRF size/tuning width
 parameters <span class="math notranslate nohighlight">\(\sigma\)</span>, making it easier to interpret (although amplitudes are often treated as nuisance parameters). It
 also leads to larger amplitude estimates and stimulus-encoded model responses. However, it does <strong>not</strong> change the
@@ -479,10 +479,10 @@ for the Gaussian 1D and 2D pRF models but also for difference of Gaussian and Ga
 models as well as Gaussian connective field models.</p>
 <p>It is possible to convert the amplitudes estimated with the proper density into those estimated with unnormalized
 density by dividing by the volume:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-76ad6663-4aa3-4969-9f86-b1067d332fa3">
-<div class="amsmath math notranslate nohighlight" id="equation-76ad6663-4aa3-4969-9f86-b1067d332fa3">
-<span class="eqno">(3)<a class="headerlink" href="#equation-76ad6663-4aa3-4969-9f86-b1067d332fa3" title="Permalink to this equation">¶</a></span>\[\begin{equation}
-\beta_\text{unnorm} = \beta_\text{norm} / V.
+<div class="math-wrapper amsmath docutils container" id="equation-aa0daf89-ae1b-40af-8532-b99d1a120906">
+<div class="amsmath math notranslate nohighlight" id="equation-aa0daf89-ae1b-40af-8532-b99d1a120906">
+<span class="eqno">(3)<a class="headerlink" href="#equation-aa0daf89-ae1b-40af-8532-b99d1a120906" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+\beta_\text{unnorm} = \frac{\beta_\text{norm}}{V}.
 \end{equation}\]</div>
 </div>
 <p>Importantly, this conversion assumes that the models for which the amplitudes have been estimated are otherwise equal.</p>
@@ -494,9 +494,9 @@ density by dividing by the volume:</p>
 <p>Some software packages normalize stimulus-encoded model responses of spatial models by the
 size of the cells in the spatial grid. For example, for the Gaussian 2D pRF model in visual space, the stimulus-encoded
 response can be normalized as follows:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-ddda9be5-16f8-4ade-883b-d6fdb0936aad">
-<div class="amsmath math notranslate nohighlight" id="equation-ddda9be5-16f8-4ade-883b-d6fdb0936aad">
-<span class="eqno">(4)<a class="headerlink" href="#equation-ddda9be5-16f8-4ade-883b-d6fdb0936aad" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-c44b7d58-0952-4d37-a821-c6ed8442be13">
+<div class="amsmath math notranslate nohighlight" id="equation-c44b7d58-0952-4d37-a821-c6ed8442be13">
+<span class="eqno">(4)<a class="headerlink" href="#equation-c44b7d58-0952-4d37-a821-c6ed8442be13" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 r(t) = \sum_{xy} g(x, y) \cdot S(t, x, y) dA,
 \end{equation}\]</div>
 </div>
@@ -504,7 +504,7 @@ r(t) = \sum_{xy} g(x, y) \cdot S(t, x, y) dA,
 size of each cell in the grid. This normalization changes
 the scale and the interpretation of amplitude parameters, making them comparable across spatial grid resolutions.</p>
 <p>An alternative convention adopted by some software packages is to normalize spatial RFs (called tuning
-profiles in prfmodel) by their sum <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>. This makes the conflict between volume-normalized vs -unnormalized densities
+profiles in prfmodel) by their sum<a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>. This makes the conflict between volume-normalized vs -unnormalized densities
 irrelevant and amplitudes comparable across grid cell sizes. Instead it ties amplitudes to the sizes of the spatial
 grid dimensions (e.g., width and height)<a class="footnote-reference brackets" href="#id5" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.</p>
 <p>However, normalization also leads to numerical issues when RFs are not covered by the
@@ -521,34 +521,23 @@ comparable cross grid resolutions. The normalization does <strong>not</strong> a
 <section id="impulse-responses-are-normalized-when-they-describe-measurements">
 <h2>Impulse responses are normalized when they describe measurements<a class="headerlink" href="#impulse-responses-are-normalized-when-they-describe-measurements" title="Link to this heading">¶</a></h2>
 <p>The predicted responses of some impulse models (see <a class="reference internal" href="autoapi/prfmodel/impulse/index.html#module-prfmodel.impulse" title="prfmodel.impulse"><code class="xref py py-mod docutils literal notranslate"><span class="pre">prfmodel.impulse</span></code></a>) are normalized in prfmodel
-(sum-normalized by default, but other functions are possible <a class="footnote-reference brackets" href="#id6" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>). This is
+(sum-normalized by default, but other functions are possible<a class="footnote-reference brackets" href="#id6" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>). This is
 because they are used to describe the typical shape of the measurement of a neural response (e.g., the BOLD
 response in fMRI). These impulse responses are convolved with the response of a model that describes the behavior of a
 neuron population (e.g., a stimulus-encoded pRF response). Here, the sum-normalization decouples amplitude parameters
 from impulse response parameters (e.g., the shape of the gamma distribution), but it does <strong>not</strong> affect the
 identifiability of model parameters.</p>
 <p>It is possible to convert impulse-sum-normalized into impulse-unnormalized amplitudes:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-aa7a5823-ea93-495c-8371-6d260798f156">
-<div class="amsmath math notranslate nohighlight" id="equation-aa7a5823-ea93-495c-8371-6d260798f156">
-<span class="eqno">(5)<a class="headerlink" href="#equation-aa7a5823-ea93-495c-8371-6d260798f156" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-0be93bb2-8349-4d7b-80da-f70c5bae8a74">
+<div class="amsmath math notranslate nohighlight" id="equation-0be93bb2-8349-4d7b-80da-f70c5bae8a74">
+<span class="eqno">(5)<a class="headerlink" href="#equation-0be93bb2-8349-4d7b-80da-f70c5bae8a74" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 \beta_\text{unnorm} = \beta_\text{norm} / \sum_t h_\text{unnorm}(t),
 \end{equation}\]</div>
 </div>
-<p>where <span class="math notranslate nohighlight">\(h(t)\)</span> is the unnormalized impulse response.</p>
+<p>where <span class="math notranslate nohighlight">\(h_\text{unnorm}(t)\)</span> is the unnormalized impulse response.</p>
 <p>Some impulse models do not use any normalization by default because they are also used to describe neuron
 population behavior. For example, the compressive spatio-temporal pRF model uses transient and
 sustained impulse models to describe temporal neuron activation patterns.</p>
-</section>
-<section id="before-convolution-stimulus-encoded-model-responses-are-padded-with-their-first-frame">
-<h2>Before convolution, stimulus-encoded model responses are padded with their first frame<a class="headerlink" href="#before-convolution-stimulus-encoded-model-responses-are-padded-with-their-first-frame" title="Link to this heading">¶</a></h2>
-<p>To make sure that convolving stimulus-encoded model responses with impulse response returns model predictions for the
-same number of time frames as the stimulus design, we pad stimulus-encoded model responses with their first frame.
-Specifically, we first prepend the repeat the first stimulus-encoded response element for each element in the impulse
-response (minus 1) and then convolve both signals using discrete convolution.</p>
-<p>This choice rests on the assumption that the observed response at the first time frame is at baseline (i.e., resting
-state) which is commonly done in experiments by, for example, running dummy scans before real scans in fMRI
-experiments. Stimuli from previous runs in an experiment should not influence the recording of the response to the
-current stimulus.</p>
 </section>
 <section id="impulse-responses-must-have-the-same-sampling-rate-as-observed-responses">
 <h2>Impulse responses must have the same sampling rate as observed responses<a class="headerlink" href="#impulse-responses-must-have-the-same-sampling-rate-as-observed-responses" title="Link to this heading">¶</a></h2>
@@ -576,6 +565,48 @@ a Gaussian 2D pRF model, this can be done by adding a custom impulse model:</p>
 <p>This implementation might seem a bit cumbersome, however, it forces the user to think explicitly about the sampling
 rates used in the model and the experiment. It also becomes helpful as soon as different model components operate on
 different sampling rates that must be aligned with each other (e.g., in the compressive spatio-temporal pRF model).</p>
+</section>
+<section id="impulse-responses-are-sampled-at-the-leading-edge-of-each-time-frame">
+<h2>Impulse responses are sampled at the leading edge of each time frame<a class="headerlink" href="#impulse-responses-are-sampled-at-the-leading-edge-of-each-time-frame" title="Link to this heading">¶</a></h2>
+<p>prfmodel assumes that the TR of observed neural timecourses is <strong>locked to the onset of a stimulus design frame</strong>
+(e.g., BOLD measurements in fMRI have been slice-time corrected). This implies that time frames of
+observed neural timecourses represent instantaneous measurements of brain activity at each TR
+(not averages over an interval).</p>
+<p>Without any up- or downsampling, stimulus design frame <span class="math notranslate nohighlight">\(i\)</span>, observed sample <span class="math notranslate nohighlight">\(i\)</span> and impulse response frame <span class="math notranslate nohighlight">\(i\)</span> all
+refer to the time <span class="math notranslate nohighlight">\(i \cdot \text{TR}\)</span>. We therefore sample impulse responses at the <strong>leading edge</strong> of each frame.</p>
+<p>With the default <code class="docutils literal notranslate"><span class="pre">offset</span></code> of zero, the first sample of the kernel is at <span class="math notranslate nohighlight">\(t=0\)</span>, and the default impulse model
+<code class="xref py py-class docutils literal notranslate"><span class="pre">impulseDerivativeTwoGammaImpulse</span></code> returns exactly zero there. Discrete convolution in prfmodel
+treats the first frame of the impulse response as lag 0, so an impulse response of zero means that a stimulus cannot
+contribute to the observed neural response during its exact onset (which is biologically plausible).</p>
+<p>The leading-edge sampling assumption can be changed by setting a positive offset in the impulse model. For example, for
+mid-frame sampling (i.e., response measurements align with the <em>center</em> of a stimulus design frame), specify the
+offset as <code class="docutils literal notranslate"><span class="pre">TR/2.0</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.impulse</span><span class="w"> </span><span class="kn">import</span> <span class="n">DerivativeTwoGammaImpulse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian2DPRFModel</span>
+
+
+<span class="n">TR</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c1"># in seconds</span>
+
+<span class="c1"># Create a custom impulse model with the TR as resolution and a positive offset</span>
+<span class="n">impulse_model</span> <span class="o">=</span> <span class="n">DerivativeTwoGammaImpulse</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="n">TR</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">TR</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+
+<span class="c1"># Insert the custom impulse model into the canonical pRF model</span>
+<span class="n">prf_model</span> <span class="o">=</span> <span class="n">Gaussian2DPRFModel</span><span class="p">(</span>
+    <span class="n">impulse_model</span><span class="o">=</span><span class="n">impulse_model</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="before-convolution-stimulus-encoded-model-responses-are-padded-with-their-first-frame">
+<h2>Before convolution, stimulus-encoded model responses are padded with their first frame<a class="headerlink" href="#before-convolution-stimulus-encoded-model-responses-are-padded-with-their-first-frame" title="Link to this heading">¶</a></h2>
+<p>To make sure that convolving stimulus-encoded model responses with impulse response returns model predictions for the
+same number of time frames as the stimulus design, we pad stimulus-encoded model responses with their first frame.
+Specifically, we first prepend the repeat the first stimulus-encoded response element for each element in the impulse
+response (minus 1) and then convolve both signals using discrete convolution.</p>
+<p>This choice rests on the assumption that the observed response at the first time frame is at baseline (i.e., resting
+state) which is commonly done in experiments by, for example, running dummy scans before real scans in fMRI
+experiments. Stimuli from previous runs in an experiment should not influence the recording of the response to the
+current stimulus.</p>
 </section>
 <section id="what-if-i-want-to-deviate-from-these-decisions">
 <h2>What if I want to deviate from these decisions?<a class="headerlink" href="#what-if-i-want-to-deviate-from-these-decisions" title="Link to this heading">¶</a></h2>
@@ -661,8 +692,9 @@ responses) but it also couples amplitudes to impulse model parameters.</p>
 <li><a class="reference internal" href="#gaussian-models-use-proper-probability-densities">Gaussian models use proper probability densities</a></li>
 <li><a class="reference internal" href="#spatial-receptive-fields-are-not-normalized">Spatial receptive fields are not normalized</a></li>
 <li><a class="reference internal" href="#impulse-responses-are-normalized-when-they-describe-measurements">Impulse responses are normalized when they describe measurements</a></li>
-<li><a class="reference internal" href="#before-convolution-stimulus-encoded-model-responses-are-padded-with-their-first-frame">Before convolution, stimulus-encoded model responses are padded with their first frame</a></li>
 <li><a class="reference internal" href="#impulse-responses-must-have-the-same-sampling-rate-as-observed-responses">Impulse responses must have the same sampling rate as observed responses</a></li>
+<li><a class="reference internal" href="#impulse-responses-are-sampled-at-the-leading-edge-of-each-time-frame">Impulse responses are sampled at the leading edge of each time frame</a></li>
+<li><a class="reference internal" href="#before-convolution-stimulus-encoded-model-responses-are-padded-with-their-first-frame">Before convolution, stimulus-encoded model responses are padded with their first frame</a></li>
 <li><a class="reference internal" href="#what-if-i-want-to-deviate-from-these-decisions">What if I want to deviate from these decisions?</a></li>
 </ul>
 </li>

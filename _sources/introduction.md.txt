@@ -475,7 +475,7 @@ impulse_model = DerivativeTwoGammaImpulse(duration=32.0, resolution=1.0)
 weight_deriv = np.round(np.arange(-3.0, 1.75, 0.25), 1)
 impulse_times = np.asarray(impulse_model.get_frames())[0]
 impulse_responses = [impulse_model(pd.DataFrame({"weight_deriv": [d]}))[0] for d in weight_deriv]
-scale = encoded_response.max()
+scale = 1.0
 convolved = [
     np.round(np.asarray(convolve_prf_impulse_response(encoded_response[None, :], h[None, :]))[0] / scale, 3)
     for h in impulse_responses
@@ -575,8 +575,8 @@ nuisances.
 
 response = convolved[default]
 frame_index = np.arange(response.size)
-amplitudes = np.round(np.linspace(0.1, 2.0, 13), 2)
-baselines = np.round(np.linspace(-2.0, 2.0, 9), 2)
+amplitudes = np.round(np.linspace(0.2, 2.0, 10), 2)
+baselines = np.round(np.linspace(-20.0, 20.0, 9), 2)
 amplitude_start = int(np.argmin(np.abs(amplitudes - 1.0)))
 baseline_start = int(np.argmin(np.abs(baselines)))
 
@@ -635,14 +635,14 @@ fig.update_layout(
     ],
 )
 fig.update_xaxes(AXIS, title_text="Time frame", row=1, col=1)
-fig.update_yaxes(AXIS, title_text="Predicted response", range=[-3.0, 3.6], row=1, col=1)
+fig.update_yaxes(AXIS, title_text="Scaled response", range=response_range, row=1, col=1)
 fig.update_xaxes(AXIS, title_text="Time frame", row=1, col=2)
-fig.update_yaxes(AXIS, title_text="Predicted response", range=[-3.0, 3.6], row=1, col=2)
+fig.update_yaxes(AXIS, title_text="Shifted response", range=response_range, row=1, col=2)
 show(fig)
 ```
 
-**Figure 5.** Scaling the convolved response with {py:class}`~prfmodel.scaling.BaselineAmplitude`. The dotted line is
-the unscaled response.
+**Figure 5.** Scaling the (peak-normalized) convolved response with {py:class}`~prfmodel.scaling.BaselineAmplitude`.
+The dotted line is the unscaled response.
 
 ## Fitting
 

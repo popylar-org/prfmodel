@@ -18,7 +18,7 @@ volume (see {py:func}`~prfmodel.density.normal_density`):
 f(x) = \frac{1}{V} e^{-\frac{\lVert x - \mu \rVert^2}{2 \sigma^2}},
 \end{equation}
 where $V = (2 \pi \sigma^2)^{k / 2}$ is the volume and $k$ is the number of dimensions of the tuning profile.
-The proper density has a peak amplitude of $\max(f(x)) = \frac{1}{V}$.
+The proper density has a peak amplitude of $\max(f(x)) = 1/V$.
 
 The proper Gaussian density has the advantage that it decouples amplitude parameters from pRF size/tuning width
 parameters $\sigma$, making it easier to interpret (although amplitudes are often treated as nuisance parameters). It
@@ -33,7 +33,7 @@ models as well as Gaussian connective field models.
 It is possible to convert the amplitudes estimated with the proper density into those estimated with unnormalized
 density by dividing by the volume:
 \begin{equation}
-\beta_\text{unnorm} = \beta_\text{norm} / V.
+\beta_\text{unnorm} = \frac{\beta_\text{norm}}{V}.
 \end{equation}
 Importantly, this conversion assumes that the models for which the amplitudes have been estimated are otherwise equal.
 
@@ -53,7 +53,7 @@ size of each cell in the grid. This normalization changes
 the scale and the interpretation of amplitude parameters, making them comparable across spatial grid resolutions.
 
 An alternative convention adopted by some software packages is to normalize spatial RFs (called tuning
-profiles in prfmodel) by their sum [^1]. This makes the conflict between volume-normalized vs -unnormalized densities
+profiles in prfmodel) by their sum[^1]. This makes the conflict between volume-normalized vs -unnormalized densities
 irrelevant and amplitudes comparable across grid cell sizes. Instead it ties amplitudes to the sizes of the spatial
 grid dimensions (e.g., width and height)[^2].
 
@@ -72,7 +72,7 @@ comparable cross grid resolutions. The normalization does **not** affect the ide
 ## Impulse responses are normalized when they describe measurements
 
 The predicted responses of some impulse models (see {py:mod}`prfmodel.impulse`) are normalized in prfmodel
-(sum-normalized by default, but other functions are possible [^3]). This is
+(sum-normalized by default, but other functions are possible[^3]). This is
 because they are used to describe the typical shape of the measurement of a neural response (e.g., the BOLD
 response in fMRI). These impulse responses are convolved with the response of a model that describes the behavior of a
 neuron population (e.g., a stimulus-encoded pRF response). Here, the sum-normalization decouples amplitude parameters
@@ -83,23 +83,11 @@ It is possible to convert impulse-sum-normalized into impulse-unnormalized ampli
 \begin{equation}
 \beta_\text{unnorm} = \beta_\text{norm} / \sum_t h_\text{unnorm}(t),
 \end{equation}
-where $h(t)$ is the unnormalized impulse response.
+where $h_\text{unnorm}(t)$ is the unnormalized impulse response.
 
 Some impulse models do not use any normalization by default because they are also used to describe neuron
 population behavior. For example, the compressive spatio-temporal pRF model uses transient and
 sustained impulse models to describe temporal neuron activation patterns.
-
-## Before convolution, stimulus-encoded model responses are padded with their first frame
-
-To make sure that convolving stimulus-encoded model responses with impulse response returns model predictions for the
-same number of time frames as the stimulus design, we pad stimulus-encoded model responses with their first frame.
-Specifically, we first prepend the repeat the first stimulus-encoded response element for each element in the impulse
-response (minus 1) and then convolve both signals using discrete convolution.
-
-This choice rests on the assumption that the observed response at the first time frame is at baseline (i.e., resting
-state) which is commonly done in experiments by, for example, running dummy scans before real scans in fMRI
-experiments. Stimuli from previous runs in an experiment should not influence the recording of the response to the
-current stimulus.
 
 ## Impulse responses must have the same sampling rate as observed responses
 
@@ -129,6 +117,53 @@ prf_model = Gaussian2DPRFModel(
 This implementation might seem a bit cumbersome, however, it forces the user to think explicitly about the sampling
 rates used in the model and the experiment. It also becomes helpful as soon as different model components operate on
 different sampling rates that must be aligned with each other (e.g., in the compressive spatio-temporal pRF model).
+
+## Impulse responses are sampled at the leading edge of each time frame
+
+prfmodel assumes that the TR of observed neural timecourses is **locked to the onset of a stimulus design frame**
+(e.g., BOLD measurements in fMRI have been slice-time corrected). This implies that time frames of
+observed neural timecourses represent instantaneous measurements of brain activity at each TR
+(not averages over an interval).
+
+Without any up- or downsampling, stimulus design frame $i$, observed sample $i$ and impulse response frame $i$ all
+refer to the time $i \cdot \text{TR}$. We therefore sample impulse responses at the **leading edge** of each frame.
+
+With the default `offset` of zero, the first sample of the kernel is at $t=0$, and the default impulse model
+{py:class}`~prfmodel.impulseDerivativeTwoGammaImpulse` returns exactly zero there. Discrete convolution in prfmodel
+treats the first frame of the impulse response as lag 0, so an impulse response of zero means that a stimulus cannot
+contribute to the observed neural response during its exact onset (which is biologically plausible).
+
+The leading-edge sampling assumption can be changed by setting a positive offset in the impulse model. For example, for
+mid-frame sampling (i.e., response measurements align with the *center* of a stimulus design frame), specify the
+offset as `TR/2.0`:
+
+```python
+from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.models.prf import Gaussian2DPRFModel
+
+
+TR = 1.5  # in seconds
+
+# Create a custom impulse model with the TR as resolution and a positive offset
+impulse_model = DerivativeTwoGammaImpulse(resolution=TR, offset=TR / 2.0)
+
+# Insert the custom impulse model into the canonical pRF model
+prf_model = Gaussian2DPRFModel(
+    impulse_model=impulse_model,
+)
+```
+
+## Before convolution, stimulus-encoded model responses are padded with their first frame
+
+To make sure that convolving stimulus-encoded model responses with impulse response returns model predictions for the
+same number of time frames as the stimulus design, we pad stimulus-encoded model responses with their first frame.
+Specifically, we first prepend the repeat the first stimulus-encoded response element for each element in the impulse
+response (minus 1) and then convolve both signals using discrete convolution.
+
+This choice rests on the assumption that the observed response at the first time frame is at baseline (i.e., resting
+state) which is commonly done in experiments by, for example, running dummy scans before real scans in fMRI
+experiments. Stimuli from previous runs in an experiment should not influence the recording of the response to the
+current stimulus.
 
 ## What if I want to deviate from these decisions?
 
