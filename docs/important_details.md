@@ -18,7 +18,7 @@ volume (see {py:func}`~prfmodel.density.normal_density`):
 f(x) = \frac{1}{V} e^{-\frac{\lVert x - \mu \rVert^2}{2 \sigma^2}},
 \end{equation}
 where $V = (2 \pi \sigma^2)^{k / 2}$ is the volume and $k$ is the number of dimensions of the tuning profile.
-The proper density has a peak amplitude of $\max(f(x)) = \frac{1}{V}$.
+The proper density has a peak amplitude of $\max(f(x)) = 1/V$.
 
 The proper Gaussian density has the advantage that it decouples amplitude parameters from pRF size/tuning width
 parameters $\sigma$, making it easier to interpret (although amplitudes are often treated as nuisance parameters). It
@@ -33,7 +33,7 @@ models as well as Gaussian connective field models.
 It is possible to convert the amplitudes estimated with the proper density into those estimated with unnormalized
 density by dividing by the volume:
 \begin{equation}
-\beta_\text{unnorm} = \beta_\text{norm} / V.
+\beta_\text{unnorm} = \frac{\beta_\text{norm}}{V}.
 \end{equation}
 Importantly, this conversion assumes that the models for which the amplitudes have been estimated are otherwise equal.
 
@@ -53,7 +53,7 @@ size of each cell in the grid. This normalization changes
 the scale and the interpretation of amplitude parameters, making them comparable across spatial grid resolutions.
 
 An alternative convention adopted by some software packages is to normalize spatial RFs (called tuning
-profiles in prfmodel) by their sum [^1]. This makes the conflict between volume-normalized vs -unnormalized densities
+profiles in prfmodel) by their sum[^1]. This makes the conflict between volume-normalized vs -unnormalized densities
 irrelevant and amplitudes comparable across grid cell sizes. Instead it ties amplitudes to the sizes of the spatial
 grid dimensions (e.g., width and height)[^2].
 
@@ -72,7 +72,7 @@ comparable cross grid resolutions. The normalization does **not** affect the ide
 ## Impulse responses are normalized when they describe measurements
 
 The predicted responses of some impulse models (see {py:mod}`prfmodel.impulse`) are normalized in prfmodel
-(sum-normalized by default, but other functions are possible [^3]). This is
+(sum-normalized by default, but other functions are possible[^3]). This is
 because they are used to describe the typical shape of the measurement of a neural response (e.g., the BOLD
 response in fMRI). These impulse responses are convolved with the response of a model that describes the behavior of a
 neuron population (e.g., a stimulus-encoded pRF response). Here, the sum-normalization decouples amplitude parameters
@@ -83,7 +83,7 @@ It is possible to convert impulse-sum-normalized into impulse-unnormalized ampli
 \begin{equation}
 \beta_\text{unnorm} = \beta_\text{norm} / \sum_t h_\text{unnorm}(t),
 \end{equation}
-where $h(t)$ is the unnormalized impulse response.
+where $h_\text{unnorm}(t)$ is the unnormalized impulse response.
 
 Some impulse models do not use any normalization by default because they are also used to describe neuron
 population behavior. For example, the compressive spatio-temporal pRF model uses transient and
