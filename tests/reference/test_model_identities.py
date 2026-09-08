@@ -18,6 +18,7 @@ import pandas as pd
 import pytest
 from scipy import integrate
 from scipy import spatial
+from scipy import special
 from prfmodel.impulse import SustainedImpulse
 from prfmodel.models.cf._gaussian import GaussianCFTuning
 from prfmodel.models.prf import DivNormGaussian2DPRFModel
@@ -45,6 +46,24 @@ SIGMA: list[float] = [1.0, 1.5]
 BASELINE: list[float] = [0.1, -0.3]
 AMPLITUDE: list[float] = [1.2, -2.0]
 
+CHANNEL_SHAPE: float = 9.0
+"""Gamma shape of the sustained channel, which is the default of `SustainedImpulse`."""
+
+UNIT_GAIN_TIME_TO_PEAK: float = (
+    (CHANNEL_SHAPE - 1) ** CHANNEL_SHAPE
+    * np.exp(1 - CHANNEL_SHAPE)
+    / special.gamma(
+        CHANNEL_SHAPE,
+    )
+)
+"""Peak time at which the sustained channel density peaks at exactly one.
+
+A gamma density of shape `m` and scale `s` attains `(m - 1)**(m - 1) * exp(1 - m) / (gamma(m) * s)` at its peak
+`(m - 1) * s`, so the peak time that makes that height one is `(m - 1)**m * exp(1 - m) / gamma(m)`. Sampling the
+channel there is what turns it into a delta, see `_pass_through_sustained_channel`.
+
+"""
+
 
 def _gaussian_params() -> pd.DataFrame:
     """Return reference parameters for `Gaussian2DPRFModel`, two units."""
@@ -63,12 +82,16 @@ def _gaussian_params() -> pd.DataFrame:
 def _pass_through_sustained_channel() -> SustainedImpulse:
     """Return a sustained channel that convolves to a delta, so CST reduces to its compressive stage.
 
-    A length-one kernel is a delta once it is sum-normalized, whatever its single value. The `offset`
-    is what makes it non-zero: frames are sampled at their leading edge, so without it the only frame
-    would sit at `t = 0`, where the gamma density is zero and the normalization would divide by zero.
+    A length-one kernel is a plain scalar gain, and the CST channels are deliberately left unnormalized, so that
+    gain is whatever the gamma density evaluates to at the single frame. Placing that frame on the peak of a
+    density whose peak height is one -- which is what `UNIT_GAIN_TIME_TO_PEAK` is -- makes the gain exactly one
+    and the convolution an identity. Callers must pass that same `time_to_peak`, since the frame is fixed here.
+
+    Frames are sampled at their leading edge, so the `offset` is also what keeps the only frame away from
+    `t = 0`, where the gamma density is zero.
 
     """
-    return SustainedImpulse(duration=1.0, offset=1.0, resolution=1.0, norm="sum")
+    return SustainedImpulse(duration=1.0, offset=UNIT_GAIN_TIME_TO_PEAK, resolution=1.0)
 
 
 class TestReductionToGaussian(PRFStimulusSetup):
@@ -144,9 +167,9 @@ class TestReductionToGaussian(PRFStimulusSetup):
 
         Three stages are disabled at once. `amplitude_transient=0` removes both transient channels;
         `n=1` makes the compressive exponent the identity; and a sustained channel whose time axis holds a
-        single frame convolves with a unit-sum kernel of length one, which is an identity convolution. What
-        remains is receptive field, stimulus encoding, HRF convolution, and an affine output, which is the
-        Gaussian model with `amplitude = amplitude_sustained`.
+        single frame of height one convolves as an identity. What remains is receptive field, stimulus
+        encoding, HRF convolution, and an affine output, which is the Gaussian model with
+        `amplitude = amplitude_sustained`.
 
         As with CSS, the identity holds only up to the `min_response` floor that the rectifier substitutes
         for an exactly-zero encoded response, hence the absolute tolerance.
@@ -157,9 +180,9 @@ class TestReductionToGaussian(PRFStimulusSetup):
                 "mu_y": MU_Y,
                 "mu_x": MU_X,
                 "sigma": SIGMA,
-                # Irrelevant here: a length-one sum-normalized kernel is a delta whatever its peak
-                # time would have been.
-                "time_to_peak": [4.0, 5.0],
+                # Fixed by `_pass_through_sustained_channel`, which samples the channel on its peak:
+                # only this peak time makes that single sample one, and so the convolution an identity.
+                "time_to_peak": [UNIT_GAIN_TIME_TO_PEAK] * 2,
                 "n": [1.0, 1.0],
                 "amplitude_sustained": AMPLITUDE,
                 "amplitude_transient": [0.0, 0.0],
@@ -190,7 +213,13 @@ class TestReductionToGaussian(PRFStimulusSetup):
 
         css_params = pd.DataFrame({**shared, "gain": AMPLITUDE, "amplitude": [1.0, 1.0]})
         cst_params = pd.DataFrame(
-            {**shared, "time_to_peak": [4.0, 5.0], "amplitude_sustained": AMPLITUDE, "amplitude_transient": [0.0, 0.0]},
+            {
+                **shared,
+                # See `test_cst_with_only_a_sustained_channel_is_gaussian`: the pass-through channel fixes it.
+                "time_to_peak": [UNIT_GAIN_TIME_TO_PEAK] * 2,
+                "amplitude_sustained": AMPLITUDE,
+                "amplitude_transient": [0.0, 0.0],
+            },
         )
 
         prf_model = Gaussian2DCSTPRFModel(

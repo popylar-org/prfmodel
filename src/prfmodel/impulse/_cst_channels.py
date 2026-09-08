@@ -6,7 +6,6 @@ from prfmodel._docstring import doc
 from prfmodel.density._gamma import gamma_density
 from prfmodel.typing import Tensor
 from prfmodel.utils import TensorFrame
-from prfmodel.utils import normalize_response
 from .base import BaseImpulse
 
 
@@ -26,11 +25,6 @@ class SustainedImpulse(BaseImpulse):
     resolution : float, default=1.0
         The time resolution of the impulse response (in seconds), that is the number of points per second at which
         the impulse response function is evaluated.
-    norm : str, optional, default=None
-        The normalization of the response. Can be `"sum"`, `"mean"`, `"max"`, `"norm"`, or `None` (default).
-        If `None`, no normalization is performed. The default is `None` because the gamma density already carries
-        its own normalizing constant, as in the reference implementation.
-        See :doc:`Important details </important_details>`.
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Dictionary keys must be valid parameter names.
         Default values are overridden by user-supplied parameters in the :meth:`__call__` method.
@@ -60,6 +54,8 @@ class SustainedImpulse(BaseImpulse):
     This makes `time_to_peak` literally the time of the maximum, which is the quantity [1]_ reports across visual
     areas (roughly 50 ms in V1 rising to 230 ms in IPS).
 
+    This model does not use any normalization for the predicted impulse response.
+
     References
     ----------
     .. [1] Kim, I., Kupers, E. R., Lerma-Usabiaga, G., & Grill-Spector, K. (2024). Characterizing spatiotemporal
@@ -84,13 +80,12 @@ class SustainedImpulse(BaseImpulse):
         duration: float = 32.0,
         offset: float = 0.0,
         resolution: float = 1.0,
-        norm: str | None = None,
         default_parameters: dict[str, float] | None = None,
         shape: float = 9.0,
     ):
         self.shape = shape
 
-        super().__init__(duration, offset, resolution, norm, default_parameters)
+        super().__init__(duration, offset, resolution, None, default_parameters)
 
     @property
     def parameter_names(self) -> list[str]:
@@ -117,9 +112,7 @@ class SustainedImpulse(BaseImpulse):
         frames = self.get_frames(dtype)
         time_to_peak = parameters[["time_to_peak"]]
 
-        dens = _gamma_at_scale(frames, _reference_scale(time_to_peak, self.shape), self.shape)
-
-        return normalize_response(dens, self.norm)
+        return _gamma_at_scale(frames, _reference_scale(time_to_peak, self.shape), self.shape)
 
 
 class TransientImpulse(BaseImpulse):
@@ -142,11 +135,6 @@ class TransientImpulse(BaseImpulse):
     resolution : float, default=1.0
         The time resolution of the impulse response (in seconds), that is the number of points per second at which
         the impulse response function is evaluated.
-    norm : str, optional, default=None
-        The normalization of the response. Can be `"sum"`, `"mean"`, `"max"`, `"norm"`, or `None` (default).
-        If `None`, no normalization is performed. Leave this at `None`: the two components each integrate to one, so
-        a biphasic response sums to approximately zero and `norm="sum"` divides by that near-zero value.
-        See :doc:`Important details </important_details>`.
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Dictionary keys must be valid parameter names.
         Default values are overridden by user-supplied parameters in the :meth:`__call__` method.
@@ -176,6 +164,8 @@ class TransientImpulse(BaseImpulse):
     Because the inhibitory component peaks later, the difference peaks *earlier* than the sustained channel and
     then crosses zero once into a negative lobe.
 
+    This model does not use any normalization for the predicted impulse response.
+
     References
     ----------
     .. [1] Kim, I., Kupers, E. R., Lerma-Usabiaga, G., & Grill-Spector, K. (2024). Characterizing spatiotemporal
@@ -200,7 +190,6 @@ class TransientImpulse(BaseImpulse):
         duration: float = 32.0,
         offset: float = 0.0,
         resolution: float = 1.0,
-        norm: str | None = None,
         default_parameters: dict[str, float] | None = None,
         shape: float = 9.0,
         inhibitory_shape: float = 10.0,
@@ -210,7 +199,7 @@ class TransientImpulse(BaseImpulse):
         self.inhibitory_shape = inhibitory_shape
         self.inhibitory_time_constant_ratio = inhibitory_time_constant_ratio
 
-        super().__init__(duration, offset, resolution, norm, default_parameters)
+        super().__init__(duration, offset, resolution, None, default_parameters)
 
     @property
     def parameter_names(self) -> list[str]:
@@ -242,7 +231,7 @@ class TransientImpulse(BaseImpulse):
         dens_excitatory = _gamma_at_scale(frames, scale, self.shape)
         dens_inhibitory = _gamma_at_scale(frames, self.inhibitory_time_constant_ratio * scale, self.inhibitory_shape)
 
-        return normalize_response(dens_excitatory - dens_inhibitory, self.norm)
+        return dens_excitatory - dens_inhibitory
 
 
 def _reference_scale(time_to_peak: Tensor, shape: float) -> Tensor:
