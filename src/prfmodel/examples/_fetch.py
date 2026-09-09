@@ -66,20 +66,24 @@ def get_data_dir(dest_dir: str | os.PathLike | None = None) -> Path:
     -----
     The directory is resolved in the following order:
 
-    1. The `dest_dir` argument, when given.
-    2. The `PRFMODEL_DATA_DIR` environment variable, when set and non-empty.
-    3. `$XDG_CACHE_HOME/prfmodel/data`, when `XDG_CACHE_HOME` is set to an absolute path.
-    4. A platform default: `%LOCALAPPDATA%\\prfmodel\\Cache\\data` on Windows,
-       `~/Library/Caches/prfmodel/data` on macOS, and `~/.cache/prfmodel/data` elsewhere.
+    1. The ``dest_dir`` argument, when given.
+    2. The ``PRFMODEL_DATA_DIR`` environment variable, when set and non-empty.
+    3. ``$XDG_CACHE_HOME/prfmodel/data``, when ``XDG_CACHE_HOME`` is set to an absolute path.
+    4. A platform default: ``%LOCALAPPDATA%\\prfmodel\\Cache\\data`` on Windows,
+       ``~/Library/Caches/prfmodel/data`` on macOS, and ``~/.cache/prfmodel/data`` elsewhere.
 
     Examples
     --------
-    .. code-block:: python
+    Resolve the directory that is used when none is requested.
 
-        from prfmodel.examples import get_data_dir
+    >>> from prfmodel.examples import get_data_dir
+    >>> get_data_dir()  # doctest: +SKIP
+    PosixPath('/home/user/.cache/prfmodel/data')
 
-        get_data_dir()  # PosixPath('/home/user/.cache/prfmodel/data')
-        get_data_dir("my_data")  # PosixPath('my_data')
+    Pass a directory to use it as-is, whatever the environment says.
+
+    >>> get_data_dir("my_data")  # doctest: +SKIP
+    PosixPath('my_data')
 
     """
     if dest_dir is not None:
@@ -147,7 +151,7 @@ def _open_url(url: str, description: str):  # noqa: ANN202 (returns a private ur
     raise OSError(msg) from last_error
 
 
-def _download_file(url: str, dest_path: Path, description: str) -> None:
+def _download_file(url: str, dest_path: Path, description: str, expected_sha256: str | None = None) -> None:
     """Download a single file, writing it atomically so a failure leaves nothing behind."""
     _check_url(url)
 
@@ -165,6 +169,12 @@ def _download_file(url: str, dest_path: Path, description: str) -> None:
                 for chunk in iter(lambda: response.read(_CHUNK_SIZE), b""):
                     out_file.write(chunk)
                     progress.update(len(chunk))
+
+        if expected_sha256 is not None:
+            actual = _sha256(temp_path)
+
+            if actual != expected_sha256:
+                raise ChecksumError(dest_path, expected_sha256, actual)
 
         os.replace(temp_path, dest_path)  # noqa: PTH105 (pathlib has no atomic replace)
     finally:
@@ -261,16 +271,19 @@ class FileFetcher:
         return self._data_dir / self._spec.files[key]
 
     def __call__(self, key: str) -> Path:
-        """Return the path of a file, extracting the dataset archive first when it is missing."""
+        """Return the path of a file, downloading it or the dataset archive first when it is missing."""
         path = self.path_for(key)
 
         if not path.exists():
-            self._fetch_archive()
+            if self._spec.url is None:
+                self._fetch_file(key)
+            else:
+                self._fetch_archive(self._spec.url)
 
         if not path.exists():
             msg = (
                 f"File '{key}' of dataset '{self._spec.name}' is missing at '{path}' and could not be "
-                f"obtained from the dataset archive."
+                f"obtained from the dataset source."
             )
             raise FileNotFoundError(msg)
 
@@ -278,7 +291,27 @@ class FileFetcher:
 
         return path
 
-    def _fetch_archive(self) -> None:
+    def _expected_sha256(self, member: str) -> str | None:
+        return self._checksums.get(member, {}).get("sha256")  # type: ignore[return-value]
+
+    def _fetch_file(self, key: str) -> None:
+        member = self._spec.files[key]
+
+        if not self._download:
+            msg = (
+                f"File '{key}' of dataset '{self._spec.name}' is not available at "
+                f"'{self._data_dir / member}' and downloading is disabled."
+            )
+            raise FileNotFoundError(msg)
+
+        _download_file(
+            self._spec.file_urls[key],
+            self._data_dir / member,
+            member,
+            self._expected_sha256(member),
+        )
+
+    def _fetch_archive(self, url: str) -> None:
         missing = [member for member in self._spec.files.values() if not (self._data_dir / member).exists()]
 
         if not missing:
@@ -295,12 +328,11 @@ class FileFetcher:
         archive_path = self._data_dir / f"{self._spec.name}.zip"
 
         try:
-            _download_file(self._spec.url, archive_path, f"{self._spec.name}.zip")
+            _download_file(url, archive_path, f"{self._spec.name}.zip")
 
             with zipfile.ZipFile(archive_path) as archive:
                 for member in missing:
-                    expected = self._checksums.get(member, {}).get("sha256")
-                    _extract_member(archive, member, self._data_dir, expected)  # type: ignore[arg-type]
+                    _extract_member(archive, member, self._data_dir, self._expected_sha256(member))
         finally:
             # The archive is several times the size of what we extract and nothing reads it again
             archive_path.unlink(missing_ok=True)

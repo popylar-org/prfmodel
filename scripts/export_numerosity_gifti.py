@@ -1,6 +1,6 @@
 """Export the odd/even numerosity time series of one subject to GIFTI.
 
-Writes three files per hemisphere into ``data/numerosity-timing-fmri/gifti``:
+Writes three files per hemisphere into:
 
 ``sub-<S>_hemi-<L|R>_desc-odd_bold.func.gii``
     Odd-run average, one ``DataArray`` per timepoint (``NIFTI_INTENT_TIME_SERIES``).
@@ -14,10 +14,6 @@ All three share one row ordering: the numerosity ROIs concatenated in ``MAP_NAME
 order. Only the numerosity maps are exported -- the timing maps overlap them (e.g.
 NPCS and TPCS share 727 gray nodes in S1 Left), so a single label per vertex would
 be ambiguous if both families were included.
-
-This script records how the published 'numerosity-timing' dataset was produced; it is not
-part of the package and is not run by it. It needs ``h5py``, which is deliberately not a
-prfmodel dependency, so install it separately to run this script.
 
 Note that row *i* is the *i*-th ROI gray node, not vertex *i* of a surface mesh.
 Rendering these on a surface needs the subject's own mrVista gray-node-to-surface
@@ -187,7 +183,7 @@ def main() -> None:
     """Write the GIFTI files for one subject."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--subject", default="S1")
-    parser.add_argument("--data", type=pathlib.Path, default=pathlib.Path("data/numerosity-timing-fmri"))
+    parser.add_argument("--data", type=pathlib.Path, default=None)
     parser.add_argument("--output", type=pathlib.Path, default=None)
     args = parser.parse_args()
 

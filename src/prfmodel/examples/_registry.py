@@ -3,6 +3,7 @@
 from __future__ import annotations
 import json
 from dataclasses import dataclass
+from dataclasses import field
 from importlib.resources import files
 from typing import TYPE_CHECKING
 
@@ -15,16 +16,14 @@ if TYPE_CHECKING:
 
 _FIGSHARE_URL = "https://ndownloader.figshare.com/files"
 
-# The derived numerosity files are not published yet; see the dataset description for what is missing
-_UNPUBLISHED = "UNPUBLISHED"
-
-_NUMEROSITY_FILE_ID = _UNPUBLISHED
-
 
 @dataclass(frozen=True)
 class DatasetSpec:
     """
-    Specification of an example dataset that is distributed as a single archive.
+    Specification of an example dataset.
+
+    A dataset is distributed either as a single archive, given by `url`, or as individual files, given by
+    `file_urls`. Exactly one of the two must be set.
 
     Parameters
     ----------
@@ -32,11 +31,14 @@ class DatasetSpec:
         Name of the dataset, as passed to :func:`~prfmodel.examples.load_dataset`.
     summary : str
         One-paragraph description of what the dataset contains.
-    url : str
-        URL of the archive that holds the dataset files.
+    url : str, optional
+        URL of the archive that holds the dataset files, for a dataset distributed as one archive.
     files : collections.abc.Mapping of str to str
-        Mapping from the logical name of a file to its path inside the archive. The path inside the archive
-        doubles as the path of the file relative to the data directory.
+        Mapping from the logical name of a file to its path relative to the data directory. For a dataset
+        distributed as one archive, this path is also the path of the file inside the archive.
+    file_urls : collections.abc.Mapping of str to str
+        Mapping from the logical name of a file to the URL it is downloaded from, for a dataset distributed
+        as individual files. Only the files that are actually loaded are downloaded.
     loader : collections.abc.Callable
         Function that turns a file fetcher and a set of options into a :class:`~prfmodel.examples.Dataset`.
     options : frozenset of str
@@ -56,15 +58,18 @@ class DatasetSpec:
     homepage : str
         URL of the page that describes the dataset.
     download_size : int
-        Size of the archive in bytes. The whole archive is downloaded even when only part of it is loaded.
+        Total size of the dataset in bytes. A dataset distributed as one archive downloads all of it even
+        when only part of it is loaded, while a dataset distributed as individual files downloads only the
+        files that are loaded.
 
     """
 
     name: str
     summary: str
-    url: str
     files: Mapping[str, str]
     loader: Callable[[FileFetcher, Options], Dataset]
+    url: str | None = None
+    file_urls: Mapping[str, str] = field(default_factory=dict)
     options: frozenset[str] = frozenset()
     splits: tuple[str, ...] = ()
     hemispheres: tuple[str, ...] = ()
@@ -75,10 +80,19 @@ class DatasetSpec:
     homepage: str = ""
     download_size: int = 0
 
+    def __post_init__(self) -> None:
+        if (self.url is None) == (not self.file_urls):
+            msg = f"Dataset '{self.name}' must set either 'url' or 'file_urls' but not both"
+            raise ValueError(msg)
+
+        if self.file_urls and set(self.file_urls) != set(self.files):
+            msg = f"Dataset '{self.name}' must give a URL for every file in 'files'"
+            raise ValueError(msg)
+
     @property
-    def is_published(self) -> bool:
-        """Whether the archive of this dataset has been published and can be downloaded."""
-        return _UNPUBLISHED not in self.url
+    def is_archive(self) -> bool:
+        """Whether this dataset is distributed as a single archive rather than as individual files."""
+        return self.url is not None
 
 
 def _make_registry() -> dict[str, DatasetSpec]:
@@ -120,7 +134,6 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "numerosity-selective regions of interest rather than surface vertices, so concatenating "
                 "both hemispheres carries no anatomical adjacency."
             ),
-            url=f"{_FIGSHARE_URL}/{_NUMEROSITY_FILE_ID}",
             files={
                 "response_odd_L": "sub-S1_hemi-L_desc-odd_bold.func.gii",
                 "response_even_L": "sub-S1_hemi-L_desc-even_bold.func.gii",
@@ -128,6 +141,14 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "response_even_R": "sub-S1_hemi-R_desc-even_bold.func.gii",
                 "roi_L": "sub-S1_hemi-L_desc-numerosity_dseg.label.gii",
                 "roi_R": "sub-S1_hemi-R_desc-numerosity_dseg.label.gii",
+            },
+            file_urls={
+                "response_odd_L": f"{_FIGSHARE_URL}/68359336",
+                "response_even_L": f"{_FIGSHARE_URL}/68359342",
+                "response_odd_R": f"{_FIGSHARE_URL}/68359327",
+                "response_even_R": f"{_FIGSHARE_URL}/68359333",
+                "roi_L": f"{_FIGSHARE_URL}/68359339",
+                "roi_R": f"{_FIGSHARE_URL}/68359330",
             },
             loader=_loaders.load_numerosity_timing,
             options=frozenset({"hemisphere", "split"}),
@@ -139,10 +160,12 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "Hendrikx, E., Paul, J. M., van Ackooij, M., van der Stoep, N., & Harvey, B. M. (2024). "
                 "Cortical quantity representations of visual numerosity and timing overlap increasingly into "
                 "superior cortices but remain distinct. NeuroImage, 286, 120515. "
-                "https://doi.org/10.1016/j.neuroimage.2024.120515"
+                "https://doi.org/10.1016/j.neuroimage.2024.120515 -- and the derived files as: "
+                "Luken, M. (2026). Single-subject numerosity-timing example dataset. figshare. "
+                "https://doi.org/10.6084/m9.figshare.33481645"
             ),
-            homepage="https://doi.org/10.1016/j.neuroimage.2024.120515",
-            download_size=17_500_000,
+            homepage="https://doi.org/10.6084/m9.figshare.33481645",
+            download_size=17_447_831,
         ),
         DatasetSpec(
             name="hcp-999999-surface",
@@ -231,14 +254,19 @@ def list_datasets() -> list[str]:
 
     Examples
     --------
-    .. code-block:: python
-
-        from prfmodel.examples import list_datasets
-
-        list_datasets()  # ['7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
+    >>> from prfmodel.examples import list_datasets
+    >>> list_datasets()
+    ['7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
 
     """
     return sorted(_get_registry())
+
+
+def _download_note(spec: DatasetSpec) -> str:
+    if spec.is_archive:
+        return "(the whole archive, also when loading part of it)"
+
+    return "(in total; only the files that are loaded are downloaded)"
 
 
 def describe_dataset(name: str) -> str:
@@ -262,19 +290,25 @@ def describe_dataset(name: str) -> str:
 
     Examples
     --------
-    .. code-block:: python
-
-        from prfmodel.examples import describe_dataset
-
-        print(describe_dataset("7t-retbar-visual"))
+    >>> from prfmodel.examples import describe_dataset
+    >>> print(describe_dataset("7t-retbar-visual"))  # doctest: +ELLIPSIS
+    7t-retbar-visual
+    ================
+    <BLANKLINE>
+    Blood oxygenation level-dependent response of a single subject to a moving bar stimulus, ...
+    <BLANKLINE>
+    Files: response_L, response_R, design
+    Hemispheres: both, left, right (default 'both')
+    Download: 51 MB (the whole archive, also when loading part of it)
+    Licence: CC BY 4.0
+    Homepage: https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209
+    <BLANKLINE>
+    Cite as: Knapen, T. (2021). fMRI Teaching Materials. figshare. https://doi.org/10.6084/m9.figshare.14096209
 
     """
     spec = _get_spec(name)
 
     lines = [f"{spec.name}", "=" * len(spec.name), "", spec.summary, ""]
-
-    if not spec.is_published:
-        lines += ["This dataset has not been published yet and cannot be downloaded.", ""]
 
     lines += [f"Files: {', '.join(spec.files)}"]
 
@@ -288,7 +322,7 @@ def describe_dataset(name: str) -> str:
         lines += [f"Surface types: {', '.join(spec.surface_types)}"]
 
     lines += [
-        f"Download: {spec.download_size / 1e6:.0f} MB (the whole archive, also when loading part of it)",
+        f"Download: {spec.download_size / 1e6:.0f} MB {_download_note(spec)}",
         f"Licence: {spec.licence}",
         f"Homepage: {spec.homepage}",
         "",

@@ -26,9 +26,6 @@ def test_published_files_have_a_checksum():
     checksums = load_checksums()
 
     for spec in _get_registry().values():
-        if not spec.is_published:
-            continue
-
         for member in spec.files.values():
             assert member in checksums, f"'{member}' of '{spec.name}' has no checksum"
             assert _SHA256_PATTERN.match(checksums[member]["sha256"])
@@ -53,9 +50,18 @@ def test_describe_dataset_reports_the_essentials():
     assert "Van Essen" in description
 
 
-def test_describe_dataset_reports_unpublished_datasets():
-    """Test that a dataset without a published archive says so."""
-    assert "has not been published yet" in describe_dataset("numerosity-timing")
+def test_describe_dataset_reports_per_file_downloads():
+    """Test that a dataset served as individual files says only what is loaded is downloaded."""
+    assert "only the files that are loaded" in describe_dataset("numerosity-timing")
+
+
+def test_every_dataset_has_exactly_one_source():
+    """Test that each dataset is served either as one archive or as individual files."""
+    for spec in _get_registry().values():
+        assert spec.is_archive != bool(spec.file_urls)
+
+        if spec.file_urls:
+            assert set(spec.file_urls) == set(spec.files)
 
 
 def test_describe_dataset_unknown_name():

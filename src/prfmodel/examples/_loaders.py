@@ -91,8 +91,9 @@ def load_dataset(  # noqa: PLR0913
     Load an example dataset, downloading it on first use.
 
     The files of a dataset are cached in a data directory, so they are downloaded only once. Datasets are
-    distributed as a single archive, which means that the whole archive is downloaded even when only part of
-    it is loaded; only the files that a dataset needs are extracted and kept.
+    distributed in two ways: As a single archive, which means that the whole archive is downloaded but only the files
+    that a dataset needs are extracted and kept; or as individual files of which only the ones that are need are
+    downloaded.
 
     Parameters
     ----------
@@ -138,32 +139,33 @@ def load_dataset(  # noqa: PLR0913
 
     Examples
     --------
-    .. code-block:: python
+    Load a surface mesh and the atlas that belongs to it.
 
-        from prfmodel.examples import load_dataset
+    >>> from prfmodel.examples import load_dataset
+    >>> surface = load_dataset("hcp-999999-surface", surface_type="flat")  # doctest: +SKIP
+    >>> sorted(surface.mesh.parts)  # doctest: +SKIP
+    ['left', 'right']
+    >>> surface.mesh.parts["left"].n_vertices  # doctest: +SKIP
+    59292
 
-        # A surface mesh and the atlas that belongs to it
-        surface = load_dataset("hcp-999999-surface", surface_type="flat")
-        surface.mesh
+    Load a response together with the raw design of the stimulus that produced it.
 
-        # A response and the raw design of the stimulus that produced it
-        dataset = load_dataset("7t-retbar-visual", hemisphere="both")
-        dataset.response.shape
+    >>> dataset = load_dataset("7t-retbar-visual", hemisphere="both")  # doctest: +SKIP
+    >>> dataset.response.shape  # doctest: +SKIP
+    (118584, 120)
 
-        # Two splits of the same response, for cross-validation
-        odd = load_dataset("numerosity-timing", hemisphere="left", split="odd")
-        even = load_dataset("numerosity-timing", hemisphere="left", split="even")
+    Load two splits of the same response, for cross-validation.
+
+    >>> odd = load_dataset("numerosity-timing", hemisphere="left", split="odd")  # doctest: +SKIP
+    >>> even = load_dataset("numerosity-timing", hemisphere="left", split="even")  # doctest: +SKIP
+    >>> odd.response.shape  # doctest: +SKIP
+    (5436, 176)
+    >>> odd.response.shape == even.response.shape  # doctest: +SKIP
+    True
 
     """
     spec = _get_spec(name)
     options = validate_options(spec, hemisphere=hemisphere, split=split, surface_type=surface_type)
-
-    if not spec.is_published:
-        msg = (
-            f"Dataset '{spec.name}' has not been published yet and cannot be downloaded. See "
-            f"describe_dataset('{spec.name}') for details."
-        )
-        raise ValueError(msg)
 
     fetcher = FileFetcher(
         spec,

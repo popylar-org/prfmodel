@@ -19,6 +19,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 from prfmodel.examples._fetch import _download_file
+from prfmodel.examples._registry import DatasetSpec
 from prfmodel.examples._registry import _get_registry
 
 logger = logging.getLogger(__name__)
@@ -27,32 +28,63 @@ _MANIFEST_PATH = Path(__file__).parent.parent / "src" / "prfmodel" / "data" / "c
 _CHUNK_SIZE = 1024 * 1024
 
 
+def _hash_stream(stream: object) -> tuple[str, int]:
+    digest = hashlib.sha256()
+    size = 0
+
+    for chunk in iter(lambda: stream.read(_CHUNK_SIZE), b""):  # type: ignore[attr-defined]
+        digest.update(chunk)
+        size += len(chunk)
+
+    return digest.hexdigest(), size
+
+
+def _hash_archive(spec: DatasetSpec, temp_dir: Path) -> dict[str, dict[str, object]]:
+    archive_path = temp_dir / f"{spec.name}.zip"
+    _download_file(spec.url, archive_path, f"{spec.name}.zip")  # type: ignore[arg-type]
+
+    entries = {}
+
+    with zipfile.ZipFile(archive_path) as archive:
+        for member in spec.files.values():
+            with archive.open(member) as stream:
+                sha256, size = _hash_stream(stream)
+
+            entries[member] = {"sha256": sha256, "size": size}
+
+    archive_path.unlink()
+
+    return entries
+
+
+def _hash_files(spec: DatasetSpec, temp_dir: Path) -> dict[str, dict[str, object]]:
+    entries = {}
+
+    for key, member in spec.files.items():
+        file_path = temp_dir / f"{spec.name}-{key}"
+        _download_file(spec.file_urls[key], file_path, member)
+
+        with file_path.open("rb") as stream:
+            sha256, size = _hash_stream(stream)
+
+        entries[member] = {"sha256": sha256, "size": size}
+        file_path.unlink()
+
+    return entries
+
+
 def build_manifest() -> dict[str, object]:
-    """Download every published archive and hash the files that the registry lists."""
+    """Download every dataset and hash the files that the registry lists."""
     entries: dict[str, dict[str, object]] = {}
 
     with tempfile.TemporaryDirectory() as temp_dir:
         for spec in _get_registry().values():
-            if not spec.is_published:
-                logger.warning("Skipping unpublished dataset '%s'", spec.name)
-                continue
+            logger.info("Hashing dataset '%s'", spec.name)
 
-            archive_path = Path(temp_dir) / f"{spec.name}.zip"
-            _download_file(spec.url, archive_path, f"{spec.name}.zip")
-
-            with zipfile.ZipFile(archive_path) as archive:
-                for member in spec.files.values():
-                    digest = hashlib.sha256()
-                    size = 0
-
-                    with archive.open(member) as stream:
-                        for chunk in iter(lambda: stream.read(_CHUNK_SIZE), b""):
-                            digest.update(chunk)
-                            size += len(chunk)
-
-                    entries[member] = {"sha256": digest.hexdigest(), "size": size}
-
-            archive_path.unlink()
+            if spec.is_archive:
+                entries.update(_hash_archive(spec, Path(temp_dir)))
+            else:
+                entries.update(_hash_files(spec, Path(temp_dir)))
 
     return {"version": 1, "files": dict(sorted(entries.items()))}
 

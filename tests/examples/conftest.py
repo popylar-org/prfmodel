@@ -67,6 +67,40 @@ def fake_registry(monkeypatch: pytest.MonkeyPatch, fake_spec: DatasetSpec) -> Da
 
 
 @pytest.fixture
+def fake_file_spec(tmp_path: Path, fake_files: dict[str, bytes]) -> DatasetSpec:
+    """Specification of a fake dataset served as individual local files."""
+    source_dir = tmp_path / "files"
+
+    for member, content in fake_files.items():
+        path = source_dir / member
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+
+    return DatasetSpec(
+        name="fake-file-dataset",
+        summary="A fake dataset served as individual files.",
+        files={"first": "first.txt", "second": "nested/second.txt"},
+        file_urls={
+            "first": (source_dir / "first.txt").as_uri(),
+            "second": (source_dir / "nested" / "second.txt").as_uri(),
+        },
+        loader=_load_fake_dataset,
+        licence="CC BY 4.0",
+        citation="Nobody. (2026). A fake dataset.",
+    )
+
+
+@pytest.fixture
+def file_fetcher(
+    fake_file_spec: DatasetSpec,
+    data_dir: Path,
+    fake_checksums: dict[str, dict[str, object]],
+) -> FileFetcher:
+    """Create a file fetcher for the fake dataset that is served as individual files."""
+    return FileFetcher(fake_file_spec, data_dir=data_dir, checksums=fake_checksums)
+
+
+@pytest.fixture
 def data_dir(tmp_path: Path) -> Path:
     """Path of an empty data directory."""
     return tmp_path / "data"

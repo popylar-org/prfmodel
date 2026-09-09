@@ -6,10 +6,15 @@ from prfmodel.examples import Dataset
 from prfmodel.examples import load_dataset
 from prfmodel.examples._options import Options
 from prfmodel.examples._registry import DatasetSpec
+from prfmodel.stimuli import PRFStimulus
 
 _NUM_VERTICES = 118584
 _NUM_HEMISPHERE_VERTICES = 59292
 _NUM_FRAMES = 120
+_NUM_NUMEROSITY_FRAMES = 176
+_NUM_NUMEROSITY_UNITS_L = 5436
+_NUM_NUMEROSITY_UNITS_R = 4889
+_NUM_ROIS = 8
 
 pytest_skip_examples = pytest.mark.examples
 
@@ -48,12 +53,6 @@ def test_load_dataset_invalid_surface_type():
     """Test that an unknown surface type is refused."""
     with pytest.raises(ValueError, match="must be one of"):
         load_dataset("hcp-999999-surface", surface_type="folded")
-
-
-def test_load_dataset_unpublished():
-    """Test that a dataset without a published archive reports that instead of failing to download."""
-    with pytest.raises(ValueError, match="has not been published yet"):
-        load_dataset("numerosity-timing", split="odd")
 
 
 def test_load_dataset_validates_before_downloading(fake_registry: DatasetSpec):
@@ -119,3 +118,36 @@ def test_load_retbar_visual(hemisphere: str, num_units: int):
     assert dataset.response.shape == (num_units, _NUM_FRAMES)
     assert dataset.files["design"].exists()
     assert dataset.stimulus is None
+
+
+@pytest_skip_examples
+@pytest.mark.parametrize("split", ["odd", "even"])
+@pytest.mark.parametrize(
+    ("hemisphere", "num_units"),
+    [
+        ("left", _NUM_NUMEROSITY_UNITS_L),
+        ("right", _NUM_NUMEROSITY_UNITS_R),
+        ("both", _NUM_NUMEROSITY_UNITS_L + _NUM_NUMEROSITY_UNITS_R),
+    ],
+)
+def test_load_numerosity_timing(hemisphere: str, num_units: int, split: str):
+    """Test that the numerosity dataset returns the response, the regions of interest, and the stimulus."""
+    dataset = load_dataset("numerosity-timing", hemisphere=hemisphere, split=split)
+
+    assert dataset.response.shape == (num_units, _NUM_NUMEROSITY_FRAMES)
+    assert dataset.roi_index.shape == (num_units,)
+    assert len(dataset.roi_mapping) == _NUM_ROIS
+    assert dataset.roi_mapping[0] == "NTO"
+    assert dataset.split == split
+    assert isinstance(dataset.stimulus, PRFStimulus)
+
+
+@pytest_skip_examples
+def test_load_numerosity_timing_downloads_only_what_is_loaded(tmp_path: Path):
+    """Test that loading one split of one hemisphere downloads only the two files it needs."""
+    load_dataset("numerosity-timing", hemisphere="left", split="odd", dest_dir=tmp_path)
+
+    assert sorted(p.name for p in tmp_path.iterdir()) == [
+        "sub-S1_hemi-L_desc-numerosity_dseg.label.gii",
+        "sub-S1_hemi-L_desc-odd_bold.func.gii",
+    ]

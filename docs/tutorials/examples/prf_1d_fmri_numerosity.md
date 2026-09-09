@@ -209,8 +209,6 @@ our predicted response to match the observed BOLD response.
 
 The {py:class}`prfmodel.models.prf.Gaussian1DPRFModel` class performs all these steps to make a combined prediction. However, we need to add a custom impulse response model to account for the fact that each time frame is one TR (2.1 seconds; the default in prfmodel is 1.0 seconds). Thus, we set the resolution of our predicted impulse response to the TR so that the predicted response has the same sampling rate as the observed timecourses (see also the section [](../../important_details.md)).
 
-Note that prfmodel parameterizes the Gaussian pRF as a proper probability density that is normalized by its volume, unlike most other pRF implementations, which use a Gaussian of unit height. The height of the pRF therefore scales with $1/\sigma$, which means that `sigma` and `amplitude` trade off against each other: a very wide pRF has a very low peak, which the amplitude then has to compensate for. Neither parameter is directly comparable to values reported by software that does not normalize (see [](../../important_details.md)).
-
 ```{code-cell} ipython3
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.prf import Gaussian1DPRFModel
@@ -588,16 +586,13 @@ We further exclude vertices whose preferred numerosity falls outside the display
 because it served as the baseline. We also remove vertices whose pRF size (`sigma`) approaches the span of the
 log-numerosity space ($\log(20) \approx 3.0$), because such a wide Gaussian predicts an almost flat line, which leaves
 `mu` unidentifiable. Note that SGD optimizes `sigma` on an unconstrained log scale, so the estimates are no longer
-capped by the grid we defined above. Finally, we drop vertices with a negative `amplitude`: their predicted response is
-inverted relative to the pRF, so `mu` marks the numerosity of strongest suppression rather than the preferred
-numerosity. There are none in this dataset, but the check matters whenever a fit is free to flip sign.
+capped by the grid we defined above.
 
 ```{code-cell} ipython3
 is_valid = (
     is_above_threshold
     & (np.exp(sgd_params["mu"]).between(1, 7))
     & (sgd_params["sigma"] < 2.8)
-    & (sgd_params["amplitude"] > 0)
 )
 is_valid.mean()
 ```
@@ -618,7 +613,7 @@ params_valid["roi"] = pd.Categorical(params_valid["roi"], categories=roi_order, 
 ```
 
 Now, we can compare the average preferred numerosity between ROIs. We also keep the number of surviving
-vertices per ROI, because it varies by an order of magnitude and tells us how much to trust each average.
+vertices per ROI, because it varies by an order of magnitude and tells us how many data points go into each average.
 
 ```{code-cell} ipython3
 params_agg_roi = params_valid.groupby("roi", observed=False)[["numerosity", "sigma"]].agg(
@@ -649,7 +644,7 @@ The error bars show the standard deviation across vertices, not the standard err
 numerosity is highest in the occipital maps NLO (lateral occipital) and NTO (temporal occipital) and lowest in NFS
 (superior frontal), while the maps around the central sulcus (NPCI, NPCM, NPCS) sit close together in between.
 However, the variation within each ROI is large relative to these differences, and the number of surviving vertices
-differs strongly between maps, so the averages are not equally reliable.
+differs strongly between maps.
 
 We can also look at the average pRF size of each ROI.
 

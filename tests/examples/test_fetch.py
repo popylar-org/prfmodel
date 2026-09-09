@@ -166,3 +166,85 @@ def test_get_data_dir_does_not_create_the_directory(clean_env: None, monkeypatch
     monkeypatch.setenv("PRFMODEL_DATA_DIR", str(tmp_path / "missing"))
 
     assert not get_data_dir().exists()
+
+
+def test_fetch_file_downloads_only_what_is_asked_for(file_fetcher: FileFetcher, data_dir: Path):
+    """Test that a dataset served as individual files downloads only the file that is requested."""
+    file_fetcher("first")
+
+    assert (data_dir / "first.txt").exists()
+    assert not (data_dir / "nested" / "second.txt").exists()
+
+
+def test_fetch_file_verifies_the_checksum(
+    fake_file_spec: DatasetSpec,
+    data_dir: Path,
+    fake_checksums: dict[str, dict[str, object]],
+):
+    """Test that a directly downloaded file that does not match its checksum is reported and not kept."""
+    corrupted = dict(fake_checksums)
+    corrupted["first.txt"] = {"sha256": "0" * 64, "size": 1}
+
+    fetcher = FileFetcher(fake_file_spec, data_dir=data_dir, checksums=corrupted)
+
+    with pytest.raises(ChecksumError, match=r"first\.txt"):
+        fetcher("first")
+
+    assert not (data_dir / "first.txt").exists()
+    assert list(data_dir.glob("*.part")) == []
+
+
+def test_fetch_file_does_not_redownload_cached_files(
+    file_fetcher: FileFetcher,
+    monkeypatch: pytest.MonkeyPatch,
+    fake_files: dict[str, bytes],
+):
+    """Test that a file that is already present is not downloaded again."""
+    file_fetcher("first")
+
+    def fail_download(*args: object, **kwargs: object) -> None:
+        pytest.fail("A cached file must not be downloaded again")
+
+    monkeypatch.setattr("prfmodel.examples._fetch._download_file", fail_download)
+
+    assert file_fetcher("first").read_bytes() == fake_files["first.txt"]
+
+
+def test_fetch_file_without_download_raises(
+    fake_file_spec: DatasetSpec,
+    data_dir: Path,
+    fake_checksums: dict[str, dict[str, object]],
+):
+    """Test that a missing file raises when downloading is disabled."""
+    fetcher = FileFetcher(fake_file_spec, data_dir=data_dir, checksums=fake_checksums, download=False)
+
+    with pytest.raises(FileNotFoundError, match=r"first\.txt"):
+        fetcher("first")
+
+
+def test_spec_requires_exactly_one_source(fake_archive: Path):
+    """Test that a dataset specification must set either an archive URL or per-file URLs."""
+    with pytest.raises(ValueError, match="either 'url' or 'file_urls'"):
+        DatasetSpec(name="neither", summary="", files={}, loader=lambda fetch, options: None)
+
+    with pytest.raises(ValueError, match="either 'url' or 'file_urls'"):
+        DatasetSpec(
+            name="both",
+            summary="",
+            files={"a": "a.txt"},
+            loader=lambda fetch, options: None,
+            url=fake_archive.as_uri(),
+            file_urls={"a": fake_archive.as_uri()},
+        )
+
+
+def test_spec_requires_a_url_for_every_file(fake_archive: Path):
+    """Test that a dataset served as individual files must give a URL for each of them."""
+    with pytest.raises(ValueError, match="URL for every file"):
+        DatasetSpec(
+            name="incomplete",
+            summary="",
+            files={"a": "a.txt", "b": "b.txt"},
+            loader=lambda fetch, options: None,
+            file_urls={"a": fake_archive.as_uri()},
+        )

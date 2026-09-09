@@ -44,6 +44,30 @@
       "sha256": "66f48b7917bf650c2dd29e77699bafd52628d1c90d5c27ef98fb1ede1de3753a",
       "size": 26158174
     },
+    "sub-S1_hemi-L_desc-even_bold.func.gii": {
+      "sha256": "8502ab2ba7d68f823c88598758f2623253c10f667823df9007ed2fcea63afaee",
+      "size": 4589914
+    },
+    "sub-S1_hemi-L_desc-numerosity_dseg.label.gii": {
+      "sha256": "51a4fa177c559598ab4a6cf83508df1b9f0a44bf5a73449e434c00694bfcce4c",
+      "size": 2180
+    },
+    "sub-S1_hemi-L_desc-odd_bold.func.gii": {
+      "sha256": "73ccf3653037e239303947a3430aa23dcd4678909f18088f91e4e75d84dbd373",
+      "size": 4589668
+    },
+    "sub-S1_hemi-R_desc-even_bold.func.gii": {
+      "sha256": "caeab5abd52b61f3718773101e0fd840ca238340242b9ebdd1214d521f91be53",
+      "size": 4131855
+    },
+    "sub-S1_hemi-R_desc-numerosity_dseg.label.gii": {
+      "sha256": "67dc21818af40eeb5a24c5338f7071fc5f99ededbc868d38c3284ed8cb65dd7d",
+      "size": 2177
+    },
+    "sub-S1_hemi-R_desc-odd_bold.func.gii": {
+      "sha256": "ee09634fd2ead78401f9cb43c9860082098bd2b0f14d76d6281125f9c0a42596",
+      "size": 4132037
+    },
     "vis_design.mat": {
       "sha256": "3c269e74c12cc79044184b47cf6803205045305687f2f30fe73e8bccd62835d3",
       "size": 475048
