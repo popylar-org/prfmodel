@@ -1,0 +1,53 @@
+{
+  "files": {
+    "hcp_999999/surface-info/mmp_atlas.npz": {
+      "sha256": "6c760f3446a9cd13986da143285d72e6532df4c7df6d4713ee79e9fcb7af629a",
+      "size": 474840
+    },
+    "hcp_999999/surfaces/flat_lh.gii": {
+      "sha256": "6882925bc1ea7a8da18381ab56678a91895b6be9d13ffc0a964ea12a7dec7aec",
+      "size": 1051644
+    },
+    "hcp_999999/surfaces/flat_rh.gii": {
+      "sha256": "c815880346310364cd102748da8140133002ca4e0cb1120175c8868fb4ab32ae",
+      "size": 945488
+    },
+    "hcp_999999/surfaces/inflated_lh.gii": {
+      "sha256": "d853d8a47e3b326421c7cb60fd2171e0b4613f9ce3364205959689169002ae12",
+      "size": 1401300
+    },
+    "hcp_999999/surfaces/inflated_rh.gii": {
+      "sha256": "1eec2f9197508353496110841b97643a022cec40261432ac7e5607a0d0625e98",
+      "size": 1282997
+    },
+    "hcp_999999/surfaces/pia_lh.gii": {
+      "sha256": "a0e273b3aa925408c7b0713326e79b66ae5fdf2e8f76f221734a968ca30c341d",
+      "size": 1374860
+    },
+    "hcp_999999/surfaces/pia_rh.gii": {
+      "sha256": "f51541432aa54f0bbfa7cdeaafd6ffdcbc10d7f83f46be9073cfe2b1873b96a6",
+      "size": 1337888
+    },
+    "hcp_999999/surfaces/wm_lh.gii": {
+      "sha256": "cc4d524c953aca73537eed1f684515891b85324070282c7dbdcc07a67534c7b1",
+      "size": 1373416
+    },
+    "hcp_999999/surfaces/wm_rh.gii": {
+      "sha256": "28ce263052dc14ac3a7e48b74f377d94c96480f69fcfbf1228432e7df14f87a1",
+      "size": 1335600
+    },
+    "sub-02_task-prf_space-59k_hemi-L_run-median_desc-bold.func.gii": {
+      "sha256": "c60e155cdc1c490ea09fe1fa414cec4cddd36308a4622d08e8d451fdfcb40038",
+      "size": 26873342
+    },
+    "sub-02_task-prf_space-59k_hemi-R_run-median_desc-bold.func.gii": {
+      "sha256": "66f48b7917bf650c2dd29e77699bafd52628d1c90d5c27ef98fb1ede1de3753a",
+      "size": 26158174
+    },
+    "vis_design.mat": {
+      "sha256": "3c269e74c12cc79044184b47cf6803205045305687f2f30fe73e8bccd62835d3",
+      "size": 475048
+    }
+  },
+  "version": 1
+}

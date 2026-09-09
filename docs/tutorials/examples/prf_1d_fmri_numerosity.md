@@ -44,7 +44,7 @@ if find_spec("tensorflow") is None:
 
 In this example, we use a public dataset by [Hendrikx et al. (2024)](https://doi.org/10.1016/j.neuroimage.2024.120515) that is available on FigShare.
 
-The numerosity stimulus that belongs to this dataset is already included in the package and can be loaded with {py:func}`prfmodel.examples.load_1d_prf_lognumerosity_stimulus`.
+The numerosity stimulus that belongs to this dataset is already included in the package and can be loaded with {py:func}`prfmodel.examples.load_1d_prf_lognumerosity_stimulus`. It is also available as the `stimulus` attribute of the loaded dataset.
 
 ```{code-cell} ipython3
 from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
@@ -93,10 +93,14 @@ Now that we have the numerosity stimulus, we load the raw BOLD response data fro
 from the left hemisphere. In the experiment, the subject was recorded for four runs, and we load the averaged neural time courses from the two even and the two odd runs. We will use the even and odd runs to do cross-validation.
 
 ```{code-cell} ipython3
-from nilearn.surface import load_surf_data
+from prfmodel.examples import load_dataset
 
-response_raw_odd = load_surf_data("data/sub-S1_hemi-L_desc-odd_bold.func.gii")
-response_raw_even = load_surf_data("data/sub-S1_hemi-L_desc-even_bold.func.gii")
+# Downloads on first use and caches in a user data directory; the second call reuses the cache
+dataset_odd = load_dataset("numerosity-timing", hemisphere="left", split="odd")
+dataset_even = load_dataset("numerosity-timing", hemisphere="left", split="even")
+
+response_raw_odd = dataset_odd.response
+response_raw_even = dataset_even.response
 
 response_raw_odd.shape, response_raw_even.shape
 ```
@@ -106,7 +110,7 @@ Both the even and odd averaged responses have 176 time frames. When combined wit
 Importantly, the response objects only contain time courses for vertices in ROIs that were shown to respond to the numerosity stimulus. Hence the small number of vertices. We can also load the indices of the ROI labels for the vertices.
 
 ```{code-cell} ipython3
-roi_index = load_surf_data("data/sub-S1_hemi-L_desc-numerosity_dseg.label.gii")
+roi_index = dataset_odd.roi_index
 roi_index.shape
 ```
 
@@ -116,13 +120,10 @@ We can look at the unique ROI indices.
 np.unique_counts(roi_index)
 ```
 
-The mapping between ROI indices and labels can also be accessed from the file.
+The mapping between ROI indices and labels comes with the dataset as well.
 
 ```{code-cell} ipython3
-import nibabel
-
-label_image = nibabel.load("data/sub-S1_hemi-L_desc-numerosity_dseg.label.gii")
-roi_mapping = label_image.labeltable.get_labels_as_dict()
+roi_mapping = dataset_odd.roi_mapping
 roi_mapping
 ```
 
