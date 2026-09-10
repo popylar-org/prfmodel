@@ -24,11 +24,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           extras: dev,publishing,tensorflow
+      - name: Cache example datasets
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.prfmodel-data
+          key: ${{ runner.os }}-prfmodel-data-${{ hashFiles('src/prfmodel/data/checksums.json') }}
       - name: Run unit tests with examples
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.12'
         run: python -m pytest -v --examples --heavy
         env:
           KERAS_BACKEND: tensorflow
+          PRFMODEL_DATA_DIR: ${{ github.workspace }}/.prfmodel-data
       - name: Run unit tests without examples
         if: matrix.os != 'ubuntu-latest' || matrix.python-version != '3.12'
         run: python -m pytest -v

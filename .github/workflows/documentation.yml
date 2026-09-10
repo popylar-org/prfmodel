@@ -53,7 +53,14 @@ jobs:
           key: ${{ runner.os }}-jupyter-cache-${{ hashFiles('docs/tutorials/**') }}
           restore-keys: |
             ${{ runner.os }}-jupyter-cache-
+      - name: Cache example datasets
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.prfmodel-data
+          key: ${{ runner.os }}-prfmodel-data-${{ hashFiles('src/prfmodel/data/checksums.json') }}
       - name: Build documentation
+        env:
+          PRFMODEL_DATA_DIR: ${{ github.workspace }}/.prfmodel-data
         run: |
           cd docs
           make html

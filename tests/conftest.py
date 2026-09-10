@@ -28,16 +28,17 @@ def pytest_configure(config: pytest.Config) -> None:
 
 def pytest_collection_modifyitems(config: pytest.Config, items: dict) -> None:
     """Add a marker to pytest mark API."""
+    # We check the marker rather than the keywords because the keywords also hold the path of a test
     if not config.getoption("--examples"):
         skip_examples = pytest.mark.skip(reason="need --examples option to run")
         for item in items:
-            if "examples" in item.keywords:
+            if item.get_closest_marker("examples") is not None:
                 item.add_marker(skip_examples)
 
     if not config.getoption("--heavy"):
         skip_heavy = pytest.mark.skip(reason="need --heavy option to run")
         for item in items:
-            if "heavy" in item.keywords:
+            if item.get_closest_marker("heavy") is not None:
                 item.add_marker(skip_heavy)
 
 

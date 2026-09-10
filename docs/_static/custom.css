@@ -1,4 +1,60 @@
 /* Make pandas DataFrame tables horizontally scrollable */
 div.output.text_html {
     overflow-x: auto;
+    /* Leave room for the table's box shadow, which the scroll container would otherwise clip */
+    padding: 0.2rem 0.2rem 0.5rem;
+}
+
+/* Style pandas DataFrame output like Furo's own tables.
+   Pandas emits <table border="1" class="dataframe">, which matches none of Furo's `table.docutils` rules, so it
+   would otherwise fall back to the browser default table styling. Colors come from Furo's CSS variables so the
+   tables follow the light/dark theme toggle. The selectors need a `table.dataframe` prefix to override the
+   <style> block that pandas ships alongside every table. */
+table.dataframe {
+    border: none;
+    border-collapse: collapse;
+    border-radius: 0.2rem;
+    border-spacing: 0;
+    box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.05), 0 0 0.0625rem rgba(0, 0, 0, 0.1);
+    font-size: var(--font-size--small);
+    /* Shrink to fit instead of stretching narrow frames across the page */
+    width: auto;
+}
+
+table.dataframe td,
+table.dataframe th {
+    border: none;
+    border-bottom: 1px solid var(--color-table-border);
+    padding: 0.3rem 0.7rem;
+    /* Keep digits in a column vertically aligned */
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+table.dataframe thead th {
+    background: var(--color-table-header-background);
+    border-bottom: 1px solid var(--color-foreground-border);
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Index column: headers in the body, left-aligned and muted to set them apart from the data */
+table.dataframe tbody th {
+    background: var(--color-table-header-background);
+    color: var(--color-foreground-secondary);
+    font-weight: 500;
+    text-align: left;
+}
+
+table.dataframe tbody td {
+    text-align: right;
+}
+
+table.dataframe tbody tr:last-child td,
+table.dataframe tbody tr:last-child th {
+    border-bottom: none;
+}
+
+table.dataframe tbody tr:hover td {
+    background: var(--color-background-hover);
 }

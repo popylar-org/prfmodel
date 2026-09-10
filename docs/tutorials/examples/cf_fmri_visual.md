@@ -30,10 +30,12 @@ In this example, we use the TensorFlow backend.
 import os
 from importlib.util import find_spec
 
+import pandas as pd
+
 # Set keras backend to 'tensorflow' (this is normally the default)
 os.environ["KERAS_BACKEND"] = "tensorflow"
-# Hide tensorflow info messages
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
+# Print parameter DataFrames with three decimals
+pd.set_option("display.precision", 3)
 
 if find_spec("tensorflow") is None:
     msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
@@ -46,10 +48,12 @@ Before we start modelling, we need to make sure that we have all the requirement
 surface of the Human Connectome Project (see https://doi.org/10.6084/m9.figshare.13372958). For visualization, we use the nilearn package. We download the surface and load the flat meshes for both hemispheres.
 
 ```{code-cell} ipython3
-from prfmodel.examples import load_surface_mesh
+from prfmodel.examples import load_dataset
 
-# Download surface mesh and load as nilearn.surface.PolyMesh object
-mesh = load_surface_mesh(dest_dir="data", surface_type="flat")
+# Downloads on first use and caches in a user data directory (see prfmodel.examples.get_data_dir)
+surface = load_dataset("hcp-999999-surface", surface_type="flat")
+
+mesh = surface.mesh
 ```
 
 ## Loading the BOLD response
@@ -59,9 +63,10 @@ Now that we have the flat surface, we load the raw BOLD response data from a sin
 ```{code-cell} ipython3
 %matplotlib inline
 import matplotlib.pyplot as plt
-from prfmodel.examples import load_single_subject_fmri_data
 
-response_raw = load_single_subject_fmri_data(dest_dir="data", hemisphere="both")
+dataset = load_dataset("7t-retbar-visual", hemisphere="both")
+
+response_raw = dataset.response
 response_raw.shape  # shape (num_vertices, num_frames)
 ```
 
@@ -141,7 +146,7 @@ pio.renderers.default = "notebook_connected"  # Requires internet connection to 
 pio.templates.default = "simple_white"
 
 # The atlas comes with the surface mesh
-atlas = np.load("data/hcp_999999/surface-info/mmp_atlas.npz")
+atlas = surface.atlas
 
 # V1 has label 1
 label_v1 = 1
@@ -215,7 +220,7 @@ import nibabel as nib
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
 
-def calculate_distance_matrix_dijkstra(surface_path: str, source_indices: Sequence) -> np.ndarray:
+def calculate_distance_matrix_dijkstra(surface_path: str | os.PathLike, source_indices: Sequence) -> np.ndarray:
     """Calculate the distance matrix for a sequence of source region vertex indices from a surface file."""
     img = nib.load(surface_path)
 
@@ -251,8 +256,8 @@ to infinity indicating that connective fields cannot map across hemispheres.
 idx_v1_left = np.where(atlas["left"] == label_v1)[0]
 idx_v1_right = np.where(atlas["right"] == label_v1)[0]
 
-dist_matrix_lh = calculate_distance_matrix_dijkstra("data/hcp_999999/surfaces/wm_lh.gii", idx_v1_left)
-dist_matrix_rh = calculate_distance_matrix_dijkstra("data/hcp_999999/surfaces/wm_rh.gii", idx_v1_right)
+dist_matrix_lh = calculate_distance_matrix_dijkstra(surface.files["wm_lh"], idx_v1_left)
+dist_matrix_rh = calculate_distance_matrix_dijkstra(surface.files["wm_rh"], idx_v1_right)
 
 # We pad both matrices with infinity values and then concatenate
 dist_matrix = np.concatenate([

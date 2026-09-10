@@ -45,7 +45,11 @@ Let's illustrate with a simulated example how to include regressors in a populat
 We first load a pRF stimulus that contains a bar moving vertically and horizontally on a 2D screen.
 
 ```{code-cell} ipython3
+import pandas as pd
 from prfmodel.examples import load_2d_prf_bar_stimulus
+
+# Print parameter DataFrames with three decimals
+pd.set_option("display.precision", 3)
 
 stimulus = load_2d_prf_bar_stimulus()
 print(stimulus)

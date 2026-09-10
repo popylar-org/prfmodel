@@ -81,6 +81,10 @@ myst_enable_extensions = [
 ]
 
 nb_merge_streams = True
+# Drop stderr output from executed notebooks. The TensorFlow/absl C++ logger writes its start-up messages to stderr
+# before `absl::InitializeLog` runs, so they cannot be silenced with `TF_CPP_MIN_LOG_LEVEL` or any other environment
+# variable. Use "remove-warn" instead to also report the removed output in the build log.
+nb_output_stderr = "remove"
 nb_execution_mode = "cache"
 nb_execution_timeout = 500
 nb_execution_raise_on_error = True
