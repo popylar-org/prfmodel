@@ -25,7 +25,11 @@ Let's start with the first step: Defining the stimulus. We load an example stimu
 The stimulus simulates a bar moving in different directions through a two-dimensional visual field.
 
 ```{code-cell} ipython3
+import pandas as pd
 from prfmodel.examples import load_2d_prf_bar_stimulus
+
+# Print parameter DataFrames with three decimals
+pd.set_option("display.precision", 3)
 
 num_frames = 200  # Simulate 200 time frames
 

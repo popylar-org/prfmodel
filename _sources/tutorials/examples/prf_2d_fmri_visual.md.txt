@@ -30,10 +30,12 @@ In this example, we use the TensorFlow backend.
 import os
 from importlib.util import find_spec
 
+import pandas as pd
+
 # Set keras backend to 'tensorflow' (this is normally the default)
 os.environ["KERAS_BACKEND"] = "tensorflow"
-# Hide tensorflow info messages
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
+# Print parameter DataFrames with three decimals
+pd.set_option("display.precision", 3)
 
 if find_spec("tensorflow") is None:
     msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
@@ -48,10 +50,12 @@ Before we start modelling, we need to make sure that we have all the requirement
 surface of the Human Connectome Project (see https://doi.org/10.6084/m9.figshare.13372958). For visualization, we use the nilearn package. We download the surface and load the flat meshes for both hemispheres.
 
 ```{code-cell} ipython3
-from prfmodel.examples import load_surface_mesh
+from prfmodel.examples import load_dataset
 
-# Download surface mesh and load as nilearn.surface.PolyMesh object
-mesh = load_surface_mesh(dest_dir="data", surface_type="flat")
+# Downloads on first use and caches in a user data directory (see prfmodel.examples.get_data_dir)
+surface = load_dataset("hcp-999999-surface", surface_type="flat")
+
+mesh = surface.mesh
 ```
 
 We can visualize the flat surface with nilearn.
@@ -77,9 +81,9 @@ fig.suptitle("Flat surface (HCP template)");
 Now that we have the flat surface, we load the raw BOLD response data from a single subject that can be represented on the surface mesh. We load data from both hemispheres of the subject by setting `hemisphere="both"`.
 
 ```{code-cell} ipython3
-from prfmodel.examples import load_single_subject_fmri_data
+dataset = load_dataset("7t-retbar-visual", hemisphere="both")
 
-response_raw = load_single_subject_fmri_data(dest_dir="data", hemisphere="both")
+response_raw = dataset.response
 response_raw.shape  # shape (num_vertices, num_frames)
 ```
 
@@ -149,7 +153,7 @@ We can see that there is high variation in the signal in the visual areas (e.g.,
 +++
 
 For pRF modeling, we also need the experimental stimulus that the subject has seen during the fMRI recording. The
-stimulus was created using MATLAB so, we first load the raw design matrix that is located in the `data` directory.
+stimulus was created using MATLAB so, we first load the raw design matrix that ships with the dataset.
 
 > **Note - stimulus preprocessing:** In this tutorial, we preprocess the raw design matrix before applying the pRF model to it.
 > However, while we use one possible preprocessing approach, we want to mention that there are alternative approaches
@@ -158,8 +162,8 @@ stimulus was created using MATLAB so, we first load the raw design matrix that i
 ```{code-cell} ipython3
 from scipy.io import loadmat
 
-design_path = "data/vis_design.mat"
-design = np.transpose(loadmat(design_path)["stim"])
+# The raw design ships with the dataset; 'files' maps short names to the cached file paths
+design = np.transpose(loadmat(dataset.files["design"])["stim"])
 design.shape  # (num_frames, num_x, num_y)
 ```
 

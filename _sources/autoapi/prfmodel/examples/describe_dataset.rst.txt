@@ -1,0 +1,32 @@
+prfmodel.examples.describe_dataset
+==================================
+
+.. py:function:: prfmodel.examples.describe_dataset(name: str) -> str
+
+   Describe an example dataset without downloading it.
+
+   :param name: Name of the dataset. Must be one of :func:`~prfmodel.examples.list_datasets`.
+   :type name: str
+
+   :returns: A human-readable description with the contents, options, size, licence, and citation of the dataset.
+   :rtype: str
+
+   :raises ValueError: If `name` is not the name of an available dataset.
+
+   .. rubric:: Examples
+
+   >>> from prfmodel.examples import describe_dataset
+   >>> print(describe_dataset("7t-retbar-visual"))  # doctest: +ELLIPSIS
+   7t-retbar-visual
+   ================
+   <BLANKLINE>
+   Blood oxygenation level-dependent response of a single subject to a moving bar stimulus, ...
+   <BLANKLINE>
+   Files: response_L, response_R, design
+   Hemispheres: both, left, right (default 'both')
+   Download: 51 MB (the whole archive, also when loading part of it)
+   Licence: CC BY 4.0
+   Homepage: https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209
+   <BLANKLINE>
+   Cite as: Knapen, T. (2021). fMRI Teaching Materials. figshare. https://doi.org/10.6084/m9.figshare.14096209
+

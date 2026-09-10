@@ -1,0 +1,17 @@
+prfmodel.examples.list_datasets
+===============================
+
+.. py:function:: prfmodel.examples.list_datasets() -> list[str]
+
+   List the names of the available example datasets.
+
+   :returns: The dataset names, sorted alphabetically. Each can be passed to
+             :func:`~prfmodel.examples.load_dataset`.
+   :rtype: list of str
+
+   .. rubric:: Examples
+
+   >>> from prfmodel.examples import list_datasets
+   >>> list_datasets()
+   ['7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
+

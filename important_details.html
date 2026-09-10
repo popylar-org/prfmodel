@@ -14,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
-    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=ad54fe46" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=45dbb535" />
     
     
 
@@ -213,6 +213,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="tutorials/examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="tutorials/examples/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/examples/prf_1d_fmri_numerosity.html">Fitting a 1D population receptive field model to fMRI data from a numerosity experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tutorials/examples/cf_fmri_visual.html">Fitting a connective field model to fMRI data from a visual experiment</a></li>
 </ul>
 </li>
@@ -232,10 +233,14 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/prfmodel/examples/index.html">prfmodel.examples</a><input aria-label="Toggle navigation of prfmodel.examples" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/ChecksumError.html">ChecksumError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/Dataset.html">Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/describe_dataset.html">describe_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/get_data_dir.html">get_data_dir</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/list_datasets.html">list_datasets</a></li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/load_1d_prf_lognumerosity_stimulus.html">load_1d_prf_lognumerosity_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/load_2d_prf_bar_stimulus.html">load_2d_prf_bar_stimulus</a></li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/load_single_subject_fmri_data.html">load_single_subject_fmri_data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/load_surface_mesh.html">load_surface_mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/load_dataset.html">load_dataset</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/prfmodel/exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -452,18 +457,18 @@ we describe the choices that affect <strong>users</strong> directly in this sect
 <h2>Gaussian models use proper probability densities<a class="headerlink" href="#gaussian-models-use-proper-probability-densities" title="Link to this heading">¶</a></h2>
 <p>Some software packages that implement Gaussian population receptive field (pRF) models use unnormalized Gaussian
 densities to predict tuning profiles. That is, they use the density:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-8dce0d85-c0cf-44e5-bd81-6ee5516154d4">
-<div class="amsmath math notranslate nohighlight" id="equation-8dce0d85-c0cf-44e5-bd81-6ee5516154d4">
-<span class="eqno">(1)<a class="headerlink" href="#equation-8dce0d85-c0cf-44e5-bd81-6ee5516154d4" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-8ac1ceee-905f-48a9-a6cd-2189a43bf72d">
+<div class="amsmath math notranslate nohighlight" id="equation-8ac1ceee-905f-48a9-a6cd-2189a43bf72d">
+<span class="eqno">(1)<a class="headerlink" href="#equation-8ac1ceee-905f-48a9-a6cd-2189a43bf72d" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 f(x) = e^{-\frac{\lVert x - \mu \rVert^2}{2 \sigma^2}},
 \end{equation}\]</div>
 </div>
 <p>that has a peak amplitude of <span class="math notranslate nohighlight">\(\max(f(x)) = 1\)</span>. Although this parameterization has advantages in some situations,
 we decided that all Gaussian models in prfmodel use proper densities that are normalized by their
 volume (see <a class="reference internal" href="autoapi/prfmodel/density/normal_density.html#prfmodel.density.normal_density" title="prfmodel.density.normal_density"><code class="xref py py-func docutils literal notranslate"><span class="pre">normal_density()</span></code></a>):</p>
-<div class="math-wrapper amsmath docutils container" id="equation-4176de4e-c7ce-42f6-a7bd-363f0e8511d4">
-<div class="amsmath math notranslate nohighlight" id="equation-4176de4e-c7ce-42f6-a7bd-363f0e8511d4">
-<span class="eqno">(2)<a class="headerlink" href="#equation-4176de4e-c7ce-42f6-a7bd-363f0e8511d4" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-9fc8a80e-c23c-4265-9df2-bedc6c491c96">
+<div class="amsmath math notranslate nohighlight" id="equation-9fc8a80e-c23c-4265-9df2-bedc6c491c96">
+<span class="eqno">(2)<a class="headerlink" href="#equation-9fc8a80e-c23c-4265-9df2-bedc6c491c96" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 f(x) = \frac{1}{V} e^{-\frac{\lVert x - \mu \rVert^2}{2 \sigma^2}},
 \end{equation}\]</div>
 </div>
@@ -479,9 +484,9 @@ for the Gaussian 1D and 2D pRF models but also for difference of Gaussian and Ga
 models as well as Gaussian connective field models.</p>
 <p>It is possible to convert the amplitudes estimated with the proper density into those estimated with unnormalized
 density by dividing by the volume:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-aa0daf89-ae1b-40af-8532-b99d1a120906">
-<div class="amsmath math notranslate nohighlight" id="equation-aa0daf89-ae1b-40af-8532-b99d1a120906">
-<span class="eqno">(3)<a class="headerlink" href="#equation-aa0daf89-ae1b-40af-8532-b99d1a120906" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-52b62bec-971d-4871-aa93-de1c1328595a">
+<div class="amsmath math notranslate nohighlight" id="equation-52b62bec-971d-4871-aa93-de1c1328595a">
+<span class="eqno">(3)<a class="headerlink" href="#equation-52b62bec-971d-4871-aa93-de1c1328595a" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 \beta_\text{unnorm} = \frac{\beta_\text{norm}}{V}.
 \end{equation}\]</div>
 </div>
@@ -494,9 +499,9 @@ density by dividing by the volume:</p>
 <p>Some software packages normalize stimulus-encoded model responses of spatial models by the
 size of the cells in the spatial grid. For example, for the Gaussian 2D pRF model in visual space, the stimulus-encoded
 response can be normalized as follows:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-c44b7d58-0952-4d37-a821-c6ed8442be13">
-<div class="amsmath math notranslate nohighlight" id="equation-c44b7d58-0952-4d37-a821-c6ed8442be13">
-<span class="eqno">(4)<a class="headerlink" href="#equation-c44b7d58-0952-4d37-a821-c6ed8442be13" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-16c39a59-5d19-49b3-8426-b4cb94215db5">
+<div class="amsmath math notranslate nohighlight" id="equation-16c39a59-5d19-49b3-8426-b4cb94215db5">
+<span class="eqno">(4)<a class="headerlink" href="#equation-16c39a59-5d19-49b3-8426-b4cb94215db5" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 r(t) = \sum_{xy} g(x, y) \cdot S(t, x, y) dA,
 \end{equation}\]</div>
 </div>
@@ -528,9 +533,9 @@ neuron population (e.g., a stimulus-encoded pRF response). Here, the sum-normali
 from impulse response parameters (e.g., the shape of the gamma distribution), but it does <strong>not</strong> affect the
 identifiability of model parameters.</p>
 <p>It is possible to convert impulse-sum-normalized into impulse-unnormalized amplitudes:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-0be93bb2-8349-4d7b-80da-f70c5bae8a74">
-<div class="amsmath math notranslate nohighlight" id="equation-0be93bb2-8349-4d7b-80da-f70c5bae8a74">
-<span class="eqno">(5)<a class="headerlink" href="#equation-0be93bb2-8349-4d7b-80da-f70c5bae8a74" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-5764a9b1-005d-4ca1-af8b-9f383456148a">
+<div class="amsmath math notranslate nohighlight" id="equation-5764a9b1-005d-4ca1-af8b-9f383456148a">
+<span class="eqno">(5)<a class="headerlink" href="#equation-5764a9b1-005d-4ca1-af8b-9f383456148a" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 \beta_\text{unnorm} = \beta_\text{norm} / \sum_t h_\text{unnorm}(t),
 \end{equation}\]</div>
 </div>
@@ -575,7 +580,7 @@ observed neural timecourses represent instantaneous measurements of brain activi
 <p>Without any up- or downsampling, stimulus design frame <span class="math notranslate nohighlight">\(i\)</span>, observed sample <span class="math notranslate nohighlight">\(i\)</span> and impulse response frame <span class="math notranslate nohighlight">\(i\)</span> all
 refer to the time <span class="math notranslate nohighlight">\(i \cdot \text{TR}\)</span>. We therefore sample impulse responses at the <strong>leading edge</strong> of each frame.</p>
 <p>With the default <code class="docutils literal notranslate"><span class="pre">offset</span></code> of zero, the first sample of the kernel is at <span class="math notranslate nohighlight">\(t=0\)</span>, and the default impulse model
-<code class="xref py py-class docutils literal notranslate"><span class="pre">impulseDerivativeTwoGammaImpulse</span></code> returns exactly zero there. Discrete convolution in prfmodel
+<a class="reference internal" href="autoapi/prfmodel/impulse/DerivativeTwoGammaImpulse.html#prfmodel.impulse.DerivativeTwoGammaImpulse" title="prfmodel.impulse.DerivativeTwoGammaImpulse"><code class="xref py py-class docutils literal notranslate"><span class="pre">DerivativeTwoGammaImpulse</span></code></a> returns exactly zero there. Discrete convolution in prfmodel
 treats the first frame of the impulse response as lag 0, so an impulse response of zero means that a stimulus cannot
 contribute to the observed neural response during its exact onset (which is biologically plausible).</p>
 <p>The leading-edge sampling assumption can be changed by setting a positive offset in the impulse model. For example, for

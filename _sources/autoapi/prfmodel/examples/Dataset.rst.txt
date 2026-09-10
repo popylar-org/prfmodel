@@ -1,0 +1,61 @@
+prfmodel.examples.Dataset
+=========================
+
+.. py:class:: prfmodel.examples.Dataset
+
+   An example dataset and the files it was loaded from.
+
+   Datasets differ in what they carry, and fields that a dataset does not provide are `None`. Print the
+   object to see which fields are populated, or call :func:`~prfmodel.examples.describe_dataset` for a
+   description of a dataset before loading it.
+
+   :param name: Name of the dataset, as passed to :func:`~prfmodel.examples.load_dataset`.
+   :type name: str
+   :param response: Neural timecourses with shape `(num_units, num_frames)`, where units are surface vertices or
+                    region of interest gray nodes depending on the dataset. When both hemispheres are requested, the rows
+                    of the left hemisphere come first.
+   :type response: numpy.ndarray, optional
+   :param stimulus: The stimulus that belongs to the response, when the dataset provides a ready-made one. Datasets whose
+                    stimulus requires preprocessing leave this `None` and expose the raw design through `files` instead.
+   :type stimulus: prfmodel.stimuli.Stimulus, optional
+   :param roi_index: Integer region of interest index for each row of `response`, with shape `(num_units,)`.
+   :type roi_index: numpy.ndarray, optional
+   :param roi_mapping: Mapping from the values in `roi_index` to region of interest labels.
+   :type roi_mapping: dict of int to str, optional
+   :param mesh: The cortical surface mesh that the response can be projected onto.
+   :type mesh: nilearn.surface.PolyMesh, optional
+   :param atlas: Per-hemisphere parcellation labels, keyed by `"left"` and `"right"`.
+   :type atlas: dict of str to numpy.ndarray, optional
+   :param hemisphere: The hemisphere selection that the dataset was loaded with.
+   :type hemisphere: str, optional
+   :param split: The data split that `response` was loaded from.
+   :type split: str, optional
+   :param files: The files that were fetched, keyed by a short logical name such as `"design"` or `"wm_lh"`.
+   :type files: collections.abc.Mapping of str to pathlib.Path
+
+   .. rubric:: Notes
+
+   The object is immutable but its arrays are not copied, so mutating them in place mutates the dataset.
+
+   .. seealso::
+
+      :py:obj:`prfmodel.examples.load_dataset`
+          Load an example dataset.
+
+      :py:obj:`prfmodel.examples.describe_dataset`
+          Describe an example dataset without loading it.
+
+
+   .. py:method:: __repr__() -> str
+
+      Create a round-trippable string representation of the dataset object.
+
+
+
+   .. py:method:: __str__() -> str
+
+      Create a human-readable string representation of the dataset object.
+
+      Fields that the dataset does not provide are left out.
+
+

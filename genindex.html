@@ -12,7 +12,7 @@
     <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
-    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=ad54fe46" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=45dbb535" />
     
     
 
@@ -211,6 +211,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="tutorials/examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="tutorials/examples/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/examples/prf_1d_fmri_numerosity.html">Fitting a 1D population receptive field model to fMRI data from a numerosity experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="tutorials/examples/cf_fmri_visual.html">Fitting a connective field model to fMRI data from a visual experiment</a></li>
 </ul>
 </li>
@@ -230,10 +231,14 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/prfmodel/examples/index.html">prfmodel.examples</a><input aria-label="Toggle navigation of prfmodel.examples" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/ChecksumError.html">ChecksumError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/Dataset.html">Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/describe_dataset.html">describe_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/get_data_dir.html">get_data_dir</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/list_datasets.html">list_datasets</a></li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/load_1d_prf_lognumerosity_stimulus.html">load_1d_prf_lognumerosity_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/load_2d_prf_bar_stimulus.html">load_2d_prf_bar_stimulus</a></li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/load_single_subject_fmri_data.html">load_single_subject_fmri_data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/load_surface_mesh.html">load_surface_mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/examples/load_dataset.html">load_dataset</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/prfmodel/exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -532,9 +537,11 @@
         </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="autoapi/prfmodel/stimuli/base/Stimulus.html#prfmodel.stimuli.base.Stimulus.__repr__">__repr__() (prfmodel.stimuli.base.Stimulus method)</a>
+        <li><a href="autoapi/prfmodel/examples/Dataset.html#prfmodel.examples.Dataset.__repr__">__repr__() (prfmodel.examples.Dataset method)</a>
 
         <ul>
+          <li><a href="autoapi/prfmodel/stimuli/base/Stimulus.html#prfmodel.stimuli.base.Stimulus.__repr__">(prfmodel.stimuli.base.Stimulus method)</a>
+</li>
           <li><a href="autoapi/prfmodel/stimuli/CFStimulus.html#prfmodel.stimuli.CFStimulus.__repr__">(prfmodel.stimuli.CFStimulus method)</a>
 </li>
           <li><a href="autoapi/prfmodel/stimuli/CSFStimulus.html#prfmodel.stimuli.CSFStimulus.__repr__">(prfmodel.stimuli.CSFStimulus method)</a>
@@ -544,9 +551,11 @@
           <li><a href="autoapi/prfmodel/stimuli/Stimulus.html#prfmodel.stimuli.Stimulus.__repr__">(prfmodel.stimuli.Stimulus method)</a>
 </li>
         </ul></li>
-        <li><a href="autoapi/prfmodel/stimuli/base/Stimulus.html#prfmodel.stimuli.base.Stimulus.__str__">__str__() (prfmodel.stimuli.base.Stimulus method)</a>
+        <li><a href="autoapi/prfmodel/examples/Dataset.html#prfmodel.examples.Dataset.__str__">__str__() (prfmodel.examples.Dataset method)</a>
 
         <ul>
+          <li><a href="autoapi/prfmodel/stimuli/base/Stimulus.html#prfmodel.stimuli.base.Stimulus.__str__">(prfmodel.stimuli.base.Stimulus method)</a>
+</li>
           <li><a href="autoapi/prfmodel/stimuli/CFStimulus.html#prfmodel.stimuli.CFStimulus.__str__">(prfmodel.stimuli.CFStimulus method)</a>
 </li>
           <li><a href="autoapi/prfmodel/stimuli/CSFStimulus.html#prfmodel.stimuli.CSFStimulus.__str__">(prfmodel.stimuli.CSFStimulus method)</a>
@@ -576,13 +585,17 @@
 </li>
           <li><a href="autoapi/prfmodel/density/shifted_gamma_density.html#prfmodel.density.shifted_gamma_density">prfmodel.density.shifted_gamma_density()</a>
 </li>
+          <li><a href="autoapi/prfmodel/examples/describe_dataset.html#prfmodel.examples.describe_dataset">prfmodel.examples.describe_dataset()</a>
+</li>
+          <li><a href="autoapi/prfmodel/examples/get_data_dir.html#prfmodel.examples.get_data_dir">prfmodel.examples.get_data_dir()</a>
+</li>
+          <li><a href="autoapi/prfmodel/examples/list_datasets.html#prfmodel.examples.list_datasets">prfmodel.examples.list_datasets()</a>
+</li>
           <li><a href="autoapi/prfmodel/examples/load_1d_prf_lognumerosity_stimulus.html#prfmodel.examples.load_1d_prf_lognumerosity_stimulus">prfmodel.examples.load_1d_prf_lognumerosity_stimulus()</a>
 </li>
           <li><a href="autoapi/prfmodel/examples/load_2d_prf_bar_stimulus.html#prfmodel.examples.load_2d_prf_bar_stimulus">prfmodel.examples.load_2d_prf_bar_stimulus()</a>
 </li>
-          <li><a href="autoapi/prfmodel/examples/load_single_subject_fmri_data.html#prfmodel.examples.load_single_subject_fmri_data">prfmodel.examples.load_single_subject_fmri_data()</a>
-</li>
-          <li><a href="autoapi/prfmodel/examples/load_surface_mesh.html#prfmodel.examples.load_surface_mesh">prfmodel.examples.load_surface_mesh()</a>
+          <li><a href="autoapi/prfmodel/examples/load_dataset.html#prfmodel.examples.load_dataset">prfmodel.examples.load_dataset()</a>
 </li>
           <li><a href="autoapi/prfmodel/impulse/convolve_prf_impulse_response.html#prfmodel.impulse.convolve_prf_impulse_response">prfmodel.impulse.convolve_prf_impulse_response()</a>
 </li>
@@ -1447,6 +1460,31 @@
           <li><a href="autoapi/prfmodel/examples/index.html#module-prfmodel.examples">module</a>
 </li>
         </ul></li>
+        <li><a href="autoapi/prfmodel/examples/ChecksumError.html#prfmodel.examples.ChecksumError">prfmodel.examples.ChecksumError</a>
+</li>
+        <li><a href="autoapi/prfmodel/examples/Dataset.html#prfmodel.examples.Dataset">prfmodel.examples.Dataset (built-in class)</a>
+</li>
+        <li>
+    prfmodel.examples.describe_dataset()
+
+        <ul>
+          <li><a href="autoapi/prfmodel/examples/describe_dataset.html#prfmodel.examples.describe_dataset">built-in function</a>
+</li>
+        </ul></li>
+        <li>
+    prfmodel.examples.get_data_dir()
+
+        <ul>
+          <li><a href="autoapi/prfmodel/examples/get_data_dir.html#prfmodel.examples.get_data_dir">built-in function</a>
+</li>
+        </ul></li>
+        <li>
+    prfmodel.examples.list_datasets()
+
+        <ul>
+          <li><a href="autoapi/prfmodel/examples/list_datasets.html#prfmodel.examples.list_datasets">built-in function</a>
+</li>
+        </ul></li>
         <li>
     prfmodel.examples.load_1d_prf_lognumerosity_stimulus()
 
@@ -1462,17 +1500,10 @@
 </li>
         </ul></li>
         <li>
-    prfmodel.examples.load_single_subject_fmri_data()
+    prfmodel.examples.load_dataset()
 
         <ul>
-          <li><a href="autoapi/prfmodel/examples/load_single_subject_fmri_data.html#prfmodel.examples.load_single_subject_fmri_data">built-in function</a>
-</li>
-        </ul></li>
-        <li>
-    prfmodel.examples.load_surface_mesh()
-
-        <ul>
-          <li><a href="autoapi/prfmodel/examples/load_surface_mesh.html#prfmodel.examples.load_surface_mesh">built-in function</a>
+          <li><a href="autoapi/prfmodel/examples/load_dataset.html#prfmodel.examples.load_dataset">built-in function</a>
 </li>
         </ul></li>
         <li>
@@ -1597,6 +1628,8 @@
         </ul></li>
         <li><a href="autoapi/prfmodel/models/base/BaseCanonical.html#prfmodel.models.base.BaseCanonical">prfmodel.models.base.BaseCanonical (built-in class)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="autoapi/prfmodel/models/base/BaseStimulusEncoder.html#prfmodel.models.base.BaseStimulusEncoder">prfmodel.models.base.BaseStimulusEncoder (built-in class)</a>
 </li>
         <li><a href="autoapi/prfmodel/models/base/BaseTuning.html#prfmodel.models.base.BaseTuning">prfmodel.models.base.BaseTuning (built-in class)</a>
@@ -1608,8 +1641,6 @@
           <li><a href="autoapi/prfmodel/models/cf/index.html#module-prfmodel.models.cf">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     prfmodel.models.cf.canonical
 

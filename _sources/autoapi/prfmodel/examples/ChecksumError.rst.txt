@@ -1,0 +1,16 @@
+prfmodel.examples.ChecksumError
+===============================
+
+.. py:exception:: prfmodel.examples.ChecksumError(path: pathlib.Path, expected: str, actual: str)
+
+
+
+   Exception raised when a file does not match its expected checksum.
+
+   :param path: Path of the file that was checked.
+   :type path: pathlib.Path
+   :param expected: Expected SHA-256 hex digest.
+   :type expected: str
+   :param actual: SHA-256 hex digest that was computed.
+   :type actual: str
+

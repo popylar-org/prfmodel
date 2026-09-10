@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.examples.load_1d_prf_lognumerosity_stimulus" href="load_1d_prf_lognumerosity_stimulus.html"><link rel="prev" title="prfmodel.density.shifted_gamma_density" href="../density/shifted_gamma_density.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.examples.ChecksumError" href="ChecksumError.html"><link rel="prev" title="prfmodel.density.shifted_gamma_density" href="../density/shifted_gamma_density.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>prfmodel.examples - prfmodel 0.0.1 documentation</title>
@@ -14,7 +14,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=ad54fe46" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=45dbb535" />
     
     
 
@@ -213,6 +213,7 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../tutorials/examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_1d_fmri_numerosity.html">Fitting a 1D population receptive field model to fMRI data from a numerosity experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/cf_fmri_visual.html">Fitting a connective field model to fMRI data from a visual experiment</a></li>
 </ul>
 </li>
@@ -232,10 +233,14 @@
 </ul>
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">prfmodel.examples</a><input aria-label="Toggle navigation of prfmodel.examples" checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="ChecksumError.html">ChecksumError</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Dataset.html">Dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="describe_dataset.html">describe_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="get_data_dir.html">get_data_dir</a></li>
+<li class="toctree-l3"><a class="reference internal" href="list_datasets.html">list_datasets</a></li>
 <li class="toctree-l3"><a class="reference internal" href="load_1d_prf_lognumerosity_stimulus.html">load_1d_prf_lognumerosity_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="load_2d_prf_bar_stimulus.html">load_2d_prf_bar_stimulus</a></li>
-<li class="toctree-l3"><a class="reference internal" href="load_single_subject_fmri_data.html">load_single_subject_fmri_data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="load_surface_mesh.html">load_surface_mesh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="load_dataset.html">load_dataset</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -445,7 +450,38 @@
         <article role="main" id="furo-main-content">
           <section id="module-prfmodel.examples">
 <span id="prfmodel-examples"></span><h1>prfmodel.examples<a class="headerlink" href="#module-prfmodel.examples" title="Link to this heading">¶</a></h1>
-<p>Example stimuli and data.</p>
+<p>Example stimuli and datasets.</p>
+<p>Bundled stimuli (<a class="reference internal" href="load_2d_prf_bar_stimulus.html#prfmodel.examples.load_2d_prf_bar_stimulus" title="prfmodel.examples.load_2d_prf_bar_stimulus"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_2d_prf_bar_stimulus()</span></code></a>, <a class="reference internal" href="load_1d_prf_lognumerosity_stimulus.html#prfmodel.examples.load_1d_prf_lognumerosity_stimulus" title="prfmodel.examples.load_1d_prf_lognumerosity_stimulus"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_1d_prf_lognumerosity_stimulus()</span></code></a>) ship with the
+package and need no download. Empirical datasets are fetched on first use with <a class="reference internal" href="load_dataset.html#prfmodel.examples.load_dataset" title="prfmodel.examples.load_dataset"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_dataset()</span></code></a> and cached
+in a user data directory (see <a class="reference internal" href="get_data_dir.html#prfmodel.examples.get_data_dir" title="prfmodel.examples.get_data_dir"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_data_dir()</span></code></a>).</p>
+<section id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="ChecksumError.html#prfmodel.examples.ChecksumError" title="prfmodel.examples.ChecksumError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ChecksumError</span></code></a></p></td>
+<td><p>Exception raised when a file does not match its expected checksum.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="Dataset.html#prfmodel.examples.Dataset" title="prfmodel.examples.Dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Dataset</span></code></a></p></td>
+<td><p>An example dataset and the files it was loaded from.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="functions">
 <h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -453,17 +489,23 @@
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="load_1d_prf_lognumerosity_stimulus.html#prfmodel.examples.load_1d_prf_lognumerosity_stimulus" title="prfmodel.examples.load_1d_prf_lognumerosity_stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_1d_prf_lognumerosity_stimulus</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="describe_dataset.html#prfmodel.examples.describe_dataset" title="prfmodel.examples.describe_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">describe_dataset</span></code></a>(→ str)</p></td>
+<td><p>Describe an example dataset without downloading it.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="get_data_dir.html#prfmodel.examples.get_data_dir" title="prfmodel.examples.get_data_dir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_data_dir</span></code></a>(→ pathlib.Path)</p></td>
+<td><p>Resolve the directory in which example datasets are stored.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="list_datasets.html#prfmodel.examples.list_datasets" title="prfmodel.examples.list_datasets"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_datasets</span></code></a>(→ list[str])</p></td>
+<td><p>List the names of the available example datasets.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="load_1d_prf_lognumerosity_stimulus.html#prfmodel.examples.load_1d_prf_lognumerosity_stimulus" title="prfmodel.examples.load_1d_prf_lognumerosity_stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_1d_prf_lognumerosity_stimulus</span></code></a>(...)</p></td>
 <td><p>Load a one-dimensional population receptive field log numerosity stimulus.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="load_2d_prf_bar_stimulus.html#prfmodel.examples.load_2d_prf_bar_stimulus" title="prfmodel.examples.load_2d_prf_bar_stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_2d_prf_bar_stimulus</span></code></a>(...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="load_2d_prf_bar_stimulus.html#prfmodel.examples.load_2d_prf_bar_stimulus" title="prfmodel.examples.load_2d_prf_bar_stimulus"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_2d_prf_bar_stimulus</span></code></a>(...)</p></td>
 <td><p>Load a two-dimensional population receptive field bar stimulus.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="load_single_subject_fmri_data.html#prfmodel.examples.load_single_subject_fmri_data" title="prfmodel.examples.load_single_subject_fmri_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_single_subject_fmri_data</span></code></a>(→ numpy.ndarray)</p></td>
-<td><p>Load example functional magnetic resonance imaging (fMRI) data for a single subject.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="load_surface_mesh.html#prfmodel.examples.load_surface_mesh" title="prfmodel.examples.load_surface_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_surface_mesh</span></code></a>(→ nilearn.surface.PolyMesh)</p></td>
-<td><p>Download and load a standardized cortical surface mesh.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="load_dataset.html#prfmodel.examples.load_dataset" title="prfmodel.examples.load_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_dataset</span></code></a>(→ prfmodel.examples._dataset.Dataset)</p></td>
+<td><p>Load an example dataset, downloading it on first use.</p></td>
 </tr>
 </tbody>
 </table>
@@ -476,12 +518,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="load_1d_prf_lognumerosity_stimulus.html">
+          <a class="next-page" href="ChecksumError.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">prfmodel.examples.load_1d_prf_lognumerosity_stimulus</div>
+                <div class="title">prfmodel.examples.ChecksumError</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -527,6 +569,8 @@
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">prfmodel.examples</a><ul>
+<li><a class="reference internal" href="#exceptions">Exceptions</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
 <li><a class="reference internal" href="#functions">Functions</a></li>
 </ul>
 </li>

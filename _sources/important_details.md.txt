@@ -129,7 +129,7 @@ Without any up- or downsampling, stimulus design frame $i$, observed sample $i$ 
 refer to the time $i \cdot \text{TR}$. We therefore sample impulse responses at the **leading edge** of each frame.
 
 With the default `offset` of zero, the first sample of the kernel is at $t=0$, and the default impulse model
-{py:class}`~prfmodel.impulseDerivativeTwoGammaImpulse` returns exactly zero there. Discrete convolution in prfmodel
+{py:class}`~prfmodel.impulse.DerivativeTwoGammaImpulse` returns exactly zero there. Discrete convolution in prfmodel
 treats the first frame of the impulse response as lag 0, so an impulse response of zero means that a stimulus cannot
 contribute to the observed neural response during its exact onset (which is biologically plausible).
 

@@ -1,0 +1,36 @@
+prfmodel.examples.get_data_dir
+==============================
+
+.. py:function:: prfmodel.examples.get_data_dir(dest_dir: str | os.PathLike | None = None) -> pathlib.Path
+
+   Resolve the directory in which example datasets are stored.
+
+   :param dest_dir: Directory to use. If given, it is used as-is and takes precedence over the environment.
+   :type dest_dir: str or os.PathLike, optional
+
+   :returns: The resolved directory. The directory is not created.
+   :rtype: pathlib.Path
+
+   .. rubric:: Notes
+
+   The directory is resolved in the following order:
+
+   1. The ``dest_dir`` argument, when given.
+   2. The ``PRFMODEL_DATA_DIR`` environment variable, when set and non-empty.
+   3. ``$XDG_CACHE_HOME/prfmodel/data``, when ``XDG_CACHE_HOME`` is set to an absolute path.
+   4. A platform default: ``%LOCALAPPDATA%\\prfmodel\\Cache\\data`` on Windows,
+      ``~/Library/Caches/prfmodel/data`` on macOS, and ``~/.cache/prfmodel/data`` elsewhere.
+
+   .. rubric:: Examples
+
+   Resolve the directory that is used when none is requested.
+
+   >>> from prfmodel.examples import get_data_dir
+   >>> get_data_dir()  # doctest: +SKIP
+   PosixPath('/home/user/.cache/prfmodel/data')
+
+   Pass a directory to use it as-is, whatever the environment says.
+
+   >>> get_data_dir("my_data")  # doctest: +SKIP
+   PosixPath('my_data')
+

@@ -5,8 +5,38 @@ prfmodel.examples
 
 .. autoapi-nested-parse::
 
-   Example stimuli and data.
+   Example stimuli and datasets.
 
+   Bundled stimuli (:func:`load_2d_prf_bar_stimulus`, :func:`load_1d_prf_lognumerosity_stimulus`) ship with the
+   package and need no download. Empirical datasets are fetched on first use with :func:`load_dataset` and cached
+   in a user data directory (see :func:`get_data_dir`).
+
+
+
+Exceptions
+----------
+
+.. toctree::
+   :hidden:
+
+   ChecksumError </autoapi/prfmodel/examples/ChecksumError>
+
+.. autoapisummary::
+
+   prfmodel.examples.ChecksumError
+
+
+Classes
+-------
+
+.. toctree::
+   :hidden:
+
+   Dataset </autoapi/prfmodel/examples/Dataset>
+
+.. autoapisummary::
+
+   prfmodel.examples.Dataset
 
 
 Functions
@@ -15,16 +45,20 @@ Functions
 .. toctree::
    :hidden:
 
+   describe_dataset </autoapi/prfmodel/examples/describe_dataset>
+   get_data_dir </autoapi/prfmodel/examples/get_data_dir>
+   list_datasets </autoapi/prfmodel/examples/list_datasets>
    load_1d_prf_lognumerosity_stimulus </autoapi/prfmodel/examples/load_1d_prf_lognumerosity_stimulus>
    load_2d_prf_bar_stimulus </autoapi/prfmodel/examples/load_2d_prf_bar_stimulus>
-   load_single_subject_fmri_data </autoapi/prfmodel/examples/load_single_subject_fmri_data>
-   load_surface_mesh </autoapi/prfmodel/examples/load_surface_mesh>
+   load_dataset </autoapi/prfmodel/examples/load_dataset>
 
 .. autoapisummary::
 
+   prfmodel.examples.describe_dataset
+   prfmodel.examples.get_data_dir
+   prfmodel.examples.list_datasets
    prfmodel.examples.load_1d_prf_lognumerosity_stimulus
    prfmodel.examples.load_2d_prf_bar_stimulus
-   prfmodel.examples.load_single_subject_fmri_data
-   prfmodel.examples.load_surface_mesh
+   prfmodel.examples.load_dataset
 
 

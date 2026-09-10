@@ -1,0 +1,76 @@
+prfmodel.examples.load_dataset
+==============================
+
+.. py:function:: prfmodel.examples.load_dataset(name: str, *, dest_dir: str | os.PathLike | None = None, hemisphere: str | None = None, split: str | None = None, surface_type: str | None = None, download: bool = True) -> prfmodel.examples._dataset.Dataset
+
+   Load an example dataset, downloading it on first use.
+
+   The files of a dataset are cached in a data directory, so they are downloaded only once. Datasets are
+   distributed in two ways: As a single archive, which means that the whole archive is downloaded but only the files
+   that a dataset needs are extracted and kept; or as individual files of which only the ones that are need are
+   downloaded.
+
+   :param name: Name of the dataset. Must be one of :func:`~prfmodel.examples.list_datasets`.
+   :type name: str
+   :param dest_dir: Directory in which the dataset files are stored. If `None` (the default), uses the directory from
+                    :func:`~prfmodel.examples.get_data_dir`.
+   :type dest_dir: str or os.PathLike, optional
+   :param hemisphere: Hemisphere(s) to load the response for. Must be either `"both"`, `"left"`, or `"right"`. For
+                      `"both"`, the data of both hemispheres are concatenated (left is first). If `None` (the default),
+                      uses the default of the dataset.
+   :type hemisphere: str, optional
+   :param split: Data split to load the response from, for datasets that provide splits. Required for those datasets.
+   :type split: str, optional
+   :param surface_type: Surface type to load, for datasets that provide surfaces. Must be either `"flat"`, `"inflated"`,
+                        `"pia"` (or `"pial"`), or `"wm"` (for white matter).
+   :type surface_type: str, optional
+   :param download: Whether files may be downloaded when they are missing. If `False`, missing files raise
+                    `FileNotFoundError` instead.
+   :type download: bool, default=True
+
+   :returns: The dataset. Which of its fields are populated depends on the dataset; see
+             :func:`~prfmodel.examples.describe_dataset`.
+   :rtype: Dataset
+
+   :raises ValueError: If `name` is not the name of an available dataset, if an option is not accepted by the dataset, or if
+       the value of an option is not valid.
+   :raises FileNotFoundError: If a file is missing and `download` is `False`.
+   :raises prfmodel.examples.ChecksumError: If a downloaded file does not match its expected checksum.
+
+   .. seealso::
+
+      :py:obj:`prfmodel.examples.list_datasets`
+          List the available example datasets.
+
+      :py:obj:`prfmodel.examples.describe_dataset`
+          Describe an example dataset without loading it.
+
+      :py:obj:`prfmodel.examples.get_data_dir`
+          Resolve the directory in which example datasets are stored.
+
+   .. rubric:: Examples
+
+   Load a surface mesh and the atlas that belongs to it.
+
+   >>> from prfmodel.examples import load_dataset
+   >>> surface = load_dataset("hcp-999999-surface", surface_type="flat")  # doctest: +SKIP
+   >>> sorted(surface.mesh.parts)  # doctest: +SKIP
+   ['left', 'right']
+   >>> surface.mesh.parts["left"].n_vertices  # doctest: +SKIP
+   59292
+
+   Load a response together with the raw design of the stimulus that produced it.
+
+   >>> dataset = load_dataset("7t-retbar-visual", hemisphere="both")  # doctest: +SKIP
+   >>> dataset.response.shape  # doctest: +SKIP
+   (118584, 120)
+
+   Load two splits of the same response, for cross-validation.
+
+   >>> odd = load_dataset("numerosity-timing", hemisphere="left", split="odd")  # doctest: +SKIP
+   >>> even = load_dataset("numerosity-timing", hemisphere="left", split="even")  # doctest: +SKIP
+   >>> odd.response.shape  # doctest: +SKIP
+   (5436, 176)
+   >>> odd.response.shape == even.response.shape  # doctest: +SKIP
+   True
+
