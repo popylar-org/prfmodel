@@ -35,10 +35,12 @@ In this tutorial, we use the TensorFlow backend.
 import os
 from importlib.util import find_spec
 
+import pandas as pd
+
 # Set keras backend to 'tensorflow' (this is normally the default)
 os.environ["KERAS_BACKEND"] = "tensorflow"
-# Hide tensorflow info messages
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
+# Print parameter DataFrames with three decimals
+pd.set_option("display.precision", 3)
 
 if find_spec("tensorflow") is None:
     msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"

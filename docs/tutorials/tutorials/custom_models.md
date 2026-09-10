@@ -29,23 +29,6 @@ In the first part, I show how to implement a 1-dimensional Gaussian population r
 to the canonical 2-dimensional model. The 1D model is often used to model neural responses to auditory or numerosity
 stimuli that lie on a single dimension (i.e., tone frequency or displayed number of objects; see Harvey et al., 2013).
 
-+++
-
-Because prfmodel uses Keras for model fitting, we need to make sure that a backend is installed before we begin.
-In this tutorial, we use the TensorFlow backend.
-
-```{code-cell} ipython3
-import os
-from importlib.util import find_spec
-
-os.environ["KERAS_BACKEND"] = "tensorflow"
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
-
-if find_spec("tensorflow") is None:
-    msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
-    raise ImportError(msg)
-```
-
 ### Loading a 1D stimulus
 
 We start by loading an example 1D {py:class}`~prfmodel.stimuli.PRFStimulus` from a numerosity experiment (for details, see {py:func}`~prfmodel.examples.load_1d_prf_lognumerosity_stimulus`).
