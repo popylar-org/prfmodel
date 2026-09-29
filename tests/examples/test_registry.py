@@ -19,6 +19,7 @@ def test_list_datasets():
         "7t-retbar-visual",
         "hcp-999999-surface",
         "numerosity-timing",
+        "visual-ecog-broadband",
     ]
 
 
@@ -76,6 +77,11 @@ def test_every_dataset_has_exactly_one_source():
 
         if spec.file_urls:
             assert set(spec.file_urls) == set(spec.files)
+
+
+def test_describe_dataset_reports_that_ecog_needs_no_impulse_response():
+    """Test that the ECoG description states the modelling consequence of an electrophysiological recording."""
+    assert "needs no impulse response" in describe_dataset("visual-ecog-broadband")
 
 
 def test_describe_dataset_unknown_name():

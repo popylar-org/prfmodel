@@ -15,6 +15,10 @@ if TYPE_CHECKING:
     from prfmodel.examples._options import Options
 
 _FIGSHARE_URL = "https://ndownloader.figshare.com/files"
+
+# Download sizes below this are reported in kilobytes rather than as '0 MB'
+_BYTES_PER_MEGABYTE = 1_000_000
+
 _OPENNEURO_CHN_URL = "https://s3.amazonaws.com/openneuro.org/ds004698/derivatives/prf-estimation"
 
 # OpenNeuro serves the latest version of a file unless a version is given, so we pin each file to ds004698 v1.0.1
@@ -44,6 +48,11 @@ _CHN_VERSION_IDS = {
     "inflated_L": "neA6erSssHoGD65IjNwnxe1DuoQTtz72",
     "inflated_R": "KcebigZeJt772fSfAyYHX62H4USz9wro",
 }
+
+# OpenNeuro addresses a file of a dataset snapshot by its path with the separators replaced by colons
+_OPENNEURO_ECOG_URL = (
+    "https://openneuro.org/crn/datasets/ds004194/snapshots/3.0.0/files/derivatives:Yuasa2023AlphaPRF:pRFmodel"
+)
 
 
 @dataclass(frozen=True)
@@ -171,6 +180,8 @@ def _make_registry() -> dict[str, DatasetSpec]:
         },
     }
 
+    ecog_file = "p10_freq_spectra-timeseries_avg-runs_bbS.mat"
+
     specs = (
         DatasetSpec(
             name="3t-chn-visual",
@@ -240,7 +251,7 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "measured with a repetition time of 0.9 s, converted to percent signal change, and taken as the "
                 "median over runs. The response is given for the voxels of a 2 mm volume that fall inside a dilated "
                 "gray matter mask. The mask is included so that results can be mapped back into the volume. The "
-                "stimulus is the full 340 frames of the bar stimulus included in the package. The cortical surfaces of"
+                "stimulus is the full 340 frames of the bar stimulus included in the package. The cortical surfaces of "
                 "the subject share the world coordinates of the volume, so the volume can be projected onto them with "
                 "nilearn.surface.vol_to_surf using the 'pia' and 'wm' surfaces, which are always downloaded."
             ),
@@ -343,6 +354,36 @@ def _make_registry() -> dict[str, DatasetSpec]:
             homepage="https://doi.org/10.6084/m9.figshare.13372958",
             download_size=61_000_000,
         ),
+        DatasetSpec(
+            name="visual-ecog-broadband",
+            summary=(
+                "Broadband power change in electrocorticography, in percent, measured as the mean power "
+                "between 70 and 180 Hz relative to the blank-screen baseline, with the line-noise harmonics "
+                "left out. It was recorded in a single subject with a high-density grid and with standard "
+                "grids and strips over right occipital and lateral cortex, while a bar swept across the "
+                "visual field. Rows are the 136 channels over visual cortex, columns are the 224 bar "
+                "positions of the experiment, averaged over its four runs and not decimated any further. "
+                "The 'units' frame is the BIDS channels table, whose 'wangprob_' columns hold the Wang "
+                "atlas probabilities that the source study thresholded at 0.05 to arrive at the electrodes "
+                "it reports. There is no haemodynamic delay to model, so a pRF model for these responses "
+                "needs no impulse response."
+            ),
+            files={"response": ecog_file},
+            file_urls={"response": f"{_OPENNEURO_ECOG_URL}:{ecog_file}"},
+            loader=_loaders.load_visual_ecog_broadband,
+            licence="CC0 1.0",
+            citation=(
+                "Yuasa, K., Groen, I. I. A., Piantoni, G., Montenegro, S., Flinker, A., Devore, S., Devinsky, O., "
+                "Doyle, W., Dugan, P., Friedman, D., Ramsey, N., Petridou, N., & Winawer, J. (2023). Precise spatial "
+                "tuning of visually driven alpha oscillations in human visual cortex. eLife, 12, RP90387. "
+                "https://doi.org/10.7554/eLife.90387 -- and the dataset as: Groen, I., Yuasa, K., Brands, A., "
+                "Piantoni, G., Montenegro, S., Flinker, A., Devore, S., Devinsky, O., Doyle, W., Dugan, P., "
+                "Friedman, D., Ramsey, N., Petridou, N., & Winawer, J. (2024). Visual ECoG dataset. OpenNeuro. "
+                "https://doi.org/10.18112/openneuro.ds004194.v3.0.0"
+            ),
+            homepage="https://openneuro.org/datasets/ds004194/versions/3.0.0",
+            download_size=268_225,
+        ),
     )
 
     return {spec.name: spec for spec in specs}
@@ -398,11 +439,20 @@ def list_datasets() -> list[str]:
     Examples
     --------
     >>> from prfmodel.examples import list_datasets
-    >>> list_datasets()
-    ['3t-chn-visual', '7t-aot-visual', '7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
+    >>> list_datasets()  # doctest: +NORMALIZE_WHITESPACE
+    ['3t-chn-visual', '7t-aot-visual', '7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing',
+     'visual-ecog-broadband']
 
     """
     return sorted(_get_registry())
+
+
+def _download_amount(size: int) -> str:
+    """Render a download size, falling back to kilobytes for a dataset that is smaller than a megabyte."""
+    if size < _BYTES_PER_MEGABYTE:
+        return f"{size / 1e3:.0f} kB"
+
+    return f"{size / 1e6:.0f} MB"
 
 
 def _download_note(spec: DatasetSpec) -> str:
@@ -468,7 +518,7 @@ def describe_dataset(name: str) -> str:
         lines += [f"Tasks: {', '.join(spec.tasks)} (default '{spec.tasks[0]}')"]
 
     lines += [
-        f"Download: {spec.download_size / 1e6:.0f} MB {_download_note(spec)}",
+        f"Download: {_download_amount(spec.download_size)} {_download_note(spec)}",
         f"Licence: {spec.licence}",
         f"Homepage: {spec.homepage}",
         "",

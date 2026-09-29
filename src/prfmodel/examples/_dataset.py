@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from dataclasses import field
 from pathlib import Path
 import numpy as np
+import pandas as pd
 from nibabel.spatialimages import SpatialImage
 from nilearn.surface import PolyMesh
 from prfmodel.stimuli import Stimulus
@@ -34,6 +35,10 @@ class Dataset:
         Integer region of interest index for each row of `response`, with shape `(num_units,)`.
     roi_mapping : dict of int to str, optional
         Mapping from the values in `roi_index` to region of interest labels.
+    units : pandas.DataFrame, optional
+        One row per row of `response`, in the same order, describing the unit it was measured at. What the
+        columns hold depends on the dataset; for a dataset of intracranial recordings they are the columns of
+        the BIDS channels table, such as electrode coordinates and atlas labels.
     mask : nibabel.spatialimages.SpatialImage, optional
         Binary volume that selects the voxels in `response`, for volumetric datasets. The rows of `response`
         follow the C order of the nonzero voxels of the mask, so results can be mapped back into the volume, for
@@ -67,6 +72,7 @@ class Dataset:
     stimulus: Stimulus | None = None
     roi_index: np.ndarray | None = None
     roi_mapping: dict[int, str] | None = None
+    units: pd.DataFrame | None = None
     mask: SpatialImage | None = None
     mesh: PolyMesh | None = None
     atlas: dict[str, np.ndarray] | None = None
@@ -103,6 +109,8 @@ class Dataset:
             if isinstance(val, np.ndarray):
                 arr_shape = ", ".join([str(s) for s in val.shape])
                 str_list.append(f"{key}=array[{arr_shape}]")
+            elif isinstance(val, pd.DataFrame):
+                str_list.append(f"{key}=frame[{val.shape[0]}, {val.shape[1]}]")
             elif isinstance(val, SpatialImage):
                 img_shape = ", ".join([str(s) for s in val.shape])
                 str_list.append(f"{key}={val.__class__.__name__}[{img_shape}]")
