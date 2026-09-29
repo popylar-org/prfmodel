@@ -36,6 +36,10 @@
       "sha256": "28ce263052dc14ac3a7e48b74f377d94c96480f69fcfbf1228432e7df14f87a1",
       "size": 1335600
     },
+    "p10_freq_spectra-timeseries_avg-runs_bbS.mat": {
+      "sha256": "667f3ce78cc39f23259076f3d519917fac8084c38b33a35ea10cef2dfdea4dcc",
+      "size": 268225
+    },
     "sub-02_task-prf_space-59k_hemi-L_run-median_desc-bold.func.gii": {
       "sha256": "c60e155cdc1c490ea09fe1fa414cec4cddd36308a4622d08e8d451fdfcb40038",
       "size": 26873342

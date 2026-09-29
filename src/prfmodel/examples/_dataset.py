@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from dataclasses import field
 from pathlib import Path
 import numpy as np
+import pandas as pd
 from nilearn.surface import PolyMesh
 from prfmodel.stimuli import Stimulus
 
@@ -33,6 +34,10 @@ class Dataset:
         Integer region of interest index for each row of `response`, with shape `(num_units,)`.
     roi_mapping : dict of int to str, optional
         Mapping from the values in `roi_index` to region of interest labels.
+    units : pandas.DataFrame, optional
+        One row per row of `response`, in the same order, describing the unit it was measured at. What the
+        columns hold depends on the dataset; for a dataset of intracranial recordings they are the columns of
+        the BIDS channels table, such as electrode coordinates and atlas labels.
     mesh : nilearn.surface.PolyMesh, optional
         The cortical surface mesh that the response can be projected onto.
     atlas : dict of str to numpy.ndarray, optional
@@ -41,6 +46,8 @@ class Dataset:
         The hemisphere selection that the dataset was loaded with.
     split : str, optional
         The data split that `response` was loaded from.
+    band : str, optional
+        The frequency band that `response` holds, for a dataset of electrophysiological recordings.
     files : collections.abc.Mapping of str to pathlib.Path
         The files that were fetched, keyed by a short logical name such as `"design"` or `"wm_lh"`.
 
@@ -60,10 +67,12 @@ class Dataset:
     stimulus: Stimulus | None = None
     roi_index: np.ndarray | None = None
     roi_mapping: dict[int, str] | None = None
+    units: pd.DataFrame | None = None
     mesh: PolyMesh | None = None
     atlas: dict[str, np.ndarray] | None = None
     hemisphere: str | None = None
     split: str | None = None
+    band: str | None = None
     files: Mapping[str, Path] = field(default_factory=dict)
 
     # Contains numpy arrays as attributes which are not hashable
@@ -94,6 +103,8 @@ class Dataset:
             if isinstance(val, np.ndarray):
                 arr_shape = ", ".join([str(s) for s in val.shape])
                 str_list.append(f"{key}=array[{arr_shape}]")
+            elif isinstance(val, pd.DataFrame):
+                str_list.append(f"{key}=frame[{val.shape[0]}, {val.shape[1]}]")
             elif key == "files":
                 str_list.append(f"{key}=[{', '.join(val)}]")
             elif isinstance(val, dict):

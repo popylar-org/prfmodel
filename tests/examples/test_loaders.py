@@ -1,6 +1,7 @@
 """Test loading example datasets."""
 
 from pathlib import Path
+import numpy as np
 import pytest
 from prfmodel.examples import Dataset
 from prfmodel.examples import load_dataset
@@ -15,6 +16,16 @@ _NUM_NUMEROSITY_FRAMES = 176
 _NUM_NUMEROSITY_UNITS_L = 5436
 _NUM_NUMEROSITY_UNITS_R = 4889
 _NUM_ROIS = 8
+_NUM_ECOG_CHANNELS = 136
+_NUM_ECOG_FRAMES = 224
+_NUM_ECOG_ROIS = 15
+_NUM_ECOG_PIXELS = 100
+
+# The bar apertures span 16.6 degrees of visual angle over 100 pixels
+_ECOG_PIXEL_DEGREES = 0.166
+
+# The broadband response is a percentage change that reaches into the hundreds
+_ECOG_BROADBAND_FLOOR = 100.0
 
 pytest_skip_examples = pytest.mark.examples
 
@@ -151,3 +162,76 @@ def test_load_numerosity_timing_downloads_only_what_is_loaded(tmp_path: Path):
         "sub-S1_hemi-L_desc-numerosity_dseg.label.gii",
         "sub-S1_hemi-L_desc-odd_bold.func.gii",
     ]
+
+
+@pytest_skip_examples
+def test_load_visual_ecog():
+    """Test that the ECoG recording returns its response together with its stimulus."""
+    dataset = load_dataset("visual-ecog-broadband")
+
+    assert dataset.response.shape == (_NUM_ECOG_CHANNELS, _NUM_ECOG_FRAMES)
+    assert np.all(np.isfinite(dataset.response))
+    assert dataset.band == "broadband"
+    assert isinstance(dataset.stimulus, PRFStimulus)
+    assert dataset.stimulus.design.shape == (_NUM_ECOG_FRAMES, _NUM_ECOG_PIXELS, _NUM_ECOG_PIXELS)
+
+
+@pytest_skip_examples
+def test_load_visual_ecog_holds_a_percentage_change():
+    """Test that the response is the broadband power change in percent rather than a log ratio."""
+    assert load_dataset("visual-ecog-broadband").response.max() > _ECOG_BROADBAND_FLOOR
+
+
+@pytest_skip_examples
+def test_load_visual_ecog_downloads_only_its_response(tmp_path: Path):
+    """Test that loading the dataset downloads the single file that holds its response."""
+    load_dataset("visual-ecog-broadband", dest_dir=tmp_path)
+
+    assert [path.name for path in tmp_path.iterdir()] == [
+        "p10_freq_spectra-timeseries_avg-runs_bbS.mat",
+    ]
+
+
+@pytest_skip_examples
+def test_load_visual_ecog_describes_every_channel():
+    """Test that the channels frame has one row per response row, in the same order."""
+    dataset = load_dataset("visual-ecog-broadband")
+    channels = dataset.units
+
+    assert len(channels) == _NUM_ECOG_CHANNELS
+    assert channels.loc[0, "name"] == "GA33"
+    assert set(channels["group"]) == {"HDgrid", "grid", "strip"}
+
+    # Every channel is a common average referenced electrode of the right hemisphere
+    assert set(channels["reference"]) == {"car"}
+    assert set(channels["hemisphere"]) == {"R"}
+
+
+@pytest_skip_examples
+def test_load_visual_ecog_groups_channels_into_visual_areas():
+    """Test that the Wang atlas labels of the channels are grouped into the areas of the source study."""
+    dataset = load_dataset("visual-ecog-broadband")
+    areas = [dataset.roi_mapping[index] for index in dataset.roi_index]
+
+    assert len(dataset.roi_mapping) == _NUM_ECOG_ROIS
+    assert dataset.roi_index.shape == (_NUM_ECOG_CHANNELS,)
+
+    # The ventral and dorsal halves of V3 are one area, and TO1 and TO2 are one area
+    assert set(areas) <= set(dataset.roi_mapping.values())
+    assert "V3v" not in areas
+    assert areas[:3] == ["none", "none", "none"]
+    assert areas[dataset.units["name"].tolist().index("GA51")] == "IPS"
+
+
+@pytest_skip_examples
+def test_load_visual_ecog_puts_the_stimulus_in_degrees_of_visual_angle():
+    """Test that the stimulus grid spans the visual angle the bar apertures were shown at."""
+    grid = load_dataset("visual-ecog-broadband").stimulus.grid
+
+    y, x = grid[..., 0], grid[..., 1]
+
+    # x grows to the right across the columns and y grows upwards, against the row order
+    assert x[0, 0] < x[0, -1]
+    assert y[0, 0] > y[-1, 0]
+    assert x[0, -1] - x[0, 0] == pytest.approx((_NUM_ECOG_PIXELS - 1) * _ECOG_PIXEL_DEGREES)
+    assert grid.mean() == pytest.approx(0.0)

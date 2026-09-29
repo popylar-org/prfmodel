@@ -15,6 +15,29 @@ if TYPE_CHECKING:
     from prfmodel.examples._options import Options
 
 _FIGSHARE_URL = "https://ndownloader.figshare.com/files"
+_OPENNEURO_URL = "https://openneuro.org/crn/datasets/ds004194/snapshots/3.0.0/files"
+_ECOG_DERIVATIVES = "derivatives:Yuasa2023AlphaPRF:pRFmodel"
+
+_ECOG_CITATION = (
+    "Yuasa, K., Groen, I. I. A., Piantoni, G., Montenegro, S., Flinker, A., Devore, S., Devinsky, O., "
+    "Doyle, W., Dugan, P., Friedman, D., Ramsey, N., Petridou, N., & Winawer, J. (2023). Precise spatial "
+    "tuning of visually driven alpha oscillations in human visual cortex. eLife, 12, RP90387. "
+    "https://doi.org/10.7554/eLife.90387 -- and the dataset as: Groen, I., Yuasa, K., Brands, A., "
+    "Piantoni, G., Montenegro, S., Flinker, A., Devore, S., Devinsky, O., Doyle, W., Dugan, P., "
+    "Friedman, D., Ramsey, N., Petridou, N., & Winawer, J. (2024). Visual ECoG dataset. OpenNeuro. "
+    "https://doi.org/10.18112/openneuro.ds004194.v3.0.0"
+)
+_ECOG_HOMEPAGE = "https://openneuro.org/datasets/ds004194/versions/3.0.0"
+
+# Download sizes below this are reported in kilobytes rather than as '0 MB'
+_BYTES_PER_MEGABYTE = 1_000_000
+_ECOG_FILE = "p10_freq_spectra-timeseries_avg-runs_bbS.mat"
+
+
+def _ecog_url(name: str) -> str:
+    """Build the URL that OpenNeuro serves a derivative of the visual ECoG dataset at."""
+    # OpenNeuro addresses a file of a snapshot by its path with the separators replaced by colons
+    return f"{_OPENNEURO_URL}/{_ECOG_DERIVATIVES}:{name}"
 
 
 @dataclass(frozen=True)
@@ -200,6 +223,28 @@ def _make_registry() -> dict[str, DatasetSpec]:
             homepage="https://doi.org/10.6084/m9.figshare.13372958",
             download_size=61_000_000,
         ),
+        DatasetSpec(
+            name="visual-ecog-broadband",
+            summary=(
+                "Broadband power change in electrocorticography, in percent, measured as the mean power "
+                "between 70 and 180 Hz relative to the blank-screen baseline, with the line-noise harmonics "
+                "left out. It was recorded in a single subject with a high-density grid and with standard "
+                "grids and strips over right occipital and lateral cortex, while a bar swept across the "
+                "visual field. Rows are the 136 channels over visual cortex, columns are the 224 bar "
+                "positions of the experiment, averaged over its four runs and not decimated any further. "
+                "The 'units' frame is the BIDS channels table, whose 'wangprob_' columns hold the Wang "
+                "atlas probabilities that the source study thresholded at 0.05 to arrive at the electrodes "
+                "it reports. There is no haemodynamic delay to model, so a pRF model for these responses "
+                "needs no impulse response."
+            ),
+            files={"response": _ECOG_FILE},
+            file_urls={"response": _ecog_url(_ECOG_FILE)},
+            loader=_loaders.load_visual_ecog_broadband,
+            licence="CC0 1.0",
+            citation=_ECOG_CITATION,
+            homepage=_ECOG_HOMEPAGE,
+            download_size=268_225,
+        ),
     )
 
     return {spec.name: spec for spec in specs}
@@ -256,10 +301,18 @@ def list_datasets() -> list[str]:
     --------
     >>> from prfmodel.examples import list_datasets
     >>> list_datasets()
-    ['7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
+    ['7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing', 'visual-ecog-broadband']
 
     """
     return sorted(_get_registry())
+
+
+def _download_amount(size: int) -> str:
+    """Render a download size, falling back to kilobytes for a dataset that is smaller than a megabyte."""
+    if size < _BYTES_PER_MEGABYTE:
+        return f"{size / 1e3:.0f} kB"
+
+    return f"{size / 1e6:.0f} MB"
 
 
 def _download_note(spec: DatasetSpec) -> str:
@@ -322,7 +375,7 @@ def describe_dataset(name: str) -> str:
         lines += [f"Surface types: {', '.join(spec.surface_types)}"]
 
     lines += [
-        f"Download: {spec.download_size / 1e6:.0f} MB {_download_note(spec)}",
+        f"Download: {_download_amount(spec.download_size)} {_download_note(spec)}",
         f"Licence: {spec.licence}",
         f"Homepage: {spec.homepage}",
         "",

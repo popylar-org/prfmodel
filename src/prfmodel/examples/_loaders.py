@@ -3,20 +3,49 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import numpy as np
+import pandas as pd
 from nibabel.gifti import GiftiImage
 from nilearn.surface import PolyMesh
 from nilearn.surface import load_surf_data
+from scipy.io import loadmat
 from prfmodel.examples._dataset import Dataset
 from prfmodel.examples._fetch import FileFetcher
 from prfmodel.examples._fetch import get_data_dir
+from prfmodel.examples._matlab import read_matlab_tables
 from prfmodel.examples._options import validate_options
 from prfmodel.examples._registry import _get_spec
 from prfmodel.examples._registry import load_checksums
 from prfmodel.examples._stimuli import load_1d_prf_lognumerosity_stimulus
+from prfmodel.stimuli import PRFStimulus
 
 if TYPE_CHECKING:
     import os
     from prfmodel.examples._options import Options
+
+# The bar apertures were resampled to 100 by 100 pixels spanning 16.6 degrees of visual angle before the
+# source study fit its pRF models, so one pixel is 0.166 degrees wide.
+_ECOG_STIMULUS_DEGREES = 16.6
+
+# The visual areas of the Wang maximum probability atlas, grouped into the regions that the source study
+# reports. Ventral and dorsal quarterfields are merged into one area, as are the two subdivisions of VO, PHC
+# and TO, and the six intraparietal areas.
+_ECOG_ROI_NAMES = ("V1", "V2", "V3", "hV4", "VO", "PHC", "V3a", "V3b", "LO1", "LO2", "TO", "IPS", "SPL1", "FEF", "none")
+_ECOG_ROI_OF_WANG_AREA = {
+    "V1v": "V1", "V1d": "V1",
+    "V2v": "V2", "V2d": "V2",
+    "V3v": "V3", "V3d": "V3",
+    "hV4": "hV4",
+    "VO1": "VO", "VO2": "VO",
+    "PHC1": "PHC", "PHC2": "PHC",
+    "V3a": "V3a",
+    "V3b": "V3b",
+    "LO1": "LO1", "LO2": "LO2",
+    "TO1": "TO", "TO2": "TO",
+    "IPS0": "IPS", "IPS1": "IPS", "IPS2": "IPS", "IPS3": "IPS", "IPS4": "IPS", "IPS5": "IPS",
+    "SPL1": "SPL1",
+    "FEF": "FEF",
+    "none": "none",
+}  # fmt: skip
 
 
 def load_retbar_visual(fetch: FileFetcher, options: Options) -> Dataset:
@@ -75,6 +104,49 @@ def load_hcp_surface(fetch: FileFetcher, options: Options) -> Dataset:
         mesh=mesh,
         atlas=atlas,
         files=files,
+    )
+
+
+def _ecog_stimulus(apertures: np.ndarray) -> PRFStimulus:
+    """Turn the bar apertures of the ECoG experiment into a stimulus on a grid in degrees."""
+    # The apertures are stored as (height, width, num_frames) but a design is (num_frames, height, width)
+    design = np.moveaxis(np.asarray(apertures, dtype=np.float64), 2, 0)
+    height, width = design.shape[1:]
+    pixel_size = _ECOG_STIMULUS_DEGREES / max(height, width)
+
+    # The participants viewed the screen directly rather than through a mirror, so screen pixels and visual
+    # field coordinates differ only in the sign of the vertical axis: x grows to the right across the columns
+    # and y grows upwards, which is against the row order. A pRF above and left of fixation therefore has a
+    # positive 'mu_y' and a negative 'mu_x', as in the source study.
+    x = (np.arange(width) - (width - 1) / 2) * pixel_size
+    y = ((height - 1) / 2 - np.arange(height)) * pixel_size
+    xv, yv = np.meshgrid(x, y)
+
+    # The y coordinate comes first because it varies along the first design axis after time
+    return PRFStimulus(design=design, grid=np.stack((yv, xv), axis=-1), dimension_labels=["y", "x"])
+
+
+def load_visual_ecog_broadband(fetch: FileFetcher, options: Options) -> Dataset:  # noqa: ARG001 (loaders take options)
+    """Load the broadband response of a single subject to a moving bar stimulus."""
+    path = fetch("response")
+
+    # Naming the variables keeps scipy from reading the object system, which it cannot represent; the tables
+    # that live there are read separately below
+    contents = loadmat(path, variable_names=["datats", "stimulus"], squeeze_me=True, struct_as_record=False)
+
+    channels = read_matlab_tables(path)["channels"]
+    roi = channels["wangarea"].map(_ECOG_ROI_OF_WANG_AREA)
+    roi_index = np.asarray(pd.Categorical(roi, categories=_ECOG_ROI_NAMES).codes, dtype=np.int32)
+
+    return Dataset(
+        name="visual-ecog-broadband",
+        response=np.asarray(contents["datats"], dtype=np.float64),
+        stimulus=_ecog_stimulus(contents["stimulus"]),
+        roi_index=roi_index,
+        roi_mapping=dict(enumerate(_ECOG_ROI_NAMES)),
+        units=channels,
+        band="broadband",
+        files=fetch.files,
     )
 
 
@@ -162,6 +234,14 @@ def load_dataset(  # noqa: PLR0913
     (5436, 176)
     >>> odd.response.shape == even.response.shape  # doctest: +SKIP
     True
+
+    Load an intracranial response together with the channels table that describes it.
+
+    >>> broadband = load_dataset("visual-ecog-broadband")  # doctest: +SKIP
+    >>> broadband.response.shape  # doctest: +SKIP
+    (136, 224)
+    >>> broadband.units.loc[0, ["name", "group", "wangarea"]].tolist()  # doctest: +SKIP
+    ['GA33', 'grid', 'none']
 
     """
     spec = _get_spec(name)
