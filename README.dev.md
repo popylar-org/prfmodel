@@ -91,8 +91,25 @@ uv run ruff format
 
 ## Pre-commit checks
 
-Whenever you make a commit to a branch of the repository, [pre-commit](https://pre-commit.com/) checks are run (including ruff) and the commit is rejected if
-they fail. Make sure that all checks pass before you commit.
+prfmodel uses [prek](https://prek.j178.dev/) to run checks (including ruff) before each commit. The checks are
+configured in [`prek.toml`](prek.toml). To enable them, install the Git hook once after cloning the repository:
+
+```shell
+uv run prek install
+```
+
+Whenever you make a commit to a branch of the repository, the checks are run and the commit is rejected if they fail.
+Make sure that all checks pass before you commit. You can also run the checks on all files manually:
+
+```shell
+uv run prek run --all-files
+```
+
+To update the hooks to their latest versions, run:
+
+```shell
+uv run prek update
+```
 
 ## Package version number
 

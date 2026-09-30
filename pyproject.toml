@@ -53,7 +53,6 @@ dev = [
     "tox",
     "myst_nb",
     "myst_parser",
-    "pre-commit",
     "sphinx",
     "sphinx-autoapi",
     "sphinx-copybutton",
@@ -66,6 +65,7 @@ dev = [
     "types-tqdm",
     "ipykernel",
     "plotly",
+    "prek",
 ]
 publishing = [
     "build",
