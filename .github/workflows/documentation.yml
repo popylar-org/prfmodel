@@ -43,7 +43,7 @@ jobs:
         run: sudo apt-get install -y graphviz
       - uses: ./.github/actions/setup-python-cached
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           extras: dev,tensorflow
       - name: Cache jupyter-cache
         uses: actions/cache@v4

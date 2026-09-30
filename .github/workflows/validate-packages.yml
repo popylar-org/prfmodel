@@ -68,7 +68,7 @@ jobs:
           ref: ${{ inputs.branch != '' && inputs.branch || github.ref }}
       - uses: ./.github/actions/setup-python-cached
         with:
-          python-version: '3.12'
+          python-version: '3.13'
           extras: tensorflow
 
       # Package-specific installs
