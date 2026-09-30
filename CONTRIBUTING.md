@@ -34,6 +34,7 @@ The sections below outline the steps in each case.
 1. make sure the existing tests still work by running ``pytest``.
 1. add your own tests (if necessary);
 1. update or expand the documentation;
+1. update the [`CHANGELOG.md`](CHANGELOG.md) file with your change under the `Unreleased` section;
 1. [push](http://rogerdudler.github.io/git-guide/) your feature branch to (your fork of) the prfmodel repository on GitHub;
 1. create the pull request, e.g. following the instructions [here](https://help.github.com/articles/creating-a-pull-request/).
 
@@ -44,6 +45,7 @@ In case you feel like you've made a valuable contribution, but you don't know ho
 To create a release you need write permission on the repository.
 
 1. Update the version number with [bump-my-version](https://callowayproject.github.io/bump-my-version/) (see the [development documentation](README.dev.md#package-version-number))
+1. In [`CHANGELOG.md`](CHANGELOG.md), move the changes under `Unreleased` to a new section for the release version
 1. Go to the [GitHub release page](https://github.com/popylar-org/prfmodel/releases)
 1. Press draft a new release button
 1. Fill version, title and description field
