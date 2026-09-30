@@ -485,11 +485,7 @@ class TestCoordinateConvention:
 
         # Component 1 (x) varies across the columns and is constant down the rows
         assert np.allclose(np.std(grid[..., 1], axis=0), 0.0), f"{name}: grid[..., 1] must be constant along rows"
-        # x decreases because the design is in screen pixel order and the display is mirrored
-        assert grid[0, -1, 1] < grid[0, 0, 1], (
-            f"{name}: grid[..., 1] (x) must decrease across the columns; the design is stored in "
-            f"screen pixel order and the mirrored display flips the horizontal axis"
-        )
+        assert grid[0, -1, 1] > grid[0, 0, 1], f"{name}: grid[..., 1] (x) must increase across the columns"
 
     def test_bar_stimulus_grid_follows_convention(self):
         """Test that `create_2d_bar_stimulus` uses the documented axis order and sign."""
@@ -520,7 +516,7 @@ class TestCoordinateConvention:
             leftmost = stimulus.grid[0, 0, 1]
             rightmost = stimulus.grid[0, -1, 1]
 
-            assert leftmost > 0.0 > rightmost, (
-                f"{name}: the leftmost design column must map to the right visual hemifield "
-                f"(positive x) and the rightmost column to the left hemifield"
+            assert leftmost < 0.0 < rightmost, (
+                f"{name}: the leftmost design column must map to the left visual hemifield "
+                f"(negative x) and the rightmost column to the right hemifield"
             )
