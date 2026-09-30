@@ -75,7 +75,7 @@ class SustainedImpulse(BaseImpulse):
 
     _positive_parameter_names: ClassVar[tuple[str, ...]] = ("time_to_peak",)
 
-    def __init__(  # noqa: PLR0913 (too many arguments)
+    def __init__(
         self,
         duration: float = 32.0,
         offset: float = 0.0,

@@ -9,13 +9,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 authors = [
-    { name = "Malte Luken", email = "m.luken@esciencecenter.nl" },
-    { name = "Flavio Hafner", email = "f.hafner@esciencecenter.nl" },
-    { name = "Gilles de Hollander", email = "gilles.de.hollander@gmail.com" },
-    { name = "Tomas Knapen", email = "t.knapen@spinozacentre.nl" }
+    { name = "Popylar Team", email = "t.knapen@spinozacentre.nl" }
 ]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
@@ -37,7 +34,7 @@ dependencies = [
     "tqdm"
 ]
 description = "A modern Python implementation for population receptive field modelling."
-keywords = [""]
+keywords = ["connective field", "contrast sentivity function", "GPU-accelerated", "computational neuroscience"]
 license = {file = "LICENSE"}
 name = "prfmodel"
 readme = {file = "README.md", content-type = "text/markdown"}
@@ -52,11 +49,10 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-regressions[dataframe,num]",  # install pandas and numpy extensions
-    "ruff",
+    "ruff==0.16.9",
     "tox",
     "myst_nb",
     "myst_parser",
-    "pre-commit",
     "sphinx",
     "sphinx-autoapi",
     "sphinx-copybutton",
@@ -69,6 +65,7 @@ dev = [
     "types-tqdm",
     "ipykernel",
     "plotly",
+    "prek",
 ]
 publishing = [
     "build",
@@ -120,7 +117,6 @@ ignore = [
     "ANN003", # Missing type annotation for `**kwargs`
     "CPY",    # Missing copyright notice at top of file (project uses a repo-level NOTICE/LICENSE instead)
     "PLR0917", # Too many positional arguments (project already tolerates this via per-function PLR0913 noqas)
-    "RUF100", # Unused `noqa` directive (flags differ across ruff versions, since this repo's ruff dep is unpinned)
     "FBT",    # Using boolean function arguments
     "TD",     # TODOs
     "FIX001", # Resolve FIXMEs
@@ -166,6 +162,9 @@ current_version = "0.0.1"
 
 [[tool.bumpversion.files]]
 filename = "src/prfmodel/__init__.py"
+
+[[tool.bumpversion.files]]
+filename = "docs/conf.py"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"

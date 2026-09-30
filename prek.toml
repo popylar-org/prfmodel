@@ -1,0 +1,25 @@
+# Configuration file for `prek`, a git hook framework written in Rust.
+# See https://prek.j178.dev for more information.
+#:schema https://www.schemastore.org/prek.json
+
+[[repos]]
+repo = "https://github.com/pre-commit/pre-commit-hooks"
+rev = "v6.0.0"
+hooks = [
+  { id = "check-yaml" },
+  { id = "check-toml" },
+  { id = "trailing-whitespace" },
+  { id = "end-of-file-fixer" },
+  {
+    id = "mixed-line-ending",
+    args = ["--fix=lf"]
+  }
+]
+
+[[repos]]
+repo = "https://github.com/astral-sh/ruff-pre-commit"
+rev = "v0.16.9"
+hooks = [
+  { id = "ruff-check" },
+  { id = "ruff-format" }
+]

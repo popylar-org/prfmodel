@@ -243,7 +243,7 @@ class GridFitter:
 
         return compile_fun(evaluate) if self.compile_step else evaluate
 
-    def _evaluate_parameter_batch(  # noqa: PLR0913 (too many arguments)
+    def _evaluate_parameter_batch(
         self,
         evaluate: Callable,
         batch: list[tuple],

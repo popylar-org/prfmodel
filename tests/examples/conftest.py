@@ -11,7 +11,7 @@ from prfmodel.examples._options import Options
 from prfmodel.examples._registry import DatasetSpec
 
 
-def _load_fake_dataset(fetch: FileFetcher, options: Options) -> Dataset:  # noqa: ARG001
+def _load_fake_dataset(fetch: FileFetcher, options: Options) -> Dataset:
     return Dataset(name="fake-dataset", files={"first": fetch("first"), "second": fetch("second")})
 
 
