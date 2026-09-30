@@ -74,13 +74,13 @@ jobs:
       # Package-specific installs
       - name: Install prfpy
         if: matrix.package == 'prfpy'
-        run: pip install "git+https://github.com/VU-Cog-Sci/prfpy.git@${PRFPY_REF}"
+        run: uv pip install "git+https://github.com/VU-Cog-Sci/prfpy.git@${PRFPY_REF}"
 
       - name: Install braincoder (+ TensorFlow backend it requires)
         if: matrix.package == 'braincoder'
         run: |
-          pip install tensorflow "tensorflow-probability[tf]"
-          pip install "git+https://github.com/Gilles86/braincoder.git@${BRAINCODER_REF}"
+          uv pip install tensorflow "tensorflow-probability[tf]"
+          uv pip install "git+https://github.com/Gilles86/braincoder.git@${BRAINCODER_REF}"
 
       - name: Run validation
         run: python validation/compare_${{ matrix.package }}.py
