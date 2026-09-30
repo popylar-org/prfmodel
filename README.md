@@ -77,18 +77,8 @@ The documentation can then be opened in the browser from `_build/html/index.html
 
 ## Development
 
-The project setup for developers is documented in [project_setup.md](project_setup.md). To make an editable install
-with development dependencies, run:
-
-```console
-python -m pip install -e .[dev]
-```
-
-The test suite can be run with:
-
-```console
-python -m pytest
-```
+Practical information on developing prfmodel can be found in [`README.dev.md`](README.dev.md). For more in-depth information
+about architecture and implementation decisions, see the [Development](https://popylar-org.github.io/prfmodel/development/index.html) section in the online documentation.
 
 ## Credits
 
