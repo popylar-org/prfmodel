@@ -168,6 +168,9 @@ current_version = "0.0.1"
 filename = "src/prfmodel/__init__.py"
 
 [[tool.bumpversion.files]]
+filename = "docs/conf.py"
+
+[[tool.bumpversion.files]]
 filename = "pyproject.toml"
 
 [[tool.mypy.overrides]]
