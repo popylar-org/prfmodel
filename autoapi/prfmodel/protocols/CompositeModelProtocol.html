@@ -466,14 +466,14 @@ any submodel but still required by the model.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">DummyModel</span><span class="p">(</span><span class="n">ModelProtocol</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="nd">@property</span>
 <span class="gp">... </span>    <span class="k">def</span><span class="w"> </span><span class="nf">parameter_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="gp">... </span>        <span class="k">return</span> <span class="p">[</span><span class="s2">"a"</span><span class="p">]</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">class</span><span class="w"> </span><span class="nc">CompositeDummyModel</span><span class="p">(</span><span class="n">CompositeModelProtocol</span><span class="p">):</span>
 <span class="gp">... </span>     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dummy_model</span><span class="p">):</span>
-<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"dummy_model"</span><span class="p">:</span> <span class="n">dummy_model</span><span class="p">}</span>  <span class="c1"># Use the public setter to store the submodels</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;dummy_model&quot;</span><span class="p">:</span> <span class="n">dummy_model</span><span class="p">}</span>  <span class="c1"># Use the public setter to store the submodels</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">DummyModel</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">composite_model</span> <span class="o">=</span> <span class="n">CompositeDummyModel</span><span class="p">(</span><span class="n">dummy_model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">composite_model</span><span class="o">.</span><span class="n">parameter_names</span>  <span class="c1"># The composite model collects the parameters of all submodels</span>
-<span class="go">['a']</span>
+<span class="go">[&#39;a&#39;]</span>
 </pre></div>
 </div>
 <dl class="py method">
