@@ -9,10 +9,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 authors = [
-    { name = "Malte Luken", email = "m.luken@esciencecenter.nl" },
-    { name = "Flavio Hafner", email = "f.hafner@esciencecenter.nl" },
-    { name = "Gilles de Hollander", email = "gilles.de.hollander@gmail.com" },
-    { name = "Tomas Knapen", email = "t.knapen@spinozacentre.nl" }
+    { name = "Popylar Team", email = "t.knapen@spinozacentre.nl" }
 ]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
@@ -37,7 +34,7 @@ dependencies = [
     "tqdm"
 ]
 description = "A modern Python implementation for population receptive field modelling."
-keywords = [""]
+keywords = ["connective field", "contrast sentivity function", "GPU-accelerated", "computational neuroscience"]
 license = {file = "LICENSE"}
 name = "prfmodel"
 readme = {file = "README.md", content-type = "text/markdown"}
