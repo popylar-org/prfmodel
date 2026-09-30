@@ -5,6 +5,13 @@ import numpy as np
 from prfmodel.stimuli import PRFStimulus
 
 
+def _load_2d_bar_design_and_grid() -> tuple[np.ndarray, np.ndarray]:
+    path = files("prfmodel.data.stimuli").joinpath("2d_bar_stimulus.npz")
+
+    with np.load(str(path)) as archive:
+        return archive["design"], archive["grid"]
+
+
 def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[PRFStimulus, PRFStimulus]:
     """
     Load a two-dimensional population receptive field bar stimulus.
@@ -61,12 +68,7 @@ def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[P
     PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
 
     """
-    path = files("prfmodel.data.stimuli").joinpath("2d_bar_stimulus.npz")
-
-    archive = np.load(str(path))
-
-    design = archive["design"]
-    grid = archive["grid"]
+    design, grid = _load_2d_bar_design_and_grid()
     dimension_labels = ["y", "x"]
 
     num_split = design.shape[0] // 2

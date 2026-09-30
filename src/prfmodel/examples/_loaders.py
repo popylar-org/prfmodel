@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import numpy as np
 from nibabel.gifti import GiftiImage
+from nibabel.nifti1 import Nifti1Image
 from nilearn.surface import PolyMesh
 from nilearn.surface import load_surf_data
 from prfmodel.examples._dataset import Dataset
@@ -12,7 +13,9 @@ from prfmodel.examples._fetch import get_data_dir
 from prfmodel.examples._options import validate_options
 from prfmodel.examples._registry import _get_spec
 from prfmodel.examples._registry import load_checksums
+from prfmodel.examples._stimuli import _load_2d_bar_design_and_grid
 from prfmodel.examples._stimuli import load_1d_prf_lognumerosity_stimulus
+from prfmodel.stimuli import PRFStimulus
 
 if TYPE_CHECKING:
     import os
@@ -56,6 +59,34 @@ def load_numerosity_timing(fetch: FileFetcher, options: Options) -> Dataset:
         roi_mapping=label_image.labeltable.get_labels_as_dict(),
         hemisphere=options.hemisphere,
         split=options.split,
+        files=fetch.files,
+    )
+
+
+def load_aot_visual(fetch: FileFetcher, options: Options) -> Dataset:
+    """Load the gray matter voxel response of a single subject to a moving bar stimulus and its cortical surface."""
+    mask = Nifti1Image.from_filename(fetch("mask"))
+    is_in_mask = np.asarray(mask.dataobj).astype(bool)
+
+    # Boolean indexing selects the voxels in C order and yields shape (num_voxels, num_frames)
+    bold = np.asarray(Nifti1Image.from_filename(fetch("response")).dataobj)
+    response = np.asarray(bold[is_in_mask], dtype=np.float64)
+
+    mesh = PolyMesh(fetch(f"{options.surface_type}_lh"), fetch(f"{options.surface_type}_rh"))
+
+    # Projecting the volume onto the surface requires both the pial and the white matter surface
+    for key in ("pia_lh", "pia_rh", "wm_lh", "wm_rh"):
+        fetch(key)
+
+    # The response covers the whole design so we do not split it like load_2d_prf_bar_stimulus does
+    design, grid = _load_2d_bar_design_and_grid()
+
+    return Dataset(
+        name="7t-aot-visual",
+        response=response,
+        stimulus=PRFStimulus(design=design, grid=grid, dimension_labels=["y", "x"]),
+        mask=mask,
+        mesh=mesh,
         files=fetch.files,
     )
 
@@ -110,7 +141,8 @@ def load_dataset(  # noqa: PLR0913
         Data split to load the response from, for datasets that provide splits. Required for those datasets.
     surface_type : str, optional
         Surface type to load, for datasets that provide surfaces. Must be either `"flat"`, `"inflated"`,
-        `"pia"` (or `"pial"`), or `"wm"` (for white matter).
+        `"pia"` (or `"pial"`), or `"wm"` (for white matter). If `None` (the default), uses the default of the
+        dataset.
     download : bool, default=True
         Whether files may be downloaded when they are missing. If `False`, missing files raise
         `FileNotFoundError` instead.
@@ -153,6 +185,14 @@ def load_dataset(  # noqa: PLR0913
     >>> dataset = load_dataset("7t-retbar-visual", hemisphere="both")  # doctest: +SKIP
     >>> dataset.response.shape  # doctest: +SKIP
     (118584, 120)
+
+    Load the gray matter voxel response of a single subject together with its own inflated cortical surface.
+
+    >>> dataset = load_dataset("7t-aot-visual", surface_type="inflated")  # doctest: +SKIP
+    >>> dataset.response.shape  # doctest: +SKIP
+    (105867, 340)
+    >>> dataset.mask.shape  # doctest: +SKIP
+    (71, 81, 91)
 
     Load two splits of the same response, for cross-validation.
 
