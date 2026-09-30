@@ -52,7 +52,6 @@ docs/_build
 .DS_Store
 
 # virtual environments
-uv.lock
 env
 .env
 env3
