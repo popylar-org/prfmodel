@@ -1,6 +1,8 @@
 """Test loading example datasets."""
 
 from pathlib import Path
+import nibabel as nib
+import numpy as np
 import pytest
 from prfmodel.examples import Dataset
 from prfmodel.examples import load_dataset
@@ -15,6 +17,10 @@ _NUM_NUMEROSITY_FRAMES = 176
 _NUM_NUMEROSITY_UNITS_L = 5436
 _NUM_NUMEROSITY_UNITS_R = 4889
 _NUM_ROIS = 8
+_NUM_AOT_VOXELS = 105867
+_NUM_AOT_FRAMES = 340
+_AOT_VOLUME_SHAPE = (71, 81, 91)
+_NUM_AOT_HEMISPHERE_VERTICES = 153144
 
 pytest_skip_examples = pytest.mark.examples
 
@@ -81,6 +87,29 @@ def test_dataset_str_skips_missing_fields():
     text = str(Dataset(name="example", hemisphere="left"))
 
     assert text == "Dataset(name=example, hemisphere=left, files=[])"
+
+
+def test_dataset_str_shows_mask_shape():
+    """Test that the string representation shows the shape of a mask image rather than its header."""
+    mask = nib.Nifti1Image(np.ones((2, 3, 4), dtype=np.uint8), affine=np.eye(4))
+    text = str(Dataset(name="example", mask=mask))
+
+    assert text == "Dataset(name=example, mask=Nifti1Image[2, 3, 4], files=[])"
+
+
+@pytest_skip_examples
+@pytest.mark.parametrize("surface_type", ["flat", "inflated", "pia", "pial", "wm"])
+def test_load_aot_visual(surface_type: str):
+    """Test that the AOT dataset returns the masked response, the mask, the stimulus, and the surface."""
+    dataset = load_dataset("7t-aot-visual", surface_type=surface_type)
+
+    assert dataset.response.shape == (_NUM_AOT_VOXELS, _NUM_AOT_FRAMES)
+    assert dataset.mask.shape == _AOT_VOLUME_SHAPE
+    assert np.count_nonzero(dataset.mask.get_fdata()) == _NUM_AOT_VOXELS
+    assert isinstance(dataset.stimulus, PRFStimulus)
+    assert dataset.stimulus.design.shape[0] == _NUM_AOT_FRAMES
+    assert dataset.mesh.parts["left"].n_vertices == _NUM_AOT_HEMISPHERE_VERTICES
+    assert {"pia_lh", "pia_rh", "wm_lh", "wm_rh"} <= set(dataset.files)
 
 
 @pytest_skip_examples

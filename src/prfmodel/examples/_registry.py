@@ -99,6 +99,18 @@ def _make_registry() -> dict[str, DatasetSpec]:
     # Imported here because the loaders import this module for its specifications
     from prfmodel.examples import _loaders  # noqa: PLC0415 (deliberate to break an import cycle)
 
+    aot_files = {
+        "response": (
+            "7t_aot_sub-003/sub-003_ses-pRF_task-pRF_rec-nordicstc_run-medianpsc_part-mag_bold_space-T1w_res-2p0mm.nii.gz"
+        ),
+        "mask": "7t_aot_sub-003/sub-003_FScortexGM_dil_T2BM_crop_resampled.nii.gz",
+        **{
+            f"{surface_type}_{hemi}": f"7t_aot_sub-003/surfaces/{surface_type}_{hemi}.gii"
+            for surface_type in ("flat", "inflated", "pia", "wm")
+            for hemi in ("lh", "rh")
+        },
+    }
+
     specs = (
         DatasetSpec(
             name="7t-retbar-visual",
@@ -124,6 +136,41 @@ def _make_registry() -> dict[str, DatasetSpec]:
             citation="Knapen, T. (2021). fMRI Teaching Materials. figshare. https://doi.org/10.6084/m9.figshare.14096209",
             homepage="https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209",
             download_size=51_000_000,
+        ),
+        DatasetSpec(
+            name="7t-aot-visual",
+            summary=(
+                "Blood oxygenation level-dependent response of a single subject (sub-003) to a moving bar stimulus, "
+                "measured with a repetition time of 0.9 s, converted to percent signal change, and taken as the "
+                "median over runs. The response is given for the voxels of a 2 mm volume that fall inside a dilated "
+                "gray matter mask. The mask is included so that results can be mapped back into the volume. The "
+                "stimulus is the full 340 frames of the bar stimulus included in the package. The cortical surfaces of"
+                "the subject share the world coordinates of the volume, so the volume can be projected onto them with "
+                "nilearn.surface.vol_to_surf using the 'pia' and 'wm' surfaces, which are always downloaded."
+            ),
+            files=aot_files,
+            file_urls={
+                "response": f"{_FIGSHARE_URL}/69496476",
+                "mask": f"{_FIGSHARE_URL}/69496449",
+                "flat_lh": f"{_FIGSHARE_URL}/69496467",
+                "flat_rh": f"{_FIGSHARE_URL}/69496452",
+                "inflated_lh": f"{_FIGSHARE_URL}/69496455",
+                "inflated_rh": f"{_FIGSHARE_URL}/69496458",
+                "pia_lh": f"{_FIGSHARE_URL}/69496473",
+                "pia_rh": f"{_FIGSHARE_URL}/69496464",
+                "wm_lh": f"{_FIGSHARE_URL}/69496461",
+                "wm_rh": f"{_FIGSHARE_URL}/69496470",
+            },
+            loader=_loaders.load_aot_visual,
+            options=frozenset({"surface_type"}),
+            surface_types=("inflated", "flat", "pia", "wm"),
+            licence="CC BY 4.0",
+            citation=(
+                "Knapen, T. (2026). Single-subject arrow-of-time example dataset. figshare. "
+                "https://doi.org/10.6084/m9.figshare.34032573"
+            ),
+            homepage="https://doi.org/10.6084/m9.figshare.34032573",
+            download_size=284_074_080,
         ),
         DatasetSpec(
             name="numerosity-timing",
@@ -256,7 +303,7 @@ def list_datasets() -> list[str]:
     --------
     >>> from prfmodel.examples import list_datasets
     >>> list_datasets()
-    ['7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
+    ['7t-aot-visual', '7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
 
     """
     return sorted(_get_registry())
