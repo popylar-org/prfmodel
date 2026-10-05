@@ -44,7 +44,7 @@ if find_spec("tensorflow") is None:
 
 ## Loading the stimulus
 
-In this example, we use a public dataset by [Hendrikx et al. (2024)](https://doi.org/10.1016/j.neuroimage.2024.120515) that is available on FigShare.
+In this example, we use a public dataset by [Hendrikx et al. (2024)](https://doi.org/10.1016/j.neuroimage.2024.120515) that is available on [Fig Share](https://doi.org/10.6084/m9.figshare.24126663).
 
 The numerosity stimulus that belongs to this dataset is already included in the package and can be loaded with {py:func}`prfmodel.examples.load_1d_prf_lognumerosity_stimulus`. It is also available as the `stimulus` attribute of the loaded dataset.
 
