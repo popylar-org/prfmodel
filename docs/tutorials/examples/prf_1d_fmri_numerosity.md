@@ -678,15 +678,6 @@ This example showed how to fit a one-dimensional Gaussian pRF model to empirical
 
 +++
 
-## Stay Tuned
-
-More tutorials on fitting models to empirical data and creating custom models are in the making.
-
-For questions and issues, please make an issue on [GitHub](https://github.com/popylar-org/prfmodel/issues) or
-contact Malte Lüken (m.luken@esciencecenter.nl).
-
-+++
-
 ## References
 
 Harvey, B. M., Klein, B. P., Petridou, N., & Dumoulin, S. O. (2013). Topographic representation of numerosity in the human parietal cortex. *Science*, *341*(6150), 1123–1126. https://doi.org/10.1126/science.1239052
