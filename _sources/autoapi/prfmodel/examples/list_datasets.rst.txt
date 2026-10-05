@@ -13,5 +13,5 @@ prfmodel.examples.list_datasets
 
    >>> from prfmodel.examples import list_datasets
    >>> list_datasets()
-   ['7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
+   ['7t-aot-visual', '7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
 

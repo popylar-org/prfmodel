@@ -11,9 +11,9 @@ prfmodel.examples.Dataset
 
    :param name: Name of the dataset, as passed to :func:`~prfmodel.examples.load_dataset`.
    :type name: str
-   :param response: Neural timecourses with shape `(num_units, num_frames)`, where units are surface vertices or
-                    region of interest gray nodes depending on the dataset. When both hemispheres are requested, the rows
-                    of the left hemisphere come first.
+   :param response: Neural timecourses with shape `(num_units, num_frames)`, where units are surface vertices, region of
+                    interest gray nodes, or voxels inside `mask`, depending on the dataset. When both hemispheres are
+                    requested, the rows of the left hemisphere come first.
    :type response: numpy.ndarray, optional
    :param stimulus: The stimulus that belongs to the response, when the dataset provides a ready-made one. Datasets whose
                     stimulus requires preprocessing leave this `None` and expose the raw design through `files` instead.
@@ -22,6 +22,10 @@ prfmodel.examples.Dataset
    :type roi_index: numpy.ndarray, optional
    :param roi_mapping: Mapping from the values in `roi_index` to region of interest labels.
    :type roi_mapping: dict of int to str, optional
+   :param mask: Binary volume that selects the voxels in `response`, for volumetric datasets. The rows of `response`
+                follow the C order of the nonzero voxels of the mask, so results can be mapped back into the volume, for
+                example with :func:`nilearn.masking.unmask`.
+   :type mask: nibabel.spatialimages.SpatialImage, optional
    :param mesh: The cortical surface mesh that the response can be projected onto.
    :type mesh: nilearn.surface.PolyMesh, optional
    :param atlas: Per-hemisphere parcellation labels, keyed by `"left"` and `"right"`.

@@ -116,9 +116,8 @@ def animate_step(name, label):
 
 
 stimulus = load_2d_prf_bar_stimulus()
-# The design columns run from positive to negative x, so flip them to plot x from left to right
-design = stimulus.design[:, :, ::-1]
-grid = stimulus.grid[:, ::-1]
+design = stimulus.design
+grid = stimulus.grid
 # Plot the visual field on a coarser grid to keep the figures small
 grid_coarse = grid[::3, ::3]
 x_coords = grid_coarse[0, :, 1]
@@ -356,8 +355,7 @@ tuning_profile = Gaussian2DPRFTuning()(stimulus, prf_parameters)
 encoded_response = np.asarray(encode_prf_response(tuning_profile, stimulus.design))[0]
 
 design_coarse = np.round(design[:, ::3, ::3], 2)
-# The profile is predicted on the original grid, so flip its columns like the design and grid above
-tuning_coarse = np.round(tuning_profile[0, :, ::-1][::3, ::3], 3)
+tuning_coarse = np.round(tuning_profile[0][::3, ::3], 3)
 time_frames = list(range(0, design.shape[0], 5))
 # Start on the frame closest to the first response peak so that the bar crosses the pRF
 peak_frame = min(time_frames, key=lambda t: abs(t - int(np.argmax(encoded_response))))

@@ -22,7 +22,8 @@ prfmodel.examples.load_dataset
    :param split: Data split to load the response from, for datasets that provide splits. Required for those datasets.
    :type split: str, optional
    :param surface_type: Surface type to load, for datasets that provide surfaces. Must be either `"flat"`, `"inflated"`,
-                        `"pia"` (or `"pial"`), or `"wm"` (for white matter).
+                        `"pia"` (or `"pial"`), or `"wm"` (for white matter). If `None` (the default), uses the default of the
+                        dataset.
    :type surface_type: str, optional
    :param download: Whether files may be downloaded when they are missing. If `False`, missing files raise
                     `FileNotFoundError` instead.
@@ -64,6 +65,14 @@ prfmodel.examples.load_dataset
    >>> dataset = load_dataset("7t-retbar-visual", hemisphere="both")  # doctest: +SKIP
    >>> dataset.response.shape  # doctest: +SKIP
    (118584, 120)
+
+   Load the gray matter voxel response of a single subject together with its own inflated cortical surface.
+
+   >>> dataset = load_dataset("7t-aot-visual", surface_type="inflated")  # doctest: +SKIP
+   >>> dataset.response.shape  # doctest: +SKIP
+   (105867, 340)
+   >>> dataset.mask.shape  # doctest: +SKIP
+   (71, 81, 91)
 
    Load two splits of the same response, for cross-validation.
 

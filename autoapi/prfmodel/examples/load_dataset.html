@@ -469,7 +469,8 @@ downloaded.</p>
 uses the default of the dataset.</p></li>
 <li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Data split to load the response from, for datasets that provide splits. Required for those datasets.</p></li>
 <li><p><strong>surface_type</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Surface type to load, for datasets that provide surfaces. Must be either <cite>“flat”</cite>, <cite>“inflated”</cite>,
-<cite>“pia”</cite> (or <cite>“pial”</cite>), or <cite>“wm”</cite> (for white matter).</p></li>
+<cite>“pia”</cite> (or <cite>“pial”</cite>), or <cite>“wm”</cite> (for white matter). If <cite>None</cite> (the default), uses the default of the
+dataset.</p></li>
 <li><p><strong>download</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – Whether files may be downloaded when they are missing. If <cite>False</cite>, missing files raise
 <cite>FileNotFoundError</cite> instead.</p></li>
 </ul>
@@ -515,6 +516,14 @@ the value of an option is not valid.</p></li>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;7t-retbar-visual&quot;</span><span class="p">,</span> <span class="n">hemisphere</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">shape</span>
 <span class="go">(118584, 120)</span>
+</pre></div>
+</div>
+<p>Load the gray matter voxel response of a single subject together with its own inflated cortical surface.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;7t-aot-visual&quot;</span><span class="p">,</span> <span class="n">surface_type</span><span class="o">=</span><span class="s2">&quot;inflated&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(105867, 340)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dataset</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(71, 81, 91)</span>
 </pre></div>
 </div>
 <p>Load two splits of the same response, for cross-validation.</p>

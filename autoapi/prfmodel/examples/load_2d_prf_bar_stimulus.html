@@ -472,16 +472,13 @@ with a <code class="docutils literal notranslate"><span class="pre">design</span
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>The full stimulus has 340 time frames, with 128 pixels in the x- and y-dimension, spanning a visual field of
+<p>The full stimulus has 340 time frames, with 128 cells in the x- and y-dimension, spanning a visual field of
 approximately -4 to 4 degrees of visual angle vertically and horizontally. The stimulus coordinate grid has been
 transformed from a rectangular into a quadratic shape. The moving bar patterns is mirrored in the time axis
 which means that it can be split in two almost identical halfs.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">design</span></code> is stored in screen pixel order while the <code class="docutils literal notranslate"><span class="pre">grid</span></code> holds visual field coordinates, which are
-related by a horizontal flip because the participant viewed the screen through a mirror. The horizontal
-coordinate therefore decreases across the design columns, so a bar in the leftmost columns falls in the right
-visual hemifield (positive <code class="docutils literal notranslate"><span class="pre">mu_x</span></code>). The vertical coordinate increases down the rows.
-<a class="reference internal" href="../stimuli/PRFStimulus.html#prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus" title="prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_2d_bar_stimulus()</span></code></a> uses the same convention, so <code class="docutils literal notranslate"><span class="pre">mu_x</span></code> estimates are
-directly comparable between the two.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">grid</span></code> holds visual field coordinates. The horizontal coordinate increases across the design columns, so a
+bar in the leftmost columns falls in the left visual hemifield (negative <code class="docutils literal notranslate"><span class="pre">mu_x</span></code>), and the vertical coordinate
+increases down the rows, so the first row is the lower edge of the visual field (negative <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>).</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">

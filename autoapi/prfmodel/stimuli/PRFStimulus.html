@@ -556,32 +556,29 @@ before <cite>xv</cite>, as in the example below.</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>The <cite>design</cite> is stored in <strong>screen pixel</strong> order, but the <cite>grid</cite> holds <strong>visual field</strong>
-coordinates in degrees of visual angle. These two spaces are related by a horizontal flip,
-because in a typical MRI setup the participant views the screen through a mirror that
-reverses left and right. The horizontal coordinate therefore <em>decreases</em> across the design
-columns: <cite>grid[0, 0, 1]</cite> is the largest (most positive) <cite>x</cite> and <cite>grid[0, -1, 1]</cite> the
-smallest. The vertical coordinate is unaffected and increases down the rows.</p>
-<p>Concretely, a bar drawn in the leftmost columns of <cite>design</cite> falls in the <strong>right</strong> visual
-hemifield (positive <cite>mu_x</cite>), and a bar in the rightmost columns falls in the left hemifield
-(negative <cite>mu_x</cite>). A <code class="docutils literal notranslate"><span class="pre">direction=&quot;horizontal&quot;</span></code> bar sweeps left-to-right across the screen,
-which is right-to-left (decreasing <cite>mu_x</cite>) through the visual field.</p>
+<p>The <cite>grid</cite> holds <strong>visual field</strong> coordinates in degrees of visual angle. The horizontal
+coordinate increases across the design columns: <cite>grid[0, 0, 1]</cite> is the smallest (most
+negative) <cite>x</cite> and <cite>grid[0, -1, 1]</cite> the largest. The vertical coordinate increases down the
+rows, so the first row is the lower edge of the visual field.</p>
+<p>Concretely, a bar drawn in the leftmost columns of <cite>design</cite> falls in the <strong>left</strong> visual
+hemifield (negative <cite>mu_x</cite>), and a bar in the rightmost columns falls in the right hemifield
+(positive <cite>mu_x</cite>). A <code class="docutils literal notranslate"><span class="pre">direction=&quot;horizontal&quot;</span></code> bar sweeps from left to right through the
+visual field (increasing <cite>mu_x</cite>).</p>
 <p>This is the same convention as the packaged stimulus returned by
-<a class="reference internal" href="../examples/load_2d_prf_bar_stimulus.html#prfmodel.examples.load_2d_prf_bar_stimulus" title="prfmodel.examples.load_2d_prf_bar_stimulus"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_2d_prf_bar_stimulus()</span></code></a>, so <cite>mu_x</cite> estimates are directly
-comparable between the two.</p>
+<a class="reference internal" href="../examples/load_2d_prf_bar_stimulus.html#prfmodel.examples.load_2d_prf_bar_stimulus" title="prfmodel.examples.load_2d_prf_bar_stimulus"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_2d_prf_bar_stimulus()</span></code></a>.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="o">.</span><span class="n">create_2d_bar_stimulus</span><span class="p">(</span><span class="n">num_frames</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
 <span class="go">PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
 </pre></div>
 </div>
-<p>The horizontal coordinate decreases across the columns, the vertical one increases down the
-rows:</p>
+<p>Both coordinates increase with their design axis, the horizontal one across the columns and
+the vertical one down the rows:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="o">.</span><span class="n">create_2d_bar_stimulus</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">pixel_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span><span class="o">.</span><span class="n">grid</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># x, constant down each column</span>
-<span class="go">array([[ 2.,  1.,  0., -1., -2.],</span>
-<span class="go">       [ 2.,  1.,  0., -1., -2.],</span>
-<span class="go">       [ 2.,  1.,  0., -1., -2.]])</span>
+<span class="go">array([[-2., -1.,  0.,  1.,  2.],</span>
+<span class="go">       [-2., -1.,  0.,  1.,  2.],</span>
+<span class="go">       [-2., -1.,  0.,  1.,  2.]])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span><span class="o">.</span><span class="n">grid</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># y, constant across each row</span>
 <span class="go">array([[-1., -1., -1., -1., -1.],</span>
 <span class="go">       [ 0.,  0.,  0.,  0.,  0.],</span>
