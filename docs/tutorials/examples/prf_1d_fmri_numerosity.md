@@ -44,7 +44,7 @@ if find_spec("tensorflow") is None:
 
 ## Loading the stimulus
 
-In this example, we use a public dataset by [Hendrikx et al. (2024)](https://doi.org/10.1016/j.neuroimage.2024.120515) that is available on FigShare.
+In this example, we use a public dataset by [Hendrikx et al. (2024)](https://doi.org/10.1016/j.neuroimage.2024.120515) that is available on [Fig Share](https://doi.org/10.6084/m9.figshare.24126663).
 
 The numerosity stimulus that belongs to this dataset is already included in the package and can be loaded with {py:func}`prfmodel.examples.load_1d_prf_lognumerosity_stimulus`. It is also available as the `stimulus` attribute of the loaded dataset.
 
@@ -675,15 +675,6 @@ and somewhat smaller in the frontal maps (NFI, NFS).
 ## Conclusion
 
 This example showed how to fit a one-dimensional Gaussian pRF model to empirical fMRI data collected from a numerosity experiment. We only looked at a subset of vertices in ROIs that previously were shown to respond to the numerosity stimulus used in the experiment. We plotted the raw BOLD response data and we created the experimental stimulus. Then, we defined a pRF model and optimized its parameters using a grid search, followed by least-squares to adjust for baseline and amplitude differences and stochastic gradient descent to finetune all parameters. Finally, we visualized model fit and compared estimated parameters between ROIs.
-
-+++
-
-## Stay Tuned
-
-More tutorials on fitting models to empirical data and creating custom models are in the making.
-
-For questions and issues, please make an issue on [GitHub](https://github.com/popylar-org/prfmodel/issues) or
-contact Malte Lüken (m.luken@esciencecenter.nl).
 
 +++
 

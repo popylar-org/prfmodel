@@ -5,6 +5,13 @@ import numpy as np
 from prfmodel.stimuli import PRFStimulus
 
 
+def _load_2d_bar_design_and_grid() -> tuple[np.ndarray, np.ndarray]:
+    path = files("prfmodel.data.stimuli").joinpath("2d_bar_stimulus.npz")
+
+    with np.load(str(path)) as archive:
+        return archive["design"], archive["grid"]
+
+
 def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[PRFStimulus, PRFStimulus]:
     """
     Load a two-dimensional population receptive field bar stimulus.
@@ -28,17 +35,14 @@ def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[P
 
     Notes
     -----
-    The full stimulus has 340 time frames, with 128 pixels in the x- and y-dimension, spanning a visual field of
+    The full stimulus has 340 time frames, with 128 cells in the x- and y-dimension, spanning a visual field of
     approximately -4 to 4 degrees of visual angle vertically and horizontally. The stimulus coordinate grid has been
     transformed from a rectangular into a quadratic shape. The moving bar patterns is mirrored in the time axis
     which means that it can be split in two almost identical halfs.
 
-    The ``design`` is stored in screen pixel order while the ``grid`` holds visual field coordinates, which are
-    related by a horizontal flip because the participant viewed the screen through a mirror. The horizontal
-    coordinate therefore decreases across the design columns, so a bar in the leftmost columns falls in the right
-    visual hemifield (positive ``mu_x``). The vertical coordinate increases down the rows.
-    :meth:`~prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus` uses the same convention, so ``mu_x`` estimates are
-    directly comparable between the two.
+    The ``grid`` holds visual field coordinates. The horizontal coordinate increases across the design columns, so a
+    bar in the leftmost columns falls in the left visual hemifield (negative ``mu_x``), and the vertical coordinate
+    increases down the rows, so the first row is the lower edge of the visual field (negative ``mu_y``).
 
     See Also
     --------
@@ -61,12 +65,7 @@ def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[P
     PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
 
     """
-    path = files("prfmodel.data.stimuli").joinpath("2d_bar_stimulus.npz")
-
-    archive = np.load(str(path))
-
-    design = archive["design"]
-    grid = archive["grid"]
+    design, grid = _load_2d_bar_design_and_grid()
     dimension_labels = ["y", "x"]
 
     num_split = design.shape[0] // 2

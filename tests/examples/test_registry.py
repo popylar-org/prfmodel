@@ -13,7 +13,7 @@ _SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 def test_list_datasets():
     """Test that all datasets are listed in alphabetical order."""
-    assert list_datasets() == ["7t-retbar-visual", "hcp-999999-surface", "numerosity-timing"]
+    assert list_datasets() == ["7t-aot-visual", "7t-retbar-visual", "hcp-999999-surface", "numerosity-timing"]
 
 
 def test_checksums_are_packaged():

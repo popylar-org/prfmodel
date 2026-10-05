@@ -591,7 +591,7 @@ We can see that vertices in higher areas in the visual pathway have larger CF si
 
 This example showed how to fit a Gaussian CF model to empirical fMRI data collected from an experiment in the visual domain. First, we plotted the raw BOLD response data on the cortical surface. Second, we calculated a distance matrix from a white matter surface using Dijkstra's algorithm. Then, we defined a CF model and optimized its parameters using a grid search followed by least-squares to adjust for baseline and amplitude differences. Finally, we visualized model fit, the estimated parameters, and derived measures on the cortical surface.
 
-## Next steps
+## Next Steps
 
 The predictions by our CF model can potentially be improved. We suggest different directions for improving the pRF model fit:
 
@@ -599,15 +599,6 @@ The predictions by our CF model can potentially be improved. We suggest differen
 - Finetuning `sigma` with stochastic gradient descent with {py:class}`prfmodel.fitters.sgd.SGDFitter`
 - Applying preprocessing steps before fitting the pRF model (e.g., high-pass filtering)
 - Building a more complex CF model (e.g., difference of Gaussian, see Zuiderbaan et al., 2012)
-
-+++
-
-## Stay Tuned
-
-More tutorials on fitting models to empirical data and creating custom models are in the making.
-
-For questions and issues, please make an issue on [GitHub](https://github.com/popylar-org/prfmodel/issues) or
-contact Malte Lüken (m.luken@esciencecenter.nl).
 
 +++
 

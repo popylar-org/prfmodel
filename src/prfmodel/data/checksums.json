@@ -1,5 +1,45 @@
 {
   "files": {
+    "7t_aot_sub-003/sub-003_FScortexGM_dil_T2BM_crop_resampled.nii.gz": {
+      "sha256": "7cd00b7a5a94a908bbd713be34ce957395d4dd27fdee42db561a29658c69f913",
+      "size": 28456
+    },
+    "7t_aot_sub-003/sub-003_ses-pRF_task-pRF_rec-nordicstc_run-medianpsc_part-mag_bold_space-T1w_res-2p0mm.nii.gz": {
+      "sha256": "2123fdd2d01f55151caca33d27e70f74d3d1ec8d9e0daeec57c0d94974c49c65",
+      "size": 242573793
+    },
+    "7t_aot_sub-003/surfaces/flat_lh.gii": {
+      "sha256": "fc2bfb19e135b539d87e7ffc9d8fe2f7ebe9474b8e73e5a3a4cac518e5057575",
+      "size": 4498873
+    },
+    "7t_aot_sub-003/surfaces/flat_rh.gii": {
+      "sha256": "6929fa8f6886b0f81a16165aaa97c97fdabfb863423f32b719c625a4ce461d4c",
+      "size": 4542417
+    },
+    "7t_aot_sub-003/surfaces/inflated_lh.gii": {
+      "sha256": "173baf881a80fa94d63668ba948a110d2cf6bcb25a38296ea067aeabb7246eec",
+      "size": 5402617
+    },
+    "7t_aot_sub-003/surfaces/inflated_rh.gii": {
+      "sha256": "b00e649695d704be78bbf74c0d60c6d0bc90489a6fc4729340dbd647f8c60720",
+      "size": 5433962
+    },
+    "7t_aot_sub-003/surfaces/pia_lh.gii": {
+      "sha256": "0f02debc4af31b8db9dacc7a27a7bef309df139b8dc95796c3a5c94c76b269e1",
+      "size": 5404919
+    },
+    "7t_aot_sub-003/surfaces/pia_rh.gii": {
+      "sha256": "0ea7e8f4ed52e8b17c9a397c96c872e635c61a6f0e57ff309ad3f536ad1758f3",
+      "size": 5406691
+    },
+    "7t_aot_sub-003/surfaces/wm_lh.gii": {
+      "sha256": "f03ab40a6b4d16b55f56e9ba867f9552e2470ca02ac4c5d5c996edb473dd736d",
+      "size": 5392080
+    },
+    "7t_aot_sub-003/surfaces/wm_rh.gii": {
+      "sha256": "ae0269ff0b14b930622e3ea0ebaf059ca11d497d93610a4d5bdc453ef0927786",
+      "size": 5390272
+    },
     "hcp_999999/surface-info/mmp_atlas.npz": {
       "sha256": "6c760f3446a9cd13986da143285d72e6532df4c7df6d4713ee79e9fcb7af629a",
       "size": 474840

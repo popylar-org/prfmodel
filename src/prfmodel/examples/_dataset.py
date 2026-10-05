@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from dataclasses import field
 from pathlib import Path
 import numpy as np
+from nibabel.spatialimages import SpatialImage
 from nilearn.surface import PolyMesh
 from prfmodel.stimuli import Stimulus
 
@@ -23,9 +24,9 @@ class Dataset:
     name : str
         Name of the dataset, as passed to :func:`~prfmodel.examples.load_dataset`.
     response : numpy.ndarray, optional
-        Neural timecourses with shape `(num_units, num_frames)`, where units are surface vertices or
-        region of interest gray nodes depending on the dataset. When both hemispheres are requested, the rows
-        of the left hemisphere come first.
+        Neural timecourses with shape `(num_units, num_frames)`, where units are surface vertices, region of
+        interest gray nodes, or voxels inside `mask`, depending on the dataset. When both hemispheres are
+        requested, the rows of the left hemisphere come first.
     stimulus : prfmodel.stimuli.Stimulus, optional
         The stimulus that belongs to the response, when the dataset provides a ready-made one. Datasets whose
         stimulus requires preprocessing leave this `None` and expose the raw design through `files` instead.
@@ -33,6 +34,10 @@ class Dataset:
         Integer region of interest index for each row of `response`, with shape `(num_units,)`.
     roi_mapping : dict of int to str, optional
         Mapping from the values in `roi_index` to region of interest labels.
+    mask : nibabel.spatialimages.SpatialImage, optional
+        Binary volume that selects the voxels in `response`, for volumetric datasets. The rows of `response`
+        follow the C order of the nonzero voxels of the mask, so results can be mapped back into the volume, for
+        example with :func:`nilearn.masking.unmask`.
     mesh : nilearn.surface.PolyMesh, optional
         The cortical surface mesh that the response can be projected onto.
     atlas : dict of str to numpy.ndarray, optional
@@ -60,6 +65,7 @@ class Dataset:
     stimulus: Stimulus | None = None
     roi_index: np.ndarray | None = None
     roi_mapping: dict[int, str] | None = None
+    mask: SpatialImage | None = None
     mesh: PolyMesh | None = None
     atlas: dict[str, np.ndarray] | None = None
     hemisphere: str | None = None
@@ -94,6 +100,9 @@ class Dataset:
             if isinstance(val, np.ndarray):
                 arr_shape = ", ".join([str(s) for s in val.shape])
                 str_list.append(f"{key}=array[{arr_shape}]")
+            elif isinstance(val, SpatialImage):
+                img_shape = ", ".join([str(s) for s in val.shape])
+                str_list.append(f"{key}={val.__class__.__name__}[{img_shape}]")
             elif key == "files":
                 str_list.append(f"{key}=[{', '.join(val)}]")
             elif isinstance(val, dict):

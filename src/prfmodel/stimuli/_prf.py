@@ -178,21 +178,18 @@ class PRFStimulus(Stimulus):
 
         Notes
         -----
-        The `design` is stored in **screen pixel** order, but the `grid` holds **visual field**
-        coordinates in degrees of visual angle. These two spaces are related by a horizontal flip,
-        because in a typical MRI setup the participant views the screen through a mirror that
-        reverses left and right. The horizontal coordinate therefore *decreases* across the design
-        columns: `grid[0, 0, 1]` is the largest (most positive) `x` and `grid[0, -1, 1]` the
-        smallest. The vertical coordinate is unaffected and increases down the rows.
+        The `grid` holds **visual field** coordinates in degrees of visual angle. The horizontal
+        coordinate increases across the design columns: `grid[0, 0, 1]` is the smallest (most
+        negative) `x` and `grid[0, -1, 1]` the largest. The vertical coordinate increases down the
+        rows, so the first row is the lower edge of the visual field.
 
-        Concretely, a bar drawn in the leftmost columns of `design` falls in the **right** visual
-        hemifield (positive `mu_x`), and a bar in the rightmost columns falls in the left hemifield
-        (negative `mu_x`). A ``direction="horizontal"`` bar sweeps left-to-right across the screen,
-        which is right-to-left (decreasing `mu_x`) through the visual field.
+        Concretely, a bar drawn in the leftmost columns of `design` falls in the **left** visual
+        hemifield (negative `mu_x`), and a bar in the rightmost columns falls in the right hemifield
+        (positive `mu_x`). A ``direction="horizontal"`` bar sweeps from left to right through the
+        visual field (increasing `mu_x`).
 
         This is the same convention as the packaged stimulus returned by
-        :func:`~prfmodel.examples.load_2d_prf_bar_stimulus`, so `mu_x` estimates are directly
-        comparable between the two.
+        :func:`~prfmodel.examples.load_2d_prf_bar_stimulus`.
 
         Examples
         --------
@@ -200,40 +197,37 @@ class PRFStimulus(Stimulus):
         >>> print(stimulus)
         PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
 
-        The horizontal coordinate decreases across the columns, the vertical one increases down the
-        rows:
+        Both coordinates increase with their design axis, the horizontal one across the columns and
+        the vertical one down the rows:
 
         >>> stimulus = PRFStimulus.create_2d_bar_stimulus(width=5, height=3, pixel_size=1.0)
         >>> stimulus.grid[..., 1]  # x, constant down each column
-        array([[ 2.,  1.,  0., -1., -2.],
-               [ 2.,  1.,  0., -1., -2.],
-               [ 2.,  1.,  0., -1., -2.]])
+        array([[-2., -1.,  0.,  1.,  2.],
+               [-2., -1.,  0.,  1.,  2.],
+               [-2., -1.,  0.,  1.,  2.]])
         >>> stimulus.grid[..., 0]  # y, constant across each row
         array([[-1., -1., -1., -1., -1.],
                [ 0.,  0.,  0.,  0.,  0.],
                [ 1.,  1.,  1.,  1.,  1.]])
 
         """
-        # Create a centered grid of x and y coordinates.
-        # x decreases across the columns: the design is stored in screen pixel order while the grid
-        # holds visual field coordinates, and the mirror in the scanner flips the horizontal axis
-        # (see Notes). This matches the packaged stimulus from
+        # Create a centered grid of x and y coordinates that increase across the columns and down the
+        # rows (see Notes). This matches the packaged stimulus from
         # :func:`~prfmodel.examples.load_2d_prf_bar_stimulus`.
-        x = ((width - 1) / 2 - np.arange(width)) * pixel_size
+        x = (np.arange(width) - (width - 1) / 2) * pixel_size
         y = (np.arange(height) - (height - 1) / 2) * pixel_size
         xv, yv = np.meshgrid(x, y)
         # Dimension y comes first because numpy uses row-major order (i.e., the first design axis
         # after time represents rows or height), so grid[..., 0] must vary along that axis
         grid = np.stack((yv, xv), axis=-1)  # shape (height, width, 2)
 
-        # Create the design array. Positions below are screen pixel columns/rows, not visual field
-        # coordinates; the horizontal axis of the two is reversed (see Notes).
+        # Create the design array. Positions below are design columns/rows, not visual field coordinates.
         design = np.zeros((num_frames, height, width), dtype=np.float32)
 
         for frame in range(num_frames):
             if direction == "horizontal":
-                # Bar moves left to right across the screen (right to left through the visual
-                # field), starting and ending just outside the screen
+                # Bar moves across the columns in index order (left to right through the visual field),
+                # starting and ending just outside the screen
                 bar_start = int(np.round(-bar_width + frame * (width + bar_width) / (num_frames - 1)))
                 bar_end = bar_start + bar_width
                 # Only draw within screen bounds
