@@ -5,6 +5,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Two values are always both regularly and log-spaced
+_MIN_LOG_DETECT_SIZE = 2
+
 
 def _get_figure_axes(ax: mpl.axes.Axes | None, **kwargs) -> tuple[mpl.figure.Figure, mpl.axes.Axes]:
     """Return the figure of an existing axes or create a new figure and axes."""
@@ -22,6 +25,22 @@ def _get_figure_axes(ax: mpl.axes.Axes | None, **kwargs) -> tuple[mpl.figure.Fig
         raise TypeError(msg)
 
     return fig, ax
+
+
+def _is_regular(values: np.ndarray) -> bool:
+    """Check whether sorted values are regularly spaced."""
+    steps = np.diff(values)
+    return bool(np.allclose(steps, steps[0]))
+
+
+def _is_log_spaced(values: np.ndarray | Sequence[float]) -> bool:
+    """Check whether grid values are log-spaced but not regularly spaced."""
+    values = np.sort(np.asarray(values, dtype=float))
+
+    if values.size <= _MIN_LOG_DETECT_SIZE or np.any(values <= 0.0) or _is_regular(values):
+        return False
+
+    return _is_regular(np.log(values))
 
 
 def _grid_bin_edges(values: np.ndarray | Sequence[float], log: bool = False) -> np.ndarray:

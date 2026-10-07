@@ -322,15 +322,16 @@ our model. Finally, we use stochastic gradient descent (SGD) to finetune our mod
 +++
 
 Let's start with the grid search by defining ranges of `mu` and `sigma` that we want to construct a grid
-of parameter values from. For `baseline` and `amplitude`, we only provide a single value so that they will stay constant
+of parameter values from. We create them from the stimulus with {py:func}`prfmodel.fitters.grid_values_1d_prf`. For
+`baseline` and `amplitude`, we only provide a single value so that they will stay constant
 across the entire grid. The two-gamma parameters of the impulse model are omitted entirely: the impulse model supplies
 them from its default Glover HRF parameter set. However, if we wanted to override the default parameters, we could also
 add ranges for them here.
 
 ```{code-cell} ipython3
-param_ranges = {
-    "mu": np.linspace(np.log(0.7), np.log(10), 50),
-    "sigma": np.linspace(0.005, 3.0, 50),
+from prfmodel.fitters import grid_values_1d_prf
+
+param_ranges = grid_values_1d_prf(stimulus) | {
     # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-0.5],
     "baseline": [0.0],
@@ -338,11 +339,20 @@ param_ranges = {
 }
 ```
 
-For both parameters, we defined ranges of values that will be used to construct the grid. That is, the
-grid search will evaluate all possible combinations of these values and return the combination that fits the observed
-data best. This will result in a grid containing $50 \times 50 = 2500$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
+By default, the function creates 49 values for `mu` that span twice the range of the stimulus around its midpoint and
+50 log-spaced values for `sigma` that range from the smallest spacing between the stimulus coordinates to their full
+range. The grid search will evaluate all possible combinations of these values and return the combination that fits the
+observed data best. This will result in a grid containing $49 \times 50 = 2450$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
 
-Two properties of the stimulus bound what these ranges can achieve. First, `mu` stops at $\log(10)$ and thus deliberately excludes the baseline numerosity 20: a vertex that is genuinely tuned to 20 cannot be recovered here and will pile up against the upper end of the grid. Second, the stimulus samples log-numerosity space at only eight points that are at least $\log(2) - \log(1) \approx 0.69$ apart. A pRF much narrower than that spacing responds to a single numerosity no matter how small `sigma` becomes, so the lower end of the `sigma` range is not identifiable from these data and estimates near the floor should be read as "no wider than one stimulus level".
+Two properties of the stimulus bound what these ranges can achieve. First, the range of `mu` extends beyond the
+displayed numerosities, from about 0.2 to 90 on the natural scale. Estimates outside the displayed numerosities 1 to 7
+(which includes the baseline numerosity 20) are only weakly constrained by the data, and we will exclude them when we
+analyze the pRF parameters. Extending the grid beyond the stimulus prevents such vertices from piling up at the edge of
+the grid. Second, the stimulus samples log-numerosity space at only eight points, the closest of which are
+$\log(7) - \log(6) \approx 0.15$ apart. This spacing is the smallest value of `sigma` in the grid. A pRF much narrower
+than the spacing responds to a single numerosity no matter how small `sigma` becomes, so the lower end of the `sigma`
+range is not identifiable from these data and estimates near the floor should be read as "no wider than one stimulus
+level".
 
 Let's construct the {py:class}`prfmodel.fitters.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.GridFitter`
 evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is the negative correlation, which ignores differences in baseline and amplitude between model predictions and observed data. This means the data do not need to be demeaned or converted to percent signal change first, but also that `baseline` and `amplitude` cannot be estimated by the grid search itself. We fix them here and estimate them with least squares in the next step.

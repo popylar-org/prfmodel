@@ -409,9 +409,10 @@ our model.
 +++
 
 Let's start with the grid search by defining ranges of `mu_x`, `mu_y`, and `sigma` that we want to construct a grid
-of parameter values from. For the pRF center coordinates `mu_x`, `mu_y`, we extend the grid beyond the range of the visual field that
-is covered by the stimulus coordinates. Later, we will filter out voxels for which the estimated pRF center lies outside
-the stimulus coordinates. For pRF size `sigma`, we define a log-spaced grid.
+of parameter values from. We create them from the stimulus with {py:func}`prfmodel.fitters.grid_values_2d_prf`. For the
+pRF center coordinates `mu_x`, `mu_y`, we extend the grid to twice the range of the visual field that is covered by the
+stimulus coordinates (`mu_extent=2.0`). Later, we will filter out voxels for which the estimated pRF center lies outside
+the stimulus coordinates. For pRF size `sigma`, we define a log-spaced grid between 0.05 and 10 degrees.
 
 For `baseline` and `amplitude`, we only provide a single value so that they will stay constant
 across the entire grid. The two-gamma parameters of the impulse model are omitted entirely. Instead, the impulse model supplies
@@ -419,10 +420,15 @@ them from its default Glover HRF parameter set. However, if we wanted to overrid
 add ranges for them here.
 
 ```{code-cell} ipython3
-param_ranges = {
-    "mu_x": np.linspace(2 * grid_min_xy[1], 2 * grid_max_xy[1], 21),  # 2 x range of visual field in experiment
-    "mu_y": np.linspace(2 * grid_min_xy[0], 2 * grid_max_xy[0], 21),
-    "sigma": np.exp(np.linspace(np.log(0.05), np.log(10.0), 20)),  # log-spaced grid
+from prfmodel.fitters import grid_values_2d_prf
+
+param_ranges = grid_values_2d_prf(
+    stimulus,
+    num_mu=21,
+    mu_extent=2.0,  # 2 x range of visual field in experiment
+    num_sigma=20,
+    sigma_range=(0.05, 10.0),  # log-spaced by default
+) | {
     # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-0.5],
     "baseline": [0.0],
@@ -433,7 +439,8 @@ param_ranges
 
 For all three parameters, we defined ranges of values that will be used to construct the grid: 21 values for `mu_x` and
 `mu_y`, and 20 values for `sigma`. We used 21 values for `mu_x` and `mu_y` so that the stimulus center (0 degrees) and
-edges ($\pm 4$ degrees) land on grid points. The grid search will evaluate all possible combinations of these values and
+edges ($\pm 4$ degrees) land on grid points. If they did not, {py:func}`prfmodel.fitters.grid_values_2d_prf` would
+warn us and suggest a number of values that aligns them. The grid search will evaluate all possible combinations of these values and
 return the combination that fits the observed data best. This will result in a grid containing
 $21 \times 21 \times 20 = 8820$ parameter combinations. This is still a relatively small grid and we recommend
 specifying finer grids in practice.
@@ -602,7 +609,7 @@ for row, (voxel_mask, label) in enumerate([
     axes[row, 0].set(xlabel="mu_x (in degrees)", ylabel="mu_y (in degrees)", title=f"pRF centers: {label}")
 
     # Count estimates for each pRF size in the grid
-    plot_grid_parameter_distribution(params_subset, param_ranges, "sigma", log=True, ax=axes[row, 1])
+    plot_grid_parameter_distribution(params_subset, param_ranges, "sigma", ax=axes[row, 1])  # Detects log spacing
     axes[row, 1].set(xlabel="sigma (in degrees)", title=f"pRF sizes: {label}")
 ```
 

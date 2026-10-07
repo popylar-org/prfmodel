@@ -12,13 +12,14 @@ from prfmodel.stimuli import PRFStimulus
 from prfmodel.utils import _EXPECTED_NDIM
 from ._utils import _get_figure_axes
 from ._utils import _grid_bin_edges
+from ._utils import _is_log_spaced
 
 
 def plot_grid_parameter_distribution(  # noqa: PLR0913
     parameters: pd.DataFrame,
     parameter_values: Mapping[str, np.ndarray | Sequence[float]],
     name: str,
-    log: bool = False,
+    log: bool | None = None,
     xlabel: str | None = None,
     ax: mpl.axes.Axes | None = None,
     **kwargs,
@@ -35,11 +36,13 @@ def plot_grid_parameter_distribution(  # noqa: PLR0913
         Estimated parameters with one row per unit (e.g., returned by :meth:`prfmodel.fitters.GridFitter.fit`).
     parameter_values : Mapping[str, numpy.ndarray or Sequence[float]]
         Values of the parameter grid (e.g., passed to :meth:`prfmodel.fitters.GridFitter.fit`). The values for `name`
-        must be regularly spaced (or log-spaced if `log=True`).
+        must be regularly spaced or log-spaced.
     name : str
         Name of the parameter to plot.
-    log : bool, optional
-        Whether the grid values are log-spaced. If `True`, the x-axis has a logarithmic scale.
+    log : bool or None, optional
+        Whether the grid values are log-spaced. If `True`, the x-axis has a logarithmic scale. If `None` (the
+        default), log spacing is detected from the grid values: Values that are log-spaced but not regularly spaced
+        are treated as log-spaced.
     xlabel : str or None, optional
         Label of the x-axis. If `None`, `name` is used.
     ax : matplotlib.axes.Axes or None, optional
@@ -57,7 +60,8 @@ def plot_grid_parameter_distribution(  # noqa: PLR0913
     Raises
     ------
     ValueError
-        If the grid values are not regularly spaced (or log-spaced if `log=True`) or contain fewer than two values.
+        If the grid values are not regularly spaced (or log-spaced if `log=True` or detected) or contain fewer than
+        two values.
 
     Notes
     -----
@@ -74,9 +78,12 @@ def plot_grid_parameter_distribution(  # noqa: PLR0913
     >>> import pandas as pd
     >>> parameter_values = {"sigma": np.geomspace(0.1, 10.0, 10)}
     >>> parameters = pd.DataFrame({"sigma": np.random.default_rng(0).choice(parameter_values["sigma"], 100)})
-    >>> fig, ax = plot_grid_parameter_distribution(parameters, parameter_values, "sigma", log=True)
+    >>> fig, ax = plot_grid_parameter_distribution(parameters, parameter_values, "sigma")  # Detects log spacing
 
     """
+    if log is None:
+        log = _is_log_spaced(parameter_values[name])
+
     edges = _grid_bin_edges(parameter_values[name], log=log)
 
     fig, ax = _get_figure_axes(ax, **kwargs)

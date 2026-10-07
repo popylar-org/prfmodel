@@ -153,14 +153,20 @@ the center and size of the Gaussian pRF (i.e., `mu_x`, `mu_y`, `sigma`). By defa
 correlation loss function that ignores differences in baseline and amplitude between model predictions and data. Note
 that the beta weights of the regressors are set to zero in the grid search so that the regressors do not influence the
 grid estimates for `mu_x`, `mu_y`, and `sigma`. We will estimate the beta weights in the following least-squares step.
+We create the values for `mu_x`, `mu_y`, and `sigma` from the stimulus with
+{py:func}`prfmodel.fitters.grid_values_2d_prf`.
 
 ```{code-cell} ipython3
-from prfmodel.fitters import GridFitter
+from prfmodel.fitters import GridFitter, grid_values_2d_prf
 
-param_grid = {
-    "mu_x": np.linspace(-3.0, 3.0, 20),
-    "mu_y": np.linspace(-3.0, 3.0, 20),
-    "sigma": np.linspace(0.5, 5.0, 20),
+param_grid = grid_values_2d_prf(
+    stimulus,
+    num_mu=21,
+    mu_extent=1.0,  # Centers span the stimulus
+    num_sigma=20,
+    sigma_range=(0.5, 5.0),
+    log_sigma=False,
+) | {
     "weight_deriv": [0.5],
     "amplitude": [1.0],
     "baseline": [0.0],

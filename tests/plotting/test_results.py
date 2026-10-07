@@ -156,6 +156,18 @@ def test_plot_grid_parameter_distribution():
     assert ax.get_xscale() == "log"
 
 
+@pytest.mark.parametrize(
+    ("grid_values", "expected_scale"),
+    [(np.geomspace(0.1, 10.0, 5), "log"), (np.linspace(0.1, 10.0, 5), "linear"), (np.array([1.0, 2.0]), "linear")],
+)
+def test_plot_grid_parameter_distribution_detect_log(grid_values: np.ndarray, expected_scale: str):
+    """Test that log spacing of the grid values is detected when 'log' is not given."""
+    parameters = pd.DataFrame({"sigma": grid_values})
+    _, ax = plot_grid_parameter_distribution(parameters, {"sigma": grid_values}, "sigma")
+    assert ax.get_xscale() == expected_scale
+    assert sum(np.sum(patch.get_data()[0]) for patch in ax.patches) == len(grid_values)
+
+
 def test_plot_parameter_by_roi():
     """Test that means and errors are computed per ROI in the given order."""
     parameters = pd.DataFrame({"sigma": [1.0, 3.0, 10.0, 10.0, 5.0]})
