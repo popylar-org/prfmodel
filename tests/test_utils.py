@@ -1,5 +1,6 @@
 """Tests for utility functions and classes."""
 
+from collections.abc import Callable
 import keras
 import numpy as np
 import pandas as pd
@@ -10,6 +11,8 @@ from prfmodel.typing import Tensor
 from prfmodel.utils import TensorFrame
 from prfmodel.utils import _get_norm_fun
 from prfmodel.utils import batched
+from prfmodel.utils import calculate_eccentricity
+from prfmodel.utils import calculate_polar_angle
 from prfmodel.utils import normalize_response
 from .conftest import TestSetup
 
@@ -47,6 +50,91 @@ def test_normalize_response_error():
 
     with pytest.raises(ValueError):
         normalize_response(response)
+
+
+@pytest.mark.parametrize(
+    ("mu_x", "mu_y", "expected"),
+    [
+        (1.0, 0.0, 0.0),  # Right
+        (1.0, 1.0, np.pi / 4),  # Upper right
+        (0.0, 1.0, np.pi / 2),  # Up
+        (-1.0, 1.0, 3 * np.pi / 4),  # Upper left
+        (-1.0, 0.0, np.pi),  # Left
+        (-1.0, -1.0, -3 * np.pi / 4),  # Lower left
+        (0.0, -1.0, -np.pi / 2),  # Down
+        (1.0, -1.0, -np.pi / 4),  # Lower right
+    ],
+)
+def test_calculate_polar_angle(mu_x: float, mu_y: float, expected: float):
+    """Test that the polar angle runs counterclockwise from the positive x-axis in all quadrants."""
+    angle = calculate_polar_angle(np.array([mu_x]), np.array([mu_y]))
+    np.testing.assert_allclose(angle, [expected], atol=1e-12)
+
+
+def test_calculate_polar_angle_scale_invariant():
+    """Test that the polar angle does not depend on the distance of the pRF center from the origin."""
+    mu_x = np.array([1.0, -2.0, 0.5])
+    mu_y = np.array([3.0, 1.0, -4.0])
+    np.testing.assert_allclose(calculate_polar_angle(mu_x, mu_y), calculate_polar_angle(10.0 * mu_x, 10.0 * mu_y))
+
+
+def test_calculate_polar_angle_range():
+    """Test that the polar angle lies in [-pi, pi]."""
+    rng = np.random.default_rng(0)
+    angle = calculate_polar_angle(rng.normal(size=1000), rng.normal(size=1000))
+    assert np.all(angle >= -np.pi)
+    assert np.all(angle <= np.pi)
+
+
+@pytest.mark.parametrize(
+    ("mu_x", "mu_y", "expected"),
+    [
+        (0.0, 0.0, 0.0),
+        (3.0, 4.0, 5.0),
+        (-3.0, 4.0, 5.0),
+        (3.0, -4.0, 5.0),
+        (-1.0, 0.0, 1.0),
+        (0.0, -2.0, 2.0),
+    ],
+)
+def test_calculate_eccentricity(mu_x: float, mu_y: float, expected: float):
+    """Test that the eccentricity is the distance of the pRF center from the origin."""
+    np.testing.assert_allclose(calculate_eccentricity(np.array([mu_x]), np.array([mu_y])), [expected])
+
+
+def test_calculate_polar_angle_eccentricity_round_trip():
+    """Test that polar angle and eccentricity recover the pRF center coordinates."""
+    rng = np.random.default_rng(0)
+    mu_x = rng.normal(size=100)
+    mu_y = rng.normal(size=100)
+    angle = calculate_polar_angle(mu_x, mu_y)
+    eccentricity = calculate_eccentricity(mu_x, mu_y)
+    np.testing.assert_allclose(eccentricity * np.cos(angle), mu_x)
+    np.testing.assert_allclose(eccentricity * np.sin(angle), mu_y)
+
+
+@pytest.mark.parametrize("fn", [calculate_polar_angle, calculate_eccentricity])
+def test_calculate_center_series_input(fn: Callable):
+    """Test that pandas Series (e.g., parameter DataFrame columns) are accepted and return a numpy array."""
+    parameters = pd.DataFrame({"mu_x": [1.0, 0.0], "mu_y": [0.0, 2.0]})
+    result = fn(parameters["mu_x"], parameters["mu_y"])
+    assert isinstance(result, np.ndarray)
+    np.testing.assert_allclose(result, fn(parameters["mu_x"].to_numpy(), parameters["mu_y"].to_numpy()))
+
+
+@pytest.mark.parametrize("fn", [calculate_polar_angle, calculate_eccentricity])
+def test_calculate_center_nan(fn: Callable):
+    """Test that NaN coordinates (e.g., of excluded units) propagate to the result."""
+    result = fn(np.array([np.nan, 1.0, 1.0]), np.array([1.0, np.nan, 1.0]))
+    assert np.isnan(result[:2]).all()
+    assert np.isfinite(result[2])
+
+
+@pytest.mark.parametrize("fn", [calculate_polar_angle, calculate_eccentricity])
+def test_calculate_center_shape(fn: Callable):
+    """Test that the result keeps the shape of the inputs (e.g., values projected onto a surface)."""
+    rng = np.random.default_rng(0)
+    assert fn(rng.normal(size=(4, 5)), rng.normal(size=(4, 5))).shape == (4, 5)
 
 
 class TestTensorFrame:

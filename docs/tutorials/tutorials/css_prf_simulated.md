@@ -201,17 +201,16 @@ grid did not contain the "true" parameters we used to simulate the original resp
 "true" parameters.
 
 Using the parameter estimates resulting from the grid search we can make model predictions and compare them against
-the original simulated response.
+the original simulated response with {py:func}`prfmodel.plotting.plot_observed_predicted`.
 
 ```{code-cell} ipython3
+from prfmodel.plotting import plot_observed_predicted
+
 gaussian_pred_response = gaussian_model(stimulus, grid_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(gaussian_pred_response[0], label="Predicted (Gaussian, grid)")
-
-fig.legend();
+plot_observed_predicted(
+    simulated_response[0], {"Predicted (Gaussian, grid)": gaussian_pred_response[0]}, observed_label="True"
+);
 ```
 
 We can see that the predicted response follows the shape of the original (true) response but still shows some deviation
@@ -240,12 +239,9 @@ The Gaussian least-squares fit adjusts the scale and baseline to match the simul
 ```{code-cell} ipython3
 gaussian_pred_response = gaussian_model(stimulus, gaussian_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(gaussian_pred_response[0], label="Predicted (Gaussian, least-squares)")
-
-fig.legend();
+plot_observed_predicted(
+    simulated_response[0], {"Predicted (Gaussian, least-squares)": gaussian_pred_response[0]}, observed_label="True"
+);
 ```
 
 ## Step 2: Fit the CSS pRF model
@@ -298,12 +294,9 @@ We can plot the predicted model response and see that it closely aligns with the
 ```{code-cell} ipython3
 sgd_pred_response_fixed_n = prf_model(stimulus, sgd_params_fixed_n)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(sgd_pred_response_fixed_n[0], "--", label="Predicted (SGD) - fixed n")
-
-fig.legend();
+plot_observed_predicted(
+    simulated_response[0], {"Predicted (SGD) - fixed n": sgd_pred_response_fixed_n[0]}, observed_label="True"
+);
 ```
 
 We can improve the model fit even further by adding `n` to the free parameters. We again run SGD but remove `n` from
@@ -336,12 +329,7 @@ plot the predicted model response against the true simulated response.
 ```{code-cell} ipython3
 sgd_pred_response = prf_model(stimulus, sgd_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(sgd_pred_response[0], "--", label="Predicted (SGD)")
-
-fig.legend();
+plot_observed_predicted(simulated_response[0], {"Predicted (SGD)": sgd_pred_response[0]}, observed_label="True");
 ```
 
 The predicted model response aligns perfectly with the true simulated response.

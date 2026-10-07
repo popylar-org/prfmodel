@@ -151,52 +151,18 @@ def project_to_surface(voxel_values: np.ndarray) -> np.ndarray:
     return np.divide(surf_values, surf_weights, out=np.full_like(surf_values, np.nan), where=surf_weights > 0)
 ```
 
-We also define a helper function to plot a statistic on the surface.
+We can then plot the standard deviation of each timecourse on the surface with
+{py:func}`prfmodel.plotting.plot_surface_stat_map`.
 
 ```{code-cell} ipython3
-from nilearn.plotting import plot_surf_stat_map
+from prfmodel.plotting import plot_surface_stat_map
 
-
-def plot_surf_stat_map_helper(
-        stat_map: np.ndarray,
-        vmin: float | None = None,
-        vmax: float | None = None,
-        title: str | None = None,
-        cmap: str = "inferno",
-    ) -> tuple[plt.Figure, plt.Axes]:
-    """Helper function to plot a surface with a stat map."""
-    fig, ax = plt.subplots(subplot_kw={"projection": "3d"}, figsize=(8, 6))
-
-    plot_surf_stat_map(
-        mesh,
-        stat_map,
-        vmin=vmin,
-        vmax=vmax,
-        hemi="both",
-        view=SURF_VIEW,
-        cmap=cmap,
-        axes=ax,
-        figure=fig,
-        title=title,
-    )
-
-    # Expand the 3D axes to fill the space to the left of the colorbar
-    surf_axes = [a for a in fig.axes if a.name == "3d"]
-    cbar_axes = [a for a in fig.axes if a.name != "3d"]
-    cbar_x0 = min(a.get_position().x0 for a in cbar_axes)
-    for a in surf_axes:
-        a.set_position([0.0, 0.0, cbar_x0 - 0.01, 0.97])
-
-    return fig, ax
-```
-
-We can then plot the standard deviation of each timecourse on the surface.
-
-```{code-cell} ipython3
 # Calculate standard deviation of each timecourse
 response_sd = response_psc.std(axis=1)
 
-plot_surf_stat_map_helper(project_to_surface(response_sd), vmax=5.0, title="Response standard deviation");
+plot_surface_stat_map(
+    mesh, project_to_surface(response_sd), view=SURF_VIEW, vmax=5.0, title="Response standard deviation"
+);
 ```
 
 We can see that there is high variation in the signal in the visual areas at the occipital pole (in the center of the
@@ -278,25 +244,21 @@ While the timecourses are quite noisy, we can see that, for some voxels, there a
 to the bar moving through the voxel's pRF. The goal of our pRF model is to predict these peaks as closely as possible.
 By comparing how similar the pRF model predictions are to the observed timecourses, we can identify voxels and areas of the brain that respond to our visual stimulus. This allows us to create a stimulus-specific pRF map of the brain.
 
-We can get an even better overview by plotting all timecourses at once in a heatmap.
+We can get an even better overview by plotting all timecourses at once in a heatmap with
+{py:func}`prfmodel.plotting.plot_response_heatmap`.
 
 ```{code-cell} ipython3
-aspect_ratio = response_psc.shape[1] / response_psc.shape[0]
+from prfmodel.plotting import plot_response_heatmap
 
-fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-
-# We use matplotlib because plotly cannot handle this many voxels
-im = ax.imshow(
+plot_response_heatmap(
     response_psc,
-    aspect=aspect_ratio,
-    cmap="inferno",
     vmin=-2,
     vmax=5,
-)
-
-ax.set_xlabel("Time frame (in TR)")
-ax.set_ylabel("Voxel index")
-fig.colorbar(im, ax=ax, label="BOLD response (in PSC)");
+    xlabel="Time frame (in TR)",
+    ylabel="Voxel index",
+    colorbar_label="BOLD response (in PSC)",
+    figsize=(6, 6),
+);
 ```
 
 Again, we can see the peaks in the BOLD response of many voxels. The location of the peaks in the timecourse differs
@@ -592,23 +554,19 @@ r_squared_test = np.asarray(
 r_squared_test.shape
 ```
 
-We can look at the distribution of R-squared values across voxels for both sets.
+We can look at the distribution of R-squared values across voxels for both sets with
+{py:func}`prfmodel.plotting.plot_r_squared_hist`.
 
 ```{code-cell} ipython3
-fig = px.histogram(
-    pd.DataFrame({
+from prfmodel.plotting import plot_r_squared_hist
+
+plot_r_squared_hist(
+    {
         "Training set (in-sample)": r_squared_train,
         "Test set (out-of-sample)": r_squared_test,
-    }).melt(var_name="set", value_name="r_squared"),
-    x="r_squared",
-    color="set",
-    barmode="overlay",
-    nbins=40,
-    range_x=(-0.5, 1.0),
-    log_y=True,  # Many voxels have scores close to zero; a log scale also shows the voxels with higher scores
-    labels={"r_squared": "R-squared", "set": ""},
-).update_layout(yaxis_title="Frequency (log scale)", height=450)
-fig.show()
+    },
+    log=True,  # Many voxels have scores close to zero; a log scale also shows the voxels with higher scores
+);
 ```
 
 We can see that many voxels have a score close to zero meaning that the pRF model does not predict the observed response well. This is expected since not the entire brain responds to our relatively simple visual stimulus.
@@ -616,17 +574,13 @@ However, a substantial amount of voxels also have higher scores, suggesting that
 The scores on the test set are slightly lower than on the training set, because the model partly fits the noise in the
 training set, which does not generalize to the test set.
 
-We can compare the in-sample and out-of-sample R-squared for each voxel directly.
+We can compare the in-sample and out-of-sample R-squared for each voxel directly with
+{py:func}`prfmodel.plotting.plot_r_squared_comparison`.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots(1, 1, figsize=(5, 5))
+from prfmodel.plotting import plot_r_squared_comparison
 
-ax.hexbin(r_squared_train, r_squared_test, gridsize=50, bins="log", cmap="inferno", extent=(-0.5, 1, -0.5, 1))
-ax.plot([-0.5, 1.0], [-0.5, 1.0], color="gray", linestyle="--")  # Identity line
-
-ax.set_xlabel("R-squared (training set)")
-ax.set_ylabel("R-squared (test set)")
-ax.set_aspect("equal");
+plot_r_squared_comparison(r_squared_train, r_squared_test, figsize=(6, 5));
 ```
 
 Voxels whose pRF model explains a large proportion of variance in the training set also tend to explain a large
@@ -635,25 +589,11 @@ proportion in the test set, so the pRF model generalizes well to the second half
 Because the grid search can only return values that are in the grid, it is worth checking how the estimated pRF
 parameters are distributed across the grid. Many voxels in our data do not respond to the stimulus, so we compare the
 estimates of all voxels with those of voxels whose pRF model explains more than 30% of the variance in the training
-set.
+set. We plot the distribution of the pRF centers with {py:func}`prfmodel.plotting.plot_2d_prf_centers` and the distribution of the pRF sizes
+with {py:func}`prfmodel.plotting.plot_grid_parameter_distribution`.
 
 ```{code-cell} ipython3
-from matplotlib.colors import LogNorm
-from matplotlib.patches import Rectangle
-
-
-def grid_bin_edges(values: np.ndarray, log: bool = False) -> np.ndarray:
-    """Compute histogram bin edges that are centered on the values of a regular (or log-spaced) grid."""
-    values = np.log(values) if log else np.asarray(values)
-    step = values[1] - values[0]
-    edges = np.append(values - step / 2, values[-1] + step / 2)
-    return np.exp(edges) if log else edges
-
-
-mu_x_edges = grid_bin_edges(param_ranges["mu_x"])
-mu_y_edges = grid_bin_edges(param_ranges["mu_y"])
-sigma_edges = grid_bin_edges(param_ranges["sigma"], log=True)
-
+from prfmodel.plotting import plot_2d_prf_centers, plot_grid_parameter_distribution
 
 fig, axes = plt.subplots(2, 2, figsize=(10, 9), layout="constrained")
 
@@ -664,36 +604,17 @@ for row, (voxel_mask, label) in enumerate([
     params_subset = grid_params[voxel_mask]
 
     # Count estimates for each combination of pRF center coordinates in the grid
-    counts, _, _ = np.histogram2d(params_subset["mu_x"], params_subset["mu_y"], bins=[mu_x_edges, mu_y_edges])
-    mesh_plot = axes[row, 0].pcolormesh(
-        mu_x_edges, mu_y_edges, np.ma.masked_equal(counts.T, 0), norm=LogNorm(), cmap="inferno"
-    )
-    fig.colorbar(mesh_plot, ax=axes[row, 0])
-
-    # Mark the part of the visual field that is covered by the stimulus
-    axes[row, 0].add_patch(Rectangle(
-        (grid_min_xy[1], grid_min_xy[0]),
-        grid_max_xy[1] - grid_min_xy[1],
-        grid_max_xy[0] - grid_min_xy[0],
-        fill=False,
-        edgecolor="tab:cyan",
-        linewidth=2,
-        label="Stimulus",
-    ))
-    axes[row, 0].set(
-        xlabel="mu_x (in degrees)", ylabel="mu_y (in degrees)", title=f"pRF centers: {label}", aspect="equal"
-    )
-    axes[row, 0].legend(loc="upper right")
+    plot_2d_prf_centers(params_subset, param_ranges, stimulus=stimulus, ax=axes[row, 0])
+    axes[row, 0].set(xlabel="mu_x (in degrees)", ylabel="mu_y (in degrees)", title=f"pRF centers: {label}")
 
     # Count estimates for each pRF size in the grid
-    sigma_counts, _ = np.histogram(params_subset["sigma"], bins=sigma_edges)
-    axes[row, 1].stairs(sigma_counts, sigma_edges, fill=True, color="tab:gray")
-    axes[row, 1].set(
-        xscale="log", xlabel="sigma (in degrees)", ylabel="Number of voxels", title=f"pRF sizes: {label}"
-    );
+    plot_grid_parameter_distribution(params_subset, param_ranges, "sigma", log=True, ax=axes[row, 1])
+    axes[row, 1].set(xlabel="sigma (in degrees)", title=f"pRF sizes: {label}")
 ```
 
-Note that the color scale of the pRF centers is logarithmic. For all voxels (top row), many pRF sizes lie at the
+The rectangle marks the part of the visual field that is covered by the stimulus. Note that the color scale of the
+pRF centers is logarithmic. In the histograms of the pRF sizes, estimates at the smallest or largest value of the grid are
+highlighted in red. For all voxels (top row), many pRF sizes lie at the
 smallest values in the grid (0.05 and 0.07 degrees). These are mostly voxels that do not respond to the stimulus:
 A tiny pRF covers only a few cells of the stimulus, which allows its predicted timecourse to match noise in the observed
 timecourse.
@@ -797,8 +718,13 @@ def fill_valid_voxels(values: np.ndarray) -> np.ndarray:
 
 r_squared_test_surf = project_to_surface(fill_valid_voxels(r_squared_test))
 
-plot_surf_stat_map_helper(
-    r_squared_test_surf, vmin=0.0, vmax=1.0, title="Out-of-sample variance explained (R-squared)"
+plot_surface_stat_map(
+    mesh,
+    r_squared_test_surf,
+    view=SURF_VIEW,
+    vmin=0.0,
+    vmax=1.0,
+    title="Out-of-sample variance explained (R-squared)",
 );
 ```
 
@@ -864,36 +790,28 @@ First, we look at the pRF size indicated by `sigma` and plot it on the surface.
 ```{code-cell} ipython3
 size_surf = project_selected(sigma)
 
-plot_surf_stat_map_helper(size_surf, vmin=0.0, vmax=5.0, title="pRF size (sigma)");
+plot_surface_stat_map(mesh, size_surf, view=SURF_VIEW, vmin=0.0, vmax=5.0, title="pRF size (sigma)");
 ```
 
 We can see that vertices in the early visual pathway (e.g., V1) tend to have smaller sizes than those in the higher areas.
 
 Besides the pRF size, we can also look at the position of the pRF relative to the center of the screen. First, we
-compute the angle of the center of the pRF relative to the center (i.e., the polar angle). Because the projection onto
+compute the angle of the center of the pRF relative to the center (i.e., the polar angle) with
+{py:func}`prfmodel.utils.calculate_polar_angle`. Because the projection onto
 the surface averages the values of neighboring voxels, we project the x- and y-coordinates of the pRF centers
 separately and compute the angle on the surface. Averaging angles directly would give wrong results where they wrap
 around from $-\pi$ to $+\pi$.
 
 ```{code-cell} ipython3
-def calc_angle(mu_x: float, mu_y: float) -> float:
-    """Compute the polar angle of a pRF from the x- and y-coordinate of its center."""
-    return np.angle(mu_x + mu_y * 1j)
-
+from prfmodel.utils import calculate_polar_angle
 
 mu_x_surf = project_selected(mu_x)
 mu_y_surf = project_selected(mu_y)
 
-angle_surf = calc_angle(mu_x_surf, mu_y_surf)
+angle_surf = calculate_polar_angle(mu_x_surf, mu_y_surf)
 
 # The polar angle is cyclic (-pi and +pi are the same direction), so we use a cyclic colormap
-plot_surf_stat_map_helper(
-    angle_surf,
-    vmin=-np.pi,
-    vmax=np.pi,
-    title="pRF center polar angle",
-    cmap="hsv",
-);
+plot_surface_stat_map(mesh, angle_surf, view=SURF_VIEW, cyclic=True, title="pRF center polar angle");
 ```
 
 The polar angle runs counterclockwise from the right side of the screen: an angle of 0 means that the pRF center lies
@@ -909,18 +827,18 @@ Note that the angles around $\pm\pi$ in the right hemisphere wrap around. That i
 direction, so the apparent jump between them is a property of the angle definition and not a discontinuity in the
 estimated pRF centers. The cyclic colormap gives both ends the same color, which keeps the transition smooth.
 
-We can also look at the eccentricity, that is, the distance of the pRF center from the center of the screen.
+We can also look at the eccentricity, that is, the distance of the pRF center from the center of the screen, which we
+compute with {py:func}`prfmodel.utils.calculate_eccentricity`.
 
 ```{code-cell} ipython3
-def calc_eccentricity(mu_x: float, mu_y: float) -> float:
-    """Compute the eccentricity of a pRF from the x- and y-coordinate of its center."""
-    return np.abs(mu_x + mu_y * 1j)
+from prfmodel.utils import calculate_eccentricity
 
-
-eccentricity_surf = calc_eccentricity(mu_x_surf, mu_y_surf)
+eccentricity_surf = calculate_eccentricity(mu_x_surf, mu_y_surf)
 
 # The corners of the stimulus have an eccentricity of 4 * sqrt(2) degrees
-plot_surf_stat_map_helper(eccentricity_surf, vmin=0.0, vmax=4.0 * np.sqrt(2), title="pRF center eccentricity");
+plot_surface_stat_map(
+    mesh, eccentricity_surf, view=SURF_VIEW, vmin=0.0, vmax=4.0 * np.sqrt(2), title="pRF center eccentricity"
+);
 ```
 
 For eccentricity, we can see segments with gradual transitions in both hemispheres that correspond to pRFs that are closer or further away from the center of the screen.
@@ -936,7 +854,7 @@ This example showed how to fit a two-dimensional Gaussian pRF model to empirical
 The predictions by our pRF model can potentially be improved. We suggest different directions for improving the pRF model fit:
 
 - Increasing the number of points in the parameter grid for the grid search
-- Finetuning the pRF model parameters with stochastic gradient descent with {py:class}`prfmodel.fitters.sgd.SGDFitter`
+- Finetuning the pRF model parameters with stochastic gradient descent with {py:class}`prfmodel.fitters.SGDFitter`
 - Building a more complex pRF model (e.g., compressive spatial summation, see Kay et al., 2013)
 
 The cross-validation can also be extended. For example, we could swap the training and test sets, fit the model on the

@@ -391,3 +391,66 @@ def as_tensor_frame(
         return TensorFrame(parameters.to_dict(), dtype=dtype)
 
     return TensorFrame(parameters.to_dict(orient="list"), dtype=dtype)
+
+
+def calculate_polar_angle(mu_x: np.ndarray | pd.Series, mu_y: np.ndarray | pd.Series) -> np.ndarray:
+    r"""Calculate the polar angle of two-dimensional population receptive field (pRF) centers.
+
+    The polar angle runs counterclockwise from the positive x-axis (e.g., the right side of the screen). It lies in
+    :math:`[-\pi, \pi]`, where positive angles correspond to the upper and negative angles to the lower half of the
+    visual field.
+
+    Parameters
+    ----------
+    mu_x : numpy.ndarray or pandas.Series
+        Horizontal coordinate of the pRF centers.
+    mu_y : numpy.ndarray or pandas.Series
+        Vertical coordinate of the pRF centers.
+
+    Returns
+    -------
+    numpy.ndarray
+        Polar angle of the pRF centers in radians.
+
+    Notes
+    -----
+    Angles are cyclic (:math:`-\pi` and :math:`\pi` are the same direction), so they should not be averaged directly.
+    To average pRF centers (e.g., when projecting them onto a surface), average `mu_x` and `mu_y` separately and
+    calculate the polar angle afterwards.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> calculate_polar_angle(np.array([1.0, 0.0, -1.0]), np.array([0.0, 1.0, 0.0]))
+    array([0.        , 1.57079633, 3.14159265])
+
+    """
+    return np.arctan2(np.asarray(mu_y, dtype=float), np.asarray(mu_x, dtype=float))
+
+
+def calculate_eccentricity(mu_x: np.ndarray | pd.Series, mu_y: np.ndarray | pd.Series) -> np.ndarray:
+    """Calculate the eccentricity of two-dimensional population receptive field (pRF) centers.
+
+    The eccentricity is the distance of the pRF center from the origin of the visual field (e.g., the center of the
+    screen).
+
+    Parameters
+    ----------
+    mu_x : numpy.ndarray or pandas.Series
+        Horizontal coordinate of the pRF centers.
+    mu_y : numpy.ndarray or pandas.Series
+        Vertical coordinate of the pRF centers.
+
+    Returns
+    -------
+    numpy.ndarray
+        Eccentricity of the pRF centers in the units of `mu_x` and `mu_y`.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> calculate_eccentricity(np.array([3.0, 0.0]), np.array([4.0, -2.0]))
+    array([5., 2.])
+
+    """
+    return np.hypot(np.asarray(mu_x, dtype=float), np.asarray(mu_y, dtype=float))

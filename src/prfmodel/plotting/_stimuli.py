@@ -1,5 +1,6 @@
 """Stimuli plotting functions."""
 
+from collections.abc import Sequence
 from typing import Literal
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -8,6 +9,9 @@ from matplotlib import animation
 from prfmodel.stimuli import CSFStimulus
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.utils import _EXPECTED_NDIM
+from ._utils import _get_figure_axes
+
+_MAX_TICK_LABELS = 20
 
 
 def _setup_2d_plot(
@@ -140,6 +144,108 @@ def plot_2d_prf_stimulus(
     ax.imshow(stimulus.design[frame_idx, :, :], extent=grid_limits, origin=origin)
 
     plt.close(fig)
+    return fig, ax
+
+
+def plot_1d_prf_stimulus(  # noqa: PLR0913
+    stimulus: PRFStimulus,
+    tick_labels: Sequence[str | float] | None = None,
+    secondary_tick_labels: Sequence[str | float] | None = None,
+    ylabel: str | None = None,
+    secondary_ylabel: str | None = None,
+    origin: Literal["upper", "lower"] = "lower",
+    ax: mpl.axes.Axes | None = None,
+    **kwargs,
+) -> tuple[mpl.figure.Figure, mpl.axes.Axes]:
+    """Plot the design of a one-dimensional population receptive field stimulus.
+
+    Shows the design as an image with time frames on the x-axis and the stimulus coordinates on the y-axis. Each row
+    corresponds to one coordinate of the stimulus grid. The coordinates do not need to be regularly spaced.
+
+    Parameters
+    ----------
+    stimulus : PRFStimulus
+        The one-dimensional population receptive field stimulus to visualize.
+    tick_labels : Sequence[str or float] or None, optional
+        Labels for each coordinate on the y-axis. If `None` and the grid has at most 20 coordinates, the grid values
+        (rounded to two decimals) are used. Otherwise, the y-axis shows the coordinate index.
+    secondary_tick_labels : Sequence[str or float] or None, optional
+        Labels for each coordinate on a secondary y-axis on the right (e.g., the coordinates on a different scale).
+        If `None`, no secondary axis is drawn.
+    ylabel : str or None, optional
+        Label of the y-axis. If `None`, the dimension label of the stimulus is used (if available).
+    secondary_ylabel : str or None, optional
+        Label of the secondary y-axis.
+    origin : str, optional
+        `origin` argument for :meth:`matplotlib.axes.Axes.imshow`. With `"lower"`, the first coordinate is at the
+        bottom.
+    ax : matplotlib.axes.Axes or None, optional
+        Axes to plot on. If `None`, a new figure and axes are created.
+    **kwargs
+        Keyword arguments passed to :func:`matplotlib.pyplot.subplots` if `ax` is `None`.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        Figure object.
+    ax : matplotlib.axes.Axes
+        Axes object.
+
+    Raises
+    ------
+    ValueError
+        If the stimulus is not 1-dimensional or the number of tick labels does not match the number of coordinates.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> design = np.eye(5)[np.random.default_rng(0).integers(0, 5, size=50)]
+    >>> grid = np.log(np.arange(1.0, 6.0))[:, np.newaxis]
+    >>> stimulus = PRFStimulus(design=design, grid=grid, dimension_labels=["log(numerosity)"])
+    >>> fig, ax = plot_1d_prf_stimulus(stimulus, secondary_tick_labels=[1, 2, 3, 4, 5])
+
+    """
+    num_dim = stimulus.grid.shape[-1]
+
+    if num_dim != 1:
+        msg = f"Stimulus must be 1-dimensional, but has {num_dim} dimensions"
+        raise ValueError(msg)
+
+    coordinates = stimulus.grid[..., 0]
+    num_coordinates = coordinates.shape[0]
+
+    if tick_labels is None and num_coordinates <= _MAX_TICK_LABELS:
+        tick_labels = [f"{value:.2f}" for value in coordinates]
+
+    for labels in (tick_labels, secondary_tick_labels):
+        if labels is not None and len(labels) != num_coordinates:
+            msg = f"Number of tick labels ({len(labels)}) must match the number of coordinates ({num_coordinates})"
+            raise ValueError(msg)
+
+    if ylabel is None and stimulus.dimension_labels:
+        ylabel = stimulus.dimension_labels[0]
+
+    fig, ax = _get_figure_axes(ax, **kwargs)
+
+    ax.imshow(stimulus.design.T, aspect="auto", interpolation="none", origin=origin)
+
+    ax.set_xlabel("Time frame")
+
+    if ylabel is not None:
+        ax.set_ylabel(ylabel)
+
+    ticks = np.arange(num_coordinates)
+
+    if tick_labels is not None:
+        ax.set_yticks(ticks, labels=[str(label) for label in tick_labels])
+
+    if secondary_tick_labels is not None:
+        secax = ax.secondary_yaxis("right")
+        secax.set_yticks(ticks, labels=[str(label) for label in secondary_tick_labels])
+
+        if secondary_ylabel is not None:
+            secax.set_ylabel(secondary_ylabel)
+
     return fig, ax
 
 

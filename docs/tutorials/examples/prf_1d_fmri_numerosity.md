@@ -66,23 +66,19 @@ unique_numerosities = np.round(np.exp(unique_log_numerosities))
 unique_numerosities
 ```
 
-We can also plot the stimulus design to see how numerosity changes over time.
+We can also plot the stimulus design with {py:func}`prfmodel.plotting.plot_1d_prf_stimulus` to see how numerosity
+changes over time.
 
 ```{code-cell} ipython3
-import matplotlib.pyplot as plt
+from prfmodel.plotting import plot_1d_prf_stimulus
 
-fig, ax = plt.subplots()
-
-ax.imshow(stimulus.design.T, aspect=stimulus.design.shape[0] / stimulus.design.shape[1])
-ax.set_xlabel("Time frame")
-ax.set_ylabel("Numerosity (natural scale)")
-ax.set_yticks(np.arange(len(unique_numerosities)))
-ax.set_yticklabels(unique_numerosities)
-
-secax = ax.secondary_yaxis("right")
-secax.set_ylabel("Numerosity (log scale)")
-secax.set_yticks(np.arange(len(unique_numerosities)))
-secax.set_yticklabels(np.round(unique_log_numerosities, 2));
+plot_1d_prf_stimulus(
+    stimulus,
+    tick_labels=unique_numerosities.astype(int),
+    secondary_tick_labels=np.round(unique_log_numerosities, 2),
+    ylabel="Numerosity (natural scale)",
+    secondary_ylabel="Numerosity (log scale)",
+);
 ```
 
 We can see that the design contains ascending and descending numerosity sequences from one to seven that are interleaved with sequences of the "baseline" numerosity 20. The ascend-descend cycle is repeated four times. Before the first cycle, there is a short baseline interval that was shown before the fMRI recording started (pre-scan interval). We will take both the cycles and the pre-scan interval into account when fitting the pRF model.
@@ -173,25 +169,21 @@ fig.update_layout(showlegend=False, height=450)
 fig.show()
 ```
 
-Only for very few vertices, we can see response patterns that approximately match the ascend-descend cycle of the numerosity stimulus. We can get a better overview by plotting all timecourses at once in a heatmap.
+Only for very few vertices, we can see response patterns that approximately match the ascend-descend cycle of the numerosity stimulus. We can get a better overview by plotting all timecourses at once in a heatmap with
+{py:func}`prfmodel.plotting.plot_response_heatmap`.
 
 ```{code-cell} ipython3
-aspect_ratio = response_psc_odd.shape[1] / response_psc_odd.shape[0]
+from prfmodel.plotting import plot_response_heatmap
 
-fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-
-# We use matplotlib because plotly cannot handle this many vertices
-im = ax.imshow(
+plot_response_heatmap(
     response_psc_odd,
-    aspect=aspect_ratio,
-    cmap="inferno",
     vmin=-2,
     vmax=5,
-)
-
-ax.set_xlabel("Time frame (in TR)")
-ax.set_ylabel("Vertex index")
-fig.colorbar(im, ax=ax, label="BOLD response (in PSC)");
+    xlabel="Time frame (in TR)",
+    ylabel="Vertex index",
+    colorbar_label="BOLD response (in PSC)",
+    figsize=(6, 6),
+);
 ```
 
 In the heatmap, the four ascend-descend cycles in the timecourses are better visible, although their exact timing varies between vertices.
@@ -472,26 +464,20 @@ r_squared_even = np.asarray(
 r_squared_even.shape
 ```
 
-We can look at the distribution of R-squared values across vertices.
+We can look at the distribution of R-squared values across vertices with {py:func}`prfmodel.plotting.plot_r_squared_hist`.
 
 ```{code-cell} ipython3
-fig, (ax1, ax2) = plt.subplots(1, 2)
+from prfmodel.plotting import plot_r_squared_hist
 
-ax1.hist(np.clip(r_squared_odd, 0, 1))
-ax1.set_title("Odd runs (in-sample)")
-ax1.set_ylabel("Count")
-ax2.hist(np.clip(r_squared_even, 0, 1))
-ax2.set_title("Even runs (out-of-sample)")
-
-for ax in (ax1, ax2):
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 2500)
-    ax.set_xlabel("R-squared")
-
-fig.tight_layout()
+plot_r_squared_hist(
+    {"Odd runs (in-sample)": r_squared_odd, "Even runs (out-of-sample)": r_squared_even},
+    bins=10,
+    value_range=(0.0, 1.0),
+    clip=True,
+);
 ```
 
-Note that the histograms clip the scores to $[0, 1]$: R-squared is negative whenever a prediction fits worse than the mean of the data, and those vertices all end up in the leftmost bin.
+Note that we clip the scores to $[0, 1]$: R-squared is negative whenever a prediction fits worse than the mean of the data, and those vertices all end up in the leftmost bin.
 
 For both odd and even runs, we can see that quite a few vertices have a score at or close to zero meaning that the pRF model does not predict the observed response well. This means that, given the model, not all vertices in the selected ROIs respond to our numerosity stimulus. However, a substantial amount of vertices also have higher scores, suggesting that the model successfully mapped their responses to the stimulus. Moreover, the R-squared distribution does not differ much between in-sample and out-of-sample predictions, suggesting that our pRF model generalizes well.
 
@@ -625,21 +611,14 @@ params_agg_roi = params_valid.groupby("roi", observed=False)[["numerosity", "sig
 params_agg_roi.round(2)
 ```
 
+We plot the average preferred numerosity of each ROI with {py:func}`prfmodel.plotting.plot_parameter_by_roi`.
+
 ```{code-cell} ipython3
-fig, ax = plt.subplots()
+from prfmodel.plotting import plot_parameter_by_roi
 
-ax.errorbar(
-    roi_order,
-    params_agg_roi["numerosity"]["mean"],
-    yerr=params_agg_roi["numerosity"]["std"],
-    fmt="o",
-    capsize=3,
-)
-
-ax.set_xlabel("ROI")
-ax.set_ylabel("Preferred numerosity")
-
-fig.tight_layout()
+plot_parameter_by_roi(
+    params_valid, "numerosity", params_valid["roi"], order=roi_order, ylabel="Preferred numerosity"
+);
 ```
 
 The error bars show the standard deviation across vertices, not the standard error of the mean. Average preferred
@@ -651,20 +630,9 @@ differs strongly between maps.
 We can also look at the average pRF size of each ROI.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots()
-
-ax.errorbar(
-    roi_order,
-    params_agg_roi["sigma"]["mean"],
-    yerr=params_agg_roi["sigma"]["std"],
-    fmt="o",
-    capsize=3,
-)
-
-ax.set_xlabel("ROI")
-ax.set_ylabel("pRF size (sigma, in log-numerosity units)")
-
-fig.tight_layout()
+plot_parameter_by_roi(
+    params_valid, "sigma", params_valid["roi"], order=roi_order, ylabel="pRF size (sigma, in log-numerosity units)"
+);
 ```
 
 Average pRF size is roughly constant across the occipital (NTO, NLO, NPO) and central sulcus (NPCI, NPCM, NPCS) maps
