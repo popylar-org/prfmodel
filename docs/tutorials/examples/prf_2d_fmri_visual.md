@@ -15,7 +15,7 @@ kernelspec:
 
 **Author**: Malte Lüken (m.luken@esciencecenter.nl)
 
-This examples shows how to fit a population receptive field (pRF) model to blood oxygenation level-dependent (BOLD) functional magnetic resonance imaging
+This example shows how to fit a population receptive field (pRF) model to blood oxygenation level-dependent (BOLD) functional magnetic resonance imaging
 (fMRI) data.
 
 A pRF model maps neural activity in a brain region of interest (ROI; e.g., V1 in the human visual cortex)
@@ -104,31 +104,51 @@ response_psc = response_raw - 100.0
 To visualize the response on the cortical surface, we need to project it from the volume onto the surface. The volume and
 the surfaces of the subject share the same coordinate system, so we can use {py:func}`nilearn.surface.vol_to_surf`
 for the projection. The function samples the volume at several depths between the pial surface and the white matter
-surface, so we load these surfaces as well. To map a value per voxel back into the volume, we use
-{py:func}`nilearn.masking.unmask` with the gray matter mask from the dataset.
+surface, so we load these surfaces as well. To map a value per voxel back into the volume, we fill the values into the
+voxels inside the gray matter mask from the dataset.
+
+The projection linearly interpolates between neighboring voxels. To prevent voxels outside the mask or voxels with
+`NaN` values from affecting the result, we set them to zero and additionally project a volume that is one for all other
+(valid) voxels and zero otherwise. Dividing the first projection by the second gives a weighted average of only the
+valid voxels at each vertex. Vertices without any valid voxels are `NaN`.
 
 ```{code-cell} ipython3
+import warnings
+
 import numpy as np
-from nilearn.masking import unmask
+from nilearn.image import new_img_like
 from nilearn.surface import PolyMesh, vol_to_surf
 
 # The pial and white matter surfaces are always downloaded together with the dataset
 pial_mesh = PolyMesh(left=dataset.files["pia_lh"], right=dataset.files["pia_rh"])
 wm_mesh = PolyMesh(left=dataset.files["wm_lh"], right=dataset.files["wm_rh"])
 
+is_in_mask = np.asarray(dataset.mask.dataobj).astype(bool)
+
 
 def project_to_surface(voxel_values: np.ndarray) -> np.ndarray:
     """Project one value per voxel in the mask onto the vertices of both hemispheres (left first)."""
-    volume = unmask(voxel_values, dataset.mask)
-    return np.concatenate([
-        vol_to_surf(
-            volume,
-            pial_mesh.parts[hemi],
-            inner_mesh=wm_mesh.parts[hemi],
-            mask_img=dataset.mask,  # Ignore samples outside the gray matter mask
-        )
-        for hemi in ("left", "right")
-    ])
+    voxel_values = np.asarray(voxel_values)
+    is_valid = np.isfinite(voxel_values)
+    # Stack the values (zero for invalid voxels) and the weights (one for valid voxels) into a 4D volume
+    volume_data = np.zeros((*dataset.mask.shape, 2))
+    volume_data[is_in_mask, 0] = np.where(is_valid, voxel_values, 0.0)
+    volume_data[is_in_mask, 1] = is_valid
+    volume = new_img_like(dataset.mask, volume_data)
+    with warnings.catch_warnings():
+        # Vertices without any samples inside the mask are NaN; nilearn warns about them
+        warnings.filterwarnings("ignore", message="Mean of empty slice", category=RuntimeWarning)
+        surf_values, surf_weights = np.concatenate([
+            vol_to_surf(
+                volume,
+                pial_mesh.parts[hemi],
+                inner_mesh=wm_mesh.parts[hemi],
+                mask_img=dataset.mask,  # Ignore samples outside the gray matter mask
+            )
+            for hemi in ("left", "right")
+        ]).T
+    # Weighted average of valid voxels; NaN for vertices without valid voxels
+    return np.divide(surf_values, surf_weights, out=np.full_like(surf_values, np.nan), where=surf_weights > 0)
 ```
 
 We also define a helper function to plot a statistic on the surface.
@@ -203,7 +223,8 @@ time frame of the BOLD response and 128 cells in the y- and x-dimension. The `gr
 of each cell in the visual field, which spans approximately -4 to 4 degrees of visual angle in both dimensions.
 
 ```{code-cell} ipython3
-stimulus.grid.min(axis=(0, 1)), stimulus.grid.max(axis=(0, 1))
+grid_min_xy, grid_max_xy = stimulus.grid.min(axis=(0, 1)), stimulus.grid.max(axis=(0, 1))
+print(grid_min_xy, grid_max_xy)
 ```
 
 We can visualize the stimulus using {py:func}`prfmodel.plotting.animate_2d_prf_stimulus`.
@@ -229,8 +250,8 @@ Before we model the BOLD response, we look at the timecourses and inspect the qu
 0.9 seconds for this dataset.
 
 ```{code-cell} ipython3
-import plotly.io as pio
 import plotly.express as px
+import plotly.io as pio
 
 pio.renderers.default = "notebook_connected"  # Requires internet connection to work
 pio.templates.default = "simple_white"
@@ -426,26 +447,34 @@ our model.
 +++
 
 Let's start with the grid search by defining ranges of `mu_x`, `mu_y`, and `sigma` that we want to construct a grid
-of parameter values from. For `baseline` and `amplitude`, we only provide a single value so that they will stay constant
+of parameter values from. For the pRF center coordinates `mu_x`, `mu_y`, we extend the grid beyond the range of the visual field that
+is covered by the stimulus coordinates. Later, we will filter out voxels for which the estimated pRF center lies outside
+the stimulus coordinates. For pRF size `sigma`, we define a log-spaced grid.
+
+For `baseline` and `amplitude`, we only provide a single value so that they will stay constant
 across the entire grid. The two-gamma parameters of the impulse model are omitted entirely. Instead, the impulse model supplies
 them from its default Glover HRF parameter set. However, if we wanted to override the default parameters, we could also
 add ranges for them here.
 
 ```{code-cell} ipython3
 param_ranges = {
-    "mu_x": np.linspace(-4, 4, 20),  # Range of visual field in experiment
-    "mu_y": np.linspace(-4, 4, 20),
-    "sigma": np.linspace(0.05, 4.0, 20),
+    "mu_x": np.linspace(2 * grid_min_xy[1], 2 * grid_max_xy[1], 21),  # 2 x range of visual field in experiment
+    "mu_y": np.linspace(2 * grid_min_xy[0], 2 * grid_max_xy[0], 21),
+    "sigma": np.exp(np.linspace(np.log(0.05), np.log(10.0), 20)),  # log-spaced grid
     # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-0.5],
     "baseline": [0.0],
     "amplitude": [1.0],
 }
+param_ranges
 ```
 
-For all three parameters, we defined ranges of 20 values that will be used to construct the grid. That is, the
-grid search will evaluate all possible combinations of these values and return the combination that fits the observed
-data best. This will result in a grid containing $20 ^ 3 = 8000$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
+For all three parameters, we defined ranges of values that will be used to construct the grid: 21 values for `mu_x` and
+`mu_y`, and 20 values for `sigma`. We used 21 values for `mu_x` and `mu_y` so that the stimulus center (0 degrees) and
+edges ($\pm 4$ degrees) land on grid points. The grid search will evaluate all possible combinations of these values and
+return the combination that fits the observed data best. This will result in a grid containing
+$21 \times 21 \times 20 = 8820$ parameter combinations. This is still a relatively small grid and we recommend
+specifying finer grids in practice.
 
 Let's construct the {py:class}`prfmodel.fitters.grid.GridFitter` and perform the grid search. Note that we pass the
 training stimulus and set `batch_size=20` to let the {py:class}`prfmodel.fitters.grid.GridFitter`
@@ -475,8 +504,11 @@ We can print the parameters estimated by the grid search.
 grid_params
 ```
 
-We can see that the estimates for `mu_x`, `mu_y`, and `sigma` are one combination in our grid. In the second step,
-we also optimize the `amplitude` of the pRF model together with the `baseline` using least squares. This adjusts the
+We can see that the estimates for `mu_x`, `mu_y`, and `sigma` are one combination in our grid.
+
++++
+
+In the second step, we optimize the `amplitude` of the pRF model together with the `baseline` using least squares. This adjusts the
 scale of our model predictions to scale the observed data. We set `batch_size=200` to estimate least-squares fits
 for batches of voxels sequentially and save memory.
 
@@ -573,8 +605,9 @@ fig = px.histogram(
     barmode="overlay",
     nbins=40,
     range_x=(-0.5, 1.0),
+    log_y=True,  # Many voxels have scores close to zero; a log scale also shows the voxels with higher scores
     labels={"r_squared": "R-squared", "set": ""},
-).update_layout(yaxis_title="Frequency", height=450)
+).update_layout(yaxis_title="Frequency (log scale)", height=450)
 fig.show()
 ```
 
@@ -599,16 +632,95 @@ ax.set_aspect("equal");
 Voxels whose pRF model explains a large proportion of variance in the training set also tend to explain a large
 proportion in the test set, so the pRF model generalizes well to the second half of the experiment.
 
-Let's plot the predicted and the observed timecourses for a subsample of voxels. The dashed line marks the split
+Because the grid search can only return values that are in the grid, it is worth checking how the estimated pRF
+parameters are distributed across the grid. Many voxels in our data do not respond to the stimulus, so we compare the
+estimates of all voxels with those of voxels whose pRF model explains more than 30% of the variance in the training
+set.
+
+```{code-cell} ipython3
+from matplotlib.colors import LogNorm
+from matplotlib.patches import Rectangle
+
+
+def grid_bin_edges(values: np.ndarray, log: bool = False) -> np.ndarray:
+    """Compute histogram bin edges that are centered on the values of a regular (or log-spaced) grid."""
+    values = np.log(values) if log else np.asarray(values)
+    step = values[1] - values[0]
+    edges = np.append(values - step / 2, values[-1] + step / 2)
+    return np.exp(edges) if log else edges
+
+
+mu_x_edges = grid_bin_edges(param_ranges["mu_x"])
+mu_y_edges = grid_bin_edges(param_ranges["mu_y"])
+sigma_edges = grid_bin_edges(param_ranges["sigma"], log=True)
+
+
+fig, axes = plt.subplots(2, 2, figsize=(10, 9), layout="constrained")
+
+for row, (voxel_mask, label) in enumerate([
+    (np.full(len(grid_params), True), "All voxels"),
+    (r_squared_train > 0.3, "R-squared (train) > 0.3"),
+]):
+    params_subset = grid_params[voxel_mask]
+
+    # Count estimates for each combination of pRF center coordinates in the grid
+    counts, _, _ = np.histogram2d(params_subset["mu_x"], params_subset["mu_y"], bins=[mu_x_edges, mu_y_edges])
+    mesh_plot = axes[row, 0].pcolormesh(
+        mu_x_edges, mu_y_edges, np.ma.masked_equal(counts.T, 0), norm=LogNorm(), cmap="inferno"
+    )
+    fig.colorbar(mesh_plot, ax=axes[row, 0])
+
+    # Mark the part of the visual field that is covered by the stimulus
+    axes[row, 0].add_patch(Rectangle(
+        (grid_min_xy[1], grid_min_xy[0]),
+        grid_max_xy[1] - grid_min_xy[1],
+        grid_max_xy[0] - grid_min_xy[0],
+        fill=False,
+        edgecolor="tab:cyan",
+        linewidth=2,
+        label="Stimulus",
+    ))
+    axes[row, 0].set(
+        xlabel="mu_x (in degrees)", ylabel="mu_y (in degrees)", title=f"pRF centers: {label}", aspect="equal"
+    )
+    axes[row, 0].legend(loc="upper right")
+
+    # Count estimates for each pRF size in the grid
+    sigma_counts, _ = np.histogram(params_subset["sigma"], bins=sigma_edges)
+    axes[row, 1].stairs(sigma_counts, sigma_edges, fill=True, color="tab:gray")
+    axes[row, 1].set(
+        xscale="log", xlabel="sigma (in degrees)", ylabel="Number of voxels", title=f"pRF sizes: {label}"
+    );
+```
+
+Note that the color scale of the pRF centers is logarithmic. For all voxels (top row), many pRF sizes lie at the
+smallest values in the grid (0.05 and 0.07 degrees). These are mostly voxels that do not respond to the stimulus:
+A tiny pRF covers only a few cells of the stimulus, which allows its predicted timecourse to match noise in the observed
+timecourse.
+
+For the well-fitting voxels (bottom row), the pRF centers concentrate inside the stimulus around the center of the visual
+field, and most pRF sizes lie between 0.5 and 10 degrees. However, some well-fitting voxels have pRF centers at the edges of
+the grid ($\pm 8$ degrees) or a pRF size at the ceiling of the grid (10 degrees). For these voxels, the best fitting
+parameters might lie outside the grid, so we will exclude them when we analyze the pRF parameters. The plots also show
+that the estimates are limited to the resolution of the grid. A finer grid or an additional optimization step (e.g., with
+SGD) can refine the estimates.
+
+Let's plot the predicted and the observed timecourses for a subsample of voxels. We sort the voxels according to their
+out-of-sample R-squared and select them at logarithmically spaced ranks. This way, the subsample contains more voxels
+with a high R-squared, which are rare compared to voxels with an R-squared close to zero. The dashed line marks the split
 between the training and the test set.
 
 ```{code-cell} ipython3
 import plotly.graph_objects as go
 
-each_k = 500
+num_examples = 100
 
-# Sort voxels according to out-of-sample R-squared
-best_voxels = np.flip(np.argsort(r_squared_test))[::each_k]
+# Sort voxels according to out-of-sample R-squared (highest first)
+sorted_voxels = np.flip(np.argsort(r_squared_test))
+
+# Select voxels at log-spaced ranks so that the subsample contains more voxels with a high R-squared
+example_ranks = np.unique(np.geomspace(1, len(sorted_voxels), num_examples).astype(int)) - 1
+best_voxels = sorted_voxels[example_ranks]
 
 response_best_voxels = response_psc[response_is_valid][best_voxels]
 pred_response_best_voxels = pred_response[best_voxels]
@@ -639,7 +751,7 @@ fig = px.line(
         "voxel": "Voxel",
         "source": "",
     },
-    title=f"Observed and predicted voxel responses (subsampled voxels)",
+    title="Observed and predicted voxel responses (subsampled voxels)",
 )
 
 # Mark the split between the training and test set
@@ -648,7 +760,7 @@ fig.add_vline(x=num_frames_train, line_dash="dash", line_color="gray")
 # Add a text trace to display per-voxel stats; this will be updated in each animation frame
 fig.add_trace(go.Scatter(
     x=[num_frames / 2],
-    y=[4.7],
+    y=[9.5],
     mode="text",
     text=[f"R-squared (test) = {r_squared_test_best_voxels[0]:.3f}, sigma = {sigma_best_voxels[0]:.3f}"],
     showlegend=False,
@@ -669,7 +781,8 @@ fig.show()
 ```
 
 We can see that the model predicts the observed timecourses for the best voxels very well, not only in the training
-set but also in the test set that it has not seen during fitting.
+set but also in the test set that it has not seen during fitting. For voxels with a lower R-squared, the observed
+timecourses contain more noise, and the regular peaks become harder to see.
 
 We can also visualize the out-of-sample R-squared on the flat surface mesh. To do this, we first fill the scores into an
 array with one value per voxel in the mask, leaving invalid voxels as `NaN` so that they are ignored in the projection.
@@ -695,28 +808,63 @@ We can see that the vertices with the highest scores are located in the visual a
 
 ## Analyzing the pRF results
 
-To analyze and interpret the pRF parameters, we will zoom in on surface vertices with an out-of-sample R-squared > 0.3
-(note that this threshold is somewhat arbitrary). Because we select vertices based on the test set, which was not used
-for fitting, the selection is not biased towards vertices whose fits mostly capture noise.
+To analyze and interpret the pRF parameters, we zoom in on voxels for which we can trust the pRF estimates. We select
+voxels that fulfill three criteria:
+
+- The out-of-sample R-squared is above 0.3 (note that this threshold is somewhat arbitrary). Because we select voxels
+  based on the test set, which was not used for fitting, the selection is not biased towards voxels whose fits mostly
+  capture noise.
+- The pRF center lies inside the visual field covered by the stimulus. We extended the grid for `mu_x` and `mu_y`
+  beyond the stimulus, but pRF centers outside the stimulus are only weakly constrained by the data.
+- The pRF size is below the largest `sigma` value in the grid. An estimate at the ceiling of the grid suggests
+  that the best fitting pRF size lies outside the grid.
+
+We select voxels instead of surface vertices because we fitted the pRF model to the timecourse of each voxel. The
+projection onto the surface averages neighboring voxels, so selecting vertices would mix the parameters of poorly fitting
+voxels into the selected vertices. Instead, we set the parameters of voxels that are not selected to `NaN` before
+the projection, so that they are ignored.
 
 ```{code-cell} ipython3
-# Create mask for vertices above R-squared threshold
-is_above_threshold = r_squared_test_surf > 0.3
+mu_x = ls_params["mu_x"].to_numpy()
+mu_y = ls_params["mu_y"].to_numpy()
+sigma = ls_params["sigma"].to_numpy()
 
-# Compute proportion of vertices above threshold
-is_above_threshold.mean()
+r_squared_threshold = 0.3
+edge_tolerance = 1e-3  # in degrees
+
+selection_criteria = pd.DataFrame({
+    f"r_squared_test > {r_squared_threshold}": r_squared_test > r_squared_threshold,
+    # The tolerance includes the grid values at the stimulus edges, which can be off due to rounding
+    "center inside stimulus": (
+        (mu_x >= grid_min_xy[1] - edge_tolerance)
+        & (mu_x <= grid_max_xy[1] + edge_tolerance)
+        & (mu_y >= grid_min_xy[0] - edge_tolerance)
+        & (mu_y <= grid_max_xy[0] + edge_tolerance)
+    ),
+    # Least squares does not change sigma, so it is always one of the grid values
+    "sigma below grid ceiling": ~np.isclose(sigma, np.max(param_ranges["sigma"])),
+})
+
+is_selected = selection_criteria.all(axis=1).to_numpy()
+
+
+def project_selected(voxel_values: np.ndarray) -> np.ndarray:
+    """Project values of the selected voxels onto the surface, ignoring all other voxels."""
+    return project_to_surface(fill_valid_voxels(np.where(is_selected, voxel_values, np.nan)))
+
+
+# Fraction of valid voxels that fulfill each criterion and all criteria together
+selection_criteria.assign(all_criteria=is_selected).mean()
 ```
 
-For these vertices, we can look at different quantities to interpret the pRFs estimated by our model.
+For the selected voxels, we can look at different quantities to interpret the pRFs estimated by our model.
 
 First, we look at the pRF size indicated by `sigma` and plot it on the surface.
 
 ```{code-cell} ipython3
-size_surf = project_to_surface(fill_valid_voxels(ls_params["sigma"]))
+size_surf = project_selected(sigma)
 
-plot_surf_stat_map_helper(
-    np.where(is_above_threshold, size_surf, np.nan), vmin=0.0, vmax=4.0, title="pRF size (sigma)"
-);
+plot_surf_stat_map_helper(size_surf, vmin=0.0, vmax=5.0, title="pRF size (sigma)");
 ```
 
 We can see that vertices in the early visual pathway (e.g., V1) tend to have smaller sizes than those in the higher areas.
@@ -733,14 +881,14 @@ def calc_angle(mu_x: float, mu_y: float) -> float:
     return np.angle(mu_x + mu_y * 1j)
 
 
-mu_x_surf = project_to_surface(fill_valid_voxels(ls_params["mu_x"]))
-mu_y_surf = project_to_surface(fill_valid_voxels(ls_params["mu_y"]))
+mu_x_surf = project_selected(mu_x)
+mu_y_surf = project_selected(mu_y)
 
 angle_surf = calc_angle(mu_x_surf, mu_y_surf)
 
 # The polar angle is cyclic (-pi and +pi are the same direction), so we use a cyclic colormap
 plot_surf_stat_map_helper(
-    np.where(is_above_threshold, angle_surf, np.nan),
+    angle_surf,
     vmin=-np.pi,
     vmax=np.pi,
     title="pRF center polar angle",
@@ -771,9 +919,8 @@ def calc_eccentricity(mu_x: float, mu_y: float) -> float:
 
 eccentricity_surf = calc_eccentricity(mu_x_surf, mu_y_surf)
 
-plot_surf_stat_map_helper(
-    np.where(is_above_threshold, eccentricity_surf, np.nan), vmin=0.0, vmax=4.0, title="pRF center eccentricity"
-);
+# The corners of the stimulus have an eccentricity of 4 * sqrt(2) degrees
+plot_surf_stat_map_helper(eccentricity_surf, vmin=0.0, vmax=4.0 * np.sqrt(2), title="pRF center eccentricity");
 ```
 
 For eccentricity, we can see segments with gradual transitions in both hemispheres that correspond to pRFs that are closer or further away from the center of the screen.
@@ -790,8 +937,6 @@ The predictions by our pRF model can potentially be improved. We suggest differe
 
 - Increasing the number of points in the parameter grid for the grid search
 - Finetuning the pRF model parameters with stochastic gradient descent with {py:class}`prfmodel.fitters.sgd.SGDFitter`
-- Applying preprocessing steps before fitting the pRF model (e.g., high-pass filtering)
-- Optimizing the impulse model parameters in the grid search
 - Building a more complex pRF model (e.g., compressive spatial summation, see Kay et al., 2013)
 
 The cross-validation can also be extended. For example, we could swap the training and test sets, fit the model on the
