@@ -13,6 +13,7 @@ from prfmodel.utils import _get_norm_fun
 from prfmodel.utils import batched
 from prfmodel.utils import calculate_eccentricity
 from prfmodel.utils import calculate_polar_angle
+from prfmodel.utils import calculate_r_squared
 from prfmodel.utils import normalize_response
 from .conftest import TestSetup
 
@@ -135,6 +136,52 @@ def test_calculate_center_shape(fn: Callable):
     """Test that the result keeps the shape of the inputs (e.g., values projected onto a surface)."""
     rng = np.random.default_rng(0)
     assert fn(rng.normal(size=(4, 5)), rng.normal(size=(4, 5))).shape == (4, 5)
+
+
+def test_calculate_r_squared_matches_keras_metric():
+    """Test that the R-squared matches the per-unit score of the Keras R2Score metric."""
+    rng = np.random.default_rng(0)
+    observed = rng.normal(size=(20, 50))
+    predicted = observed + rng.normal(scale=0.5, size=(20, 50))
+    # The Keras metric computes the score along the first axis, so units must be on the second axis
+    expected = keras.metrics.R2Score(class_aggregation=None, dtype="float64")(observed.T, predicted.T)
+    np.testing.assert_allclose(calculate_r_squared(observed, predicted), keras.ops.convert_to_numpy(expected))
+
+
+def test_calculate_r_squared_values():
+    """Test the R-squared of perfect, mean, and anticorrelated predictions."""
+    observed = np.tile(np.array([1.0, 2.0, 3.0, 4.0]), (3, 1))
+    predicted = np.stack([observed[0], np.full(4, 2.5), observed[0][::-1]])
+    np.testing.assert_allclose(calculate_r_squared(observed, predicted), [1.0, 0.0, -3.0])
+
+
+def test_calculate_r_squared_tensor_input():
+    """Test that backend tensors are accepted and a numpy array is returned."""
+    observed = np.array([[1.0, 2.0, 3.0], [3.0, 1.0, 2.0]])
+    result = calculate_r_squared(keras.ops.convert_to_tensor(observed), keras.ops.convert_to_tensor(observed))
+    assert isinstance(result, np.ndarray)
+    np.testing.assert_allclose(result, [1.0, 1.0])
+
+
+def test_calculate_r_squared_single_unit():
+    """Test that a single 1-dimensional timecourse gives a single score."""
+    result = calculate_r_squared(np.array([1.0, 2.0, 3.0]), np.array([1.0, 2.0, 4.0]))
+    assert result.shape == ()
+    np.testing.assert_allclose(result, 0.5)
+
+
+def test_calculate_r_squared_constant_observed():
+    """Test that the R-squared is NaN for a constant observed response."""
+    observed = np.array([[1.0, 1.0, 1.0], [1.0, 2.0, 3.0]])
+    result = calculate_r_squared(observed, np.zeros_like(observed))
+    assert np.isnan(result[0])
+    assert np.isfinite(result[1])
+
+
+def test_calculate_r_squared_shape_mismatch():
+    """Test that responses with different shapes raise an error."""
+    with pytest.raises(ValueError, match="same shape"):
+        calculate_r_squared(np.zeros((2, 5)), np.zeros((2, 6)))
 
 
 class TestTensorFrame:

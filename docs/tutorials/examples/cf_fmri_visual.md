@@ -412,14 +412,12 @@ predict_batched = batched(cf_model)
 pred_response = predict_batched(stimulus, ls_params, batch_size=200)
 ```
 
-We can quantify how well the predictions align with the observed timecourses using the R-squared metric. This metric indicates the proportion of variance in the observed data explained by our model predictions.
+We can quantify how well the predictions align with the observed timecourses using the R-squared metric, which we compute with {py:func}`prfmodel.utils.calculate_r_squared`. This metric indicates the proportion of variance in the observed data explained by our model predictions.
 
 ```{code-cell} ipython3
-from keras.metrics import R2Score
+from prfmodel.utils import calculate_r_squared
 
-r2_metric = R2Score(class_aggregation=None)  # Don't aggregate score over vertices
-
-r_squared = np.asarray(r2_metric(response_valid.T, pred_response.T))  # Transpose to compute score across time frames
+r_squared = calculate_r_squared(response_valid, pred_response)  # One score per vertex
 r_squared.shape
 ```
 

@@ -527,19 +527,16 @@ pred_response_train = pred_response[:, :num_frames_train]
 pred_response_test = pred_response[:, num_frames_train:]
 ```
 
-We can quantify how well the predictions align with the observed timecourses using the R-squared metric. This metric
-indicates the proportion of variance in the observed data explained by our model predictions. We start by comparing
-the model predictions to the observed timecourses of the training set. Because we used the training set to fit our pRF
-model, we are assessing its in-sample fit.
+We can quantify how well the predictions align with the observed timecourses using the R-squared metric, which we
+compute with {py:func}`prfmodel.utils.calculate_r_squared`. This metric indicates the proportion of variance in the
+observed data explained by our model predictions. We start by comparing the model predictions to the observed
+timecourses of the training set. Because we used the training set to fit our pRF model, we are assessing its in-sample
+fit.
 
 ```{code-cell} ipython3
-from keras.metrics import R2Score
+from prfmodel.utils import calculate_r_squared
 
-r2_metric = R2Score(class_aggregation=None)  # Don't aggregate score over voxels
-
-r_squared_train = np.asarray(
-    r2_metric(response_train_valid.T, pred_response_train.T)
-)  # Transpose to compute score across time frames
+r_squared_train = calculate_r_squared(response_train_valid, pred_response_train)  # One score per voxel
 r_squared_train.shape
 ```
 
@@ -547,10 +544,7 @@ We also compute the R-squared on the test set to assess the out-of-sample fit. N
 be negative when the predictions are worse than a flat line at the mean of the observed timecourse.
 
 ```{code-cell} ipython3
-r2_metric.reset_state()
-r_squared_test = np.asarray(
-    r2_metric(response_test_valid.T, pred_response_test.T)
-)  # Transpose to compute score across time frames
+r_squared_test = calculate_r_squared(response_test_valid, pred_response_test)
 r_squared_test.shape
 ```
 

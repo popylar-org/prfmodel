@@ -441,26 +441,19 @@ prf_model_batched = batched(prf_model)
 pred_response = np.asarray(prf_model_batched(stimulus, sgd_params, batch_size=100))
 ```
 
-We can quantify how well the predictions align with the observed timecourses using the R-squared metric. This metric indicates the proportion of variance in the observed data explained by our model predictions. We start by comparing the model predictions to the observed timecourses from the odd runs. We used the odd runs to fit our pRF model so we are assessing its in-sample fit.
+We can quantify how well the predictions align with the observed timecourses using the R-squared metric, which we compute with {py:func}`prfmodel.utils.calculate_r_squared`. This metric indicates the proportion of variance in the observed data explained by our model predictions. We start by comparing the model predictions to the observed timecourses from the odd runs. We used the odd runs to fit our pRF model so we are assessing its in-sample fit.
 
 ```{code-cell} ipython3
-from keras.metrics import R2Score
+from prfmodel.utils import calculate_r_squared
 
-r2_metric = R2Score(class_aggregation=None)  # Don't aggregate score over vertices
-
-r_squared_odd = np.asarray(
-    r2_metric(response_psc_odd.T, pred_response.T)
-)  # Transpose to compute score across time frames
+r_squared_odd = calculate_r_squared(response_psc_odd, pred_response)  # One score per vertex
 r_squared_odd.shape
 ```
 
 We can also compute the R-squared on the even runs to assess the out-of-sample fit.
 
 ```{code-cell} ipython3
-r2_metric.reset_state()
-r_squared_even = np.asarray(
-    r2_metric(response_psc_even.T, pred_response.T)
-)  # Transpose to compute score across time frames
+r_squared_even = calculate_r_squared(response_psc_even, pred_response)
 r_squared_even.shape
 ```
 
