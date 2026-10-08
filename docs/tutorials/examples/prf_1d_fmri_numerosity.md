@@ -66,23 +66,19 @@ unique_numerosities = np.round(np.exp(unique_log_numerosities))
 unique_numerosities
 ```
 
-We can also plot the stimulus design to see how numerosity changes over time.
+We can also plot the stimulus design with {py:func}`prfmodel.plotting.plot_1d_prf_stimulus` to see how numerosity
+changes over time.
 
 ```{code-cell} ipython3
-import matplotlib.pyplot as plt
+from prfmodel.plotting import plot_1d_prf_stimulus
 
-fig, ax = plt.subplots()
-
-ax.imshow(stimulus.design.T, aspect=stimulus.design.shape[0] / stimulus.design.shape[1])
-ax.set_xlabel("Time frame")
-ax.set_ylabel("Numerosity (natural scale)")
-ax.set_yticks(np.arange(len(unique_numerosities)))
-ax.set_yticklabels(unique_numerosities)
-
-secax = ax.secondary_yaxis("right")
-secax.set_ylabel("Numerosity (log scale)")
-secax.set_yticks(np.arange(len(unique_numerosities)))
-secax.set_yticklabels(np.round(unique_log_numerosities, 2));
+plot_1d_prf_stimulus(
+    stimulus,
+    tick_labels=unique_numerosities.astype(int),
+    secondary_tick_labels=np.round(unique_log_numerosities, 2),
+    ylabel="Numerosity (natural scale)",
+    secondary_ylabel="Numerosity (log scale)",
+);
 ```
 
 We can see that the design contains ascending and descending numerosity sequences from one to seven that are interleaved with sequences of the "baseline" numerosity 20. The ascend-descend cycle is repeated four times. Before the first cycle, there is a short baseline interval that was shown before the fMRI recording started (pre-scan interval). We will take both the cycles and the pre-scan interval into account when fitting the pRF model.
@@ -173,25 +169,21 @@ fig.update_layout(showlegend=False, height=450)
 fig.show()
 ```
 
-Only for very few vertices, we can see response patterns that approximately match the ascend-descend cycle of the numerosity stimulus. We can get a better overview by plotting all timecourses at once in a heatmap.
+Only for very few vertices, we can see response patterns that approximately match the ascend-descend cycle of the numerosity stimulus. We can get a better overview by plotting all timecourses at once in a heatmap with
+{py:func}`prfmodel.plotting.plot_response_heatmap`.
 
 ```{code-cell} ipython3
-aspect_ratio = response_psc_odd.shape[1] / response_psc_odd.shape[0]
+from prfmodel.plotting import plot_response_heatmap
 
-fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-
-# We use matplotlib because plotly cannot handle this many vertices
-im = ax.imshow(
+plot_response_heatmap(
     response_psc_odd,
-    aspect=aspect_ratio,
-    cmap="inferno",
     vmin=-2,
     vmax=5,
-)
-
-ax.set_xlabel("Time frame (in TR)")
-ax.set_ylabel("Vertex index")
-fig.colorbar(im, ax=ax, label="BOLD response (in PSC)");
+    xlabel="Time frame (in TR)",
+    ylabel="Vertex index",
+    colorbar_label="BOLD response (in PSC)",
+    figsize=(6, 6),
+);
 ```
 
 In the heatmap, the four ascend-descend cycles in the timecourses are better visible, although their exact timing varies between vertices.
@@ -330,15 +322,16 @@ our model. Finally, we use stochastic gradient descent (SGD) to finetune our mod
 +++
 
 Let's start with the grid search by defining ranges of `mu` and `sigma` that we want to construct a grid
-of parameter values from. For `baseline` and `amplitude`, we only provide a single value so that they will stay constant
+of parameter values from. We create them from the stimulus with {py:func}`prfmodel.fitters.grid_values_1d_prf`. For
+`baseline` and `amplitude`, we only provide a single value so that they will stay constant
 across the entire grid. The two-gamma parameters of the impulse model are omitted entirely: the impulse model supplies
 them from its default Glover HRF parameter set. However, if we wanted to override the default parameters, we could also
 add ranges for them here.
 
 ```{code-cell} ipython3
-param_ranges = {
-    "mu": np.linspace(np.log(0.7), np.log(10), 50),
-    "sigma": np.linspace(0.005, 3.0, 50),
+from prfmodel.fitters import grid_values_1d_prf
+
+param_ranges = grid_values_1d_prf(stimulus) | {
     # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-0.5],
     "baseline": [0.0],
@@ -346,11 +339,20 @@ param_ranges = {
 }
 ```
 
-For both parameters, we defined ranges of values that will be used to construct the grid. That is, the
-grid search will evaluate all possible combinations of these values and return the combination that fits the observed
-data best. This will result in a grid containing $50 \times 50 = 2500$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
+By default, the function creates 49 values for `mu` that span twice the range of the stimulus around its midpoint and
+50 log-spaced values for `sigma` that range from the smallest spacing between the stimulus coordinates to their full
+range. The grid search will evaluate all possible combinations of these values and return the combination that fits the
+observed data best. This will result in a grid containing $49 \times 50 = 2450$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
 
-Two properties of the stimulus bound what these ranges can achieve. First, `mu` stops at $\log(10)$ and thus deliberately excludes the baseline numerosity 20: a vertex that is genuinely tuned to 20 cannot be recovered here and will pile up against the upper end of the grid. Second, the stimulus samples log-numerosity space at only eight points that are at least $\log(2) - \log(1) \approx 0.69$ apart. A pRF much narrower than that spacing responds to a single numerosity no matter how small `sigma` becomes, so the lower end of the `sigma` range is not identifiable from these data and estimates near the floor should be read as "no wider than one stimulus level".
+Two properties of the stimulus bound what these ranges can achieve. First, the range of `mu` extends beyond the
+displayed numerosities, from about 0.2 to 90 on the natural scale. Estimates outside the displayed numerosities 1 to 7
+(which includes the baseline numerosity 20) are only weakly constrained by the data, and we will exclude them when we
+analyze the pRF parameters. Extending the grid beyond the stimulus prevents such vertices from piling up at the edge of
+the grid. Second, the stimulus samples log-numerosity space at only eight points, the closest of which are
+$\log(7) - \log(6) \approx 0.15$ apart. This spacing is the smallest value of `sigma` in the grid. A pRF much narrower
+than the spacing responds to a single numerosity no matter how small `sigma` becomes, so the lower end of the `sigma`
+range is not identifiable from these data and estimates near the floor should be read as "no wider than one stimulus
+level".
 
 Let's construct the {py:class}`prfmodel.fitters.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.GridFitter`
 evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is the negative correlation, which ignores differences in baseline and amplitude between model predictions and observed data. This means the data do not need to be demeaned or converted to percent signal change first, but also that `baseline` and `amplitude` cannot be estimated by the grid search itself. We fix them here and estimate them with least squares in the next step.
@@ -449,49 +451,36 @@ prf_model_batched = batched(prf_model)
 pred_response = np.asarray(prf_model_batched(stimulus, sgd_params, batch_size=100))
 ```
 
-We can quantify how well the predictions align with the observed timecourses using the R-squared metric. This metric indicates the proportion of variance in the observed data explained by our model predictions. We start by comparing the model predictions to the observed timecourses from the odd runs. We used the odd runs to fit our pRF model so we are assessing its in-sample fit.
+We can quantify how well the predictions align with the observed timecourses using the R-squared metric, which we compute with {py:func}`prfmodel.utils.calculate_r_squared`. This metric indicates the proportion of variance in the observed data explained by our model predictions. We start by comparing the model predictions to the observed timecourses from the odd runs. We used the odd runs to fit our pRF model so we are assessing its in-sample fit.
 
 ```{code-cell} ipython3
-from keras.metrics import R2Score
+from prfmodel.utils import calculate_r_squared
 
-r2_metric = R2Score(class_aggregation=None)  # Don't aggregate score over vertices
-
-r_squared_odd = np.asarray(
-    r2_metric(response_psc_odd.T, pred_response.T)
-)  # Transpose to compute score across time frames
+r_squared_odd = calculate_r_squared(response_psc_odd, pred_response)  # One score per vertex
 r_squared_odd.shape
 ```
 
 We can also compute the R-squared on the even runs to assess the out-of-sample fit.
 
 ```{code-cell} ipython3
-r2_metric.reset_state()
-r_squared_even = np.asarray(
-    r2_metric(response_psc_even.T, pred_response.T)
-)  # Transpose to compute score across time frames
+r_squared_even = calculate_r_squared(response_psc_even, pred_response)
 r_squared_even.shape
 ```
 
-We can look at the distribution of R-squared values across vertices.
+We can look at the distribution of R-squared values across vertices with {py:func}`prfmodel.plotting.plot_r_squared_hist`.
 
 ```{code-cell} ipython3
-fig, (ax1, ax2) = plt.subplots(1, 2)
+from prfmodel.plotting import plot_r_squared_hist
 
-ax1.hist(np.clip(r_squared_odd, 0, 1))
-ax1.set_title("Odd runs (in-sample)")
-ax1.set_ylabel("Count")
-ax2.hist(np.clip(r_squared_even, 0, 1))
-ax2.set_title("Even runs (out-of-sample)")
-
-for ax in (ax1, ax2):
-    ax.set_xlim(0, 1)
-    ax.set_ylim(0, 2500)
-    ax.set_xlabel("R-squared")
-
-fig.tight_layout()
+plot_r_squared_hist(
+    {"Odd runs (in-sample)": r_squared_odd, "Even runs (out-of-sample)": r_squared_even},
+    bins=10,
+    value_range=(0.0, 1.0),
+    clip=True,
+);
 ```
 
-Note that the histograms clip the scores to $[0, 1]$: R-squared is negative whenever a prediction fits worse than the mean of the data, and those vertices all end up in the leftmost bin.
+Note that we clip the scores to $[0, 1]$: R-squared is negative whenever a prediction fits worse than the mean of the data, and those vertices all end up in the leftmost bin.
 
 For both odd and even runs, we can see that quite a few vertices have a score at or close to zero meaning that the pRF model does not predict the observed response well. This means that, given the model, not all vertices in the selected ROIs respond to our numerosity stimulus. However, a substantial amount of vertices also have higher scores, suggesting that the model successfully mapped their responses to the stimulus. Moreover, the R-squared distribution does not differ much between in-sample and out-of-sample predictions, suggesting that our pRF model generalizes well.
 
@@ -625,21 +614,14 @@ params_agg_roi = params_valid.groupby("roi", observed=False)[["numerosity", "sig
 params_agg_roi.round(2)
 ```
 
+We plot the average preferred numerosity of each ROI with {py:func}`prfmodel.plotting.plot_parameter_by_roi`.
+
 ```{code-cell} ipython3
-fig, ax = plt.subplots()
+from prfmodel.plotting import plot_parameter_by_roi
 
-ax.errorbar(
-    roi_order,
-    params_agg_roi["numerosity"]["mean"],
-    yerr=params_agg_roi["numerosity"]["std"],
-    fmt="o",
-    capsize=3,
-)
-
-ax.set_xlabel("ROI")
-ax.set_ylabel("Preferred numerosity")
-
-fig.tight_layout()
+plot_parameter_by_roi(
+    params_valid, "numerosity", params_valid["roi"], order=roi_order, ylabel="Preferred numerosity"
+);
 ```
 
 The error bars show the standard deviation across vertices, not the standard error of the mean. Average preferred
@@ -651,20 +633,9 @@ differs strongly between maps.
 We can also look at the average pRF size of each ROI.
 
 ```{code-cell} ipython3
-fig, ax = plt.subplots()
-
-ax.errorbar(
-    roi_order,
-    params_agg_roi["sigma"]["mean"],
-    yerr=params_agg_roi["sigma"]["std"],
-    fmt="o",
-    capsize=3,
-)
-
-ax.set_xlabel("ROI")
-ax.set_ylabel("pRF size (sigma, in log-numerosity units)")
-
-fig.tight_layout()
+plot_parameter_by_roi(
+    params_valid, "sigma", params_valid["roi"], order=roi_order, ylabel="pRF size (sigma, in log-numerosity units)"
+);
 ```
 
 Average pRF size is roughly constant across the occipital (NTO, NLO, NPO) and central sulcus (NPCI, NPCM, NPCS) maps

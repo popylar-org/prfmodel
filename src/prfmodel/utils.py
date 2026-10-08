@@ -391,3 +391,131 @@ def as_tensor_frame(
         return TensorFrame(parameters.to_dict(), dtype=dtype)
 
     return TensorFrame(parameters.to_dict(orient="list"), dtype=dtype)
+
+
+def calculate_polar_angle(mu_x: np.ndarray | pd.Series, mu_y: np.ndarray | pd.Series) -> np.ndarray:
+    r"""Calculate the polar angle of two-dimensional population receptive field (pRF) centers.
+
+    The polar angle runs counterclockwise from the positive x-axis (e.g., the right side of the screen). It lies in
+    :math:`[-\pi, \pi]`, where positive angles correspond to the upper and negative angles to the lower half of the
+    visual field.
+
+    Parameters
+    ----------
+    mu_x : numpy.ndarray or pandas.Series
+        Horizontal coordinate of the pRF centers.
+    mu_y : numpy.ndarray or pandas.Series
+        Vertical coordinate of the pRF centers.
+
+    Returns
+    -------
+    numpy.ndarray
+        Polar angle of the pRF centers in radians.
+
+    Notes
+    -----
+    Angles are cyclic (:math:`-\pi` and :math:`\pi` are the same direction), so they should not be averaged directly.
+    To average pRF centers (e.g., when projecting them onto a surface), average `mu_x` and `mu_y` separately and
+    calculate the polar angle afterwards.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> calculate_polar_angle(np.array([1.0, 0.0, -1.0]), np.array([0.0, 1.0, 0.0]))
+    array([0.        , 1.57079633, 3.14159265])
+
+    """
+    return np.arctan2(np.asarray(mu_y, dtype=float), np.asarray(mu_x, dtype=float))
+
+
+def calculate_eccentricity(mu_x: np.ndarray | pd.Series, mu_y: np.ndarray | pd.Series) -> np.ndarray:
+    """Calculate the eccentricity of two-dimensional population receptive field (pRF) centers.
+
+    The eccentricity is the distance of the pRF center from the origin of the visual field (e.g., the center of the
+    screen).
+
+    Parameters
+    ----------
+    mu_x : numpy.ndarray or pandas.Series
+        Horizontal coordinate of the pRF centers.
+    mu_y : numpy.ndarray or pandas.Series
+        Vertical coordinate of the pRF centers.
+
+    Returns
+    -------
+    numpy.ndarray
+        Eccentricity of the pRF centers in the units of `mu_x` and `mu_y`.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> calculate_eccentricity(np.array([3.0, 0.0]), np.array([4.0, -2.0]))
+    array([5., 2.])
+
+    """
+    return np.hypot(np.asarray(mu_x, dtype=float), np.asarray(mu_y, dtype=float))
+
+
+def calculate_r_squared(observed: np.ndarray | Tensor, predicted: np.ndarray | Tensor) -> np.ndarray:
+    r"""Calculate the coefficient of determination (R-squared) of predicted responses for each unit.
+
+    The R-squared is the proportion of variance in the observed response over time that is explained by the predicted
+    response.
+
+    Parameters
+    ----------
+    observed : numpy.ndarray or :data:`prfmodel.typing.Tensor`
+        Observed response with shape `(num_units, num_frames)`.
+    predicted : numpy.ndarray or :data:`prfmodel.typing.Tensor`
+        Predicted response with the same shape as `observed`.
+
+    Returns
+    -------
+    numpy.ndarray
+        R-squared of each unit with shape `(num_units,)`.
+
+    Raises
+    ------
+    ValueError
+        If `observed` and `predicted` do not have the same shape.
+
+    Notes
+    -----
+    The R-squared is at most one and can be negative when the prediction is worse than a flat line at the mean of the
+    observed response (e.g., when evaluating predictions out-of-sample). It is `NaN` for units with a constant
+    observed response, for which the explained variance is undefined. It is calculated as:
+
+    .. math::
+
+        R^2 = 1 - \frac{\sum_t (y_t - \hat{y}_t)^2}{\sum_t (y_t - \bar{y})^2}
+
+    where :math:`y_t` is the observed and :math:`\hat{y}_t` the predicted response at time frame :math:`t`, and
+    :math:`\bar{y}` is the mean of the observed response.
+
+    The score is computed over the last axis, so `observed` and `predicted` can also have shape `(num_frames,)` for a
+    single unit.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> observed = np.array([[1.0, 2.0, 3.0, 4.0], [1.0, 2.0, 3.0, 4.0]])
+    >>> predicted = np.array([[1.0, 2.0, 3.0, 4.0], [2.5, 2.5, 2.5, 2.5]])
+    >>> calculate_r_squared(observed, predicted)
+    array([1., 0.])
+
+    """
+    observed = np.asarray(ops.convert_to_numpy(observed), dtype=float)
+    predicted = np.asarray(ops.convert_to_numpy(predicted), dtype=float)
+
+    if observed.shape != predicted.shape:
+        msg = (
+            f"'observed' and 'predicted' must have the same shape, but have shapes {observed.shape} "
+            f"and {predicted.shape}"
+        )
+        raise ValueError(msg)
+
+    ss_residual = np.sum((observed - predicted) ** 2, axis=-1)
+    ss_total = np.sum((observed - np.mean(observed, axis=-1, keepdims=True)) ** 2, axis=-1)
+
+    # The explained variance of a constant observed response is undefined
+    return 1.0 - np.divide(ss_residual, ss_total, out=np.full_like(ss_total, np.nan), where=ss_total > 0.0)

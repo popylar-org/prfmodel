@@ -83,7 +83,8 @@ It has shape `(num_frames,)`. The `contrast` attribute defines the contrast for 
 
 +++
 
-We can visualize the stimulus by plotting the contrast over time for each spatial frequency.
+We can visualize the stimulus by plotting the contrast over time for each spatial frequency with
+{py:func}`prfmodel.plotting.plot_csf_stimulus_design`.
 
 ```{code-cell} ipython3
 from prfmodel.plotting import plot_csf_stimulus_design
@@ -164,7 +165,8 @@ simulated_csf = np.asarray(predict_contrast_sensitivity(
 ))
 ```
 
-We can plot the true CSF against the contrast sensitivity and spatial frequencies of our stimulus.
+We can plot the true CSF against the contrast sensitivity and spatial frequencies of our stimulus with
+{py:func}`prfmodel.plotting.plot_csf_stimulus_curve`.
 
 ```{code-cell} ipython3
 from prfmodel.plotting import plot_csf_stimulus_curve
@@ -238,17 +240,14 @@ grid did not contain the "true" parameters we used to simulate the original resp
 "true" parameters.
 
 Using the parameter estimates resulting from the grid search we can make model predictions and compare them against
-the original simulated response.
+the original simulated response with {py:func}`prfmodel.plotting.plot_observed_predicted`.
 
 ```{code-cell} ipython3
+from prfmodel.plotting import plot_observed_predicted
+
 grid_pred_response = csf_model(stimulus, grid_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(grid_pred_response[0], label="Predicted (grid)")
-
-fig.legend();
+plot_observed_predicted(simulated_response[0], {"Predicted (grid)": grid_pred_response[0]}, observed_label="True");
 ```
 
 We can see that the predicted response follows the shape of the original (true) response but still shows some deviation
@@ -282,12 +281,9 @@ Looking at the parameters, we can see that the model compensates the deviation i
 ```{code-cell} ipython3
 ls_pred_response = csf_model(stimulus, ls_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(ls_pred_response[0], label="Predicted (least-squares)")
-
-fig.legend();
+plot_observed_predicted(
+    simulated_response[0], {"Predicted (least-squares)": ls_pred_response[0]}, observed_label="True"
+);
 ```
 
 To finetune our model fits, we use SGD to iteratively optimize model parameters using the gradient of a loss function
@@ -328,12 +324,7 @@ original simulated response almost perfectly.
 ```{code-cell} ipython3
 sgd_pred_response = csf_model(stimulus, sgd_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(sgd_pred_response[0], "--", label="Predicted (SGD)")
-
-fig.legend();
+plot_observed_predicted(simulated_response[0], {"Predicted (SGD)": sgd_pred_response[0]}, observed_label="True");
 ```
 
 We can also plot the alignment of the predicted CSF with the true CSF.

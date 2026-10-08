@@ -78,54 +78,17 @@ response_psc = ((response_raw.T / response_raw.mean(axis=1)).T - 1.0) * 100.0
 
 The `response_psc` object contains the BOLD response timecourse for each voxel on the surface mesh. It has shape `(num_vertices, num_frames)` where `num_vertices` is the number of vertices on the surface mesh and `num_frames` the number of time frames of the recording. The timecourses from the left and right hemispheres are concatenated (left is first). Because the data has been converted to PSC, each timecourse should have a mean of zero.
 
-First, we define a helper function to plot a statistic on the surface.
+We can plot the standard deviation of each timecourse on the surface with
+{py:func}`prfmodel.plotting.plot_surface_stat_map`.
 
 ```{code-cell} ipython3
 import numpy as np
-from nilearn.plotting import plot_surf_stat_map
+from prfmodel.plotting import plot_surface_stat_map
 
-SURF_VIEW = (90, 270)
-
-
-def plot_surf_stat_map_helper(
-        stat_map: np.ndarray,
-        vmin: float | None = None,
-        vmax: float | None = None,
-        title: str | None = None,
-    ) -> tuple[plt.Figure, plt.Axes]:
-    """Helper function to plot a surface with a stat map."""
-    fig, ax = plt.subplots(subplot_kw={"projection": "3d"}, figsize=(8, 6))
-
-    plot_surf_stat_map(
-        mesh,
-        stat_map,
-        vmin=vmin,
-        vmax=vmax,
-        hemi="both",
-        view=SURF_VIEW,
-        cmap="inferno",
-        axes=ax,
-        figure=fig,
-        title=title,
-    )
-
-    # Expand the 3D axes to fill the space to the left of the colorbar
-    surf_axes = [a for a in fig.axes if a.name == "3d"]
-    cbar_axes = [a for a in fig.axes if a.name != "3d"]
-    cbar_x0 = min(a.get_position().x0 for a in cbar_axes)
-    for a in surf_axes:
-        a.set_position([0.0, 0.0, cbar_x0 - 0.01, 0.97])
-
-    return fig, ax
-```
-
-We can then plot the standard deviation of each timecourse on the surface.
-
-```{code-cell} ipython3
 # Calculate standard deviation of each timecourse
 response_sd = response_psc.std(axis=1)
 
-plot_surf_stat_map_helper(response_sd, vmax=5.0, title="Response standard deviation");
+plot_surface_stat_map(mesh, response_sd, vmax=5.0, title="Response standard deviation");
 ```
 
 We can see that there is high variation in the signal in the visual areas (e.g., V1-V3) as we would expect for a visual stimulus.
@@ -183,24 +146,21 @@ fig.show()
 While the timecourses are quite noisy, we can see that, for some vertices, there are four regular peaks in the signal. These peaks originate from the visual stimulus that was shown during the fMRI recording. The visual stimulus contained four corresponding
 bars moving through the visual field in different directions (see [](prf_2d_fmri_visual.md)). The goal of our CF model is to map these responses to the responses from other vertices in the brain.
 
-We can get an overview of all vertices by plotting all timecourses at once in a heatmap.
+We can get an overview of all vertices by plotting all timecourses at once in a heatmap with
+{py:func}`prfmodel.plotting.plot_response_heatmap`.
 
 ```{code-cell} ipython3
-aspect_ratio = response_psc.shape[1] / response_psc.shape[0]
+from prfmodel.plotting import plot_response_heatmap
 
-fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-
-im = ax.imshow(
+plot_response_heatmap(
     response_psc,
-    aspect=aspect_ratio,
-    cmap="inferno",
     vmin=-2,
     vmax=5,
-)
-
-ax.set_xlabel("Time frame (in TR)")
-ax.set_ylabel("Vertex index")
-fig.colorbar(im, ax=ax, label="BOLD response (in PSC)");
+    xlabel="Time frame (in TR)",
+    ylabel="Vertex index",
+    colorbar_label="BOLD response (in PSC)",
+    figsize=(8, 6),
+);
 ```
 
 ## Creating the Distance Matrix
@@ -452,26 +412,21 @@ predict_batched = batched(cf_model)
 pred_response = predict_batched(stimulus, ls_params, batch_size=200)
 ```
 
-We can quantify how well the predictions align with the observed timecourses using the R-squared metric. This metric indicates the proportion of variance in the observed data explained by our model predictions.
+We can quantify how well the predictions align with the observed timecourses using the R-squared metric, which we compute with {py:func}`prfmodel.utils.calculate_r_squared`. This metric indicates the proportion of variance in the observed data explained by our model predictions.
 
 ```{code-cell} ipython3
-from keras.metrics import R2Score
+from prfmodel.utils import calculate_r_squared
 
-r2_metric = R2Score(class_aggregation=None)  # Don't aggregate score over vertices
-
-r_squared = np.asarray(r2_metric(response_valid.T, pred_response.T))  # Transpose to compute score across time frames
+r_squared = calculate_r_squared(response_valid, pred_response)  # One score per vertex
 r_squared.shape
 ```
 
-We can look at the distribution of R-squared values across vertices.
+We can look at the distribution of R-squared values across vertices with {py:func}`prfmodel.plotting.plot_r_squared_hist`.
 
 ```{code-cell} ipython3
-fig = px.histogram(
-    x=r_squared,
-    nbins=15,
-    labels={"x": "R-squared"},
-).update_layout(yaxis_title="Frequency", height=450)
-fig.show()
+from prfmodel.plotting import plot_r_squared_hist
+
+plot_r_squared_hist(r_squared, bins=15, value_range=(0.0, 1.0), clip=True);
 ```
 
 We can see that many vertices have a score above zero meaning that the response of the CF model matches the observed response.
@@ -553,7 +508,9 @@ We can also visualize the R-squared score on the flat surface mesh.
 r_squared_full = np.full((response_psc.shape[0],), fill_value=np.nan)
 r_squared_full[response_is_valid] = r_squared
 
-plot_surf_stat_map_helper(r_squared_full, vmin=0.0, vmax=1.0, title="Variance explained (R-squared)");
+plot_surface_stat_map(
+    mesh, r_squared_full, vmin=0.0, vmax=1.0, title="Variance explained (R-squared)"
+);
 ```
 
 We can see that the vertices with the highest scores are located in the visual areas of both hemispheres. This means
@@ -580,7 +537,7 @@ size = np.full((response_psc.shape[0],), fill_value=np.nan)
 # Fill valid vertices with estimated size parameters
 size[response_is_valid] = np.where(is_above_threshold, ls_params["sigma"], np.nan)
 
-plot_surf_stat_map_helper(size, vmin=0.0, vmax=20.0, title="CF size (sigma, in mm)");
+plot_surface_stat_map(mesh, size, vmin=0.0, vmax=20.0, title="CF size (sigma, in mm)");
 ```
 
 We can see that vertices in higher areas in the visual pathway have larger CF sizes.
