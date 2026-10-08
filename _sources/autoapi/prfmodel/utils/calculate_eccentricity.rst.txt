@@ -1,0 +1,24 @@
+prfmodel.utils.calculate_eccentricity
+=====================================
+
+.. py:function:: prfmodel.utils.calculate_eccentricity(mu_x: numpy.ndarray | pandas.Series, mu_y: numpy.ndarray | pandas.Series) -> numpy.ndarray
+
+   Calculate the eccentricity of two-dimensional population receptive field (pRF) centers.
+
+   The eccentricity is the distance of the pRF center from the origin of the visual field (e.g., the center of the
+   screen).
+
+   :param mu_x: Horizontal coordinate of the pRF centers.
+   :type mu_x: numpy.ndarray or pandas.Series
+   :param mu_y: Vertical coordinate of the pRF centers.
+   :type mu_y: numpy.ndarray or pandas.Series
+
+   :returns: Eccentricity of the pRF centers in the units of `mu_x` and `mu_y`.
+   :rtype: numpy.ndarray
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> calculate_eccentricity(np.array([3.0, 0.0]), np.array([4.0, -2.0]))
+   array([5., 2.])
+

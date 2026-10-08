@@ -1,0 +1,53 @@
+prfmodel.fitters.grid_values_1d_prf
+===================================
+
+.. py:function:: prfmodel.fitters.grid_values_1d_prf(stimulus: prfmodel.stimuli.PRFStimulus, num_mu: int = 49, mu_extent: float = 2.0, num_sigma: int = 50, sigma_range: tuple[float, float] | None = None, log_sigma: bool = True) -> dict[str, numpy.ndarray]
+
+   Create grid search values for the center and size of a one-dimensional pRF from the stimulus.
+
+   The values for the pRF center `mu` span the stimulus coordinates, extended beyond them by `mu_extent` around their
+   midpoint. The values for the pRF size `sigma` range from the smallest spacing to the full range of the stimulus
+   coordinates by default.
+
+   :param stimulus: One-dimensional stimulus. The coordinates do not need to be regularly spaced.
+   :type stimulus: PRFStimulus
+   :param num_mu: Number of values for `mu`.
+   :type num_mu: int, optional
+   :param mu_extent: Range of the pRF center values relative to the range of the stimulus coordinates. With `1.0`, the values span
+                     exactly the stimulus; with `2.0` (the default), they span twice its range around its midpoint.
+   :type mu_extent: float, optional
+   :param num_sigma: Number of values for `sigma`.
+   :type num_sigma: int, optional
+   :param sigma_range: Smallest and largest value for `sigma`. If `None`, the smallest value is the smallest spacing between the
+                       stimulus coordinates and the largest value is their range.
+   :type sigma_range: tuple[float, float] or None, optional
+   :param log_sigma: Whether the values for `sigma` are log-spaced (the default) or linearly spaced. Log spacing samples small pRFs,
+                     whose predictions change quickly with their size, more densely.
+   :type log_sigma: bool, optional
+
+   :returns: Values for `mu` and `sigma` that can be passed to :meth:`prfmodel.fitters.GridFitter.fit`. Values for the
+             other model parameters (e.g., `baseline` and `amplitude`) must be added, for example, with the `|` operator.
+   :rtype: dict[str, numpy.ndarray]
+
+   :raises ValueError: If the stimulus is not 1-dimensional, `num_mu` is smaller than one, `mu_extent` is not positive, or the lower
+       limit of `sigma_range` is not positive when `log_sigma=True`.
+
+   :Warns: **GridAlignmentWarning** -- If the edges or the midpoint of the stimulus do not fall on the values for `mu`. The warning suggests a value
+           for `num_mu` that aligns them.
+
+   .. seealso::
+
+      :py:obj:`grid_values_2d_prf`
+          Grid search values for two-dimensional pRFs.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
+   >>> stimulus = load_1d_prf_lognumerosity_stimulus()  # Log numerosities from log(1) to log(20)
+   >>> values = grid_values_1d_prf(stimulus, num_mu=9, num_sigma=5)
+   >>> np.round(values["mu"], 2)
+   array([-1.5 , -0.75,  0.  ,  0.75,  1.5 ,  2.25,  3.  ,  3.74,  4.49])
+   >>> np.round(values["sigma"], 2)
+   array([0.15, 0.32, 0.68, 1.43, 3.  ])
+

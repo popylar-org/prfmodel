@@ -1,0 +1,41 @@
+prfmodel.plotting.plot_r_squared_hist
+=====================================
+
+.. py:function:: prfmodel.plotting.plot_r_squared_hist(r_squared: numpy.ndarray | collections.abc.Mapping[str, numpy.ndarray], bins: int = 40, value_range: tuple[float, float] = (-0.5, 1.0), clip: bool = False, log: bool = False, xlabel: str = 'R-squared', ax: matplotlib.axes.Axes | None = None, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Plot the distribution of R-squared scores across units.
+
+   :param r_squared: R-squared score of each unit with shape `(num_units,)`. To compare several sets of scores (e.g., in-sample and
+                     out-of-sample), pass a mapping from labels to scores. The histograms are then overlaid and labeled in a legend.
+                     `NaN` values are ignored.
+   :type r_squared: numpy.ndarray or Mapping[str, numpy.ndarray]
+   :param bins: Number of histogram bins.
+   :type bins: int, optional
+   :param value_range: Lower and upper limit of the histogram bins.
+   :type value_range: tuple[float, float], optional
+   :param clip: Whether to clip scores to `value_range` so that scores outside the range are counted in the outermost bins.
+                If `False`, scores outside the range are not shown.
+   :type clip: bool, optional
+   :param log: Whether to use a logarithmic scale for the counts. Useful when most units have a score close to zero.
+   :type log: bool, optional
+   :param xlabel: Label of the x-axis.
+   :type xlabel: str, optional
+   :param ax: Axes to plot on. If `None`, a new figure and axes are created.
+   :type ax: matplotlib.axes.Axes or None, optional
+   :param \*\*kwargs: Keyword arguments passed to :func:`matplotlib.pyplot.subplots` if `ax` is `None`.
+
+   :returns: * **fig** (*matplotlib.figure.Figure*) -- Figure object.
+             * **ax** (*matplotlib.axes.Axes*) -- Axes object.
+
+   .. seealso::
+
+      :py:obj:`plot_r_squared_comparison`
+          Compare two sets of R-squared scores unit by unit.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> rng = np.random.default_rng(0)
+   >>> r_squared = {"Training set": rng.uniform(size=100), "Test set": rng.uniform(size=100)}
+   >>> fig, ax = plot_r_squared_hist(r_squared, log=True)
+

@@ -1,0 +1,52 @@
+prfmodel.plotting.plot_grid_parameter_distribution
+==================================================
+
+.. py:function:: prfmodel.plotting.plot_grid_parameter_distribution(parameters: pandas.DataFrame, parameter_values: collections.abc.Mapping[str, numpy.ndarray | collections.abc.Sequence[float]], name: str, log: bool | None = None, xlabel: str | None = None, ax: matplotlib.axes.Axes | None = None, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Plot how the estimates of a parameter are distributed across the values of a parameter grid.
+
+   Draws a histogram with one bin centered on each value in the grid. Estimates at the smallest or largest value of
+   the grid are highlighted: For these units, the best fitting parameter might lie outside the grid. Useful to
+   diagnose the results of a :class:`~prfmodel.fitters.GridFitter`.
+
+   :param parameters: Estimated parameters with one row per unit (e.g., returned by :meth:`prfmodel.fitters.GridFitter.fit`).
+   :type parameters: pandas.DataFrame
+   :param parameter_values: Values of the parameter grid (e.g., passed to :meth:`prfmodel.fitters.GridFitter.fit`). The values for `name`
+                            must be regularly spaced or log-spaced.
+   :type parameter_values: Mapping[str, numpy.ndarray or Sequence[float]]
+   :param name: Name of the parameter to plot.
+   :type name: str
+   :param log: Whether the grid values are log-spaced. If `True`, the x-axis has a logarithmic scale. If `None` (the
+               default), log spacing is detected from the grid values: Values that are log-spaced but not regularly spaced
+               are treated as log-spaced.
+   :type log: bool or None, optional
+   :param xlabel: Label of the x-axis. If `None`, `name` is used.
+   :type xlabel: str or None, optional
+   :param ax: Axes to plot on. If `None`, a new figure and axes are created.
+   :type ax: matplotlib.axes.Axes or None, optional
+   :param \*\*kwargs: Keyword arguments passed to :func:`matplotlib.pyplot.subplots` if `ax` is `None`.
+
+   :returns: * **fig** (*matplotlib.figure.Figure*) -- Figure object.
+             * **ax** (*matplotlib.axes.Axes*) -- Axes object.
+
+   :raises ValueError: If the grid values are not regularly spaced (or log-spaced if `log=True` or detected) or contain fewer than
+       two values.
+
+   .. rubric:: Notes
+
+   Estimates outside the range of the grid (e.g., after refining the grid estimates with
+   :class:`~prfmodel.fitters.SGDFitter`) are not shown.
+
+   .. seealso::
+
+      :py:obj:`plot_2d_prf_centers`
+          Distribution of pRF centers in a two-dimensional visual field.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> parameter_values = {"sigma": np.geomspace(0.1, 10.0, 10)}
+   >>> parameters = pd.DataFrame({"sigma": np.random.default_rng(0).choice(parameter_values["sigma"], 100)})
+   >>> fig, ax = plot_grid_parameter_distribution(parameters, parameter_values, "sigma")  # Detects log spacing
+

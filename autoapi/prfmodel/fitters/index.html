@@ -259,12 +259,15 @@
 <li class="toctree-l4"><a class="reference internal" href="losses/CorrelationLoss.html">CorrelationLoss</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="GridAlignmentWarning.html">GridAlignmentWarning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="GridFitter.html">GridFitter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="GridHistory.html">GridHistory</a></li>
 <li class="toctree-l3"><a class="reference internal" href="LeastSquaresFitter.html">LeastSquaresFitter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="LeastSquaresHistory.html">LeastSquaresHistory</a></li>
 <li class="toctree-l3"><a class="reference internal" href="SGDFitter.html">SGDFitter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="SGDHistory.html">SGDHistory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grid_values_1d_prf.html">grid_values_1d_prf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="grid_values_2d_prf.html">grid_values_2d_prf</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../impulse/index.html">prfmodel.impulse</a><input aria-label="Toggle navigation of prfmodel.impulse" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -353,9 +356,18 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../plotting/index.html">prfmodel.plotting</a><input aria-label="Toggle navigation of prfmodel.plotting" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/animate_2d_prf_stimulus.html">animate_2d_prf_stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_1d_prf_stimulus.html">plot_1d_prf_stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_2d_prf_centers.html">plot_2d_prf_centers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/plot_2d_prf_stimulus.html">plot_2d_prf_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/plot_csf_stimulus_curve.html">plot_csf_stimulus_curve</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/plot_csf_stimulus_design.html">plot_csf_stimulus_design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_grid_parameter_distribution.html">plot_grid_parameter_distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_observed_predicted.html">plot_observed_predicted</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_parameter_by_roi.html">plot_parameter_by_roi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_r_squared_comparison.html">plot_r_squared_comparison</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_r_squared_hist.html">plot_r_squared_hist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_response_heatmap.html">plot_response_heatmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_surface_stat_map.html">plot_surface_stat_map</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../protocols/index.html">prfmodel.protocols</a><input aria-label="Toggle navigation of prfmodel.protocols" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -403,6 +415,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../utils/TensorFrame.html">TensorFrame</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utils/as_tensor_frame.html">as_tensor_frame</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utils/batched.html">batched</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/calculate_eccentricity.html">calculate_eccentricity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/calculate_polar_angle.html">calculate_polar_angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/calculate_r_squared.html">calculate_r_squared</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utils/convert_parameters_to_tensor.html">convert_parameters_to_tensor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utils/get_dtype.html">get_dtype</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utils/normalize_response.html">normalize_response</a></li>
@@ -457,6 +472,8 @@
 with least-squares estimates or used as the starting point for SGD for finetuning the estimates. See
 <a class="reference internal" href="../../../tutorials/index.html#tutorials"><span class="std std-ref">Tutorials &amp; Examples</span></a> for details.</p>
 <p>Each fitting method returns a history object that stores final loss scores for all data units.</p>
+<p>The functions <a class="reference internal" href="grid_values_2d_prf.html#prfmodel.fitters.grid_values_2d_prf" title="prfmodel.fitters.grid_values_2d_prf"><code class="xref py py-func docutils literal notranslate"><span class="pre">grid_values_2d_prf()</span></code></a> and <a class="reference internal" href="grid_values_1d_prf.html#prfmodel.fitters.grid_values_1d_prf" title="prfmodel.fitters.grid_values_1d_prf"><code class="xref py py-func docutils literal notranslate"><span class="pre">grid_values_1d_prf()</span></code></a> create
+values for the pRF center and size parameters of a <a class="reference internal" href="GridFitter.html#prfmodel.fitters.GridFitter" title="prfmodel.fitters.GridFitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridFitter</span></code></a> from the stimulus.</p>
 <p>The <a class="reference internal" href="adapter/index.html#module-prfmodel.fitters.adapter" title="prfmodel.fitters.adapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">adapter</span></code></a> submodule contains functionality to transform parameters during model fitting
 (e.g., to optimize a parameter on the log scale). Currently, this is only implemented for SGD.</p>
 <p>The <a class="reference internal" href="losses/index.html#module-prfmodel.fitters.losses" title="prfmodel.fitters.losses"><code class="xref py py-mod docutils literal notranslate"><span class="pre">losses</span></code></a> submodule contains additional loss functions, such as
@@ -474,6 +491,20 @@ with least-squares estimates or used as the starting point for SGD for finetunin
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="losses/index.html#module-prfmodel.fitters.losses" title="prfmodel.fitters.losses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">losses</span></code></a></p></td>
 <td><p>Custom loss functions.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="exceptions">
+<h2>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="GridAlignmentWarning.html#prfmodel.fitters.GridAlignmentWarning" title="prfmodel.fitters.GridAlignmentWarning"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GridAlignmentWarning</span></code></a></p></td>
+<td><p>Warning for when the edges or the midpoint of a stimulus do not fall on grid values.</p></td>
 </tr>
 </tbody>
 </table>
@@ -503,6 +534,23 @@ with least-squares estimates or used as the starting point for SGD for finetunin
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="SGDHistory.html#prfmodel.fitters.SGDHistory" title="prfmodel.fitters.SGDHistory"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SGDHistory</span></code></a></p></td>
 <td><p>Stochastic gradient descent metric history.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+</div>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="grid_values_1d_prf.html#prfmodel.fitters.grid_values_1d_prf" title="prfmodel.fitters.grid_values_1d_prf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grid_values_1d_prf</span></code></a>(→ dict[str, numpy.ndarray])</p></td>
+<td><p>Create grid search values for the center and size of a one-dimensional pRF from the stimulus.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="grid_values_2d_prf.html#prfmodel.fitters.grid_values_2d_prf" title="prfmodel.fitters.grid_values_2d_prf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">grid_values_2d_prf</span></code></a>(→ dict[str, numpy.ndarray])</p></td>
+<td><p>Create grid search values for the center and size of a two-dimensional population receptive field (pRF).</p></td>
 </tr>
 </tbody>
 </table>
@@ -567,7 +615,9 @@ with least-squares estimates or used as the starting point for SGD for finetunin
             <ul>
 <li><a class="reference internal" href="#">prfmodel.fitters</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#exceptions">Exceptions</a></li>
 <li><a class="reference internal" href="#classes">Classes</a></li>
+<li><a class="reference internal" href="#functions">Functions</a></li>
 </ul>
 </li>
 </ul>

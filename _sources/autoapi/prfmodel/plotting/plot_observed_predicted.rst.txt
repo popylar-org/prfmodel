@@ -1,0 +1,35 @@
+prfmodel.plotting.plot_observed_predicted
+=========================================
+
+.. py:function:: prfmodel.plotting.plot_observed_predicted(observed: numpy.ndarray, predicted: numpy.ndarray | collections.abc.Mapping[str, numpy.ndarray], split: int | None = None, observed_label: str = 'Observed', xlabel: str = 'Time frame', ylabel: str = 'Response', ax: matplotlib.axes.Axes | None = None, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Plot an observed timecourse together with one or more predicted timecourses.
+
+   :param observed: Observed (or simulated) timecourse of a single unit with shape `(num_frames,)`.
+   :type observed: numpy.ndarray
+   :param predicted: Predicted timecourse with shape `(num_frames,)`. To compare several predictions (e.g., from different fitters),
+                     pass a mapping from labels to predicted timecourses. Predictions are drawn as dashed lines.
+   :type predicted: numpy.ndarray or Mapping[str, numpy.ndarray]
+   :param split: Time frame at which to draw a vertical line (e.g., the split between a training and test set).
+   :type split: int or None, optional
+   :param observed_label: Legend label of the observed timecourse.
+   :type observed_label: str, optional
+   :param xlabel: Label of the x-axis.
+   :type xlabel: str, optional
+   :param ylabel: Label of the y-axis.
+   :type ylabel: str, optional
+   :param ax: Axes to plot on. If `None`, a new figure and axes are created.
+   :type ax: matplotlib.axes.Axes or None, optional
+   :param \*\*kwargs: Keyword arguments passed to :func:`matplotlib.pyplot.subplots` if `ax` is `None`.
+
+   :returns: * **fig** (*matplotlib.figure.Figure*) -- Figure object.
+             * **ax** (*matplotlib.axes.Axes*) -- Axes object.
+
+   :raises ValueError: If a predicted timecourse does not have the same shape as the observed timecourse.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> observed = np.sin(np.linspace(0.0, 10.0, 100))
+   >>> fig, ax = plot_observed_predicted(observed, {"Grid": 0.8 * observed, "SGD": 0.95 * observed})
+

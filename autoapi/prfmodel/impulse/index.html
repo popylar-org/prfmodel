@@ -3,7 +3,7 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.impulse.base" href="base/index.html"><link rel="prev" title="prfmodel.fitters.SGDHistory" href="../fitters/SGDHistory.html">
+<link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.impulse.base" href="base/index.html"><link rel="prev" title="prfmodel.fitters.grid_values_2d_prf" href="../fitters/grid_values_2d_prf.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>prfmodel.impulse - prfmodel 0.0.1 documentation</title>
@@ -259,12 +259,15 @@
 <li class="toctree-l4"><a class="reference internal" href="../fitters/losses/CorrelationLoss.html">CorrelationLoss</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../fitters/GridAlignmentWarning.html">GridAlignmentWarning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/GridFitter.html">GridFitter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/GridHistory.html">GridHistory</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/LeastSquaresFitter.html">LeastSquaresFitter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/LeastSquaresHistory.html">LeastSquaresHistory</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/SGDFitter.html">SGDFitter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/SGDHistory.html">SGDHistory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fitters/grid_values_1d_prf.html">grid_values_1d_prf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fitters/grid_values_2d_prf.html">grid_values_2d_prf</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">prfmodel.impulse</a><input aria-label="Toggle navigation of prfmodel.impulse" checked="" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -353,9 +356,18 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../plotting/index.html">prfmodel.plotting</a><input aria-label="Toggle navigation of prfmodel.plotting" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/animate_2d_prf_stimulus.html">animate_2d_prf_stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_1d_prf_stimulus.html">plot_1d_prf_stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_2d_prf_centers.html">plot_2d_prf_centers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/plot_2d_prf_stimulus.html">plot_2d_prf_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/plot_csf_stimulus_curve.html">plot_csf_stimulus_curve</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/plot_csf_stimulus_design.html">plot_csf_stimulus_design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_grid_parameter_distribution.html">plot_grid_parameter_distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_observed_predicted.html">plot_observed_predicted</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_parameter_by_roi.html">plot_parameter_by_roi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_r_squared_comparison.html">plot_r_squared_comparison</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_r_squared_hist.html">plot_r_squared_hist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_response_heatmap.html">plot_response_heatmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_surface_stat_map.html">plot_surface_stat_map</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../protocols/index.html">prfmodel.protocols</a><input aria-label="Toggle navigation of prfmodel.protocols" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -403,6 +415,9 @@
 <li class="toctree-l3"><a class="reference internal" href="../utils/TensorFrame.html">TensorFrame</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utils/as_tensor_frame.html">as_tensor_frame</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utils/batched.html">batched</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/calculate_eccentricity.html">calculate_eccentricity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/calculate_polar_angle.html">calculate_polar_angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utils/calculate_r_squared.html">calculate_r_squared</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utils/convert_parameters_to_tensor.html">convert_parameters_to_tensor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utils/get_dtype.html">get_dtype</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utils/normalize_response.html">normalize_response</a></li>
@@ -533,14 +548,14 @@ a response from a population receptive field (pRF) response model.</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../fitters/SGDHistory.html">
+          <a class="prev-page" href="../fitters/grid_values_2d_prf.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">prfmodel.fitters.SGDHistory</div>
+                <div class="title">prfmodel.fitters.grid_values_2d_prf</div>
                 
               </div>
             </a>

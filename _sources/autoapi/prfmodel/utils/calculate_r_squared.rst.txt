@@ -1,0 +1,44 @@
+prfmodel.utils.calculate_r_squared
+==================================
+
+.. py:function:: prfmodel.utils.calculate_r_squared(observed: numpy.ndarray | prfmodel.typing.Tensor, predicted: numpy.ndarray | prfmodel.typing.Tensor) -> numpy.ndarray
+
+   Calculate the coefficient of determination (R-squared) of predicted responses for each unit.
+
+   The R-squared is the proportion of variance in the observed response over time that is explained by the predicted
+   response.
+
+   :param observed: Observed response with shape `(num_units, num_frames)`.
+   :type observed: numpy.ndarray or :data:`prfmodel.typing.Tensor`
+   :param predicted: Predicted response with the same shape as `observed`.
+   :type predicted: numpy.ndarray or :data:`prfmodel.typing.Tensor`
+
+   :returns: R-squared of each unit with shape `(num_units,)`.
+   :rtype: numpy.ndarray
+
+   :raises ValueError: If `observed` and `predicted` do not have the same shape.
+
+   .. rubric:: Notes
+
+   The R-squared is at most one and can be negative when the prediction is worse than a flat line at the mean of the
+   observed response (e.g., when evaluating predictions out-of-sample). It is `NaN` for units with a constant
+   observed response, for which the explained variance is undefined. It is calculated as:
+
+   .. math::
+
+       R^2 = 1 - \frac{\sum_t (y_t - \hat{y}_t)^2}{\sum_t (y_t - \bar{y})^2}
+
+   where :math:`y_t` is the observed and :math:`\hat{y}_t` the predicted response at time frame :math:`t`, and
+   :math:`\bar{y}` is the mean of the observed response.
+
+   The score is computed over the last axis, so `observed` and `predicted` can also have shape `(num_frames,)` for a
+   single unit.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> observed = np.array([[1.0, 2.0, 3.0, 4.0], [1.0, 2.0, 3.0, 4.0]])
+   >>> predicted = np.array([[1.0, 2.0, 3.0, 4.0], [2.5, 2.5, 2.5, 2.5]])
+   >>> calculate_r_squared(observed, predicted)
+   array([1., 0.])
+

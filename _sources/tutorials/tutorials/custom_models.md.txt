@@ -40,27 +40,23 @@ stimulus = load_1d_prf_lognumerosity_stimulus()
 print(stimulus)
 ```
 
-We can visualize the design matrix with the displayed numerosity at each time frame on the natural and log scale.
+We can visualize the design matrix with the displayed numerosity at each time frame on the natural and log scale with
+{py:func}`prfmodel.plotting.plot_1d_prf_stimulus`.
 
 ```{code-cell} ipython3
-import matplotlib.pyplot as plt
 import numpy as np
+from prfmodel.plotting import plot_1d_prf_stimulus
 
 unique_log_numerosities = stimulus.grid[:, 0]
 unique_numerosities = np.round(np.exp(unique_log_numerosities))
 
-fig, ax = plt.subplots()
-
-ax.imshow(stimulus.design.T, aspect=stimulus.design.shape[0]/stimulus.design.shape[1])
-ax.set_xlabel("Time frame")
-ax.set_ylabel("Numerosity (natural scale)")
-ax.set_yticks(np.arange(len(unique_numerosities)))
-ax.set_yticklabels(unique_numerosities)
-
-secax = ax.secondary_yaxis("right")
-secax.set_ylabel("Numerosity (log scale)")
-secax.set_yticks(np.arange(len(unique_numerosities)))
-secax.set_yticklabels(np.round(unique_log_numerosities, 2));
+plot_1d_prf_stimulus(
+    stimulus,
+    tick_labels=unique_numerosities.astype(int),
+    secondary_tick_labels=np.round(unique_log_numerosities, 2),
+    ylabel="Numerosity (natural scale)",
+    secondary_ylabel="Numerosity (log scale)",
+);
 ```
 
 ### Implementing the custom tuning model

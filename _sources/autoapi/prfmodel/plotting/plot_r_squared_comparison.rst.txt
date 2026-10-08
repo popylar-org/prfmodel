@@ -1,0 +1,47 @@
+prfmodel.plotting.plot_r_squared_comparison
+===========================================
+
+.. py:function:: prfmodel.plotting.plot_r_squared_comparison(r_squared_x: numpy.ndarray, r_squared_y: numpy.ndarray, value_range: tuple[float, float] = (-0.5, 1.0), gridsize: int = 50, cmap: str = 'inferno', xlabel: str = 'R-squared (training set)', ylabel: str = 'R-squared (test set)', ax: matplotlib.axes.Axes | None = None, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Compare two sets of R-squared scores unit by unit.
+
+   Plots a two-dimensional histogram (with hexagonal bins and logarithmic counts) of two scores for each unit
+   together with the identity line. Useful to compare in-sample with out-of-sample scores or scores of two models.
+   Units above the identity line have a higher score on the y-axis.
+
+   :param r_squared_x: R-squared score of each unit on the x-axis with shape `(num_units,)`.
+   :type r_squared_x: numpy.ndarray
+   :param r_squared_y: R-squared score of each unit on the y-axis with shape `(num_units,)`.
+   :type r_squared_y: numpy.ndarray
+   :param value_range: Lower and upper limit of both axes.
+   :type value_range: tuple[float, float], optional
+   :param gridsize: Number of hexagons in the x-direction.
+   :type gridsize: int, optional
+   :param cmap: Name of the colormap.
+   :type cmap: str, optional
+   :param xlabel: Label of the x-axis.
+   :type xlabel: str, optional
+   :param ylabel: Label of the y-axis.
+   :type ylabel: str, optional
+   :param ax: Axes to plot on. If `None`, a new figure and axes are created.
+   :type ax: matplotlib.axes.Axes or None, optional
+   :param \*\*kwargs: Keyword arguments passed to :func:`matplotlib.pyplot.subplots` if `ax` is `None`.
+
+   :returns: * **fig** (*matplotlib.figure.Figure*) -- Figure object.
+             * **ax** (*matplotlib.axes.Axes*) -- Axes object.
+
+   :raises ValueError: If `r_squared_x` and `r_squared_y` do not have the same shape.
+
+   .. seealso::
+
+      :py:obj:`plot_r_squared_hist`
+          Distribution of R-squared scores across units.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> rng = np.random.default_rng(0)
+   >>> r_squared_train = rng.uniform(size=100)
+   >>> r_squared_test = r_squared_train - rng.uniform(0.0, 0.2, size=100)
+   >>> fig, ax = plot_r_squared_comparison(r_squared_train, r_squared_test)
+

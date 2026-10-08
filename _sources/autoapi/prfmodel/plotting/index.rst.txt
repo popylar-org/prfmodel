@@ -7,8 +7,9 @@ prfmodel.plotting
 
    Plotting functions.
 
-   Contains miscallenous plotting and visualization functions. Currently, only functions for visualizing population
-   receptive field (pRF) and contrast sensitivity function (CSF) stimuli are implemented.
+   Contains plotting and visualization functions for stimuli, observed and predicted responses, model evaluation, and
+   estimated model parameters. Functions that create a single plot return the figure and axes objects and most accept
+   an existing `ax` so that they can be combined in a larger figure.
 
 
 
@@ -19,15 +20,33 @@ Functions
    :hidden:
 
    animate_2d_prf_stimulus </autoapi/prfmodel/plotting/animate_2d_prf_stimulus>
+   plot_1d_prf_stimulus </autoapi/prfmodel/plotting/plot_1d_prf_stimulus>
+   plot_2d_prf_centers </autoapi/prfmodel/plotting/plot_2d_prf_centers>
    plot_2d_prf_stimulus </autoapi/prfmodel/plotting/plot_2d_prf_stimulus>
    plot_csf_stimulus_curve </autoapi/prfmodel/plotting/plot_csf_stimulus_curve>
    plot_csf_stimulus_design </autoapi/prfmodel/plotting/plot_csf_stimulus_design>
+   plot_grid_parameter_distribution </autoapi/prfmodel/plotting/plot_grid_parameter_distribution>
+   plot_observed_predicted </autoapi/prfmodel/plotting/plot_observed_predicted>
+   plot_parameter_by_roi </autoapi/prfmodel/plotting/plot_parameter_by_roi>
+   plot_r_squared_comparison </autoapi/prfmodel/plotting/plot_r_squared_comparison>
+   plot_r_squared_hist </autoapi/prfmodel/plotting/plot_r_squared_hist>
+   plot_response_heatmap </autoapi/prfmodel/plotting/plot_response_heatmap>
+   plot_surface_stat_map </autoapi/prfmodel/plotting/plot_surface_stat_map>
 
 .. autoapisummary::
 
    prfmodel.plotting.animate_2d_prf_stimulus
+   prfmodel.plotting.plot_1d_prf_stimulus
+   prfmodel.plotting.plot_2d_prf_centers
    prfmodel.plotting.plot_2d_prf_stimulus
    prfmodel.plotting.plot_csf_stimulus_curve
    prfmodel.plotting.plot_csf_stimulus_design
+   prfmodel.plotting.plot_grid_parameter_distribution
+   prfmodel.plotting.plot_observed_predicted
+   prfmodel.plotting.plot_parameter_by_roi
+   prfmodel.plotting.plot_r_squared_comparison
+   prfmodel.plotting.plot_r_squared_hist
+   prfmodel.plotting.plot_response_heatmap
+   prfmodel.plotting.plot_surface_stat_map
 
 

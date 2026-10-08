@@ -1,0 +1,9 @@
+prfmodel.fitters.GridAlignmentWarning
+=====================================
+
+.. py:exception:: prfmodel.fitters.GridAlignmentWarning
+
+
+
+   Warning for when the edges or the midpoint of a stimulus do not fall on grid values.
+

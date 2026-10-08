@@ -1,0 +1,31 @@
+prfmodel.utils.calculate_polar_angle
+====================================
+
+.. py:function:: prfmodel.utils.calculate_polar_angle(mu_x: numpy.ndarray | pandas.Series, mu_y: numpy.ndarray | pandas.Series) -> numpy.ndarray
+
+   Calculate the polar angle of two-dimensional population receptive field (pRF) centers.
+
+   The polar angle runs counterclockwise from the positive x-axis (e.g., the right side of the screen). It lies in
+   :math:`[-\pi, \pi]`, where positive angles correspond to the upper and negative angles to the lower half of the
+   visual field.
+
+   :param mu_x: Horizontal coordinate of the pRF centers.
+   :type mu_x: numpy.ndarray or pandas.Series
+   :param mu_y: Vertical coordinate of the pRF centers.
+   :type mu_y: numpy.ndarray or pandas.Series
+
+   :returns: Polar angle of the pRF centers in radians.
+   :rtype: numpy.ndarray
+
+   .. rubric:: Notes
+
+   Angles are cyclic (:math:`-\pi` and :math:`\pi` are the same direction), so they should not be averaged directly.
+   To average pRF centers (e.g., when projecting them onto a surface), average `mu_x` and `mu_y` separately and
+   calculate the polar angle afterwards.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> calculate_polar_angle(np.array([1.0, 0.0, -1.0]), np.array([0.0, 1.0, 0.0]))
+   array([0.        , 1.57079633, 3.14159265])
+

@@ -1,0 +1,39 @@
+prfmodel.plotting.plot_response_heatmap
+=======================================
+
+.. py:function:: prfmodel.plotting.plot_response_heatmap(response: numpy.ndarray, vmin: float | None = None, vmax: float | None = None, cmap: str = 'inferno', xlabel: str = 'Time frame', ylabel: str = 'Unit index', colorbar_label: str | None = 'Response', ax: matplotlib.axes.Axes | None = None, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Plot the response of many units over time as a heatmap.
+
+   Gives an overview of all observed or predicted timecourses at once (also known as a carpet plot). Each row shows
+   the response of one unit (e.g., voxel or vertex) and each column one time frame.
+
+   :param response: Response with shape `(num_units, num_frames)`.
+   :type response: numpy.ndarray
+   :param vmin: Lower limit of the color scale.
+   :type vmin: float or None, optional
+   :param vmax: Upper limit of the color scale.
+   :type vmax: float or None, optional
+   :param cmap: Name of the colormap.
+   :type cmap: str, optional
+   :param xlabel: Label of the x-axis.
+   :type xlabel: str, optional
+   :param ylabel: Label of the y-axis.
+   :type ylabel: str, optional
+   :param colorbar_label: Label of the colorbar. If `None`, no colorbar is drawn.
+   :type colorbar_label: str or None, optional
+   :param ax: Axes to plot on. If `None`, a new figure and axes are created.
+   :type ax: matplotlib.axes.Axes or None, optional
+   :param \*\*kwargs: Keyword arguments passed to :func:`matplotlib.pyplot.subplots` if `ax` is `None`.
+
+   :returns: * **fig** (*matplotlib.figure.Figure*) -- Figure object.
+             * **ax** (*matplotlib.axes.Axes*) -- Axes object.
+
+   :raises ValueError: If `response` is not 2-dimensional.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> response = np.random.default_rng(0).normal(size=(500, 120))
+   >>> fig, ax = plot_response_heatmap(response, vmin=-2.0, vmax=2.0)
+

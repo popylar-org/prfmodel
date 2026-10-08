@@ -32,6 +32,9 @@ Functions
 
    as_tensor_frame </autoapi/prfmodel/utils/as_tensor_frame>
    batched </autoapi/prfmodel/utils/batched>
+   calculate_eccentricity </autoapi/prfmodel/utils/calculate_eccentricity>
+   calculate_polar_angle </autoapi/prfmodel/utils/calculate_polar_angle>
+   calculate_r_squared </autoapi/prfmodel/utils/calculate_r_squared>
    convert_parameters_to_tensor </autoapi/prfmodel/utils/convert_parameters_to_tensor>
    get_dtype </autoapi/prfmodel/utils/get_dtype>
    normalize_response </autoapi/prfmodel/utils/normalize_response>
@@ -40,6 +43,9 @@ Functions
 
    prfmodel.utils.as_tensor_frame
    prfmodel.utils.batched
+   prfmodel.utils.calculate_eccentricity
+   prfmodel.utils.calculate_polar_angle
+   prfmodel.utils.calculate_r_squared
    prfmodel.utils.convert_parameters_to_tensor
    prfmodel.utils.get_dtype
    prfmodel.utils.normalize_response

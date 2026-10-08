@@ -259,12 +259,15 @@
 <li class="toctree-l4"><a class="reference internal" href="../fitters/losses/CorrelationLoss.html">CorrelationLoss</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="../fitters/GridAlignmentWarning.html">GridAlignmentWarning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/GridFitter.html">GridFitter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/GridHistory.html">GridHistory</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/LeastSquaresFitter.html">LeastSquaresFitter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/LeastSquaresHistory.html">LeastSquaresHistory</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/SGDFitter.html">SGDFitter</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../fitters/SGDHistory.html">SGDHistory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fitters/grid_values_1d_prf.html">grid_values_1d_prf</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../fitters/grid_values_2d_prf.html">grid_values_2d_prf</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../impulse/index.html">prfmodel.impulse</a><input aria-label="Toggle navigation of prfmodel.impulse" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -353,9 +356,18 @@
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../plotting/index.html">prfmodel.plotting</a><input aria-label="Toggle navigation of prfmodel.plotting" class="toctree-checkbox" id="toctree-checkbox-24" name="toctree-checkbox-24" role="switch" type="checkbox"/><label for="toctree-checkbox-24"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/animate_2d_prf_stimulus.html">animate_2d_prf_stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_1d_prf_stimulus.html">plot_1d_prf_stimulus</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_2d_prf_centers.html">plot_2d_prf_centers</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/plot_2d_prf_stimulus.html">plot_2d_prf_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/plot_csf_stimulus_curve.html">plot_csf_stimulus_curve</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../plotting/plot_csf_stimulus_design.html">plot_csf_stimulus_design</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_grid_parameter_distribution.html">plot_grid_parameter_distribution</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_observed_predicted.html">plot_observed_predicted</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_parameter_by_roi.html">plot_parameter_by_roi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_r_squared_comparison.html">plot_r_squared_comparison</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_r_squared_hist.html">plot_r_squared_hist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_response_heatmap.html">plot_response_heatmap</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../plotting/plot_surface_stat_map.html">plot_surface_stat_map</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../protocols/index.html">prfmodel.protocols</a><input aria-label="Toggle navigation of prfmodel.protocols" class="toctree-checkbox" id="toctree-checkbox-25" name="toctree-checkbox-25" role="switch" type="checkbox"/><label for="toctree-checkbox-25"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -403,6 +415,9 @@
 <li class="toctree-l3"><a class="reference internal" href="TensorFrame.html">TensorFrame</a></li>
 <li class="toctree-l3"><a class="reference internal" href="as_tensor_frame.html">as_tensor_frame</a></li>
 <li class="toctree-l3"><a class="reference internal" href="batched.html">batched</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calculate_eccentricity.html">calculate_eccentricity</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calculate_polar_angle.html">calculate_polar_angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="calculate_r_squared.html">calculate_r_squared</a></li>
 <li class="toctree-l3"><a class="reference internal" href="convert_parameters_to_tensor.html">convert_parameters_to_tensor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="get_dtype.html">get_dtype</a></li>
 <li class="toctree-l3"><a class="reference internal" href="normalize_response.html">normalize_response</a></li>
@@ -478,13 +493,22 @@
 <tr class="row-even"><td><p><a class="reference internal" href="batched.html#prfmodel.utils.batched" title="prfmodel.utils.batched"><code class="xref py py-obj docutils literal notranslate"><span class="pre">batched</span></code></a>(→ collections.abc.Callable)</p></td>
 <td><p>Decorate a model prediction function to make batched predictions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="convert_parameters_to_tensor.html#prfmodel.utils.convert_parameters_to_tensor" title="prfmodel.utils.convert_parameters_to_tensor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_parameters_to_tensor</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="calculate_eccentricity.html#prfmodel.utils.calculate_eccentricity" title="prfmodel.utils.calculate_eccentricity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_eccentricity</span></code></a>(→ numpy.ndarray)</p></td>
+<td><p>Calculate the eccentricity of two-dimensional population receptive field (pRF) centers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="calculate_polar_angle.html#prfmodel.utils.calculate_polar_angle" title="prfmodel.utils.calculate_polar_angle"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_polar_angle</span></code></a>(→ numpy.ndarray)</p></td>
+<td><p>Calculate the polar angle of two-dimensional population receptive field (pRF) centers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="calculate_r_squared.html#prfmodel.utils.calculate_r_squared" title="prfmodel.utils.calculate_r_squared"><code class="xref py py-obj docutils literal notranslate"><span class="pre">calculate_r_squared</span></code></a>(→ numpy.ndarray)</p></td>
+<td><p>Calculate the coefficient of determination (R-squared) of predicted responses for each unit.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="convert_parameters_to_tensor.html#prfmodel.utils.convert_parameters_to_tensor" title="prfmodel.utils.convert_parameters_to_tensor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_parameters_to_tensor</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
 <td><p>Convert model parameters in a dataframe into a tensor.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="get_dtype.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dtype</span></code></a>(→ str)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="get_dtype.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dtype</span></code></a>(→ str)</p></td>
 <td><p>Get the (default) dtype.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="normalize_response.html#prfmodel.utils.normalize_response" title="prfmodel.utils.normalize_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_response</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="normalize_response.html#prfmodel.utils.normalize_response" title="prfmodel.utils.normalize_response"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize_response</span></code></a>(→ prfmodel.typing.Tensor)</p></td>
 <td><p>Normalize a response.</p></td>
 </tr>
 </tbody>

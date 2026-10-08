@@ -174,14 +174,19 @@ We start with a grid search over `mu_x`, `mu_y`, and `sigma` using the
 ```{code-cell} ipython3
 from prfmodel.models.prf import Gaussian2DPRFModel
 import numpy as np
+from prfmodel.fitters import grid_values_2d_prf
 
 # Step 1: fit a plain Gaussian model to locate the center and size of the pRF
 gaussian_model = Gaussian2DPRFModel()
 
-param_ranges_gaussian = {
-    "mu_x": np.linspace(-3.0, 3.0, 10),
-    "mu_y": np.linspace(-3.0, 3.0, 10),
-    "sigma": np.linspace(0.5, 5.0, 20),
+param_ranges_gaussian = grid_values_2d_prf(
+    stimulus,
+    num_mu=11,
+    mu_extent=1.0,  # Centers span the stimulus
+    num_sigma=20,
+    sigma_range=(0.5, 5.0),
+    log_sigma=False,
+) | {
     # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-0.5],
     "baseline": [0.0],
@@ -189,8 +194,10 @@ param_ranges_gaussian = {
 }
 ```
 
-For all three parameters, we defined ranges of 10 values, giving the fitter $10 \times 10 \times 10 = 1000$
-parameter combinations to evaluate. Let's construct the `GridFitter` and run the grid search.
+We create the values for `mu_x`, `mu_y`, and `sigma` from the stimulus with
+{py:func}`prfmodel.fitters.grid_values_2d_prf`: 11 values for `mu_x` and `mu_y` that span the stimulus (so that its
+center and edges are grid points) and 20 linearly spaced values for `sigma`, giving the fitter
+$11 \times 11 \times 20 = 2420$ parameter combinations to evaluate. Let's construct the `GridFitter` and run the grid search.
 
 ```{code-cell} ipython3
 from prfmodel.fitters import GridFitter
@@ -231,17 +238,17 @@ ls_history, ls_params = ls_fitter.fit(
 ls_params
 ```
 
-We make a prediction with our estimated parameters and compare against the true DN response.
+We make a prediction with our estimated parameters and compare against the true DN response with
+{py:func}`prfmodel.plotting.plot_observed_predicted`.
 
 ```{code-cell} ipython3
+from prfmodel.plotting import plot_observed_predicted
+
 gaussian_pred_response = gaussian_model(stimulus, ls_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(gaussian_pred_response[0], label="Predicted (Gaussian)")
-
-fig.legend();
+plot_observed_predicted(
+    simulated_response[0], {"Predicted (Gaussian)": gaussian_pred_response[0]}, observed_label="True"
+);
 ```
 
 Now we can see that the Gaussian model does not quite capture the shape of the true DN response. This is because it cannot account
@@ -304,12 +311,7 @@ We can make a prediction with the DoG model to see how well it fits the true DN 
 ```{code-cell} ipython3
 dog_pred_response = dog_model(stimulus, dog_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(dog_pred_response[0], "--", label="Predicted (DoG)")
-
-fig.legend();
+plot_observed_predicted(simulated_response[0], {"Predicted (DoG)": dog_pred_response[0]}, observed_label="True");
 ```
 
 We can see that the DoG model captures the shape of the true DN response much better than the Gaussian model. However, the fit is still not perfect because the DoG model cannot capture the compression in the true DN response.
@@ -359,12 +361,7 @@ We can also make a prediction with the CSS model to see how well it fits the tru
 ```{code-cell} ipython3
 css_pred_response = css_model(stimulus, css_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(css_pred_response[0], "--", label="Predicted (CSS)")
-
-fig.legend();
+plot_observed_predicted(simulated_response[0], {"Predicted (CSS)": css_pred_response[0]}, observed_label="True");
 ```
 
 We can see that it fits the true DN response worse than the DoG model because compression is weaker than surround suppresion.
@@ -397,12 +394,9 @@ We can use them to make a prediction with the DN model and compare against the t
 ```{code-cell} ipython3
 dn_init_pred_response = dn_model(stimulus, dn_init_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(dn_init_pred_response[0], "--", label="Predicted (DN, init)")
-
-fig.legend();
+plot_observed_predicted(
+    simulated_response[0], {"Predicted (DN, init)": dn_init_pred_response[0]}, observed_label="True"
+);
 ```
 
 We can see that the initial parameters already capture the true DN response to some degree. They capture the surround suppression but not the compression (i.e., the sharpness of the peaks).
@@ -452,12 +446,7 @@ We can make a prediction with the estimated DN parameters and compare it against
 ```{code-cell} ipython3
 dn_pred_response = dn_model(stimulus, dn_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(dn_pred_response[0], "--", label="Predicted (DN, SGD)")
-
-fig.legend();
+plot_observed_predicted(simulated_response[0], {"Predicted (DN, SGD)": dn_pred_response[0]}, observed_label="True");
 ```
 
 We can see that it matches the original simulated response perfectly.

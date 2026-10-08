@@ -1,0 +1,49 @@
+prfmodel.plotting.plot_2d_prf_centers
+=====================================
+
+.. py:function:: prfmodel.plotting.plot_2d_prf_centers(parameters: pandas.DataFrame, parameter_values: collections.abc.Mapping[str, numpy.ndarray | collections.abc.Sequence[float]] | None = None, stimulus: prfmodel.stimuli.PRFStimulus | None = None, x: str = 'mu_x', y: str = 'mu_y', bins: int = 50, cmap: str = 'inferno', ax: matplotlib.axes.Axes | None = None, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Plot how the centers of two-dimensional population receptive fields (pRFs) are distributed in the visual field.
+
+   Draws a two-dimensional histogram of the pRF centers with a logarithmic color scale. Optionally, marks the part
+   of the visual field that is covered by the stimulus.
+
+   :param parameters: Estimated parameters with one row per unit.
+   :type parameters: pandas.DataFrame
+   :param parameter_values: Values of the parameter grid (e.g., passed to :meth:`prfmodel.fitters.GridFitter.fit`). If given, the
+                            histogram has one bin centered on each grid value of `x` and `y`, which must be regularly spaced. If `None`,
+                            `bins` bins spanning the range of the estimates are used in each dimension.
+   :type parameter_values: Mapping[str, numpy.ndarray or Sequence[float]] or None, optional
+   :param stimulus: Two-dimensional stimulus whose grid extent is marked by a rectangle.
+   :type stimulus: PRFStimulus or None, optional
+   :param x: Name of the parameter for the horizontal pRF center coordinate.
+   :type x: str, optional
+   :param y: Name of the parameter for the vertical pRF center coordinate.
+   :type y: str, optional
+   :param bins: Number of bins in each dimension if `parameter_values` is `None`.
+   :type bins: int, optional
+   :param cmap: Name of the colormap.
+   :type cmap: str, optional
+   :param ax: Axes to plot on. If `None`, a new figure and axes are created.
+   :type ax: matplotlib.axes.Axes or None, optional
+   :param \*\*kwargs: Keyword arguments passed to :func:`matplotlib.pyplot.subplots` if `ax` is `None`.
+
+   :returns: * **fig** (*matplotlib.figure.Figure*) -- Figure object.
+             * **ax** (*matplotlib.axes.Axes*) -- Axes object.
+
+   :raises ValueError: If the stimulus is not 2-dimensional.
+
+   .. seealso::
+
+      :py:obj:`plot_grid_parameter_distribution`
+          Distribution of a single parameter across grid values.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> rng = np.random.default_rng(0)
+   >>> parameters = pd.DataFrame({"mu_x": rng.normal(size=100), "mu_y": rng.normal(size=100)})
+   >>> stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=10, width=32, height=32)
+   >>> fig, ax = plot_2d_prf_centers(parameters, stimulus=stimulus)
+

@@ -1,0 +1,42 @@
+prfmodel.plotting.plot_1d_prf_stimulus
+======================================
+
+.. py:function:: prfmodel.plotting.plot_1d_prf_stimulus(stimulus: prfmodel.stimuli.PRFStimulus, tick_labels: collections.abc.Sequence[str | float] | None = None, secondary_tick_labels: collections.abc.Sequence[str | float] | None = None, ylabel: str | None = None, secondary_ylabel: str | None = None, origin: Literal['upper', 'lower'] = 'lower', ax: matplotlib.axes.Axes | None = None, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Plot the design of a one-dimensional population receptive field stimulus.
+
+   Shows the design as an image with time frames on the x-axis and the stimulus coordinates on the y-axis. Each row
+   corresponds to one coordinate of the stimulus grid. The coordinates do not need to be regularly spaced.
+
+   :param stimulus: The one-dimensional population receptive field stimulus to visualize.
+   :type stimulus: PRFStimulus
+   :param tick_labels: Labels for each coordinate on the y-axis. If `None` and the grid has at most 20 coordinates, the grid values
+                       (rounded to two decimals) are used. Otherwise, the y-axis shows the coordinate index.
+   :type tick_labels: Sequence[str or float] or None, optional
+   :param secondary_tick_labels: Labels for each coordinate on a secondary y-axis on the right (e.g., the coordinates on a different scale).
+                                 If `None`, no secondary axis is drawn.
+   :type secondary_tick_labels: Sequence[str or float] or None, optional
+   :param ylabel: Label of the y-axis. If `None`, the dimension label of the stimulus is used (if available).
+   :type ylabel: str or None, optional
+   :param secondary_ylabel: Label of the secondary y-axis.
+   :type secondary_ylabel: str or None, optional
+   :param origin: `origin` argument for :meth:`matplotlib.axes.Axes.imshow`. With `"lower"`, the first coordinate is at the
+                  bottom.
+   :type origin: str, optional
+   :param ax: Axes to plot on. If `None`, a new figure and axes are created.
+   :type ax: matplotlib.axes.Axes or None, optional
+   :param \*\*kwargs: Keyword arguments passed to :func:`matplotlib.pyplot.subplots` if `ax` is `None`.
+
+   :returns: * **fig** (*matplotlib.figure.Figure*) -- Figure object.
+             * **ax** (*matplotlib.axes.Axes*) -- Axes object.
+
+   :raises ValueError: If the stimulus is not 1-dimensional or the number of tick labels does not match the number of coordinates.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> design = np.eye(5)[np.random.default_rng(0).integers(0, 5, size=50)]
+   >>> grid = np.log(np.arange(1.0, 6.0))[:, np.newaxis]
+   >>> stimulus = PRFStimulus(design=design, grid=grid, dimension_labels=["log(numerosity)"])
+   >>> fig, ax = plot_1d_prf_stimulus(stimulus, secondary_tick_labels=[1, 2, 3, 4, 5])
+

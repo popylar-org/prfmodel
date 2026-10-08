@@ -1,0 +1,42 @@
+prfmodel.plotting.plot_parameter_by_roi
+=======================================
+
+.. py:function:: prfmodel.plotting.plot_parameter_by_roi(parameters: pandas.DataFrame, name: str, roi: numpy.ndarray | collections.abc.Sequence[str] | pandas.Series, order: collections.abc.Sequence[str] | None = None, error: Literal['std', 'sem'] = 'std', xlabel: str = 'ROI', ylabel: str | None = None, ax: matplotlib.axes.Axes | None = None, **kwargs) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]
+
+   Plot the average of a parameter for each region of interest (ROI).
+
+   Draws the mean of the parameter across the units in each ROI with error bars.
+
+   :param parameters: Estimated parameters with one row per unit.
+   :type parameters: pandas.DataFrame
+   :param name: Name of the parameter to plot.
+   :type name: str
+   :param roi: ROI label of each unit with shape `(num_units,)`.
+   :type roi: numpy.ndarray or Sequence[str] or pandas.Series
+   :param order: Order of the ROIs on the x-axis. ROIs that are not in `order` are not shown. If `None`, ROIs are shown in the
+                 order in which they first appear in `roi`.
+   :type order: Sequence[str] or None, optional
+   :param error: Whether the error bars show the standard deviation (`"std"`) or the standard error of the mean (`"sem"`) across
+                 the units in each ROI.
+   :type error: {"std", "sem"}, optional
+   :param xlabel: Label of the x-axis.
+   :type xlabel: str, optional
+   :param ylabel: Label of the y-axis. If `None`, `name` is used.
+   :type ylabel: str or None, optional
+   :param ax: Axes to plot on. If `None`, a new figure and axes are created.
+   :type ax: matplotlib.axes.Axes or None, optional
+   :param \*\*kwargs: Keyword arguments passed to :func:`matplotlib.pyplot.subplots` if `ax` is `None`.
+
+   :returns: * **fig** (*matplotlib.figure.Figure*) -- Figure object.
+             * **ax** (*matplotlib.axes.Axes*) -- Axes object.
+
+   :raises ValueError: If `roi` does not have one label for each unit or `error` is not `"std"` or `"sem"`.
+
+   .. rubric:: Examples
+
+   >>> import numpy as np
+   >>> import pandas as pd
+   >>> parameters = pd.DataFrame({"sigma": np.random.default_rng(0).uniform(size=6)})
+   >>> roi = ["V1", "V1", "V2", "V2", "V3", "V3"]
+   >>> fig, ax = plot_parameter_by_roi(parameters, "sigma", roi, error="sem")
+

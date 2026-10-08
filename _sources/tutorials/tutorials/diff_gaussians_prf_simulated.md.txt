@@ -162,15 +162,20 @@ simultaneously, and gives us a good initialisation point for the DoG model.
 
 ```{code-cell} ipython3
 import numpy as np
+from prfmodel.fitters import grid_values_2d_prf
 from prfmodel.models.prf import Gaussian2DPRFModel
 
 # Step 1: fit a plain Gaussian model to locate the center and size of the pRF
 gaussian_center_model = Gaussian2DPRFModel()
 
-param_ranges_gaussian = {
-    "mu_x": np.linspace(-3.0, 3.0, 10),
-    "mu_y": np.linspace(-3.0, 3.0, 10),
-    "sigma": np.linspace(0.5, 3.0, 10),
+param_ranges_gaussian = grid_values_2d_prf(
+    stimulus,
+    num_mu=11,
+    mu_extent=1.0,  # Centers span the stimulus
+    num_sigma=10,
+    sigma_range=(0.5, 3.0),
+    log_sigma=False,
+) | {
     # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-0.5],
     "baseline": [0.0],
@@ -178,7 +183,9 @@ param_ranges_gaussian = {
 }
 ```
 
-For all three parameters, we defined ranges of 10 values, giving $10 \times 10 \times 10 = 1000$
+We create the values for `mu_x`, `mu_y`, and `sigma` from the stimulus with
+{py:func}`prfmodel.fitters.grid_values_2d_prf`: 11 values for `mu_x` and `mu_y` that span the stimulus (so that its
+center and edges are grid points) and 10 linearly spaced values for `sigma`, giving $11 \times 11 \times 10 = 1210$
 parameter combinations to evaluate. Let's construct the `GridFitter` and run the grid search.
 
 ```{code-cell} ipython3
@@ -202,17 +209,17 @@ grid_params
 ```
 
 The grid search returns the best-matching combination. The estimates for `mu_x`, `mu_y`, and
-`sigma` are close to the true values but constrained to the grid.
+`sigma` are close to the true values but constrained to the grid. We make a prediction with the estimated parameters
+and compare it against the true response with {py:func}`prfmodel.plotting.plot_observed_predicted`.
 
 ```{code-cell} ipython3
+from prfmodel.plotting import plot_observed_predicted
+
 gaussian_pred_response = gaussian_center_model(stimulus, grid_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(gaussian_pred_response[0], label="Predicted (Gaussian, least-squares)")
-
-fig.legend();
+plot_observed_predicted(
+    simulated_response[0], {"Predicted (Gaussian, least-squares)": gaussian_pred_response[0]}, observed_label="True"
+);
 ```
 
 The Gaussian fit already captures the main shape of the response. Next we use least squares
@@ -242,12 +249,9 @@ The Gaussian least-squares fit adjusts the scale and baseline to match the simul
 ```{code-cell} ipython3
 gaussian_pred_response = gaussian_center_model(stimulus, gaussian_center_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(gaussian_pred_response[0], label="Predicted (Gaussian, least-squares)")
-
-fig.legend();
+plot_observed_predicted(
+    simulated_response[0], {"Predicted (Gaussian, least-squares)": gaussian_pred_response[0]}, observed_label="True"
+);
 ```
 
 ### Step 2: Fit the DoG model (include surround gaussian)
@@ -308,12 +312,7 @@ We can plot the predicted model response and see that it matches the original si
 ```{code-cell} ipython3
 sgd_pred_response = prf_model(stimulus, sgd_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(sgd_pred_response[0], "--", label="Predicted (SGD)")
-
-fig.legend();
+plot_observed_predicted(simulated_response[0], {"Predicted (SGD)": sgd_pred_response[0]}, observed_label="True");
 ```
 
 ## Conclusion
