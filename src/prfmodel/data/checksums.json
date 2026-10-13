@@ -40,6 +40,78 @@
       "sha256": "ae0269ff0b14b930622e3ea0ebaf059ca11d497d93610a4d5bdc453ef0927786",
       "size": 5390272
     },
+    "chn_sub-01/stimuli/task-fixedbar_run-1_desc-down_aperture.mat": {
+      "sha256": "21dcd3b461ccfe78f87dc74244f65b32ffb66b84c364bb8d4621585f94d68261",
+      "size": 57540
+    },
+    "chn_sub-01/stimuli/task-logbar_run-1_desc-down_aperture.mat": {
+      "sha256": "5ab7883400c35640a232364e66a8cb543c8e39ae1c6902864f70e3a1a2c3655c",
+      "size": 70960
+    },
+    "chn_sub-01/sub-01/anat/sub-01_ses-01_acq-MEMPRvNav_rec-RMS_hemi-L_inflated.surf.gii": {
+      "sha256": "7ac8e180955720c113171ba337081f768af3320f38ac5557d27d3ebfec0406f0",
+      "size": 5459956
+    },
+    "chn_sub-01/sub-01/anat/sub-01_ses-01_acq-MEMPRvNav_rec-RMS_hemi-R_inflated.surf.gii": {
+      "sha256": "886356b074cdda41a7e62f3fc06ab6812ab22e36747d284fea5eebc3fd99b23e",
+      "size": 5504705
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-fixedbar_run-1_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "0f9af7c76c25f5f1569ff22ba38e3da430563b5019d80e567d056667b3380e04",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-fixedbar_run-1_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "d8ebcbe971f596a8efd54159e472a003f60f78ec096ff4803b13031562cc674d",
+      "size": 363820921
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-logbar_run-1_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "79daeeb0cf72f2d89fb776bb898ff78b2ba2adcd923053dd75233ed6abd89056",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-logbar_run-1_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "72fa108f45fe3cb5a7c80632efd780e798096fd2523f73b50ed894cc3906e493",
+      "size": 363820921
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-02_task-fixedbar_run-1_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "58beb7b697ac3af9b6dc069a678fa9b6b4edd28c42bfdcf0396952ee1cbb6223",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-02_task-fixedbar_run-1_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "8f978306938ecc78343cddcf8f8eb256e2ab3a30583bb05ecd4ffdd3c7c08795",
+      "size": 363820921
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-02_task-logbar_run-1_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "a5db530d922b546a13f722180767c305e9f45dbf513d82957edd727cccf0d655",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-02_task-logbar_run-1_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "522165b5cb6e2e5e83d9f87c720079be2f30e01d996e4e8514f913eb9fe3bbb6",
+      "size": 363820921
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-L_space-fsnative_v1.label": {
+      "sha256": "efa4a83140308c8a1ffe3e13b03c9db18e6d0c5524e7e6dd09a7f7afd10ebad0",
+      "size": 354776
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-L_space-fsnative_v2.label": {
+      "sha256": "4dc89d48933fa6da9cebf0769d0d8676797c4fa6d7118efae6805bf4cce61b26",
+      "size": 245339
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-L_space-fsnative_v3.label": {
+      "sha256": "5dae1e18a42c332c8ce2a648c16a0005d9cd5cba344a933030fee07fe555c744",
+      "size": 175421
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-R_space-fsnative_v1.label": {
+      "sha256": "ffd7e0a87dde2beb4424431addfaacdd5ebb4b04ac04b0cdd196c8f68d410a68",
+      "size": 375710
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-R_space-fsnative_v2.label": {
+      "sha256": "d7ca97b061a0798f4eb9595bcfbb1566858f8886437035e2640a3dd90a887cf5",
+      "size": 254839
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-R_space-fsnative_v3.label": {
+      "sha256": "38a2cbdc151413ac3dc9cb39e51c9ea6111910eb66f64c505a32ba095689f5cf",
+      "size": 195474
+    },
     "hcp_999999/surface-info/mmp_atlas.npz": {
       "sha256": "6c760f3446a9cd13986da143285d72e6532df4c7df6d4713ee79e9fcb7af629a",
       "size": 474840

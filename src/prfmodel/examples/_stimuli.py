@@ -1,7 +1,10 @@
 """Bundled example stimuli."""
 
+from fractions import Fraction
 from importlib.resources import files
+from os import PathLike
 import numpy as np
+from scipy.io import loadmat
 from prfmodel.stimuli import PRFStimulus
 
 
@@ -10,6 +13,44 @@ def _load_2d_bar_design_and_grid() -> tuple[np.ndarray, np.ndarray]:
 
     with np.load(str(path)) as archive:
         return archive["design"], archive["grid"]
+
+
+def _resample_frames(design: np.ndarray, source_duration: float, target_duration: float, num_frames: int) -> np.ndarray:
+    """Average the frames of a design over the bins of a coarser frame duration, weighting by their overlap."""
+    # With a duration ratio of p / q, repeating every source frame q times puts both on a common step of which p make
+    # up one target frame, so averaging blocks of p weights each source frame by its overlap with the target frame
+    ratio = Fraction(target_duration / source_duration).limit_denominator(1000)
+    num_repeats = ratio.denominator
+    bin_size = ratio.numerator
+
+    upsampled = np.repeat(design, num_repeats, axis=0)
+
+    if upsampled.shape[0] < num_frames * bin_size:
+        msg = (
+            f"Design with {design.shape[0]} frames of {source_duration} s does not cover {num_frames} frames of "
+            f"{target_duration} s"
+        )
+        raise ValueError(msg)
+
+    binned = upsampled[: num_frames * bin_size].reshape(num_frames, bin_size, *design.shape[1:])
+
+    return binned.mean(axis=1)
+
+
+def _load_chn_aperture_stimulus(
+    path: str | PathLike,
+    num_frames: int,
+    frame_duration: float = 1.2,
+    aperture_duration: float = 1.0,
+) -> PRFStimulus:
+    stim = loadmat(path, squeeze_me=True)["stim"]
+    aperture = np.asarray(stim["img"].item(), dtype=np.float64)
+
+    # The aperture is stored as (rows, columns, frames) but the design has frames first
+    design = _resample_frames(aperture.transpose(2, 0, 1), aperture_duration, frame_duration, num_frames)
+    grid = np.stack((stim["y"].item(), stim["x"].item()), axis=-1).astype(np.float64)
+
+    return PRFStimulus(design=design, grid=grid, dimension_labels=["y", "x"])
 
 
 def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[PRFStimulus, PRFStimulus]:

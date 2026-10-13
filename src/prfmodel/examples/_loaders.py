@@ -3,6 +3,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import numpy as np
+from nibabel.freesurfer import read_label
 from nibabel.gifti import GiftiImage
 from nibabel.nifti1 import Nifti1Image
 from nilearn.surface import PolyMesh
@@ -14,6 +15,7 @@ from prfmodel.examples._options import validate_options
 from prfmodel.examples._registry import _get_spec
 from prfmodel.examples._registry import load_checksums
 from prfmodel.examples._stimuli import _load_2d_bar_design_and_grid
+from prfmodel.examples._stimuli import _load_chn_aperture_stimulus
 from prfmodel.examples._stimuli import load_1d_prf_lognumerosity_stimulus
 from prfmodel.stimuli import PRFStimulus
 
@@ -91,6 +93,45 @@ def load_aot_visual(fetch: FileFetcher, options: Options) -> Dataset:
     )
 
 
+_CHN_ROIS = ("v1", "v2", "v3")
+_HEMISPHERE_PARTS = {"L": "left", "R": "right"}
+
+
+def load_chn_visual(fetch: FileFetcher, options: Options) -> Dataset:
+    """Load the native surface response of a single subject to a fixed or logarithmic moving bar stimulus."""
+    responses = []
+    roi_indices = []
+    mesh_parts = {}
+
+    for code in options.hemisphere_codes:
+        # The file holds a single (num_vertices, num_frames) array, which nilearn.surface.load_surf_data would transpose
+        image = GiftiImage.from_filename(fetch(f"response_{options.task}_{options.split}_{code}"))
+        responses.append(np.asarray(image.darrays[0].data, dtype=np.float64))
+
+        roi_index = np.zeros(responses[-1].shape[0], dtype=np.int32)
+
+        for value, roi in enumerate(_CHN_ROIS, start=1):
+            roi_index[read_label(fetch(f"{roi}_{code}"))] = value
+
+        roi_indices.append(roi_index)
+        mesh_parts[_HEMISPHERE_PARTS[code]] = fetch(f"inflated_{code}")
+
+    response = np.concatenate(responses)
+
+    return Dataset(
+        name="3t-chn-visual",
+        response=response,
+        stimulus=_load_chn_aperture_stimulus(fetch(f"aperture_{options.task}"), num_frames=response.shape[1]),
+        roi_index=np.concatenate(roi_indices),
+        roi_mapping={0: "other", **{value: roi.upper() for value, roi in enumerate(_CHN_ROIS, start=1)}},
+        mesh=PolyMesh(**mesh_parts),
+        hemisphere=options.hemisphere,
+        split=options.split,
+        task=options.task,
+        files=fetch.files,
+    )
+
+
 def load_hcp_surface(fetch: FileFetcher, options: Options) -> Dataset:
     """Load a standardized cortical surface mesh and the atlas that belongs to it."""
     mesh = PolyMesh(fetch(f"{options.surface_type}_lh"), fetch(f"{options.surface_type}_rh"))
@@ -116,6 +157,7 @@ def load_dataset(  # noqa: PLR0913
     hemisphere: str | None = None,
     split: str | None = None,
     surface_type: str | None = None,
+    task: str | None = None,
     download: bool = True,
 ) -> Dataset:
     """
@@ -143,6 +185,9 @@ def load_dataset(  # noqa: PLR0913
         Surface type to load, for datasets that provide surfaces. Must be either `"flat"`, `"inflated"`,
         `"pia"` (or `"pial"`), or `"wm"` (for white matter). If `None` (the default), uses the default of the
         dataset.
+    task : str, optional
+        Experimental task to load the response and stimulus of, for datasets that provide several tasks. If `None`
+        (the default), uses the default of the dataset.
     download : bool, default=True
         Whether files may be downloaded when they are missing. If `False`, missing files raise
         `FileNotFoundError` instead.
@@ -203,9 +248,18 @@ def load_dataset(  # noqa: PLR0913
     >>> odd.response.shape == even.response.shape  # doctest: +SKIP
     True
 
+    Load the same stimulus in two sessions, here with a bar that is warped logarithmically with eccentricity.
+
+    >>> first = load_dataset("3t-chn-visual", split="ses-01", task="logbar")  # doctest: +SKIP
+    >>> second = load_dataset("3t-chn-visual", split="ses-02", task="logbar")  # doctest: +SKIP
+    >>> first.response.shape  # doctest: +SKIP
+    (221709, 305)
+    >>> first.roi_mapping  # doctest: +SKIP
+    {0: 'other', 1: 'V1', 2: 'V2', 3: 'V3'}
+
     """
     spec = _get_spec(name)
-    options = validate_options(spec, hemisphere=hemisphere, split=split, surface_type=surface_type)
+    options = validate_options(spec, hemisphere=hemisphere, split=split, surface_type=surface_type, task=task)
 
     fetcher = FileFetcher(
         spec,

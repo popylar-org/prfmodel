@@ -171,5 +171,5 @@ filename = "docs/conf.py"
 filename = "pyproject.toml"
 
 [[tool.mypy.overrides]]
-module = ["keras.*", "nilearn.*"]
+module = ["keras.*", "nilearn.*", "scipy.*"]
 ignore_missing_imports = true

@@ -15,6 +15,29 @@ if TYPE_CHECKING:
     from prfmodel.examples._options import Options
 
 _FIGSHARE_URL = "https://ndownloader.figshare.com/files"
+_OPENNEURO_CHN_URL = "https://s3.amazonaws.com/openneuro.org/ds004698/derivatives/prf-estimation"
+
+# OpenNeuro serves the latest version of a file unless a version is given, so we pin each file to ds004698 v1.0.1
+_CHN_VERSION_IDS = {
+    "response_fixedbar_ses-01_L": "P_skpwTDq63Fj2vwtUNRWn1t5VGnpEJj",
+    "response_fixedbar_ses-01_R": "IgzEz4D73tUMn2v.73HCz.4Jg.Cd0.hF",
+    "response_fixedbar_ses-02_L": "f5y3VlzEx7wEJxdVqWZaoJc5PkkDigJS",
+    "response_fixedbar_ses-02_R": "sYv_PYxpjkgxSSDhwQPxtpgK_gIV5177",
+    "response_logbar_ses-01_L": "dtR30Dl4gW.tqQbssS7MqzuTxHn_7_U_",
+    "response_logbar_ses-01_R": "IB7ekisbIDU7lilso7_Yax.iP5TOW1IH",
+    "response_logbar_ses-02_L": "QCR9Deka2rRUVgz4ZPchPnDQwwycSUI1",
+    "response_logbar_ses-02_R": "VqVnpEaeFmgXmtee2tA7o_obDwmE2DjO",
+    "aperture_fixedbar": "6qlxLM8jYBkBROjA0bs7n2ow4DXONnSh",
+    "aperture_logbar": "tapQvwLFQt0bOrgTiUgSqJz_MibDtc4.",
+    "v1_L": "mjNORGYirlmF06GwNe_plhwSmeGgIk_Z",
+    "v1_R": "Fp9lgchWq57TkYM7sBQLXhfXDVdiyCQJ",
+    "v2_L": "L7cGmp75FyLvb5onXBo3zqfvSVbUaFvS",
+    "v2_R": "fbYJhlucI8yE6mUBFIueg7GjKDbulcAx",
+    "v3_L": "K9OGCiz15d9.ZNjTkYpgu7.vpu9FOoER",
+    "v3_R": "r1SCgV5lrX5gtMyO.J5Fu426XSbZCxLY",
+    "inflated_L": "neA6erSssHoGD65IjNwnxe1DuoQTtz72",
+    "inflated_R": "KcebigZeJt772fSfAyYHX62H4USz9wro",
+}
 
 
 @dataclass(frozen=True)
@@ -48,7 +71,9 @@ class DatasetSpec:
     hemispheres : tuple of str
         Hemisphere selections that this dataset accepts.
     surface_types : tuple of str
-        Surface types that this dataset accepts.
+        Surface types that this dataset accepts. The first one is used when none is requested.
+    tasks : tuple of str
+        Experimental tasks that this dataset provides. The first one is used when none is requested.
     default_hemisphere : str
         Hemisphere selection that is used when none is requested.
     licence : str
@@ -74,6 +99,7 @@ class DatasetSpec:
     splits: tuple[str, ...] = ()
     hemispheres: tuple[str, ...] = ()
     surface_types: tuple[str, ...] = ()
+    tasks: tuple[str, ...] = ()
     default_hemisphere: str = "both"
     licence: str = ""
     citation: str = ""
@@ -111,7 +137,63 @@ def _make_registry() -> dict[str, DatasetSpec]:
         },
     }
 
+    # Paths relative to the prf-estimation derivatives of the CHN dataset
+    chn_paths = {
+        **{
+            f"response_{task}_{session}_{hemi}": (
+                f"sub-01/func/sub-01_{session}_task-{task}_run-1_hemi-{hemi}_space-fsnative_desc-preproc_bold.func.gii"
+            )
+            for task in ("fixedbar", "logbar")
+            for session in ("ses-01", "ses-02")
+            for hemi in ("L", "R")
+        },
+        **{f"aperture_{task}": f"stimuli/task-{task}_run-1_desc-down_aperture.mat" for task in ("fixedbar", "logbar")},
+        **{
+            f"{roi}_{hemi}": f"sub-01/rois/sub-01_hemi-{hemi}_space-fsnative_{roi}.label"
+            for roi in ("v1", "v2", "v3")
+            for hemi in ("L", "R")
+        },
+        **{
+            f"inflated_{hemi}": f"sub-01/anat/sub-01_ses-01_acq-MEMPRvNav_rec-RMS_hemi-{hemi}_inflated.surf.gii"
+            for hemi in ("L", "R")
+        },
+    }
+
     specs = (
+        DatasetSpec(
+            name="3t-chn-visual",
+            summary=(
+                "Blood oxygenation level-dependent response of a single subject (sub-01) to a moving bar stimulus, "
+                "measured with a repetition time of 1.2 s for 305 frames, preprocessed with fMRIPrep, denoised, and "
+                "sampled onto the 221,709 (left) and 223,660 (right) vertices of the native cortical surface "
+                "of the subject. The bar is either of a fixed width ('fixedbar' task) or warped logarithmically with "
+                "eccentricity ('logbar' task). The splits are the first run of each of two sessions, which show the "
+                "identical stimulus, so they can be used for cross-validation. The stimulus is the binary aperture "
+                "on a 108 x 108 grid spanning -8 to 8 degrees of visual angle, averaged from 1 Hz to the "
+                "repetition time; its first row is the upper edge of the visual field. Each row of the response "
+                "carries a V1, V2, or V3 region of interest index, and the inflated surfaces of the subject are "
+                "included for plotting. Every hemisphere downloads about 360 MB per split and task."
+            ),
+            files={key: f"chn_sub-01/{path}" for key, path in chn_paths.items()},
+            file_urls={
+                key: f"{_OPENNEURO_CHN_URL}/{path}?versionId={_CHN_VERSION_IDS[key]}" for key, path in chn_paths.items()
+            },
+            loader=_loaders.load_chn_visual,
+            options=frozenset({"hemisphere", "split", "task"}),
+            splits=("ses-01", "ses-02"),
+            tasks=("fixedbar", "logbar"),
+            hemispheres=("both", "left", "right"),
+            default_hemisphere="left",
+            licence="CC0",
+            citation=(
+                "Chang, K., Fine, I., & Boynton, G. M. (2025). Improving the reliability and accuracy of population "
+                "receptive field measures using a logarithmically warped stimulus. Journal of Vision, 25(1), 5. "
+                "https://doi.org/10.1167/jov.25.1.5 -- and the dataset as: Chang, K., Fine, I., & Boynton, G. M. "
+                "(2024). CHN Retinotopic Mapping Dataset. OpenNeuro. https://doi.org/10.18112/openneuro.ds004698.v1.0.1"
+            ),
+            homepage="https://openneuro.org/datasets/ds004698/versions/1.0.1",
+            download_size=2_910_567_576,
+        ),
         DatasetSpec(
             name="7t-retbar-visual",
             summary=(
@@ -303,7 +385,7 @@ def list_datasets() -> list[str]:
     --------
     >>> from prfmodel.examples import list_datasets
     >>> list_datasets()
-    ['7t-aot-visual', '7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
+    ['3t-chn-visual', '7t-aot-visual', '7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
 
     """
     return sorted(_get_registry())
@@ -367,6 +449,9 @@ def describe_dataset(name: str) -> str:
 
     if spec.surface_types:
         lines += [f"Surface types: {', '.join(spec.surface_types)}"]
+
+    if spec.tasks:
+        lines += [f"Tasks: {', '.join(spec.tasks)} (default '{spec.tasks[0]}')"]
 
     lines += [
         f"Download: {spec.download_size / 1e6:.0f} MB {_download_note(spec)}",

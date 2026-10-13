@@ -46,6 +46,8 @@ class Dataset:
         The hemisphere selection that the dataset was loaded with.
     split : str, optional
         The data split that `response` was loaded from.
+    task : str, optional
+        The experimental task that `response` was recorded in, for datasets that provide several tasks.
     files : collections.abc.Mapping of str to pathlib.Path
         The files that were fetched, keyed by a short logical name such as `"design"` or `"wm_lh"`.
 
@@ -70,6 +72,7 @@ class Dataset:
     atlas: dict[str, np.ndarray] | None = None
     hemisphere: str | None = None
     split: str | None = None
+    task: str | None = None
     files: Mapping[str, Path] = field(default_factory=dict)
 
     # Contains numpy arrays as attributes which are not hashable
