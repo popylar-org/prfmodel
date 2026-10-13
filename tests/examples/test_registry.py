@@ -66,7 +66,7 @@ def test_describe_dataset_reports_tasks():
     description = describe_dataset("3t-chn-visual")
 
     assert "Tasks: fixedbar, logbar (default 'fixedbar')" in description
-    assert "Splits: ses-01, ses-02 (required)" in description
+    assert "Splits: ses-01_run-01, ses-01_run-02, ses-02_run-01 (required)" in description
 
 
 def test_every_dataset_has_exactly_one_source():
