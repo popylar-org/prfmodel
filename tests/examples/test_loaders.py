@@ -63,12 +63,12 @@ def test_load_dataset_unsupported_task():
 def test_load_dataset_invalid_task():
     """Test that an unknown task is refused."""
     with pytest.raises(ValueError, match="must be one of"):
-        load_dataset("3t-chn-visual", split="ses-01", task="wedge")
+        load_dataset("3t-chn-visual", split="ses-01_run-01", task="wedge")
 
 
 def test_validate_options_default_task():
     """Test that the first task of a dataset is used when none is requested."""
-    options = validate_options(_get_spec("3t-chn-visual"), split="ses-01")
+    options = validate_options(_get_spec("3t-chn-visual"), split="ses-01_run-01")
 
     assert options.task == "fixedbar"
     assert options.hemisphere == "left"
@@ -203,7 +203,7 @@ def test_load_numerosity_timing(hemisphere: str, num_units: int, split: str):
 
 @pytest_skip_examples
 @pytest.mark.parametrize("task", ["fixedbar", "logbar"])
-@pytest.mark.parametrize("split", ["ses-01", "ses-02"])
+@pytest.mark.parametrize("split", ["ses-01_run-01", "ses-01_run-02", "ses-02_run-01"])
 def test_load_chn_visual(split: str, task: str):
     """Test that the CHN dataset returns the response, the regions of interest, the stimulus, and the surface."""
     dataset = load_dataset("3t-chn-visual", hemisphere="left", split=split, task=task)
@@ -222,15 +222,15 @@ def test_load_chn_visual(split: str, task: str):
 @pytest_skip_examples
 def test_load_chn_visual_downloads_only_what_is_loaded(tmp_path: Path):
     """Test that loading one split, task, and hemisphere downloads only the files it needs."""
-    load_dataset("3t-chn-visual", hemisphere="left", split="ses-01", task="logbar", dest_dir=tmp_path)
+    load_dataset("3t-chn-visual", hemisphere="left", split="ses-01_run-02", task="logbar", dest_dir=tmp_path)
 
     assert sorted(p.name for p in tmp_path.rglob("*") if p.is_file()) == [
         "sub-01_hemi-L_space-fsnative_v1.label",
         "sub-01_hemi-L_space-fsnative_v2.label",
         "sub-01_hemi-L_space-fsnative_v3.label",
         "sub-01_ses-01_acq-MEMPRvNav_rec-RMS_hemi-L_inflated.surf.gii",
-        "sub-01_ses-01_task-logbar_run-1_hemi-L_space-fsnative_desc-preproc_bold.func.gii",
-        "task-logbar_run-1_desc-down_aperture.mat",
+        "sub-01_ses-01_task-logbar_run-2_hemi-L_space-fsnative_desc-preproc_bold.func.gii",
+        "task-logbar_run-2_desc-down_aperture.mat",
     ]
 
 

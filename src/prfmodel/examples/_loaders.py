@@ -118,10 +118,14 @@ def load_chn_visual(fetch: FileFetcher, options: Options) -> Dataset:
 
     response = np.concatenate(responses)
 
+    # Runs differ in their sequence of bar positions but sessions repeat them, so the aperture depends on the run only
+    run = options.split.split("_")[1]  # type: ignore[union-attr]
+    stimulus = _load_chn_aperture_stimulus(fetch(f"aperture_{options.task}_{run}"), num_frames=response.shape[1])
+
     return Dataset(
         name="3t-chn-visual",
         response=response,
-        stimulus=_load_chn_aperture_stimulus(fetch(f"aperture_{options.task}"), num_frames=response.shape[1]),
+        stimulus=stimulus,
         roi_index=np.concatenate(roi_indices),
         roi_mapping={0: "other", **{value: roi.upper() for value, roi in enumerate(_CHN_ROIS, start=1)}},
         mesh=PolyMesh(**mesh_parts),
@@ -250,8 +254,8 @@ def load_dataset(  # noqa: PLR0913
 
     Load the same stimulus in two sessions, here with a bar that is warped logarithmically with eccentricity.
 
-    >>> first = load_dataset("3t-chn-visual", split="ses-01", task="logbar")  # doctest: +SKIP
-    >>> second = load_dataset("3t-chn-visual", split="ses-02", task="logbar")  # doctest: +SKIP
+    >>> first = load_dataset("3t-chn-visual", split="ses-01_run-01", task="logbar")  # doctest: +SKIP
+    >>> second = load_dataset("3t-chn-visual", split="ses-02_run-01", task="logbar")  # doctest: +SKIP
     >>> first.response.shape  # doctest: +SKIP
     (221709, 305)
     >>> first.roi_mapping  # doctest: +SKIP

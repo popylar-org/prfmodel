@@ -44,9 +44,17 @@
       "sha256": "21dcd3b461ccfe78f87dc74244f65b32ffb66b84c364bb8d4621585f94d68261",
       "size": 57540
     },
+    "chn_sub-01/stimuli/task-fixedbar_run-2_desc-down_aperture.mat": {
+      "sha256": "f4e838f7b365eeec4a65e3b57daebc87757d3173a9ae03a769e11993ea5e0f49",
+      "size": 58427
+    },
     "chn_sub-01/stimuli/task-logbar_run-1_desc-down_aperture.mat": {
       "sha256": "5ab7883400c35640a232364e66a8cb543c8e39ae1c6902864f70e3a1a2c3655c",
       "size": 70960
+    },
+    "chn_sub-01/stimuli/task-logbar_run-2_desc-down_aperture.mat": {
+      "sha256": "40b319c51434e49918f5507a1230077edf336ee649f66a77a9ce4719bc1f3fe2",
+      "size": 71915
     },
     "chn_sub-01/sub-01/anat/sub-01_ses-01_acq-MEMPRvNav_rec-RMS_hemi-L_inflated.surf.gii": {
       "sha256": "7ac8e180955720c113171ba337081f768af3320f38ac5557d27d3ebfec0406f0",
@@ -64,12 +72,28 @@
       "sha256": "d8ebcbe971f596a8efd54159e472a003f60f78ec096ff4803b13031562cc674d",
       "size": 363820921
     },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-fixedbar_run-2_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "ce1742910a8b0b34ec100988be0281f2718367d6304c195fb01b87256de22d53",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-fixedbar_run-2_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "5e6cf221988a11ea1725d375ae50992a681439f95b887b391ca436e045d5919e",
+      "size": 363820921
+    },
     "chn_sub-01/sub-01/func/sub-01_ses-01_task-logbar_run-1_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
       "sha256": "79daeeb0cf72f2d89fb776bb898ff78b2ba2adcd923053dd75233ed6abd89056",
       "size": 360647293
     },
     "chn_sub-01/sub-01/func/sub-01_ses-01_task-logbar_run-1_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
       "sha256": "72fa108f45fe3cb5a7c80632efd780e798096fd2523f73b50ed894cc3906e493",
+      "size": 363820921
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-logbar_run-2_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "54421cee997240f230873bc866571723e187948b3cc0fb578582086305c237c1",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-logbar_run-2_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "5e1f153e90cfb5ec27ea2def78892bb80ad585766ebe78d10940485a3d4a8c2f",
       "size": 363820921
     },
     "chn_sub-01/sub-01/func/sub-01_ses-02_task-fixedbar_run-1_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {

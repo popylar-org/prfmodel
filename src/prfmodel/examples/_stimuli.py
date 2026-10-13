@@ -47,6 +47,9 @@ def _load_chn_aperture_stimulus(
     aperture = np.asarray(stim["img"].item(), dtype=np.float64)
 
     # The aperture is stored as (rows, columns, frames) but the design has frames first
+    # The aperture is sampled at 1 Hz (366 frames) while the response is sampled at the repetition time of 1.2 s
+    # (305 frames) over the same 366 s, so we average the aperture into repetition time bins to get one design frame
+    # per response frame without shifting the bar in time
     design = _resample_frames(aperture.transpose(2, 0, 1), aperture_duration, frame_duration, num_frames)
     grid = np.stack((stim["y"].item(), stim["x"].item()), axis=-1).astype(np.float64)
 
