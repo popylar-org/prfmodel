@@ -13,7 +13,13 @@ _SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 def test_list_datasets():
     """Test that all datasets are listed in alphabetical order."""
-    assert list_datasets() == ["7t-aot-visual", "7t-retbar-visual", "hcp-999999-surface", "numerosity-timing"]
+    assert list_datasets() == [
+        "3t-chn-visual",
+        "7t-aot-visual",
+        "7t-retbar-visual",
+        "hcp-999999-surface",
+        "numerosity-timing",
+    ]
 
 
 def test_checksums_are_packaged():
@@ -53,6 +59,14 @@ def test_describe_dataset_reports_the_essentials():
 def test_describe_dataset_reports_per_file_downloads():
     """Test that a dataset served as individual files says only what is loaded is downloaded."""
     assert "only the files that are loaded" in describe_dataset("numerosity-timing")
+
+
+def test_describe_dataset_reports_tasks():
+    """Test that a dataset with several tasks names them and its default."""
+    description = describe_dataset("3t-chn-visual")
+
+    assert "Tasks: fixedbar, logbar (default 'fixedbar')" in description
+    assert "Splits: ses-01_run-01, ses-01_run-02, ses-02_run-01 (required)" in description
 
 
 def test_every_dataset_has_exactly_one_source():

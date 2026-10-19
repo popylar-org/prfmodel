@@ -27,12 +27,15 @@ class Options:
         Name of the requested data split, or `None` for datasets without splits.
     surface_type : str or None
         Requested surface type, or `None` for datasets without surfaces.
+    task : str or None
+        Requested experimental task, or `None` for datasets with a single task.
 
     """
 
     hemisphere: str = "both"
     split: str | None = None
     surface_type: str | None = None
+    task: str | None = None
 
     @property
     def hemisphere_codes(self) -> tuple[str, ...]:
@@ -60,6 +63,7 @@ def validate_options(
     hemisphere: str | None = None,
     split: str | None = None,
     surface_type: str | None = None,
+    task: str | None = None,
 ) -> Options:
     """
     Check the requested options against a dataset and fill in its defaults.
@@ -74,6 +78,8 @@ def validate_options(
         Requested data split.
     surface_type : str, optional
         Requested surface type. The value `"pial"` is accepted as an alias for `"pia"`.
+    task : str, optional
+        Requested experimental task.
 
     Returns
     -------
@@ -90,6 +96,7 @@ def validate_options(
     _check_supported(spec, "hemisphere", hemisphere)
     _check_supported(spec, "split", split)
     _check_supported(spec, "surface_type", surface_type)
+    _check_supported(spec, "task", task)
 
     resolved_hemisphere = hemisphere if hemisphere is not None else spec.default_hemisphere
 
@@ -110,8 +117,15 @@ def validate_options(
         resolved_surface_type = "pia" if surface_type == "pial" else (surface_type or spec.surface_types[0])
         _check_value(spec, "surface_type", resolved_surface_type, spec.surface_types)
 
+    resolved_task = task
+
+    if "task" in spec.options:
+        resolved_task = task or spec.tasks[0]
+        _check_value(spec, "task", resolved_task, spec.tasks)
+
     return Options(
         hemisphere=resolved_hemisphere,
         split=split,
         surface_type=resolved_surface_type,
+        task=resolved_task,
     )
