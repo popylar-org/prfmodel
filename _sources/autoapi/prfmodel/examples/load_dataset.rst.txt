@@ -1,7 +1,7 @@
 prfmodel.examples.load_dataset
 ==============================
 
-.. py:function:: prfmodel.examples.load_dataset(name: str, *, dest_dir: str | os.PathLike | None = None, hemisphere: str | None = None, split: str | None = None, surface_type: str | None = None, download: bool = True) -> prfmodel.examples._dataset.Dataset
+.. py:function:: prfmodel.examples.load_dataset(name: str, *, dest_dir: str | os.PathLike | None = None, hemisphere: str | None = None, split: str | None = None, surface_type: str | None = None, task: str | None = None, download: bool = True) -> prfmodel.examples._dataset.Dataset
 
    Load an example dataset, downloading it on first use.
 
@@ -25,6 +25,9 @@ prfmodel.examples.load_dataset
                         `"pia"` (or `"pial"`), or `"wm"` (for white matter). If `None` (the default), uses the default of the
                         dataset.
    :type surface_type: str, optional
+   :param task: Experimental task to load the response and stimulus of, for datasets that provide several tasks. If `None`
+                (the default), uses the default of the dataset.
+   :type task: str, optional
    :param download: Whether files may be downloaded when they are missing. If `False`, missing files raise
                     `FileNotFoundError` instead.
    :type download: bool, default=True
@@ -82,4 +85,13 @@ prfmodel.examples.load_dataset
    (5436, 176)
    >>> odd.response.shape == even.response.shape  # doctest: +SKIP
    True
+
+   Load the same stimulus in two sessions, here with a bar that is warped logarithmically with eccentricity.
+
+   >>> first = load_dataset("3t-chn-visual", split="ses-01_run-01", task="logbar")  # doctest: +SKIP
+   >>> second = load_dataset("3t-chn-visual", split="ses-02_run-01", task="logbar")  # doctest: +SKIP
+   >>> first.response.shape  # doctest: +SKIP
+   (221709, 305)
+   >>> first.roi_mapping  # doctest: +SKIP
+   {0: 'other', 1: 'V1', 2: 'V2', 3: 'V3'}
 

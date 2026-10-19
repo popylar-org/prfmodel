@@ -34,6 +34,8 @@ prfmodel.examples.Dataset
    :type hemisphere: str, optional
    :param split: The data split that `response` was loaded from.
    :type split: str, optional
+   :param task: The experimental task that `response` was recorded in, for datasets that provide several tasks.
+   :type task: str, optional
    :param files: The files that were fetched, keyed by a short logical name such as `"design"` or `"wm_lh"`.
    :type files: collections.abc.Mapping of str to pathlib.Path
 
