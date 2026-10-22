@@ -214,6 +214,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../tutorials/examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_1d_fmri_numerosity.html">Fitting a 1D population receptive field model to fMRI data from a numerosity experiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_2d_ecog_visual.html">Comparing 2D population receptive field models on ECoG data from a visual experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/cf_fmri_visual.html">Fitting a connective field model to fMRI data from a visual experiment</a></li>
 </ul>
 </li>
@@ -241,6 +242,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../examples/load_1d_prf_lognumerosity_stimulus.html">load_1d_prf_lognumerosity_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../examples/load_2d_prf_bar_stimulus.html">load_2d_prf_bar_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../examples/load_dataset.html">load_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/read_matlab_tables.html">read_matlab_tables</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -476,7 +478,7 @@ style analysis.</p>
 </ul>
 <p>A <a class="reference internal" href="RegressorsList.html#prfmodel.regressors.RegressorsList" title="prfmodel.regressors.RegressorsList"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegressorsList</span></code></a> composite is used internally when multiple regressor models are passed to a canonical
 model.</p>
-<p>At call time the regressor design data is provided as a <a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> (or a list of DataFrames for a
+<p>At call time the regressor design data is provided as a <a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> (or a list of DataFrames for a
 <a class="reference internal" href="RegressorsList.html#prfmodel.regressors.RegressorsList" title="prfmodel.regressors.RegressorsList"><code class="xref py py-class docutils literal notranslate"><span class="pre">RegressorsList</span></code></a>). Each regressor model looks up the columns it needs by name, so column order is
 unimportant and extra columns are silently ignored.</p>
 <p>Regressor models are intended to be used as submodels within canonical models, e.g.,

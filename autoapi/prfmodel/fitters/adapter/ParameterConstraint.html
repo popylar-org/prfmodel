@@ -214,6 +214,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../tutorials/examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../../tutorials/examples/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../tutorials/examples/prf_1d_fmri_numerosity.html">Fitting a 1D population receptive field model to fMRI data from a numerosity experiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../tutorials/examples/prf_2d_ecog_visual.html">Comparing 2D population receptive field models on ECoG data from a visual experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../tutorials/examples/cf_fmri_visual.html">Fitting a connective field model to fMRI data from a visual experiment</a></li>
 </ul>
 </li>
@@ -241,6 +242,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../examples/load_1d_prf_lognumerosity_stimulus.html">load_1d_prf_lognumerosity_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../examples/load_2d_prf_bar_stimulus.html">load_2d_prf_bar_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../examples/load_dataset.html">load_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../examples/read_matlab_tables.html">read_matlab_tables</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -567,7 +569,7 @@ model prediction, which is what enforces the constraint during fitting.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><em>pandas.DataFrame</em></a>) – Dataframe with columns containing different model parameters and rows containing parameter values
+<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns containing different model parameters and rows containing parameter values
 for different units.</p></li>
 <li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <cite>None</cite> (the default), uses the dtype from
 <a class="reference internal" href="../../utils/get_dtype.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>. A dataframe is converted column by column, so a dtype narrower than
@@ -596,7 +598,7 @@ unbounded scale that a gradient-based optimizer works on. Use <a class="referenc
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><em>pandas.DataFrame</em></a>) – Dataframe with columns containing different model parameters and rows containing parameter values
+<li><p><strong>parameters</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><em>pandas.DataFrame</em></a>) – Dataframe with columns containing different model parameters and rows containing parameter values
 for different units.</p></li>
 <li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <cite>None</cite> (the default), uses the dtype from
 <a class="reference internal" href="../../utils/get_dtype.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>. A dataframe is converted column by column, so a dtype narrower than

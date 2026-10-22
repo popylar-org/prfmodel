@@ -22,6 +22,10 @@ prfmodel.examples.Dataset
    :type roi_index: numpy.ndarray, optional
    :param roi_mapping: Mapping from the values in `roi_index` to region of interest labels.
    :type roi_mapping: dict of int to str, optional
+   :param units: One row per row of `response`, in the same order, describing the unit it was measured at. What the
+                 columns hold depends on the dataset; for a dataset of intracranial recordings they are the columns of
+                 the BIDS channels table, such as electrode coordinates and atlas labels.
+   :type units: pandas.DataFrame, optional
    :param mask: Binary volume that selects the voxels in `response`, for volumetric datasets. The rows of `response`
                 follow the C order of the nonzero voxels of the mask, so results can be mapped back into the volume, for
                 example with :func:`nilearn.masking.unmask`.

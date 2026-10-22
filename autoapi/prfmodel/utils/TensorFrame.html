@@ -214,6 +214,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../tutorials/examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_1d_fmri_numerosity.html">Fitting a 1D population receptive field model to fMRI data from a numerosity experiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_2d_ecog_visual.html">Comparing 2D population receptive field models on ECoG data from a visual experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/cf_fmri_visual.html">Fitting a connective field model to fMRI data from a visual experiment</a></li>
 </ul>
 </li>
@@ -241,6 +242,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../examples/load_1d_prf_lognumerosity_stimulus.html">load_1d_prf_lognumerosity_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../examples/load_2d_prf_bar_stimulus.html">load_2d_prf_bar_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../examples/load_dataset.html">load_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../examples/read_matlab_tables.html">read_matlab_tables</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -469,7 +471,7 @@
 <dt class="sig sig-object py" id="prfmodel.utils.TensorFrame">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.utils.</span></span><span class="sig-name descname"><span class="pre">TensorFrame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.utils.TensorFrame" title="Link to this definition">¶</a></dt>
 <dd><p>A dictionary-like object that supports dataframe-style column selection but returns Keras tensors.</p>
-<p>This is the tensor-holding counterpart of the <a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> that models accept in their
+<p>This is the tensor-holding counterpart of the <a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> that models accept in their
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">call()</span></code> implementation. Use <a class="reference internal" href="as_tensor_frame.html#prfmodel.utils.as_tensor_frame" title="prfmodel.utils.as_tensor_frame"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.as_tensor_frame()</span></code></a> to build one from a data frame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -488,7 +490,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="prfmodel.utils.TensorFrame.to_dataframe">
-<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.6)"><span class="pre">pandas.DataFrame</span></a></span></span><a class="headerlink" href="#prfmodel.utils.TensorFrame.to_dataframe" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><span class="pre">pandas.DataFrame</span></a></span></span><a class="headerlink" href="#prfmodel.utils.TensorFrame.to_dataframe" title="Link to this definition">¶</a></dt>
 <dd><p>Convert the object into a dataframe.</p>
 </dd></dl>
 

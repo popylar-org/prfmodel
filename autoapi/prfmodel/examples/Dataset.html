@@ -214,6 +214,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../tutorials/examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_1d_fmri_numerosity.html">Fitting a 1D population receptive field model to fMRI data from a numerosity experiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_2d_ecog_visual.html">Comparing 2D population receptive field models on ECoG data from a visual experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/cf_fmri_visual.html">Fitting a connective field model to fMRI data from a visual experiment</a></li>
 </ul>
 </li>
@@ -241,6 +242,7 @@
 <li class="toctree-l3"><a class="reference internal" href="load_1d_prf_lognumerosity_stimulus.html">load_1d_prf_lognumerosity_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="load_2d_prf_bar_stimulus.html">load_2d_prf_bar_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="load_dataset.html">load_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="read_matlab_tables.html">read_matlab_tables</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -483,6 +485,9 @@ requested, the rows of the left hemisphere come first.</p></li>
 stimulus requires preprocessing leave this <cite>None</cite> and expose the raw design through <cite>files</cite> instead.</p></li>
 <li><p><strong>roi_index</strong> (<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><em>numpy.ndarray</em></a><em>, </em><em>optional</em>) – Integer region of interest index for each row of <cite>response</cite>, with shape <cite>(num_units,)</cite>.</p></li>
 <li><p><strong>roi_mapping</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><em>dict</em></a><em> of </em><em>int to str</em><em>, </em><em>optional</em>) – Mapping from the values in <cite>roi_index</cite> to region of interest labels.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><em>pandas.DataFrame</em></a><em>, </em><em>optional</em>) – One row per row of <cite>response</cite>, in the same order, describing the unit it was measured at. What the
+columns hold depends on the dataset; for a dataset of intracranial recordings they are the columns of
+the BIDS channels table, such as electrode coordinates and atlas labels.</p></li>
 <li><p><strong>mask</strong> (<em>nibabel.spatialimages.SpatialImage</em><em>, </em><em>optional</em>) – Binary volume that selects the voxels in <cite>response</cite>, for volumetric datasets. The rows of <cite>response</cite>
 follow the C order of the nonzero voxels of the mask, so results can be mapped back into the volume, for
 example with <code class="xref py py-func docutils literal notranslate"><span class="pre">nilearn.masking.unmask()</span></code>.</p></li>

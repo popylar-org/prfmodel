@@ -95,3 +95,11 @@ prfmodel.examples.load_dataset
    >>> first.roi_mapping  # doctest: +SKIP
    {0: 'other', 1: 'V1', 2: 'V2', 3: 'V3'}
 
+   Load an intracranial response together with the channels table that describes it.
+
+   >>> broadband = load_dataset("visual-ecog-broadband")  # doctest: +SKIP
+   >>> broadband.response.shape  # doctest: +SKIP
+   (136, 224)
+   >>> broadband.units.loc[0, ["name", "group", "wangarea"]].tolist()  # doctest: +SKIP
+   ['GA33', 'grid', 'none']
+

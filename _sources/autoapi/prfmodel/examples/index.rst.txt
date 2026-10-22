@@ -11,6 +11,9 @@ prfmodel.examples
    package and need no download. Empirical datasets are fetched on first use with :func:`load_dataset` and cached
    in a user data directory (see :func:`get_data_dir`).
 
+   Datasets that are distributed as MATLAB files may store part of their metadata in ``table`` objects, which
+   :func:`read_matlab_tables` reads because :func:`scipy.io.loadmat` cannot.
+
 
 
 Exceptions
@@ -51,6 +54,7 @@ Functions
    load_1d_prf_lognumerosity_stimulus </autoapi/prfmodel/examples/load_1d_prf_lognumerosity_stimulus>
    load_2d_prf_bar_stimulus </autoapi/prfmodel/examples/load_2d_prf_bar_stimulus>
    load_dataset </autoapi/prfmodel/examples/load_dataset>
+   read_matlab_tables </autoapi/prfmodel/examples/read_matlab_tables>
 
 .. autoapisummary::
 
@@ -60,5 +64,6 @@ Functions
    prfmodel.examples.load_1d_prf_lognumerosity_stimulus
    prfmodel.examples.load_2d_prf_bar_stimulus
    prfmodel.examples.load_dataset
+   prfmodel.examples.read_matlab_tables
 
 

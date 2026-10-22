@@ -1,0 +1,37 @@
+prfmodel.examples.read_matlab_tables
+====================================
+
+.. py:function:: prfmodel.examples.read_matlab_tables(path: str | os.PathLike) -> dict[str, pandas.DataFrame]
+
+   Read every MATLAB ``table`` variable in a MAT-file into a DataFrame.
+
+   MATLAB stores a ``table`` as an object rather than as an array, which puts it out of reach of
+   :func:`scipy.io.loadmat`: the tables of a file all collapse into a single ``None`` key that holds an
+   opaque placeholder, and their contents end up in an undocumented ``__function_workspace__`` entry. This
+   function reads that object system and rebuilds the tables, so a file can be opened with
+   :func:`scipy.io.loadmat` for its arrays and with this function for its tables.
+
+   Only version 5 MAT-files are supported, which is what MATLAB writes unless ``-v7.3`` is requested.
+
+   :param path: Path of the MAT-file to read.
+   :type path: str or os.PathLike
+
+   :returns: The tables in the file, keyed by the name of the variable that holds them. Empty if the file holds
+             no tables. Columns of text become columns of :class:`str`, and columns that are matrices in MATLAB
+             become columns of :class:`numpy.ndarray`.
+   :rtype: dict of str to pandas.DataFrame
+
+   :raises ValueError: If the file is not a little endian version 5 MAT-file, if its object system uses an unsupported
+       version, or if a table in it is not laid out as expected.
+
+   .. rubric:: Examples
+
+   >>> from prfmodel.examples import read_matlab_tables
+   >>> tables = read_matlab_tables("p01_freq_spectra.mat")  # doctest: +SKIP
+   >>> sorted(tables)  # doctest: +SKIP
+   ['channels', 'events']
+   >>> tables["channels"].shape  # doctest: +SKIP
+   (11, 48)
+   >>> tables["channels"]["name"].tolist()[:4]  # doctest: +SKIP
+   ['OT05', 'OT06', 'OT07', 'OT08']
+

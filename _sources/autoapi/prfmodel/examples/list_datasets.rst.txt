@@ -12,6 +12,7 @@ prfmodel.examples.list_datasets
    .. rubric:: Examples
 
    >>> from prfmodel.examples import list_datasets
-   >>> list_datasets()
-   ['3t-chn-visual', '7t-aot-visual', '7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing']
+   >>> list_datasets()  # doctest: +NORMALIZE_WHITESPACE
+   ['3t-chn-visual', '7t-aot-visual', '7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing',
+    'visual-ecog-broadband']
 

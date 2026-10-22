@@ -214,6 +214,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../tutorials/examples/index.html">Examples</a><input aria-label="Toggle navigation of Examples" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_2d_fmri_visual.html">Fitting a 2D population receptive field model to fMRI data from a visual experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_1d_fmri_numerosity.html">Fitting a 1D population receptive field model to fMRI data from a numerosity experiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/prf_2d_ecog_visual.html">Comparing 2D population receptive field models on ECoG data from a visual experiment</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../tutorials/examples/cf_fmri_visual.html">Fitting a connective field model to fMRI data from a visual experiment</a></li>
 </ul>
 </li>
@@ -241,6 +242,7 @@
 <li class="toctree-l3"><a class="reference internal" href="load_1d_prf_lognumerosity_stimulus.html">load_1d_prf_lognumerosity_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="load_2d_prf_bar_stimulus.html">load_2d_prf_bar_stimulus</a></li>
 <li class="toctree-l3"><a class="reference internal" href="load_dataset.html">load_dataset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="read_matlab_tables.html">read_matlab_tables</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -469,6 +471,8 @@
 <p>Bundled stimuli (<a class="reference internal" href="load_2d_prf_bar_stimulus.html#prfmodel.examples.load_2d_prf_bar_stimulus" title="prfmodel.examples.load_2d_prf_bar_stimulus"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_2d_prf_bar_stimulus()</span></code></a>, <a class="reference internal" href="load_1d_prf_lognumerosity_stimulus.html#prfmodel.examples.load_1d_prf_lognumerosity_stimulus" title="prfmodel.examples.load_1d_prf_lognumerosity_stimulus"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_1d_prf_lognumerosity_stimulus()</span></code></a>) ship with the
 package and need no download. Empirical datasets are fetched on first use with <a class="reference internal" href="load_dataset.html#prfmodel.examples.load_dataset" title="prfmodel.examples.load_dataset"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_dataset()</span></code></a> and cached
 in a user data directory (see <a class="reference internal" href="get_data_dir.html#prfmodel.examples.get_data_dir" title="prfmodel.examples.get_data_dir"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_data_dir()</span></code></a>).</p>
+<p>Datasets that are distributed as MATLAB files may store part of their metadata in <code class="docutils literal notranslate"><span class="pre">table</span></code> objects, which
+<a class="reference internal" href="read_matlab_tables.html#prfmodel.examples.read_matlab_tables" title="prfmodel.examples.read_matlab_tables"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_matlab_tables()</span></code></a> reads because <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.io.loadmat.html#scipy.io.loadmat" title="(in SciPy v1.18.0)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.io.loadmat()</span></code></a> cannot.</p>
 <section id="exceptions">
 <h2>Exceptions<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -521,6 +525,9 @@ in a user data directory (see <a class="reference internal" href="get_data_dir.h
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="load_dataset.html#prfmodel.examples.load_dataset" title="prfmodel.examples.load_dataset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_dataset</span></code></a>(→ prfmodel.examples._dataset.Dataset)</p></td>
 <td><p>Load an example dataset, downloading it on first use.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="read_matlab_tables.html#prfmodel.examples.read_matlab_tables" title="prfmodel.examples.read_matlab_tables"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_matlab_tables</span></code></a>(→ dict[str, pandas.DataFrame])</p></td>
+<td><p>Read every MATLAB <code class="docutils literal notranslate"><span class="pre">table</span></code> variable in a MAT-file into a DataFrame.</p></td>
 </tr>
 </tbody>
 </table>
