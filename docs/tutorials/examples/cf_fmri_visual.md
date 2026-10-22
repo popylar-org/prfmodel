@@ -38,7 +38,7 @@ os.environ["KERAS_BACKEND"] = "tensorflow"
 pd.set_option("display.precision", 3)
 
 if find_spec("tensorflow") is None:
-    msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
+    msg = 'Could not find the tensorflow package. Please install it with: pip install "prfmodel[tensorflow]"'
     raise ImportError(msg)
 ```
 
