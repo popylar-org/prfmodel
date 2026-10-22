@@ -169,6 +169,9 @@ filename = "docs/conf.py"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
+# Only replace the package version, not a dependency that happens to be pinned to the same version
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
 
 [[tool.mypy.overrides]]
 module = ["keras.*", "nilearn.*", "scipy.*"]
