@@ -114,6 +114,44 @@ uv run prek update
 ## Package version number
 
 - We recommend using [semantic versioning](https://semver.org/).
+- While the package is in beta, the major version stays at `0` (e.g., `0.1.0`). We don't use pre-release suffixes
+  such as `b1`.
 - The package version is stored in `pyproject.toml` (`project.version` and `tool.bumpversion.current_version`) and in `src/prfmodel/__init__.py`.
 - To increase the version number in all of these places at once, use [bump-my-version](https://callowayproject.github.io/bump-my-version/) (e.g., `uv run bump-my-version bump patch`).
 - Don't forget to update the version number before making a release!
+
+## Making a release
+
+Releases are published to [PyPI](https://pypi.org/project/prfmodel/) by the
+[`release.yml`](.github/workflows/release.yml) workflow when a GitHub release is published. The workflow builds the
+sdist and wheel, checks their metadata, and installs the wheel into a fresh environment to check that it imports and
+contains its package data before uploading it. It uses
+[trusted publishing](https://docs.pypi.org/trusted-publishers/), so no API token is needed.
+
+### One-time setup
+
+1. On [PyPI](https://pypi.org/manage/account/publishing/), add a trusted publisher with owner `popylar-org`,
+   repository `prfmodel`, workflow `release.yml`, and environment `pypi`. Until the first release, the project
+   does not exist on PyPI yet, so add it as a *pending* publisher, which also reserves the name.
+2. Do the same on [TestPyPI](https://test.pypi.org/manage/account/publishing/) with environment `testpypi`.
+3. In the GitHub repository settings, create the environments `pypi` and `testpypi`. Adding required reviewers to
+   `pypi` means that every upload to PyPI has to be approved, even after a release was published by mistake.
+
+### Steps
+
+1. Update [`CHANGELOG.md`](CHANGELOG.md): move the entries under `[Unreleased]` to a new section for the version.
+2. Update the version number with bump-my-version (see [Package version number](#package-version-number)), and merge
+   the change into `main`.
+3. Optionally, do a dry run: in the Actions tab, run the *Publish to PyPI* workflow manually on `main`. This
+   uploads the package to TestPyPI instead. Install it from there into a fresh environment to check it:
+
+   ```shell
+   python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ "prfmodel[tensorflow]==<version>"
+   ```
+
+   TestPyPI never accepts the same version twice, so repeating a dry run for the same version checks the build but
+   does not replace the uploaded files.
+4. Create a [GitHub release](https://github.com/popylar-org/prfmodel/releases/new) from `main` with a new tag that
+   is the version with a leading `v` (e.g., `v0.1.0`). The workflow fails without uploading anything if the tag
+   does not match the version in `pyproject.toml`.
+5. Publishing the release starts the workflow. Check that it succeeded and that the version appears on PyPI.
