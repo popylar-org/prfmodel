@@ -176,6 +176,11 @@ _PARAMS: dict[str, str] = {
         "    Tensor-holding population receptive field stimulus object,\n"
         "    from :meth:`~prfmodel.stimuli.PRFStimulus.to_tensors`."
     ),
+    "warns_invalid_units": (
+        "InvalidUnitsWarning\n"
+        "    When the time series of some units in `data` are constant or contain NaN or infinite values. These\n"
+        "    units are excluded from the fit and their estimated parameters and losses are NaN."
+    ),
     "warns_resolution_mismatch": (
         "ResolutionMismatchWarning\n"
         "    When an impulse submodel has an explicit resolution that differs from the frame duration of the\n"

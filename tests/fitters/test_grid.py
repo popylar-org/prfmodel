@@ -1,9 +1,12 @@
 """Tests for grid fitting."""
 
+import warnings
 import keras
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
+from prfmodel.exceptions import InvalidUnitsWarning
 from prfmodel.exceptions import ShapeError
 from prfmodel.fitters import GridFitter
 from prfmodel.fitters import GridHistory
@@ -12,9 +15,12 @@ from prfmodel.fitters.losses import CorrelationLoss
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.regressors import AdditiveRegressors
 from prfmodel.stimuli import PRFStimulus
+from prfmodel.typing import Tensor
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model
 from tests.reference import _oracle
+from .conftest import INVALID_UNITS_MESSAGE
+from .conftest import insert_invalid_units
 from .conftest import parametrize_dtype
 
 
@@ -138,22 +144,87 @@ class TestGridFitter(TestSetup):
         param_ranges: dict[str, np.ndarray],
     ):
         """Test that fit returns an infinite loss warning and matching NaN estimates when appropriate."""
+
+        def infinite_loss(y_true: Tensor, y_pred: Tensor) -> Tensor:
+            return ops.sum(ops.square(y_true - y_pred), axis=-1) + np.inf
+
         fitter = GridFitter(
             model=model,
             stimulus=stimulus,
+            loss=infinite_loss,
         )
 
-        params_copy = params.copy()
-        params_copy.iloc[0, :] = np.nan
-
-        observed = np.array(model(stimulus, params))  # Need to convert to numpy to assign value
-        observed[0, :] = np.nan
+        observed = np.asarray(model(stimulus, params))
 
         with pytest.warns(InfiniteLossWarning):
             history, grid_params = fitter.fit(observed, param_ranges, batch_size=20)
 
         self._check_history(history)
-        self._check_grid_params(grid_params, params_copy, ["mu_x", "mu_y", "sigma"])
+        assert np.all(np.isposinf(history.history["loss"]))
+        assert grid_params.shape == (len(params), len(param_ranges))
+        assert grid_params.isna().all().all()
+
+
+class TestGridFitterInvalidUnits(TestSetup):
+    """Tests that units with a constant or non-finite time series are excluded from the search."""
+
+    @pytest.fixture
+    def param_ranges(self):
+        """Parameter ranges."""
+        return _param_ranges()
+
+    def test_invalid_units_are_excluded(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        param_ranges: dict[str, list],
+    ):
+        """Excluded units get NaN parameters and losses, and the other units get what they get on their own."""
+        observed = np.asarray(model(stimulus, params))
+        data, is_valid = insert_invalid_units(observed)
+        fitter = GridFitter(model=model, stimulus=stimulus)
+
+        with pytest.warns(InvalidUnitsWarning, match=INVALID_UNITS_MESSAGE):
+            history, grid_params = fitter.fit(data, param_ranges, batch_size=100)
+
+        expected_history, expected_params = fitter.fit(observed, param_ranges, batch_size=100)
+
+        assert grid_params.shape == (len(data), len(param_ranges))
+        assert grid_params[~is_valid].isna().all().all()
+        assert np.all(np.isnan(history.history["loss"][~is_valid]))
+        pd.testing.assert_frame_equal(grid_params[is_valid].reset_index(drop=True), expected_params)
+        np.testing.assert_array_equal(history.history["loss"][is_valid], expected_history.history["loss"])
+
+    def test_all_units_excluded(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        param_ranges: dict[str, list],
+    ):
+        """Data in which no unit can be fit returns NaN for every unit instead of raising."""
+        data = np.zeros((3, stimulus.design.shape[0]))
+
+        with pytest.warns(InvalidUnitsWarning, match="Excluded 3 of 3 units"):
+            history, grid_params = GridFitter(model=model, stimulus=stimulus).fit(data, param_ranges)
+
+        assert grid_params.shape == (len(data), len(param_ranges))
+        assert grid_params.isna().all().all()
+        assert np.all(np.isnan(history.history["loss"]))
+
+    def test_valid_units_do_not_warn(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        param_ranges: dict[str, list],
+    ):
+        """Data in which every unit can be fit does not warn."""
+        observed = np.asarray(model(stimulus, params))
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", InvalidUnitsWarning)
+            GridFitter(model=model, stimulus=stimulus).fit(observed, param_ranges, batch_size=100)
 
 
 class TestGridFitterValidation(TestSetup):
@@ -404,7 +475,8 @@ class TestGridFitterIgnoresExtraColumns(TestSetup):
         grid = {name: np.array([float(params[name].iloc[0])]) for name in params.columns}
         grid["beta_mx"] = np.array([1.0])
 
-        observed = np.zeros((len(params), num_frames))
+        # Not constant, so that the units are searched rather than excluded before the design is used
+        observed = np.asarray(model(stimulus, params.assign(beta_mx=1.0), regressors=design))
         _, grid_params = GridFitter(model=model, stimulus=stimulus).fit(observed, grid, regressors=design)
 
         assert grid_params.shape == (len(params), len(grid))

@@ -6,6 +6,8 @@ import pandas as pd
 from keras import ops
 from tqdm.auto import tqdm
 from prfmodel._docstring import doc
+from prfmodel.fitters._validation import _find_valid_units
+from prfmodel.fitters._validation import _merge_unit_estimates
 from prfmodel.fitters._validation import _validate_data_shape
 from prfmodel.models.base import BaseCanonical
 from prfmodel.regressors.base import BaseRegressors
@@ -82,7 +84,7 @@ class LeastSquaresFitter:
     ...     "baseline": [0.0], "amplitude": [0.0],
     ... })
     >>> # Create dummy data for a single unit
-    >>> data = np.zeros((1, stimulus.design.shape[0]))
+    >>> data = np.random.default_rng(0).standard_normal((1, stimulus.design.shape[0]))
     >>> fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
     >>> # Fit model parameters
     >>> history, params_ls = fitter.fit(
@@ -118,6 +120,7 @@ class LeastSquaresFitter:
     def dtype(self, value: str | None) -> None:
         self._dtype = get_dtype(value)
 
+    @doc
     def fit(  # noqa: PLR0913 (too many arguments)
         self,
         data: Tensor,
@@ -157,7 +160,8 @@ class LeastSquaresFitter:
             A history object that contains a dict with the key `loss` and the residual sum of squares
             for each data batch.
         pandas.DataFrame
-            A dataframe with final model parameters.
+            A dataframe with final model parameters. The slope and intercept parameters are NaN for units that are
+            excluded from the fit (see Warns). Other parameters are returned unchanged.
 
         Raises
         ------
@@ -165,7 +169,13 @@ class LeastSquaresFitter:
             If `data` does not have two dimensions, if its number of rows does not match the number of rows in
             `parameters`, or if its number of columns does not match the number of frames in the model prediction.
 
+        Warns
+        -----
+        %(warns_invalid_units)s
+
         """
+        data = ops.convert_to_tensor(data, dtype=self.dtype)
+
         _validate_data_shape(data, num_units=len(parameters))
 
         slope_names = [slope_name] if not isinstance(slope_name, list) else slope_name
@@ -193,27 +203,37 @@ class LeastSquaresFitter:
             msg = "Argument 'intercept_name' must be a column in 'parameters'"
             raise ValueError(msg)
 
+        valid_units = _find_valid_units(data)
+
         num_units = len(parameters)
         if batch_size is None:
             batch_size = num_units
 
-        residual_sums = []
-        new_parameters = parameters.copy()
+        residual_sums = np.full((num_units,), fill_value=np.nan, dtype=self.dtype)
+        param_batches = []
 
-        batch_starts = range(0, num_units, batch_size)
+        batch_starts = range(0, len(valid_units), batch_size)
         for start in tqdm(batch_starts, desc="Processing data batches", total=len(batch_starts)):
-            end = min(start + batch_size, num_units)
+            rows = valid_units[start : start + batch_size]
             batch_residuals, batch_params = self._fit_batch(
-                data[start:end],
-                new_parameters.iloc[start:end],
+                ops.take(data, rows, axis=0),
+                parameters.iloc[rows],
                 slope_names,
                 intercept_name,
                 regressors,
             )
-            new_parameters.iloc[start:end] = batch_params
-            residual_sums.append(batch_residuals)
+            residual_sums[rows] = batch_residuals
+            param_batches.append(batch_params)
 
-        return LeastSquaresHistory({"loss": np.concatenate(residual_sums)}), new_parameters
+        estimated_names = slope_names if intercept_name is None else [intercept_name, *slope_names]
+        estimates = pd.concat(param_batches, ignore_index=True) if param_batches else parameters.iloc[:0]
+        # The estimates take the dtype of their column in 'parameters' rather than the dtype of the fitter
+        estimates = estimates.astype(
+            {name: np.result_type(parameters[name].to_numpy().dtype, np.float32) for name in estimated_names},
+        )
+        new_parameters = _merge_unit_estimates(parameters, estimates, valid_units, estimated_names)
+
+        return LeastSquaresHistory({"loss": residual_sums}), new_parameters
 
     def _fit_batch(
         self,

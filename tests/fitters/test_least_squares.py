@@ -1,8 +1,10 @@
 """Tests for linear fitting."""
 
+import warnings
 import numpy as np
 import pandas as pd
 import pytest
+from prfmodel.exceptions import InvalidUnitsWarning
 from prfmodel.exceptions import ShapeError
 from prfmodel.fitters import LeastSquaresFitter
 from prfmodel.fitters import LeastSquaresHistory
@@ -15,6 +17,9 @@ from tests.conftest import PRFStimulusSetup
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model
 from tests.reference import _oracle
+from .conftest import INVALID_UNITS_MESSAGE
+from .conftest import insert_invalid_parameters
+from .conftest import insert_invalid_units
 from .conftest import parametrize_dtype
 from .conftest import skip_torch
 from .conftest import skip_windows
@@ -512,7 +517,8 @@ class TestLeastSquaresFitterDataShape(TestSetup):
     ):
         """Data whose frames do not match the model prediction raises instead of failing inside the solve."""
         num_frames = stimulus.design.shape[0]
-        data = np.zeros((len(params), num_frames - 1))
+        # Not constant, so that the units are fit rather than excluded before the frames are checked
+        data = np.random.default_rng(0).standard_normal((len(params), num_frames - 1))
 
         with pytest.raises(ShapeError, match=f"must have {num_frames} columns"):
             LeastSquaresFitter(model=model, stimulus=stimulus).fit(
@@ -521,3 +527,96 @@ class TestLeastSquaresFitterDataShape(TestSetup):
                 slope_name="amplitude",
                 batch_size=batch_size,
             )
+
+
+class TestLeastSquaresFitterInvalidUnits(TestSetup):
+    """Tests that units with a constant or non-finite time series are excluded from the fit."""
+
+    estimated_names: tuple[str, ...] = ("baseline", "amplitude")
+
+    @pytest.mark.parametrize("batch_size", [None, 1, 2])
+    def test_invalid_units_are_excluded(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        batch_size: int | None,
+    ):
+        """Excluded units get NaN estimates and losses, and the other units get what they get on their own.
+
+        The excluded units start from NaN pRF parameters, as a grid search returns them, which must not reach the
+        parameter checks of the model.
+
+        """
+        params = params.assign(roi=["V1", "V2", "V3"])
+        observed = np.asarray(model(stimulus, params))
+        data, is_valid = insert_invalid_units(observed)
+        init = insert_invalid_parameters(params, is_valid, ["mu_x", "mu_y", "sigma"])
+        init.index = init.index * 10
+
+        fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
+
+        with pytest.warns(InvalidUnitsWarning, match=INVALID_UNITS_MESSAGE):
+            history, ls_params = fitter.fit(
+                data,
+                init,
+                slope_name="amplitude",
+                intercept_name="baseline",
+                batch_size=batch_size,
+            )
+
+        expected_history, expected_params = fitter.fit(
+            observed,
+            params,
+            slope_name="amplitude",
+            intercept_name="baseline",
+            batch_size=batch_size,
+        )
+
+        estimated = list(self.estimated_names)
+        other = [name for name in init.columns if name not in estimated]
+
+        assert ls_params.index.equals(init.index)
+        assert list(ls_params.columns) == list(init.columns)
+        assert ls_params.loc[~is_valid, estimated].isna().all().all()
+        pd.testing.assert_frame_equal(ls_params.loc[~is_valid, other], init.loc[~is_valid, other])
+        pd.testing.assert_frame_equal(ls_params[is_valid].reset_index(drop=True), expected_params)
+
+        assert np.all(np.isnan(history.history["loss"][~is_valid]))
+        np.testing.assert_allclose(history.history["loss"][is_valid], expected_history.history["loss"])
+
+    def test_all_units_excluded(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Data in which no unit can be fit returns NaN estimates for every unit instead of raising."""
+        data = np.zeros((len(params), stimulus.design.shape[0]))
+
+        with pytest.warns(InvalidUnitsWarning, match=f"Excluded {len(params)} of {len(params)} units"):
+            history, ls_params = LeastSquaresFitter(model=model, stimulus=stimulus).fit(
+                data,
+                params,
+                slope_name="amplitude",
+                intercept_name="baseline",
+            )
+
+        other = [name for name in params.columns if name not in self.estimated_names]
+
+        assert ls_params[list(self.estimated_names)].isna().all().all()
+        pd.testing.assert_frame_equal(ls_params[other], params[other])
+        assert np.all(np.isnan(history.history["loss"]))
+
+    def test_valid_units_do_not_warn(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Data in which every unit can be fit does not warn."""
+        observed = np.asarray(model(stimulus, params))
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", InvalidUnitsWarning)
+            LeastSquaresFitter(model=model, stimulus=stimulus).fit(observed, params, slope_name="amplitude")

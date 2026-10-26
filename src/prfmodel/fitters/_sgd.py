@@ -8,6 +8,8 @@ from keras import ops
 from tqdm.auto import tqdm
 from prfmodel._backend._fitters import BackendSGDFitter
 from prfmodel._docstring import doc
+from prfmodel.fitters._validation import _find_valid_units
+from prfmodel.fitters._validation import _merge_unit_estimates
 from prfmodel.fitters._validation import _validate_data_shape
 from prfmodel.fitters.adapter import Adapter
 from prfmodel.models.base import BaseCanonical
@@ -125,7 +127,7 @@ class SGDFitter(BackendSGDFitter):
     ...     "sigma": [1.0],
     ... })
     >>> # Create dummy data for a single unit
-    >>> data = np.zeros((1, stimulus.design.shape[0]))
+    >>> data = np.random.default_rng(0).standard_normal((1, stimulus.design.shape[0]))
     >>> # Fit model parameters
     >>> history, params_sgd = fitter.fit(data, params_init, num_steps=5)
     >>> print(list(params_sgd.columns))
@@ -196,6 +198,7 @@ class SGDFitter(BackendSGDFitter):
     def _delete_variables(self) -> None:
         del self._parameter_variables
 
+    @doc
     def fit(  # noqa: PLR0913 (too many arguments in function definition)
         self,
         data: Tensor,
@@ -232,7 +235,8 @@ class SGDFitter(BackendSGDFitter):
         SGDHistory
             A history object that contains loss and metric values for each optimization step.
         pandas.DataFrame
-            A dataframe with final model parameters.
+            A dataframe with final model parameters. The parameters that are not in `fixed_parameters` are NaN for
+            units that are excluded from the fit (see Warns). Other parameters are returned unchanged.
 
         Raises
         ------
@@ -241,12 +245,19 @@ class SGDFitter(BackendSGDFitter):
             `init_parameters`, or if its number of columns does not match the number of frames in the model
             prediction.
 
+        Warns
+        -----
+        %(warns_invalid_units)s
+
         """
         if fixed_parameters is None:
             fixed_parameters = []
 
+        data = ops.convert_to_tensor(data, dtype=self.dtype)
+
         num_units = len(init_parameters)
         _validate_data_shape(data, num_units=num_units)
+        valid_units = _find_valid_units(data)
         if batch_size is None:
             batch_size = num_units
 
@@ -254,9 +265,9 @@ class SGDFitter(BackendSGDFitter):
         param_batches = []
         step_offset = 0
 
-        batch_starts = range(0, num_units, batch_size)
+        batch_starts = range(0, len(valid_units), batch_size)
         for start in tqdm(batch_starts, desc="Processing data batches", total=len(batch_starts)):
-            end = min(start + batch_size, num_units)
+            rows = valid_units[start : start + batch_size]
 
             # Each batch is fit on a freshly-constructed instance rather than reusing 'self'. Reusing
             # 'self' across batches would keep accumulating every previous batch's parameter variables
@@ -271,8 +282,8 @@ class SGDFitter(BackendSGDFitter):
                 dtype=self.dtype,
             )
             batch_history, batch_params = batch_fitter._fit_batch(  # noqa: SLF001 (private member access)
-                data[start:end],
-                init_parameters.iloc[start:end],
+                ops.take(data, rows, axis=0),
+                init_parameters.iloc[rows],
                 fixed_parameters,
                 num_steps,
                 regressors,
@@ -286,8 +297,14 @@ class SGDFitter(BackendSGDFitter):
 
             param_batches.append(batch_params)
 
-        new_parameters = pd.concat(param_batches, ignore_index=True)
-        new_parameters.index = init_parameters.index
+        # The parameters that become trainable variables (see '_create_variables')
+        estimated_names = [
+            name
+            for name in init_parameters.columns
+            if name in self.model.parameter_names and name not in fixed_parameters
+        ]
+        estimates = pd.concat(param_batches, ignore_index=True) if param_batches else init_parameters.iloc[:0]
+        new_parameters = _merge_unit_estimates(init_parameters, estimates, valid_units, estimated_names)
 
         return history, new_parameters
 

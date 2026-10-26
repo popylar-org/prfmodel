@@ -60,3 +60,14 @@ class ResolutionMismatchWarning(UserWarning):
     :class:`~prfmodel.models.prf.CSTPRFModel` have different explicit resolutions.
 
     """
+
+
+class InvalidUnitsWarning(UserWarning):
+    """Warning for when units in the target data of a fitter cannot be fit.
+
+    Fitters issue this warning when the time series of a unit is constant (e.g., a vertex on the medial wall) or
+    contains `NaN` or infinite values. These units are excluded from the fit and the parameters the fitter
+    estimates are `NaN` for them, as are their losses. Remove such units from the data before fitting to avoid
+    the warning.
+
+    """
