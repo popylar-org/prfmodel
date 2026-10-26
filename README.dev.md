@@ -61,6 +61,10 @@ uv run pytest
 
 The package uses [GitHub action workflows](https://docs.github.com/en/actions) to automatically run tests on GitHub infrastructure against multiple Python versions. Existing workflows can be found in [`.github/workflows`](.github/workflows/)
 
+These workflows install the dependency versions in `uv.lock`. The [`fresh-install.yml`](.github/workflows/fresh-install.yml)
+workflow instead installs prfmodel with pip, as users do, and tests it against the newest dependency versions. It runs
+weekly and can be started manually from the Actions tab, for example before a release.
+
 ## Validation
 
 prfmodel is validated against external packages ([braincoder](https://github.com/Gilles86/braincoder/tree/main), [prfpy](https://github.com/VU-Cog-Sci/prfpy)). These validation checks live in the [`validation/`](validation/) folder and are also run through GitHub action workflows.
