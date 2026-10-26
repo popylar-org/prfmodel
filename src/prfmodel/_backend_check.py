@@ -10,8 +10,11 @@ import contextlib
 import difflib
 import importlib.util
 import json
+import logging
 import os
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 SUPPORTED_BACKENDS = ("jax", "tensorflow", "torch")
 
@@ -28,7 +31,7 @@ def check_backend() -> None:
         If the selected backend is not one that prfmodel supports or is not installed.
 
     """
-    backend, selection = _selected_backend()
+    backend, origin, selection = _selected_backend()
 
     if backend not in SUPPORTED_BACKENDS:
         msg = f"{selection}, which prfmodel does not support."
@@ -54,20 +57,26 @@ def check_backend() -> None:
         msg += f" {_how_to_fix()}"
         raise ImportError(msg)
 
+    logger.info("Using the Keras backend '%s' (%s).", keras.backend.backend(), origin)
 
-def _selected_backend() -> tuple[str, str]:
-    # Resolves the backend as Keras does and describes where the choice comes from. Keras ignores KERAS_BACKEND when
-    # it is empty.
+
+def _selected_backend() -> tuple[str, str, str]:
+    # Resolves the backend as Keras does. Returns the backend, where the choice comes from, and a description of both
+    # for error messages. Keras ignores KERAS_BACKEND when it is empty.
     if backend := os.environ.get("KERAS_BACKEND"):
-        return backend, f"KERAS_BACKEND is set to '{backend}'"
+        return backend, "set by KERAS_BACKEND", f"KERAS_BACKEND is set to '{backend}'"
 
     config_path = Path(os.environ.get("KERAS_HOME", "~/.keras"), "keras.json").expanduser()
     # Keras falls back to its default if the file is missing or invalid
     with contextlib.suppress(OSError, ValueError, TypeError, KeyError):
         backend = str(json.loads(config_path.read_text())["backend"])
-        return backend, f"KERAS_BACKEND is not set, so Keras uses the backend '{backend}' from {config_path}"
+        return (
+            backend,
+            f"set in {config_path}",
+            f"KERAS_BACKEND is not set, so Keras uses the backend '{backend}' from {config_path}",
+        )
 
-    return "tensorflow", "KERAS_BACKEND is not set, so Keras uses its default backend 'tensorflow'"
+    return "tensorflow", "Keras default", "KERAS_BACKEND is not set, so Keras uses its default backend 'tensorflow'"
 
 
 def _how_to_fix(missing: str | None = None) -> str:

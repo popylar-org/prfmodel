@@ -1,6 +1,7 @@
 """Tests for the check of the Keras backend."""
 
 import json
+import logging
 import os
 import subprocess
 import sys
@@ -46,6 +47,33 @@ def import_prfmodel(
 def test_installed_backend_passes():
     """Test that the backend the tests run with passes the check."""
     check_backend()
+
+
+def test_backend_from_environment_is_logged(caplog: pytest.LogCaptureFixture, monkeypatch: pytest.MonkeyPatch):
+    """Test that the check logs the backend selected by KERAS_BACKEND."""
+    monkeypatch.setenv("KERAS_BACKEND", CURRENT_BACKEND)
+
+    with caplog.at_level(logging.INFO, logger="prfmodel"):
+        check_backend()
+
+    assert f"Using the Keras backend '{CURRENT_BACKEND}' (set by KERAS_BACKEND)." in caplog.text
+
+
+def test_backend_from_keras_configuration_is_logged(
+    tmp_path: Path,
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Test that the check logs the backend selected by the Keras configuration file."""
+    config_path = tmp_path / "keras.json"
+    config_path.write_text(json.dumps({"backend": CURRENT_BACKEND}))
+    monkeypatch.delenv("KERAS_BACKEND", raising=False)
+    monkeypatch.setenv("KERAS_HOME", str(tmp_path))
+
+    with caplog.at_level(logging.INFO, logger="prfmodel"):
+        check_backend()
+
+    assert f"Using the Keras backend '{CURRENT_BACKEND}' (set in {config_path})." in caplog.text
 
 
 def test_current_backend_imports(tmp_path: Path):
