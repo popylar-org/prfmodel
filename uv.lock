@@ -3530,7 +3530,7 @@ wheels = [
 
 [[package]]
 name = "prfmodel"
-version = "0.0.1"
+version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "keras", version = "3.12.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
