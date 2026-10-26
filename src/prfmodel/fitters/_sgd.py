@@ -26,7 +26,8 @@ class SGDHistory:
     Attributes
     ----------
     history : dict
-        Dictionary with keys indicating metric names and values containing metric values for each step.
+        Dictionary with keys indicating metric names and values containing metric values for each step. After
+        :meth:`SGDFitter.fit` returns, the values are plain Python floats on every backend.
     step : list of int
         List of step indices. When fitting is split into data batches (see `batch_size` in :meth:`SGDFitter.fit`),
         each batch is optimized independently but its steps continue counting up from where the previous batch left
@@ -73,9 +74,9 @@ class SGDFitter(BackendSGDFitter):
         Adapter object to apply transformations to parameters during fitting.
     optimizer : keras.optimizers.Optimizer, optional
         Optimizer instance. Default is `None` where a `keras.optimizers.Adam` optimizer is used.
-    loss : keras.optimizers.Loss or Callable, optional
-        Loss instance or function with the signatur `f(y, y_pred)`, where `y` are the target data and `y_pred` are the
-        model predicitons. Default is `None` where a `keras.optimizers.MeanSquaredError` loss is used.
+    loss : keras.losses.Loss or Callable, optional
+        Loss instance or function with the signature `f(y, y_pred)`, where `y` are the target data and `y_pred` are
+        the model predictions. Default is `None` where a `keras.losses.MeanSquaredError` loss is used.
     compile_step : bool, default=False
         Whether to compile the optimization step with the backend's native primitive: `jax.jit` on JAX,
         `tf.function` on TensorFlow and `torch.compile` on PyTorch. With `False` (the default) the step
@@ -380,6 +381,12 @@ class SGDFitter(BackendSGDFitter):
                     pbar.set_postfix({key: float(value) for key, value in logs.items()})
 
                 history.on_step_end(step, logs)
+
+        # The logs are backend tensors. They are converted once the loop is done, in one transfer per metric,
+        # rather than at every step, which would synchronize the loop with the device (see the progress bar).
+        history.history = {
+            key: ops.convert_to_numpy(ops.stack(values)).tolist() for key, values in history.history.items()
+        }
 
         if state is not None:
             trainable_variables, non_trainable_variables, _, metrics_variables = state
