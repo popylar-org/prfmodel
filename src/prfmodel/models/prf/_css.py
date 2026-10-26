@@ -23,9 +23,9 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     Two-dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS).
 
     This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
-    and scaling model response. In contrast to :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`, it
+    and scaling model response. In contrast to :class:`~prfmodel.models.prf.Gaussian2DPRFModel`, it
     encodes the stimulus response using compressive spatial summation (see
-    :class:`~prfmodel.models.encoding.CompressiveEncoder`).
+    :class:`~prfmodel.models.compression.CompressiveEncoder`).
 
     Parameters
     ----------
@@ -74,16 +74,16 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
          - Compression exponent (must be > 0).
        * - ``delay``
          - Impulse
-         - Peak time of the positive gamma component (in seconds; optional).
+         - Mean time of the positive gamma component (in seconds; optional).
        * - ``dispersion``
          - Impulse
-         - Rate parameter of the positive gamma component (optional).
+         - Scale parameter of the positive gamma component (optional).
        * - ``undershoot``
          - Impulse
-         - Peak time of the negative gamma component (in seconds; optional).
+         - Mean time of the negative gamma component (in seconds; optional).
        * - ``u_dispersion``
          - Impulse
-         - Rate parameter of the negative gamma component (optional).
+         - Scale parameter of the negative gamma component (optional).
        * - ``ratio``
          - Impulse
          - Weight of the negative gamma component (optional).
@@ -155,22 +155,22 @@ def init_css_from_gaussian(gaussian_params: pd.DataFrame, gain: float = 1.0, n: 
     """
     Initialize compressive spatial summation parameters from fitted Gaussian parameters.
 
-    Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
-    into starting parameters for a :class:`~prfmodel.models.css.Gaussian2DCSSPRFModel`.
+    Converts the output of a fitted :class:`~prfmodel.models.prf.Gaussian2DPRFModel`
+    into starting parameters for a :class:`~prfmodel.models.prf.Gaussian2DCSSPRFModel`.
 
     Parameters
     ----------
     gaussian_params : pandas.DataFrame
-        DataFrame of fitted parameters from a :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`.
+        DataFrame of fitted parameters from a :class:`~prfmodel.models.prf.Gaussian2DPRFModel`.
     gain : float, default=1.0
-        Amplification parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`.
+        Amplification parameter for the :class:`~prfmodel.models.compression.CompressiveEncoder`.
     n : float, default=0.5
-        Compression exponent parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`. Must be > 0.
+        Compression exponent parameter for the :class:`~prfmodel.models.compression.CompressiveEncoder`. Must be > 0.
 
     Returns
     -------
     pandas.DataFrame
-        DataFrame with two additional columns: ``gain`` and ``m``.
+        DataFrame with two additional columns: ``gain`` and ``n``.
 
     Raises
     ------

@@ -201,7 +201,7 @@ from prfmodel.plotting import animate_2d_prf_stimulus
 
 ani = animate_2d_prf_stimulus(stimulus, interval=50)  # Pause 50 ms between time frames
 
-HTML(ani.to_html5_video())
+HTML(ani.to_jshtml())
 ```
 
 We can see that the stimulus consists of a bar that moves vertically and horizontally across the screen, interrupted
@@ -451,8 +451,8 @@ return the combination that fits the observed data best. This will result in a g
 $21 \times 21 \times 20 = 8820$ parameter combinations. This is still a relatively small grid and we recommend
 specifying finer grids in practice.
 
-Let's construct the {py:class}`prfmodel.fitters.grid.GridFitter` and perform the grid search. Note that we pass the
-training stimulus and set `batch_size=20` to let the {py:class}`prfmodel.fitters.grid.GridFitter`
+Let's construct the {py:class}`prfmodel.fitters.GridFitter` and perform the grid search. Note that we pass the
+training stimulus and set `batch_size=20` to let the {py:class}`prfmodel.fitters.GridFitter`
 evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is the negative correlation, which ignores differences in baseline and amplitude between model predictions and observed data. This means the data do not need to be demeaned or converted to percent signal change first, but also that `baseline` and `amplitude` cannot be estimated by the grid search itself. We fix them here and estimate them with least squares in the next step.
 
 ```{code-cell} ipython3

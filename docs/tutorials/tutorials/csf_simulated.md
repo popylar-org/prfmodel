@@ -289,7 +289,7 @@ plot_observed_predicted(
 ```
 
 To finetune our model fits, we use SGD to iteratively optimize model parameters using the gradient of a loss function
-that is computed between data and model predictions. The default loss function in prfmodel is the means squared error.
+that is computed between data and model predictions. The default loss function in prfmodel is the mean squared error.
 As initial parameters, we use the result from the grid search and least squares fit. We fix the parameters related to
 the impulse response to their initial values (which are the "true" values).
 

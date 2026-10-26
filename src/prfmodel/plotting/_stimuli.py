@@ -89,8 +89,7 @@ def animate_2d_prf_stimulus(  # noqa: PLR0913
     >>> from IPython.display import HTML  # doctest: +SKIP
     >>> bar_stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64, frame_duration=1.0)
     >>> ani = animate_2d_prf_stimulus(bar_stimulus)
-    >>> video = ani.to_html5_video()  # doctest: +SKIP
-    >>> HTML(video)  # doctest: +SKIP
+    >>> HTML(ani.to_jshtml())  # doctest: +SKIP
 
     """
     fig, ax, grid_limits = _setup_2d_plot(stimulus, title, **kwargs)

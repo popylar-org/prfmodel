@@ -297,16 +297,16 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
          - Standard deviation of the isotropic Gaussian.
        * - ``delay``
          - Impulse
-         - Peak time of the positive gamma component (in seconds; optional).
+         - Mean time of the positive gamma component (in seconds; optional).
        * - ``dispersion``
          - Impulse
-         - Rate parameter of the positive gamma component (optional).
+         - Scale parameter of the positive gamma component (optional).
        * - ``undershoot``
          - Impulse
-         - Peak time of the negative gamma component (in seconds; optional).
+         - Mean time of the negative gamma component (in seconds; optional).
        * - ``u_dispersion``
          - Impulse
-         - Rate parameter of the negative gamma component (optional).
+         - Scale parameter of the negative gamma component (optional).
        * - ``ratio``
          - Impulse
          - Weight of the negative gamma component (optional).
@@ -413,16 +413,16 @@ class Gaussian1DPRFModel(CanonicalPRFModel):
          - Standard deviation of the Gaussian.
        * - ``delay``
          - Impulse
-         - Peak time of the positive gamma component (in seconds; optional).
+         - Mean time of the positive gamma component (in seconds; optional).
        * - ``dispersion``
          - Impulse
-         - Rate parameter of the positive gamma component (optional).
+         - Scale parameter of the positive gamma component (optional).
        * - ``undershoot``
          - Impulse
-         - Peak time of the negative gamma component (in seconds; optional).
+         - Mean time of the negative gamma component (in seconds; optional).
        * - ``u_dispersion``
          - Impulse
-         - Rate parameter of the negative gamma component (optional).
+         - Scale parameter of the negative gamma component (optional).
        * - ``ratio``
          - Impulse
          - Weight of the negative gamma component (optional).

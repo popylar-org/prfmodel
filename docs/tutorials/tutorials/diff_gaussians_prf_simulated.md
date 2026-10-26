@@ -56,18 +56,16 @@ The stimulus simulates a bar moving in different directions through a two-dimens
 ```{code-cell} ipython3
 from prfmodel.examples import load_2d_prf_bar_stimulus
 
-num_frames = 200  # Simulate 200 time frames
-
 stimulus = load_2d_prf_bar_stimulus()
 print(stimulus)
 ```
 
-When printing the `stimulus` object, we can see that it has three attributes. The `design` attribute defines how
-the visual field changes over time. It has shape `(num_frames, height, width)`, where height and width define the number of pixels at which the visual field is recorded. The `grid` attribute maps each pixel to its coordinate in the visual field (i.e., the degree of visual angle). Its last axis follows the axes of the design, so `grid[..., 0]` holds the vertical (`y`) coordinate and `grid[..., 1]` the horizontal (`x`) coordinate.
+When printing the `stimulus` object, we can see that it has four attributes. The `design` attribute defines how
+the visual field changes over time. It has shape `(num_frames, height, width)`, where height and width define the number of pixels at which the visual field is recorded. The `grid` attribute maps each pixel to its coordinate in the visual field (i.e., the degree of visual angle). Its last axis follows the axes of the design, so `grid[..., 0]` holds the vertical (`y`) coordinate and `grid[..., 1]` the horizontal (`x`) coordinate. The `frame_duration` attribute is the duration of each frame in seconds (e.g., one TR), at which the model samples its impulse response, and `dimension_labels` names the grid axes.
 
 +++
 
-We can visualize the stimulus using `animate_2d_stimulus`.
+We can visualize the stimulus using {py:func}`prfmodel.plotting.animate_2d_prf_stimulus`.
 
 ```{code-cell} ipython3
 from IPython.display import HTML
@@ -75,7 +73,7 @@ from prfmodel.plotting import animate_2d_prf_stimulus
 
 ani = animate_2d_prf_stimulus(stimulus, interval=25)  # Pause 25 ms between time frames
 
-HTML(ani.to_html5_video())
+HTML(ani.to_jshtml())
 ```
 
 ## Defining the DoG pRF model

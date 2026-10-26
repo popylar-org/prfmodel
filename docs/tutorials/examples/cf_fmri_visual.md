@@ -265,7 +265,7 @@ It assumes that the stimulus (a vertex in the distance matrix) elicits a respons
 Gaussian shape in two-dimensional cortical space. A baseline and amplitude parameter shift and scale
 the predicted response to match the observed BOLD response.
 
-The {py:class}`prfmodel.models.prf.GaussianCFModel` class performs these steps to make a combined prediction.
+The {py:class}`prfmodel.models.cf.GaussianCFModel` class performs these steps to make a combined prediction.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -274,7 +274,7 @@ from prfmodel.models.cf import GaussianCFModel
 cf_model = GaussianCFModel()
 ```
 
-The {py:class}`prfmodel.models.prf.GaussianCFModel` class requires two core parameters: `center_index` indicates the location of the CF in the
+The {py:class}`prfmodel.models.cf.GaussianCFModel` class requires two core parameters: `center_index` indicates the location of the CF in the
 source region. With the current CF implementation in prfmodel, this must be a vertex index in the distance matrix/source
 region. This means that the center of a CF must be a vertex on the surface mesh (i.e., it cannot be in between vertices).
 
@@ -319,7 +319,7 @@ response_valid = response_psc[response_is_valid]
 is_v1_valid = is_v1[response_is_valid]
 ```
 
-We will fit the CF model to our BOLD response data using two stages. We begin with a grid search using {py:class}`prfmodel.fitters.grid.GridFitter` to find good values for our parameters of interest (`center_index`, and `sigma`). Then, we use {py:class}`prfmodel.fitters.linear.LeastSquaresFitter` to estimate the `baseline` and `amplitude` of
+We will fit the CF model to our BOLD response data using two stages. We begin with a grid search using {py:class}`prfmodel.fitters.GridFitter` to find good values for our parameters of interest (`center_index`, and `sigma`). Then, we use {py:class}`prfmodel.fitters.LeastSquaresFitter` to estimate the `baseline` and `amplitude` of
 our model.
 
 > **Note**: Typically, we would also use stochastic gradient descent (SGD) to finetune our model fits after the least-squares stage. To keep the example computationally simple, we omit this step here but encourage readers to explore this approach at the end.
@@ -343,7 +343,7 @@ param_ranges = {
 The grid search will evaluate all possible combinations of the defined ranges and return the combination that fits the simulated
 data best. Note that this is still a relatively small grid and we recommend specifying finer grids in practice.
 
-Let's construct the {py:class}`prfmodel.fitters.grid.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.grid.GridFitter`
+Let's construct the {py:class}`prfmodel.fitters.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.GridFitter`
 evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is the negative correlation, which ignores differences in baseline and amplitude between model predictions and observed data. This means the data do not need to be demeaned or converted to percent signal change first, but also that `baseline` and `amplitude` cannot be estimated by the grid search itself. We fix them here and estimate them with least squares in the next step.
 
 ```{code-cell} ipython3
@@ -553,7 +553,7 @@ This example showed how to fit a Gaussian CF model to empirical fMRI data collec
 The predictions by our CF model can potentially be improved. We suggest different directions for improving the pRF model fit:
 
 - Increasing the number of points in the parameter grid for the grid search
-- Finetuning `sigma` with stochastic gradient descent with {py:class}`prfmodel.fitters.sgd.SGDFitter`
+- Finetuning `sigma` with stochastic gradient descent with {py:class}`prfmodel.fitters.SGDFitter`
 - Applying preprocessing steps before fitting the pRF model (e.g., high-pass filtering)
 - Building a more complex CF model (e.g., difference of Gaussian, see Zuiderbaan et al., 2012)
 

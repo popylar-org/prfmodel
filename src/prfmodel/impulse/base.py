@@ -5,12 +5,12 @@ Classes in this module inherit from :class:`~prfmodel.protocols.ModelProtocol` t
 
 They are abstract base classes, meaning that they
 cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
-shared by all child classes. For example, :class:`~prfmodel.models.base.BaseImpulse` defines that all child classes
-must implement a :meth:`~prfmodel.models.base.BaseImpulse.call` method that takes a set of parameters
+shared by all child classes. For example, :class:`~prfmodel.impulse.base.BaseImpulse` defines that all child classes
+must implement a :meth:`~prfmodel.impulse.base.BaseImpulse.call` method that takes a set of parameters
 as input. However, it leaves it up to each child class to define how input parameters are used to make
 model predictions.
 
-All base classes have a concrete user-facing :meth:``__call__`` method
+All base classes have a concrete user-facing ``__call__`` method
 (e.g., :meth:`~prfmodel.impulse.base.BaseImpulse.__call__`) that takes non-tensor arguments and
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
@@ -23,8 +23,8 @@ added to the user-supplied parameter dataframe (replicating the default value fo
 method if not already present.
 
 Impulse models sample their response at a time `resolution`. By default the resolution is `None`, which means that
-a canonical model samples the impulse model at the frame duration of its stimulus (e.g.,
-:attr:`~prfmodel.stimuli.PRFStimulus.frame_duration`), and that the impulse model is sampled at
+a canonical model samples the impulse model at the frame duration of its stimulus (e.g., `frame_duration` of a
+:class:`~prfmodel.stimuli.PRFStimulus`), and that the impulse model is sampled at
 :data:`DEFAULT_RESOLUTION` when it is used on its own.
 
 """

@@ -58,19 +58,19 @@ class GridFitter:
     ----------
     %(model_fitter)s
     %(stimulus)s
-    loss : keras.optimizers.Loss or Callable, optional
+    loss : keras.losses.Loss or Callable, optional
         Loss instance or function with the signature `f(y_true, y_pred)`, where `y_true` is the target data and
-        `y_pred` are the model predicitons. Default is `None` where a
+        `y_pred` are the model predictions. Default is `None` where a
         :class:`~prfmodel.fitters.losses.CorrelationLoss` loss is used. Note that, when a
         :class:`keras.losses.Loss` instance is used, the argument `reduction` must be set to `"none"` to enable
         loss computation for all data batches. When a function is used, it must return a loss value for every unit in
         `y_true` and `y_pred`.
     compile_step : bool, default=False
-        Whether to compile the optimization step with the backend's native primitive: `jax.jit` on JAX,
-                `tf.function` on TensorFlow and `torch.compile` on PyTorch. With `False` (the default) the step
-                runs eagerly, which is slower but makes the step inspectable and produces Python
-                tracebacks that point at the offending line. Whether compiling pays off depends on the backend
-                and on the problem size.
+        Whether to compile the evaluation of each grid batch with the backend's native primitive: `jax.jit` on JAX,
+        `tf.function` on TensorFlow and `torch.compile` on PyTorch. With `False` (the default) the evaluation
+        runs eagerly, which is slower but makes it inspectable and produces Python
+        tracebacks that point at the offending line. Whether compiling pays off depends on the backend
+        and on the problem size.
     %(dtype)s
 
     Warns

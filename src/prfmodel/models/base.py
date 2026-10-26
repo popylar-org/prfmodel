@@ -10,7 +10,7 @@ classes must implement a :meth:`~prfmodel.models.base.BaseTuning.call` method th
 stimulus and set of tensor parameters as input. However, it leaves it up to each child class to define how input
 stimulus and parameters are used to make model predictions.
 
-All base classes have a concrete user-facing :meth:``__call__`` method
+All base classes have a concrete user-facing ``__call__`` method
 (e.g., :meth:`~prfmodel.models.base.BaseTuning.__call__`) that takes non-tensor arguments and
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
@@ -29,7 +29,7 @@ which user-facing and tensor-holding stimulus types :meth:`__call__` and :meth:`
 
 An exception is :class:`~prfmodel.models.base.BaseCanonical` which is a composite model class that is intended for
 holding and calling submodels that inherit from :class:`~prfmodel.protocols.ModelProtocol`. Child classes must only
-define the :meth:`call` method and optionally the :attr`_additional_parameter_names` attribute. The composite model
+define the :meth:`call` method and optionally the :attr:`_additional_parameter_names` attribute. The composite model
 class collects the parameter names of all submodels and performs validation checks on them.
 
 """

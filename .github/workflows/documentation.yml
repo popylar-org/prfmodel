@@ -35,12 +35,10 @@ jobs:
             SAFE=$(echo "$BRANCH" | sed 's/[^a-zA-Z0-9._-]/-/g')
             echo "dir=branches/${SAFE}" >> "$GITHUB_OUTPUT"
           fi
-      - name: Install ffmpeg
+      - name: Install graphviz (for inheritance diagrams)
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
-      - name: Install graphviz (for inheritance diagrams)
-        run: sudo apt-get install -y graphviz
+          sudo apt-get install -y graphviz
       - uses: ./.github/actions/setup-python-cached
         with:
           python-version: '3.13'

@@ -40,8 +40,8 @@ class ParameterTransform:
 
     Notes
     -----
-    Instances of this class can be used inside an :class:`~prfmodel.adapter.Adapter` object to transform specific
-    parameters during model fitting.
+    Instances of this class can be used inside an :class:`~prfmodel.fitters.adapter.Adapter` object to transform
+    specific parameters during model fitting.
 
     When using the transform within stochastic gradient descent, the transform and inverse functions should allow for
     gradient tracking (e.g., by using functions from the `keras.ops` module).
@@ -438,8 +438,9 @@ class Adapter:
     Parameters
     ----------
     transforms : list of ParameterTransform, optional
-        A list of :class:`~prfmodel.adapter.ParameterTransform` or :class:`~prfmodel.adapter.ParameterConstraint`
-        objects that will be applied in the given order. If `None`, no transformations will be applied.
+        A list of :class:`~prfmodel.fitters.adapter.ParameterTransform` or
+        :class:`~prfmodel.fitters.adapter.ParameterConstraint` objects that will be applied in the given order. If
+        `None`, no transformations will be applied.
 
     Examples
     --------

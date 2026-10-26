@@ -105,19 +105,19 @@ class Gaussian2DCSTPRFModel(CSTPRFModel):
        * - ``delay``
          - Impulse
          - --
-         - Peak time of the positive gamma component (in seconds).
+         - Mean time of the positive gamma component (in seconds).
        * - ``dispersion``
          - Impulse
          - --
-         - Rate parameter of the positive gamma component.
+         - Scale parameter of the positive gamma component.
        * - ``undershoot``
          - Impulse
          - --
-         - Peak time of the negative gamma component (in seconds).
+         - Mean time of the negative gamma component (in seconds).
        * - ``u_dispersion``
          - Impulse
          - --
-         - Rate parameter of the negative gamma component.
+         - Scale parameter of the negative gamma component.
        * - ``ratio``
          - Impulse
          - --

@@ -21,7 +21,6 @@ from prfmodel.models.prf import DivNormGaussian2DPRFModel
 from prfmodel.models.prf import DoG2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
-from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from tests.conftest import PRFStimulusSetup
 from tests.conftest import TestSetup
@@ -98,7 +97,7 @@ class TestSGDFitter(_SGDGradientChecks, TestSetup):
         assert isinstance(history, SGDHistory)
         assert history.step == list(range(self.num_steps))
         assert isinstance(history.history, dict)
-        assert all(isinstance(x, Tensor) for x in history.history["loss"])
+        assert all(type(x) is float for x in history.history["loss"])
 
     def _check_sgd_params_shape(self, result_params: pd.DataFrame, params: pd.DataFrame) -> None:
         assert isinstance(result_params, pd.DataFrame)
@@ -596,6 +595,21 @@ class TestSGDFitterCompiledStep(PRFStimulusSetup):
     def test_compilation_can_be_switched_on(self, stimulus: PRFStimulus, response_model: Gaussian2DPRFModel):
         """Test that every backend has a compilation primitive available."""
         assert SGDFitter(model=response_model, stimulus=stimulus, compile_step=True).compile_step
+
+    def test_compiled_history_holds_floats(
+        self,
+        stimulus: PRFStimulus,
+        response_model: Gaussian2DPRFModel,
+        init_params: pd.DataFrame,
+        true_params: pd.DataFrame,
+    ):
+        """Test that the history holds plain floats when the step is compiled, as it does when it runs eagerly."""
+        fitter = SGDFitter(model=response_model, stimulus=stimulus, compile_step=True)
+
+        history, _ = fitter.fit(response_model(stimulus, true_params), init_params, num_steps=self.num_steps)
+
+        assert len(history.history["loss"]) == self.num_steps
+        assert all(type(x) is float for x in history.history["loss"])
 
     def test_compiled_and_eager_fits_agree(
         self,

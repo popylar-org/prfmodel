@@ -111,9 +111,9 @@ We can visualize the stimulus using {py:func}`prfmodel.plotting.animate_2d_prf_s
 from IPython.display import HTML
 from prfmodel.plotting import animate_2d_prf_stimulus
 
-ani = animate_2d_prf_stimulus(stimulus, interval=50)  # Pause 100 ms between time frames
+ani = animate_2d_prf_stimulus(stimulus, interval=50)  # Pause 50 ms between time frames
 
-HTML(ani.to_html5_video())
+HTML(ani.to_jshtml())
 ```
 
 The stimulus grid spans $\pm 8.3$ degrees of visual angle in both the x- and y-dimension. The design of this stimulus
@@ -263,8 +263,8 @@ For all three parameters, we defined ranges of 20 values that will be used to co
 grid search will evaluate all possible combinations of these values and return the combination that fits the simulated
 data best. This will result in a grid containing $20 ^ 3 = 8000$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
 
-Let's construct the {py:class}`prfmodel.fitters.grid.GridFitter` and perform the grid search. Note that every fitter
-is constructed with `stimulus_train`, so it only ever sees the first half of the experiment. Note also that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.grid.GridFitter`
+Let's construct the {py:class}`prfmodel.fitters.GridFitter` and perform the grid search. Note that every fitter
+is constructed with `stimulus_train`, so it only ever sees the first half of the experiment. Note also that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.GridFitter`
 evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is the negative correlation, which ignores differences in baseline and amplitude between model predictions and observed data. This means the data do not need to be demeaned or converted to percent signal change first, but also that `baseline` and `amplitude` cannot be estimated by the grid search itself. We fix them here and estimate them with least squares in the next step.
 
 ```{code-cell} ipython3

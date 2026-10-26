@@ -10,7 +10,7 @@ classes must implement a :meth:`~prfmodel.regressors.base.BaseRegressors.call` m
 and a set of parameters as input. However, it leaves it up to each child class to define how regresors and
 parameters are used to make model predictions.
 
-All base classes have a concrete user-facing :meth:``__call__`` method
+All base classes have a concrete user-facing ``__call__`` method
 (e.g., :meth:`~prfmodel.regressors.base.BaseRegressors.__call__`) that takes non-tensor arguments and
 performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
 class and only accepts tensor arguments to enable backend compilation.
