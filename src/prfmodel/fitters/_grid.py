@@ -70,6 +70,10 @@ class GridFitter:
                 and on the problem size.
     %(dtype)s
 
+    Warns
+    -----
+    %(warns_resolution_mismatch)s
+
     Notes
     -----
     Depending on the size of the parameter grid and the number of batches in the data, the search can be very
@@ -124,6 +128,8 @@ class GridFitter:
     ):
         self.model = model
         self.stimulus = stimulus
+
+        self.model.check_stimulus(self.stimulus)
 
         if loss is None:
             loss = CorrelationLoss(reduction="none")

@@ -49,3 +49,14 @@ class ShapeMismatchError(ValueError):
         arg2_shape: tuple[int, ...],
     ):
         super().__init__(f"Shapes of '{arg1_name}' {arg1_shape} and '{arg2_name}' {arg2_shape} do not match")
+
+
+class ResolutionMismatchWarning(UserWarning):
+    """Warning for when submodels of a canonical model are sampled on time axes of different resolutions.
+
+    Canonical models issue this warning when an impulse submodel with an explicit
+    :attr:`~prfmodel.impulse.base.BaseImpulse.resolution` is combined with a stimulus whose frame duration
+    differs from it, or when the temporal submodels of a
+    :class:`~prfmodel.models.prf.CSTPRFModel` have different explicit resolutions.
+
+    """

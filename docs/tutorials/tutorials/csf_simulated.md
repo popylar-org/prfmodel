@@ -73,13 +73,15 @@ contrast, sf = np.meshgrid(contrast_levels, sf_levels)
 stimulus = CSFStimulus(
     sf=sf.ravel(),
     contrast=contrast.ravel(),
+    frame_duration=1.0,  # Each frame lasts one second (e.g., one TR)
 )
 
 print(stimulus)
 ```
 
-When printing the `stimulus` object, we can see that it has two attributes. The `sf` attribute defines the spatial frequencies.
+When printing the `stimulus` object, we can see that it has three attributes. The `sf` attribute defines the spatial frequencies.
 It has shape `(num_frames,)`. The `contrast` attribute defines the contrast for each spatial frequency with shape `(num_frames,)`.
+The `frame_duration` attribute is the duration of each frame in seconds, at which the model samples its impulse response.
 
 +++
 

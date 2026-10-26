@@ -93,36 +93,38 @@ It is possible to convert impulse-sum-normalized into impulse-unnormalized ampli
 \end{equation}
 where $h_\text{unnorm}(t)$ is the unnormalized impulse response.
 
-## Impulse responses must have the same sampling rate as observed responses
+## Impulse responses are sampled at the frame duration of the stimulus
 
-Discrete convolution assumes that the convolved signals have the same sampling rate. In prfmodel, the sampling rate
-of stimulus designs and observed neural responses is implicit. They are represented as series of time frames that
-typically have the same sampling rate (the TR; repetition time), but for some models, they can differ (e.g., in the
-compressive spatio-temporal pRF model). For model predictions to be correct, the sampling rate of impulse responses
-must match the sampling rate of the stimulus design. By default, the `resolution` (sampling interval) of impulse models
-in prfmodel is 1 second, which gives silently wrong predictions when the stimulus design has a different sampling
-rate. Therefore, the `resolution` of the impulse model must always be matched to the stimulus design. For a Gaussian 2D
-pRF model, this can be done by adding a custom impulse model:
+Discrete convolution assumes that the convolved signals have the same sampling rate. In prfmodel, stimulus designs
+and observed neural responses are represented as series of time frames that typically have the same sampling rate
+(the TR; repetition time). For model predictions to be correct, impulse responses must be sampled at the same rate as
+the stimulus design.
+
+For this reason, every pRF and CSF stimulus has a required `frame_duration` that contains the duration of one design
+frame in seconds (e.g., the TR). Impulse models have a `resolution` (their sampling interval in seconds) that is `None`
+by default. Inside a canonical model, an impulse model without a `resolution` is sampled at the `frame_duration` of the
+stimulus that the model is called with, so the timing is correct without any further setup:
 
 ```python
-from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.prf import Gaussian2DPRFModel
+from prfmodel.stimuli import PRFStimulus
 
 
 TR = 1.5  # in seconds
 
-# Create a custom impulse model with the TR as resolution
-impulse_model = DerivativeTwoGammaImpulse(resolution=TR)
+# The stimulus carries the sampling rate of the design
+stimulus = PRFStimulus(design=design, grid=grid, frame_duration=TR)
 
-# Insert the custom impulse model into the canonical pRF model
-prf_model = Gaussian2DPRFModel(
-    impulse_model=impulse_model,
-)
+# The default impulse model is sampled every 1.5 seconds when the model is called with this stimulus
+prf_model = Gaussian2DPRFModel()
+response = prf_model(stimulus, parameters)
 ```
 
-This implementation might seem a bit cumbersome, however, it forces the user to think explicitly about the sampling
-rates used in the model and the experiment. It also becomes helpful as soon as different model components operate on
-different sampling rates that must be aligned with each other (e.g., in the compressive spatio-temporal pRF model).
+An explicit `resolution` is never overridden. If it differs from the `frame_duration` of the stimulus, the canonical
+model (and every fitter it is passed to) issues a {py:class}`~prfmodel.exceptions.ResolutionMismatchWarning`,
+because the impulse response and the stimulus design are then convolved on different time axes. An impulse model that
+is used on its own (e.g., to plot an impulse response) is sampled every second if it has no `resolution`.
+
 When comparing model predictions against observed timecourses, both must have matching sampling rates too (typically
 the TR), otherwise one or the other must be up- or downsampled.
 
@@ -152,10 +154,11 @@ from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.prf import Gaussian2DPRFModel
 
 
-TR = 1.5  # in seconds
+TR = 1.5  # in seconds, the 'frame_duration' of the stimulus
 
-# Create a custom impulse model with the TR as resolution and a positive offset
-impulse_model = DerivativeTwoGammaImpulse(resolution=TR, offset=TR / 2.0)
+# Create a custom impulse model with a positive offset. Without a 'resolution', it is sampled at the
+# 'frame_duration' of the stimulus.
+impulse_model = DerivativeTwoGammaImpulse(offset=TR / 2.0)
 
 # Insert the custom impulse model into the canonical pRF model
 prf_model = Gaussian2DPRFModel(

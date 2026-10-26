@@ -11,6 +11,7 @@ from typing import ClassVar
 from typing import cast
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.exceptions import ResolutionMismatchWarning
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import SustainedImpulse
 from prfmodel.impulse import TransientImpulse
@@ -117,7 +118,7 @@ class CanonicalPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
         response = encoding_model.call(stimulus, response, parameters)
 
         if self.models["impulse_model"] is not None:
-            impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+            impulse_model = cast("BaseImpulse", self.models["impulse_model"]).at_resolution(stimulus.frame_duration)
             impulse_response = impulse_model.call(parameters)
             response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
 
@@ -280,7 +281,7 @@ class _BaseDualPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
         response = self._combine_responses(stimulus, parameters, dtype)
 
         if self.models["impulse_model"] is not None:
-            impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+            impulse_model = cast("BaseImpulse", self.models["impulse_model"]).at_resolution(stimulus.frame_duration)
             impulse_response = impulse_model.call(parameters)
             response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
 
@@ -551,6 +552,8 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
 
         # h₁ convolution → L(t)
         if impulse_model is not None:
+            # Resolved once so that h₂ below is built on the same time axis as h₁
+            impulse_model = impulse_model.at_resolution(stimulus.frame_duration)
             impulse_response = impulse_model.call(parameters)
             response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
 
@@ -585,10 +588,6 @@ class DelayedNormPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
             response = response + regressors_model.call(regressors, parameters)
 
         return response
-
-
-class ResolutionMismatchWarning(UserWarning):
-    """Warning for when submodels of a canonical model are sampled on time axes of different resolutions."""
 
 
 @doc
@@ -739,8 +738,8 @@ class CSTPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
         response = encoding_model.call(stimulus, response, parameters)
 
         # Temporal stage: one convolution per channel. The off-transient is the negated on-transient.
-        sustained_model = cast("BaseImpulse", self.models["sustained_model"])
-        transient_model = cast("BaseImpulse", self.models["transient_model"])
+        sustained_model = cast("BaseImpulse", self.models["sustained_model"]).at_resolution(stimulus.frame_duration)
+        transient_model = cast("BaseImpulse", self.models["transient_model"]).at_resolution(stimulus.frame_duration)
 
         response_sustained = convolve_prf_impulse_response(response, sustained_model.call(parameters), dtype=dtype)
         response_transient = convolve_prf_impulse_response(response, transient_model.call(parameters), dtype=dtype)
@@ -759,7 +758,7 @@ class CSTPRFModel(BaseCanonical[PRFStimulus, PRFStimulusTensors]):
         transient = amplitude_transient * (transient_on + transient_off)
 
         if self.models["impulse_model"] is not None:
-            impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+            impulse_model = cast("BaseImpulse", self.models["impulse_model"]).at_resolution(stimulus.frame_duration)
             impulse_response = impulse_model.call(parameters)
 
             sustained = convolve_prf_impulse_response(sustained, impulse_response, dtype=dtype)
@@ -796,18 +795,23 @@ def _check_channel_resolution(
     transient_model: BaseImpulse,
     impulse_model: BaseImpulse | None,
 ) -> None:
-    """Warn if the channel models and the impulse model are sampled at different resolutions.
+    """Warn if the channel models and the impulse model are sampled at different explicit resolutions.
 
     :func:`~prfmodel.impulse.convolve_prf_impulse_response` requires its inputs to be sampled at the same rate
     but does not check it, so a mismatch yields a silently wrong prediction rather than an error. This is a
     warning rather than an error because a deliberate mismatch is meaningful: a finer neural time axis than the
     measurement axis is exactly how the reference computes its channels.
 
+    Submodels without an explicit resolution are skipped: they are sampled at the frame duration of the stimulus,
+    which :meth:`~prfmodel.models.base.BaseCanonical.check_stimulus` compares against the explicit resolutions.
+
     """
-    resolutions = {"sustained_model": sustained_model.resolution, "transient_model": transient_model.resolution}
+    submodels = {"sustained_model": sustained_model, "transient_model": transient_model}
 
     if impulse_model is not None:
-        resolutions["impulse_model"] = impulse_model.resolution
+        submodels["impulse_model"] = impulse_model
+
+    resolutions = {name: model.resolution for name, model in submodels.items() if model.resolution is not None}
 
     if len(set(resolutions.values())) > 1:
         msg = (

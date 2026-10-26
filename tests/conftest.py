@@ -56,10 +56,12 @@ class PRFStimulusSetup:
         # Select subset of time frames that contain a single vertical and horizontal bar movement across screen
         design_sub = stimulus.design[self.start_frame : self.end_frame]
 
-        # Stimulus is immutable so we need to recreated it
+        # Stimulus is immutable so we need to recreated it. The frame duration matches the impulse resolution that
+        # the model regression snapshots were generated with.
         return PRFStimulus(
             design=design_sub,
             grid=stimulus.grid,
+            frame_duration=1.0,
             dimension_labels=stimulus.dimension_labels,
         )
 

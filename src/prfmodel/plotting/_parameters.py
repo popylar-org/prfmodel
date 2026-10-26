@@ -252,7 +252,7 @@ def plot_2d_prf_centers(  # noqa: PLR0913
     >>> import pandas as pd
     >>> rng = np.random.default_rng(0)
     >>> parameters = pd.DataFrame({"mu_x": rng.normal(size=100), "mu_y": rng.normal(size=100)})
-    >>> stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=10, width=32, height=32)
+    >>> stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=10, width=32, height=32, frame_duration=1.0)
     >>> fig, ax = plot_2d_prf_centers(parameters, stimulus=stimulus)
 
     """

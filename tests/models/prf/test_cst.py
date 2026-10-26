@@ -217,12 +217,33 @@ class TestCSTPRFModelValidation:
             Gaussian2DCSTPRFModel(
                 sustained_model=SustainedImpulse(resolution=1.5),
                 transient_model=TransientImpulse(resolution=1.5),
+                impulse_model=DerivativeTwoGammaImpulse(resolution=1.0),
             )
 
     def test_channels_mismatched_with_each_other_warn(self):
         """Test that the two channels sampled differently from one another are reported."""
         with pytest.warns(ResolutionMismatchWarning, match="resolution"):
-            Gaussian2DCSTPRFModel(sustained_model=SustainedImpulse(resolution=1.5))
+            Gaussian2DCSTPRFModel(
+                sustained_model=SustainedImpulse(resolution=1.5),
+                transient_model=TransientImpulse(resolution=1.0),
+            )
+
+    def test_explicit_channel_resolution_is_checked_against_the_stimulus(self):
+        """Test that a channel with an explicit resolution is compared with the stimulus rather than the defaults.
+
+        Submodels without an explicit resolution follow the frame duration of the stimulus, so a mismatch between
+        an explicit and a default resolution is only known once the stimulus is given.
+
+        """
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+
+            model = Gaussian2DCSTPRFModel(sustained_model=SustainedImpulse(resolution=1.5))
+
+        stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=10, width=8, height=8, frame_duration=1.0)
+
+        with pytest.warns(ResolutionMismatchWarning, match="sustained_model"):
+            model.check_stimulus(stimulus)
 
     def test_matching_resolutions_do_not_warn(self):
         """Test that the default configuration, where every time axis agrees, is silent."""

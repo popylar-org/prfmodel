@@ -80,6 +80,10 @@ class SGDFitter(BackendSGDFitter):
         and on the problem size.
     %(dtype)s
 
+    Warns
+    -----
+    %(warns_resolution_mismatch)s
+
     Notes
     -----
     At each step during the fitting, the `model` makes a prediction for each batch in the target data
@@ -143,6 +147,8 @@ class SGDFitter(BackendSGDFitter):
 
         self.model = model
         self.stimulus = stimulus
+
+        self.model.check_stimulus(self.stimulus)
 
         if adapter is None:
             adapter = Adapter()

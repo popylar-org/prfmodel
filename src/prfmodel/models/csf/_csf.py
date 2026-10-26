@@ -357,6 +357,7 @@ class CSFModel(CanonicalCSFModel):
     ...    # Simulate data for 4 time frames
     ...    sf=np.array([1.0, 3.0, 6.0, 12.0]),
     ...    contrast=np.array([0.1, 0.2, 0.4, 0.8]),
+    ...    frame_duration=1.0,
     ... )
     >>> model = CSFModel()
     >>> # Define all model parameters for 3 units

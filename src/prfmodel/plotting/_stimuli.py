@@ -87,7 +87,7 @@ def animate_2d_prf_stimulus(  # noqa: PLR0913
     Examples
     --------
     >>> from IPython.display import HTML  # doctest: +SKIP
-    >>> bar_stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64)
+    >>> bar_stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64, frame_duration=1.0)
     >>> ani = animate_2d_prf_stimulus(bar_stimulus)
     >>> video = ani.to_html5_video()  # doctest: +SKIP
     >>> HTML(video)  # doctest: +SKIP
@@ -201,7 +201,7 @@ def plot_1d_prf_stimulus(  # noqa: PLR0913
     >>> import numpy as np
     >>> design = np.eye(5)[np.random.default_rng(0).integers(0, 5, size=50)]
     >>> grid = np.log(np.arange(1.0, 6.0))[:, np.newaxis]
-    >>> stimulus = PRFStimulus(design=design, grid=grid, dimension_labels=["log(numerosity)"])
+    >>> stimulus = PRFStimulus(design=design, grid=grid, frame_duration=1.0, dimension_labels=["log(numerosity)"])
     >>> fig, ax = plot_1d_prf_stimulus(stimulus, secondary_tick_labels=[1, 2, 3, 4, 5])
 
     """

@@ -47,10 +47,44 @@ _PARAMS: dict[str, str] = {
         "    The dtype of the prediction result. If `None` (the default), uses the dtype from\n"
         "    :func:`prfmodel.utils.get_dtype`."
     ),
+    "frame_duration": (
+        "frame_duration : float\n"
+        "    The duration of one time frame (in seconds), e.g., the repetition time (TR) in fMRI. Must be given\n"
+        "    as a keyword argument. Canonical models sample their impulse models at this interval unless the\n"
+        "    impulse model has an explicit `resolution`. See :doc:`Important details </important_details>`."
+    ),
     "gaussian_norm_note": (
         "This model uses a proper Gaussian density that is normalized by its volume.\n"
         "This differs from other Gaussian pRF model implementations. See\n"
         ":doc:`Important details </important_details>`."
+    ),
+    "impulse_default_parameters": (
+        "default_parameters : dict of float or str, optional\n"
+        "    Dictionary with scalar default parameter values or name of default parameter set.\n"
+        "    Dictionary keys must be valid parameter names. Default values are overridden by user-supplied parameters\n"
+        "    in the :meth:`__call__` method."
+    ),
+    "impulse_default_parameters_hrf": (
+        'default_parameters : dict of float or str, optional, default="glover_hrf"\n'
+        "    Dictionary with scalar default parameter values or name of default parameter set. Available default\n"
+        "    parameter sets are `glover_hrf` (default) and `spm_hrf`. See :mod:`~prfmodel.impulse.defaults` for\n"
+        "    details. Dictionary keys must be valid parameter names. Default values are overridden by user-supplied\n"
+        "    parameters in the :meth:`__call__` method."
+    ),
+    "impulse_duration": ("duration : float, default=32.0\n    The duration of the impulse response (in seconds)."),
+    "impulse_norm": (
+        'norm : str, optional, default="sum"\n'
+        '    The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or\n'
+        "    `None`. If `None`, no normalization is performed. See :doc:`Important details </important_details>`."
+    ),
+    "impulse_offset": ("offset : float, default=0.0\n    The offset of the impulse response (in seconds)."),
+    "impulse_resolution": (
+        "resolution : float, optional\n"
+        "    The time resolution of the impulse response (in seconds), that is the interval between two points at\n"
+        "    which the impulse response function is evaluated. If `None` (the default), a canonical model samples the\n"
+        "    impulse response at the frame duration of its stimulus, and the impulse response is sampled at\n"
+        "    :data:`~prfmodel.impulse.base.DEFAULT_RESOLUTION` (1 second) when the impulse model is used on its own.\n"
+        "    See :meth:`~prfmodel.impulse.base.BaseImpulse.at_resolution`."
     ),
     "model_cf": ("cf_model : BaseTuning\n    A connective field tuning model instance."),
     "model_csf": ("cfs_model : BaseTuning\n    A contrast sensitivity function tuning model instance."),
@@ -74,7 +108,8 @@ _PARAMS: dict[str, str] = {
         "impulse_model : BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional\n"
         "    An impulse model class or instance. Model classes will be instantiated during\n"
         "    initialization. The default creates a :class:`~prfmodel.impulse.DerivativeTwoGammaImpulse`\n"
-        "    instance with default values."
+        "    instance with default values. Impulse models without an explicit `resolution` are sampled at the\n"
+        "    frame duration of the stimulus."
     ),
     "model_prf": ("prf_model : BaseTuning\n    A population receptive field tuning model instance."),
     "model_scaling": (
@@ -140,6 +175,11 @@ _PARAMS: dict[str, str] = {
         "stimulus : PRFStimulusTensors\n"
         "    Tensor-holding population receptive field stimulus object,\n"
         "    from :meth:`~prfmodel.stimuli.PRFStimulus.to_tensors`."
+    ),
+    "warns_resolution_mismatch": (
+        "ResolutionMismatchWarning\n"
+        "    When an impulse submodel has an explicit resolution that differs from the frame duration of the\n"
+        "    stimulus. See :meth:`~prfmodel.models.base.BaseCanonical.check_stimulus`."
     ),
 }
 

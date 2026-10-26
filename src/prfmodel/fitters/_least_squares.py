@@ -49,6 +49,10 @@ class LeastSquaresFitter:
     %(stimulus)s
     %(dtype)s
 
+    Warns
+    -----
+    %(warns_resolution_mismatch)s
+
     Notes
     -----
     This fitter optimizes one or more slope parameters (and optionally an intercept) by estimating a general linear
@@ -100,6 +104,8 @@ class LeastSquaresFitter:
     ):
         self.model = model
         self.stimulus = stimulus
+
+        self.model.check_stimulus(self.stimulus)
         self.dtype = dtype
 
     @property

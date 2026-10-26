@@ -2,14 +2,17 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from dataclasses import field
 import numpy as np
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from .base import Stimulus
 from .base import StimulusTensors
+from .base import _check_frame_duration
 
 
 @dataclass(frozen=True, eq=False)
@@ -25,13 +28,17 @@ class PRFStimulusTensors(StimulusTensors):
         The :attr:`PRFStimulus.design` array as a tensor.
     grid : :data:`prfmodel.typing.Tensor`
         The :attr:`PRFStimulus.grid` array as a tensor.
+    frame_duration : float
+        The :attr:`PRFStimulus.frame_duration` as a Python float.
 
     """
 
     design: Tensor
     grid: Tensor
+    frame_duration: float
 
 
+@doc
 @dataclass(frozen=True, eq=False)
 class PRFStimulus(Stimulus):
     """
@@ -51,6 +58,7 @@ class PRFStimulus(Stimulus):
         coordinate that varies along design axis `i + 1`. For a 2D stimulus with a design of shape
         `(num_frames, height, width)` this means `grid[..., 0]` is the vertical (`y`) coordinate and
         `grid[..., 1]` is the horizontal (`x`) coordinate. See Notes.
+    %(frame_duration)s
     dimension_labels : Sequence[str] or None, optional
         Names of the grid dimensions (e.g., `["y", "x"]`). If given, the number of labels must match the last grid
         axis. Label `i` names the coordinate stored in `grid[..., i]`.
@@ -62,7 +70,8 @@ class PRFStimulus(Stimulus):
     ShapeMismatchError
         If the design and grid dimensions do not match.
     ValueError
-        If the number of dimension labels does not match the last grid dimension.
+        If the number of dimension labels does not match the last grid dimension or if `frame_duration` is not
+        positive.
 
     Notes
     -----
@@ -103,17 +112,19 @@ class PRFStimulus(Stimulus):
     >>> # Moving along the last column changes x only:
     >>> grid[0, 15, :]
     array([-1.75,  3.75])
-    >>> stimulus = PRFStimulus(design=design, grid=grid, dimension_labels=["y", "x"])
+    >>> stimulus = PRFStimulus(design=design, grid=grid, frame_duration=1.5, dimension_labels=["y", "x"])
     >>> print(stimulus)
-    PRFStimulus(design=array[10, 8, 16], grid=array[8, 16, 2], dimension_labels=['y', 'x'])
+    PRFStimulus(design=array[10, 8, 16], grid=array[8, 16, 2], frame_duration=1.5, dimension_labels=['y', 'x'])
 
     """
 
     design: np.ndarray
     grid: np.ndarray
+    frame_duration: float = field(kw_only=True)
     dimension_labels: Sequence[str] | None = None
 
     def __post_init__(self):
+        _check_frame_duration(self.frame_duration)
         self._check_grid_design_shape()
         self._check_grid_dimensions()
         self._check_dimension_labels()
@@ -137,6 +148,7 @@ class PRFStimulus(Stimulus):
             raise ValueError(msg)
 
     @classmethod
+    @doc
     def create_2d_bar_stimulus(  # noqa: PLR0913 (too many arguments)
         cls,
         num_frames: int = 100,
@@ -145,6 +157,8 @@ class PRFStimulus(Stimulus):
         bar_width: int = 20,
         direction: str = "horizontal",
         pixel_size: float = 0.05,
+        *,
+        frame_duration: float,
     ) -> "PRFStimulus":
         """
         Create a population receptive field bar stimulus that moves across a 2D screen.
@@ -165,6 +179,7 @@ class PRFStimulus(Stimulus):
             Direction in which the bar moves.
         pixel_size : float, optional
             Size of a pixel in spatial units.
+        %(frame_duration)s
 
         Returns
         -------
@@ -193,14 +208,15 @@ class PRFStimulus(Stimulus):
 
         Examples
         --------
-        >>> stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=200)
-        >>> print(stimulus)
-        PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
+        >>> stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=200, frame_duration=1.0)
+        >>> print(stimulus)  # doctest: +NORMALIZE_WHITESPACE
+        PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], frame_duration=1.0,
+                    dimension_labels=['y', 'x'])
 
         Both coordinates increase with their design axis, the horizontal one across the columns and
         the vertical one down the rows:
 
-        >>> stimulus = PRFStimulus.create_2d_bar_stimulus(width=5, height=3, pixel_size=1.0)
+        >>> stimulus = PRFStimulus.create_2d_bar_stimulus(width=5, height=3, pixel_size=1.0, frame_duration=1.0)
         >>> stimulus.grid[..., 1]  # x, constant down each column
         array([[-2., -1.,  0.,  1.,  2.],
                [-2., -1.,  0.,  1.,  2.],
@@ -255,6 +271,7 @@ class PRFStimulus(Stimulus):
         return cls(
             design=design,
             grid=grid,
+            frame_duration=frame_duration,
             dimension_labels=dimension_labels,
         )
 
@@ -288,4 +305,5 @@ class PRFStimulus(Stimulus):
         return PRFStimulusTensors(
             design=ops.convert_to_tensor(self.design, dtype=dtype),
             grid=ops.convert_to_tensor(self.grid, dtype=dtype),
+            frame_duration=float(self.frame_duration),
         )

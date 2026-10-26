@@ -34,6 +34,8 @@ class collects the parameter names of all submodels and performs validation chec
 
 """
 
+import math
+import warnings
 from abc import abstractmethod
 from typing import Generic
 from typing import TypeVar
@@ -42,6 +44,8 @@ import numpy as np
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.exceptions import ResolutionMismatchWarning
+from prfmodel.impulse.base import BaseImpulse
 from prfmodel.protocols import CompositeModelProtocol
 from prfmodel.protocols import ModelProtocol
 from prfmodel.regressors.base import BaseRegressors
@@ -387,10 +391,15 @@ class BaseCanonical(CompositeModelProtocol, Generic[S, T]):
         ------
         %(raises_missing_parameters)s
 
+        Warns
+        -----
+        %(warns_resolution_mismatch)s
+
         """
         dtype = get_dtype(dtype)
         regressors_model = cast("BaseRegressors | None", self.models.get("regressors_model"))
 
+        self.check_stimulus(stimulus)
         self.check_parameter_names(parameters)
         self.check_parameter_values(parameters)
         _validate_regressors_argument(regressors_model, regressors)
@@ -402,6 +411,44 @@ class BaseCanonical(CompositeModelProtocol, Generic[S, T]):
                 _extract_regressor_design(regressors_model, regressors, dtype),
             ),
         )
+
+    @doc
+    def check_stimulus(self, stimulus: S) -> None:
+        """Check that the impulse submodels are sampled at the frame duration of the stimulus.
+
+        Impulse submodels without an explicit :attr:`~prfmodel.impulse.base.BaseImpulse.resolution` are
+        sampled at the frame duration of the stimulus in :meth:`call` and always pass this check. Stimuli without a
+        frame duration (e.g., :class:`~prfmodel.stimuli.CFStimulus`) are not checked.
+
+        Parameters
+        ----------
+        %(stimulus)s
+
+        Warns
+        -----
+        ResolutionMismatchWarning
+            When an impulse submodel has an explicit resolution that differs from the frame duration of
+            `stimulus`.
+
+        """
+        frame_duration: float | None = getattr(stimulus, "frame_duration", None)
+
+        if frame_duration is None:
+            return
+
+        for name, model in self.models.items():
+            if not isinstance(model, BaseImpulse) or model.resolution is None:
+                continue
+
+            # The relative tolerance accepts frame durations read from single precision file headers
+            if not math.isclose(model.resolution, frame_duration, rel_tol=1e-6):
+                msg = (
+                    f"Submodel '{name}' has a resolution of {model.resolution} s but the stimulus has a frame "
+                    f"duration of {frame_duration} s, so they are convolved on different time axes. Create "
+                    f"'{name}' without a resolution to sample it at the frame duration of the stimulus or set "
+                    f"resolution={frame_duration}."
+                )
+                warnings.warn(message=msg, category=ResolutionMismatchWarning, stacklevel=3)
 
     @doc
     @abstractmethod

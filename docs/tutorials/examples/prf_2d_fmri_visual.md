@@ -287,6 +287,7 @@ num_frames_train = num_frames // 2
 stimulus_train = PRFStimulus(
     design=stimulus.design[:num_frames_train],
     grid=stimulus.grid,
+    frame_duration=stimulus.frame_duration,
     dimension_labels=stimulus.dimension_labels,
 )
 
@@ -319,24 +320,29 @@ our predicted response to match the observed BOLD response.
 
 The {py:class}`prfmodel.models.prf.Gaussian2DPRFModel` class performs all these steps to make a combined prediction.
 
-**Important**: We need to add a custom impulse response model to account for the fact that each time frame in the stimulus design (and in the observed timecourses) is one TR of 0.9 seconds (the default in prfmodel is 1.0 seconds). We set the resolution
-of our predicted impulse response to the TR so that the final predicted model response has the same sampling rate as the observed timecourses (see also the section [](../../important_details.md)).
+**Important**: Each time frame in the stimulus design (and in the observed timecourses) is one TR of 0.9 seconds. The
+dataset stores the TR as the `frame_duration` of the stimulus, and the pRF model samples its impulse response at this
+frame duration, so that the final predicted model response has the same sampling rate as the observed timecourses (see
+also the section [](../../important_details.md)).
 
 ```{code-cell} ipython3
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.prf import Gaussian2DPRFModel
 
-# Define repetition time (TR)
-tr = 0.9
+# The repetition time (TR) is stored as the frame duration of the stimulus
+print(stimulus.frame_duration)
 
-# Create custom impulse model. Each frame is sampled at its leading edge, so the first
-# frame sits at t = 0 (where the response is zero) and no offset is needed.
-impulse_model = DerivativeTwoGammaImpulse(resolution=tr)
+# Create the impulse model. Without a resolution, it is sampled at the frame duration of the stimulus.
+# Each frame is sampled at its leading edge, so the first frame sits at t = 0 (where the response is zero)
+# and no offset is needed.
+impulse_model = DerivativeTwoGammaImpulse()
 ```
 
 We can visualize the predicted impulse response. The two-gamma parameters (`delay`, `dispersion`, `undershoot`,
 `u_dispersion`, `ratio`) default to the Glover HRF parameter set
 (see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only need to set `weight_deriv`.
+On its own, the impulse model does not know the stimulus, so we sample it at the frame duration of the stimulus with
+{py:meth}`~prfmodel.impulse.base.BaseImpulse.at_resolution` before plotting.
 
 ```{code-cell} ipython3
 # Only weight_deriv is set; the two-gamma parameters use the model's default Glover HRF values
@@ -344,8 +350,8 @@ impulse_default_params = pd.DataFrame({
     "weight_deriv": [-0.5],
 })
 
-# Predict impulse response
-impulse_response = impulse_model(impulse_default_params)
+# Predict impulse response at the frame duration of the stimulus
+impulse_response = impulse_model.at_resolution(stimulus.frame_duration)(impulse_default_params)
 
 fig = px.line(
     pd.DataFrame({
@@ -363,7 +369,7 @@ fig.show()
 We insert the impulse model into the {py:class}`prfmodel.models.prf.Gaussian2DPRFModel` that makes combined model predictions.
 
 ```{code-cell} ipython3
-# Define pRF model with custom impulse response submodel
+# Define pRF model with the impulse response submodel
 prf_model = Gaussian2DPRFModel(
     impulse_model=impulse_model,
 )

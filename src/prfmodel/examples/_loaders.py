@@ -17,6 +17,7 @@ from prfmodel.examples._matlab import read_matlab_tables
 from prfmodel.examples._options import validate_options
 from prfmodel.examples._registry import _get_spec
 from prfmodel.examples._registry import load_checksums
+from prfmodel.examples._stimuli import _BAR_STIMULUS_FRAME_DURATION
 from prfmodel.examples._stimuli import _load_2d_bar_design_and_grid
 from prfmodel.examples._stimuli import _load_chn_aperture_stimulus
 from prfmodel.examples._stimuli import load_1d_prf_lognumerosity_stimulus
@@ -29,6 +30,10 @@ if TYPE_CHECKING:
 # The bar apertures were resampled to 100 by 100 pixels spanning 16.6 degrees of visual angle before the
 # source study fit its pRF models, so one pixel is 0.166 degrees wide.
 _ECOG_STIMULUS_DEGREES = 16.6
+
+# Each bar position was shown for 500 ms followed by a 350 ms blank, so one bar step and one response frame span
+# 850 ms.
+_ECOG_FRAME_DURATION = 0.85
 
 # The visual areas of the Wang maximum probability atlas, grouped into the regions that the source study
 # reports. Ventral and dorsal quarterfields are merged into one area, as are the two subdivisions of VO, PHC
@@ -114,7 +119,12 @@ def load_aot_visual(fetch: FileFetcher, options: Options) -> Dataset:
     return Dataset(
         name="7t-aot-visual",
         response=response,
-        stimulus=PRFStimulus(design=design, grid=grid, dimension_labels=["y", "x"]),
+        stimulus=PRFStimulus(
+            design=design,
+            grid=grid,
+            frame_duration=_BAR_STIMULUS_FRAME_DURATION,
+            dimension_labels=["y", "x"],
+        ),
         mask=mask,
         mesh=mesh,
         files=fetch.files,
@@ -198,7 +208,12 @@ def _ecog_stimulus(apertures: np.ndarray) -> PRFStimulus:
     xv, yv = np.meshgrid(x, y)
 
     # The y coordinate comes first because it varies along the first design axis after time
-    return PRFStimulus(design=design, grid=np.stack((yv, xv), axis=-1), dimension_labels=["y", "x"])
+    return PRFStimulus(
+        design=design,
+        grid=np.stack((yv, xv), axis=-1),
+        frame_duration=_ECOG_FRAME_DURATION,
+        dimension_labels=["y", "x"],
+    )
 
 
 def load_visual_ecog_broadband(fetch: FileFetcher, options: Options) -> Dataset:  # noqa: ARG001 (loaders take options)

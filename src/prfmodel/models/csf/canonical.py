@@ -97,7 +97,7 @@ class CanonicalCSFModel(BaseCanonical[CSFStimulus, CSFStimulusTensors]):
         response = csf_model.call(stimulus, parameters)
 
         if self.models["impulse_model"] is not None:
-            impulse_model = cast("BaseImpulse", self.models["impulse_model"])
+            impulse_model = cast("BaseImpulse", self.models["impulse_model"]).at_resolution(stimulus.frame_duration)
             impulse_response = impulse_model.call(parameters)
             response = convolve_prf_impulse_response(response, impulse_response, dtype=dtype)
 

@@ -39,9 +39,9 @@ class Gaussian2DCSTPRFModel(CSTPRFModel):
     Warnings
     --------
     **The temporal channels are sampled at the stimulus frame rate.** The reference computes the channels on a
-    10 ms grid and downsamples to the repetition time; this package has no stimulus time axis, so one stimulus
-    frame is one output sample throughout, and the channel models are given ``resolution=tr`` in the same way
-    the impulse model is.
+    10 ms grid and downsamples to the repetition time; in this package one stimulus frame is one output sample
+    throughout, and the channel models are sampled at the ``frame_duration`` of the stimulus in the same way the
+    impulse model is.
 
     The consequence is concrete: the reference reports ``time_to_peak`` values of roughly 50-110 ms in V1 rising
     to 160-230 ms in IPS, all of which fall inside a single frame at a one second repetition time. At that

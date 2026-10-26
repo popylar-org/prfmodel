@@ -5,6 +5,7 @@ from abc import abstractmethod
 import numpy as np
 import pandas as pd
 import pytest
+from prfmodel.impulse.base import DEFAULT_RESOLUTION
 from prfmodel.impulse.base import BaseImpulse
 from tests.models.conftest import parametrize_dtype
 
@@ -45,6 +46,42 @@ class TestImpulseSetup(ABC):
         """
         with pytest.raises(AttributeError):
             setattr(irf_model, attribute, 2.0)
+
+    def test_resolution_defaults_to_none(self, irf_model: BaseImpulse):
+        """Test that a model without an explicit resolution is sampled every second on its own."""
+        model = irf_model.__class__()
+
+        assert model.resolution is None
+        assert model.num_frames == int(model.duration / DEFAULT_RESOLUTION)
+        np.testing.assert_allclose(np.diff(np.asarray(model.get_frames())[0]), DEFAULT_RESOLUTION)
+
+    def test_at_resolution_resamples_a_model_without_resolution(
+        self,
+        irf_model: BaseImpulse,
+        parameters: pd.DataFrame,
+    ):
+        """Test that a model without an explicit resolution is resampled as if it had been created with one.
+
+        The original model must stay untouched, because canonical models resample the same submodel for every
+        stimulus they are called with.
+
+        """
+        resolution = 1.5
+        model = irf_model.__class__()
+        resolved = model.at_resolution(resolution)
+
+        assert resolved is not model
+        assert resolved.resolution == resolution
+        assert model.resolution is None
+        assert model.at_resolution(resolution) is resolved
+        np.testing.assert_allclose(np.diff(np.asarray(resolved.get_frames())[0]), resolution, rtol=1e-6)
+        np.testing.assert_array_equal(resolved(parameters), irf_model.__class__(resolution=resolution)(parameters))
+
+    def test_at_resolution_keeps_an_explicit_resolution(self, irf_model: BaseImpulse):
+        """Test that an explicit resolution is never overridden."""
+        model = irf_model.__class__(resolution=0.5)
+
+        assert model.at_resolution(1.5) is model
 
     def test_norm_error(self, irf_model: BaseImpulse):
         """Test that an invalid norm argument raises an error."""

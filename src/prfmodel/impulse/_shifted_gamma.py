@@ -9,6 +9,7 @@ from prfmodel.utils import normalize_response
 from .base import BaseImpulse
 
 
+@doc
 class ShiftedGammaImpulse(BaseImpulse):
     r"""
     Shifted gamma distribution impulse model.
@@ -19,21 +20,11 @@ class ShiftedGammaImpulse(BaseImpulse):
 
     Parameters
     ----------
-    duration : float, default=32.0
-        The duration of the impulse response (in seconds).
-    offset : float, default=0.0
-        The offset of the impulse response (in seconds).
-        response values at t = 0.
-    resolution : float, default=1.0
-        The time resultion of the impulse response (in seconds), that is the number of points per second at which the
-        impulse response function is evaluated.
-    norm : str, optional, default="sum"
-        The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
-        no normalization is performed. See :doc:`Important details </important_details>`.
-    default_parameters : dict of float or str, optional
-        Dictionary with scalar default parameter values or name of default parameter set.
-        Dictionary keys must be valid parameter names.  Default values are overridden by user-supplied parameters in
-        the :meth:`__call__` method.
+    %(impulse_duration)s
+    %(impulse_offset)s
+    %(impulse_resolution)s
+    %(impulse_norm)s
+    %(impulse_default_parameters)s
 
     See Also
     --------

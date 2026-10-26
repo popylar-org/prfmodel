@@ -16,6 +16,7 @@ def test_grid_design_shape_error():
         _ = PRFStimulus(
             design=np.zeros((1, 2)),
             grid=np.zeros((1, 1)),
+            frame_duration=1.0,
         )
 
 
@@ -25,6 +26,7 @@ def test_grid_dimension_error():
         _ = PRFStimulus(
             design=np.zeros((1, 1, 2)),
             grid=np.zeros((1, 2, 1)),
+            frame_duration=1.0,
         )
 
 
@@ -35,6 +37,7 @@ def test_dimension_labels_error():
             design=np.zeros((1, 2)),
             grid=np.zeros((2, 1)),
             dimension_labels=["y", "x"],
+            frame_duration=1.0,
         )
 
 
@@ -45,6 +48,7 @@ def stimulus():
         design=np.zeros((1, 2, 1)),
         grid=np.zeros((2, 1, 2)),
         dimension_labels=["y", "x"],
+        frame_duration=1.0,
     )
 
 
@@ -55,6 +59,7 @@ def stimulus_1d():
         design=np.zeros((1, 2)),
         grid=np.zeros((2, 1)),
         dimension_labels=["x"],
+        frame_duration=1.0,
     )
 
 
@@ -67,7 +72,9 @@ def test_repr(stimulus: PRFStimulus):
 
 def test_str(stimulus: PRFStimulus):
     """Test human-readable string representation of PRFStimulus."""
-    assert str(stimulus) == "PRFStimulus(design=array[1, 2, 1], grid=array[2, 1, 2], dimension_labels=['y', 'x'])"
+    assert str(stimulus) == (
+        "PRFStimulus(design=array[1, 2, 1], grid=array[2, 1, 2], frame_duration=1.0, dimension_labels=['y', 'x'])"
+    )
 
 
 def test_eq(stimulus: PRFStimulus):
@@ -76,6 +83,7 @@ def test_eq(stimulus: PRFStimulus):
         design=np.zeros((1, 2, 1)),
         grid=np.zeros((2, 1, 2)),
         dimension_labels=["y", "x"],
+        frame_duration=1.0,
     )
 
     assert stimulus == stimulus_2
@@ -87,6 +95,7 @@ def test_ne(stimulus: PRFStimulus):
         design=np.zeros((1, 2, 2)),
         grid=np.zeros((2, 2, 2)),
         dimension_labels=["y", "x"],
+        frame_duration=1.0,
     )
 
     assert stimulus != stimulus_3
@@ -143,6 +152,7 @@ def test_rectangular_grid(dimensions: str, axis: str):
     stimulus = PRFStimulus(
         design=design,
         grid=grid,
+        frame_duration=1.0,
     )
 
     assert isinstance(stimulus, PRFStimulus)
@@ -156,6 +166,7 @@ def test_create_2d_bar_stimulus(direction: str):
         width=5,
         height=4,
         direction=direction,
+        frame_duration=1.0,
     )
 
     assert isinstance(stimulus, PRFStimulus)
@@ -178,3 +189,49 @@ def test_create_2d_bar_stimulus(direction: str):
             # All values in each column should be equal for all frames
             cols_equal = np.all(stimulus.design == stimulus.design[:, :, [0]])
             assert np.all(cols_equal)
+
+
+def test_frame_duration_is_required():
+    """Test that a stimulus cannot be created without a frame duration.
+
+    Without one, impulse models would fall back to a fixed sampling interval that is silently wrong for any other
+    repetition time.
+
+    """
+    with pytest.raises(TypeError, match="frame_duration"):
+        PRFStimulus(design=np.zeros((1, 2, 1)), grid=np.zeros((2, 1, 2)))  # type: ignore[call-arg]
+
+
+@pytest.mark.parametrize("frame_duration", [0.0, -0.9])
+def test_frame_duration_must_be_positive(frame_duration: float):
+    """Test that a non-positive frame duration is rejected."""
+    with pytest.raises(ValueError, match="'frame_duration' must be > 0"):
+        PRFStimulus(design=np.zeros((1, 2, 1)), grid=np.zeros((2, 1, 2)), frame_duration=frame_duration)
+
+
+def test_ne_frame_duration(stimulus: PRFStimulus):
+    """Test that stimuli that only differ in their frame duration are not equal."""
+    stimulus_2 = PRFStimulus(
+        design=stimulus.design,
+        grid=stimulus.grid,
+        frame_duration=2.0,
+        dimension_labels=stimulus.dimension_labels,
+    )
+
+    assert stimulus != stimulus_2
+
+
+def test_to_tensors_keeps_frame_duration_as_float(stimulus: PRFStimulus):
+    """Test that the frame duration stays a Python float so that it is a constant when traced."""
+    tensors = stimulus.to_tensors()
+
+    assert type(tensors.frame_duration) is float
+    assert tensors.frame_duration == stimulus.frame_duration
+
+
+def test_create_2d_bar_stimulus_frame_duration():
+    """Test that the bar stimulus factory forwards the frame duration."""
+    frame_duration = 0.9
+    stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=10, width=5, height=4, frame_duration=frame_duration)
+
+    assert stimulus.frame_duration == frame_duration

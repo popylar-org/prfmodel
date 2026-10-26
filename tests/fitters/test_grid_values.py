@@ -13,11 +13,11 @@ def _stimulus_2d(x: np.ndarray, y: np.ndarray) -> PRFStimulus:
     xv, yv = np.meshgrid(x, y)
     # y is stacked first because it varies along the row axis
     grid = np.stack((yv, xv), axis=-1)
-    return PRFStimulus(design=np.zeros((3, len(y), len(x))), grid=grid)
+    return PRFStimulus(design=np.zeros((3, len(y), len(x))), grid=grid, frame_duration=1.0)
 
 
 def _stimulus_1d(coordinates: np.ndarray) -> PRFStimulus:
-    return PRFStimulus(design=np.eye(len(coordinates)), grid=np.asarray(coordinates)[:, np.newaxis])
+    return PRFStimulus(design=np.eye(len(coordinates)), grid=np.asarray(coordinates)[:, np.newaxis], frame_duration=1.0)
 
 
 @pytest.fixture
@@ -58,7 +58,7 @@ def test_grid_values_2d_prf_aligned(stimulus_2d: PRFStimulus):
 
 def test_grid_values_2d_prf_reproduces_manual_grid():
     """Test that the defaults reproduce a grid extended to twice the stimulus range with 21 values."""
-    stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=5, width=64, height=64)
+    stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=5, width=64, height=64, frame_duration=1.0)
     grid_min, grid_max = stimulus.grid.min(axis=(0, 1)), stimulus.grid.max(axis=(0, 1))
     values = grid_values_2d_prf(stimulus)
     np.testing.assert_allclose(values["mu_x"], np.linspace(2 * grid_min[1], 2 * grid_max[1], 21))
