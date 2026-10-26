@@ -30,7 +30,7 @@ dependencies = [
     "nilearn",
     "numpy>=2.0.0",
     "pandas",
-    "scipy",
+    "scipy<1.18",  # 1.18 changed how loadmat returns MATLAB objects, which breaks read_matlab_tables
     "tqdm",
 ]
 description = "A modern Python implementation for population receptive field modelling."
