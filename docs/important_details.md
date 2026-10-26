@@ -41,6 +41,15 @@ Importantly, this conversion assumes that the models for which the amplitudes ha
 Note that you can implement your own Gaussian models in prfmodel that use unnormalized densities
 (see the tutorial on [custom models](tutorials/tutorials/custom_models.md)).
 
+## Spatial pRF models expect the y-axis first
+
+In prfmodel, spatial pRF models assume that the stimulus grid and design matrix have the y-axis as their first
+dimension. For example, a Gaussian 2D pRF model expects that `stimulus.grid[:, :, 0]` contains the y-coordinate and
+`stimulus.grid[:, :, 1]` the x-coordinate of every cell in the stimulus design. This matters because the model
+parameters (e.g., the center coordinates of the Gaussian, `mu_x` and `mu_y`) are applied to the stimulus grid and
+design matrix following this order. This order conforms with C-style row-major order that is also used as the default
+in most other Python packages, e.g., NumPy. For spatial 3D pRF models, the order is y, x, z.
+
 ## Spatial receptive fields are not scaled by grid cell size
 
 Some software packages normalize stimulus-encoded model responses of spatial models by the
