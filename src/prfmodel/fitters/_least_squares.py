@@ -6,6 +6,7 @@ import pandas as pd
 from keras import ops
 from tqdm.auto import tqdm
 from prfmodel._docstring import doc
+from prfmodel.fitters._validation import _validate_data_shape
 from prfmodel.models.base import BaseCanonical
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.regressors.base import _extract_regressor_design
@@ -158,7 +159,15 @@ class LeastSquaresFitter:
         pandas.DataFrame
             A dataframe with final model parameters.
 
+        Raises
+        ------
+        ShapeError
+            If `data` does not have two dimensions, if its number of rows does not match the number of rows in
+            `parameters`, or if its number of columns does not match the number of frames in the model prediction.
+
         """
+        _validate_data_shape(data, num_units=len(parameters))
+
         slope_names = [slope_name] if not isinstance(slope_name, list) else slope_name
 
         for name in slope_names:
@@ -251,6 +260,8 @@ class LeastSquaresFitter:
             x_list.insert(0, ops.ones_like(x_list[0], dtype=self.dtype))
 
         x_matrix = ops.stack(x_list, axis=-1)
+
+        _validate_data_shape(data_batch, num_frames=x_matrix.shape[1])
 
         targets = ops.expand_dims(data_batch, axis=-1)
 

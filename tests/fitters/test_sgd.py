@@ -5,6 +5,7 @@ import keras
 import numpy as np
 import pandas as pd
 import pytest
+from prfmodel.exceptions import ShapeError
 from prfmodel.fitters import SGDFitter
 from prfmodel.fitters import SGDHistory
 from prfmodel.fitters.adapter import Adapter
@@ -721,3 +722,56 @@ class TestSGDFitterIgnoresExtraColumns(TestSetup):
 
         assert list(fit_params.columns) == list(labelled.columns)
         assert list(fit_params["roi"]) == list(labelled["roi"])
+
+
+class TestSGDFitterDataShape(TestSetup):
+    """Tests that target data of the wrong shape is reported before any optimization step."""
+
+    num_steps: int = 1
+
+    @pytest.mark.parametrize("ndim", [1, 3])
+    def test_data_without_two_dimensions_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        ndim: int,
+    ):
+        """Data that is not `(num_units, num_frames)` raises rather than being sliced along the wrong axis."""
+        observed = np.asarray(model(stimulus, params))
+        data = observed[0] if ndim == 1 else observed[..., np.newaxis]
+
+        with pytest.raises(ShapeError, match="must have exactly 2 dimensions"):
+            SGDFitter(model=model, stimulus=stimulus).fit(data, params, num_steps=self.num_steps)
+
+    def test_data_with_wrong_number_of_units_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Data with more rows than the parameters raises rather than leaving the extra rows unfit."""
+        data = np.zeros((len(params) + 1, stimulus.design.shape[0]))
+
+        with pytest.raises(ShapeError, match=f"must have {len(params)} rows"):
+            SGDFitter(model=model, stimulus=stimulus).fit(data, params, num_steps=self.num_steps)
+
+    @pytest.mark.parametrize("batch_size", [None, 1])
+    def test_data_with_wrong_number_of_frames_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        batch_size: int | None,
+    ):
+        """Data whose frames do not match the model prediction raises instead of failing inside the loss."""
+        num_frames = stimulus.design.shape[0]
+        data = np.zeros((len(params), num_frames - 1))
+
+        with pytest.raises(ShapeError, match=f"must have {num_frames} columns"):
+            SGDFitter(model=model, stimulus=stimulus).fit(
+                data,
+                params,
+                num_steps=self.num_steps,
+                batch_size=batch_size,
+            )

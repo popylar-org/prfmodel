@@ -13,6 +13,7 @@ from more_itertools import chunked
 from tqdm.auto import tqdm
 from prfmodel._backend import compile_fun
 from prfmodel._docstring import doc
+from prfmodel.fitters._validation import _validate_data_shape
 from prfmodel.fitters.losses import CorrelationLoss
 from prfmodel.models.base import BaseCanonical
 from prfmodel.regressors.base import BaseRegressors
@@ -179,6 +180,12 @@ class GridFitter:
         pandas.DataFrame
             A dataframe with final model parameters.
 
+        Raises
+        ------
+        ShapeError
+            If `data` does not have two dimensions or if its number of columns does not match the number of frames
+            in the model prediction.
+
         """
         data = ops.convert_to_tensor(data, dtype=self.dtype)
 
@@ -187,7 +194,12 @@ class GridFitter:
         total_grid_size = int(np.prod([len(x) for x in arrays]))
 
         _validate_regressors_argument(self.model.models.get("regressors_model"), regressors)
-        self._validate_grid(parameter_names, arrays)
+        grid = self._validate_grid(parameter_names, arrays)
+
+        # One prediction for a single grid combination before the loop, so that data with the wrong number of
+        # frames is reported here rather than as a broadcasting error from inside the loss.
+        prediction = self.model(self.stimulus, grid.iloc[:1], regressors=regressors, dtype=self.dtype)
+        _validate_data_shape(data, num_frames=prediction.shape[1])
 
         if batch_size is None:
             batch_size = total_grid_size
@@ -221,7 +233,7 @@ class GridFitter:
         self,
         parameter_names: list[str],
         arrays: list[np.ndarray],
-    ) -> None:
+    ) -> pd.DataFrame:
         # The batches are evaluated through 'call', which must stay traceable and so validates nothing. These
         # are the checks the public model facade would have run, before the loop. The grid is a
         # cartesian product and every domain check is elementwise on a single parameter, so checking each axis
@@ -234,6 +246,8 @@ class GridFitter:
 
         self.model.check_parameter_names(grid)
         self.model.check_parameter_values(grid)
+
+        return grid
 
     def _make_evaluate_fun(self, data: Tensor, regressors: pd.DataFrame | None) -> Callable:
         stimulus = self.stimulus.to_tensors(self.dtype)

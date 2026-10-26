@@ -8,6 +8,7 @@ from keras import ops
 from tqdm.auto import tqdm
 from prfmodel._backend._fitters import BackendSGDFitter
 from prfmodel._docstring import doc
+from prfmodel.fitters._validation import _validate_data_shape
 from prfmodel.fitters.adapter import Adapter
 from prfmodel.models.base import BaseCanonical
 from prfmodel.stimuli import Stimulus
@@ -233,11 +234,19 @@ class SGDFitter(BackendSGDFitter):
         pandas.DataFrame
             A dataframe with final model parameters.
 
+        Raises
+        ------
+        ShapeError
+            If `data` does not have two dimensions, if its number of rows does not match the number of rows in
+            `init_parameters`, or if its number of columns does not match the number of frames in the model
+            prediction.
+
         """
         if fixed_parameters is None:
             fixed_parameters = []
 
         num_units = len(init_parameters)
+        _validate_data_shape(data, num_units=num_units)
         if batch_size is None:
             batch_size = num_units
 
@@ -321,6 +330,8 @@ class SGDFitter(BackendSGDFitter):
             ),
             dtype=self.dtype,
         )
+
+        _validate_data_shape(data_batch, num_frames=y_pred.shape[1])
 
         # Keras builds the compiled loss on its first call. Doing that here rather than inside the step
         # keeps the build out of the traced region, where TorchDynamo fails to rewrite it. The call has no

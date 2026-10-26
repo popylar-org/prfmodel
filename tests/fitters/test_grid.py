@@ -4,6 +4,7 @@ import keras
 import numpy as np
 import pandas as pd
 import pytest
+from prfmodel.exceptions import ShapeError
 from prfmodel.fitters import GridFitter
 from prfmodel.fitters import GridHistory
 from prfmodel.fitters._grid import InfiniteLossWarning
@@ -249,6 +250,36 @@ class TestGridFitterValidation(TestSetup):
 
         with pytest.raises(ValueError, match="regressors_model"):
             fitter.fit(observed, param_ranges, regressors=design)
+
+    @pytest.mark.parametrize("ndim", [1, 3])
+    def test_data_without_two_dimensions_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        param_ranges: dict[str, np.ndarray],
+        observed: np.ndarray,
+        ndim: int,
+    ):
+        """Test that data that is not `(num_units, num_frames)` raises rather than treating frames as units."""
+        fitter = GridFitter(model=model, stimulus=stimulus)
+        data = observed[0] if ndim == 1 else observed[..., np.newaxis]
+
+        with pytest.raises(ShapeError, match="must have exactly 2 dimensions"):
+            fitter.fit(data, param_ranges)
+
+    def test_data_with_wrong_number_of_frames_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        param_ranges: dict[str, np.ndarray],
+        observed: np.ndarray,
+    ):
+        """Test that data whose frames do not match the model prediction raises before the search."""
+        fitter = GridFitter(model=model, stimulus=stimulus)
+        num_frames = stimulus.design.shape[0]
+
+        with pytest.raises(ShapeError, match=f"must have {num_frames} columns"):
+            fitter.fit(observed[:, :-1], param_ranges)
 
     def test_valid_grid_does_not_raise(
         self,
