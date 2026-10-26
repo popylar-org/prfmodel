@@ -349,7 +349,7 @@ sgd_fitter = SGDFitter(
 sgd_history, css_params = sgd_fitter.fit(
     data=simulated_response,
     init_parameters=css_init_params,
-    fixed_parameters=["weight_deriv", "gain"],
+    fixed_parameters=["weight_deriv"],
     num_steps=500,
 )
 

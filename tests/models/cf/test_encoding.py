@@ -97,7 +97,6 @@ class TestCompressiveEncoderCF(TestSetup):
         """Compressive encoder parameters."""
         return pd.DataFrame(
             {
-                "gain": [1.2, 0.9, 0.1],
                 "n": [0.8, 1.2, 0.5],
             },
         )

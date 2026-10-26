@@ -724,8 +724,6 @@ We can see that the CSS pRF model predictions have a similar shape to the Gaussi
 
 We fit the CSS pRF model directly with SGD, again on the first half only. For initalizing the starting parameter values, we choose a value for
 the compression exponent `n` close to 1. That way, SGD can move from almost no compression to more or no compression.
-The CSS pRF model also has a `gain` parameter that controls the amplitude of the nonlinearity, but we do not estimate
-this parameter here and keep fixed to 1 (i.e., no gain).
 
 ```{code-cell} ipython3
 init_params_css = init_css_from_gaussian(sgd_params, n=0.9)
@@ -745,12 +743,9 @@ sgd_fitter_css = SGDFitter(
     compile_step=True,
 )
 
-fixed_parameters = ["gain"]
-
 _, sgd_params_css = sgd_fitter_css.fit(
     data=response_train,
     init_parameters=init_params_css,
-    fixed_parameters=fixed_parameters,
 )
 
 sgd_params_css
