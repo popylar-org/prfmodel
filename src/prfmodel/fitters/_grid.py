@@ -15,6 +15,7 @@ from prfmodel._backend import compile_fun
 from prfmodel._docstring import doc
 from prfmodel.fitters._validation import _find_valid_units
 from prfmodel.fitters._validation import _validate_data_shape
+from prfmodel.fitters._validation import _validate_parameter_names
 from prfmodel.fitters.losses import CorrelationLoss
 from prfmodel.models.base import BaseCanonical
 from prfmodel.regressors.base import BaseRegressors
@@ -188,6 +189,8 @@ class GridFitter:
         ShapeError
             If `data` does not have two dimensions or if its number of columns does not match the number of frames
             in the model prediction.
+        ValueError
+            If a key of `parameter_values` is not a parameter of the model.
 
         Warns
         -----
@@ -273,6 +276,11 @@ class GridFitter:
         # cartesian product and every domain check is elementwise on a single parameter, so checking each axis
         # once covers every combination the loop will evaluate. Each axis is tiled to a common length rather
         # than expanded into the product, which keeps this proportional to the longest axis.
+        #
+        # An extra name would multiply the size of the grid without changing any prediction, and a misspelled
+        # name for a parameter with a default would pass the check for missing names, so both raise here.
+        _validate_parameter_names(parameter_names, self.model.parameter_names, "parameter_values")
+
         num_rows = max((len(array) for array in arrays), default=0)
         grid = pd.DataFrame(
             {name: np.resize(array, num_rows) for name, array in zip(parameter_names, arrays, strict=True)},

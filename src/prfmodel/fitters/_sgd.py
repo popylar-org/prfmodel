@@ -11,6 +11,7 @@ from prfmodel._docstring import doc
 from prfmodel.fitters._validation import _find_valid_units
 from prfmodel.fitters._validation import _merge_unit_estimates
 from prfmodel.fitters._validation import _validate_data_shape
+from prfmodel.fitters._validation import _validate_parameter_names
 from prfmodel.fitters.adapter import Adapter
 from prfmodel.models.base import BaseCanonical
 from prfmodel.stimuli import Stimulus
@@ -203,7 +204,7 @@ class SGDFitter(BackendSGDFitter):
         self,
         data: Tensor,
         init_parameters: pd.DataFrame,
-        fixed_parameters: Sequence[str] | None = None,
+        fixed_parameters: str | Sequence[str] | None = None,
         num_steps: int = 1000,
         batch_size: int | None = None,
         regressors: pd.DataFrame | None = None,
@@ -219,9 +220,9 @@ class SGDFitter(BackendSGDFitter):
         init_parameters : pandas.DataFrame
             Dataframe with initial model parameters. Columns must contain different model parameters and
             rows parameter values for each unit in `data`.
-        fixed_parameters : Sequence of str, optional
-            Names of model parameters that are fixed to their starting values, i.e., their values are not optimized
-            during the fitting. If `None` (the default), all parameters are optimized during fitting.
+        fixed_parameters : str or Sequence of str, optional
+            Name(s) of model parameters that are fixed to their starting values, i.e., their values are not
+            optimized during the fitting. If `None` (the default), all parameters are optimized during fitting.
         num_steps : int, default=1000
             Number of optimization steps.
         batch_size : int, optional
@@ -244,6 +245,8 @@ class SGDFitter(BackendSGDFitter):
             If `data` does not have two dimensions, if its number of rows does not match the number of rows in
             `init_parameters`, or if its number of columns does not match the number of frames in the model
             prediction.
+        ValueError
+            If a name in `fixed_parameters` is not a parameter of the model or the adapter.
 
         Warns
         -----
@@ -252,6 +255,14 @@ class SGDFitter(BackendSGDFitter):
         """
         if fixed_parameters is None:
             fixed_parameters = []
+        elif isinstance(fixed_parameters, str):
+            fixed_parameters = [fixed_parameters]
+
+        _validate_parameter_names(
+            fixed_parameters,
+            self.model.parameter_names + self.adapter.parameter_names,
+            "fixed_parameters",
+        )
 
         data = ops.convert_to_tensor(data, dtype=self.dtype)
 

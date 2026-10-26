@@ -1,6 +1,8 @@
 """Validation shared by the fitters."""
 
+import difflib
 import warnings
+from collections.abc import Iterable
 from collections.abc import Sequence
 import numpy as np
 import pandas as pd
@@ -36,6 +38,30 @@ def _validate_data_shape(
             data_shape,
             f"must have {num_frames} columns, one for each frame of the model prediction",
         )
+
+
+def _validate_parameter_names(names: Iterable[str], valid_names: Sequence[str], argument: str) -> None:
+    """Check that every name in `names` is one of `valid_names`.
+
+    A fitter would otherwise ignore a misspelled name, so the error points to the closest valid name.
+
+    """
+    unknown = [name for name in names if name not in valid_names]
+
+    if not unknown:
+        return
+
+    descriptions = []
+    for name in unknown:
+        # A caller can pass something other than a string (e.g., 'None'), which has no close match
+        matches = difflib.get_close_matches(name, valid_names, n=1) if isinstance(name, str) else []
+        descriptions.append(f"{name!r} (did you mean {matches[0]!r}?)" if matches else repr(name))
+
+    msg = (
+        f"Argument '{argument}' contains unknown parameter names: {', '.join(descriptions)}. "
+        f"Valid names are: {', '.join(dict.fromkeys(valid_names))}."
+    )
+    raise ValueError(msg)
 
 
 def _find_valid_units(data: Tensor) -> np.ndarray:

@@ -352,6 +352,29 @@ class TestGridFitterValidation(TestSetup):
         with pytest.raises(ShapeError, match=f"must have {num_frames} columns"):
             fitter.fit(observed[:, :-1], param_ranges)
 
+    @pytest.mark.parametrize(
+        ("name", "message"),
+        [
+            # A misspelled parameter with a default would pass the check for missing names
+            ("weight_derive", r"'weight_derive' \(did you mean 'weight_deriv'\?\)"),
+            ("roi", r"unknown parameter names: 'roi'"),
+        ],
+    )
+    def test_unknown_parameter_name_raises(  # noqa: PLR0913 (too many arguments in function definition)
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        param_ranges: dict[str, list],
+        observed: np.ndarray,
+        name: str,
+        message: str,
+    ):
+        """Test that a key that is not a model parameter raises rather than being returned as an estimate."""
+        fitter = GridFitter(model=model, stimulus=stimulus)
+
+        with pytest.raises(ValueError, match=message):
+            fitter.fit(observed, param_ranges | {name: [0.5]})
+
     def test_valid_grid_does_not_raise(
         self,
         stimulus: PRFStimulus,

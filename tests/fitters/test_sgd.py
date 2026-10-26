@@ -925,3 +925,86 @@ class TestSGDFitterInvalidUnits(TestSetup):
 
         assert sgd_params.loc[~is_valid, list(self.estimated_names)].isna().all().all()
         assert np.all(np.isfinite(sgd_params[is_valid].to_numpy()))
+
+
+class TestSGDFitterParameterNames(TestSetup):
+    """Tests that names in `fixed_parameters` are checked against the parameters of the model and the adapter."""
+
+    num_steps: int = 2
+
+    def test_unknown_fixed_parameter_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """A misspelled name raises rather than leaving the parameter it was meant to fix to be optimized."""
+        observed = np.asarray(model(stimulus, params))
+
+        with pytest.raises(ValueError, match=r"'weight_derive' \(did you mean 'weight_deriv'\?\)"):
+            SGDFitter(model=model, stimulus=stimulus).fit(
+                observed,
+                params,
+                fixed_parameters=["weight_derive"],
+                num_steps=self.num_steps,
+            )
+
+    def test_single_name_fixes_that_parameter(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """A single string is one name rather than a sequence of characters."""
+        observed = np.asarray(model(stimulus, params))
+        init = params.assign(sigma=params["sigma"] + 0.2, weight_deriv=0.3)
+
+        _, fit_params = SGDFitter(model=model, stimulus=stimulus).fit(
+            observed,
+            init,
+            fixed_parameters="weight_deriv",
+            num_steps=self.num_steps,
+        )
+
+        np.testing.assert_array_equal(fit_params["weight_deriv"], init["weight_deriv"].astype(get_dtype(None)))
+        assert not np.allclose(fit_params["sigma"], init["sigma"])
+
+    def test_defaulted_parameter_without_column_is_accepted(
+        self,
+        stimulus: PRFStimulus,
+        params: pd.DataFrame,
+    ):
+        """A parameter of the model is a valid name even when its default is used instead of a column."""
+        # Unlike the 'model' fixture, the default impulse model has default values for its parameters
+        model = Gaussian2DPRFModel()
+        observed = np.asarray(model(stimulus, params))
+        init = params.drop(columns=["delay"])
+
+        _, fit_params = SGDFitter(model=model, stimulus=stimulus).fit(
+            observed,
+            init,
+            fixed_parameters=["delay"],
+            num_steps=self.num_steps,
+        )
+
+        assert list(fit_params.columns) == list(init.columns)
+
+    def test_adapter_parameter_is_accepted(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """A parameter that only the adapter reads is a valid name."""
+        observed = np.asarray(model(stimulus, params))
+        init = params.assign(min_sigma=0.05)
+        adapter = Adapter([ParameterConstraint(["sigma"], lower="min_sigma")])
+
+        _, fit_params = SGDFitter(model=model, stimulus=stimulus, adapter=adapter).fit(
+            observed,
+            init,
+            fixed_parameters=["min_sigma"],
+            num_steps=self.num_steps,
+        )
+
+        np.testing.assert_array_equal(fit_params["min_sigma"], init["min_sigma"].astype(get_dtype(None)))

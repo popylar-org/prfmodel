@@ -620,3 +620,30 @@ class TestLeastSquaresFitterInvalidUnits(TestSetup):
         with warnings.catch_warnings():
             warnings.simplefilter("error", InvalidUnitsWarning)
             LeastSquaresFitter(model=model, stimulus=stimulus).fit(observed, params, slope_name="amplitude")
+
+
+class TestLeastSquaresFitterParameterNames(TestSetup):
+    """Tests that slope names are checked against the parameters of the model."""
+
+    @pytest.mark.parametrize(
+        ("slope_name", "message"),
+        [
+            ("amplitud", r"'amplitud' \(did you mean 'amplitude'\?\)"),
+            # A column the model does not read would give a degenerate design matrix
+            ("gain", r"unknown parameter names: 'gain'"),
+        ],
+    )
+    def test_unknown_slope_name_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        slope_name: str,
+        message: str,
+    ):
+        """A slope that is not a model parameter raises rather than returning meaningless estimates."""
+        init = params.assign(gain=1.0)
+        observed = np.asarray(model(stimulus, params))
+
+        with pytest.raises(ValueError, match=message):
+            LeastSquaresFitter(model=model, stimulus=stimulus).fit(observed, init, slope_name=slope_name)

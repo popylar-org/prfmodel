@@ -9,6 +9,7 @@ from prfmodel._docstring import doc
 from prfmodel.fitters._validation import _find_valid_units
 from prfmodel.fitters._validation import _merge_unit_estimates
 from prfmodel.fitters._validation import _validate_data_shape
+from prfmodel.fitters._validation import _validate_parameter_names
 from prfmodel.models.base import BaseCanonical
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.regressors.base import _extract_regressor_design
@@ -168,6 +169,8 @@ class LeastSquaresFitter:
         ShapeError
             If `data` does not have two dimensions, if its number of rows does not match the number of rows in
             `parameters`, or if its number of columns does not match the number of frames in the model prediction.
+        ValueError
+            If a name in `slope_name` is not a parameter of the model or not a column in `parameters`.
 
         Warns
         -----
@@ -179,6 +182,10 @@ class LeastSquaresFitter:
         _validate_data_shape(data, num_units=len(parameters))
 
         slope_names = [slope_name] if not isinstance(slope_name, list) else slope_name
+
+        # The basis of a slope the model does not read is the same as with the slope at zero, so the design matrix
+        # would be degenerate
+        _validate_parameter_names(slope_names, self.model.parameter_names, "slope_name")
 
         for name in slope_names:
             if name not in parameters.columns:
