@@ -5,6 +5,10 @@ import keras
 import numpy as np
 import pandas as pd
 import pytest
+from prfmodel.exceptions import InvalidUnitsWarning
+from prfmodel.exceptions import ShapeError
+from prfmodel.fitters import GridFitter
+from prfmodel.fitters import LeastSquaresFitter
 from prfmodel.fitters import SGDFitter
 from prfmodel.fitters import SGDHistory
 from prfmodel.fitters.adapter import Adapter
@@ -17,11 +21,13 @@ from prfmodel.models.prf import DivNormGaussian2DPRFModel
 from prfmodel.models.prf import DoG2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
-from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from tests.conftest import PRFStimulusSetup
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model
+from .conftest import INVALID_UNITS_MESSAGE
+from .conftest import insert_invalid_parameters
+from .conftest import insert_invalid_units
 from .conftest import parametrize_dtype
 from .conftest import skip_torch
 from .conftest import skip_windows
@@ -91,7 +97,7 @@ class TestSGDFitter(_SGDGradientChecks, TestSetup):
         assert isinstance(history, SGDHistory)
         assert history.step == list(range(self.num_steps))
         assert isinstance(history.history, dict)
-        assert all(isinstance(x, Tensor) for x in history.history["loss"])
+        assert all(type(x) is float for x in history.history["loss"])
 
     def _check_sgd_params_shape(self, result_params: pd.DataFrame, params: pd.DataFrame) -> None:
         assert isinstance(result_params, pd.DataFrame)
@@ -590,6 +596,21 @@ class TestSGDFitterCompiledStep(PRFStimulusSetup):
         """Test that every backend has a compilation primitive available."""
         assert SGDFitter(model=response_model, stimulus=stimulus, compile_step=True).compile_step
 
+    def test_compiled_history_holds_floats(
+        self,
+        stimulus: PRFStimulus,
+        response_model: Gaussian2DPRFModel,
+        init_params: pd.DataFrame,
+        true_params: pd.DataFrame,
+    ):
+        """Test that the history holds plain floats when the step is compiled, as it does when it runs eagerly."""
+        fitter = SGDFitter(model=response_model, stimulus=stimulus, compile_step=True)
+
+        history, _ = fitter.fit(response_model(stimulus, true_params), init_params, num_steps=self.num_steps)
+
+        assert len(history.history["loss"]) == self.num_steps
+        assert all(type(x) is float for x in history.history["loss"])
+
     def test_compiled_and_eager_fits_agree(
         self,
         stimulus: PRFStimulus,
@@ -693,9 +714,11 @@ class TestSGDFitterCompiledStep(PRFStimulusSetup):
         params["dispersion"] = -1.0
 
         fitter = SGDFitter(model=model, stimulus=stimulus, compile_step=True)
+        # Not constant, so that the unit is fit rather than excluded before its starting values are checked
+        data = np.random.default_rng(0).standard_normal((1, stimulus.design.shape[0]))
 
         with pytest.raises(ValueError, match="must be > 0"):
-            fitter.fit(np.zeros((1, stimulus.design.shape[0])), params, num_steps=5)
+            fitter.fit(data, params, num_steps=5)
 
 
 class TestSGDFitterIgnoresExtraColumns(TestSetup):
@@ -721,3 +744,281 @@ class TestSGDFitterIgnoresExtraColumns(TestSetup):
 
         assert list(fit_params.columns) == list(labelled.columns)
         assert list(fit_params["roi"]) == list(labelled["roi"])
+
+
+class TestSGDFitterDataShape(TestSetup):
+    """Tests that target data of the wrong shape is reported before any optimization step."""
+
+    num_steps: int = 1
+
+    @pytest.mark.parametrize("ndim", [1, 3])
+    def test_data_without_two_dimensions_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        ndim: int,
+    ):
+        """Data that is not `(num_units, num_frames)` raises rather than being sliced along the wrong axis."""
+        observed = np.asarray(model(stimulus, params))
+        data = observed[0] if ndim == 1 else observed[..., np.newaxis]
+
+        with pytest.raises(ShapeError, match="must have exactly 2 dimensions"):
+            SGDFitter(model=model, stimulus=stimulus).fit(data, params, num_steps=self.num_steps)
+
+    def test_data_with_wrong_number_of_units_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Data with more rows than the parameters raises rather than leaving the extra rows unfit."""
+        data = np.zeros((len(params) + 1, stimulus.design.shape[0]))
+
+        with pytest.raises(ShapeError, match=f"must have {len(params)} rows"):
+            SGDFitter(model=model, stimulus=stimulus).fit(data, params, num_steps=self.num_steps)
+
+    @pytest.mark.parametrize("batch_size", [None, 1])
+    def test_data_with_wrong_number_of_frames_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        batch_size: int | None,
+    ):
+        """Data whose frames do not match the model prediction raises instead of failing inside the loss."""
+        num_frames = stimulus.design.shape[0]
+        # Not constant, so that the units are fit rather than excluded before the frames are checked
+        data = np.random.default_rng(0).standard_normal((len(params), num_frames - 1))
+
+        with pytest.raises(ShapeError, match=f"must have {num_frames} columns"):
+            SGDFitter(model=model, stimulus=stimulus).fit(
+                data,
+                params,
+                num_steps=self.num_steps,
+                batch_size=batch_size,
+            )
+
+
+class TestSGDFitterInvalidUnits(TestSetup):
+    """Tests that units with a constant or non-finite time series are excluded from the fit."""
+
+    num_steps: int = 5
+    estimated_names: tuple[str, ...] = ("mu_x", "mu_y", "sigma", "baseline", "amplitude")
+
+    @pytest.fixture
+    def fixed_parameters(self, model: Gaussian2DPRFModel) -> list[str]:
+        """Return the parameters of the impulse model, which are not estimated."""
+        return [name for name in model.parameter_names if name not in self.estimated_names]
+
+    @pytest.mark.parametrize("batch_size", [None, 1])
+    def test_invalid_units_are_excluded(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        fixed_parameters: list[str],
+        batch_size: int | None,
+    ):
+        """Excluded units get NaN estimates, and the other units get what they get on their own.
+
+        The excluded units start from NaN pRF parameters, as a grid search returns them, which must not reach the
+        parameter checks of the model. The loss in the history only covers the units that are fit, so it stays
+        finite.
+
+        """
+        params = params.assign(roi=["V1", "V2", "V3"])
+        observed = np.asarray(model(stimulus, params))
+        data, is_valid = insert_invalid_units(observed)
+        init = insert_invalid_parameters(params, is_valid, ["mu_x", "mu_y", "sigma"])
+        init.index = init.index * 10
+
+        fitter = SGDFitter(model=model, stimulus=stimulus)
+
+        with pytest.warns(InvalidUnitsWarning, match=INVALID_UNITS_MESSAGE):
+            history, sgd_params = fitter.fit(
+                data,
+                init,
+                fixed_parameters=fixed_parameters,
+                num_steps=self.num_steps,
+                batch_size=batch_size,
+            )
+
+        expected_history, expected_params = fitter.fit(
+            observed,
+            params,
+            fixed_parameters=fixed_parameters,
+            num_steps=self.num_steps,
+            batch_size=batch_size,
+        )
+
+        assert sgd_params.index.equals(init.index)
+        assert list(sgd_params.columns) == list(init.columns)
+        assert sgd_params.loc[~is_valid, list(self.estimated_names)].isna().all().all()
+        np.testing.assert_allclose(
+            sgd_params.loc[~is_valid, fixed_parameters].to_numpy(),
+            init.loc[~is_valid, fixed_parameters].to_numpy(),
+            rtol=1e-6,
+        )
+        assert list(sgd_params.loc[~is_valid, "roi"]) == list(init.loc[~is_valid, "roi"])
+        pd.testing.assert_frame_equal(sgd_params[is_valid].reset_index(drop=True), expected_params, rtol=1e-5)
+
+        assert np.all(np.isfinite(history.history["loss"]))
+        np.testing.assert_allclose(history.history["loss"], expected_history.history["loss"], rtol=1e-5)
+
+    def test_all_units_excluded(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Data in which no unit can be fit returns NaN estimates for every unit instead of raising."""
+        data = np.zeros((len(params), stimulus.design.shape[0]))
+
+        with pytest.warns(InvalidUnitsWarning, match=f"Excluded {len(params)} of {len(params)} units"):
+            history, sgd_params = SGDFitter(model=model, stimulus=stimulus).fit(
+                data,
+                params,
+                num_steps=self.num_steps,
+            )
+
+        assert history.step == []
+        assert sgd_params.shape == params.shape
+        assert sgd_params.isna().all().all()
+
+    def test_valid_units_do_not_warn(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Data in which every unit can be fit does not warn."""
+        observed = np.asarray(model(stimulus, params))
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", InvalidUnitsWarning)
+            SGDFitter(model=model, stimulus=stimulus).fit(observed, params, num_steps=self.num_steps)
+
+    def test_grid_least_squares_sgd_pipeline(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        fixed_parameters: list[str],
+    ):
+        """The estimates of one fitter can be passed to the next even when the data contains invalid units.
+
+        The grid search returns NaN pRF parameters for the excluded units. The next fitters exclude the same units,
+        so these NaN values never reach the parameter checks of the model.
+
+        """
+        data, is_valid = insert_invalid_units(np.asarray(model(stimulus, params)))
+
+        grid = {name: [float(params[name].iloc[0])] for name in fixed_parameters}
+        grid |= {"mu_x": [-1.0, 0.0, 1.0], "mu_y": [-1.0, 0.0, 1.0], "sigma": [1.0, 2.0, 3.0]}
+        grid |= {"baseline": [0.0], "amplitude": [1.0]}
+
+        with pytest.warns(InvalidUnitsWarning, match=INVALID_UNITS_MESSAGE):
+            _, grid_params = GridFitter(model=model, stimulus=stimulus).fit(data, grid)
+
+        with pytest.warns(InvalidUnitsWarning, match=INVALID_UNITS_MESSAGE):
+            _, ls_params = LeastSquaresFitter(model=model, stimulus=stimulus).fit(
+                data,
+                grid_params,
+                slope_name="amplitude",
+                intercept_name="baseline",
+            )
+
+        with pytest.warns(InvalidUnitsWarning, match=INVALID_UNITS_MESSAGE):
+            _, sgd_params = SGDFitter(model=model, stimulus=stimulus).fit(
+                data,
+                ls_params,
+                fixed_parameters=fixed_parameters,
+                num_steps=self.num_steps,
+            )
+
+        assert sgd_params.loc[~is_valid, list(self.estimated_names)].isna().all().all()
+        assert np.all(np.isfinite(sgd_params[is_valid].to_numpy()))
+
+
+class TestSGDFitterParameterNames(TestSetup):
+    """Tests that names in `fixed_parameters` are checked against the parameters of the model and the adapter."""
+
+    num_steps: int = 2
+
+    def test_unknown_fixed_parameter_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """A misspelled name raises rather than leaving the parameter it was meant to fix to be optimized."""
+        observed = np.asarray(model(stimulus, params))
+
+        with pytest.raises(ValueError, match=r"'weight_derive' \(did you mean 'weight_deriv'\?\)"):
+            SGDFitter(model=model, stimulus=stimulus).fit(
+                observed,
+                params,
+                fixed_parameters=["weight_derive"],
+                num_steps=self.num_steps,
+            )
+
+    def test_single_name_fixes_that_parameter(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """A single string is one name rather than a sequence of characters."""
+        observed = np.asarray(model(stimulus, params))
+        init = params.assign(sigma=params["sigma"] + 0.2, weight_deriv=0.3)
+
+        _, fit_params = SGDFitter(model=model, stimulus=stimulus).fit(
+            observed,
+            init,
+            fixed_parameters="weight_deriv",
+            num_steps=self.num_steps,
+        )
+
+        np.testing.assert_array_equal(fit_params["weight_deriv"], init["weight_deriv"].astype(get_dtype(None)))
+        assert not np.allclose(fit_params["sigma"], init["sigma"])
+
+    def test_defaulted_parameter_without_column_is_accepted(
+        self,
+        stimulus: PRFStimulus,
+        params: pd.DataFrame,
+    ):
+        """A parameter of the model is a valid name even when its default is used instead of a column."""
+        # Unlike the 'model' fixture, the default impulse model has default values for its parameters
+        model = Gaussian2DPRFModel()
+        observed = np.asarray(model(stimulus, params))
+        init = params.drop(columns=["delay"])
+
+        _, fit_params = SGDFitter(model=model, stimulus=stimulus).fit(
+            observed,
+            init,
+            fixed_parameters=["delay"],
+            num_steps=self.num_steps,
+        )
+
+        assert list(fit_params.columns) == list(init.columns)
+
+    def test_adapter_parameter_is_accepted(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """A parameter that only the adapter reads is a valid name."""
+        observed = np.asarray(model(stimulus, params))
+        init = params.assign(min_sigma=0.05)
+        adapter = Adapter([ParameterConstraint(["sigma"], lower="min_sigma")])
+
+        _, fit_params = SGDFitter(model=model, stimulus=stimulus, adapter=adapter).fit(
+            observed,
+            init,
+            fixed_parameters=["min_sigma"],
+            num_steps=self.num_steps,
+        )
+
+        np.testing.assert_array_equal(fit_params["min_sigma"], init["min_sigma"].astype(get_dtype(None)))

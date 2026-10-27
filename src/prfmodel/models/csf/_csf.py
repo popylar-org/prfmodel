@@ -317,16 +317,16 @@ class CSFModel(CanonicalCSFModel):
          - Exponent of the Naka-Rushton contrast response function.
        * - ``delay``
          - Impulse
-         - Peak time of the positive gamma component (in seconds; optional).
+         - Mean time of the positive gamma component (in seconds; optional).
        * - ``dispersion``
          - Impulse
-         - Rate parameter of the positive gamma component (optional).
+         - Scale parameter of the positive gamma component (optional).
        * - ``undershoot``
          - Impulse
-         - Peak time of the negative gamma component (in seconds; optional).
+         - Mean time of the negative gamma component (in seconds; optional).
        * - ``u_dispersion``
          - Impulse
-         - Rate parameter of the negative gamma component (optional).
+         - Scale parameter of the negative gamma component (optional).
        * - ``ratio``
          - Impulse
          - Weight of the negative gamma component (optional).
@@ -357,6 +357,7 @@ class CSFModel(CanonicalCSFModel):
     ...    # Simulate data for 4 time frames
     ...    sf=np.array([1.0, 3.0, 6.0, 12.0]),
     ...    contrast=np.array([0.1, 0.2, 0.4, 0.8]),
+    ...    frame_duration=1.0,
     ... )
     >>> model = CSFModel()
     >>> # Define all model parameters for 3 units

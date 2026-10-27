@@ -16,8 +16,10 @@ class StimulusTensors:
     :mod:`numpy` and can be traced by a backend compiler.
 
     Build one with :meth:`~prfmodel.stimuli.Stimulus.to_tensors`. Subclasses declare the array fields of the
-    stimulus they mirror; fields that no model reads, such as
-    :attr:`~prfmodel.stimuli.PRFStimulus.dimension_labels`, are deliberately left out.
+    stimulus they mirror; fields that no model reads, such as `dimension_labels` of a
+    :class:`~prfmodel.stimuli.PRFStimulus`, are deliberately left out. Scalar fields that fix the shape of a model's
+    computation, such as `frame_duration`, stay Python floats rather than tensors, so they remain constants when the
+    computation is traced by a backend compiler.
 
     Notes
     -----
@@ -31,6 +33,12 @@ class StimulusTensors:
 
     # Contains tensors as attributes which are not hashable
     __hash__ = None  # type: ignore[assignment]
+
+
+def _check_frame_duration(frame_duration: float) -> None:
+    if frame_duration <= 0.0:
+        msg = f"Argument 'frame_duration' must be > 0 but is {frame_duration}"
+        raise ValueError(msg)
 
 
 @dataclass(frozen=True, eq=False)

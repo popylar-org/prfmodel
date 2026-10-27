@@ -9,6 +9,7 @@ from prfmodel.utils import TensorFrame
 from .base import BaseImpulse
 
 
+@doc
 class SustainedImpulse(BaseImpulse):
     r"""
     Sustained temporal channel impulse model.
@@ -18,13 +19,9 @@ class SustainedImpulse(BaseImpulse):
 
     Parameters
     ----------
-    duration : float, default=32.0
-        The duration of the impulse response (in seconds).
-    offset : float, default=0.0
-        The offset of the impulse response (in seconds).
-    resolution : float, default=1.0
-        The time resolution of the impulse response (in seconds), that is the number of points per second at which
-        the impulse response function is evaluated.
+    %(impulse_duration)s
+    %(impulse_offset)s
+    %(impulse_resolution)s
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Dictionary keys must be valid parameter names.
         Default values are overridden by user-supplied parameters in the :meth:`__call__` method.
@@ -79,7 +76,7 @@ class SustainedImpulse(BaseImpulse):
         self,
         duration: float = 32.0,
         offset: float = 0.0,
-        resolution: float = 1.0,
+        resolution: float | None = None,
         default_parameters: dict[str, float] | None = None,
         shape: float = 9.0,
     ):
@@ -115,6 +112,7 @@ class SustainedImpulse(BaseImpulse):
         return _gamma_at_scale(frames, _reference_scale(time_to_peak, self.shape), self.shape)
 
 
+@doc
 class TransientImpulse(BaseImpulse):
     r"""
     Transient temporal channel impulse model.
@@ -128,13 +126,9 @@ class TransientImpulse(BaseImpulse):
 
     Parameters
     ----------
-    duration : float, default=32.0
-        The duration of the impulse response (in seconds).
-    offset : float, default=0.0
-        The offset of the impulse response (in seconds).
-    resolution : float, default=1.0
-        The time resolution of the impulse response (in seconds), that is the number of points per second at which
-        the impulse response function is evaluated.
+    %(impulse_duration)s
+    %(impulse_offset)s
+    %(impulse_resolution)s
     default_parameters : dict of float, optional
         Dictionary with scalar default parameter values. Dictionary keys must be valid parameter names.
         Default values are overridden by user-supplied parameters in the :meth:`__call__` method.
@@ -189,7 +183,7 @@ class TransientImpulse(BaseImpulse):
         self,
         duration: float = 32.0,
         offset: float = 0.0,
-        resolution: float = 1.0,
+        resolution: float | None = None,
         default_parameters: dict[str, float] | None = None,
         shape: float = 9.0,
         inhibitory_shape: float = 10.0,

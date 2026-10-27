@@ -1,12 +1,15 @@
 """Container for contrast sensitivity function stimulus."""
 
 from dataclasses import dataclass
+from dataclasses import field
 import numpy as np
 from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.typing import Tensor
 from prfmodel.utils import get_dtype
 from .base import Stimulus
 from .base import StimulusTensors
+from .base import _check_frame_duration
 
 
 class CSFStimulusShapeError(Exception):
@@ -56,13 +59,17 @@ class CSFStimulusTensors(StimulusTensors):
         The :attr:`CSFStimulus.sf` array as a tensor.
     contrast : :data:`prfmodel.typing.Tensor`
         The :attr:`CSFStimulus.contrast` array as a tensor.
+    frame_duration : float
+        The :attr:`CSFStimulus.frame_duration` as a Python float.
 
     """
 
     sf: Tensor
     contrast: Tensor
+    frame_duration: float
 
 
+@doc
 @dataclass(frozen=True, eq=False)
 class CSFStimulus(Stimulus):
     """
@@ -74,6 +81,7 @@ class CSFStimulus(Stimulus):
         Spatial frequency at each time frame, with shape ``(num_frames,)``.
     contrast : numpy.ndarray
         Contrast at each time frame, with shape ``(num_frames,)``.
+    %(frame_duration)s
 
     Raises
     ------
@@ -81,6 +89,8 @@ class CSFStimulus(Stimulus):
         If ``sf`` or ``contrast`` is not one-dimensional.
     CSFStimulusShapeError
         If ``sf`` and ``contrast`` do not have the same shape.
+    ValueError
+        If ``frame_duration`` is not positive.
 
     Examples
     --------
@@ -89,16 +99,18 @@ class CSFStimulus(Stimulus):
     >>> import numpy as np
     >>> sf = np.array([1.0, 3.0, 6.0, 12.0])
     >>> contrast = np.array([0.1, 0.2, 0.4, 0.8])
-    >>> stimulus = CSFStimulus(sf=sf, contrast=contrast)
+    >>> stimulus = CSFStimulus(sf=sf, contrast=contrast, frame_duration=1.5)
     >>> print(stimulus)
-    CSFStimulus(sf=array[4], contrast=array[4])
+    CSFStimulus(sf=array[4], contrast=array[4], frame_duration=1.5)
 
     """
 
     sf: np.ndarray
     contrast: np.ndarray
+    frame_duration: float = field(kw_only=True)
 
     def __post_init__(self):
+        _check_frame_duration(self.frame_duration)
         self._check_dimensions()
         self._check_shapes()
 
@@ -131,7 +143,7 @@ class CSFStimulus(Stimulus):
         Examples
         --------
         >>> import numpy as np
-        >>> stimulus = CSFStimulus(sf=np.array([1.0, 3.0]), contrast=np.array([0.1, 0.2]))
+        >>> stimulus = CSFStimulus(sf=np.array([1.0, 3.0]), contrast=np.array([0.1, 0.2]), frame_duration=1.0)
         >>> tensors = stimulus.to_tensors("float32")
         >>> print(tuple(tensors.sf.shape))
         (2,)
@@ -142,4 +154,5 @@ class CSFStimulus(Stimulus):
         return CSFStimulusTensors(
             sf=ops.convert_to_tensor(self.sf, dtype=dtype),
             contrast=ops.convert_to_tensor(self.contrast, dtype=dtype),
+            frame_duration=float(self.frame_duration),
         )

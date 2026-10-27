@@ -32,8 +32,7 @@ class TestCompressiveGaussian2DPRFModel(PRFStimulusSetup):
                 "ratio": [0.48, 0.48, 0.48],
                 "weight_deriv": [0.5, 0.5, 0.5],
                 "baseline": [0.0, 0.1, 0.2],
-                "amplitude": [1.1, 1.0, 0.9],
-                "gain": [0.1, 0.2, 0.3],
+                "amplitude": [0.11, 0.2, 0.27],
                 "n": [0.9, 1.1, 0.1],
             },
         )

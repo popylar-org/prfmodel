@@ -49,3 +49,25 @@ class ShapeMismatchError(ValueError):
         arg2_shape: tuple[int, ...],
     ):
         super().__init__(f"Shapes of '{arg1_name}' {arg1_shape} and '{arg2_name}' {arg2_shape} do not match")
+
+
+class ResolutionMismatchWarning(UserWarning):
+    """Warning for when submodels of a canonical model are sampled on time axes of different resolutions.
+
+    Canonical models issue this warning when an impulse submodel with an explicit
+    :attr:`~prfmodel.impulse.base.BaseImpulse.resolution` is combined with a stimulus whose frame duration
+    differs from it, or when the temporal submodels of a
+    :class:`~prfmodel.models.prf.CSTPRFModel` have different explicit resolutions.
+
+    """
+
+
+class InvalidUnitsWarning(UserWarning):
+    """Warning for when units in the target data of a fitter cannot be fit.
+
+    Fitters issue this warning when the time series of a unit is constant (e.g., a vertex on the medial wall) or
+    contains `NaN` or infinite values. These units are excluded from the fit and the parameters the fitter
+    estimates are `NaN` for them, as are their losses. Remove such units from the data before fitting to avoid
+    the warning.
+
+    """

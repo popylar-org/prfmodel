@@ -30,12 +30,17 @@ Two subtleties to be aware of when reading the prfpy-side implementation:
    *oversampled* grid (1600 points at 0.02 s for TR=1).  Using oversampling=1
    instead shifts the gamma evaluation by loc=dt=1 s, misaligning the peak by a
    full second.  We therefore fetch the oversampled kernel and downsample by
-   slicing every 50th point, making the shift only 0.02 s (negligible).
+   slicing every 50th point, making the shift only TR/50 (negligible).
 
 2. prfmodel includes baseline and amplitude in its full prediction.  A non-zero
    baseline adds a constant offset that, after normalisation, changes the shape
    of the normalised timeseries.  We set baseline=0 and amplitude=1 in the
    SPM-params DataFrame so both sides return a raw convolved signal.
+
+3. prfmodel samples its impulse kernel at the frame duration of the stimulus
+   (0.9 s for the bar stimulus), so the nilearn kernel is built with t_r set to
+   that same frame duration.  A kernel at any other TR convolves the two
+   predictions on different time axes.
 
 Coordinate conventions
 ----------------------
@@ -84,21 +89,23 @@ _SPM_HRF_PARAMS = {
     "weight_deriv": 0.0,
 }
 
-# Looser tolerance for the with-HRF check, set from the measured floor rather than chosen.
+# Looser tolerance for the with-HRF check, set from the measured floor rather than chosen. The figures
+# below were measured on the bar stimulus, so both kernels are sampled at its 0.9 s frame duration.
 #
 # The convolution is not the reason: prfmodel's Keras depthwise convolution and the scipy
-# fftconvolve used on the prfpy side agree to 4e-08 of peak when handed the same kernel. Nor is
-# prfmodel's kernel: an exact scipy kernel on prfmodel's own grid agrees to 2.9e-07. The residual is
+# fftconvolve used on the prfpy side agree to 3.0e-07 of peak when handed the same kernel. Nor is
+# prfmodel's kernel: an exact scipy kernel on prfmodel's own grid agrees to 3.3e-07. The residual is
 # how nilearn lays out its time axis, and it has two parts that partly cancel: a `loc=dt` shift of
-# one oversampled step (3.76e-03 on its own) and a `linspace` grid whose spacing is `32/31` s rather
-# than 1 (7.13e-04 on its own). Downsampling removes neither, and no change on the prfmodel side can
-# close either. Together they measured 2.97e-03 of peak in the convolved prediction while prfmodel
-# sampled bin centres; on the leading-edge grid the two kernels agree to 3.47e-03 of peak on their
-# own, so the convolved floor is of the same order.
+# one oversampled step (3.46e-03 on its own) and a `linspace` grid whose downsampled spacing is
+# 0.90039 s rather than 0.9 s (5.29e-04 on its own). Downsampling removes neither, and no change on
+# the prfmodel side can close either. Together they measure 2.97e-03 of peak in the convolved
+# prediction; on the leading-edge grid the two kernels agree to 6.56e-03 of peak on their own, so the
+# convolved floor is of the same order.
 #
 # 5e-3 sits above that floor and well below a real defect: against the same edge-sampled
-# reference, the class of error this check exists to catch measures 9.64e-02 when the kernel is
-# mis-sampled by half a step and 1.88e-01 when it is off by a full one.
+# reference, the class of error this check exists to catch measures 8.35e-02 when the kernel is
+# mis-sampled by half a step and 1.70e-01 when it is off by a full one. Building the reference
+# kernel at 1 s instead of the 0.9 s frame duration measures 1.22e-01.
 RTOL_WITH_HRF: float = 5e-3
 
 
@@ -143,24 +150,25 @@ def _make_spm_params() -> pd.DataFrame:
     )
 
 
-def _prfpy_response_with_hrf(pre_hrf: np.ndarray) -> np.ndarray:
+def _prfpy_response_with_hrf(pre_hrf: np.ndarray, t_r: float) -> np.ndarray:
     """Convolve pre-HRF neural response with the SPM canonical HRF via scipy.
 
     nilearn's spm_hrf returns the kernel on an oversampled grid (default 50x).
-    Calling it with oversampling=1 introduces a loc=dt=1 s shift that misaligns
-    the kernel by a full second relative to prfmodel's gamma evaluation. Instead
-    we oversample at the default rate and then downsample to 1 s/sample, so the
-    loc shift is only 0.02 s and its effect is negligible.
+    Calling it with oversampling=1 introduces a loc=dt=t_r shift that misaligns
+    the kernel by a full frame relative to prfmodel's gamma evaluation. Instead
+    we oversample at the default rate and then downsample to one sample per frame,
+    so the loc shift is only t_r/50 and its effect is negligible.
 
     The downsample starts at index 0, because prfmodel now samples each frame at its leading
-    edge (0 s, 1 s, ...) as nilearn does. Both kernels therefore sit on the same grid, and
+    edge (0, t_r, 2*t_r, ...) as nilearn does. Both kernels therefore sit on the same grid, and
     comparing them compares the two implementations rather than the two conventions; reading
-    one of them half a step out puts them 9.44e-02 of peak apart.
+    one of them half a step out puts them 8.35e-02 of peak apart.
 
-    TR=1 s is assumed — the resolution at which prfmodel samples its impulse kernel.
+    t_r must be the frame duration of the stimulus, the resolution at which prfmodel samples its
+    impulse kernel.
     """
     oversampling = 50
-    kernel = spm_hrf(t_r=1.0, oversampling=oversampling)[::oversampling]
+    kernel = spm_hrf(t_r=t_r, oversampling=oversampling)[::oversampling]
     pad_len = len(kernel) - 1
     padded = np.pad(pre_hrf, (pad_len, 0), mode="edge")
     convolved = signal.fftconvolve(padded, kernel)
@@ -193,7 +201,7 @@ def check_with_hrf(stimulus: PRFStimulus) -> None:
     """
     spm_params = _make_spm_params()
     ref_hrf = prfmodel_response(stimulus, spm_params, with_hrf=True)
-    prfpy_hrf = _prfpy_response_with_hrf(_prfpy_response(stimulus))
+    prfpy_hrf = _prfpy_response_with_hrf(_prfpy_response(stimulus), stimulus.frame_duration)
     if not compare_predictions(ref_hrf, prfpy_hrf, "prfpy (with HRF)", rtol=RTOL_WITH_HRF):
         msg = (
             f"prfmodel and prfpy disagree on the full prediction by more than {RTOL_WITH_HRF:.0e} "

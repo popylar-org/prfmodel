@@ -46,7 +46,7 @@ os.environ["KERAS_BACKEND"] = "tensorflow"
 pd.set_option("display.precision", 3)
 
 if find_spec("tensorflow") is None:
-    msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
+    msg = 'Could not find the tensorflow package. Please install it with: pip install "prfmodel[tensorflow]"'
     raise ImportError(msg)
 ```
 
@@ -73,13 +73,15 @@ contrast, sf = np.meshgrid(contrast_levels, sf_levels)
 stimulus = CSFStimulus(
     sf=sf.ravel(),
     contrast=contrast.ravel(),
+    frame_duration=1.0,  # Each frame lasts one second (e.g., one TR)
 )
 
 print(stimulus)
 ```
 
-When printing the `stimulus` object, we can see that it has two attributes. The `sf` attribute defines the spatial frequencies.
+When printing the `stimulus` object, we can see that it has three attributes. The `sf` attribute defines the spatial frequencies.
 It has shape `(num_frames,)`. The `contrast` attribute defines the contrast for each spatial frequency with shape `(num_frames,)`.
+The `frame_duration` attribute is the duration of each frame in seconds, at which the model samples its impulse response.
 
 +++
 
@@ -287,7 +289,7 @@ plot_observed_predicted(
 ```
 
 To finetune our model fits, we use SGD to iteratively optimize model parameters using the gradient of a loss function
-that is computed between data and model predictions. The default loss function in prfmodel is the means squared error.
+that is computed between data and model predictions. The default loss function in prfmodel is the mean squared error.
 As initial parameters, we use the result from the grid search and least squares fit. We fix the parameters related to
 the impulse response to their initial values (which are the "true" values).
 

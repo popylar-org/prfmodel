@@ -192,7 +192,7 @@ def test_plot_2d_prf_centers():
     """Test that pRF centers are counted on the grid and the stimulus is marked."""
     parameter_values = {"mu_x": np.linspace(-2.0, 2.0, 5), "mu_y": np.linspace(-1.0, 1.0, 3)}
     parameters = pd.DataFrame({"mu_x": [-2.0, -2.0, 1.0, np.nan], "mu_y": [-1.0, -1.0, 0.0, 0.0]})
-    stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=5, width=8, height=8)
+    stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=5, width=8, height=8, frame_duration=1.0)
     fig, ax = plot_2d_prf_centers(parameters, parameter_values, stimulus=stimulus)
     _assert_figure_axes(fig, ax)
     counts = ax.collections[0].get_array()
@@ -205,7 +205,7 @@ def test_plot_2d_prf_centers():
 
 def test_plot_2d_prf_centers_1d_stimulus():
     """Test that a stimulus that is not 2-dimensional raises an error."""
-    stimulus = PRFStimulus(design=np.zeros((3, 4)), grid=np.zeros((4, 1)))
+    stimulus = PRFStimulus(design=np.zeros((3, 4)), grid=np.zeros((4, 1)), frame_duration=1.0)
     with pytest.raises(ValueError, match="2-dimensional"):
         plot_2d_prf_centers(pd.DataFrame({"mu_x": [0.0], "mu_y": [0.0]}), stimulus=stimulus)
 
@@ -215,7 +215,7 @@ def stimulus_1d():
     """One-dimensional stimulus."""
     design = np.eye(4)[[0, 1, 2, 3, 2, 1]]
     grid = np.log(np.array([1.0, 2.0, 3.0, 4.0]))[:, np.newaxis]
-    return PRFStimulus(design=design, grid=grid, dimension_labels=["log(n)"])
+    return PRFStimulus(design=design, grid=grid, dimension_labels=["log(n)"], frame_duration=1.0)
 
 
 def test_plot_1d_prf_stimulus(stimulus_1d: PRFStimulus):
@@ -230,7 +230,7 @@ def test_plot_1d_prf_stimulus(stimulus_1d: PRFStimulus):
 def test_plot_1d_prf_stimulus_invalid(stimulus_1d: PRFStimulus):
     """Test that invalid stimuli and tick labels raise errors."""
     with pytest.raises(ValueError, match="1-dimensional"):
-        plot_1d_prf_stimulus(PRFStimulus.create_2d_bar_stimulus(num_frames=5, width=8, height=8))
+        plot_1d_prf_stimulus(PRFStimulus.create_2d_bar_stimulus(num_frames=5, width=8, height=8, frame_duration=1.0))
     with pytest.raises(ValueError, match="tick labels"):
         plot_1d_prf_stimulus(stimulus_1d, tick_labels=["a"])
 

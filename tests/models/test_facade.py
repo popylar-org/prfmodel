@@ -76,7 +76,6 @@ _PARAMETER_VALUES = {
     "baseline": 0.1,
     "amplitude": 1.2,
     "shift": 0.0,
-    "gain": 1.0,
     "n": 0.5,
     "center_index": 0.0,
 }

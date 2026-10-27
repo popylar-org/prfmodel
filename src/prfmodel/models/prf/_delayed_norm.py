@@ -64,19 +64,19 @@ class DelayedNormGaussian2DPRFModel(DelayedNormPRFModel):
        * - ``delay``
          - h₁
          - τ₁ (default 0.05)
-         - Peak time of the positive gamma component (in seconds).
+         - Mean time of the positive gamma component (in seconds).
        * - ``dispersion``
          - h₁
          - —
-         - Rate parameter of the positive gamma component.
+         - Scale parameter of the positive gamma component.
        * - ``undershoot``
          - h₁
          - —
-         - Peak time of the negative gamma component (in seconds).
+         - Mean time of the negative gamma component (in seconds).
        * - ``u_dispersion``
          - h₁
          - —
-         - Rate parameter of the negative gamma component.
+         - Scale parameter of the negative gamma component.
        * - ``ratio``
          - h₁
          - —

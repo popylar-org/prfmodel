@@ -137,9 +137,9 @@ class TestReductionToGaussian(PRFStimulusSetup):
         np.testing.assert_allclose(observed, reference, rtol=1e-10)
 
     def test_css_with_unit_exponent_is_gaussian(self, stimulus: PRFStimulus, reference: np.ndarray):
-        """Test that compressive spatial summation with `n=1, gain=1` is a plain Gaussian.
+        """Test that compressive spatial summation with `n=1` is a plain Gaussian.
 
-        `CompressiveEncoder` computes `gain * maximum(response, min_response) ** n`, so the identity
+        `CompressiveEncoder` computes `maximum(response, min_response) ** n`, so the identity
         holds only up to the `min_response` floor, which replaces an exactly-zero encoded response
         with 1e-10. That floor is the reason for the absolute tolerance below; it bites on frames
         where the bar does not overlap the receptive field at all.
@@ -150,7 +150,6 @@ class TestReductionToGaussian(PRFStimulusSetup):
                 "mu_y": MU_Y,
                 "mu_x": MU_X,
                 "sigma": SIGMA,
-                "gain": [1.0, 1.0],
                 "n": [1.0, 1.0],
                 **HRF_PARAMS,
                 "baseline": BASELINE,
@@ -204,14 +203,15 @@ class TestReductionToGaussian(PRFStimulusSetup):
         `test_cst_with_only_a_sustained_channel_is_gaussian` pins the composition only at `n=1`, where the
         power law is the identity and a wrong exponent would go unnoticed. With a pass-through sustained
         channel and no transient, CST computes `amplitude_sustained * maximum(encoded, eps) ** n`, which is exactly
-        what `CompressiveEncoder` computes with `gain = amplitude_sustained`. Asserting that at `n=0.4` pins the
-        rectifier floor, the exponent, and the weight all at once, against a model anchored externally.
+        what the CSS model computes with `amplitude = amplitude_sustained`, because the convolution is linear.
+        Asserting that at `n=0.4` pins the rectifier floor, the exponent, and the weight all at once, against a model
+        anchored externally.
 
         """
         exponent = [0.4, 0.7]
         shared = {"mu_y": MU_Y, "mu_x": MU_X, "sigma": SIGMA, "n": exponent, **HRF_PARAMS, "baseline": BASELINE}
 
-        css_params = pd.DataFrame({**shared, "gain": AMPLITUDE, "amplitude": [1.0, 1.0]})
+        css_params = pd.DataFrame({**shared, "amplitude": AMPLITUDE})
         cst_params = pd.DataFrame(
             {
                 **shared,
@@ -230,38 +230,6 @@ class TestReductionToGaussian(PRFStimulusSetup):
         expected = np.asarray(Gaussian2DCSSPRFModel()(stimulus, css_params, dtype="float64"))
 
         np.testing.assert_allclose(observed, expected, rtol=1e-10)
-
-    def test_css_gain_scales_each_unit_by_its_own_value(self, stimulus: PRFStimulus):
-        """Test that at `n=1` the CSS model is a Gaussian whose amplitude is scaled by `gain`.
-
-        `gain` differs across units here, unlike in `test_css_with_unit_exponent_is_gaussian`. With
-        `gain=1` for every unit the reduction cannot see the unit axis at all: reversing `gain` and
-        `n` across units leaves the result bit-identical. Distinct per-unit values pin the axis.
-
-        """
-        gain = [2.0, 3.0]
-
-        params = pd.DataFrame(
-            {
-                "mu_y": MU_Y,
-                "mu_x": MU_X,
-                "sigma": SIGMA,
-                "gain": gain,
-                "n": [1.0, 1.0],
-                **HRF_PARAMS,
-                "baseline": BASELINE,
-                "amplitude": AMPLITUDE,
-            },
-        )
-
-        # At n=1 the encoder is a plain multiplication, so `gain` folds into `amplitude`.
-        expected_params = _gaussian_params()
-        expected_params["amplitude"] = [a * g for a, g in zip(AMPLITUDE, gain, strict=True)]
-        expected = np.asarray(Gaussian2DPRFModel()(stimulus, expected_params, dtype="float64"))
-
-        observed = np.asarray(Gaussian2DCSSPRFModel()(stimulus, params, dtype="float64"))
-
-        np.testing.assert_allclose(observed, expected, rtol=1e-8, atol=1e-9)
 
     def test_div_norm_without_normalization_is_gaussian(self, stimulus: PRFStimulus, reference: np.ndarray):
         """Test that divisive normalization with an inert denominator is a plain Gaussian.

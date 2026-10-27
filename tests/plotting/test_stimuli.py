@@ -38,7 +38,7 @@ def test__get_grid_limits_non_square():
 @pytest.fixture
 def bar_stimulus():
     """Create bar stimulus to plot."""
-    return PRFStimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64)
+    return PRFStimulus.create_2d_bar_stimulus(num_frames=100, width=128, height=64, frame_duration=1.0)
 
 
 def test_animate_2d_stimulus(bar_stimulus: PRFStimulus):
@@ -76,6 +76,7 @@ class CSFPlottingSetup:
         return CSFStimulus(
             sf=np.array([1.0, 3.0, 6.0, 12.0]),
             contrast=np.array([0.1, 0.2, 0.4, 0.8]),
+            frame_duration=1.0,
         )
 
 

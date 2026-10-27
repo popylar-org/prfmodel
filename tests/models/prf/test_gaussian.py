@@ -172,6 +172,7 @@ class TestGaussian1DPRFTuning:
         return PRFStimulus(
             design=design,
             grid=grid,
+            frame_duration=1.0,
         )
 
     @pytest.fixture
@@ -452,7 +453,7 @@ class TestCoordinateConvention:
             # A horizontal bar at a fixed y, spanning every x
             design[:, index - 2 : index + 3, :] = 1.0
 
-        return PRFStimulus(design=design, grid=grid, dimension_labels=["y", "x"]), coords[index]
+        return PRFStimulus(design=design, grid=grid, dimension_labels=["y", "x"], frame_duration=1.0), coords[index]
 
     @pytest.mark.parametrize("axis", ["x", "y"])
     def test_prf_responds_on_the_axis_it_is_named_after(self, axis: str):
@@ -489,7 +490,13 @@ class TestCoordinateConvention:
 
     def test_bar_stimulus_grid_follows_convention(self):
         """Test that `create_2d_bar_stimulus` uses the documented axis order and sign."""
-        stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=10, width=16, height=8, pixel_size=0.5)
+        stimulus = PRFStimulus.create_2d_bar_stimulus(
+            num_frames=10,
+            width=16,
+            height=8,
+            pixel_size=0.5,
+            frame_duration=1.0,
+        )
 
         assert stimulus.grid.shape == (8, 16, 2)
         self._assert_grid_convention(stimulus.grid, "create_2d_bar_stimulus")
@@ -508,7 +515,7 @@ class TestCoordinateConvention:
         stimulus sources. It fails if either one flips its horizontal axis independently.
 
         """
-        generated = PRFStimulus.create_2d_bar_stimulus(num_frames=10, width=32, height=32)
+        generated = PRFStimulus.create_2d_bar_stimulus(num_frames=10, width=32, height=32, frame_duration=1.0)
         packaged = load_2d_prf_bar_stimulus()
 
         for name, stimulus in [("create_2d_bar_stimulus", generated), ("load_2d_prf_bar_stimulus", packaged)]:

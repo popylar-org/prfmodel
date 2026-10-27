@@ -7,6 +7,13 @@ import numpy as np
 from scipy.io import loadmat
 from prfmodel.stimuli import PRFStimulus
 
+# The packaged bar stimulus was presented with one design frame per repetition time of 0.9 s (see the 7t-aot-visual
+# dataset, which was measured with it)
+_BAR_STIMULUS_FRAME_DURATION = 0.9
+
+# The numerosity experiment was measured with a repetition time of 2.1 s and one design frame per repetition time
+_LOGNUMEROSITY_STIMULUS_FRAME_DURATION = 2.1
+
 
 def _load_2d_bar_design_and_grid() -> tuple[np.ndarray, np.ndarray]:
     path = files("prfmodel.data.stimuli").joinpath("2d_bar_stimulus.npz")
@@ -53,7 +60,7 @@ def _load_chn_aperture_stimulus(
     design = _resample_frames(aperture.transpose(2, 0, 1), aperture_duration, frame_duration, num_frames)
     grid = np.stack((stim["y"].item(), stim["x"].item()), axis=-1).astype(np.float64)
 
-    return PRFStimulus(design=design, grid=grid, dimension_labels=["y", "x"])
+    return PRFStimulus(design=design, grid=grid, frame_duration=frame_duration, dimension_labels=["y", "x"])
 
 
 def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[PRFStimulus, PRFStimulus]:
@@ -82,7 +89,8 @@ def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[P
     The full stimulus has 340 time frames, with 128 cells in the x- and y-dimension, spanning a visual field of
     approximately -4 to 4 degrees of visual angle vertically and horizontally. The stimulus coordinate grid has been
     transformed from a rectangular into a quadratic shape. The moving bar patterns is mirrored in the time axis
-    which means that it can be split in two almost identical halfs.
+    which means that it can be split in two almost identical halfs. The stimulus was presented with one time frame
+    per repetition time of 0.9 seconds, so its ``frame_duration`` is 0.9.
 
     The ``grid`` holds visual field coordinates. The horizontal coordinate increases across the design columns, so a
     bar in the leftmost columns falls in the left visual hemifield (negative ``mu_x``), and the vertical coordinate
@@ -100,13 +108,13 @@ def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[P
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> stimulus = load_2d_prf_bar_stimulus()
     >>> print(stimulus)
-    PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
+    PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], frame_duration=0.9, dimension_labels=['y', 'x'])
 
     Load a train and test stimulus with the first and second half of the design matrix.
 
     >>> stimulus_train, stimulus_test = load_2d_prf_bar_stimulus(return_test=True)
     >>> print(stimulus_train)
-    PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
+    PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], frame_duration=0.9, dimension_labels=['y', 'x'])
 
     """
     design, grid = _load_2d_bar_design_and_grid()
@@ -119,6 +127,7 @@ def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[P
     stimulus_train = PRFStimulus(
         design=design_train,
         grid=grid,
+        frame_duration=_BAR_STIMULUS_FRAME_DURATION,
         dimension_labels=dimension_labels,
     )
 
@@ -128,6 +137,7 @@ def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[P
     stimulus_test = PRFStimulus(
         design=design_test,
         grid=np.copy(grid),
+        frame_duration=_BAR_STIMULUS_FRAME_DURATION,
         dimension_labels=dimension_labels.copy(),
     )
 
@@ -151,7 +161,8 @@ def load_1d_prf_lognumerosity_stimulus() -> PRFStimulus:
     The stimulus contains four cycles of the same sequence of unique numerosities 1, 2, 3, 4, 5, 6, 7, and 20.
     Each numerosity is presented for two consecutive frames. The numerosities 1 to 7 first ascend in order followed by
     numerosity 20 presented for eight frames and then descend in order followed by 20 for eight frames.
-    The first six frames also contain numerosity 20 and serve as a prescan interval in the experiment.
+    The first six frames also contain numerosity 20 and serve as a prescan interval in the experiment. Each frame
+    lasts one repetition time of 2.1 seconds, so the ``frame_duration`` of the stimulus is 2.1.
 
     References
     ----------
@@ -163,7 +174,7 @@ def load_1d_prf_lognumerosity_stimulus() -> PRFStimulus:
     --------
     >>> stimulus = load_1d_prf_lognumerosity_stimulus()
     >>> print(stimulus)
-    PRFStimulus(design=array[182, 8], grid=array[8, 1], dimension_labels=['log_numerosity'])
+    PRFStimulus(design=array[182, 8], grid=array[8, 1], frame_duration=2.1, dimension_labels=['log_numerosity'])
 
     """
     path = files("prfmodel.data.stimuli").joinpath("1d_lognumerosity_stimulus.npz")
@@ -178,5 +189,6 @@ def load_1d_prf_lognumerosity_stimulus() -> PRFStimulus:
     return PRFStimulus(
         design=design,
         grid=grid,
+        frame_duration=_LOGNUMEROSITY_STIMULUS_FRAME_DURATION,
         dimension_labels=dimension_labels,
     )

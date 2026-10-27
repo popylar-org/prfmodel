@@ -36,6 +36,7 @@ class TestSetup:
         return CSFStimulus(
             sf=sf,
             contrast=contrast,
+            frame_duration=1.0,
         )
 
 

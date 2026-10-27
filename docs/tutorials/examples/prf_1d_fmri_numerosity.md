@@ -38,7 +38,7 @@ os.environ["KERAS_BACKEND"] = "tensorflow"
 pd.set_option("display.precision", 3)
 
 if find_spec("tensorflow") is None:
-    msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
+    msg = 'Could not find the tensorflow package. Please install it with: pip install "prfmodel[tensorflow]"'
     raise ImportError(msg)
 ```
 
@@ -201,23 +201,24 @@ Gaussian shape in one-dimensional log-numerosity space. This response is convolv
 that follows the shape of the hemodynamic response in the brain. Finally, a baseline and amplitude parameter shift and scale
 our predicted response to match the observed BOLD response.
 
-The {py:class}`prfmodel.models.prf.Gaussian1DPRFModel` class performs all these steps to make a combined prediction. However, we need to add a custom impulse response model to account for the fact that each time frame is one TR (2.1 seconds; the default in prfmodel is 1.0 seconds). Thus, we set the resolution of our predicted impulse response to the TR so that the predicted response has the same sampling rate as the observed timecourses (see also the section [](../../important_details.md)).
+The {py:class}`prfmodel.models.prf.Gaussian1DPRFModel` class performs all these steps to make a combined prediction. Each time frame is one TR of 2.1 seconds, which the example stimulus stores as its `frame_duration`. The pRF model samples its impulse response at this frame duration, so the predicted response has the same sampling rate as the observed timecourses (see also the section [](../../important_details.md)).
 
 ```{code-cell} ipython3
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.prf import Gaussian1DPRFModel
 
-# Define repetition time (TR)
-TR = 2.1
+# The repetition time (TR) is stored as the frame duration of the stimulus
+print(stimulus.frame_duration)
 
-# Create custom impulse model. Each frame is sampled at its leading edge, so the first
-# frame sits at t = 0 (where the response is zero) and no offset is needed.
-impulse_model = DerivativeTwoGammaImpulse(resolution=TR)
+# Create the impulse model. Without a resolution, it is sampled at the frame duration of the stimulus.
+# Each frame is sampled at its leading edge, so the first frame sits at t = 0 (where the response is zero)
+# and no offset is needed.
+impulse_model = DerivativeTwoGammaImpulse()
 ```
 
 We can visualize the predicted impulse response. The two-gamma parameters (`delay`, `dispersion`, `undershoot`,
 `u_dispersion`, `ratio`) default to the Glover HRF parameter set
-(see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only need to set `weight_deriv`. This parameter weights the temporal derivative of the two-gamma response and absorbs small differences in hemodynamic latency between vertices. Negative values shift the response earlier in time, positive values later. We start from `-0.5` and let the fitter refine it per vertex further below.
+(see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only need to set `weight_deriv`. This parameter weights the temporal derivative of the two-gamma response and absorbs small differences in hemodynamic latency between vertices. Negative values shift the response earlier in time, positive values later. We start from `-0.5` and let the fitter refine it per vertex further below. On its own, the impulse model does not know the stimulus, so we sample it at the frame duration of the stimulus with {py:meth}`~prfmodel.impulse.base.BaseImpulse.at_resolution` before plotting.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -230,7 +231,7 @@ impulse_default_params = pd.DataFrame(
 )
 
 # Predict impulse response (two-gamma parameters use the default Glover HRF values)
-impulse_response = np.asarray(impulse_model(impulse_default_params))
+impulse_response = np.asarray(impulse_model.at_resolution(stimulus.frame_duration)(impulse_default_params))
 
 fig = px.line(
     pd.DataFrame({"Time frame (in TR)": np.arange(impulse_response.shape[1]), "Impulse response": impulse_response[0]}),
@@ -245,7 +246,7 @@ fig.show()
 We insert the impulse model into the {py:class}`~prfmodel.models.prf.Gaussian1DPRFModel` that makes combined model predictions.
 
 ```{code-cell} ipython3
-# Define pRF model with custom impulse response submodel
+# Define pRF model with the impulse response submodel
 prf_model = Gaussian1DPRFModel(
     impulse_model=impulse_model,
 )

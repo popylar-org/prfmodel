@@ -1,11 +1,10 @@
 
 [![github license badge](https://img.shields.io/github/license/popylar-org/prfmodel)](https://github.com/popylar-org/prfmodel/blob/main/LICENSE)
+[![RSD](https://img.shields.io/badge/rsd-prfmodel-00a3e3.svg)](https://research-software-directory.org/software/prfmodel)
 [![build](https://github.com/popylar-org/prfmodel/actions/workflows/build.yml/badge.svg)](https://github.com/popylar-org/prfmodel/actions/workflows/build.yml)
 [![docs](https://img.shields.io/github/actions/workflow/status/popylar-org/prfmodel/.github%2Fworkflows%2Fdocumentation.yml?label=docs)](https://github.com/popylar-org/prfmodel/actions/workflows/documentation.yml)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
 [![Linting: Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-
-## How to use prfmodel
 
 A modern Python implementation for population receptive field model fitting.
 
@@ -18,33 +17,34 @@ with prfmodel.
 
 **Requirements**: prfmodel requires Python version >= 3.10 and <= 3.13.
 
-To install the development version of prfmodel from GitHub, run:
-
-```console
-git clone git@github.com:popylar-org/prfmodel.git
-cd prfmodel
-python -m pip install .
-```
-
-The package relies on [Keras](https://keras.io/) for multi-backend model fitting. At least one backend must be
-installed to use prfmodel.
+prfmodel is available on [PyPI](https://pypi.org/project/prfmodel/). The package relies on
+[Keras](https://keras.io/) for multi-backend model fitting. At least one backend must be installed to use prfmodel.
 
 To install prfmodel with the Tensorflow backend, run:
 
 ```console
-python -m pip install .[tensorflow]
+python -m pip install "prfmodel[tensorflow]"
 ```
 
-To install the PyTorch backend, run:
+To install it with the PyTorch backend, run:
 
 ```console
-python -m pip install .[torch]
+python -m pip install "prfmodel[torch]"
 ```
 
-To install the JAX backend, run:
+To install it with the JAX backend, run:
 
 ```console
-python -m pip install .[jax]
+python -m pip install "prfmodel[jax]"
+```
+
+The quotes around `prfmodel[...]` are needed in some shells (e.g., zsh, the default shell on macOS), which would
+otherwise interpret the square brackets.
+
+To install the latest development version from GitHub instead, run:
+
+```console
+python -m pip install "prfmodel[tensorflow] @ git+https://github.com/popylar-org/prfmodel.git"
 ```
 
 The default backend in Keras is Tensorflow, but this can be changed by setting the `KERAS_BACKEND` environment

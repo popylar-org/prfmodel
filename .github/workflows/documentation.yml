@@ -35,12 +35,10 @@ jobs:
             SAFE=$(echo "$BRANCH" | sed 's/[^a-zA-Z0-9._-]/-/g')
             echo "dir=branches/${SAFE}" >> "$GITHUB_OUTPUT"
           fi
-      - name: Install ffmpeg
+      - name: Install graphviz (for inheritance diagrams)
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
-      - name: Install graphviz (for inheritance diagrams)
-        run: sudo apt-get install -y graphviz
+          sudo apt-get install -y graphviz
       - uses: ./.github/actions/setup-python-cached
         with:
           python-version: '3.13'
@@ -64,6 +62,13 @@ jobs:
         run: |
           cd docs
           make html
+      - name: Upload documentation for the link check
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-docs
+          path: docs/_build/html/
+          if-no-files-found: error
+          retention-days: 1
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' }}
@@ -73,3 +78,31 @@ jobs:
           publish_dir: docs/_build/html/
           destination_dir: ${{ steps.deploy-target.outputs.dir }}
           keep_files: true
+
+  # Checks the links in the Markdown files in the repository root (e.g., README.md), in the Markdown sources of the
+  # documentation, and in the built HTML, which also contains the links from the API documentation and the notebook
+  # outputs. It runs as a separate job so that a broken external link does not stop the documentation from being
+  # deployed. lychee reads its configuration from lychee.toml.
+  links:
+    name: Check links
+    needs: docs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch != '' && github.event.inputs.branch || github.ref }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: html-docs
+          path: docs/_build/html/
+      - name: Check links with lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --no-progress
+            '*.md'
+            'docs/**/*.md'
+            'docs/_build/html/**/*.html'

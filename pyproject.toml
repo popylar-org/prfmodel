@@ -12,7 +12,7 @@ authors = [
     { name = "Popylar Team", email = "t.knapen@spinozacentre.nl" }
 ]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
@@ -30,7 +30,7 @@ dependencies = [
     "nilearn",
     "numpy>=2.0.0",
     "pandas",
-    "scipy",
+    "scipy<1.18",  # 1.18 changed how loadmat returns MATLAB objects, which breaks read_matlab_tables
     "tqdm",
 ]
 description = "A modern Python implementation for population receptive field modelling."
@@ -39,7 +39,7 @@ license = {file = "LICENSE"}
 name = "prfmodel"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.10,<3.14"
-version = "0.0.1"
+version = "0.1.0"
 
 [project.optional-dependencies]
 dev = [
@@ -159,7 +159,7 @@ force-single-line = true
 no-lines-before = ["future","standard-library","third-party","first-party","local-folder"]
 
 [tool.bumpversion]
-current_version = "0.0.1"
+current_version = "0.1.0"
 
 [[tool.bumpversion.files]]
 filename = "src/prfmodel/__init__.py"
@@ -169,6 +169,9 @@ filename = "docs/conf.py"
 
 [[tool.bumpversion.files]]
 filename = "pyproject.toml"
+# Only replace the package version, not a dependency that happens to be pinned to the same version
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
 
 [[tool.mypy.overrides]]
 module = ["keras.*", "nilearn.*", "scipy.*"]

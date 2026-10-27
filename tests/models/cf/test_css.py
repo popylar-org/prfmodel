@@ -28,8 +28,7 @@ class TestCompressiveGaussianCFModel(CFSetup):
                 "center_index": [0, 2, 1],
                 "sigma": [1.0, 2.0, 3.0],
                 "baseline": [0.5, -0.1, 0.2],
-                "amplitude": [-1.1, 0.5, 2.0],
-                "gain": [0.1, 0.2, 0.3],
+                "amplitude": [-0.11, 0.1, 0.6],
                 "n": [0.9, 1.1, 0.1],
             },
         )

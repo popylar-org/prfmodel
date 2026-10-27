@@ -23,6 +23,10 @@ _ALLOWED_SCHEMES = ("http:", "https:", "file:")
 _CHUNK_SIZE = 1024 * 1024
 _MAX_ATTEMPTS = 3
 _BACKOFF_SECONDS = 1.0
+# Applies to each socket operation, so it bounds how long a stalled connection waits for data, not the whole download
+_TIMEOUT_SECONDS = 30.0
+# HTTPError is a URLError too but is not retried, because the server answered and will answer the same again
+_RETRYABLE_ERRORS = (urllib.error.URLError, TimeoutError, ConnectionError)
 
 
 class ChecksumError(OSError):
@@ -127,27 +131,46 @@ def _check_url(url: str) -> None:
         raise ValueError(msg)
 
 
-def _open_url(url: str, description: str):  # noqa: ANN202 (returns a private urllib response type)
-    last_error: urllib.error.URLError | TimeoutError | None = None
+def _transfer(url: str, out_path: Path, description: str) -> None:
+    # We audit the URL scheme in _check_url but ruff still flags the call
+    with (
+        urllib.request.urlopen(url, timeout=_TIMEOUT_SECONDS) as response,  # noqa: S310
+        out_path.open("wb") as out_file,
+    ):
+        total = int(response.headers.get("Content-Length") or 0)
+
+        with tqdm(total=total or None, unit="B", unit_scale=True, desc=description) as progress:
+            for chunk in iter(lambda: response.read(_CHUNK_SIZE), b""):
+                out_file.write(chunk)
+                progress.update(len(chunk))
+
+
+def _transfer_with_retries(url: str, out_path: Path, description: str) -> None:
+    """Download a file to a path, starting over when the connection fails or stalls, including mid-transfer."""
+    last_error: Exception | None = None
 
     for attempt in range(_MAX_ATTEMPTS):
         try:
-            # We audit the URL scheme in _check_url but ruff still flags the call
-            return urllib.request.urlopen(url)  # noqa: S310
+            _transfer(url, out_path, description)
         except urllib.error.HTTPError as error:  # noqa: PERF203 (a retry loop must catch per attempt)
             msg = (
                 f"Could not download {description} from '{url}' ({error.code} {error.reason}). The file "
                 f"identifier may have changed; please report this."
             )
             raise OSError(msg) from error
-        except (urllib.error.URLError, TimeoutError) as error:
+        except _RETRYABLE_ERRORS as error:
             last_error = error
             if attempt < _MAX_ATTEMPTS - 1:
                 delay = _BACKOFF_SECONDS * 2**attempt
                 logger.warning("Download of %s failed (%s); retrying in %.0f s", description, error, delay)
                 time.sleep(delay)
+        else:
+            return
 
-    msg = f"Could not download {description} from '{url}' after {_MAX_ATTEMPTS} attempts."
+    msg = (
+        f"Could not download {description} from '{url}' after {_MAX_ATTEMPTS} attempts. Check your internet "
+        f"connection and try again."
+    )
     raise OSError(msg) from last_error
 
 
@@ -157,18 +180,14 @@ def _download_file(url: str, dest_path: Path, description: str, expected_sha256:
 
     dest_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # The temporary file lives in the destination directory so that os.replace stays on one filesystem
+    # The temporary file lives in the destination directory so that os.replace stays on one filesystem. We only
+    # need its name: every attempt reopens it, so a retry overwrites what a failed attempt wrote.
     handle, temp_name = tempfile.mkstemp(dir=dest_path.parent, prefix=f"{dest_path.name}.", suffix=".part")
+    os.close(handle)
     temp_path = Path(temp_name)
 
     try:
-        with _open_url(url, description) as response, os.fdopen(handle, "wb") as out_file:
-            total = int(response.headers.get("Content-Length") or 0)
-
-            with tqdm(total=total or None, unit="B", unit_scale=True, desc=description) as progress:
-                for chunk in iter(lambda: response.read(_CHUNK_SIZE), b""):
-                    out_file.write(chunk)
-                    progress.update(len(chunk))
+        _transfer_with_retries(url, temp_path, description)
 
         if expected_sha256 is not None:
             actual = _sha256(temp_path)

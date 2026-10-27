@@ -1,0 +1,68 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  prfmodel - A modern Python implementation for population
+  receptive field modelling
+message: >-
+  This file contains the list of all contributors to
+  prfmodel. If you use this software, please cite it using
+  the metadata from this file.
+type: software
+authors:
+  - given-names: Malte
+    family-names: Lüken
+    email: m.luken@esciencecenter.nl
+    affiliation: Netherlands eScience Center
+  - given-names: Tomas
+    family-names: Knapen
+    email: t.knapen@spinozacentre.nl
+    affiliation: Spinoza Centre for Neuroimaging
+  - given-names: Ben
+    family-names: ' Harvey'
+    email: b.m.harvey@uu.nl
+    affiliation: Utrecht University
+  - given-names: Serge
+    family-names: Dumoulin
+    email: s.dumoulin@spinozacentre.nl
+    affiliation: Spinoza Centre for Neuroimaging
+  - given-names: Jose Angel
+    family-names: Daza Arevalo
+    email: j.daza@esciencecenter.nl
+    affiliation: Netherlands eScience Center
+  - given-names: Gilles
+    name-particle: de
+    family-names: Hollander
+    email: gilles.de.hollander@gmail.com
+    affiliation: University of Zurich
+  - given-names: Flavio
+    family-names: Hafner
+    email: f.hafner@esciencecenter.nl
+    affiliation: Netherlands eScience Center
+  - given-names: Koen
+    family-names: Haak
+    email: k.v.haak@tilburguniversity.edu
+    affiliation: Tilburg University
+  - given-names: Natalia
+    family-names: Petridou
+    email: n.petridou@umcutrecht.nl
+    affiliation: University Medical Center Utrecht
+  - given-names: Frans
+    family-names: Cornelissen
+    email: f.w.cornelissen@umcg.nl
+    affiliation: University Medical Center Groningen
+repository-code: 'https://github.com/popylar-org/prfmodel'
+url: 'https://popylar-org.github.io/prfmodel/index.html'
+abstract: >-
+  prfmodel is a modern Python implementation for fitting
+  population receptive field (pRF) and adjacent models, such
+  as connective field and contrast sensitivity models. It
+  leverages GPU-accelerated backends, such as TensorFlow, to
+  fit these models at break-neck speed.
+keywords:
+  - connective field
+  - contrast sensitivity function
+  - GPU-accelerated
+  - computational neuroscience
+license: Apache-2.0

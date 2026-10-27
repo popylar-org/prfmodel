@@ -1,16 +1,57 @@
 """Test downloading, caching, and verifying example dataset files."""
 
+import http.server
 import sys
+import threading
 import zipfile
+from collections.abc import Iterator
 from pathlib import Path
 import pytest
 from prfmodel.examples import ChecksumError
 from prfmodel.examples import get_data_dir
+from prfmodel.examples._fetch import _MAX_ATTEMPTS
 from prfmodel.examples._fetch import FileFetcher
 from prfmodel.examples._fetch import _download_file
 from prfmodel.examples._registry import DatasetSpec
 
 _ENV_VARS = ("PRFMODEL_DATA_DIR", "XDG_CACHE_HOME", "LOCALAPPDATA")
+_PAYLOAD = b"payload" * 1000
+
+
+class _StallingServer(http.server.ThreadingHTTPServer):
+    """Serve a payload, stalling halfway through the body for the first `stalls` requests."""
+
+    def __init__(self, stalls: int):
+        super().__init__(("127.0.0.1", 0), _StallingHandler)
+        self.stalls = stalls
+        self.requests = 0
+        self.release = threading.Event()
+
+    @property
+    def url(self) -> str:
+        return f"http://127.0.0.1:{self.server_address[1]}/file.bin"
+
+
+class _StallingHandler(http.server.BaseHTTPRequestHandler):
+    server: _StallingServer
+
+    def do_GET(self) -> None:
+        self.server.requests += 1
+
+        self.send_response(200)
+        self.send_header("Content-Length", str(len(_PAYLOAD)))
+        self.end_headers()
+
+        if self.server.requests <= self.server.stalls:
+            self.wfile.write(_PAYLOAD[: len(_PAYLOAD) // 2])
+            self.wfile.flush()
+            # Keep the connection open without sending the rest until the test is over
+            self.server.release.wait()
+        else:
+            self.wfile.write(_PAYLOAD)
+
+    def log_message(self, format: str, *args: object) -> None:  # noqa: A002 (name is set by the base class)
+        pass
 
 
 @pytest.fixture
@@ -18,6 +59,28 @@ def clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
     """Remove every environment variable that the data directory is resolved from."""
     for name in _ENV_VARS:
         monkeypatch.delenv(name, raising=False)
+
+
+@pytest.fixture
+def fast_retries(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Make a stalled download time out and be retried within a fraction of a second."""
+    monkeypatch.setattr("prfmodel.examples._fetch._TIMEOUT_SECONDS", 0.2)
+    monkeypatch.setattr("prfmodel.examples._fetch._BACKOFF_SECONDS", 0.0)
+
+
+@pytest.fixture
+def stalling_server(request: pytest.FixtureRequest) -> Iterator[_StallingServer]:
+    """Run a server that stalls for as many requests as the test parametrizes, then serves the payload."""
+    server = _StallingServer(stalls=request.param)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+
+    yield server
+
+    server.release.set()
+    server.shutdown()
+    server.server_close()
+    thread.join()
 
 
 def test_fetch_extracts_and_returns_path(fetcher: FileFetcher, fake_files: dict[str, bytes]):
@@ -119,6 +182,32 @@ def test_download_rejects_disallowed_scheme(tmp_path: Path):
     """Test that a URL with a scheme that is not allowed is refused."""
     with pytest.raises(ValueError, match="must start with"):
         _download_file("ftp://example.com/file.zip", tmp_path / "file.zip", "file.zip")
+
+
+@pytest.mark.parametrize("stalling_server", [1], indirect=True)
+def test_download_retries_a_stalled_transfer(fast_retries: None, stalling_server: _StallingServer, tmp_path: Path):
+    """Test that a connection that stalls mid-transfer times out and the download starts over."""
+    dest_path = tmp_path / "file.bin"
+
+    _download_file(stalling_server.url, dest_path, "file.bin")
+
+    assert stalling_server.requests == 2  # noqa: PLR2004
+    # The retry must overwrite the partial data of the stalled attempt, not append to it
+    assert dest_path.read_bytes() == _PAYLOAD
+    assert list(tmp_path.glob("*.part")) == []
+
+
+@pytest.mark.parametrize("stalling_server", [_MAX_ATTEMPTS], indirect=True)
+def test_download_gives_up_after_repeated_stalls(fast_retries: None, stalling_server: _StallingServer, tmp_path: Path):
+    """Test that a download that keeps stalling raises after the last attempt and leaves nothing behind."""
+    dest_path = tmp_path / "file.bin"
+
+    with pytest.raises(OSError, match=f"after {_MAX_ATTEMPTS} attempts"):
+        _download_file(stalling_server.url, dest_path, "file.bin")
+
+    assert stalling_server.requests == _MAX_ATTEMPTS
+    assert not dest_path.exists()
+    assert list(tmp_path.glob("*.part")) == []
 
 
 def test_get_data_dir_prefers_the_argument(monkeypatch: pytest.MonkeyPatch):

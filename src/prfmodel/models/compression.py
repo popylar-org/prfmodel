@@ -27,8 +27,8 @@ class CompressiveEncoder(CompositeModelProtocol, BaseStimulusEncoder[S, T]):
     r"""
     Compressive encoding model.
 
-    Amplifies and compresses an encoded stimulus response.
-    The model has two parameters: `gain` (amplification amplitude) and `n` (compression exponent).
+    Compresses an encoded stimulus response.
+    The model has one parameter: `n` (compression exponent).
 
     Parameters
     ----------
@@ -40,11 +40,15 @@ class CompressiveEncoder(CompositeModelProtocol, BaseStimulusEncoder[S, T]):
 
     Notes
     -----
-    Compressive encoding with `gain` :math:`g` and :math:`n` is done according to the equation [1]_:
+    Compressive encoding with exponent :math:`n` is done according to the equation [1]_:
 
     .. math::
 
-        p(x) = g \times \text{max}(f(x), \epsilon)^n
+        p(x) = \text{max}(f(x), \epsilon)^n
+
+    The equation in [1]_ also has a gain factor. The model has no such parameter because in a canonical model the
+    compressed response is scaled after the impulse stage (e.g., by the ``amplitude`` of
+    :class:`~prfmodel.scaling.BaselineAmplitude`), and a gain would trade off exactly against that scale.
 
     References
     ----------
@@ -68,7 +72,6 @@ class CompressiveEncoder(CompositeModelProtocol, BaseStimulusEncoder[S, T]):
     >>> # Define model parameters for 3 units
     >>> params = pd.DataFrame({
     ...     # Compressive parameters
-    ...     "gain": [0.5, 0.1, 1.2],
     ...     "n": [0.4, 0.5, 0.9],
     ... })
     >>> # Predict model response
@@ -78,7 +81,7 @@ class CompressiveEncoder(CompositeModelProtocol, BaseStimulusEncoder[S, T]):
 
     """
 
-    _additional_parameter_names = ("gain", "n")
+    _additional_parameter_names = ("n",)
 
     def __init__(self, encoding_model: BaseStimulusEncoder, min_response: float = 1e-10):
         self.models = {"encoding_model": encoding_model}
@@ -88,7 +91,7 @@ class CompressiveEncoder(CompositeModelProtocol, BaseStimulusEncoder[S, T]):
     def call(self, stimulus: T, response: Tensor, parameters: TensorFrame) -> Tensor:
         """Compress and encode a model response with a stimulus.
 
-        Encodes the model response, then compresses and amplifies the encoded response.
+        Encodes the model response, then compresses the encoded response.
 
         Parameters
         ----------
@@ -105,8 +108,7 @@ class CompressiveEncoder(CompositeModelProtocol, BaseStimulusEncoder[S, T]):
             the stimulus and the response.
 
         """
-        gain = parameters[["gain"]]
         n = parameters[["n"]]
         encoding_model = cast("BaseStimulusEncoder", self.models["encoding_model"])
         response = encoding_model.call(stimulus, response, parameters)
-        return gain * ops.power(ops.maximum(response, self.min_response), n)
+        return ops.power(ops.maximum(response, self.min_response), n)

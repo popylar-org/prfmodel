@@ -43,8 +43,8 @@ class CanonicalCFModel(BaseCanonical[CFStimulus, CFStimulusTensors]):
     3. The scaling model modifies the encoded response.
     4. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
 
-    In contrast to pRF models (e.g., :class:`~prfmodel.models.CanonicalPRFModel`), connective field models do not
-    require an impulse model because it already contained in the signal of the source response.
+    In contrast to pRF models (e.g., :class:`~prfmodel.models.prf.canonical.CanonicalPRFModel`), connective field
+    models do not require an impulse model because it is already contained in the signal of the source response.
 
     """
 
