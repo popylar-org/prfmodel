@@ -1,5 +1,6 @@
 
 [![github license badge](https://img.shields.io/github/license/popylar-org/prfmodel)](https://github.com/popylar-org/prfmodel/blob/main/LICENSE)
+[![RSD](https://img.shields.io/badge/rsd-prfmodel-00a3e3.svg)](https://research-software-directory.org/software/prfmodel)
 [![build](https://github.com/popylar-org/prfmodel/actions/workflows/build.yml/badge.svg)](https://github.com/popylar-org/prfmodel/actions/workflows/build.yml)
 [![docs](https://img.shields.io/github/actions/workflow/status/popylar-org/prfmodel/.github%2Fworkflows%2Fdocumentation.yml?label=docs)](https://github.com/popylar-org/prfmodel/actions/workflows/documentation.yml)
 [![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
