@@ -72,7 +72,7 @@ prfmodel is validated against external packages ([braincoder](https://github.com
 ## Documentation
 
 The general package documentation (e.g., installation guide, examples, tutorials) live in the [`docs/`](docs/) folder.
-In this folder, documentation can be written in Markdown or [Restructured Text](https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html). The documentation is rendered with the Sphinx framework.
+In this folder, documentation can be written in Markdown or [Restructured Text](https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html). The documentation is rendered with the Sphinx framework.
 
 API documentation is created automatically using [AutoAPI](https://sphinx-autoapi.readthedocs.io/) through docstrings written directly in the package code. The package follows the [numpydoc](https://numpydoc.readthedocs.io/en/latest/) style for writing docstrings. Examples in docstrings can be automatically tested via:
 
