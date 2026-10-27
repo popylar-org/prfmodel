@@ -17,6 +17,9 @@ prfmodel.fitters.LeastSquaresFitter
                  :func:`prfmodel.utils.get_dtype`.
    :type dtype: str, optional
 
+   :Warns: **ResolutionMismatchWarning** -- When an impulse submodel has an explicit resolution that differs from the frame duration of the
+           stimulus. See :meth:`~prfmodel.models.base.BaseCanonical.check_stimulus`.
+
    .. rubric:: Notes
 
    This fitter optimizes one or more slope parameters (and optionally an intercept) by estimating a general linear
@@ -45,7 +48,7 @@ prfmodel.fitters.LeastSquaresFitter
    ...     "baseline": [0.0], "amplitude": [0.0],
    ... })
    >>> # Create dummy data for a single unit
-   >>> data = np.zeros((1, stimulus.design.shape[0]))
+   >>> data = np.random.default_rng(0).standard_normal((1, stimulus.design.shape[0]))
    >>> fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
    >>> # Fit model parameters
    >>> history, params_ls = fitter.fit(
@@ -83,7 +86,15 @@ prfmodel.fitters.LeastSquaresFitter
 
       :returns: * *LeastSquaresHistory* -- A history object that contains a dict with the key `loss` and the residual sum of squares
                   for each data batch.
-                * *pandas.DataFrame* -- A dataframe with final model parameters.
+                * *pandas.DataFrame* -- A dataframe with final model parameters. The slope and intercept parameters are NaN for units that are
+                  excluded from the fit (see Warns). Other parameters are returned unchanged.
+
+      :raises ShapeError: If `data` does not have two dimensions, if its number of rows does not match the number of rows in
+          `parameters`, or if its number of columns does not match the number of frames in the model prediction.
+      :raises ValueError: If a name in `slope_name` is not a parameter of the model or not a column in `parameters`.
+
+      :Warns: **InvalidUnitsWarning** -- When the time series of some units in `data` are constant or contain NaN or infinite values. These
+              units are excluded from the fit and their estimated parameters and losses are NaN.
 
 
 

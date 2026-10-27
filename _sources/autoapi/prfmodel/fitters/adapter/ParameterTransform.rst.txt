@@ -21,8 +21,8 @@ prfmodel.fitters.adapter.ParameterTransform
 
    .. rubric:: Notes
 
-   Instances of this class can be used inside an :class:`~prfmodel.adapter.Adapter` object to transform specific
-   parameters during model fitting.
+   Instances of this class can be used inside an :class:`~prfmodel.fitters.adapter.Adapter` object to transform
+   specific parameters during model fitting.
 
    When using the transform within stochastic gradient descent, the transform and inverse functions should allow for
    gradient tracking (e.g., by using functions from the `keras.ops` module).

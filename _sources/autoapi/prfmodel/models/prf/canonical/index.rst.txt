@@ -11,19 +11,6 @@ prfmodel.models.prf.canonical
 
 
 
-Exceptions
-----------
-
-.. toctree::
-   :hidden:
-
-   ResolutionMismatchWarning </autoapi/prfmodel/models/prf/canonical/ResolutionMismatchWarning>
-
-.. autoapisummary::
-
-   prfmodel.models.prf.canonical.ResolutionMismatchWarning
-
-
 Classes
 -------
 

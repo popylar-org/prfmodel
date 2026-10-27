@@ -12,12 +12,12 @@ prfmodel.scaling.base
 
    They are abstract base classes, meaning that they
    cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
-   shared by all child classes. For example, :class:`~prfmodel.models.base.BaseScaling` defines that all child classes
-   must implement a :meth:`~prfmodel.models.base.BaseScaling.call` method that takes a model response and a set of
+   shared by all child classes. For example, :class:`~prfmodel.scaling.base.BaseScaling` defines that all child classes
+   must implement a :meth:`~prfmodel.scaling.base.BaseScaling.call` method that takes a model response and a set of
    parameters as input. However, it leaves it up to each child class to define how input response parameters are used to
    make model predictions.
 
-   All base classes have a concrete user-facing :meth:``__call__`` method
+   All base classes have a concrete user-facing ``__call__`` method
    (e.g., :meth:`~prfmodel.scaling.base.BaseScaling.__call__`) that takes non-tensor arguments and
    performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
    class and only accepts tensor arguments to enable backend compilation.

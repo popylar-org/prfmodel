@@ -9,7 +9,8 @@ prfmodel.fitters.SGDHistory
 
    .. attribute:: history
 
-      Dictionary with keys indicating metric names and values containing metric values for each step.
+      Dictionary with keys indicating metric names and values containing metric values for each step. After
+      :meth:`SGDFitter.fit` returns, the values are plain Python floats on every backend.
 
       :type: dict
 

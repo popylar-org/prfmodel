@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.examples.load_dataset" href="load_dataset.html"><link rel="prev" title="prfmodel.examples.load_1d_prf_lognumerosity_stimulus" href="load_1d_prf_lognumerosity_stimulus.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>prfmodel.examples.load_2d_prf_bar_stimulus - prfmodel 0.0.1 documentation</title>
+        <title>prfmodel.examples.load_2d_prf_bar_stimulus - prfmodel 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">prfmodel 0.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
-  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  <span class="sidebar-brand-text">prfmodel 0.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -246,6 +246,8 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../exceptions/InvalidUnitsWarning.html">InvalidUnitsWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../exceptions/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../exceptions/ShapeError.html">ShapeError</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../exceptions/ShapeMismatchError.html">ShapeMismatchError</a></li>
 </ul>
@@ -324,7 +326,6 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../models/prf/index.html">prfmodel.models.prf</a><input aria-label="Toggle navigation of prfmodel.models.prf" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../models/prf/canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CSTPRFModel.html">CSTPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
@@ -492,7 +493,8 @@ with a <code class="docutils literal notranslate"><span class="pre">design</span
 <p>The full stimulus has 340 time frames, with 128 cells in the x- and y-dimension, spanning a visual field of
 approximately -4 to 4 degrees of visual angle vertically and horizontally. The stimulus coordinate grid has been
 transformed from a rectangular into a quadratic shape. The moving bar patterns is mirrored in the time axis
-which means that it can be split in two almost identical halfs.</p>
+which means that it can be split in two almost identical halfs. The stimulus was presented with one time frame
+per repetition time of 0.9 seconds, so its <code class="docutils literal notranslate"><span class="pre">frame_duration</span></code> is 0.9.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">grid</span></code> holds visual field coordinates. The horizontal coordinate increases across the design columns, so a
 bar in the leftmost columns falls in the left visual hemifield (negative <code class="docutils literal notranslate"><span class="pre">mu_x</span></code>), and the vertical coordinate
 increases down the rows, so the first row is the lower edge of the visual field (negative <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>).</p>
@@ -510,13 +512,13 @@ increases down the rows, so the first row is the lower edge of the visual field 
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.examples</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_2d_prf_bar_stimulus</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">load_2d_prf_bar_stimulus</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
-<span class="go">PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
+<span class="go">PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], frame_duration=0.9, dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
 </pre></div>
 </div>
 <p>Load a train and test stimulus with the first and second half of the design matrix.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus_train</span><span class="p">,</span> <span class="n">stimulus_test</span> <span class="o">=</span> <span class="n">load_2d_prf_bar_stimulus</span><span class="p">(</span><span class="n">return_test</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus_train</span><span class="p">)</span>
-<span class="go">PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
+<span class="go">PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], frame_duration=0.9, dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -591,7 +593,7 @@ increases down the rows, so the first row is the lower edge of the visual field 
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+</div><script src="../../../_static/documentation_options.js?v=01f34227"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

@@ -20,9 +20,9 @@ prfmodel.fitters.SGDFitter
    :type adapter: Adapter, optional
    :param optimizer: Optimizer instance. Default is `None` where a `keras.optimizers.Adam` optimizer is used.
    :type optimizer: keras.optimizers.Optimizer, optional
-   :param loss: Loss instance or function with the signatur `f(y, y_pred)`, where `y` are the target data and `y_pred` are the
-                model predicitons. Default is `None` where a `keras.optimizers.MeanSquaredError` loss is used.
-   :type loss: keras.optimizers.Loss or Callable, optional
+   :param loss: Loss instance or function with the signature `f(y, y_pred)`, where `y` are the target data and `y_pred` are
+                the model predictions. Default is `None` where a `keras.losses.MeanSquaredError` loss is used.
+   :type loss: keras.losses.Loss or Callable, optional
    :param compile_step: Whether to compile the optimization step with the backend's native primitive: `jax.jit` on JAX,
                         `tf.function` on TensorFlow and `torch.compile` on PyTorch. With `False` (the default) the step
                         runs eagerly, which is slower but makes the step inspectable and produces Python
@@ -32,6 +32,9 @@ prfmodel.fitters.SGDFitter
    :param dtype: The dtype of the prediction result. If `None` (the default), uses the dtype from
                  :func:`prfmodel.utils.get_dtype`.
    :type dtype: str, optional
+
+   :Warns: **ResolutionMismatchWarning** -- When an impulse submodel has an explicit resolution that differs from the frame duration of the
+           stimulus. See :meth:`~prfmodel.models.base.BaseCanonical.check_stimulus`.
 
    .. rubric:: Notes
 
@@ -73,14 +76,14 @@ prfmodel.fitters.SGDFitter
    ...     "sigma": [1.0],
    ... })
    >>> # Create dummy data for a single unit
-   >>> data = np.zeros((1, stimulus.design.shape[0]))
+   >>> data = np.random.default_rng(0).standard_normal((1, stimulus.design.shape[0]))
    >>> # Fit model parameters
    >>> history, params_sgd = fitter.fit(data, params_init, num_steps=5)
    >>> print(list(params_sgd.columns))
    ['mu_y', 'mu_x', 'sigma']
 
 
-   .. py:method:: fit(data: prfmodel.typing.Tensor, init_parameters: pandas.DataFrame, fixed_parameters: collections.abc.Sequence[str] | None = None, num_steps: int = 1000, batch_size: int | None = None, regressors: pandas.DataFrame | None = None) -> tuple[SGDHistory, pandas.DataFrame]
+   .. py:method:: fit(data: prfmodel.typing.Tensor, init_parameters: pandas.DataFrame, fixed_parameters: str | collections.abc.Sequence[str] | None = None, num_steps: int = 1000, batch_size: int | None = None, regressors: pandas.DataFrame | None = None) -> tuple[SGDHistory, pandas.DataFrame]
 
       Fit a population receptive field model to target data.
 
@@ -90,9 +93,9 @@ prfmodel.fitters.SGDFitter
       :param init_parameters: Dataframe with initial model parameters. Columns must contain different model parameters and
                               rows parameter values for each unit in `data`.
       :type init_parameters: pandas.DataFrame
-      :param fixed_parameters: Names of model parameters that are fixed to their starting values, i.e., their values are not optimized
-                               during the fitting. If `None` (the default), all parameters are optimized during fitting.
-      :type fixed_parameters: Sequence of str, optional
+      :param fixed_parameters: Name(s) of model parameters that are fixed to their starting values, i.e., their values are not
+                               optimized during the fitting. If `None` (the default), all parameters are optimized during fitting.
+      :type fixed_parameters: str or Sequence of str, optional
       :param num_steps: Number of optimization steps.
       :type num_steps: int, default=1000
       :param batch_size: Number of units to fit at the same time. If `None` (the default), all units are fit at once.
@@ -102,7 +105,16 @@ prfmodel.fitters.SGDFitter
       :type regressors: pandas.DataFrame, optional
 
       :returns: * *SGDHistory* -- A history object that contains loss and metric values for each optimization step.
-                * *pandas.DataFrame* -- A dataframe with final model parameters.
+                * *pandas.DataFrame* -- A dataframe with final model parameters. The parameters that are not in `fixed_parameters` are NaN for
+                  units that are excluded from the fit (see Warns). Other parameters are returned unchanged.
+
+      :raises ShapeError: If `data` does not have two dimensions, if its number of rows does not match the number of rows in
+          `init_parameters`, or if its number of columns does not match the number of frames in the model
+          prediction.
+      :raises ValueError: If a name in `fixed_parameters` is not a parameter of the model or the adapter.
+
+      :Warns: **InvalidUnitsWarning** -- When the time series of some units in `data` are constant or contain NaN or infinite values. These
+              units are excluded from the fit and their estimated parameters and losses are NaN.
 
 
 

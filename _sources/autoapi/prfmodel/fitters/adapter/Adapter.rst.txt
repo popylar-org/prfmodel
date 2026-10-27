@@ -8,8 +8,9 @@ prfmodel.fitters.adapter.Adapter
    Applies transformations sequentially to different parameters. This can be useful for model fitting to optimize
    parameters on a different scale instead of their natural one.
 
-   :param transforms: A list of :class:`~prfmodel.adapter.ParameterTransform` or :class:`~prfmodel.adapter.ParameterConstraint`
-                      objects that will be applied in the given order. If `None`, no transformations will be applied.
+   :param transforms: A list of :class:`~prfmodel.fitters.adapter.ParameterTransform` or
+                      :class:`~prfmodel.fitters.adapter.ParameterConstraint` objects that will be applied in the given order. If
+                      `None`, no transformations will be applied.
    :type transforms: list of ParameterTransform, optional
 
    .. rubric:: Examples

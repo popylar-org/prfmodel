@@ -43,7 +43,7 @@ os.environ["KERAS_BACKEND"] = "tensorflow"
 pd.set_option("display.precision", 3)
 
 if find_spec("tensorflow") is None:
-    msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
+    msg = 'Could not find the tensorflow package. Please install it with: pip install "prfmodel[tensorflow]"'
     raise ImportError(msg)
 ```
 
@@ -60,12 +60,12 @@ stimulus = load_2d_prf_bar_stimulus()
 print(stimulus)
 ```
 
-When printing the `stimulus` object, we can see that it has three attributes. The `design` attribute defines how
-the visual field changes over time. It has shape `(num_frames, height, width)`, where height and width define the number of pixels at which the visual field is recorded. The `grid` attribute maps each pixel to its coordinate in the visual field (i.e., the degree of visual angle). Its last axis follows the axes of the design, so `grid[..., 0]` holds the vertical (`y`) coordinate and `grid[..., 1]` the horizontal (`x`) coordinate.
+When printing the `stimulus` object, we can see that it has four attributes. The `design` attribute defines how
+the visual field changes over time. It has shape `(num_frames, height, width)`, where height and width define the number of pixels at which the visual field is recorded. The `grid` attribute maps each pixel to its coordinate in the visual field (i.e., the degree of visual angle). Its last axis follows the axes of the design, so `grid[..., 0]` holds the vertical (`y`) coordinate and `grid[..., 1]` the horizontal (`x`) coordinate. The `frame_duration` attribute is the duration of each frame in seconds (e.g., one TR), at which the model samples its impulse response, and `dimension_labels` names the grid axes.
 
 +++
 
-We can visualize the stimulus using `animate_2d_stimulus`.
+We can visualize the stimulus using {py:func}`prfmodel.plotting.animate_2d_prf_stimulus`.
 
 ```{code-cell} ipython3
 from IPython.display import HTML
@@ -73,7 +73,7 @@ from prfmodel.plotting import animate_2d_prf_stimulus
 
 ani = animate_2d_prf_stimulus(stimulus, interval=25)  # Pause 25 ms between time frames
 
-HTML(ani.to_html5_video())
+HTML(ani.to_jshtml())
 ```
 
 ## Defining the CSS pRF model
@@ -83,10 +83,12 @@ We first define a custom encoding model using the `CompressiveEncoder` class tha
 `PRFStimulusEncoder`. Then, we insert the encoding model into a Gaussian 2D pRF model. The `CompressiveEncoder` compresses
 the stimulus-encoded pRF response as follows (see Kay et al., 2013):
 
-$$p(t) = gain \times \left[\int S(t,x,y) \times G(x,y)dxdy\right]^n,$$
+$$p(t) = \left[\int S(t,x,y) \times G(x,y)dxdy\right]^n,$$
 
-where $S(t,x,y)$ is the stimulus design and $G(x,y)$ is the pRF response. The CSS model has two additionial parameters,
-`gain` (encoded response amplitude) and `n` (compression exponent). When $n < 1.0$, the encode response is compressed.
+where $S(t,x,y)$ is the stimulus design and $G(x,y)$ is the pRF response. The CSS model has one additional parameter,
+`n` (compression exponent). When $n < 1.0$, the encoded response is compressed. Kay et al. (2013) also scale the
+compressed response with a gain factor; here, that is the `amplitude` parameter of the scaling model, which scales the
+response after it has been convolved with the impulse response.
 
 ```{code-cell} ipython3
 from prfmodel.models.compression import CompressiveEncoder
@@ -109,7 +111,7 @@ The list of parameters that need to be set to make model predictions can be obta
 prf_model.parameter_names
 ```
 
-The parameters `mu_x` and `mu_y` define the center of the pRF while `gain` and `n` determine the compression of the stimulus encoding. The parameters `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the impulse response that is convolved with our pRF response; the two-gamma parameters (`delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`) default to the Glover HRF parameter set (see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only set `weight_deriv` here. The parameters `baseline` and `amplitude` shift and scale our convolved response, respectively. We store the parameter values in a `pandas.DataFrame` object.
+The parameters `mu_x` and `mu_y` define the center of the pRF while `n` determines the compression of the stimulus encoding. The parameters `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the impulse response that is convolved with our pRF response; the two-gamma parameters (`delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`) default to the Glover HRF parameter set (see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only set `weight_deriv` here. The parameters `baseline` and `amplitude` shift and scale our convolved response, respectively. We store the parameter values in a `pandas.DataFrame` object.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -123,7 +125,6 @@ true_params = pd.DataFrame(
         "weight_deriv": [-0.5],
         "baseline": [10.0],
         "amplitude": [1.1],
-        "gain": [1.0],
         "n": [0.8],
     },
 )
@@ -254,8 +255,8 @@ plot_observed_predicted(
 ## Step 2: Fit the CSS pRF model
 
 We now initialize a CSS pRF model from the parameters estimated in the previous step. Because the CSS model additionally
-requires parameters `gain` and `n`, we use the `init_css_from_gaussian` helper function to add starting values for
-these parameters.
+requires the parameter `n`, we use the `init_css_from_gaussian` helper function to add a starting value for this
+parameter.
 
 We then run SGD directly on the CSS model. We add an adapter that log-transforms `sigma` and `n` during parameter
 optimization, forcing them to stay positive.

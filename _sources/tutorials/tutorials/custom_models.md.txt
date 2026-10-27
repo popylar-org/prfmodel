@@ -79,7 +79,7 @@ __abstractmethods__ = frozenset({'call', 'parameter_names'}).
 ```
 
 1. The `parameter_names` property, which lists the parameter names the model expects.
-2. The `call` method, which computes the pRF response for a given stimulus and parameter set. This method can implement an arbitrary response function, but here we re-use {py:fun}`~prfmodel.models.prf.predict_gaussian_response` from the Gaussian module, which is dimension-agnostic and works for any number of spatial dimensions.
+2. The `call` method, which computes the pRF response for a given stimulus and parameter set. This method can implement an arbitrary response function, but here we re-use {py:func}`~prfmodel.models.prf.predict_gaussian_response` from the Gaussian module, which is dimension-agnostic and works for any number of spatial dimensions.
 
 Note that we implement `call`, not `__call__`. Model classes have two entry points:
 
@@ -104,7 +104,7 @@ That division has one rule you have to respect when writing `call`: it must be *
 {py:mod}`keras.ops` only, never NumPy or pandas, and never write an `if` statement that branches on a tensor *value*.
 While a graph is being built, a tensor holds no value to branch on, so a check like `if ops.all(sigma > 0)`
 raises an error. Branching on a tensor *shape* is fine because shapes are known while tracing. If you need to reject bad
-parameter values, do it where the values are still concrete, for example by overriding the {py:meth}`check_parameter_values`
+parameter values, do it where the values are still concrete, for example by overriding the {py:meth}`~prfmodel.models.base.BaseTuning.check_parameter_values`
 method of the model class (more on that soon).
 
 We can also see that `BaseTuning` is a generic class with respect to the stimulus.

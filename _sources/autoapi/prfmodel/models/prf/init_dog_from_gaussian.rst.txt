@@ -5,11 +5,11 @@ prfmodel.models.prf.init_dog_from_gaussian
 
    Initialize DoG model parameters from fitted Gaussian model parameters.
 
-   Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
-   into starting parameters for a :class:`~prfmodel.models.dog.DoG2DPRFModel`, suitable for
+   Converts the output of a fitted :class:`~prfmodel.models.prf.Gaussian2DPRFModel`
+   into starting parameters for a :class:`~prfmodel.models.prf.DoG2DPRFModel`, suitable for
    subsequent SGD.
 
-   :param gaussian_params: DataFrame of fitted parameters from a :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`.
+   :param gaussian_params: DataFrame of fitted parameters from a :class:`~prfmodel.models.prf.Gaussian2DPRFModel`.
                            Must contain columns: ``sigma`` and ``amplitude`` (plus all shared columns).
    :type gaussian_params: pandas.DataFrame
    :param sigma_ratio: Ratio used to set the surround size: ``sigma_surround = sigma_center * sigma_ratio``.

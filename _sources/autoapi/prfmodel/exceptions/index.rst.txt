@@ -17,11 +17,15 @@ Exceptions
 .. toctree::
    :hidden:
 
+   InvalidUnitsWarning </autoapi/prfmodel/exceptions/InvalidUnitsWarning>
+   ResolutionMismatchWarning </autoapi/prfmodel/exceptions/ResolutionMismatchWarning>
    ShapeError </autoapi/prfmodel/exceptions/ShapeError>
    ShapeMismatchError </autoapi/prfmodel/exceptions/ShapeMismatchError>
 
 .. autoapisummary::
 
+   prfmodel.exceptions.InvalidUnitsWarning
+   prfmodel.exceptions.ResolutionMismatchWarning
    prfmodel.exceptions.ShapeError
    prfmodel.exceptions.ShapeMismatchError
 

@@ -14,7 +14,8 @@ prfmodel.models.csf.CSFModel
    :type width_l: float, default=0.68
    :param impulse_model: An impulse model class or instance. Model classes will be instantiated during
                          initialization. The default creates a :class:`~prfmodel.impulse.DerivativeTwoGammaImpulse`
-                         instance with default values.
+                         instance with default values. Impulse models without an explicit `resolution` are sampled at the
+                         frame duration of the stimulus.
    :type impulse_model: BaseImpulse or type or None, default=DerivativeTwoGammaImpulse, optional
    :param scaling_model: A scaling model class or instance. Model classes will be instantiated during initialization.
                          The default creates a :class:`~prfmodel.scaling.BaselineAmplitude` instance.
@@ -58,16 +59,16 @@ prfmodel.models.csf.CSFModel
         - Exponent of the Naka-Rushton contrast response function.
       * - ``delay``
         - Impulse
-        - Peak time of the positive gamma component (in seconds; optional).
+        - Mean time of the positive gamma component (in seconds; optional).
       * - ``dispersion``
         - Impulse
-        - Rate parameter of the positive gamma component (optional).
+        - Scale parameter of the positive gamma component (optional).
       * - ``undershoot``
         - Impulse
-        - Peak time of the negative gamma component (in seconds; optional).
+        - Mean time of the negative gamma component (in seconds; optional).
       * - ``u_dispersion``
         - Impulse
-        - Rate parameter of the negative gamma component (optional).
+        - Scale parameter of the negative gamma component (optional).
       * - ``ratio``
         - Impulse
         - Weight of the negative gamma component (optional).
@@ -98,6 +99,7 @@ prfmodel.models.csf.CSFModel
    ...    # Simulate data for 4 time frames
    ...    sf=np.array([1.0, 3.0, 6.0, 12.0]),
    ...    contrast=np.array([0.1, 0.2, 0.4, 0.8]),
+   ...    frame_duration=1.0,
    ... )
    >>> model = CSFModel()
    >>> # Define all model parameters for 3 units
@@ -145,6 +147,9 @@ prfmodel.models.csf.CSFModel
 
       :raises ValueError: If `parameters` is missing one or more of :attr:`parameter_names`.
 
+      :Warns: **ResolutionMismatchWarning** -- When an impulse submodel has an explicit resolution that differs from the frame duration of the
+              stimulus. See :meth:`~prfmodel.models.base.BaseCanonical.check_stimulus`.
+
 
 
    .. py:method:: call(stimulus: prfmodel.stimuli.CSFStimulusTensors, parameters: prfmodel.utils.TensorFrame, regressors: prfmodel.utils.TensorFrame | None = None) -> prfmodel.typing.Tensor
@@ -185,6 +190,22 @@ prfmodel.models.csf.CSFModel
       :type parameters: pandas.DataFrame
 
       :raises ValueError: When a parameter that must be ``> 0`` is zero or negative.
+
+
+
+   .. py:method:: check_stimulus(stimulus: S) -> None
+
+      Check that the impulse submodels are sampled at the frame duration of the stimulus.
+
+      Impulse submodels without an explicit :attr:`~prfmodel.impulse.base.BaseImpulse.resolution` are
+      sampled at the frame duration of the stimulus in :meth:`call` and always pass this check. Stimuli without a
+      frame duration (e.g., :class:`~prfmodel.stimuli.CFStimulus`) are not checked.
+
+      :param stimulus: Stimulus object.
+      :type stimulus: Stimulus
+
+      :Warns: **ResolutionMismatchWarning** -- When an impulse submodel has an explicit resolution that differs from the frame duration of
+              `stimulus`.
 
 
 

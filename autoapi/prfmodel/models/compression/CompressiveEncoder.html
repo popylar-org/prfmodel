@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.csf" href="../csf/index.html"><link rel="prev" title="prfmodel.models.compression" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>prfmodel.models.compression.CompressiveEncoder - prfmodel 0.0.1 documentation</title>
+        <title>prfmodel.models.compression.CompressiveEncoder - prfmodel 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../../index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+      <a href="../../../../index.html"><div class="brand">prfmodel 0.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
   
-  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  <span class="sidebar-brand-text">prfmodel 0.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -246,6 +246,8 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../exceptions/InvalidUnitsWarning.html">InvalidUnitsWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../exceptions/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../exceptions/ShapeError.html">ShapeError</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../exceptions/ShapeMismatchError.html">ShapeMismatchError</a></li>
 </ul>
@@ -324,7 +326,6 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../prf/index.html">prfmodel.models.prf</a><input aria-label="Toggle navigation of prfmodel.models.prf" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../prf/canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../prf/canonical/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../prf/canonical/CSTPRFModel.html">CSTPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../prf/canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../prf/canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
@@ -471,8 +472,8 @@
 <dt class="sig sig-object py" id="prfmodel.models.compression.CompressiveEncoder">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">prfmodel.models.compression.</span></span><span class="sig-name descname"><span class="pre">CompressiveEncoder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/BaseStimulusEncoder.html#prfmodel.models.base.BaseStimulusEncoder" title="prfmodel.models.base.BaseStimulusEncoder"><span class="pre">prfmodel.models.base.BaseStimulusEncoder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#prfmodel.models.compression.CompressiveEncoder" title="Link to this definition">¶</a></dt>
 <dd><p>Compressive encoding model.</p>
-<p>Amplifies and compresses an encoded stimulus response.
-The model has two parameters: <cite>gain</cite> (amplification amplitude) and <cite>n</cite> (compression exponent).</p>
+<p>Compresses an encoded stimulus response.
+The model has one parameter: <cite>n</cite> (compression exponent).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -483,15 +484,19 @@ The model has two parameters: <cite>gain</cite> (amplification amplitude) and <c
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>Compressive encoding with <cite>gain</cite> <span class="math notranslate nohighlight">\(g\)</span> and <span class="math notranslate nohighlight">\(n\)</span> is done according to the equation <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>:</p>
+<p>Compressive encoding with exponent <span class="math notranslate nohighlight">\(n\)</span> is done according to the equation <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
-\[p(x) = g \times \text{max}(f(x), \epsilon)^n\]</div>
+\[p(x) = \text{max}(f(x), \epsilon)^n\]</div>
 </div>
+<p>The equation in <a class="footnote-reference brackets" href="#id3" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> also has a gain factor. The model has no such parameter because in a canonical model the
+compressed response is scaled after the impulse stage (e.g., by the <code class="docutils literal notranslate"><span class="pre">amplitude</span></code> of
+<a class="reference internal" href="../../scaling/BaselineAmplitude.html#prfmodel.scaling.BaselineAmplitude" title="prfmodel.scaling.BaselineAmplitude"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaselineAmplitude</span></code></a>), and a gain would trade off exactly against that scale.</p>
 <p class="rubric">References</p>
 <aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id2" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<aside class="footnote brackets" id="id3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<span class="backrefs">(<a role="doc-backlink" href="#id1">1</a>,<a role="doc-backlink" href="#id2">2</a>)</span>
 <p>Kay, K. N., Winawer, J., Mezer, A., &amp; Wandell, B. A. (2013). Compressive spatial summation in human visual
 cortex. <em>Journal of Neurophysiology</em>, 110(2), 481-494. <a class="reference external" href="https://doi.org/10.1152/jn.00105.2013">https://doi.org/10.1152/jn.00105.2013</a></p>
 </aside>
@@ -511,7 +516,6 @@ cortex. <em>Journal of Neurophysiology</em>, 110(2), 481-494. <a class="referenc
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define model parameters for 3 units</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">params</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
 <span class="gp">... </span>    <span class="c1"># Compressive parameters</span>
-<span class="gp">... </span>    <span class="s2">&quot;gain&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">],</span>
 <span class="gp">... </span>    <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">],</span>
 <span class="gp">... </span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Predict model response</span>
@@ -555,7 +559,7 @@ response.</p>
 <dt class="sig sig-object py" id="prfmodel.models.compression.CompressiveEncoder.call">
 <span class="sig-name descname"><span class="pre">call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../base/index.html#prfmodel.models.base.T" title="prfmodel.models.base.T"><span class="pre">prfmodel.models.base.T</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../utils/TensorFrame.html#prfmodel.utils.TensorFrame" title="prfmodel.utils.TensorFrame"><span class="pre">prfmodel.utils.TensorFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><span class="pre">prfmodel.typing.Tensor</span></a></span></span><a class="headerlink" href="#prfmodel.models.compression.CompressiveEncoder.call" title="Link to this definition">¶</a></dt>
 <dd><p>Compress and encode a model response with a stimulus.</p>
-<p>Encodes the model response, then compresses and amplifies the encoded response.</p>
+<p>Encodes the model response, then compresses the encoded response.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -724,7 +728,7 @@ for different units.</p>
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=d45e8c67"></script>
+</div><script src="../../../../_static/documentation_options.js?v=01f34227"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

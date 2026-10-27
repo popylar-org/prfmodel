@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Tutorials &amp; Examples" href="tutorials/index.html"><link rel="prev" title="Getting started" href="getting_started.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Important details - prfmodel 0.0.1 documentation</title>
+        <title>Important details - prfmodel 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+      <a href="index.html"><div class="brand">prfmodel 0.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
   
-  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  <span class="sidebar-brand-text">prfmodel 0.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -246,6 +246,8 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="autoapi/prfmodel/exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/exceptions/InvalidUnitsWarning.html">InvalidUnitsWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/exceptions/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/exceptions/ShapeError.html">ShapeError</a></li>
 <li class="toctree-l3"><a class="reference internal" href="autoapi/prfmodel/exceptions/ShapeMismatchError.html">ShapeMismatchError</a></li>
 </ul>
@@ -324,7 +326,6 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="autoapi/prfmodel/models/prf/index.html">prfmodel.models.prf</a><input aria-label="Toggle navigation of prfmodel.models.prf" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="autoapi/prfmodel/models/prf/canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/prf/canonical/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/prf/canonical/CSTPRFModel.html">CSTPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/prf/canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="autoapi/prfmodel/models/prf/canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
@@ -474,18 +475,18 @@ we describe the choices that affect <strong>users</strong> directly in this sect
 <h2>Gaussian models use proper probability densities<a class="headerlink" href="#gaussian-models-use-proper-probability-densities" title="Link to this heading">¶</a></h2>
 <p>Some software packages that implement Gaussian population receptive field (pRF) models use unnormalized Gaussian
 densities to predict tuning profiles. That is, they use the density:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-f24e510e-7df9-4bea-a4e7-0bcf75eef8b2">
-<div class="amsmath math notranslate nohighlight" id="equation-f24e510e-7df9-4bea-a4e7-0bcf75eef8b2">
-<span class="eqno">(1)<a class="headerlink" href="#equation-f24e510e-7df9-4bea-a4e7-0bcf75eef8b2" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-7bfcb4c7-4b0a-42d4-9078-05e02014cd9b">
+<div class="amsmath math notranslate nohighlight" id="equation-7bfcb4c7-4b0a-42d4-9078-05e02014cd9b">
+<span class="eqno">(1)<a class="headerlink" href="#equation-7bfcb4c7-4b0a-42d4-9078-05e02014cd9b" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 f(x) = e^{-\frac{\lVert x - \mu \rVert^2}{2 \sigma^2}},
 \end{equation}\]</div>
 </div>
 <p>that has a peak amplitude of <span class="math notranslate nohighlight">\(\max(f(x)) = 1\)</span>. Although this parameterization has advantages in some situations,
 we decided that all Gaussian models in prfmodel use proper densities that are normalized by their
 volume (see <a class="reference internal" href="autoapi/prfmodel/density/normal_density.html#prfmodel.density.normal_density" title="prfmodel.density.normal_density"><code class="xref py py-func docutils literal notranslate"><span class="pre">normal_density()</span></code></a>):</p>
-<div class="math-wrapper amsmath docutils container" id="equation-923d0ec4-7050-4b9b-8840-47aefb9dc43d">
-<div class="amsmath math notranslate nohighlight" id="equation-923d0ec4-7050-4b9b-8840-47aefb9dc43d">
-<span class="eqno">(2)<a class="headerlink" href="#equation-923d0ec4-7050-4b9b-8840-47aefb9dc43d" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-fe37a185-fa03-4532-a1cb-7e7c0865a15f">
+<div class="amsmath math notranslate nohighlight" id="equation-fe37a185-fa03-4532-a1cb-7e7c0865a15f">
+<span class="eqno">(2)<a class="headerlink" href="#equation-fe37a185-fa03-4532-a1cb-7e7c0865a15f" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 f(x) = \frac{1}{V} e^{-\frac{\lVert x - \mu \rVert^2}{2 \sigma^2}},
 \end{equation}\]</div>
 </div>
@@ -502,9 +503,9 @@ for the Gaussian 1D and 2D pRF models but also for difference of Gaussian and Ga
 models as well as Gaussian connective field models.</p>
 <p>It is possible to convert the amplitudes estimated with the proper density into those estimated with unnormalized
 density by dividing by the volume:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-67f2dd71-de7a-430e-82ff-888ae366a23f">
-<div class="amsmath math notranslate nohighlight" id="equation-67f2dd71-de7a-430e-82ff-888ae366a23f">
-<span class="eqno">(3)<a class="headerlink" href="#equation-67f2dd71-de7a-430e-82ff-888ae366a23f" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-f76add9f-c566-4411-9e92-497c93c465b2">
+<div class="amsmath math notranslate nohighlight" id="equation-f76add9f-c566-4411-9e92-497c93c465b2">
+<span class="eqno">(3)<a class="headerlink" href="#equation-f76add9f-c566-4411-9e92-497c93c465b2" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 \beta_\text{unnorm} = \frac{\beta_\text{norm}}{V}.
 \end{equation}\]</div>
 </div>
@@ -512,14 +513,23 @@ density by dividing by the volume:</p>
 <p>Note that you can implement your own Gaussian models in prfmodel that use unnormalized densities
 (see the tutorial on <a class="reference internal" href="tutorials/tutorials/custom_models.html"><span class="std std-doc">custom models</span></a>).</p>
 </section>
+<section id="spatial-prf-models-expect-the-y-axis-first">
+<h2>Spatial pRF models expect the y-axis first<a class="headerlink" href="#spatial-prf-models-expect-the-y-axis-first" title="Link to this heading">¶</a></h2>
+<p>In prfmodel, spatial pRF models assume that the stimulus grid and design matrix have the y-axis as their first
+dimension. For example, a Gaussian 2D pRF model expects that <code class="docutils literal notranslate"><span class="pre">stimulus.grid[:,</span> <span class="pre">:,</span> <span class="pre">0]</span></code> contains the y-coordinate and
+<code class="docutils literal notranslate"><span class="pre">stimulus.grid[:,</span> <span class="pre">:,</span> <span class="pre">1]</span></code> the x-coordinate of every cell in the stimulus design. This matters because the model
+parameters (e.g., the center coordinates of the Gaussian, <code class="docutils literal notranslate"><span class="pre">mu_x</span></code> and <code class="docutils literal notranslate"><span class="pre">mu_y</span></code>) are applied to the stimulus grid and
+design matrix following this order. This order conforms with C-style row-major order that is also used as the default
+in most other Python packages, e.g., NumPy. For spatial 3D pRF models, the order is y, x, z.</p>
+</section>
 <section id="spatial-receptive-fields-are-not-scaled-by-grid-cell-size">
 <h2>Spatial receptive fields are not scaled by grid cell size<a class="headerlink" href="#spatial-receptive-fields-are-not-scaled-by-grid-cell-size" title="Link to this heading">¶</a></h2>
 <p>Some software packages normalize stimulus-encoded model responses of spatial models by the
 size of the cells in the spatial grid. For example, for the Gaussian 2D pRF model in visual space, the stimulus-encoded
 response can be normalized as follows:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-61eb2cf7-6532-4ebd-9085-19f3f6046802">
-<div class="amsmath math notranslate nohighlight" id="equation-61eb2cf7-6532-4ebd-9085-19f3f6046802">
-<span class="eqno">(4)<a class="headerlink" href="#equation-61eb2cf7-6532-4ebd-9085-19f3f6046802" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-9240ed5a-0a35-48eb-b6d2-59b15ec4ae8e">
+<div class="amsmath math notranslate nohighlight" id="equation-9240ed5a-0a35-48eb-b6d2-59b15ec4ae8e">
+<span class="eqno">(4)<a class="headerlink" href="#equation-9240ed5a-0a35-48eb-b6d2-59b15ec4ae8e" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 r(t) = \sum_{xy} g(x, y) \cdot S(t, x, y) dA,
 \end{equation}\]</div>
 </div>
@@ -557,43 +567,43 @@ parameters. With sum-normalization, a sustained stimulus with encoded response <
 <span class="math notranslate nohighlight">\(\beta \times r\)</span> (unit DC gain), making the amplitude easier to interpret. It also makes the amplitude approximately
 invariant to the resolution of the impulse response (the approximation improves with finer resolution).</p>
 <p>It is possible to convert impulse-sum-normalized into impulse-unnormalized amplitudes:</p>
-<div class="math-wrapper amsmath docutils container" id="equation-3f65e21b-f090-4087-a850-a36651484b30">
-<div class="amsmath math notranslate nohighlight" id="equation-3f65e21b-f090-4087-a850-a36651484b30">
-<span class="eqno">(5)<a class="headerlink" href="#equation-3f65e21b-f090-4087-a850-a36651484b30" title="Permalink to this equation">¶</a></span>\[\begin{equation}
+<div class="math-wrapper amsmath docutils container" id="equation-5893b232-b749-4135-96ef-6aca323619b4">
+<div class="amsmath math notranslate nohighlight" id="equation-5893b232-b749-4135-96ef-6aca323619b4">
+<span class="eqno">(5)<a class="headerlink" href="#equation-5893b232-b749-4135-96ef-6aca323619b4" title="Permalink to this equation">¶</a></span>\[\begin{equation}
 \beta_\text{unnorm} = \beta_\text{norm} / \sum_t h_\text{unnorm}(t),
 \end{equation}\]</div>
 </div>
 <p>where <span class="math notranslate nohighlight">\(h_\text{unnorm}(t)\)</span> is the unnormalized impulse response.</p>
 </section>
-<section id="impulse-responses-must-have-the-same-sampling-rate-as-observed-responses">
-<h2>Impulse responses must have the same sampling rate as observed responses<a class="headerlink" href="#impulse-responses-must-have-the-same-sampling-rate-as-observed-responses" title="Link to this heading">¶</a></h2>
-<p>Discrete convolution assumes that the convolved signals have the same sampling rate. In prfmodel, the sampling rate
-of stimulus designs and observed neural responses is implicit. They are represented as series of time frames that
-typically have the same sampling rate (the TR; repetition time), but for some models, they can differ (e.g., in the
-compressive spatio-temporal pRF model). For model predictions to be correct, the sampling rate of impulse responses
-must match the sampling rate of the stimulus design. By default, the <code class="docutils literal notranslate"><span class="pre">resolution</span></code> (sampling interval) of impulse models
-in prfmodel is 1 second, which gives silently wrong predictions when the stimulus design has a different sampling
-rate. Therefore, the <code class="docutils literal notranslate"><span class="pre">resolution</span></code> of the impulse model must always be matched to the stimulus design. For a Gaussian 2D
-pRF model, this can be done by adding a custom impulse model:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.impulse</span><span class="w"> </span><span class="kn">import</span> <span class="n">DerivativeTwoGammaImpulse</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian2DPRFModel</span>
+<section id="impulse-responses-are-sampled-at-the-frame-duration-of-the-stimulus">
+<h2>Impulse responses are sampled at the frame duration of the stimulus<a class="headerlink" href="#impulse-responses-are-sampled-at-the-frame-duration-of-the-stimulus" title="Link to this heading">¶</a></h2>
+<p>Discrete convolution assumes that the convolved signals have the same sampling rate. In prfmodel, stimulus designs
+and observed neural responses are represented as series of time frames that typically have the same sampling rate
+(the TR; repetition time). For model predictions to be correct, impulse responses must be sampled at the same rate as
+the stimulus design.</p>
+<p>For this reason, every pRF and CSF stimulus has a required <code class="docutils literal notranslate"><span class="pre">frame_duration</span></code> that contains the duration of one design
+frame in seconds (e.g., the TR). Impulse models have a <code class="docutils literal notranslate"><span class="pre">resolution</span></code> (their sampling interval in seconds) that is <code class="docutils literal notranslate"><span class="pre">None</span></code>
+by default. Inside a canonical model, an impulse model without a <code class="docutils literal notranslate"><span class="pre">resolution</span></code> is sampled at the <code class="docutils literal notranslate"><span class="pre">frame_duration</span></code> of the
+stimulus that the model is called with, so the timing is correct without any further setup:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian2DPRFModel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.stimuli</span><span class="w"> </span><span class="kn">import</span> <span class="n">PRFStimulus</span>
 
 
 <span class="n">TR</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c1"># in seconds</span>
 
-<span class="c1"># Create a custom impulse model with the TR as resolution</span>
-<span class="n">impulse_model</span> <span class="o">=</span> <span class="n">DerivativeTwoGammaImpulse</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="n">TR</span><span class="p">)</span>
+<span class="c1"># The stimulus carries the sampling rate of the design</span>
+<span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">frame_duration</span><span class="o">=</span><span class="n">TR</span><span class="p">)</span>
 
-<span class="c1"># Insert the custom impulse model into the canonical pRF model</span>
-<span class="n">prf_model</span> <span class="o">=</span> <span class="n">Gaussian2DPRFModel</span><span class="p">(</span>
-    <span class="n">impulse_model</span><span class="o">=</span><span class="n">impulse_model</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="c1"># The default impulse model is sampled every 1.5 seconds when the model is called with this stimulus</span>
+<span class="n">prf_model</span> <span class="o">=</span> <span class="n">Gaussian2DPRFModel</span><span class="p">()</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">prf_model</span><span class="p">(</span><span class="n">stimulus</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This implementation might seem a bit cumbersome, however, it forces the user to think explicitly about the sampling
-rates used in the model and the experiment. It also becomes helpful as soon as different model components operate on
-different sampling rates that must be aligned with each other (e.g., in the compressive spatio-temporal pRF model).
-When comparing model predictions against observed timecourses, both must have matching sampling rates too (typically
+<p>An explicit <code class="docutils literal notranslate"><span class="pre">resolution</span></code> is never overridden. If it differs from the <code class="docutils literal notranslate"><span class="pre">frame_duration</span></code> of the stimulus, the canonical
+model (and every fitter it is passed to) issues a <a class="reference internal" href="autoapi/prfmodel/exceptions/ResolutionMismatchWarning.html#prfmodel.exceptions.ResolutionMismatchWarning" title="prfmodel.exceptions.ResolutionMismatchWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResolutionMismatchWarning</span></code></a>,
+because the impulse response and the stimulus design are then convolved on different time axes. An impulse model that
+is used on its own (e.g., to plot an impulse response) is sampled every second if it has no <code class="docutils literal notranslate"><span class="pre">resolution</span></code>.</p>
+<p>When comparing model predictions against observed timecourses, both must have matching sampling rates too (typically
 the TR), otherwise one or the other must be up- or downsampled.</p>
 </section>
 <section id="impulse-responses-are-sampled-at-the-leading-edge-of-each-time-frame-by-default">
@@ -617,10 +627,11 @@ default slice-time correction reference of 0.5 in fMRIPrep), the offset should b
 <span class="kn">from</span><span class="w"> </span><span class="nn">prfmodel.models.prf</span><span class="w"> </span><span class="kn">import</span> <span class="n">Gaussian2DPRFModel</span>
 
 
-<span class="n">TR</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c1"># in seconds</span>
+<span class="n">TR</span> <span class="o">=</span> <span class="mf">1.5</span>  <span class="c1"># in seconds, the &#39;frame_duration&#39; of the stimulus</span>
 
-<span class="c1"># Create a custom impulse model with the TR as resolution and a positive offset</span>
-<span class="n">impulse_model</span> <span class="o">=</span> <span class="n">DerivativeTwoGammaImpulse</span><span class="p">(</span><span class="n">resolution</span><span class="o">=</span><span class="n">TR</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">TR</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+<span class="c1"># Create a custom impulse model with a positive offset. Without a &#39;resolution&#39;, it is sampled at the</span>
+<span class="c1"># &#39;frame_duration&#39; of the stimulus.</span>
+<span class="n">impulse_model</span> <span class="o">=</span> <span class="n">DerivativeTwoGammaImpulse</span><span class="p">(</span><span class="n">offset</span><span class="o">=</span><span class="n">TR</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
 
 <span class="c1"># Insert the custom impulse model into the canonical pRF model</span>
 <span class="n">prf_model</span> <span class="o">=</span> <span class="n">Gaussian2DPRFModel</span><span class="p">(</span>
@@ -724,9 +735,10 @@ responses) but it also couples amplitudes to impulse model parameters because it
             <ul>
 <li><a class="reference internal" href="#">Important details</a><ul>
 <li><a class="reference internal" href="#gaussian-models-use-proper-probability-densities">Gaussian models use proper probability densities</a></li>
+<li><a class="reference internal" href="#spatial-prf-models-expect-the-y-axis-first">Spatial pRF models expect the y-axis first</a></li>
 <li><a class="reference internal" href="#spatial-receptive-fields-are-not-scaled-by-grid-cell-size">Spatial receptive fields are not scaled by grid cell size</a></li>
 <li><a class="reference internal" href="#impulse-responses-are-only-normalized-when-they-describe-measurements-of-neural-activity">Impulse responses are only normalized when they describe measurements of neural activity</a></li>
-<li><a class="reference internal" href="#impulse-responses-must-have-the-same-sampling-rate-as-observed-responses">Impulse responses must have the same sampling rate as observed responses</a></li>
+<li><a class="reference internal" href="#impulse-responses-are-sampled-at-the-frame-duration-of-the-stimulus">Impulse responses are sampled at the frame duration of the stimulus</a></li>
 <li><a class="reference internal" href="#impulse-responses-are-sampled-at-the-leading-edge-of-each-time-frame-by-default">Impulse responses are sampled at the leading edge of each time frame by default</a></li>
 <li><a class="reference internal" href="#before-convolution-stimulus-encoded-model-responses-are-padded-with-their-first-frame">Before convolution, stimulus-encoded model responses are padded with their first frame</a></li>
 <li><a class="reference internal" href="#what-if-i-want-to-deviate-from-these-decisions">What if I want to deviate from these decisions?</a></li>
@@ -741,7 +753,7 @@ responses) but it also couples amplitudes to impulse model parameters because it
       
     </aside>
   </div>
-</div><script src="_static/documentation_options.js?v=d45e8c67"></script>
+</div><script src="_static/documentation_options.js?v=01f34227"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/scripts/furo.js?v=46bd48cc"></script>

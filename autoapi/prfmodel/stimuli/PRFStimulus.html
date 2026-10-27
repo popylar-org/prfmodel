@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.stimuli.PRFStimulusTensors" href="PRFStimulusTensors.html"><link rel="prev" title="prfmodel.stimuli.CSFStimulusTensors" href="CSFStimulusTensors.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>prfmodel.stimuli.PRFStimulus - prfmodel 0.0.1 documentation</title>
+        <title>prfmodel.stimuli.PRFStimulus - prfmodel 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">prfmodel 0.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
-  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  <span class="sidebar-brand-text">prfmodel 0.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -246,6 +246,8 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../exceptions/InvalidUnitsWarning.html">InvalidUnitsWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../exceptions/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../exceptions/ShapeError.html">ShapeError</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../exceptions/ShapeMismatchError.html">ShapeMismatchError</a></li>
 </ul>
@@ -324,7 +326,6 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../models/prf/index.html">prfmodel.models.prf</a><input aria-label="Toggle navigation of prfmodel.models.prf" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../models/prf/canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CSTPRFModel.html">CSTPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
@@ -484,6 +485,9 @@ coordinate that varies along design axis <cite>i + 1</cite>. For a 2D stimulus w
 <cite>(num_frames, height, width)</cite> this means <cite>grid[…, 0]</cite> is the vertical (<cite>y</cite>) coordinate and
 <cite>grid[…, 1]</cite> is the horizontal (<cite>x</cite>) coordinate. See Notes.</p>
 </p></li>
+<li><p><strong>frame_duration</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – The duration of one time frame (in seconds), e.g., the repetition time (TR) in fMRI. Must be given
+as a keyword argument. Canonical models sample their impulse models at this interval unless the
+impulse model has an explicit <cite>resolution</cite>. See <a class="reference internal" href="../../../important_details.html"><span class="doc">Important details</span></a>.</p></li>
 <li><p><strong>dimension_labels</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>] or </em><em>None</em><em>, </em><em>optional</em>) – Names of the grid dimensions (e.g., <cite>[“y”, “x”]</cite>). If given, the number of labels must match the last grid
 axis. Label <cite>i</cite> names the coordinate stored in <cite>grid[…, i]</cite>.</p></li>
 </ul>
@@ -492,7 +496,8 @@ axis. Label <cite>i</cite> names the coordinate stored in <cite>grid[…, i]</ci
 <dd class="field-even"><ul class="simple">
 <li><p><a class="reference internal" href="../exceptions/ShapeError.html#prfmodel.exceptions.ShapeError" title="prfmodel.exceptions.ShapeError"><strong>ShapeError</strong></a> – If the number of grid axes (excluding the last) does not match the last grid dimension.</p></li>
 <li><p><a class="reference internal" href="../exceptions/ShapeMismatchError.html#prfmodel.exceptions.ShapeMismatchError" title="prfmodel.exceptions.ShapeMismatchError"><strong>ShapeMismatchError</strong></a> – If the design and grid dimensions do not match.</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If the number of dimension labels does not match the last grid dimension.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If the number of dimension labels does not match the last grid dimension or if <cite>frame_duration</cite> is not
+positive.</p></li>
 </ul>
 </dd>
 </dl>
@@ -529,9 +534,9 @@ before <cite>xv</cite>, as in the example below.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Moving along the last column changes x only:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="p">:]</span>
 <span class="go">array([-1.75,  3.75])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">dimension_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="p">(</span><span class="n">design</span><span class="o">=</span><span class="n">design</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="n">grid</span><span class="p">,</span> <span class="n">frame_duration</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">dimension_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
-<span class="go">PRFStimulus(design=array[10, 8, 16], grid=array[8, 16, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
+<span class="go">PRFStimulus(design=array[10, 8, 16], grid=array[8, 16, 2], frame_duration=1.5, dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
 </pre></div>
 </div>
 <dl class="py method">
@@ -548,7 +553,7 @@ before <cite>xv</cite>, as in the example below.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">create_2d_bar_stimulus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bar_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'horizontal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><span class="pre">PRFStimulus</span></a></span></span><a class="headerlink" href="#prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">create_2d_bar_stimulus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_frames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bar_width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'horizontal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pixel_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame_duration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#prfmodel.stimuli.PRFStimulus" title="prfmodel.stimuli.PRFStimulus"><span class="pre">PRFStimulus</span></a></span></span><a class="headerlink" href="#prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus" title="Link to this definition">¶</a></dt>
 <dd><p>Create a population receptive field bar stimulus that moves across a 2D screen.</p>
 <p>The stimulus starts and ends moving just outside the screen.</p>
 <dl class="field-list simple">
@@ -560,6 +565,9 @@ before <cite>xv</cite>, as in the example below.</p>
 <li><p><strong>bar_width</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><em>int</em></a><em>, </em><em>optional</em>) – Width of the moving bar (in pixels).</p></li>
 <li><p><strong>direction</strong> (<em>{&quot;horizontal&quot;</em><em>, </em><em>&quot;vertical&quot;}</em><em>, </em><em>optional</em>) – Direction in which the bar moves.</p></li>
 <li><p><strong>pixel_size</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>, </em><em>optional</em>) – Size of a pixel in spatial units.</p></li>
+<li><p><strong>frame_duration</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a>) – The duration of one time frame (in seconds), e.g., the repetition time (TR) in fMRI. Must be given
+as a keyword argument. Canonical models sample their impulse models at this interval unless the
+impulse model has an explicit <cite>resolution</cite>. See <a class="reference internal" href="../../../important_details.html"><span class="doc">Important details</span></a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -584,14 +592,15 @@ visual field (increasing <cite>mu_x</cite>).</p>
 <p>This is the same convention as the packaged stimulus returned by
 <a class="reference internal" href="../examples/load_2d_prf_bar_stimulus.html#prfmodel.examples.load_2d_prf_bar_stimulus" title="prfmodel.examples.load_2d_prf_bar_stimulus"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_2d_prf_bar_stimulus()</span></code></a>.</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="o">.</span><span class="n">create_2d_bar_stimulus</span><span class="p">(</span><span class="n">num_frames</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="o">.</span><span class="n">create_2d_bar_stimulus</span><span class="p">(</span><span class="n">num_frames</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">frame_duration</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">stimulus</span><span class="p">)</span>
-<span class="go">PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
+<span class="go">PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], frame_duration=1.0,</span>
+<span class="go">            dimension_labels=[&#39;y&#39;, &#39;x&#39;])</span>
 </pre></div>
 </div>
 <p>Both coordinates increase with their design axis, the horizontal one across the columns and
 the vertical one down the rows:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="o">.</span><span class="n">create_2d_bar_stimulus</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">pixel_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span> <span class="o">=</span> <span class="n">PRFStimulus</span><span class="o">.</span><span class="n">create_2d_bar_stimulus</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">pixel_size</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">frame_duration</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">stimulus</span><span class="o">.</span><span class="n">grid</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># x, constant down each column</span>
 <span class="go">array([[-2., -1.,  0.,  1.,  2.],</span>
 <span class="go">       [-2., -1.,  0.,  1.,  2.],</span>
@@ -710,7 +719,7 @@ the vertical one down the rows:</p>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+</div><script src="../../../_static/documentation_options.js?v=01f34227"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

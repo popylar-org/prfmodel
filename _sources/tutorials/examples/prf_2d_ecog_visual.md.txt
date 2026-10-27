@@ -38,7 +38,7 @@ os.environ["KERAS_BACKEND"] = "tensorflow"
 pd.set_option("display.precision", 3)
 
 if find_spec("tensorflow") is None:
-    msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
+    msg = 'Could not find the tensorflow package. Please install it with: pip install "prfmodel[tensorflow]"'
     raise ImportError(msg)
 ```
 
@@ -111,9 +111,9 @@ We can visualize the stimulus using {py:func}`prfmodel.plotting.animate_2d_prf_s
 from IPython.display import HTML
 from prfmodel.plotting import animate_2d_prf_stimulus
 
-ani = animate_2d_prf_stimulus(stimulus, interval=50)  # Pause 100 ms between time frames
+ani = animate_2d_prf_stimulus(stimulus, interval=50)  # Pause 50 ms between time frames
 
-HTML(ani.to_html5_video())
+HTML(ani.to_jshtml())
 ```
 
 The stimulus grid spans $\pm 8.3$ degrees of visual angle in both the x- and y-dimension. The design of this stimulus
@@ -263,8 +263,8 @@ For all three parameters, we defined ranges of 20 values that will be used to co
 grid search will evaluate all possible combinations of these values and return the combination that fits the simulated
 data best. This will result in a grid containing $20 ^ 3 = 8000$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
 
-Let's construct the {py:class}`prfmodel.fitters.grid.GridFitter` and perform the grid search. Note that every fitter
-is constructed with `stimulus_train`, so it only ever sees the first half of the experiment. Note also that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.grid.GridFitter`
+Let's construct the {py:class}`prfmodel.fitters.GridFitter` and perform the grid search. Note that every fitter
+is constructed with `stimulus_train`, so it only ever sees the first half of the experiment. Note also that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.GridFitter`
 evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is the negative correlation, which ignores differences in baseline and amplitude between model predictions and observed data. This means the data do not need to be demeaned or converted to percent signal change first, but also that `baseline` and `amplitude` cannot be estimated by the grid search itself. We fix them here and estimate them with least squares in the next step.
 
 ```{code-cell} ipython3
@@ -724,8 +724,6 @@ We can see that the CSS pRF model predictions have a similar shape to the Gaussi
 
 We fit the CSS pRF model directly with SGD, again on the first half only. For initalizing the starting parameter values, we choose a value for
 the compression exponent `n` close to 1. That way, SGD can move from almost no compression to more or no compression.
-The CSS pRF model also has a `gain` parameter that controls the amplitude of the nonlinearity, but we do not estimate
-this parameter here and keep fixed to 1 (i.e., no gain).
 
 ```{code-cell} ipython3
 init_params_css = init_css_from_gaussian(sgd_params, n=0.9)
@@ -745,12 +743,9 @@ sgd_fitter_css = SGDFitter(
     compile_step=True,
 )
 
-fixed_parameters = ["gain"]
-
 _, sgd_params_css = sgd_fitter_css.fit(
     data=response_train,
     init_parameters=init_params_css,
-    fixed_parameters=fixed_parameters,
 )
 
 sgd_params_css

@@ -23,7 +23,8 @@ prfmodel.examples.load_2d_prf_bar_stimulus
    The full stimulus has 340 time frames, with 128 cells in the x- and y-dimension, spanning a visual field of
    approximately -4 to 4 degrees of visual angle vertically and horizontally. The stimulus coordinate grid has been
    transformed from a rectangular into a quadratic shape. The moving bar patterns is mirrored in the time axis
-   which means that it can be split in two almost identical halfs.
+   which means that it can be split in two almost identical halfs. The stimulus was presented with one time frame
+   per repetition time of 0.9 seconds, so its ``frame_duration`` is 0.9.
 
    The ``grid`` holds visual field coordinates. The horizontal coordinate increases across the design columns, so a
    bar in the leftmost columns falls in the left visual hemifield (negative ``mu_x``), and the vertical coordinate
@@ -44,11 +45,11 @@ prfmodel.examples.load_2d_prf_bar_stimulus
    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
    >>> stimulus = load_2d_prf_bar_stimulus()
    >>> print(stimulus)
-   PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
+   PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], frame_duration=0.9, dimension_labels=['y', 'x'])
 
    Load a train and test stimulus with the first and second half of the design matrix.
 
    >>> stimulus_train, stimulus_test = load_2d_prf_bar_stimulus(return_test=True)
    >>> print(stimulus_train)
-   PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
+   PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], frame_duration=0.9, dimension_labels=['y', 'x'])
 

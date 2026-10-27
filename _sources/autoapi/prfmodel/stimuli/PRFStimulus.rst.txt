@@ -19,13 +19,18 @@ prfmodel.stimuli.PRFStimulus
                 `(num_frames, height, width)` this means `grid[..., 0]` is the vertical (`y`) coordinate and
                 `grid[..., 1]` is the horizontal (`x`) coordinate. See Notes.
    :type grid: numpy.ndarray
+   :param frame_duration: The duration of one time frame (in seconds), e.g., the repetition time (TR) in fMRI. Must be given
+                          as a keyword argument. Canonical models sample their impulse models at this interval unless the
+                          impulse model has an explicit `resolution`. See :doc:`Important details </important_details>`.
+   :type frame_duration: float
    :param dimension_labels: Names of the grid dimensions (e.g., `["y", "x"]`). If given, the number of labels must match the last grid
                             axis. Label `i` names the coordinate stored in `grid[..., i]`.
    :type dimension_labels: Sequence[str] or None, optional
 
    :raises ShapeError: If the number of grid axes (excluding the last) does not match the last grid dimension.
    :raises ShapeMismatchError: If the design and grid dimensions do not match.
-   :raises ValueError: If the number of dimension labels does not match the last grid dimension.
+   :raises ValueError: If the number of dimension labels does not match the last grid dimension or if `frame_duration` is not
+       positive.
 
    .. rubric:: Notes
 
@@ -66,9 +71,9 @@ prfmodel.stimuli.PRFStimulus
    >>> # Moving along the last column changes x only:
    >>> grid[0, 15, :]
    array([-1.75,  3.75])
-   >>> stimulus = PRFStimulus(design=design, grid=grid, dimension_labels=["y", "x"])
+   >>> stimulus = PRFStimulus(design=design, grid=grid, frame_duration=1.5, dimension_labels=["y", "x"])
    >>> print(stimulus)
-   PRFStimulus(design=array[10, 8, 16], grid=array[8, 16, 2], dimension_labels=['y', 'x'])
+   PRFStimulus(design=array[10, 8, 16], grid=array[8, 16, 2], frame_duration=1.5, dimension_labels=['y', 'x'])
 
 
    .. py:method:: __repr__() -> str
@@ -83,7 +88,7 @@ prfmodel.stimuli.PRFStimulus
 
 
 
-   .. py:method:: create_2d_bar_stimulus(num_frames: int = 100, width: int = 128, height: int = 128, bar_width: int = 20, direction: str = 'horizontal', pixel_size: float = 0.05) -> PRFStimulus
+   .. py:method:: create_2d_bar_stimulus(num_frames: int = 100, width: int = 128, height: int = 128, bar_width: int = 20, direction: str = 'horizontal', pixel_size: float = 0.05, *, frame_duration: float) -> PRFStimulus
       :classmethod:
 
 
@@ -103,6 +108,10 @@ prfmodel.stimuli.PRFStimulus
       :type direction: {"horizontal", "vertical"}, optional
       :param pixel_size: Size of a pixel in spatial units.
       :type pixel_size: float, optional
+      :param frame_duration: The duration of one time frame (in seconds), e.g., the repetition time (TR) in fMRI. Must be given
+                             as a keyword argument. Canonical models sample their impulse models at this interval unless the
+                             impulse model has an explicit `resolution`. See :doc:`Important details </important_details>`.
+      :type frame_duration: float
 
       :returns: A stimulus instance with the generated design and grid.
       :rtype: PRFStimulus
@@ -126,14 +135,15 @@ prfmodel.stimuli.PRFStimulus
 
       .. rubric:: Examples
 
-      >>> stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=200)
-      >>> print(stimulus)
-      PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
+      >>> stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=200, frame_duration=1.0)
+      >>> print(stimulus)  # doctest: +NORMALIZE_WHITESPACE
+      PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], frame_duration=1.0,
+                  dimension_labels=['y', 'x'])
 
       Both coordinates increase with their design axis, the horizontal one across the columns and
       the vertical one down the rows:
 
-      >>> stimulus = PRFStimulus.create_2d_bar_stimulus(width=5, height=3, pixel_size=1.0)
+      >>> stimulus = PRFStimulus.create_2d_bar_stimulus(width=5, height=3, pixel_size=1.0, frame_duration=1.0)
       >>> stimulus.grid[..., 1]  # x, constant down each column
       array([[-2., -1.,  0.,  1.,  2.],
              [-2., -1.,  0.,  1.,  2.],

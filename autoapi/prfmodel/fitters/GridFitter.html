@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.fitters.GridHistory" href="GridHistory.html"><link rel="prev" title="prfmodel.fitters.GridAlignmentWarning" href="GridAlignmentWarning.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>prfmodel.fitters.GridFitter - prfmodel 0.0.1 documentation</title>
+        <title>prfmodel.fitters.GridFitter - prfmodel 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">prfmodel 0.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
-  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  <span class="sidebar-brand-text">prfmodel 0.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -246,6 +246,8 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../exceptions/InvalidUnitsWarning.html">InvalidUnitsWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../exceptions/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../exceptions/ShapeError.html">ShapeError</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../exceptions/ShapeMismatchError.html">ShapeMismatchError</a></li>
 </ul>
@@ -324,7 +326,6 @@
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../models/prf/index.html">prfmodel.models.prf</a><input aria-label="Toggle navigation of prfmodel.models.prf" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../models/prf/canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CSTPRFModel.html">CSTPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../models/prf/canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
@@ -480,23 +481,24 @@ minimum loss.</p>
 The model must implement the <a class="reference internal" href="../models/base/BaseCanonical.html#prfmodel.models.base.BaseCanonical.__call__" title="prfmodel.models.base.BaseCanonical.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a> method to make
 predictions that can be compared to data.</p></li>
 <li><p><strong>stimulus</strong> (<a class="reference internal" href="../stimuli/Stimulus.html#prfmodel.stimuli.Stimulus" title="prfmodel.stimuli.Stimulus"><em>Stimulus</em></a>) – Stimulus object.</p></li>
-<li><p><strong>loss</strong> (<em>keras.optimizers.Loss</em><em> or </em><em>Callable</em><em>, </em><em>optional</em>) – Loss instance or function with the signature <cite>f(y_true, y_pred)</cite>, where <cite>y_true</cite> is the target data and
-<cite>y_pred</cite> are the model predicitons. Default is <cite>None</cite> where a
+<li><p><strong>loss</strong> (<em>keras.losses.Loss</em><em> or </em><em>Callable</em><em>, </em><em>optional</em>) – Loss instance or function with the signature <cite>f(y_true, y_pred)</cite>, where <cite>y_true</cite> is the target data and
+<cite>y_pred</cite> are the model predictions. Default is <cite>None</cite> where a
 <a class="reference internal" href="losses/CorrelationLoss.html#prfmodel.fitters.losses.CorrelationLoss" title="prfmodel.fitters.losses.CorrelationLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">CorrelationLoss</span></code></a> loss is used. Note that, when a
 <code class="xref py py-class docutils literal notranslate"><span class="pre">keras.losses.Loss</span></code> instance is used, the argument <cite>reduction</cite> must be set to <cite>“none”</cite> to enable
 loss computation for all data batches. When a function is used, it must return a loss value for every unit in
 <cite>y_true</cite> and <cite>y_pred</cite>.</p></li>
-<li><p><strong>compile_step</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>, </em><em>default=False</em>) – <dl class="simple">
-<dt>Whether to compile the optimization step with the backend’s native primitive: <cite>jax.jit</cite> on JAX,</dt><dd><p><cite>tf.function</cite> on TensorFlow and <cite>torch.compile</cite> on PyTorch. With <cite>False</cite> (the default) the step
-runs eagerly, which is slower but makes the step inspectable and produces Python
+<li><p><strong>compile_step</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><em>bool</em></a><em>, </em><em>default=False</em>) – Whether to compile the evaluation of each grid batch with the backend’s native primitive: <cite>jax.jit</cite> on JAX,
+<cite>tf.function</cite> on TensorFlow and <cite>torch.compile</cite> on PyTorch. With <cite>False</cite> (the default) the evaluation
+runs eagerly, which is slower but makes it inspectable and produces Python
 tracebacks that point at the offending line. Whether compiling pays off depends on the backend
-and on the problem size.</p>
-</dd>
-</dl>
-</p></li>
+and on the problem size.</p></li>
 <li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <cite>None</cite> (the default), uses the dtype from
 <a class="reference internal" href="../utils/get_dtype.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ResolutionMismatchWarning</strong> – When an impulse submodel has an explicit resolution that differs from the frame duration of the
+stimulus. See <a class="reference internal" href="../models/base/BaseCanonical.html#prfmodel.models.base.BaseCanonical.check_stimulus" title="prfmodel.models.base.BaseCanonical.check_stimulus"><code class="xref py py-meth docutils literal notranslate"><span class="pre">check_stimulus()</span></code></a>.</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
@@ -524,7 +526,7 @@ among them. Fix such parameters to a single placeholder value in the grid and es
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fitter</span> <span class="o">=</span> <span class="n">GridFitter</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">stimulus</span><span class="o">=</span><span class="n">stimulus</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create dummy data for a single unit</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">stimulus</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">standard_normal</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">stimulus</span><span class="o">.</span><span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Define possible parameters in grid</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">param_values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;mu_y&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span> <span class="s2">&quot;mu_x&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">],</span> <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">]}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Fit model parameters</span>
@@ -555,9 +557,21 @@ has a <code class="docutils literal notranslate"><span class="pre">regressors_mo
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><ul class="simple">
 <li><p><em>GridHistory</em> – A history object that contains loss and metric values for each data batch.</p></li>
-<li><p><em>pandas.DataFrame</em> – A dataframe with final model parameters.</p></li>
+<li><p><em>pandas.DataFrame</em> – A dataframe with final model parameters. All parameters are NaN for units that are excluded from the
+fit (see Warns).</p></li>
 </ul>
 </p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><a class="reference internal" href="../exceptions/ShapeError.html#prfmodel.exceptions.ShapeError" title="prfmodel.exceptions.ShapeError"><strong>ShapeError</strong></a> – If <cite>data</cite> does not have two dimensions or if its number of columns does not match the number of frames
+in the model prediction.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If a key of <cite>parameter_values</cite> is not a parameter of the model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Warns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>InvalidUnitsWarning</strong> – When the time series of some units in <cite>data</cite> are constant or contain NaN or infinite values. These
+units are excluded from the fit and their estimated parameters and losses are NaN.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -644,7 +658,7 @@ has a <code class="docutils literal notranslate"><span class="pre">regressors_mo
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+</div><script src="../../../_static/documentation_options.js?v=01f34227"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

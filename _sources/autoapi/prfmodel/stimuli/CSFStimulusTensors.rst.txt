@@ -14,4 +14,6 @@ prfmodel.stimuli.CSFStimulusTensors
    :type sf: :data:`prfmodel.typing.Tensor`
    :param contrast: The :attr:`CSFStimulus.contrast` array as a tensor.
    :type contrast: :data:`prfmodel.typing.Tensor`
+   :param frame_duration: The :attr:`CSFStimulus.frame_duration` as a Python float.
+   :type frame_duration: float
 

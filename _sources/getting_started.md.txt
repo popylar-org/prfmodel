@@ -31,17 +31,16 @@ from prfmodel.examples import load_2d_prf_bar_stimulus
 # Print parameter DataFrames with three decimals
 pd.set_option("display.precision", 3)
 
-num_frames = 200  # Simulate 200 time frames
-
 stimulus = load_2d_prf_bar_stimulus()
 print(stimulus)
 ```
 
-When printing the `stimulus` object, we can see that it has three attributes. The `design` attribute defines how
+When printing the `stimulus` object, we can see that it has four attributes. The `design` attribute defines how
 the visual field changes over time. It has shape `(num_frames, height, width)`, where height and width define the number of pixels at which the visual field is recorded.
 The `grid` attribute maps each pixel to its coordinate in the visual field (i.e., the degree of visual angle). Its last
 axis follows the axes of the design, so `grid[..., 0]` holds the vertical (`y`) coordinate and `grid[..., 1]` the
-horizontal (`x`) coordinate.
+horizontal (`x`) coordinate. The `frame_duration` attribute is the duration of each frame in seconds (e.g., one TR),
+at which the model samples its impulse response, and `dimension_labels` names the grid axes.
 
 ## Defining the pRF model
 
@@ -118,7 +117,7 @@ of parameter values from. For all other parameters, we only provide a single val
 across the entire grid.
 
 Note that we set `baseline` to `0.0` and `amplitude` to `1.0` even though we simulated the data with a `baseline` of
-`10.0`. This is difference is on purpose because, by default, the `GridFitter` minimizes the negative correlation between prediction and data, which is unaffected by the baseline and amplitude of the prediction. Any value works here, and we estimate
+`10.0`. This difference is on purpose because, by default, the `GridFitter` minimizes the negative correlation between prediction and data, which is unaffected by the baseline and amplitude of the prediction. Any value works here, and we estimate
 both parameters properly with least squares in the next step.
 
 ```{code-cell} ipython3
@@ -218,7 +217,7 @@ fig.legend();
 ```
 
 To finetune our model fits, we use SGD to iteratively optimize model parameters using the gradient of a loss function
-that is computed between data and model predictions. The default loss function in prfmodel is the means squared error.
+that is computed between data and model predictions. The default loss function in prfmodel is the mean squared error.
 As initial parameters, we use the result from the grid search and least squares fit. We fix the parameters related to
 the impulse response to their initial values (which are the "true" values).
 

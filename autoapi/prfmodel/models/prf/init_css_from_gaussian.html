@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.prf.init_cst_from_gaussian" href="init_cst_from_gaussian.html"><link rel="prev" title="prfmodel.models.prf.encode_prf_response" href="encode_prf_response.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>prfmodel.models.prf.init_css_from_gaussian - prfmodel 0.0.1 documentation</title>
+        <title>prfmodel.models.prf.init_css_from_gaussian - prfmodel 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../../index.html"><div class="brand">prfmodel 0.0.1 documentation</div></a>
+      <a href="../../../../index.html"><div class="brand">prfmodel 0.1.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
   
-  <span class="sidebar-brand-text">prfmodel 0.0.1 documentation</span>
+  <span class="sidebar-brand-text">prfmodel 0.1.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -246,6 +246,8 @@
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../exceptions/index.html">prfmodel.exceptions</a><input aria-label="Toggle navigation of prfmodel.exceptions" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../exceptions/InvalidUnitsWarning.html">InvalidUnitsWarning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../exceptions/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../exceptions/ShapeError.html">ShapeError</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../exceptions/ShapeMismatchError.html">ShapeMismatchError</a></li>
 </ul>
@@ -324,7 +326,6 @@
 </li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">prfmodel.models.prf</a><input aria-label="Toggle navigation of prfmodel.models.prf" checked="" class="toctree-checkbox" id="toctree-checkbox-22" name="toctree-checkbox-22" role="switch" type="checkbox"/><label for="toctree-checkbox-22"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l4 has-children"><a class="reference internal" href="canonical/index.html">prfmodel.models.prf.canonical</a><input aria-label="Toggle navigation of prfmodel.models.prf.canonical" class="toctree-checkbox" id="toctree-checkbox-23" name="toctree-checkbox-23" role="switch" type="checkbox"/><label for="toctree-checkbox-23"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="canonical/ResolutionMismatchWarning.html">ResolutionMismatchWarning</a></li>
 <li class="toctree-l5"><a class="reference internal" href="canonical/CSTPRFModel.html">CSTPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="canonical/CanonicalPRFModel.html">CanonicalPRFModel</a></li>
 <li class="toctree-l5"><a class="reference internal" href="canonical/CenterSurroundPRFModel.html">CenterSurroundPRFModel</a></li>
@@ -469,26 +470,25 @@
 <h1>prfmodel.models.prf.init_css_from_gaussian<a class="headerlink" href="#prfmodel-models-prf-init-css-from-gaussian" title="Link to this heading">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="prfmodel.models.prf.init_css_from_gaussian">
-<span class="sig-prename descclassname"><span class="pre">prfmodel.models.prf.</span></span><span class="sig-name descname"><span class="pre">init_css_from_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gaussian_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">gain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><span class="pre">pandas.DataFrame</span></a></span></span><a class="headerlink" href="#prfmodel.models.prf.init_css_from_gaussian" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">prfmodel.models.prf.</span></span><span class="sig-name descname"><span class="pre">init_css_from_gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gaussian_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><span class="pre">pandas.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><span class="pre">pandas.DataFrame</span></a></span></span><a class="headerlink" href="#prfmodel.models.prf.init_css_from_gaussian" title="Link to this definition">¶</a></dt>
 <dd><p>Initialize compressive spatial summation parameters from fitted Gaussian parameters.</p>
-<p>Converts the output of a fitted <code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code>
-into starting parameters for a <code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DCSSPRFModel</span></code>.</p>
+<p>Converts the output of a fitted <a class="reference internal" href="Gaussian2DPRFModel.html#prfmodel.models.prf.Gaussian2DPRFModel" title="prfmodel.models.prf.Gaussian2DPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code></a>
+into starting parameters for a <a class="reference internal" href="Gaussian2DCSSPRFModel.html#prfmodel.models.prf.Gaussian2DCSSPRFModel" title="prfmodel.models.prf.Gaussian2DCSSPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DCSSPRFModel</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>gaussian_params</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><em>pandas.DataFrame</em></a>) – DataFrame of fitted parameters from a <code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code>.</p></li>
-<li><p><strong>gain</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>, </em><em>default=1.0</em>) – Amplification parameter for the <code class="xref py py-class docutils literal notranslate"><span class="pre">CompressiveEncoder</span></code>.</p></li>
-<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>, </em><em>default=0.5</em>) – Compression exponent parameter for the <code class="xref py py-class docutils literal notranslate"><span class="pre">CompressiveEncoder</span></code>. Must be &gt; 0.</p></li>
+<li><p><strong>gaussian_params</strong> (<a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)"><em>pandas.DataFrame</em></a>) – DataFrame of fitted parameters from a <a class="reference internal" href="Gaussian2DPRFModel.html#prfmodel.models.prf.Gaussian2DPRFModel" title="prfmodel.models.prf.Gaussian2DPRFModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">Gaussian2DPRFModel</span></code></a>.</p></li>
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>, </em><em>default=0.5</em>) – Compression exponent parameter for the <a class="reference internal" href="../compression/CompressiveEncoder.html#prfmodel.models.compression.CompressiveEncoder" title="prfmodel.models.compression.CompressiveEncoder"><code class="xref py py-class docutils literal notranslate"><span class="pre">CompressiveEncoder</span></code></a>. Must be &gt; 0.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataFrame with two additional columns: <code class="docutils literal notranslate"><span class="pre">gain</span></code> and <code class="docutils literal notranslate"><span class="pre">m</span></code>.</p>
+<dd class="field-even"><p>DataFrame with one additional column: <code class="docutils literal notranslate"><span class="pre">n</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="http://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.1)">pandas.DataFrame</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">n</span></code> &lt;= 0 or if <code class="docutils literal notranslate"><span class="pre">n</span></code> or <code class="docutils literal notranslate"><span class="pre">gain</span></code> are not finite.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">n</span></code> &lt;= 0 or not finite.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -500,9 +500,9 @@ into starting parameters for a <code class="xref py py-class docutils literal no
 <span class="gp">... </span>    <span class="s2">&quot;baseline&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
 <span class="gp">... </span>    <span class="s2">&quot;amplitude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">],</span>
 <span class="gp">... </span><span class="p">})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">css_params</span> <span class="o">=</span> <span class="n">init_css_from_gaussian</span><span class="p">(</span><span class="n">gaussian_params</span><span class="p">,</span> <span class="n">gain</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">css_params</span> <span class="o">=</span> <span class="n">init_css_from_gaussian</span><span class="p">(</span><span class="n">gaussian_params</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">css_params</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()))</span>
-<span class="go">[&#39;amplitude&#39;, &#39;baseline&#39;, &#39;gain&#39;, &#39;mu_x&#39;, &#39;mu_y&#39;, &#39;n&#39;, &#39;sigma&#39;]</span>
+<span class="go">[&#39;amplitude&#39;, &#39;baseline&#39;, &#39;mu_x&#39;, &#39;mu_y&#39;, &#39;n&#39;, &#39;sigma&#39;]</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -577,7 +577,7 @@ into starting parameters for a <code class="xref py py-class docutils literal no
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=d45e8c67"></script>
+</div><script src="../../../../_static/documentation_options.js?v=01f34227"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

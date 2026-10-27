@@ -11,9 +11,14 @@ prfmodel.stimuli.CSFStimulus
    :type sf: numpy.ndarray
    :param contrast: Contrast at each time frame, with shape ``(num_frames,)``.
    :type contrast: numpy.ndarray
+   :param frame_duration: The duration of one time frame (in seconds), e.g., the repetition time (TR) in fMRI. Must be given
+                          as a keyword argument. Canonical models sample their impulse models at this interval unless the
+                          impulse model has an explicit `resolution`. See :doc:`Important details </important_details>`.
+   :type frame_duration: float
 
    :raises CSFStimulusDimensionError: If ``sf`` or ``contrast`` is not one-dimensional.
    :raises CSFStimulusShapeError: If ``sf`` and ``contrast`` do not have the same shape.
+   :raises ValueError: If ``frame_duration`` is not positive.
 
    .. rubric:: Examples
 
@@ -22,9 +27,9 @@ prfmodel.stimuli.CSFStimulus
    >>> import numpy as np
    >>> sf = np.array([1.0, 3.0, 6.0, 12.0])
    >>> contrast = np.array([0.1, 0.2, 0.4, 0.8])
-   >>> stimulus = CSFStimulus(sf=sf, contrast=contrast)
+   >>> stimulus = CSFStimulus(sf=sf, contrast=contrast, frame_duration=1.5)
    >>> print(stimulus)
-   CSFStimulus(sf=array[4], contrast=array[4])
+   CSFStimulus(sf=array[4], contrast=array[4], frame_duration=1.5)
 
 
    .. py:method:: __repr__() -> str
@@ -53,7 +58,7 @@ prfmodel.stimuli.CSFStimulus
       .. rubric:: Examples
 
       >>> import numpy as np
-      >>> stimulus = CSFStimulus(sf=np.array([1.0, 3.0]), contrast=np.array([0.1, 0.2]))
+      >>> stimulus = CSFStimulus(sf=np.array([1.0, 3.0]), contrast=np.array([0.1, 0.2]), frame_duration=1.0)
       >>> tensors = stimulus.to_tensors("float32")
       >>> print(tuple(tensors.sf.shape))
       (2,)
