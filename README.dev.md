@@ -82,6 +82,15 @@ uv run pytest --doctest-modules --ignore=src/prfmodel/_backend/ src/
 
 This is also run as a GitHub actions workflow.
 
+The [`documentation.yml`](.github/workflows/documentation.yml) workflow also checks the links in the Markdown files in
+the repository root, in the Markdown sources of the documentation, and in the built HTML with
+[lychee](https://lychee.cli.rs), configured in [`lychee.toml`](lychee.toml). To run the same check locally after
+building the documentation, run from the repository root:
+
+```shell
+lychee '*.md' 'docs/**/*.md' 'docs/_build/html/**/*.html'
+```
+
 ## Code quality
 
 To ensure code quality and consistent formatting, prfmodel uses [ruff](https://docs.astral.sh/ruff/). Ruff checks are run on the whole repository, including tests.
