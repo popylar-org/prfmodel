@@ -273,7 +273,7 @@ def plot_csf_stimulus_design(stimulus: CSFStimulus, **kwargs) -> tuple[mpl.figur
     """
     Plot the design of a contrast sensitivity function (CSF) stimulus.
 
-    Plots the stimulus contrast over time with color indicating different spatial frequencies.
+    Plots the stimulus contrast (in percent) over time with color indicating different spatial frequencies.
 
     Parameters
     ----------
@@ -305,7 +305,7 @@ def plot_csf_stimulus_design(stimulus: CSFStimulus, **kwargs) -> tuple[mpl.figur
         ax.plot(frames, con, label=freq)
 
     ax.set_xlabel("Time frame")
-    ax.set_ylabel("Contrast")
+    ax.set_ylabel("Contrast (%)")
 
     fig.legend(title="Spatial\nfrequency", bbox_to_anchor=(1.05, 1))
 
@@ -320,7 +320,8 @@ def plot_csf_stimulus_curve(
     """
     Plot a contrast sensitivity curve over a stimulus design.
 
-    Plots spatial frequency over contrast sensitivity (100/contrast) and draws a contrast sentitivity curve on top.
+    Plots spatial frequency over contrast sensitivity (100 / contrast, with contrast in percent) and draws a contrast
+    sensitivity curve on top.
 
     Parameters
     ----------

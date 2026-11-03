@@ -99,7 +99,7 @@ class TestPlotCSFStimulusDesign(CSFPlottingSetup):
         """Test that axis labels are set."""
         _, ax = plot_csf_stimulus_design(csf_stimulus)
         assert ax.get_xlabel() == "Time frame"
-        assert ax.get_ylabel() == "Contrast"
+        assert ax.get_ylabel() == "Contrast (%)"
 
     def test_kwargs_forwarded_to_subplots(self, csf_stimulus: CSFStimulus):
         """Test that kwargs are forwarded to plt.subplots (e.g. figsize)."""

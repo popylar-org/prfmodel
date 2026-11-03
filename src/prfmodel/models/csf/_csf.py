@@ -146,7 +146,7 @@ def predict_contrast_response(
     Parameters
     ----------
     contrast : Tensor
-        Contrast at each time frame, with shape ``(num_frames,)``.
+        Michelson contrast in percent (0 to 100) at each time frame, with shape ``(num_frames,)``.
     sensitivity : Tensor
         Contrast sensitivity for each voxel at each time frame, with shape ``(num_voxels, num_frames)``.
     slope_crf : Tensor
@@ -164,11 +164,15 @@ def predict_contrast_response(
 
     Notes
     -----
-    The Naka-Rushton CRF combines contrast :math:`C` with the threshold :math:`Q = 1 / S(f)` derived from the CSF S(f):
+    The Naka-Rushton CRF combines contrast :math:`C` (in percent) with the contrast threshold :math:`Q = 100 / S(f)`
+    (also in percent) derived from the CSF :math:`S(f)`:
 
     .. math::
 
         R(t) = \frac{C(t)^q}{C(t)^q + Q(t)^q}
+
+    Contrast sensitivity is the reciprocal of the threshold contrast as a fraction, so the threshold in percent is
+    :math:`100 / S(f)`. The response is half-maximal where the contrast equals the threshold, :math:`C(t) = Q(t)`.
 
     For numerical stability, the CRF is evaluated in the log domain as the algebraically equivalent
     :math:`R(t) = \sigma(q \cdot (\log C(t) - \log Q(t)))`, where :math:`\sigma` is the logistic sigmoid. This avoids
@@ -220,6 +224,10 @@ class CSFTuning(BaseTuning[CSFStimulus, CSFStimulusTensors]):
 
     Notes
     -----
+    The stimulus contrast (:attr:`CSFStimulus.contrast <prfmodel.stimuli.CSFStimulus.contrast>`) must be Michelson
+    contrast in percent (0 to 100), because the Naka-Rushton threshold is :math:`100 / S(f)` (see
+    :func:`predict_contrast_response`). Contrast given as a fraction (0 to 1) yields near-floor responses.
+
     The model has four fitted parameters:
 
     ``cs_peak``
@@ -383,7 +391,8 @@ class CSFModel(CanonicalCSFModel):
     >>> stimulus = CSFStimulus(
     ...    # Simulate data for 4 time frames
     ...    sf=np.array([1.0, 3.0, 6.0, 12.0]),
-    ...    contrast=np.array([0.1, 0.2, 0.4, 0.8]),
+    ...    # Michelson contrast in percent
+    ...    contrast=np.array([10.0, 20.0, 40.0, 80.0]),
     ...    frame_duration=1.0,
     ... )
     >>> model = CSFModel()

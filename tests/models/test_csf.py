@@ -28,8 +28,8 @@ class TestSetup:
 
     @pytest.fixture
     def contrast(self) -> np.ndarray:
-        """Michelson contrast."""
-        return np.array([0.05, 0.1, 0.2, 0.4, 0.8, 0.4, 0.1, 0.05])
+        """Michelson contrast in percent."""
+        return np.array([5.0, 10.0, 20.0, 40.0, 80.0, 40.0, 10.0, 5.0])
 
     @pytest.fixture
     def stimulus(self, sf: np.ndarray, contrast: np.ndarray) -> CSFStimulus:
@@ -178,7 +178,7 @@ class TestPredictContrastResponse(TestSetup):
     def test_known_naka_rushton_value(self) -> None:
         """Test Naka-Rushton formula against the analytical expression at a single operating point.
 
-        At contrast c, sensitivity s, and slope q: R = c^q / (c^q + (1/s)^q).
+        At contrast c (in percent), sensitivity s, and slope q: R = c^q / (c^q + (100/s)^q).
 
         """
         c, s, q = 0.5, 100.0, 2.0

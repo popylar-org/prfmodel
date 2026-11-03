@@ -16,6 +16,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `load_dataset` no longer requires a `split` for datasets that have a default split; `describe_dataset`
   reports the default split
 
+### Changed
+
+- `plot_csf_stimulus_design` labels its y-axis "Contrast (%)" instead of "Contrast".
+
+### Fixed
+
+- `CSFTuning` and `CSFModel` no longer produce NaN predictions or NaN gradients in float32 for high contrasts, low
+  contrast sensitivities, or steep `slope_crf`. The Naka-Rushton contrast response function is now evaluated in the
+  log domain as a sigmoid, and `CSFTuning` no longer computes the contrast sensitivity itself, only its logarithm.
+  Predictions that were finite before are unchanged up to floating-point rounding. The `eps` of `CSFTuning` now only
+  bounds the contrast.
+- `predict_contrast_response` evaluates the Naka-Rushton contrast response function in the same way. Its `eps` now
+  bounds the sensitivity instead of the threshold `100 / sensitivity`, which changes results only for sensitivities
+  below `eps` or above `100 / eps`.
+- The documentation of `predict_contrast_response` stated the Naka-Rushton threshold as `Q = 1 / S(f)` instead of
+  `Q = 100 / S(f)`.
+- The documentation now states that CSF models expect contrast as Michelson contrast in percent (0 to 100), on
+  `CSFStimulus`, `predict_contrast_response`, `CSFTuning`, and in the CSF tutorial. The examples of `CSFStimulus` and
+  `CSFModel` used contrast as a fraction, and the tutorial gave the contrast unit as cycles per degree.
+
 ## [0.1.0] - 2026-10-26
 
 ### Changed
