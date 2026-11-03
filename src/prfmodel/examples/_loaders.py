@@ -18,10 +18,13 @@ from prfmodel.examples._options import validate_options
 from prfmodel.examples._registry import _get_spec
 from prfmodel.examples._registry import load_checksums
 from prfmodel.examples._stimuli import _BAR_STIMULUS_FRAME_DURATION
+from prfmodel.examples._stimuli import _NCSF_FRAME_DURATION
 from prfmodel.examples._stimuli import _load_2d_bar_design_and_grid
 from prfmodel.examples._stimuli import _load_chn_aperture_stimulus
+from prfmodel.examples._stimuli import _load_ncsf_csf_stimulus
 from prfmodel.examples._stimuli import load_1d_prf_lognumerosity_stimulus
 from prfmodel.stimuli import PRFStimulus
+from prfmodel.stimuli import Stimulus
 
 if TYPE_CHECKING:
     import os
@@ -94,6 +97,62 @@ def load_numerosity_timing(fetch: FileFetcher, options: Options) -> Dataset:
         roi_mapping=label_image.labeltable.get_labels_as_dict(),
         hemisphere=options.hemisphere,
         split=options.split,
+        files=fetch.files,
+    )
+
+
+_NCSF_TEMPLATE_MAPS = ("angle", "eccen", "sigma")
+_NCSF_HEMISPHERE_NAMES = {"L": "left", "R": "right"}
+
+
+def load_ncsf_visual(fetch: FileFetcher, options: Options) -> Dataset:
+    """Load the surface response of a single subject to a contrast sensitivity or a moving bar stimulus."""
+    # Only the CSF task was split, and checking before fetching avoids a download that would be refused
+    if options.task == "prf" and options.split != "all":
+        msg = f"Task 'prf' of dataset '7t-ncsf-visual' has only the split 'all' but '{options.split}' was requested"
+        raise ValueError(msg)
+
+    responses = []
+    roi_indices = []
+    units = []
+
+    for code in options.hemisphere_codes:
+        response_path = fetch(f"response_{options.task}_{options.split}_{code}")
+        responses.append(np.asarray(load_surf_data(response_path), dtype=np.float64))
+        roi_indices.append(np.asarray(load_surf_data(fetch(f"roi_{code}")), dtype=np.int32))
+        # The template polar angle is unsigned in both hemispheres, so the hemisphere tells the visual hemifield
+        maps = {
+            f"benson14_{key}": np.asarray(load_surf_data(fetch(f"benson14_{key}_{code}")), dtype=np.float64)
+            for key in _NCSF_TEMPLATE_MAPS
+        }
+        units.append(pd.DataFrame({"hemisphere": _NCSF_HEMISPHERE_NAMES[code], **maps}))
+
+    # The label table is identical across hemispheres so we read it from the first one
+    label_image = GiftiImage.from_filename(fetch(f"roi_{options.hemisphere_codes[0]}"))
+
+    stimulus: Stimulus
+
+    if options.task == "csf":
+        stimulus = _load_ncsf_csf_stimulus()
+    else:
+        with np.load(fetch("stimulus_prf")) as archive:
+            stimulus = PRFStimulus(
+                design=np.asarray(archive["design"], dtype=np.float64),
+                grid=np.asarray(archive["grid"], dtype=np.float64),
+                frame_duration=_NCSF_FRAME_DURATION,
+                dimension_labels=["y", "x"],
+            )
+
+    return Dataset(
+        name="7t-ncsf-visual",
+        response=np.concatenate(responses),
+        stimulus=stimulus,
+        roi_index=np.concatenate(roi_indices),
+        roi_mapping=label_image.labeltable.get_labels_as_dict(),
+        units=pd.concat(units, ignore_index=True),
+        hemisphere=options.hemisphere,
+        split=options.split,
+        task=options.task,
         files=fetch.files,
     )
 
@@ -269,7 +328,8 @@ def load_dataset(  # noqa: PLR0913
         `"both"`, the data of both hemispheres are concatenated (left is first). If `None` (the default),
         uses the default of the dataset.
     split : str, optional
-        Data split to load the response from, for datasets that provide splits. Required for those datasets.
+        Data split to load the response from, for datasets that provide splits. Required for those datasets unless
+        they have a default split, which :func:`~prfmodel.examples.describe_dataset` reports.
     surface_type : str, optional
         Surface type to load, for datasets that provide surfaces. Must be either `"flat"`, `"inflated"`,
         `"pia"` (or `"pial"`), or `"wm"` (for white matter). If `None` (the default), uses the default of the
@@ -345,6 +405,16 @@ def load_dataset(  # noqa: PLR0913
     (221709, 305)
     >>> first.roi_mapping  # doctest: +SKIP
     {0: 'other', 1: 'V1', 2: 'V2', 3: 'V3'}
+
+    Load the response to a contrast sensitivity stimulus, averaged over all runs or, for cross-validation, over the
+    odd runs only.
+
+    >>> csf = load_dataset("7t-ncsf-visual", task="csf")  # doctest: +SKIP
+    >>> csf.response.shape  # doctest: +SKIP
+    (118584, 214)
+    >>> odd = load_dataset("7t-ncsf-visual", task="csf", split="odd")  # doctest: +SKIP
+    >>> odd.units.columns.tolist()  # doctest: +SKIP
+    ['hemisphere', 'benson14_angle', 'benson14_eccen', 'benson14_sigma']
 
     Load an intracranial response together with the channels table that describes it.
 

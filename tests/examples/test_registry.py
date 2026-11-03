@@ -1,5 +1,6 @@
 """Test the specifications of the available example datasets."""
 
+import dataclasses
 import re
 from importlib.resources import files
 import pytest
@@ -16,6 +17,7 @@ def test_list_datasets():
     assert list_datasets() == [
         "3t-chn-visual",
         "7t-aot-visual",
+        "7t-ncsf-visual",
         "7t-retbar-visual",
         "hcp-999999-surface",
         "numerosity-timing",
@@ -68,6 +70,22 @@ def test_describe_dataset_reports_tasks():
 
     assert "Tasks: fixedbar, logbar (default 'fixedbar')" in description
     assert "Splits: ses-01_run-01, ses-01_run-02, ses-02_run-01 (required)" in description
+
+
+def test_describe_dataset_reports_a_default_split():
+    """Test that a dataset with a default split names it instead of requiring a split."""
+    description = describe_dataset("7t-ncsf-visual")
+
+    assert "Splits: all, odd, even (default 'all')" in description
+    assert "Tasks: csf, prf (default 'csf')" in description
+
+
+def test_default_split_must_be_a_split():
+    """Test that a default split that the dataset does not provide is refused."""
+    spec = _get_registry()["7t-ncsf-visual"]
+
+    with pytest.raises(ValueError, match="default split 'third'"):
+        dataclasses.replace(spec, default_split="third")
 
 
 def test_every_dataset_has_exactly_one_source():

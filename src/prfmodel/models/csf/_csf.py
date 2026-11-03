@@ -72,20 +72,38 @@ def predict_contrast_sensitivity(  # noqa: PLR0913 (too many arguments)
     """
     dtype = get_dtype(dtype)
 
-    for _name, _arg in [("cs_peak", cs_peak), ("sf_peak", sf_peak), ("width_r", width_r)]:
-        if hasattr(_arg, "ndim") and _arg.ndim < _EXPECTED_NDIM:
-            raise ShapeError(_name, tuple(_arg.shape), f"must have at least {_EXPECTED_NDIM} dimensions")
+    return ops.power(10.0, _log10_contrast_sensitivity(sf, cs_peak, sf_peak, width_l, width_r, dtype))
 
-    _batched = [
-        (_name, _arg)
-        for _name, _arg in [("cs_peak", cs_peak), ("sf_peak", sf_peak), ("width_r", width_r)]
-        if hasattr(_arg, "shape") and len(_arg.shape) >= _EXPECTED_NDIM and _arg.shape[0] != 1
+
+# Every argument needs a batch dimension, and the arguments with more than one batch must agree on its size
+def _check_batch_shapes(args: list[tuple[str, Tensor]]) -> None:
+    for name, arg in args:
+        if hasattr(arg, "ndim") and arg.ndim < _EXPECTED_NDIM:
+            raise ShapeError(name, tuple(arg.shape), f"must have at least {_EXPECTED_NDIM} dimensions")
+
+    batched = [
+        (name, arg)
+        for name, arg in args
+        if hasattr(arg, "shape") and len(arg.shape) >= _EXPECTED_NDIM and arg.shape[0] != 1
     ]
-    if _batched:
-        _ref_name, _ref_arg = _batched[0]
-        for _name, _arg in _batched[1:]:
-            if _arg.shape[0] != _ref_arg.shape[0]:
-                raise ShapeMismatchError(_ref_name, tuple(_ref_arg.shape), _name, tuple(_arg.shape))
+
+    for name, arg in batched[1:]:
+        ref_name, ref_arg = batched[0]
+
+        if arg.shape[0] != ref_arg.shape[0]:
+            raise ShapeMismatchError(ref_name, tuple(ref_arg.shape), name, tuple(arg.shape))
+
+
+# Base-10 log of the aLP CSF (see predict_contrast_sensitivity), with shape (num_batches, num_frames)
+def _log10_contrast_sensitivity(  # noqa: PLR0913 (too many arguments)
+    sf: Tensor,
+    cs_peak: Tensor,
+    sf_peak: Tensor,
+    width_l: float | Tensor,
+    width_r: Tensor,
+    dtype: str,
+) -> Tensor:
+    _check_batch_shapes([("cs_peak", cs_peak), ("sf_peak", sf_peak), ("width_r", width_r)])
 
     log10 = math.log(10.0)
 
@@ -102,12 +120,35 @@ def predict_contrast_sensitivity(  # noqa: PLR0913 (too many arguments)
     log_cs_peak = ops.log(cs_peak) / log10
     log_diff_sq = ops.square(log_sf - log_sf_peak)
 
-    # Asymmetric branches of the aLP CSF
-    sensitivity_l = ops.power(10.0, log_cs_peak - log_diff_sq * ops.square(width_l))
-    sensitivity_r = ops.power(10.0, log_cs_peak - log_diff_sq * ops.square(width_r))
+    # Asymmetric branches of the aLP CSF; select the left branch where sf < sfp, the right where sf >= sfp
+    log_sensitivity_l = log_cs_peak - log_diff_sq * ops.square(width_l)
+    log_sensitivity_r = log_cs_peak - log_diff_sq * ops.square(width_r)
+    return ops.where(sf < sf_peak, log_sensitivity_l, log_sensitivity_r)
 
-    # Select branch: left where sf < sfp, right where sf >= sfp
-    return ops.where(sf < sf_peak, sensitivity_l, sensitivity_r)
+
+# Naka-Rushton response C^q / (C^q + Q^q) to the contrast C in percent, with the threshold Q = 100 / S taken from the
+# natural log of the sensitivity S, which is bounded below by eps. It is evaluated as the equivalent
+# sigmoid(q * (log C - log Q)), which forms no power of C or Q and so cannot overflow. Blank frames (C <= 0) respond
+# with exactly zero; their log is taken of a placeholder, which keeps the gradients finite.
+def _contrast_response(
+    contrast: Tensor,
+    log_sensitivity: Tensor,
+    slope_crf: Tensor,
+    dtype: str,
+    eps: float,
+) -> Tensor:
+    _check_batch_shapes([("sensitivity", log_sensitivity), ("slope_crf", slope_crf)])
+
+    contrast = ops.expand_dims(ops.convert_to_tensor(contrast, dtype=dtype), 0)  # (1, num_frames)
+    log_sensitivity = ops.convert_to_tensor(log_sensitivity, dtype=dtype)  # (num_batches, num_frames)
+    slope_crf = ops.convert_to_tensor(slope_crf, dtype=dtype)  # (num_batches, 1)
+
+    is_shown = contrast > 0
+    log_contrast = ops.log(ops.where(is_shown, contrast, ops.ones_like(contrast)))
+    log_threshold = math.log(100.0) - ops.maximum(log_sensitivity, math.log(eps))
+    response = ops.sigmoid(slope_crf * (log_contrast - log_threshold))
+
+    return ops.where(is_shown, response, ops.zeros_like(response))
 
 
 def predict_contrast_response(
@@ -126,7 +167,7 @@ def predict_contrast_response(
     Parameters
     ----------
     contrast : Tensor
-        Contrast at each time frame, with shape ``(num_frames,)``.
+        Michelson contrast in percent (0 to 100) at each time frame, with shape ``(num_frames,)``.
     sensitivity : Tensor
         Contrast sensitivity for each voxel at each time frame, with shape ``(num_voxels, num_frames)``.
     slope_crf : Tensor
@@ -135,7 +176,7 @@ def predict_contrast_response(
         The dtype of the prediction result. If ``None`` (the default), uses the dtype from
         :func:`prfmodel.utils.get_dtype`.
     eps : float, default=1e-10
-        Minimum contrast and sensitivity value to ensure numerical and gradient stability.
+        Minimum contrast sensitivity, which keeps the log of a zero sensitivity finite.
 
     Returns
     -------
@@ -144,39 +185,26 @@ def predict_contrast_response(
 
     Notes
     -----
-    The Naka-Rushton CRF combines contrast :math:`C` with the threshold :math:`Q = 1 / S(f)` derived from the CSF S(f):
+    The Naka-Rushton CRF combines contrast :math:`C` (in percent) with the contrast threshold :math:`Q = 100 / S(f)`
+    (also in percent) derived from the CSF :math:`S(f)`:
 
     .. math::
 
         R(t) = \frac{C(t)^q}{C(t)^q + Q(t)^q}
 
+    Contrast sensitivity is the reciprocal of the threshold contrast as a fraction, so the threshold in percent is
+    :math:`100 / S(f)`. The response is half-maximal where the contrast equals the threshold, :math:`C(t) = Q(t)`.
+    Frames with zero contrast (blank frames) have a response of exactly zero.
+
+    For numerical stability, the CRF is evaluated in the log domain as the algebraically equivalent
+    :math:`R(t) = \sigma(q \cdot (\log C(t) - \log Q(t)))`, where :math:`\sigma` is the logistic sigmoid. This avoids
+    forming :math:`C^q` and :math:`Q^q`, which overflow for high contrasts, low sensitivities, or steep slopes.
+
     """
     dtype = get_dtype(dtype)
-
-    for _name, _arg in [("sensitivity", sensitivity), ("slope_crf", slope_crf)]:
-        if hasattr(_arg, "ndim") and _arg.ndim < _EXPECTED_NDIM:
-            raise ShapeError(_name, tuple(_arg.shape), f"must have at least {_EXPECTED_NDIM} dimensions")
-
-    _batched = [
-        (_name, _arg)
-        for _name, _arg in [("sensitivity", sensitivity), ("slope_crf", slope_crf)]
-        if hasattr(_arg, "shape") and len(_arg.shape) >= _EXPECTED_NDIM and _arg.shape[0] != 1
-    ]
-    if _batched:
-        _ref_name, _ref_arg = _batched[0]
-        for _name, _arg in _batched[1:]:
-            if _arg.shape[0] != _ref_arg.shape[0]:
-                raise ShapeMismatchError(_ref_name, tuple(_ref_arg.shape), _name, tuple(_arg.shape))
-
-    contrast = ops.expand_dims(ops.convert_to_tensor(contrast, dtype=dtype), 0)  # (1, num_frames)
     sensitivity = ops.convert_to_tensor(sensitivity, dtype=dtype)  # (num_batches, num_frames)
-    slope_crf = ops.convert_to_tensor(slope_crf, dtype=dtype)  # (num_batches, 1)
 
-    # Naka-Rushton: R = c^q / (c^q + Q^q)  where Q = 100 / sensitivity
-    c_q = ops.power(ops.maximum(contrast, eps), slope_crf)
-    q_q = ops.power(ops.maximum(100.0 / sensitivity, eps), slope_crf)
-
-    return c_q / (c_q + q_q)
+    return _contrast_response(contrast, ops.log(ops.maximum(sensitivity, eps)), slope_crf, dtype, eps)
 
 
 class CSFTuning(BaseTuning[CSFStimulus, CSFStimulusTensors]):
@@ -192,10 +220,17 @@ class CSFTuning(BaseTuning[CSFStimulus, CSFStimulusTensors]):
         Curvature of the left branch of the asymmetric log-parabolic CSF (for spatial frequencies
         below the peak). Not a fitted parameter; fixed at construction time.
     eps : float, default=1e-10
-        Minimum contrast and sensitivity value to ensure numerical and gradient stability.
+        Minimum contrast sensitivity, as in :func:`predict_contrast_response`.
 
     Notes
     -----
+    The stimulus contrast (:attr:`CSFStimulus.contrast <prfmodel.stimuli.CSFStimulus.contrast>`) must be Michelson
+    contrast in percent (0 to 100), because the Naka-Rushton threshold is :math:`100 / S(f)` (see
+    :func:`predict_contrast_response`). Contrast given as a fraction (0 to 1) yields near-floor responses.
+
+    Blank frames, which have zero contrast or zero spatial frequency, have a tuning response of exactly zero, so they
+    can be stored as they were recorded. Their gradients stay finite.
+
     The model has four fitted parameters:
 
     ``cs_peak``
@@ -242,29 +277,32 @@ class CSFTuning(BaseTuning[CSFStimulus, CSFStimulusTensors]):
 
         """
         dtype = parameters.dtype
-        sf = stimulus.sf
-        contrast = stimulus.contrast
-        cs_peak = parameters[["cs_peak"]]
-        sf_peak = parameters[["sf_peak"]]
-        width_r = parameters[["width_r"]]
-        slope_crf = parameters[["slope_crf"]]
+        sf = ops.convert_to_tensor(stimulus.sf, dtype=dtype)
 
-        sensitivity = predict_contrast_sensitivity(
-            sf=sf,
-            cs_peak=cs_peak,
-            sf_peak=sf_peak,
+        # A zero spatial frequency (a blank frame) has no log, so its sensitivity is computed at a placeholder that
+        # keeps the gradients finite, and its response is set to zero, the limit as the spatial frequency goes to zero
+        is_grating = ops.expand_dims(sf > 0, 0)  # (1, num_frames)
+
+        # Stay in the log domain: forming the sensitivity 10^x underflows for low sensitivities, which yields NaN
+        # gradients
+        log10_sensitivity = _log10_contrast_sensitivity(
+            sf=ops.where(sf > 0, sf, ops.ones_like(sf)),
+            cs_peak=parameters[["cs_peak"]],
+            sf_peak=parameters[["sf_peak"]],
             width_l=self.width_l,
-            width_r=width_r,
+            width_r=parameters[["width_r"]],
             dtype=dtype,
         )
 
-        return predict_contrast_response(
-            contrast=contrast,
-            sensitivity=sensitivity,
-            slope_crf=slope_crf,
+        response = _contrast_response(
+            contrast=stimulus.contrast,
+            log_sensitivity=math.log(10.0) * log10_sensitivity,
+            slope_crf=parameters[["slope_crf"]],
             dtype=dtype,
             eps=self.eps,
         )
+
+        return ops.where(is_grating, response, ops.zeros_like(response))
 
 
 @doc
@@ -356,7 +394,8 @@ class CSFModel(CanonicalCSFModel):
     >>> stimulus = CSFStimulus(
     ...    # Simulate data for 4 time frames
     ...    sf=np.array([1.0, 3.0, 6.0, 12.0]),
-    ...    contrast=np.array([0.1, 0.2, 0.4, 0.8]),
+    ...    # Michelson contrast in percent
+    ...    contrast=np.array([10.0, 20.0, 40.0, 80.0]),
     ...    frame_duration=1.0,
     ... )
     >>> model = CSFModel()

@@ -40,6 +40,74 @@
       "sha256": "ae0269ff0b14b930622e3ea0ebaf059ca11d497d93610a4d5bdc453ef0927786",
       "size": 5390272
     },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_angle.func.gii": {
+      "sha256": "9cdda063b0f4a7f8dd946fbced115d8e9e6daf8ed5e5cefa3f671936c6080517",
+      "size": 34703
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_dseg.label.gii": {
+      "sha256": "761d1319ecb93c67c0954b9363a134d82be6bbfe53171967574f191d9baf6d8b",
+      "size": 4188
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_eccen.func.gii": {
+      "sha256": "489807ef3708df5b1f3f3c6fd7c9cb54eb8ae2a21f7cb509a46d9f428b3d6458",
+      "size": 35223
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_sigma.func.gii": {
+      "sha256": "f75a0dcc3587b285140aa4b118a81e91715b35fde3f5c3141ca669cf2a028b2a",
+      "size": 35015
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-R_space-fsLR_den-59k_atlas-benson14_angle.func.gii": {
+      "sha256": "9b15ff575af7a322e09967016faa851c152b02d6f848e117091add9c0d39520f",
+      "size": 34100
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-R_space-fsLR_den-59k_atlas-benson14_dseg.label.gii": {
+      "sha256": "df4d75068a90499f05088740557e273fb1dc73bf7a48e103672a5f4cdf86866e",
+      "size": 4173
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-R_space-fsLR_den-59k_atlas-benson14_eccen.func.gii": {
+      "sha256": "ddfe4e91a33559cdd4f612a10ef71e8bc0af7834371dd64b55c3e01869276e94",
+      "size": 34552
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-R_space-fsLR_den-59k_atlas-benson14_sigma.func.gii": {
+      "sha256": "fa1ca36732cf8d1759578da31cfc2448c2cbd1721fa2433d1436a8793b36d4e2",
+      "size": 34420
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_hemi-L_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "5e4ab621ff9396c49185015f82a06b952fe98095c48263449416d1fa4649ec29",
+      "size": 57510028
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_hemi-R_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "5e77127ec681fbadbbb012503b3b28e14220049a532b5090584a4e22cf133f53",
+      "size": 56999381
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_split-even_hemi-L_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "90492d2824951606b31fd75474d220a277b559f575bab59571904da1a6152eb7",
+      "size": 57512784
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_split-even_hemi-R_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "3e1990d7f6a43f151ded6d63fda8779e99c092a363258566fab91f0684913efc",
+      "size": 57014745
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_split-odd_hemi-L_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "097bd6fe9bd13fbca505951d8141e96aec6aeb4fa9347a28ee9502cbfd016463",
+      "size": 57461992
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_split-odd_hemi-R_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "61ceb2aec31e78f87dff2977464da56b9cecb4d94bcc31ae5b63ddf69775dff2",
+      "size": 56973069
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-prf_hemi-L_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "58563b650171a27a1f3c13990c83c964ec6469bc2a490afa9f7e013d2159588b",
+      "size": 26210408
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-prf_hemi-R_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "3be33d149f7ea0869bf456211c1e46e619a2d0459f8e450f884f500cc2e8d402",
+      "size": 21844241
+    },
+    "7t_ncsf_sub-16112020/task-prf_stimulus.npz": {
+      "sha256": "787c6772050d05fea95f440579438e6f7dc1d6f48c5ad2ec20ceba39830477f9",
+      "size": 149546
+    },
     "chn_sub-01/stimuli/task-fixedbar_run-1_desc-down_aperture.mat": {
       "sha256": "21dcd3b461ccfe78f87dc74244f65b32ffb66b84c364bb8d4621585f94d68261",
       "size": 57540

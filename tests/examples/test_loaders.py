@@ -11,6 +11,7 @@ from prfmodel.examples._options import Options
 from prfmodel.examples._options import validate_options
 from prfmodel.examples._registry import DatasetSpec
 from prfmodel.examples._registry import _get_spec
+from prfmodel.stimuli import CSFStimulus
 from prfmodel.stimuli import PRFStimulus
 
 _NUM_AOT_VOXELS = 105867
@@ -44,7 +45,52 @@ _ECOG_PIXEL_DEGREES = 0.166
 # The broadband response is a percentage change that reaches into the hundreds
 _ECOG_BROADBAND_FLOOR = 100.0
 
+_NUM_NCSF_FRAMES = {"csf": 214, "prf": 248}
+_NCSF_FRAME_DURATION = 1.5
+_NCSF_GRID_SIZE = 100
+
+# The synthetic nCSF files have a different number of frames per response file, which shows which one was loaded
+_NUM_FAKE_NCSF_VERTICES = 4
+_NUM_FAKE_NCSF_FRAMES = {"csf_all": 2, "csf_odd": 3, "csf_even": 4, "prf_all": 5}
+_FAKE_NCSF_ROIS = {0: "unknown", 1: "V1"}
+
+# Values of the right hemisphere are offset from those of the left one, which shows the order of the hemispheres
+_FAKE_NCSF_HEMISPHERE_OFFSET = {"L": 0.0, "R": 100.0}
+
 pytest_skip_examples = pytest.mark.examples
+
+
+def _write_gifti(path: Path, arrays: list[np.ndarray], labels: dict[int, str] | None = None) -> None:
+    image = nib.gifti.GiftiImage(darrays=[nib.gifti.GiftiDataArray(array) for array in arrays])
+
+    for key, name in (labels or {}).items():
+        label = nib.gifti.GiftiLabel(key=key)
+        label.label = name
+        image.labeltable.labels.append(label)
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    nib.save(image, path)
+
+
+# Writes tiny stand-ins for the files of the nCSF dataset at the paths that the registry expects
+def _write_fake_ncsf_files(data_dir: Path) -> None:
+    spec = _get_spec("7t-ncsf-visual")
+    vertices = np.arange(_NUM_FAKE_NCSF_VERTICES, dtype=np.float32)
+
+    for key, member in spec.files.items():
+        path = data_dir / member
+        offset = _FAKE_NCSF_HEMISPHERE_OFFSET.get(key[-1], 0.0)
+
+        if key.startswith("response_"):
+            num_frames = _NUM_FAKE_NCSF_FRAMES[key.removeprefix("response_")[:-2]]
+            _write_gifti(path, [vertices + offset + frame for frame in range(num_frames)])
+        elif key.startswith("benson14_"):
+            _write_gifti(path, [vertices + offset])
+        elif key.startswith("roi_"):
+            _write_gifti(path, [np.array([0, 1, 1, 0], dtype=np.int32)], labels=_FAKE_NCSF_ROIS)
+        else:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            np.savez(path, design=np.zeros((5, 2, 3)), grid=np.zeros((2, 3, 2)))
 
 
 def test_load_dataset_unknown_name():
@@ -94,6 +140,58 @@ def test_validate_options_default_task():
 def test_validate_options_no_task():
     """Test that datasets without tasks resolve the task to None."""
     assert validate_options(_get_spec("numerosity-timing"), split="odd").task is None
+
+
+def test_validate_options_default_split():
+    """Test that a dataset with a default split uses it when none is requested."""
+    assert validate_options(_get_spec("7t-ncsf-visual")).split == "all"
+    assert validate_options(_get_spec("7t-ncsf-visual"), split="odd").split == "odd"
+
+
+def test_load_ncsf_visual_refuses_a_split_of_the_prf_task(tmp_path: Path):
+    """Test that the pRF task, which was not split, refuses a split before fetching anything."""
+    with pytest.raises(ValueError, match="only the split 'all'"):
+        load_dataset("7t-ncsf-visual", task="prf", split="odd", dest_dir=tmp_path, download=False)
+
+    assert not any(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(("task", "split"), [("csf", "all"), ("csf", "odd"), ("csf", "even"), ("prf", "all")])
+@pytest.mark.parametrize("hemisphere", ["left", "right", "both"])
+def test_load_ncsf_visual_from_local_files(tmp_path: Path, hemisphere: str, task: str, split: str):
+    """Test that the nCSF loader assembles the response, regions of interest, template maps, and stimulus."""
+    _write_fake_ncsf_files(tmp_path)
+
+    dataset = load_dataset(
+        "7t-ncsf-visual",
+        hemisphere=hemisphere,
+        task=task,
+        split=split,
+        dest_dir=tmp_path,
+        download=False,
+    )
+
+    codes = {"left": ["L"], "right": ["R"], "both": ["L", "R"]}[hemisphere]
+    num_units = _NUM_FAKE_NCSF_VERTICES * len(codes)
+    vertices = np.arange(_NUM_FAKE_NCSF_VERTICES)
+    expected_first_frame = np.concatenate([vertices + _FAKE_NCSF_HEMISPHERE_OFFSET[code] for code in codes])
+
+    assert dataset.response.shape == (num_units, _NUM_FAKE_NCSF_FRAMES[f"{task}_{split}"])
+    np.testing.assert_array_equal(dataset.response[:, 0], expected_first_frame)
+    assert dataset.roi_index.shape == (num_units,)
+    assert dataset.roi_mapping == _FAKE_NCSF_ROIS
+    assert dataset.units.columns.tolist() == ["hemisphere", "benson14_angle", "benson14_eccen", "benson14_sigma"]
+    expected_hemispheres = np.repeat([{"L": "left", "R": "right"}[code] for code in codes], _NUM_FAKE_NCSF_VERTICES)
+    np.testing.assert_array_equal(dataset.units["hemisphere"], expected_hemispheres)
+    np.testing.assert_array_equal(dataset.units["benson14_eccen"], expected_first_frame)
+    assert (dataset.hemisphere, dataset.task, dataset.split) == (hemisphere, task, split)
+    assert ("stimulus_prf" in dataset.files) == (task == "prf")
+
+    if task == "csf":
+        assert isinstance(dataset.stimulus, CSFStimulus)
+    else:
+        assert isinstance(dataset.stimulus, PRFStimulus)
+        assert dataset.stimulus.dimension_labels == ["y", "x"]
 
 
 def test_load_dataset_invalid_hemisphere():
@@ -271,6 +369,39 @@ def test_load_chn_visual_downloads_only_what_is_loaded(tmp_path: Path):
         "sub-01_ses-01_acq-MEMPRvNav_rec-RMS_hemi-L_inflated.surf.gii",
         "sub-01_ses-01_task-logbar_run-2_hemi-L_space-fsnative_desc-preproc_bold.func.gii",
         "task-logbar_run-2_desc-down_aperture.mat",
+    ]
+
+
+@pytest_skip_examples
+@pytest.mark.parametrize(("task", "split"), [("csf", "all"), ("csf", "odd"), ("csf", "even"), ("prf", "all")])
+def test_load_ncsf_visual(task: str, split: str):
+    """Test that the nCSF dataset returns the response, the regions of interest, the template maps, and the stimulus."""
+    dataset = load_dataset("7t-ncsf-visual", hemisphere="both", task=task, split=split)
+
+    num_units = _NUM_HCP_VERTICES_L + _NUM_HCP_VERTICES_R
+
+    assert dataset.response.shape == (num_units, _NUM_NCSF_FRAMES[task])
+    assert dataset.roi_index.shape == (num_units,)
+    assert dataset.roi_mapping[1] == "V1"
+    assert dataset.units.shape == (num_units, 4)
+    assert (dataset.units["hemisphere"] == "left").sum() == _NUM_HCP_VERTICES_L
+    assert dataset.stimulus.frame_duration == _NCSF_FRAME_DURATION
+
+    if task == "prf":
+        assert dataset.stimulus.design.shape == (_NUM_NCSF_FRAMES["prf"], _NCSF_GRID_SIZE, _NCSF_GRID_SIZE)
+
+
+@pytest_skip_examples
+def test_load_ncsf_visual_downloads_only_what_is_loaded(tmp_path: Path):
+    """Test that loading the odd split of the CSF task of one hemisphere downloads only the files it needs."""
+    load_dataset("7t-ncsf-visual", hemisphere="left", task="csf", split="odd", dest_dir=tmp_path)
+
+    assert sorted(p.name for p in tmp_path.rglob("*") if p.is_file()) == [
+        "sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_angle.func.gii",
+        "sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_dseg.label.gii",
+        "sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_eccen.func.gii",
+        "sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_sigma.func.gii",
+        "sub-16112020_task-csf_split-odd_hemi-L_space-fsLR_den-59k_desc-detrend3_bold.func.gii",
     ]
 
 

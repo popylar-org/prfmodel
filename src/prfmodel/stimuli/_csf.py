@@ -78,9 +78,11 @@ class CSFStimulus(Stimulus):
     Parameters
     ----------
     sf : numpy.ndarray
-        Spatial frequency at each time frame, with shape ``(num_frames,)``.
+        Spatial frequency at each time frame, with shape ``(num_frames,)``. Blank frames can have a spatial frequency
+        of zero.
     contrast : numpy.ndarray
-        Contrast at each time frame, with shape ``(num_frames,)``.
+        Michelson contrast in percent (0 to 100) at each time frame, with shape ``(num_frames,)``. Contrast given as
+        a fraction (0 to 1) is interpreted as 0 to 1 percent.
     %(frame_duration)s
 
     Raises
@@ -98,7 +100,7 @@ class CSFStimulus(Stimulus):
 
     >>> import numpy as np
     >>> sf = np.array([1.0, 3.0, 6.0, 12.0])
-    >>> contrast = np.array([0.1, 0.2, 0.4, 0.8])
+    >>> contrast = np.array([10.0, 20.0, 40.0, 80.0])  # Michelson contrast in percent
     >>> stimulus = CSFStimulus(sf=sf, contrast=contrast, frame_duration=1.5)
     >>> print(stimulus)
     CSFStimulus(sf=array[4], contrast=array[4], frame_duration=1.5)
@@ -143,7 +145,7 @@ class CSFStimulus(Stimulus):
         Examples
         --------
         >>> import numpy as np
-        >>> stimulus = CSFStimulus(sf=np.array([1.0, 3.0]), contrast=np.array([0.1, 0.2]), frame_duration=1.0)
+        >>> stimulus = CSFStimulus(sf=np.array([1.0, 3.0]), contrast=np.array([10.0, 20.0]), frame_duration=1.0)
         >>> tensors = stimulus.to_tensors("float32")
         >>> print(tuple(tensors.sf.shape))
         (2,)

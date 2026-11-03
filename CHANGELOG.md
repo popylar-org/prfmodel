@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-03
+
+### Added
+
+- Example dataset `7t-ncsf-visual` containing the surface response of a single subject to a contrast sensitivity
+  stimulus (`task="csf"`, with `"odd"` and `"even"` splits for cross-validation) and to a moving bar stimulus
+  (`task="prf"`), on the HCP fs_LR 59k mesh, with Benson et al. (2014) template visual areas, polar angle,
+  eccentricity, and pRF size (Roelofzen et al., 2025). Its contrast sensitivity stimulus ships with the package.
+- `load_dataset` no longer requires a `split` for datasets that have a default split; `describe_dataset`
+  reports the default split
+
+### Changed
+
+- `plot_csf_stimulus_design` labels its y-axis "Contrast (%)" instead of "Contrast".
+
+### Fixed
+
+- `CSFTuning` and `CSFModel` no longer produce NaN predictions or NaN gradients in float32 for high contrasts, low
+  contrast sensitivities, or steep `slope_crf`. The Naka-Rushton contrast response function is now evaluated in the
+  log domain as a sigmoid, and `CSFTuning` no longer computes the contrast sensitivity itself, only its logarithm.
+  Predictions that were finite before are unchanged up to floating-point rounding, except for blank frames (see
+  below). The `eps` of `CSFTuning` now bounds the sensitivity, as in `predict_contrast_response`.
+- `predict_contrast_response` evaluates the Naka-Rushton contrast response function in the same way. Its `eps` now
+  bounds the sensitivity instead of the threshold `100 / sensitivity`, which changes results only for sensitivities
+  below `eps` or above `100 / eps`.
+- Blank frames respond with exactly zero in `predict_contrast_response`, `CSFTuning`, and `CSFModel`, instead of
+  `eps^q / (eps^q + Q^q)`, which is far from zero for a shallow `slope_crf`. In `CSFTuning` and `CSFModel`, blank
+  frames can have zero spatial frequency (as well as zero contrast) without making the gradients NaN.
+- `plot_csf_stimulus_design` draws each spatial frequency at the frames that show it, instead of at consecutive
+  frames from the first one, which was wrong when a frequency is shown in more than one block.
+- `plot_csf_stimulus_design` and `plot_csf_stimulus_curve` leave out blank frames, which `plot_csf_stimulus_curve`
+  divided by, and `plot_csf_stimulus_curve` draws the curve in order of spatial frequency instead of in frame order.
+- The documentation of `predict_contrast_response` stated the Naka-Rushton threshold as `Q = 1 / S(f)` instead of
+  `Q = 100 / S(f)`.
+- The documentation now states that CSF models expect contrast as Michelson contrast in percent (0 to 100), on
+  `CSFStimulus`, `predict_contrast_response`, `CSFTuning`, and in the CSF tutorial. The examples of `CSFStimulus` and
+  `CSFModel` used contrast as a fraction, and the tutorial gave the contrast unit as cycles per degree.
+
 ## [0.1.0] - 2026-10-26
 
 ### Changed
@@ -59,5 +97,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     default `BaselineAmplitude` scaling model, a prediction from 0.0.1 is reproduced with `amplitude` set to
     `gain * amplitude`.
 
-[unreleased]: https://github.com/popylar-org/prfmodel/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/popylar-org/prfmodel/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/popylar-org/prfmodel/releases/tag/v0.2.0
 [0.1.0]: https://github.com/popylar-org/prfmodel/releases/tag/v0.1.0
