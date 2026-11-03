@@ -40,6 +40,10 @@ authors:
     family-names: Hafner
     email: f.hafner@esciencecenter.nl
     affiliation: Netherlands eScience Center
+  - given-names: Marcus
+    family-names: Daghlian
+    email: m.daghlian@ucl.ac.uk
+    affiliation: University College London
   - given-names: Koen
     family-names: Haak
     email: k.v.haak@tilburguniversity.edu
