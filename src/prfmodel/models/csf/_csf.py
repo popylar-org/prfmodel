@@ -87,6 +87,18 @@ def predict_contrast_sensitivity(  # noqa: PLR0913 (too many arguments)
             if _arg.shape[0] != _ref_arg.shape[0]:
                 raise ShapeMismatchError(_ref_name, tuple(_ref_arg.shape), _name, tuple(_arg.shape))
 
+    return ops.power(10.0, _log10_contrast_sensitivity(sf, cs_peak, sf_peak, width_l, width_r, dtype))
+
+
+def _log10_contrast_sensitivity(  # noqa: PLR0913 (too many arguments)
+    sf: Tensor,
+    cs_peak: Tensor,
+    sf_peak: Tensor,
+    width_l: float | Tensor,
+    width_r: Tensor,
+    dtype: str,
+) -> Tensor:
+    """Base-10 log of the aLP CSF (see :func:`predict_contrast_sensitivity`), shape ``(num_batches, num_frames)``."""
     log10 = math.log(10.0)
 
     sf = ops.expand_dims(ops.convert_to_tensor(sf, dtype=dtype), 0)  # (1, num_frames)
@@ -102,12 +114,20 @@ def predict_contrast_sensitivity(  # noqa: PLR0913 (too many arguments)
     log_cs_peak = ops.log(cs_peak) / log10
     log_diff_sq = ops.square(log_sf - log_sf_peak)
 
-    # Asymmetric branches of the aLP CSF
-    sensitivity_l = ops.power(10.0, log_cs_peak - log_diff_sq * ops.square(width_l))
-    sensitivity_r = ops.power(10.0, log_cs_peak - log_diff_sq * ops.square(width_r))
+    # Asymmetric branches of the aLP CSF; select the left branch where sf < sfp, the right where sf >= sfp
+    log_sensitivity_l = log_cs_peak - log_diff_sq * ops.square(width_l)
+    log_sensitivity_r = log_cs_peak - log_diff_sq * ops.square(width_r)
+    return ops.where(sf < sf_peak, log_sensitivity_l, log_sensitivity_r)
 
-    # Select branch: left where sf < sfp, right where sf >= sfp
-    return ops.where(sf < sf_peak, sensitivity_l, sensitivity_r)
+
+def _naka_rushton_from_log(log_contrast: Tensor, log_threshold: Tensor, slope_crf: Tensor) -> Tensor:
+    """Naka-Rushton response from natural-log contrast and threshold: ``sigmoid(q * (log C - log Q))``.
+
+    Algebraically equal to ``C^q / (C^q + Q^q)``, but forms no power of `C` or `Q`, so it cannot overflow and its
+    gradients stay finite.
+
+    """
+    return ops.sigmoid(slope_crf * (log_contrast - log_threshold))
 
 
 def predict_contrast_response(
@@ -150,6 +170,10 @@ def predict_contrast_response(
 
         R(t) = \frac{C(t)^q}{C(t)^q + Q(t)^q}
 
+    For numerical stability, the CRF is evaluated in the log domain as the algebraically equivalent
+    :math:`R(t) = \sigma(q \cdot (\log C(t) - \log Q(t)))`, where :math:`\sigma` is the logistic sigmoid. This avoids
+    forming :math:`C^q` and :math:`Q^q`, which overflow for high contrasts, low sensitivities, or steep slopes.
+
     """
     dtype = get_dtype(dtype)
 
@@ -172,11 +196,11 @@ def predict_contrast_response(
     sensitivity = ops.convert_to_tensor(sensitivity, dtype=dtype)  # (num_batches, num_frames)
     slope_crf = ops.convert_to_tensor(slope_crf, dtype=dtype)  # (num_batches, 1)
 
-    # Naka-Rushton: R = c^q / (c^q + Q^q)  where Q = 100 / sensitivity
-    c_q = ops.power(ops.maximum(contrast, eps), slope_crf)
-    q_q = ops.power(ops.maximum(100.0 / sensitivity, eps), slope_crf)
+    # Naka-Rushton: R = c^q / (c^q + Q^q)  where Q = 100 / sensitivity, evaluated in the log domain
+    log_contrast = ops.log(ops.maximum(contrast, eps))
+    log_threshold = math.log(100.0) - ops.log(ops.maximum(sensitivity, eps))
 
-    return c_q / (c_q + q_q)
+    return _naka_rushton_from_log(log_contrast, log_threshold, slope_crf)
 
 
 class CSFTuning(BaseTuning[CSFStimulus, CSFStimulusTensors]):
@@ -192,7 +216,7 @@ class CSFTuning(BaseTuning[CSFStimulus, CSFStimulusTensors]):
         Curvature of the left branch of the asymmetric log-parabolic CSF (for spatial frequencies
         below the peak). Not a fitted parameter; fixed at construction time.
     eps : float, default=1e-10
-        Minimum contrast and sensitivity value to ensure numerical and gradient stability.
+        Minimum contrast value, which keeps the log of zero-contrast (blank) frames and the gradients finite.
 
     Notes
     -----
@@ -249,7 +273,9 @@ class CSFTuning(BaseTuning[CSFStimulus, CSFStimulusTensors]):
         width_r = parameters[["width_r"]]
         slope_crf = parameters[["slope_crf"]]
 
-        sensitivity = predict_contrast_sensitivity(
+        # Stay in the log domain end to end: forming the sensitivity 10^x and the CRF powers C^q and Q^q
+        # underflows/overflows for low sensitivities, high contrasts, or steep slopes, which yields NaN gradients
+        log10_sensitivity = _log10_contrast_sensitivity(
             sf=sf,
             cs_peak=cs_peak,
             sf_peak=sf_peak,
@@ -258,13 +284,14 @@ class CSFTuning(BaseTuning[CSFStimulus, CSFStimulusTensors]):
             dtype=dtype,
         )
 
-        return predict_contrast_response(
-            contrast=contrast,
-            sensitivity=sensitivity,
-            slope_crf=slope_crf,
-            dtype=dtype,
-            eps=self.eps,
-        )
+        contrast = ops.expand_dims(ops.convert_to_tensor(contrast, dtype=dtype), 0)  # (1, num_frames)
+        slope_crf = ops.convert_to_tensor(slope_crf, dtype=dtype)  # (num_batches, 1)
+
+        # Naka-Rushton threshold Q = 100 / S, so log Q = log 100 - log S
+        log_contrast = ops.log(ops.maximum(contrast, self.eps))
+        log_threshold = math.log(100.0) - math.log(10.0) * log10_sensitivity
+
+        return _naka_rushton_from_log(log_contrast, log_threshold, slope_crf)
 
 
 @doc

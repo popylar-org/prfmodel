@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
+from prfmodel.fitters import SGDFitter
 from prfmodel.models.csf import CSFModel
 from prfmodel.models.csf import CSFTuning
 from prfmodel.models.csf import predict_contrast_response
@@ -190,6 +191,22 @@ class TestPredictContrastResponse(TestSetup):
 
         assert np.allclose(result, expected)
 
+    def test_no_overflow_at_high_contrast_and_slope(self) -> None:
+        """Test that a high contrast and steep slope saturate the CRF instead of overflowing to NaN.
+
+        In float32, ``C^q`` overflows to ``inf`` for ``C = 100`` and ``q = 20`` (``1e40``), so evaluating
+        ``C^q / (C^q + Q^q)`` directly yields ``inf / inf = NaN``.
+
+        """
+        contrast = np.array([100.0, 1.0])
+        sensitivity = np.array([[100.0, 1e-3]])
+        slope_crf = np.array([[20.0]])
+
+        result = np.asarray(predict_contrast_response(contrast, sensitivity, slope_crf, dtype="float32"))
+
+        assert np.all(np.isfinite(result))
+        assert np.allclose(result, [[1.0, 0.0]])
+
 
 class TestCSFTuning(TestSetup):
     """Tests for CSFTuning class."""
@@ -217,6 +234,71 @@ class TestCSFTuning(TestSetup):
         model = CSFTuning()
         result = model(stimulus, params, dtype=dtype)
         assert result.shape == (self.num_voxels, self.num_frames)
+
+    def test_matches_composed_functions(self, stimulus: CSFStimulus, params: pd.DataFrame) -> None:
+        """Test that the log-domain tuning response equals composing the public CSF and CRF functions."""
+        model = CSFTuning()
+        result = model(stimulus, params, dtype="float64")
+
+        sensitivity = predict_contrast_sensitivity(
+            stimulus.sf,
+            params[["cs_peak"]].to_numpy(),
+            params[["sf_peak"]].to_numpy(),
+            model.width_l,
+            params[["width_r"]].to_numpy(),
+            dtype="float64",
+        )
+        expected = predict_contrast_response(
+            stimulus.contrast,
+            sensitivity,
+            params[["slope_crf"]].to_numpy(),
+            dtype="float64",
+        )
+
+        assert np.allclose(result, np.asarray(expected))
+
+    def test_extreme_parameters_fit_to_finite_parameters(self) -> None:
+        """Test that extreme CSF parameters do not poison the gradient in float32.
+
+        A low peak sensitivity with a steep right branch drives the sensitivity far below one at high spatial
+        frequencies, and a steep CRF slope at high contrast makes the CRF powers overflow. Forming ``10^x``,
+        ``C^q``, and ``Q^q`` in float32 then underflows or overflows and yields NaN gradients, even where the
+        forward value is fine. Only a gradient reveals it, so this fits rather than merely predicting.
+
+        """
+        stimulus = CSFStimulus(
+            sf=np.array([0.5, 1.0, 3.0, 6.0, 12.0, 18.0, 1.0, 0.5]),
+            # Percent contrast, including blank frames
+            contrast=np.array([0.0, 0.25, 1.0, 5.0, 20.0, 80.0, 0.0, 100.0]),
+            frame_duration=1.0,
+        )
+        model = CSFModel(impulse_model=None)
+
+        true_params = pd.DataFrame(
+            {
+                "cs_peak": [100.0, 100.0],
+                "sf_peak": [2.5, 2.5],
+                "width_r": [1.28, 1.28],
+                "slope_crf": [2.0, 2.0],
+                "baseline": [0.0, 0.0],
+                "amplitude": [1.0, 1.0],
+            },
+        )
+        init_params = pd.DataFrame(
+            {
+                "cs_peak": [2.0, 100.0],
+                "sf_peak": [1.0, 3.0],
+                "width_r": [3.0, 1.28],
+                "slope_crf": [8.0, 20.0],
+                "baseline": [0.0, 0.0],
+                "amplitude": [1.0, 1.0],
+            },
+        )
+
+        fitter = SGDFitter(model=model, stimulus=stimulus, dtype="float32")
+        _, fitted = fitter.fit(model(stimulus, true_params, dtype="float32"), init_params, num_steps=5)
+
+        assert np.all(np.isfinite(fitted.to_numpy())), f"Fit produced non-finite parameters: {fitted}"
 
 
 class TestCSFModel(TestSetup):
