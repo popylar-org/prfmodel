@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.examples.read_matlab_tables" href="read_matlab_tables.html"><link rel="prev" title="prfmodel.examples.load_2d_prf_bar_stimulus" href="load_2d_prf_bar_stimulus.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>prfmodel.examples.load_dataset - prfmodel 0.1.0 documentation</title>
+        <title>prfmodel.examples.load_dataset - prfmodel 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">prfmodel 0.1.0 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">prfmodel 0.2.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
-  <span class="sidebar-brand-text">prfmodel 0.1.0 documentation</span>
+  <span class="sidebar-brand-text">prfmodel 0.2.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -485,7 +485,8 @@ downloaded.</p>
 <li><p><strong>hemisphere</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><em>optional</em>) – Hemisphere(s) to load the response for. Must be either <cite>“both”</cite>, <cite>“left”</cite>, or <cite>“right”</cite>. For
 <cite>“both”</cite>, the data of both hemispheres are concatenated (left is first). If <cite>None</cite> (the default),
 uses the default of the dataset.</p></li>
-<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><em>optional</em>) – Data split to load the response from, for datasets that provide splits. Required for those datasets.</p></li>
+<li><p><strong>split</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><em>optional</em>) – Data split to load the response from, for datasets that provide splits. Required for those datasets unless
+they have a default split, which <a class="reference internal" href="describe_dataset.html#prfmodel.examples.describe_dataset" title="prfmodel.examples.describe_dataset"><code class="xref py py-func docutils literal notranslate"><span class="pre">describe_dataset()</span></code></a> reports.</p></li>
 <li><p><strong>surface_type</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><em>optional</em>) – Surface type to load, for datasets that provide surfaces. Must be either <cite>“flat”</cite>, <cite>“inflated”</cite>,
 <cite>“pia”</cite> (or <cite>“pial”</cite>), or <cite>“wm”</cite> (for white matter). If <cite>None</cite> (the default), uses the default of the
 dataset.</p></li>
@@ -562,6 +563,16 @@ the value of an option is not valid.</p></li>
 <span class="go">(221709, 305)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">first</span><span class="o">.</span><span class="n">roi_mapping</span>
 <span class="go">{0: &#39;other&#39;, 1: &#39;V1&#39;, 2: &#39;V2&#39;, 3: &#39;V3&#39;}</span>
+</pre></div>
+</div>
+<p>Load the response to a contrast sensitivity stimulus, averaged over all runs or, for cross-validation, over the
+odd runs only.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">csf</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;7t-ncsf-visual&quot;</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s2">&quot;csf&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">csf</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(118584, 214)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">odd</span> <span class="o">=</span> <span class="n">load_dataset</span><span class="p">(</span><span class="s2">&quot;7t-ncsf-visual&quot;</span><span class="p">,</span> <span class="n">task</span><span class="o">=</span><span class="s2">&quot;csf&quot;</span><span class="p">,</span> <span class="n">split</span><span class="o">=</span><span class="s2">&quot;odd&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">odd</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[&#39;hemisphere&#39;, &#39;benson14_angle&#39;, &#39;benson14_eccen&#39;, &#39;benson14_sigma&#39;]</span>
 </pre></div>
 </div>
 <p>Load an intracranial response together with the channels table that describes it.</p>
@@ -644,7 +655,7 @@ the value of an option is not valid.</p></li>
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>

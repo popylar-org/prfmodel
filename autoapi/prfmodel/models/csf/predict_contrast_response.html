@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="prfmodel.models.csf.predict_contrast_sensitivity" href="predict_contrast_sensitivity.html"><link rel="prev" title="prfmodel.models.csf.CSFTuning" href="CSFTuning.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>prfmodel.models.csf.predict_contrast_response - prfmodel 0.1.0 documentation</title>
+        <title>prfmodel.models.csf.predict_contrast_response - prfmodel 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../../index.html"><div class="brand">prfmodel 0.1.0 documentation</div></a>
+      <a href="../../../../index.html"><div class="brand">prfmodel 0.2.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
   
-  <span class="sidebar-brand-text">prfmodel 0.1.0 documentation</span>
+  <span class="sidebar-brand-text">prfmodel 0.2.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -477,12 +477,12 @@ contrast response function (CRF).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>contrast</strong> (<a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><em>Tensor</em></a>) – Contrast at each time frame, with shape <code class="docutils literal notranslate"><span class="pre">(num_frames,)</span></code>.</p></li>
+<li><p><strong>contrast</strong> (<a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><em>Tensor</em></a>) – Michelson contrast in percent (0 to 100) at each time frame, with shape <code class="docutils literal notranslate"><span class="pre">(num_frames,)</span></code>.</p></li>
 <li><p><strong>sensitivity</strong> (<a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><em>Tensor</em></a>) – Contrast sensitivity for each voxel at each time frame, with shape <code class="docutils literal notranslate"><span class="pre">(num_voxels,</span> <span class="pre">num_frames)</span></code>.</p></li>
 <li><p><strong>slope_crf</strong> (<a class="reference internal" href="../../typing/index.html#prfmodel.typing.Tensor" title="prfmodel.typing.Tensor"><em>Tensor</em></a>) – Exponent <span class="math notranslate nohighlight">\(q\)</span> of the Naka-Rushton CRF with shape <code class="docutils literal notranslate"><span class="pre">(num_batches,</span> <span class="pre">1)</span></code>.</p></li>
 <li><p><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><em>str</em></a><em>, </em><em>optional</em>) – The dtype of the prediction result. If <code class="docutils literal notranslate"><span class="pre">None</span></code> (the default), uses the dtype from
 <a class="reference internal" href="../../utils/get_dtype.html#prfmodel.utils.get_dtype" title="prfmodel.utils.get_dtype"><code class="xref py py-func docutils literal notranslate"><span class="pre">prfmodel.utils.get_dtype()</span></code></a>.</p></li>
-<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>, </em><em>default=1e-10</em>) – Minimum contrast and sensitivity value to ensure numerical and gradient stability.</p></li>
+<li><p><strong>eps</strong> (<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><em>float</em></a><em>, </em><em>default=1e-10</em>) – Minimum contrast sensitivity, which keeps the log of a zero sensitivity finite.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -493,11 +493,18 @@ contrast response function (CRF).</p>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
-<p>The Naka-Rushton CRF combines contrast <span class="math notranslate nohighlight">\(C\)</span> with the threshold <span class="math notranslate nohighlight">\(Q = 1 / S(f)\)</span> derived from the CSF S(f):</p>
+<p>The Naka-Rushton CRF combines contrast <span class="math notranslate nohighlight">\(C\)</span> (in percent) with the contrast threshold <span class="math notranslate nohighlight">\(Q = 100 / S(f)\)</span>
+(also in percent) derived from the CSF <span class="math notranslate nohighlight">\(S(f)\)</span>:</p>
 <div class="math-wrapper docutils container">
 <div class="math notranslate nohighlight">
 \[R(t) = \frac{C(t)^q}{C(t)^q + Q(t)^q}\]</div>
 </div>
+<p>Contrast sensitivity is the reciprocal of the threshold contrast as a fraction, so the threshold in percent is
+<span class="math notranslate nohighlight">\(100 / S(f)\)</span>. The response is half-maximal where the contrast equals the threshold, <span class="math notranslate nohighlight">\(C(t) = Q(t)\)</span>.
+Frames with zero contrast (blank frames) have a response of exactly zero.</p>
+<p>For numerical stability, the CRF is evaluated in the log domain as the algebraically equivalent
+<span class="math notranslate nohighlight">\(R(t) = \sigma(q \cdot (\log C(t) - \log Q(t)))\)</span>, where <span class="math notranslate nohighlight">\(\sigma\)</span> is the logistic sigmoid. This avoids
+forming <span class="math notranslate nohighlight">\(C^q\)</span> and <span class="math notranslate nohighlight">\(Q^q\)</span>, which overflow for high contrasts, low sensitivities, or steep slopes.</p>
 </dd></dl>
 
 </section>
@@ -570,7 +577,7 @@ contrast response function (CRF).</p>
       
     </aside>
   </div>
-</div><script src="../../../../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../../../../_static/documentation_options.js?v=938c9ccc"></script>
     <script src="../../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../../_static/scripts/furo.js?v=46bd48cc"></script>

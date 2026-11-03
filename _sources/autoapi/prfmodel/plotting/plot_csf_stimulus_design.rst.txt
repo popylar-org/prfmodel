@@ -5,7 +5,8 @@ prfmodel.plotting.plot_csf_stimulus_design
 
    Plot the design of a contrast sensitivity function (CSF) stimulus.
 
-   Plots the stimulus contrast over time with color indicating different spatial frequencies.
+   Plots the stimulus contrast (in percent) over time with color indicating different spatial frequencies. Blank
+   frames, which have zero contrast or zero spatial frequency, are left out.
 
    :param stimulus: Stimulus object with contrast and spatial frequencies.
    :type stimulus: CSFStimulus

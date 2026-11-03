@@ -13,10 +13,17 @@ prfmodel.models.csf.CSFTuning
    :param width_l: Curvature of the left branch of the asymmetric log-parabolic CSF (for spatial frequencies
                    below the peak). Not a fitted parameter; fixed at construction time.
    :type width_l: float, default=0.68
-   :param eps: Minimum contrast and sensitivity value to ensure numerical and gradient stability.
+   :param eps: Minimum contrast sensitivity, as in :func:`predict_contrast_response`.
    :type eps: float, default=1e-10
 
    .. rubric:: Notes
+
+   The stimulus contrast (:attr:`CSFStimulus.contrast <prfmodel.stimuli.CSFStimulus.contrast>`) must be Michelson
+   contrast in percent (0 to 100), because the Naka-Rushton threshold is :math:`100 / S(f)` (see
+   :func:`predict_contrast_response`). Contrast given as a fraction (0 to 1) yields near-floor responses.
+
+   Blank frames, which have zero contrast or zero spatial frequency, have a tuning response of exactly zero, so they
+   can be stored as they were recorded. Their gradients stay finite.
 
    The model has four fitted parameters:
 

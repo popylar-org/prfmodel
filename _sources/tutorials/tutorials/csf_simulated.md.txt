@@ -55,7 +55,7 @@ if find_spec("tensorflow") is None:
 Let's start with the first step: Defining the stimulus. In practice, we recommend that users save the stimulus they use in an experiment to a file and load it to avoid mismatches between experiment and analysis.
 Because we use simulated data in this tutorial, we create a new stimulus using the `CSFStimulus` class. Our stimulus
 includes all combiations of 6 unique spatial frequencies and 14 unique contrast levels. The contrast increases
-from 0.25 to 80 (in c/degree) and then decreases back to 0.25 on a log scale.
+from 0.25 to 80 percent and then decreases back to 0.25 percent on a log scale.
 
 ```{code-cell} ipython3
 import numpy as np
@@ -80,7 +80,7 @@ print(stimulus)
 ```
 
 When printing the `stimulus` object, we can see that it has three attributes. The `sf` attribute defines the spatial frequencies.
-It has shape `(num_frames,)`. The `contrast` attribute defines the contrast for each spatial frequency with shape `(num_frames,)`.
+It has shape `(num_frames,)`. The `contrast` attribute defines the Michelson contrast in percent (0 to 100) for each spatial frequency with shape `(num_frames,)`. CSF models expect percent rather than fractions (0 to 1), because the contrast threshold of the Naka-Rushton response function is `100 / sensitivity`.
 The `frame_duration` attribute is the duration of each frame in seconds, at which the model samples its impulse response.
 
 +++

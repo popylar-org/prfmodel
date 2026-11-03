@@ -19,7 +19,8 @@ prfmodel.examples.load_dataset
                       `"both"`, the data of both hemispheres are concatenated (left is first). If `None` (the default),
                       uses the default of the dataset.
    :type hemisphere: str, optional
-   :param split: Data split to load the response from, for datasets that provide splits. Required for those datasets.
+   :param split: Data split to load the response from, for datasets that provide splits. Required for those datasets unless
+                 they have a default split, which :func:`~prfmodel.examples.describe_dataset` reports.
    :type split: str, optional
    :param surface_type: Surface type to load, for datasets that provide surfaces. Must be either `"flat"`, `"inflated"`,
                         `"pia"` (or `"pial"`), or `"wm"` (for white matter). If `None` (the default), uses the default of the
@@ -94,6 +95,16 @@ prfmodel.examples.load_dataset
    (221709, 305)
    >>> first.roi_mapping  # doctest: +SKIP
    {0: 'other', 1: 'V1', 2: 'V2', 3: 'V3'}
+
+   Load the response to a contrast sensitivity stimulus, averaged over all runs or, for cross-validation, over the
+   odd runs only.
+
+   >>> csf = load_dataset("7t-ncsf-visual", task="csf")  # doctest: +SKIP
+   >>> csf.response.shape  # doctest: +SKIP
+   (118584, 214)
+   >>> odd = load_dataset("7t-ncsf-visual", task="csf", split="odd")  # doctest: +SKIP
+   >>> odd.units.columns.tolist()  # doctest: +SKIP
+   ['hemisphere', 'benson14_angle', 'benson14_eccen', 'benson14_sigma']
 
    Load an intracranial response together with the channels table that describes it.
 

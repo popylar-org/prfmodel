@@ -22,6 +22,8 @@ prfmodel.models.csf
    The function :func:`predict_contrast_response` can be used to predict the contrast response from contrast and contrast
    sensitivity (using a Naka-Rushton response function).
 
+   All CSF models expect the stimulus contrast as Michelson contrast in percent (0 to 100).
+
    .. rubric:: References
 
    .. [1] Roelofzen, C., Daghlian, M., van Dijk, J. A., de Jong, M. C., & Dumoulin, S. O. (2025). Modeling neural

@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="prfmodel.plotting.plot_grid_parameter_distribution" href="plot_grid_parameter_distribution.html"><link rel="prev" title="prfmodel.plotting.plot_csf_stimulus_curve" href="plot_csf_stimulus_curve.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>prfmodel.plotting.plot_csf_stimulus_design - prfmodel 0.1.0 documentation</title>
+        <title>prfmodel.plotting.plot_csf_stimulus_design - prfmodel 0.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
@@ -166,7 +166,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../../index.html"><div class="brand">prfmodel 0.1.0 documentation</div></a>
+      <a href="../../../index.html"><div class="brand">prfmodel 0.2.0 documentation</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -187,7 +187,7 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
   
-  <span class="sidebar-brand-text">prfmodel 0.1.0 documentation</span>
+  <span class="sidebar-brand-text">prfmodel 0.2.0 documentation</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
   <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
@@ -472,7 +472,8 @@
 <dt class="sig sig-object py" id="prfmodel.plotting.plot_csf_stimulus_design">
 <span class="sig-prename descclassname"><span class="pre">prfmodel.plotting.</span></span><span class="sig-name descname"><span class="pre">plot_csf_stimulus_design</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stimulus</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../stimuli/CSFStimulus.html#prfmodel.stimuli.CSFStimulus" title="prfmodel.stimuli.CSFStimulus"><span class="pre">prfmodel.stimuli.CSFStimulus</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.figure.Figure.html#matplotlib.figure.Figure" title="(in Matplotlib v3.11.2)"><span class="pre">matplotlib.figure.Figure</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes" title="(in Matplotlib v3.11.2)"><span class="pre">matplotlib.axes.Axes</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#prfmodel.plotting.plot_csf_stimulus_design" title="Link to this definition">¶</a></dt>
 <dd><p>Plot the design of a contrast sensitivity function (CSF) stimulus.</p>
-<p>Plots the stimulus contrast over time with color indicating different spatial frequencies.</p>
+<p>Plots the stimulus contrast (in percent) over time with color indicating different spatial frequencies. Blank
+frames, which have zero contrast or zero spatial frequency, are left out.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -567,7 +568,7 @@
       
     </aside>
   </div>
-</div><script src="../../../_static/documentation_options.js?v=01f34227"></script>
+</div><script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
