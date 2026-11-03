@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Example dataset `7t-ncsf-visual` containing the surface response of a single subject to a contrast sensitivity
+  stimulus (`task="csf"`, with `"odd"` and `"even"` splits for cross-validation) and to a moving bar stimulus
+  (`task="prf"`), on the HCP fs_LR 59k mesh, with Benson et al. (2014) template visual areas, polar angle,
+  eccentricity, and pRF size (Roelofzen et al., 2025). Its contrast sensitivity stimulus ships with the package.
+- `load_dataset` no longer requires a `split` for datasets that have a default split; `describe_dataset`
+  reports the default split
+
 ## [0.1.0] - 2026-10-26
 
 ### Changed

@@ -49,6 +49,27 @@ _CHN_VERSION_IDS = {
     "inflated_R": "KcebigZeJt772fSfAyYHX62H4USz9wro",
 }
 
+# Figshare file identifiers of the files of the 7t-ncsf-visual dataset
+_NCSF_FIGSHARE_IDS = {
+    "response_csf_all_L": 70993131,
+    "response_csf_all_R": 70993122,
+    "response_csf_odd_L": 70993128,
+    "response_csf_odd_R": 70993119,
+    "response_csf_even_L": 70993125,
+    "response_csf_even_R": 70993116,
+    "response_prf_all_L": 70993113,
+    "response_prf_all_R": 70993110,
+    "benson14_angle_L": 70993107,
+    "benson14_angle_R": 70993095,
+    "benson14_eccen_L": 70993101,
+    "benson14_eccen_R": 70993092,
+    "benson14_sigma_L": 70993104,
+    "benson14_sigma_R": 70993086,
+    "roi_L": 70993098,
+    "roi_R": 70993089,
+    "stimulus_prf": 70993083,
+}
+
 # OpenNeuro addresses a file of a dataset snapshot by its path with the separators replaced by colons
 _OPENNEURO_ECOG_URL = (
     "https://openneuro.org/crn/datasets/ds004194/snapshots/3.0.0/files/derivatives:Yuasa2023AlphaPRF:pRFmodel"
@@ -82,7 +103,10 @@ class DatasetSpec:
     options : frozenset of str
         Names of the :func:`~prfmodel.examples.load_dataset` options that this dataset accepts.
     splits : tuple of str
-        Names of the data splits that this dataset provides. When non-empty, a split must be requested.
+        Names of the data splits that this dataset provides. When non-empty, a split must be requested unless
+        `default_split` is set.
+    default_split : str, optional
+        Split that is used when none is requested. If `None` (the default), a dataset with splits requires one.
     hemispheres : tuple of str
         Hemisphere selections that this dataset accepts.
     surface_types : tuple of str
@@ -112,6 +136,7 @@ class DatasetSpec:
     file_urls: Mapping[str, str] = field(default_factory=dict)
     options: frozenset[str] = frozenset()
     splits: tuple[str, ...] = ()
+    default_split: str | None = None
     hemispheres: tuple[str, ...] = ()
     surface_types: tuple[str, ...] = ()
     tasks: tuple[str, ...] = ()
@@ -128,6 +153,10 @@ class DatasetSpec:
 
         if self.file_urls and set(self.file_urls) != set(self.files):
             msg = f"Dataset '{self.name}' must give a URL for every file in 'files'"
+            raise ValueError(msg)
+
+        if self.default_split is not None and self.default_split not in self.splits:
+            msg = f"Dataset '{self.name}' must have its default split '{self.default_split}' in 'splits'"
             raise ValueError(msg)
 
     @property
@@ -181,6 +210,33 @@ def _make_registry() -> dict[str, DatasetSpec]:
     }
 
     ecog_file = "p10_freq_spectra-timeseries_avg-runs_bbS.mat"
+
+    # The odd and even splits exist for the CSF task only
+    ncsf_prefix = "sub-16112020"
+    ncsf_space = "space-fsLR_den-59k"
+    ncsf_responses = {
+        "csf_all": "task-csf",
+        "csf_odd": "task-csf_split-odd",
+        "csf_even": "task-csf_split-even",
+        "prf_all": "task-prf",
+    }
+    ncsf_paths = {
+        **{
+            f"response_{key}_{hemi}": f"{ncsf_prefix}_{entities}_hemi-{hemi}_{ncsf_space}_desc-detrend3_bold.func.gii"
+            for key, entities in ncsf_responses.items()
+            for hemi in ("L", "R")
+        },
+        **{
+            f"benson14_{key}_{hemi}": f"{ncsf_prefix}_hemi-{hemi}_{ncsf_space}_atlas-benson14_{key}.func.gii"
+            for key in ("angle", "eccen", "sigma")
+            for hemi in ("L", "R")
+        },
+        **{
+            f"roi_{hemi}": f"{ncsf_prefix}_hemi-{hemi}_{ncsf_space}_atlas-benson14_dseg.label.gii"
+            for hemi in ("L", "R")
+        },
+        "stimulus_prf": "task-prf_stimulus.npz",
+    }
 
     specs = (
         DatasetSpec(
@@ -322,11 +378,50 @@ def _make_registry() -> dict[str, DatasetSpec]:
             download_size=17_447_831,
         ),
         DatasetSpec(
+            name="7t-ncsf-visual",
+            summary=(
+                "Blood oxygenation level-dependent response of a single subject (sub-16112020), measured in a 7T "
+                "scanner with a repetition time of 1.5 s, detrended, converted to percent signal change, averaged "
+                "over runs, and projected onto the 59,292 vertices of each hemisphere of the HCP fs_LR 59k surface, "
+                "so it can be drawn on the meshes of the 'hcp-999999-surface' dataset. In the 'csf' task, for "
+                "fitting neural contrast sensitivity function models, full-screen gratings show one of six spatial "
+                "frequencies (0.5 to 18 cycles per degree) at one of fourteen Michelson contrasts (0.25 to 80 "
+                "percent) per frame, for 214 frames. Blank frames have zero contrast and are given a placeholder "
+                "spatial frequency of 1 cycle per degree, because the models take its logarithm. In the 'prf' task, "
+                "bars filled with natural images sweep across the screen in eight directions, for 248 frames, on a "
+                "grid spanning about -5.1 to 5.1 degrees of visual angle whose first row is the upper edge of the "
+                "visual field. The 'csf' task also provides the averages of the odd and of the even runs as splits, "
+                "for cross-validation or a split-half noise ceiling; the 'prf' task provides only the average of all "
+                "runs. Each row of the response carries a visual area index from the Benson et al. (2014) template "
+                "atlas of the subject, and the 'units' frame holds the template polar angle, eccentricity, and pRF "
+                "size, which are zero where the template does not reach. Every hemisphere downloads about 57 MB for "
+                "the 'csf' task and 22 to 26 MB for the 'prf' task."
+            ),
+            files={key: f"7t_ncsf_sub-16112020/{path}" for key, path in ncsf_paths.items()},
+            file_urls={key: f"{_FIGSHARE_URL}/{_NCSF_FIGSHARE_IDS[key]}" for key in ncsf_paths},
+            loader=_loaders.load_ncsf_visual,
+            options=frozenset({"hemisphere", "split", "task"}),
+            splits=("all", "odd", "even"),
+            default_split="all",
+            tasks=("csf", "prf"),
+            hemispheres=("both", "left", "right"),
+            default_hemisphere="both",
+            licence="CC BY 4.0",
+            citation=(
+                "Roelofzen, C., Daghlian, M., van Dijk, J. A., de Jong, M. C., & Dumoulin, S. O. (2025). Modeling "
+                "neural contrast sensitivity functions in human visual cortex. Imaging Neuroscience, 3, "
+                "imag_a_00469. https://doi.org/10.1162/imag_a_00469"
+            ),
+            homepage="https://doi.org/10.6084/m9.figshare.34887324",
+            download_size=391_892_568,
+        ),
+        DatasetSpec(
             name="hcp-999999-surface",
             summary=(
                 "Standardized cortical surface meshes based on the Human Connectome Project, together with "
                 "the multi-modal parcellation atlas that belongs to them. Each hemisphere has 59k vertices, "
-                "so responses from the '7t-retbar-visual' dataset can be projected onto these meshes."
+                "so responses from the '7t-retbar-visual' and '7t-ncsf-visual' datasets can be projected onto these "
+                "meshes."
             ),
             url=f"{_FIGSHARE_URL}/25768841",
             files={
@@ -440,8 +535,8 @@ def list_datasets() -> list[str]:
     --------
     >>> from prfmodel.examples import list_datasets
     >>> list_datasets()  # doctest: +NORMALIZE_WHITESPACE
-    ['3t-chn-visual', '7t-aot-visual', '7t-retbar-visual', 'hcp-999999-surface', 'numerosity-timing',
-     'visual-ecog-broadband']
+    ['3t-chn-visual', '7t-aot-visual', '7t-ncsf-visual', '7t-retbar-visual', 'hcp-999999-surface',
+     'numerosity-timing', 'visual-ecog-broadband']
 
     """
     return sorted(_get_registry())
@@ -509,7 +604,8 @@ def describe_dataset(name: str) -> str:
         lines += [f"Hemispheres: {', '.join(spec.hemispheres)} (default '{spec.default_hemisphere}')"]
 
     if spec.splits:
-        lines += [f"Splits: {', '.join(spec.splits)} (required)"]
+        split_note = "required" if spec.default_split is None else f"default '{spec.default_split}'"
+        lines += [f"Splits: {', '.join(spec.splits)} ({split_note})"]
 
     if spec.surface_types:
         lines += [f"Surface types: {', '.join(spec.surface_types)}"]

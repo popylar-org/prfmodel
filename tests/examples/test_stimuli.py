@@ -7,8 +7,12 @@ from scipy.io import savemat
 from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
 from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.examples._stimuli import _load_chn_aperture_stimulus
+from prfmodel.examples._stimuli import _load_ncsf_csf_stimulus
 from prfmodel.examples._stimuli import _resample_frames
+from prfmodel.stimuli import CSFStimulus
 from prfmodel.stimuli import PRFStimulus
+
+_NCSF_FRAME_DURATION = 1.5
 
 
 def test_load_2d_bar_stimulus_single():
@@ -82,3 +86,17 @@ def test_load_chn_aperture_stimulus(tmp_path: Path):
     np.testing.assert_allclose(stimulus.grid[..., 1], x)
     np.testing.assert_allclose(stimulus.design[:5, 0, 1], 1.0)
     assert stimulus.design[:, 1:].max() == 0.0
+
+
+def test_load_ncsf_csf_stimulus():
+    """Test that the bundled CSF stimulus gives blank frames a positive spatial frequency but keeps them blank."""
+    stimulus = _load_ncsf_csf_stimulus(blank_sf=2.0)
+    is_blank = stimulus.contrast == 0
+
+    assert isinstance(stimulus, CSFStimulus)
+    assert stimulus.sf.shape == (214,)
+    assert stimulus.frame_duration == _NCSF_FRAME_DURATION
+    assert np.any(is_blank)
+    np.testing.assert_array_equal(stimulus.sf[is_blank], 2.0)
+    assert set(np.unique(stimulus.sf[~is_blank])) == {0.5, 1.0, 3.0, 6.0, 12.0, 18.0}
+    np.testing.assert_allclose([stimulus.contrast[~is_blank].min(), stimulus.contrast.max()], [0.25, 80.0])

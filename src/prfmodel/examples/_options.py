@@ -90,7 +90,7 @@ def validate_options(
     ------
     ValueError
         If an option is not accepted by the dataset, if its value is not valid, or if the dataset requires a
-        split and none was requested.
+        split and none was requested. A dataset with a default split does not require one.
 
     """
     _check_supported(spec, "hemisphere", hemisphere)
@@ -103,12 +103,16 @@ def validate_options(
     if "hemisphere" in spec.options:
         _check_value(spec, "hemisphere", resolved_hemisphere, spec.hemispheres)
 
+    resolved_split = split
+
     if spec.splits:
-        if split is None:
+        resolved_split = split if split is not None else spec.default_split
+
+        if resolved_split is None:
             msg = f"Dataset '{spec.name}' requires the option 'split' to be one of {spec.splits}"
             raise ValueError(msg)
 
-        _check_value(spec, "split", split, spec.splits)
+        _check_value(spec, "split", resolved_split, spec.splits)
 
     resolved_surface_type = surface_type
 
@@ -125,7 +129,7 @@ def validate_options(
 
     return Options(
         hemisphere=resolved_hemisphere,
-        split=split,
+        split=resolved_split,
         surface_type=resolved_surface_type,
         task=resolved_task,
     )

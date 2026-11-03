@@ -5,6 +5,7 @@ from importlib.resources import files
 from os import PathLike
 import numpy as np
 from scipy.io import loadmat
+from prfmodel.stimuli import CSFStimulus
 from prfmodel.stimuli import PRFStimulus
 
 # The packaged bar stimulus was presented with one design frame per repetition time of 0.9 s (see the 7t-aot-visual
@@ -13,6 +14,27 @@ _BAR_STIMULUS_FRAME_DURATION = 0.9
 
 # The numerosity experiment was measured with a repetition time of 2.1 s and one design frame per repetition time
 _LOGNUMEROSITY_STIMULUS_FRAME_DURATION = 2.1
+
+# Both tasks of the 7t-ncsf-visual dataset were measured with a repetition time of 1.5 s and one frame per repetition
+# time
+_NCSF_FRAME_DURATION = 1.5
+
+
+def _load_ncsf_csf_stimulus(blank_sf: float = 1.0) -> CSFStimulus:
+    path = files("prfmodel.data.stimuli").joinpath("csf_stimulus.npz")
+
+    with np.load(str(path)) as archive:
+        sf = archive["sf"]
+        contrast = archive["contrast"]
+
+    # Blank frames are stored with zero spatial frequency and zero contrast. The CSF models take the logarithm of the
+    # spatial frequency, which gives NaN gradients at zero, so blank frames get a placeholder instead. Their contrast
+    # stays zero, so this changes no prediction.
+    return CSFStimulus(
+        sf=np.where(contrast == 0, blank_sf, sf),
+        contrast=contrast,
+        frame_duration=_NCSF_FRAME_DURATION,
+    )
 
 
 def _load_2d_bar_design_and_grid() -> tuple[np.ndarray, np.ndarray]:
