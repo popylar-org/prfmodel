@@ -419,6 +419,41 @@ def _make_registry() -> dict[str, DatasetSpec]:
             download_size=391_892_568,
         ),
         DatasetSpec(
+            name="numerosity-four-conditions",
+            summary=(
+                "Preprocessed fMRI time-course data for four experimental "
+                "conditions (Area, Size, Circumference, and Density) and their "
+                "average, accompanied by FreeSurfer surface files for flatmap "
+                "visualisation of both hemispheres."
+            ),
+            files={
+                "responses": "fmri_full_grid_dataset.pkl",
+                "lh_flat": "Surfaces/lh.flat.gii",
+                "lh_vertex_indices": "Surfaces/lh.flat.vertex_indices.npy",
+                "lh_white": "Surfaces/lh.white",
+                "rh_flat": "Surfaces/rh.flat.gii",
+                "rh_vertex_indices": "Surfaces/rh.flat.vertex_indices.npy",
+                "rh_white": "Surfaces/rh.white",
+            },
+            file_urls={
+                "responses": f"{_FIGSHARE_URL}/71024598",
+                "lh_flat": f"{_FIGSHARE_URL}/71025390",
+                "lh_vertex_indices": f"{_FIGSHARE_URL}/71025384",
+                "lh_white": f"{_FIGSHARE_URL}/71025375",
+                "rh_flat": f"{_FIGSHARE_URL}/71025378",
+                "rh_vertex_indices": f"{_FIGSHARE_URL}/71025381",
+                "rh_white": f"{_FIGSHARE_URL}/71025387",
+            },
+            loader=_loaders.load_numerosity_four_conditions,
+            licence="CC BY 4.0",
+            citation=(
+                "Mauro, K. (2026). Four Condition Numerosity Dataset. "
+                "figshare. https://doi.org/10.6084/m9.figshare.34898940"
+            ),
+            homepage="https://doi.org/10.6084/m9.figshare.34898940",
+            download_size=673939692,
+        ),
+        DatasetSpec(
             name="hcp-999999-surface",
             summary=(
                 "Standardized cortical surface meshes based on the Human Connectome Project, together with "
@@ -539,7 +574,7 @@ def list_datasets() -> list[str]:
     >>> from prfmodel.examples import list_datasets
     >>> list_datasets()  # doctest: +NORMALIZE_WHITESPACE
     ['3t-chn-visual', '7t-aot-visual', '7t-ncsf-visual', '7t-retbar-visual', 'hcp-999999-surface',
-     'numerosity-timing', 'visual-ecog-broadband']
+     'numerosity-four-conditions', 'numerosity-timing', 'visual-ecog-broadband']
 
     """
     return sorted(_get_registry())

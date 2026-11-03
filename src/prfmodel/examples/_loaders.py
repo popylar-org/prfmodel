@@ -298,6 +298,25 @@ def load_visual_ecog_broadband(fetch: FileFetcher, options: Options) -> Dataset:
     )
 
 
+def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dataset:  # noqa: ARG001 (loaders take options)
+    """Load the four-condition numerosity workshop dataset."""
+    for key in (
+        "responses",
+        "lh_flat",
+        "lh_vertex_indices",
+        "lh_white",
+        "rh_flat",
+        "rh_vertex_indices",
+        "rh_white",
+    ):
+        fetch(key)
+
+    return Dataset(
+        name="numerosity-four-conditions",
+        files=fetch.files,
+    )
+
+
 def load_dataset(  # noqa: PLR0913
     name: str,
     *,
