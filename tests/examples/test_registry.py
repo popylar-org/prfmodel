@@ -20,6 +20,7 @@ def test_list_datasets():
         "7t-ncsf-visual",
         "7t-retbar-visual",
         "hcp-999999-surface",
+        "numerosity-four-conditions",
         "numerosity-timing",
         "visual-ecog-broadband",
     ]

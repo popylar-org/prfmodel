@@ -279,6 +279,34 @@
     "vis_design.mat": {
       "sha256": "3c269e74c12cc79044184b47cf6803205045305687f2f30fe73e8bccd62835d3",
       "size": 475048
+    },
+    "fmri_full_grid_dataset.pkl": {
+      "sha256": "70f4a2c4985c0036b0b37ffd9798526c86ae61e03d995d052ef1ea3308f2c0a3",
+      "size": 651625350
+    },
+    "Surfaces/lh.flat.gii": {
+      "sha256": "1ef37ed133185dd4f9231c0a15301119dcd3d03413ba8e891e394e8ff4383b8c",
+      "size": 4381665
+    },
+    "Surfaces/lh.flat.vertex_indices.npy": {
+      "sha256": "5a66d5c8904d0f372a2539ec5583a6362839687daabb447216426c25736081ac",
+      "size": 1178344
+    },
+    "Surfaces/lh.white": {
+      "sha256": "839444d66a0e29b4330b308217233f3e0bb6fc4fa64cad87d2f7ff49665a7744",
+      "size": 5610756
+    },
+    "Surfaces/rh.flat.gii": {
+      "sha256": "a15f62023d2768d468dcd5f96d80fab5a374ef8cb29d63b919ad968b4aa4c76b",
+      "size": 4361533
+    },
+    "Surfaces/rh.flat.vertex_indices.npy": {
+      "sha256": "ecab0647ac0682174dc865b01d133a126c42c02061b3cf7e66059161d11a030f",
+      "size": 1175248
+    },
+    "Surfaces/rh.white": {
+      "sha256": "058ce0b1515b87a65af91635827a8e02f72638cb695f97376d0185540098ca16",
+      "size": 5606796
     }
   },
   "version": 1
