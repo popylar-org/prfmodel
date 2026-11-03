@@ -78,7 +78,8 @@ class CSFStimulus(Stimulus):
     Parameters
     ----------
     sf : numpy.ndarray
-        Spatial frequency at each time frame, with shape ``(num_frames,)``.
+        Spatial frequency at each time frame, with shape ``(num_frames,)``. Blank frames can have a spatial frequency
+        of zero.
     contrast : numpy.ndarray
         Michelson contrast in percent (0 to 100) at each time frame, with shape ``(num_frames,)``. Contrast given as
         a fraction (0 to 1) is interpreted as 0 to 1 percent.

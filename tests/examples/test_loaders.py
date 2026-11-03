@@ -180,14 +180,15 @@ def test_load_ncsf_visual_from_local_files(tmp_path: Path, hemisphere: str, task
     np.testing.assert_array_equal(dataset.response[:, 0], expected_first_frame)
     assert dataset.roi_index.shape == (num_units,)
     assert dataset.roi_mapping == _FAKE_NCSF_ROIS
-    assert dataset.units.columns.tolist() == ["benson14_angle", "benson14_eccen", "benson14_sigma"]
+    assert dataset.units.columns.tolist() == ["hemisphere", "benson14_angle", "benson14_eccen", "benson14_sigma"]
+    expected_hemispheres = np.repeat([{"L": "left", "R": "right"}[code] for code in codes], _NUM_FAKE_NCSF_VERTICES)
+    np.testing.assert_array_equal(dataset.units["hemisphere"], expected_hemispheres)
     np.testing.assert_array_equal(dataset.units["benson14_eccen"], expected_first_frame)
     assert (dataset.hemisphere, dataset.task, dataset.split) == (hemisphere, task, split)
     assert ("stimulus_prf" in dataset.files) == (task == "prf")
 
     if task == "csf":
         assert isinstance(dataset.stimulus, CSFStimulus)
-        assert np.all(dataset.stimulus.sf > 0)
     else:
         assert isinstance(dataset.stimulus, PRFStimulus)
         assert dataset.stimulus.dimension_labels == ["y", "x"]
@@ -382,7 +383,8 @@ def test_load_ncsf_visual(task: str, split: str):
     assert dataset.response.shape == (num_units, _NUM_NCSF_FRAMES[task])
     assert dataset.roi_index.shape == (num_units,)
     assert dataset.roi_mapping[1] == "V1"
-    assert dataset.units.shape == (num_units, 3)
+    assert dataset.units.shape == (num_units, 4)
+    assert (dataset.units["hemisphere"] == "left").sum() == _NUM_HCP_VERTICES_L
     assert dataset.stimulus.frame_duration == _NCSF_FRAME_DURATION
 
     if task == "prf":

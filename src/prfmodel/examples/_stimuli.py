@@ -20,21 +20,13 @@ _LOGNUMEROSITY_STIMULUS_FRAME_DURATION = 2.1
 _NCSF_FRAME_DURATION = 1.5
 
 
-def _load_ncsf_csf_stimulus(blank_sf: float = 1.0) -> CSFStimulus:
+def _load_ncsf_csf_stimulus() -> CSFStimulus:
     path = files("prfmodel.data.stimuli").joinpath("csf_stimulus.npz")
 
+    # Blank frames are kept as they were recorded, with zero spatial frequency and zero contrast, which the CSF models
+    # and plots handle
     with np.load(str(path)) as archive:
-        sf = archive["sf"]
-        contrast = archive["contrast"]
-
-    # Blank frames are stored with zero spatial frequency and zero contrast. The CSF models take the logarithm of the
-    # spatial frequency, which gives NaN gradients at zero, so blank frames get a placeholder instead. Their contrast
-    # stays zero, so this changes no prediction.
-    return CSFStimulus(
-        sf=np.where(contrast == 0, blank_sf, sf),
-        contrast=contrast,
-        frame_duration=_NCSF_FRAME_DURATION,
-    )
+        return CSFStimulus(sf=archive["sf"], contrast=archive["contrast"], frame_duration=_NCSF_FRAME_DURATION)
 
 
 def _load_2d_bar_design_and_grid() -> tuple[np.ndarray, np.ndarray]:

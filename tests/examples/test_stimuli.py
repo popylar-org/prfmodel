@@ -89,14 +89,14 @@ def test_load_chn_aperture_stimulus(tmp_path: Path):
 
 
 def test_load_ncsf_csf_stimulus():
-    """Test that the bundled CSF stimulus gives blank frames a positive spatial frequency but keeps them blank."""
-    stimulus = _load_ncsf_csf_stimulus(blank_sf=2.0)
+    """Test that the bundled CSF stimulus keeps blank frames as recorded, with zero spatial frequency and contrast."""
+    stimulus = _load_ncsf_csf_stimulus()
     is_blank = stimulus.contrast == 0
 
     assert isinstance(stimulus, CSFStimulus)
     assert stimulus.sf.shape == (214,)
     assert stimulus.frame_duration == _NCSF_FRAME_DURATION
     assert np.any(is_blank)
-    np.testing.assert_array_equal(stimulus.sf[is_blank], 2.0)
+    np.testing.assert_array_equal(stimulus.sf[is_blank], 0.0)
     assert set(np.unique(stimulus.sf[~is_blank])) == {0.5, 1.0, 3.0, 6.0, 12.0, 18.0}
     np.testing.assert_allclose([stimulus.contrast[~is_blank].min(), stimulus.contrast.max()], [0.25, 80.0])

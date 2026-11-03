@@ -55,8 +55,9 @@ def _gifti_names() -> list[str]:
     return names
 
 
+# Coordinate grid of the pRF design, in degrees, with the vertical coordinate first. The outer pixels lie on the edges
+# of the screen rather than half a pixel inside them, as in the workshop and in prfpy, so that fits are comparable
 def _prf_grid(num_y: int, num_x: int) -> np.ndarray:
-    """Build the coordinate grid of the pRF design, in degrees, with the vertical coordinate first."""
     radius = math.degrees(math.atan(_SCREEN_SIZE_CM / 2.0 / _SCREEN_DISTANCE_CM))
 
     # Row 0 is the top of the screen, so the vertical coordinate decreases down the rows

@@ -207,6 +207,21 @@ class TestPredictContrastResponse(TestSetup):
         assert np.all(np.isfinite(result))
         assert np.allclose(result, [[1.0, 0.0]])
 
+    def test_zero_contrast_gives_zero_response(self) -> None:
+        """Test that a blank frame, with zero contrast, responds with exactly zero even for a shallow slope.
+
+        Raising zero contrast to a floor of ``eps = 1e-10`` instead gives ``eps^q / (eps^q + Q^q) = 0.09`` here.
+
+        """
+        contrast = np.array([0.0, 10.0])
+        sensitivity = np.array([[100.0, 100.0]])
+        slope_crf = np.array([[0.1]])
+
+        result = np.asarray(predict_contrast_response(contrast, sensitivity, slope_crf, dtype="float64"))
+
+        assert result[0, 0] == 0.0
+        assert result[0, 1] > 0.0
+
 
 class TestCSFTuning(TestSetup):
     """Tests for CSFTuning class."""
@@ -297,6 +312,35 @@ class TestCSFTuning(TestSetup):
 
         fitter = SGDFitter(model=model, stimulus=stimulus, dtype="float32")
         _, fitted = fitter.fit(model(stimulus, true_params, dtype="float32"), init_params, num_steps=5)
+
+        assert np.all(np.isfinite(fitted.to_numpy())), f"Fit produced non-finite parameters: {fitted}"
+
+    def test_blank_frames_with_zero_spatial_frequency(self, params: pd.DataFrame) -> None:
+        """Test that blank frames stored as recorded, with zero spatial frequency, respond with zero and fit.
+
+        The log of a zero spatial frequency is ``-inf``, which leaves the forward value at zero but makes the gradients
+        NaN unless the model keeps blank frames out of the log. A grating at zero spatial frequency also responds with
+        zero, the limit of the response as the spatial frequency goes to zero.
+
+        """
+        stimulus = CSFStimulus(
+            sf=np.array([0.0, 1.0, 3.0, 0.0, 6.0, 0.0]),
+            contrast=np.array([0.0, 20.0, 80.0, 0.0, 5.0, 50.0]),
+            frame_duration=1.0,
+        )
+        is_blank = stimulus.sf == 0
+
+        response = np.asarray(CSFTuning()(stimulus, params, dtype="float32"))
+
+        np.testing.assert_array_equal(response[:, is_blank], 0.0)
+        assert np.all(response[:, ~is_blank] > 0.0)
+
+        model = CSFModel(impulse_model=None)
+        full_params = params.assign(baseline=0.0, amplitude=1.0)
+        init_params = full_params.assign(cs_peak=50.0, slope_crf=4.0)
+
+        fitter = SGDFitter(model=model, stimulus=stimulus, dtype="float32")
+        _, fitted = fitter.fit(model(stimulus, full_params, dtype="float32"), init_params, num_steps=5)
 
         assert np.all(np.isfinite(fitted.to_numpy())), f"Fit produced non-finite parameters: {fitted}"
 

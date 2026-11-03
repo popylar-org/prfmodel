@@ -102,6 +102,7 @@ def load_numerosity_timing(fetch: FileFetcher, options: Options) -> Dataset:
 
 
 _NCSF_TEMPLATE_MAPS = ("angle", "eccen", "sigma")
+_NCSF_HEMISPHERE_NAMES = {"L": "left", "R": "right"}
 
 
 def load_ncsf_visual(fetch: FileFetcher, options: Options) -> Dataset:
@@ -119,14 +120,12 @@ def load_ncsf_visual(fetch: FileFetcher, options: Options) -> Dataset:
         response_path = fetch(f"response_{options.task}_{options.split}_{code}")
         responses.append(np.asarray(load_surf_data(response_path), dtype=np.float64))
         roi_indices.append(np.asarray(load_surf_data(fetch(f"roi_{code}")), dtype=np.int32))
-        units.append(
-            pd.DataFrame(
-                {
-                    f"benson14_{key}": np.asarray(load_surf_data(fetch(f"benson14_{key}_{code}")), dtype=np.float64)
-                    for key in _NCSF_TEMPLATE_MAPS
-                },
-            ),
-        )
+        # The template polar angle is unsigned in both hemispheres, so the hemisphere tells the visual hemifield
+        maps = {
+            f"benson14_{key}": np.asarray(load_surf_data(fetch(f"benson14_{key}_{code}")), dtype=np.float64)
+            for key in _NCSF_TEMPLATE_MAPS
+        }
+        units.append(pd.DataFrame({"hemisphere": _NCSF_HEMISPHERE_NAMES[code], **maps}))
 
     # The label table is identical across hemispheres so we read it from the first one
     label_image = GiftiImage.from_filename(fetch(f"roi_{options.hemisphere_codes[0]}"))
@@ -415,7 +414,7 @@ def load_dataset(  # noqa: PLR0913
     (118584, 214)
     >>> odd = load_dataset("7t-ncsf-visual", task="csf", split="odd")  # doctest: +SKIP
     >>> odd.units.columns.tolist()  # doctest: +SKIP
-    ['benson14_angle', 'benson14_eccen', 'benson14_sigma']
+    ['hemisphere', 'benson14_angle', 'benson14_eccen', 'benson14_sigma']
 
     Load an intracranial response together with the channels table that describes it.
 

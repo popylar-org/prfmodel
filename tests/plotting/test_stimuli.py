@@ -1,5 +1,6 @@
 """Tests for stimulus plotting functions."""
 
+import warnings
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -79,6 +80,15 @@ class CSFPlottingSetup:
             frame_duration=1.0,
         )
 
+    @pytest.fixture
+    def blocked_stimulus(self):
+        """CSF stimulus that shows each spatial frequency in two blocks, between blank frames."""
+        return CSFStimulus(
+            sf=np.array([0.0, 3.0, 3.0, 1.0, 1.0, 0.0, 1.0, 3.0, 3.0, 0.0]),
+            contrast=np.array([0.0, 10.0, 20.0, 5.0, 40.0, 0.0, 80.0, 30.0, 60.0, 0.0]),
+            frame_duration=1.0,
+        )
+
 
 class TestPlotCSFStimulusDesign(CSFPlottingSetup):
     """Tests for plot_csf_stimulus_design."""
@@ -94,6 +104,18 @@ class TestPlotCSFStimulusDesign(CSFPlottingSetup):
         _, ax = plot_csf_stimulus_design(csf_stimulus)
         n_unique_sf = len(np.unique(csf_stimulus.sf))
         assert len(ax.lines) == n_unique_sf
+
+    def test_frames_of_separate_blocks_and_blank_frames(self, blocked_stimulus: CSFStimulus):
+        """Test that each frequency is drawn at its own frames, broken between its blocks, and blanks are left out."""
+        _, ax = plot_csf_stimulus_design(blocked_stimulus)
+
+        assert [line.get_label() for line in ax.lines] == ["1.0", "3.0"]
+
+        for line in ax.lines:
+            is_freq = blocked_stimulus.sf == float(line.get_label())
+            np.testing.assert_array_equal(line.get_xdata(), np.arange(blocked_stimulus.sf.shape[0]))
+            np.testing.assert_array_equal(line.get_ydata()[is_freq], blocked_stimulus.contrast[is_freq])
+            assert np.all(np.isnan(line.get_ydata()[~is_freq]))
 
     def test_axis_labels(self, csf_stimulus: CSFStimulus):
         """Test that axis labels are set."""
@@ -128,6 +150,22 @@ class TestPlotCSFStimulusCurve(CSFPlottingSetup):
         _, ax = plot_csf_stimulus_curve(csf_stimulus, csf_curve)
         assert ax.get_xlabel() == "Spatial frequency"
         assert ax.get_ylabel() == "Contrast sensitivity"
+
+    def test_blank_frames_left_out_and_curve_sorted(self, blocked_stimulus: CSFStimulus):
+        """Test that blank frames are not drawn, which would divide by zero, and the curve follows frequency order."""
+        csf = np.where(blocked_stimulus.sf == 1.0, 20.0, 50.0)
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            _, ax = plot_csf_stimulus_curve(blocked_stimulus, csf)
+
+        points = np.concatenate([collection.get_offsets() for collection in ax.collections])
+        assert points.shape == (7, 2)
+        assert np.all(np.isfinite(points))
+
+        (curve,) = ax.lines
+        np.testing.assert_array_equal(curve.get_xdata(), [1.0, 1.0, 1.0, 3.0, 3.0, 3.0, 3.0])
+        np.testing.assert_array_equal(curve.get_ydata(), [20.0, 20.0, 20.0, 50.0, 50.0, 50.0, 50.0])
 
     def test_multi_voxel_csf(self, csf_stimulus: CSFStimulus):
         """Test that a 2-D csf array (multiple voxels) is accepted."""

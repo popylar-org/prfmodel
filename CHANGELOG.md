@@ -27,11 +27,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `CSFTuning` and `CSFModel` no longer produce NaN predictions or NaN gradients in float32 for high contrasts, low
   contrast sensitivities, or steep `slope_crf`. The Naka-Rushton contrast response function is now evaluated in the
   log domain as a sigmoid, and `CSFTuning` no longer computes the contrast sensitivity itself, only its logarithm.
-  Predictions that were finite before are unchanged up to floating-point rounding. The `eps` of `CSFTuning` now only
-  bounds the contrast.
+  Predictions that were finite before are unchanged up to floating-point rounding, except for blank frames (see
+  below). The `eps` of `CSFTuning` now bounds the sensitivity, as in `predict_contrast_response`.
 - `predict_contrast_response` evaluates the Naka-Rushton contrast response function in the same way. Its `eps` now
   bounds the sensitivity instead of the threshold `100 / sensitivity`, which changes results only for sensitivities
   below `eps` or above `100 / eps`.
+- Blank frames respond with exactly zero in `predict_contrast_response`, `CSFTuning`, and `CSFModel`, instead of
+  `eps^q / (eps^q + Q^q)`, which is far from zero for a shallow `slope_crf`. In `CSFTuning` and `CSFModel`, blank
+  frames can have zero spatial frequency (as well as zero contrast) without making the gradients NaN.
+- `plot_csf_stimulus_design` draws each spatial frequency at the frames that show it, instead of at consecutive
+  frames from the first one, which was wrong when a frequency is shown in more than one block.
+- `plot_csf_stimulus_design` and `plot_csf_stimulus_curve` leave out blank frames, which `plot_csf_stimulus_curve`
+  divided by, and `plot_csf_stimulus_curve` draws the curve in order of spatial frequency instead of in frame order.
 - The documentation of `predict_contrast_response` stated the Naka-Rushton threshold as `Q = 1 / S(f)` instead of
   `Q = 100 / S(f)`.
 - The documentation now states that CSF models expect contrast as Michelson contrast in percent (0 to 100), on
