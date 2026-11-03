@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-03
+
 ### Added
 
 - Example dataset `7t-ncsf-visual` containing the surface response of a single subject to a contrast sensitivity
@@ -88,5 +90,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     default `BaselineAmplitude` scaling model, a prediction from 0.0.1 is reproduced with `amplitude` set to
     `gain * amplitude`.
 
-[unreleased]: https://github.com/popylar-org/prfmodel/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/popylar-org/prfmodel/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/popylar-org/prfmodel/releases/tag/v0.2.0
 [0.1.0]: https://github.com/popylar-org/prfmodel/releases/tag/v0.1.0
