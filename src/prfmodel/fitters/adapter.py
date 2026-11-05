@@ -9,6 +9,7 @@ from collections.abc import Callable
 from collections.abc import Sequence
 from typing import TypeVar
 from typing import cast
+import numpy as np
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
@@ -18,25 +19,23 @@ from prfmodel.utils import TensorFrame
 P = TypeVar("P", pd.DataFrame, TensorFrame)
 
 
-def _apply_to_column(fun: Callable, parameters: P, param: str, dtype: str | None) -> pd.Series | Tensor:
-    """Apply `fun` to one parameter column and return a value that can be stored back in `parameters`.
+def _apply_to_dataframe_column(fun: Callable, column: pd.Series, dtype: str | None) -> np.ndarray:
+    """Apply `fun` to a dataframe column and return a NumPy array that can be stored back in the dataframe.
 
     The function receives the column itself, so it can be a NumPy function or a :mod:`keras.ops` function.
     A :mod:`keras.ops` function returns a backend tensor, which can live on an accelerator (e.g., a CUDA or
     Apple MPS device). Pandas copies whatever is assigned to a column through NumPy, which fails for tensors that
-    are not on the host, so for a dataframe the result is converted to a NumPy array first.
+    are not on the host, so the result is converted to a NumPy array first.
 
-    A dataframe column is cast to `dtype` (if given) before `fun` is applied, so that a :mod:`keras.ops` function
-    computes at the caller's precision rather than at the column's. This matters for float64 columns (the pandas
-    default) on devices without float64 support, such as Apple MPS. A
-    :class:`~prfmodel.utils.TensorFrame` carries its own dtype and is passed through as is.
+    The column is cast to `dtype` (if given) before `fun` is applied, so that a :mod:`keras.ops` function computes at
+    the caller's precision rather than at the column's. This matters for float64 columns (the pandas default) on
+    devices without float64 support, such as Apple MPS.
 
     """
-    if isinstance(parameters, pd.DataFrame):
-        column = parameters[param] if dtype is None else parameters[param].astype(dtype)
-        return ops.convert_to_numpy(fun(column))
+    if dtype is not None:
+        column = column.astype(np.dtype(dtype))
 
-    return fun(parameters[param])
+    return ops.convert_to_numpy(fun(column))
 
 
 class ParameterTransform:
@@ -123,7 +122,10 @@ class ParameterTransform:
         parameters = parameters.copy()
 
         for param in self.parameter_names:
-            parameters[param] = _apply_to_column(self.transform_fun, parameters, param, dtype)
+            if isinstance(parameters, pd.DataFrame):
+                parameters[param] = _apply_to_dataframe_column(self.transform_fun, parameters[param], dtype)
+            else:
+                parameters[param] = self.transform_fun(parameters[param])
 
         return parameters
 
@@ -147,7 +149,10 @@ class ParameterTransform:
         parameters = parameters.copy()
 
         for param in self.parameter_names:
-            parameters[param] = _apply_to_column(self.inverse_fun, parameters, param, dtype)
+            if isinstance(parameters, pd.DataFrame):
+                parameters[param] = _apply_to_dataframe_column(self.inverse_fun, parameters[param], dtype)
+            else:
+                parameters[param] = self.inverse_fun(parameters[param])
 
         return parameters
 
