@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from keras import ops
 from tqdm.auto import tqdm
+from prfmodel._backend import svd
 from prfmodel._docstring import doc
 from prfmodel.fitters._validation import _find_valid_units
 from prfmodel.fitters._validation import _merge_unit_estimates
@@ -294,7 +295,7 @@ class LeastSquaresFitter:
 
         # One least-squares problem per unit, solved for all units at once with a batched singular value
         # decomposition.
-        u_factor, singular_values, vt_factor = ops.linalg.svd(x_matrix, full_matrices=False)
+        u_factor, singular_values, vt_factor = svd(x_matrix)
 
         # Singular values at or below the cutoff count as zero, which is what 'numpy.linalg.lstsq' does
         # with 'rcond=None'. A unit whose design matrix is rank deficient (i.e., a prediction that is constant,

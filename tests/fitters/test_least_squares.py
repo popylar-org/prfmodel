@@ -26,6 +26,8 @@ from .conftest import skip_torch
 from .conftest import skip_windows
 
 _ATOL = 1e-3
+# Upper bound of a prediction that counts as tiny but non-zero
+_TINY_PREDICTION = 1e-15
 
 
 class TestLeastSquaresFitter(TestSetup):
@@ -174,6 +176,38 @@ class TestLeastSquaresFitter(TestSetup):
         fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
 
         _, ls_params = fitter.fit(observed, far_params, slope_name="amplitude", intercept_name="baseline")
+
+        assert np.all(np.isfinite(ls_params.to_numpy()))
+        np.testing.assert_allclose(ls_params["amplitude"].to_numpy()[0], 0.0, atol=1e-6)
+        np.testing.assert_allclose(ls_params["baseline"].to_numpy()[0], observed[0].mean(), atol=1e-4)
+
+    def test_a_unit_at_the_edge_of_the_aperture_gets_the_minimum_norm_solution(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Test that a unit with a tiny but non-zero prediction is solved like a unit with a zero prediction.
+
+        A narrow pRF just outside the aperture predicts values around 1e-19. The singular value decomposition on
+        Apple MPS (torch >= 2.14) fails to converge for the design matrix of this unit, which the fitter has to
+        work around. The prediction lies below the singular value cutoff, so the fit gives the minimum-norm
+        solution, as for a flat zero prediction.
+
+        """
+        rng = np.random.default_rng(0)
+        edge_params = params.copy()
+        edge_params.loc[0, ["mu_x", "mu_y", "sigma"]] = [5.4, 0.0, 0.15]
+
+        basis = ops.convert_to_numpy(model(stimulus, edge_params.assign(baseline=0.0, amplitude=1.0)))
+        largest_prediction = np.abs(basis[0]).max()
+        assert 0.0 < largest_prediction < _TINY_PREDICTION, "The unit at the edge must predict a tiny non-zero response"
+
+        observed = 2.5 * basis + 3.0 + rng.normal(0.0, 0.05, basis.shape)
+
+        fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
+
+        _, ls_params = fitter.fit(observed, edge_params, slope_name="amplitude", intercept_name="baseline")
 
         assert np.all(np.isfinite(ls_params.to_numpy()))
         np.testing.assert_allclose(ls_params["amplitude"].to_numpy()[0], 0.0, atol=1e-6)

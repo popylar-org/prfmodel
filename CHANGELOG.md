@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`TypeError: '>' not supported between instances of 'Node' and 'int'`, torch 2.15). On MPS, the number of buffers
   per fused kernel is also capped below Metal's limit of 31, which kernels could exceed
   (`number of constant buffers exceeds maximum supported (31)`).
+- `LeastSquaresFitter` works with the PyTorch backend on Apple MPS when a unit predicts a tiny but non-zero response
+  (e.g., a narrow pRF just outside the stimulus aperture). The singular value decomposition on MPS (torch >= 2.14)
+  failed to converge for such units (`linalg.svd: The algorithm failed to converge`), so it is now computed on the
+  CPU when the tensors are on MPS.
 
 ## [0.2.0] - 2026-11-03
 
