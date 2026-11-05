@@ -1,12 +1,13 @@
 """Population receptive field stimulus encoding."""
 
-import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.stimuli import PRFStimulus
+from prfmodel.stimuli import PRFStimulusTensors
 from prfmodel.typing import Tensor
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import get_dtype
 
 
@@ -37,6 +38,11 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
     ------
     ShapeMismatchError
         If the shape of the model response and the stimulus design do not match.
+
+    Notes
+    -----
+    This function does **not** normalize the stimulus-encoded response by the cell size of the stimulus grid.
+    See :doc:`Important details </important_details>`.
 
     Examples
     --------
@@ -80,18 +86,24 @@ def encode_prf_response(response: Tensor, design: Tensor, dtype: str | None = No
 
     design = ops.expand_dims(design, 0)
     response = ops.expand_dims(response, 1)
-    # Do not sum over the first two dimensions: num_units, num_frames
-    axes = tuple(ops.arange(2, len(design.shape)))
+    # Do not sum over the first two dimensions: num_units, num_frames. These are axis indices rather than
+    # data, so they are built with 'range': a tensor here cannot be iterated when the step is traced.
+    axes = tuple(range(2, len(design.shape)))
     # tensordot is much more memory efficient that standard multiplication
     return ops.squeeze(ops.tensordot(response, design, axes=[axes, axes]), axis=(1, 2))
 
 
-class PRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus]):
+class PRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus, PRFStimulusTensors]):
     """
     Encoding model for population receptive field stimuli.
 
     Multiplies a stimulus design with a population receptive field model response along the
     stimulus dimensions and sums over them.
+
+    Notes
+    -----
+    This encoding model does **not** normalize the stimulus-encoded response by the cell size of the stimulus grid.
+    See :doc:`Important details </important_details>`.
 
     See Also
     --------
@@ -105,28 +117,19 @@ class PRFStimulusEncoder(BaseStimulusEncoder[PRFStimulus]):
         return []
 
     @doc
-    def __call__(
-        self,
-        stimulus: PRFStimulus,
-        response: Tensor,
-        parameters: pd.DataFrame,  # noqa: ARG002 (unused method argument)
-        dtype: str | None = None,
-    ) -> Tensor:
+    def call(self, stimulus: PRFStimulusTensors, response: Tensor, parameters: TensorFrame) -> Tensor:
         """Encode a population receptive field model response with a stimulus design.
 
         Parameters
         ----------
-        %(stimulus_prf)s
+        %(stimulus_prf_tensors)s
         response : Tensor
             Population receptive field response.
-        %(parameters)s
-        %(dtype)s
+        %(parameters_tensors)s
 
         Returns
         -------
         %(predicted_response_2d)s
 
         """
-        dtype = get_dtype(dtype)
-        design = ops.convert_to_tensor(stimulus.design, dtype=dtype)
-        return encode_prf_response(response, design, dtype=dtype)
+        return encode_prf_response(response, stimulus.design, dtype=parameters.dtype)

@@ -1,39 +1,30 @@
 """Shifted gamma distribution impulse response."""
 
-import pandas as pd
-from keras import ops
+from typing import ClassVar
 from prfmodel._docstring import doc
 from prfmodel.density._gamma import shifted_gamma_density
 from prfmodel.typing import Tensor
-from prfmodel.utils import convert_parameters_to_tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import normalize_response
 from .base import BaseImpulse
 
 
+@doc
 class ShiftedGammaImpulse(BaseImpulse):
     r"""
     Shifted gamma distribution impulse model.
 
     Predicts an impulse response that is a shifted gamma distribution.
-    The model has three parameters: `delay` refers to the positive peak, `dispersion` to the
-    rate, and `shift` to the onset of the gamma distribution.
+    The model has three parameters: `delay` is the mean time (in seconds) of the gamma distribution, `dispersion`
+    its scale, and `shift` its onset.
 
     Parameters
     ----------
-    duration : float, default=32.0
-        The duration of the impulse response (in seconds).
-    offset : float, default=0.0001
-        The offset of the impulse response (in seconds). By default a very small offset is added to prevent infinite
-        response values at t = 0.
-    resolution : float, default=1.0
-        The time resultion of the impulse response (in seconds), that is the number of points per second at which the
-        impulse response function is evaluated.
-    norm : str, optional, default="sum"
-        The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`. If `None`,
-        no normalization is performed.
-    default_parameters : dict of float, optional
-        Dictionary with scalar default parameter values. Keys must be valid parameter names.
+    %(impulse_duration)s
+    %(impulse_offset)s
+    %(impulse_resolution)s
+    %(impulse_norm)s
+    %(impulse_default_parameters)s
 
     See Also
     --------
@@ -43,13 +34,16 @@ class ShiftedGammaImpulse(BaseImpulse):
     Notes
     -----
     The predicted impulse response at time :math:`t` with :math:`\alpha = delay / dispersion`,
-    :math:`\lambda = dispersion`, and :math:`\delta = shift` is:
+    :math:`\theta = dispersion`, and :math:`\delta = shift` is:
 
     .. math::
 
-        f(t) = f_{\text{gamma}}(t - \delta; \alpha, \lambda)
+        f(t) = f_{\text{gamma}}(t - \delta; \alpha, \theta)
 
     The response prior to the onset of the gamma distribution is set to zero.
+
+    `dispersion` is the gamma **scale**, following the convention used by SPM, nilearn and Glover.
+    Consequently the mean of the gamma distribution is exactly `delay` seconds after `shift`.
 
     References
     ----------
@@ -69,47 +63,41 @@ class ShiftedGammaImpulse(BaseImpulse):
     ...     "dispersion": [1.0, 1.0, 1.0],
     ...     "shift": [1.0, 2.0, 5.0],
     ... })
-    >>> impulse_model = ShiftedGammaImpulse(
-    ...     duration=100.0  # 100 seconds
-    ... )
+    >>> impulse_model = ShiftedGammaImpulse()
     >>> resp = impulse_model(params)
     >>> print(resp.shape)  # (num_units, num_frames)
-    (3, 100)
+    (3, 32)
 
     """
 
+    _positive_parameter_names: ClassVar[tuple[str, ...]] = ("delay", "dispersion")
+
     @property
     def parameter_names(self) -> list[str]:
-        """
-        Names of parameters used by the model.
-
-        Parameter names are: `delay`, `dispersion`, and `shift`.
-
-        """
+        """Parameter names are: `delay`, `dispersion`, and `shift`."""
         return ["delay", "dispersion", "shift"]
 
     @doc
-    def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def call(self, parameters: TensorFrame) -> Tensor:
         """
         Predict the impulse response.
 
         Parameters
         ----------
-        %(parameters)s
-        %(dtype)s
+        %(parameters_tensors)s :attr:`default_parameters` must already be merged in.
 
         Returns
         -------
         :data:`prfmodel.typing.Tensor`
-            The predicted impulse response with shape `(num_units, num_frames)` and dtype `dtype`.
+            The predicted impulse response with shape `(num_units, num_frames)`.
 
         """
         parameters = self._join_default_parameters(parameters)
-        dtype = get_dtype(dtype)
-        frames = ops.cast(self.frames, dtype=dtype)
-        delay = convert_parameters_to_tensor(parameters[["delay"]], dtype=dtype)
-        dispersion = convert_parameters_to_tensor(parameters[["dispersion"]], dtype=dtype)
-        shift = convert_parameters_to_tensor(parameters[["shift"]], dtype=dtype)
+        dtype = parameters.dtype
+        frames = self.get_frames(dtype)
+        delay = parameters[["delay"]]
+        dispersion = parameters[["dispersion"]]
+        shift = parameters[["shift"]]
 
         dens = shifted_gamma_density(frames, delay / dispersion, dispersion, shift)
 

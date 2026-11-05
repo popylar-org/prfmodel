@@ -6,7 +6,7 @@ jupytext:
     format_version: 0.13
     jupytext_version: 1.18.1
 kernelspec:
-  display_name: venv
+  display_name: prfmodel (3.12.3)
   language: python
   name: python3
 ---
@@ -15,7 +15,7 @@ kernelspec:
 
 **Author**: Malte Lüken (m.luken@esciencecenter.nl)
 
-This examples shows how to fit a population receptive field (pRF) model to blood oxygenation level-dependent (BOLD) functional magnetic resonance imaging
+This example shows how to fit a population receptive field (pRF) model to blood oxygenation level-dependent (BOLD) functional magnetic resonance imaging
 (fMRI) data.
 
 A pRF model maps neural activity in a brain region of interest (ROI; e.g., V1 in the human visual cortex)
@@ -30,36 +30,46 @@ In this example, we use the TensorFlow backend.
 import os
 from importlib.util import find_spec
 
+import pandas as pd
+
 # Set keras backend to 'tensorflow' (this is normally the default)
 os.environ["KERAS_BACKEND"] = "tensorflow"
-# Hide tensorflow info messages
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
+# Print parameter DataFrames with three decimals
+pd.set_option("display.precision", 3)
 
 if find_spec("tensorflow") is None:
-    msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
+    msg = 'Could not find the tensorflow package. Please install it with: pip install "prfmodel[tensorflow]"'
     raise ImportError(msg)
 ```
 
-## Loading the surface
+## Loading the dataset
 
 +++
 
-Before we start modelling, we need to make sure that we have all the requirements to visualize the BOLD response data. To visualize fMRI data, we can project it onto an anatomical surface of the brain. In this tutorial, we use a template surface based on the
-surface of the Human Connectome Project (see https://doi.org/10.6084/m9.figshare.13372958). For visualization, we use the nilearn package. We download the surface and load the flat meshes for both hemispheres.
+In this example, we use BOLD responses that were recorded from a single subject with a 7 Tesla MRI scanner while
+they were watching a bar moving through their visual field. We load the dataset with
+{py:func}`prfmodel.examples.load_dataset` (on the first function call, the dataset will be downloaded from
+[Fig Share](https://doi.org/10.6084/m9.figshare.34032573)). The dataset also contains the cortical surfaces of the subject, which we
+will use to visualize our results. We choose the flat surface, which shows the entire cortex of each hemisphere at once.
 
 ```{code-cell} ipython3
-from prfmodel.examples import load_surface_mesh
+from prfmodel.examples import load_dataset
 
-# Download surface mesh and load as nilearn.surface.PolyMesh object
-mesh = load_surface_mesh(dest_dir="data", surface_type="flat")
+# Downloads on first use and caches in a user data directory (see prfmodel.examples.get_data_dir)
+dataset = load_dataset("7t-aot-visual", surface_type="flat")
+
+print(dataset)
 ```
 
-We can visualize the flat surface with nilearn.
+When printing the `dataset` object, we can see which fields it contains. We can visualize the flat surface mesh with
+nilearn.
 
 ```{code-cell} ipython3
 %matplotlib inline
 import matplotlib.pyplot as plt
 from nilearn.plotting import plot_surf
+
+mesh = dataset.mesh
 
 SURF_VIEW = (90, 270)
 
@@ -67,188 +77,121 @@ fig, ax = plt.subplots(subplot_kw={"projection": "3d"}, figsize=(8, 6))
 
 plot_surf(mesh, hemi="both", view=SURF_VIEW, axes=ax, figure=fig)
 
-fig.suptitle("Flat surface (HCP template)");
+fig.suptitle("Flat surface");
 ```
 
 ## Loading the BOLD response
 
 +++
 
-Now that we have the flat surface, we load the raw BOLD response data from a single subject that can be represented on the surface mesh. We load data from both hemispheres of the subject by setting `hemisphere="both"`.
+The BOLD response was recorded in a volume of voxels with a size of 2 mm. The dataset only contains the voxels that
+fall inside a (dilated) gray matter mask.
 
 ```{code-cell} ipython3
-from prfmodel.examples import load_single_subject_fmri_data
-
-response_raw = load_single_subject_fmri_data(dest_dir="data", hemisphere="both")
-response_raw.shape  # shape (num_vertices, num_frames)
+response_raw = dataset.response
+response_raw.shape  # shape (num_voxels, num_frames)
 ```
 
-The BOLD response time courses have 120 time frames. We convert the raw BOLD response signal to percent signal change (PSC).
+The `response_raw` object contains the BOLD response timecourse for each voxel inside the mask. It has shape
+`(num_voxels, num_frames)` where `num_voxels` is the number of voxels in the mask and `num_frames` the number of time
+frames of the recording. The BOLD response timecourses have 340 time frames. They have already been converted to
+percent signal change (PSC) relative to a baseline of 100, so we subtract 100 to center each timecourse around zero.
 
 ```{code-cell} ipython3
-response_psc = ((response_raw.T / response_raw.mean(axis=1)).T - 1.0) * 100.0
+response_psc = response_raw - 100.0
 ```
 
-The `response` object contains the BOLD response timecourse for each voxel on the surface mesh. It has shape `(num_vertices, num_frames)` where `num_vertices` is the number of vertices on the surface mesh and `num_frames` the number of time frames of the recording. The timecourses from the left and right hemispheres are concatenated (left is first). Because the data has been converted to PSC, each timecourse should have a mean of zero.
+To visualize the response on the cortical surface, we need to project it from the volume onto the surface. The volume and
+the surfaces of the subject share the same coordinate system, so we can use {py:func}`nilearn.surface.vol_to_surf`
+for the projection. The function samples the volume at several depths between the pial surface and the white matter
+surface, so we load these surfaces as well. To map a value per voxel back into the volume, we fill the values into the
+voxels inside the gray matter mask from the dataset.
 
-First, we define a helper function to plot a statistic on the surface.
+The projection linearly interpolates between neighboring voxels. To prevent voxels outside the mask or voxels with
+`NaN` values from affecting the result, we set them to zero and additionally project a volume that is one for all other
+(valid) voxels and zero otherwise. Dividing the first projection by the second gives a weighted average of only the
+valid voxels at each vertex. Vertices without any valid voxels are `NaN`.
 
 ```{code-cell} ipython3
+import warnings
+
 import numpy as np
-from nilearn.plotting import plot_surf_stat_map
+from nilearn.image import new_img_like
+from nilearn.surface import PolyMesh, vol_to_surf
+
+# The pial and white matter surfaces are always downloaded together with the dataset
+pial_mesh = PolyMesh(left=dataset.files["pia_lh"], right=dataset.files["pia_rh"])
+wm_mesh = PolyMesh(left=dataset.files["wm_lh"], right=dataset.files["wm_rh"])
+
+is_in_mask = np.asarray(dataset.mask.dataobj).astype(bool)
 
 
-def plot_surf_stat_map_helper(
-        stat_map: np.ndarray,
-        vmin: float | None = None,
-        vmax: float | None = None,
-        title: str | None = None,
-    ) -> tuple[plt.Figure, plt.Axes]:
-    """Helper function to plot a surface with a stat map."""
-    fig, ax = plt.subplots(subplot_kw={"projection": "3d"}, figsize=(8, 6))
-
-    plot_surf_stat_map(
-        mesh,
-        stat_map,
-        vmin=vmin,
-        vmax=vmax,
-        hemi="both",
-        view=SURF_VIEW,
-        cmap="inferno",
-        axes=ax,
-        figure=fig,
-        title=title,
-    )
-
-    # Expand the 3D axes to fill the space to the left of the colorbar
-    surf_axes = [a for a in fig.axes if a.name == "3d"]
-    cbar_axes = [a for a in fig.axes if a.name != "3d"]
-    cbar_x0 = min(a.get_position().x0 for a in cbar_axes)
-    for a in surf_axes:
-        a.set_position([0.0, 0.0, cbar_x0 - 0.01, 0.97])
-
-    return fig, ax
+def project_to_surface(voxel_values: np.ndarray) -> np.ndarray:
+    """Project one value per voxel in the mask onto the vertices of both hemispheres (left first)."""
+    voxel_values = np.asarray(voxel_values)
+    is_valid = np.isfinite(voxel_values)
+    # Stack the values (zero for invalid voxels) and the weights (one for valid voxels) into a 4D volume
+    volume_data = np.zeros((*dataset.mask.shape, 2))
+    volume_data[is_in_mask, 0] = np.where(is_valid, voxel_values, 0.0)
+    volume_data[is_in_mask, 1] = is_valid
+    volume = new_img_like(dataset.mask, volume_data)
+    with warnings.catch_warnings():
+        # Vertices without any samples inside the mask are NaN; nilearn warns about them
+        warnings.filterwarnings("ignore", message="Mean of empty slice", category=RuntimeWarning)
+        surf_values, surf_weights = np.concatenate([
+            vol_to_surf(
+                volume,
+                pial_mesh.parts[hemi],
+                inner_mesh=wm_mesh.parts[hemi],
+                mask_img=dataset.mask,  # Ignore samples outside the gray matter mask
+            )
+            for hemi in ("left", "right")
+        ]).T
+    # Weighted average of valid voxels; NaN for vertices without valid voxels
+    return np.divide(surf_values, surf_weights, out=np.full_like(surf_values, np.nan), where=surf_weights > 0)
 ```
 
-We can then plot the standard deviation of each timecourse on the surface.
+We can then plot the standard deviation of each timecourse on the surface with
+{py:func}`prfmodel.plotting.plot_surface_stat_map`.
 
 ```{code-cell} ipython3
+from prfmodel.plotting import plot_surface_stat_map
+
 # Calculate standard deviation of each timecourse
 response_sd = response_psc.std(axis=1)
 
-plot_surf_stat_map_helper(response_sd, vmax=5.0, title="Response standard deviation");
+plot_surface_stat_map(
+    mesh, project_to_surface(response_sd), view=SURF_VIEW, vmax=5.0, title="Response standard deviation"
+);
 ```
 
-We can see that there is high variation in the signal in the visual areas (e.g., V1-V3) as we would expect for a visual stimulus.
+We can see that there is high variation in the signal in the visual areas at the occipital pole (in the center of the
+plot) as we would expect for a visual stimulus.
 
 +++
 
-## Creating the stimulus
+## Loading the stimulus
 
 +++
 
 For pRF modeling, we also need the experimental stimulus that the subject has seen during the fMRI recording. The
-stimulus was created using MATLAB so, we first load the raw design matrix that is located in the `data` directory.
-
-> **Note - stimulus preprocessing:** In this tutorial, we preprocess the raw design matrix before applying the pRF model to it.
-> However, while we use one possible preprocessing approach, we want to mention that there are alternative approaches
-> resting on different assumptions that can lead to similar modelling results.
+dataset comes with a ready-made {py:class}`prfmodel.stimuli.PRFStimulus` that has already been preprocessed for pRF
+modeling.
 
 ```{code-cell} ipython3
-from scipy.io import loadmat
-
-design_path = "data/vis_design.mat"
-design = np.transpose(loadmat(design_path)["stim"])
-design.shape  # (num_frames, num_x, num_y)
-```
-
-The first dimension is time which matches the time frames (second dimension) of our BOLD timecourses. The other dimensions
-correspond to the x- and y-coordinates of the pixels on the screen on which the stimulus was presented. We can see that
-the screen was rectangular. For pRF modelling, we prefer a square design, so we transform the design matrix into square
-shape by padding the y-axis.
-
-```{code-cell} ipython3
-# Calculate difference in number of pixels between x and y dimension
-pixel_offset = int((design.shape[1] - design.shape[2]) / 2)
-
-# Pad the y-dimension with zeros to match x dimension
-design_square = np.pad(
-    design,
-    [
-        (0, 0),  # We ignore the time frame and x dimension
-        (0, 0),
-        (pixel_offset, pixel_offset+1),
-    ],
-    constant_values=0,  # Pad with zeros
-)
-design_square.shape
-```
-
-Let's take a look at the range of values in the design.
-
-```{code-cell} ipython3
-design_square.min(), design_square.max()
-```
-
-We can see that the design still holds raw pixel color intensity values ranging from 0 to 255. For pRF modelling,
-we first binarize them to 0 (stimulus absent) and 1 (color intensity > 0; stimulus present). Then, we apply a Gaussian filter to smooth the
-transitions between stimulus absence and presence. Note that we also swap the x- and y-dimension to match the order
-that prfmodel expects.
-
-```{code-cell} ipython3
-from scipy.ndimage import gaussian_filter
-
-design_smooth = np.moveaxis(
-    gaussian_filter(
-        np.clip(design_square, 0, 1),  # Clip values to interval 0 and 1
-        sigma=10,
-        axes=(1, 2),  # Apply filter to each time frame separately
-    ),
-    1, 2,  # Swap x and y dimension because prfmodel expects y dimension to be first!
-)
-design_smooth.min(), design_smooth.max()
-```
-
-Now, the design values range between 0 and 1. However, it still has 500 pixels in each screen dimension.
-This resolution is unecessarily high for our pRF model, so we only select every 5th pixel to get a lower resolution.
-
-```{code-cell} ipython3
-design_smooth_low_res = design_smooth[:, ::5, ::5]
-design_smooth_low_res.shape
-```
-
-The pRF is defined on the visual field and not on the screen pixels.
-Therefore, we also need to define the coordinates of each pixel in the visual field. The visual field of our stimulus
-ranges from -10 to 10 degrees of visual angle.
-
-```{code-cell} ipython3
-num_grid_points = design_smooth_low_res.shape[1]
-
-x_min, y_min, x_max, y_max = -10.0, -10.0, 10.0, 10.0
-
-coordinates = np.stack(
-    # Get all combinations of x- and y-coordinates
-    np.meshgrid(
-        np.linspace(x_min, x_max, num_grid_points),
-        np.linspace(y_min, y_max, num_grid_points),
-    ),
-    axis=-1,
-)
-coordinates.shape
-```
-
-The `coordinates` object contains the x- and y-coordinate for every screen pixel in the visual field. We combine the
-final design and the coordinates in a {py:class}`prfmodel.stimuli.PRFStimulus` container that we will later use as input for our pRF model.
-
-```{code-cell} ipython3
-from prfmodel.stimuli import PRFStimulus
-
-stimulus = PRFStimulus(design_smooth_low_res, coordinates, ["y", "x"])  # y comes before x!
+stimulus = dataset.stimulus
 
 print(stimulus)
 ```
 
-When printing the `stimulus` object, we can see the shapes of its attributes.
+When printing the `stimulus` object, we can see the shapes of its attributes. The `design` has one frame for each
+time frame of the BOLD response and 128 cells in the y- and x-dimension. The `grid` contains the y- and x-coordinates
+of each cell in the visual field, which spans approximately -4 to 4 degrees of visual angle in both dimensions.
+
+```{code-cell} ipython3
+grid_min_xy, grid_max_xy = stimulus.grid.min(axis=(0, 1)), stimulus.grid.max(axis=(0, 1))
+print(grid_min_xy, grid_max_xy)
+```
 
 We can visualize the stimulus using {py:func}`prfmodel.plotting.animate_2d_prf_stimulus`.
 
@@ -258,69 +201,113 @@ from prfmodel.plotting import animate_2d_prf_stimulus
 
 ani = animate_2d_prf_stimulus(stimulus, interval=50)  # Pause 50 ms between time frames
 
-HTML(ani.to_html5_video())
+HTML(ani.to_jshtml())
 ```
 
-We can see that the stimulus consists of four rectangular bars that move vertically and horizontally across the screen.
+We can see that the stimulus consists of a bar that moves vertically and horizontally across the screen, interrupted
+by blank periods. The second half of the experiment plays the bar sequence of the first half backwards in time, so each
+sweep is repeated in the opposite direction. We will use this structure later for cross-validation.
 
 +++
 
 ## Inspecting the data
 
-Before we model the BOLD response, we look at the timecourses and inspect the quality of the data. To do this we select a subset of vertices and plot their BOLD response over time. Note that the unit of time frames is repetition time (TR) which is
-1.5 seconds for this dataset.
+Before we model the BOLD response, we look at the timecourses and inspect the quality of the data. To do this we select a subset of voxels and plot their BOLD response over time. Note that the unit of time frames is repetition time (TR) which is
+0.9 seconds for this dataset.
 
 ```{code-cell} ipython3
-import plotly.io as pio
 import plotly.express as px
+import plotly.io as pio
 
 pio.renderers.default = "notebook_connected"  # Requires internet connection to work
 pio.templates.default = "simple_white"
 
+num_frames = response_psc.shape[1]
+
 fig = px.line(
     response_psc[::500, :].T,
     animation_frame="variable",
-    range_x=(0, 120),
+    range_x=(0, num_frames),
     range_y=(-5, 5),
     labels={
         "index": "Time frame (in TR)",
         "value": "BOLD response (in PSC)",
-        "variable": "Vertex",
+        "variable": "Voxel",
     },
-    title="Vertex time courses",
+    title="Voxel time courses",
 )
 fig.update_layout(showlegend=False, height=450)
 fig.show()
 ```
 
-While the timecourses are quite noisy, we can see that, for some vertices, there are four regular peaks in the signal. These peaks correspond
-to the bars moving through the visual field. The goal of our pRF model is to predict these peaks as closely as possible.
-By comparing how similar the pRF model predictions are to the observed timecourses, we can identify vertices and areas of the brain that respond to our visual stimulus. This allows us to create a stimulus-specific pRF map of the brain.
+While the timecourses are quite noisy, we can see that, for some voxels, there are regular peaks in the signal. These peaks correspond
+to the bar moving through the voxel's pRF. The goal of our pRF model is to predict these peaks as closely as possible.
+By comparing how similar the pRF model predictions are to the observed timecourses, we can identify voxels and areas of the brain that respond to our visual stimulus. This allows us to create a stimulus-specific pRF map of the brain.
 
-We can get an even better overview by plotting all timecourses at once in a heatmap.
+We can get an even better overview by plotting all timecourses at once in a heatmap with
+{py:func}`prfmodel.plotting.plot_response_heatmap`.
 
 ```{code-cell} ipython3
-aspect_ratio = response_psc.shape[1] / response_psc.shape[0]
+from prfmodel.plotting import plot_response_heatmap
 
-fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-
-# We use matplotlib because plotly cannot handle this many vertices
-im = ax.imshow(
+plot_response_heatmap(
     response_psc,
-    aspect=aspect_ratio,
-    cmap="inferno",
     vmin=-2,
     vmax=5,
-)
-
-ax.set_xlabel("Time frame (in TR)")
-ax.set_ylabel("Vertex index")
-fig.colorbar(im, ax=ax, label="BOLD response (in PSC)");
+    xlabel="Time frame (in TR)",
+    ylabel="Voxel index",
+    colorbar_label="BOLD response (in PSC)",
+    figsize=(6, 6),
+);
 ```
 
-Again, we can see the four peaks in the BOLD response of some vertices in both hemispheres. However, the location of the peaks in the timecourse differs between vertices and hemispheres.
+Again, we can see the peaks in the BOLD response of many voxels. The location of the peaks in the timecourse differs
+between voxels, reflecting the different locations of their pRFs in the visual field.
 
 +++
+
+## Splitting the data for cross-validation
+
++++
+
+A model that fits the data it was estimated on well does not necessarily predict new data well, because it can also fit
+the noise in the data (overfitting). To evaluate how well our pRF model generalizes, we use cross-validation: we fit the model on the
+first half of the experiment (the training set) and evaluate its predictions on the second half (the test set).
+Because the second half repeats the bar sweeps of the first half in the opposite direction, both halves cover the
+same locations in the visual field but have independent noise.
+
+We split both the stimulus design and the BOLD response at the midpoint of the time axis.
+
+```{code-cell} ipython3
+from prfmodel.stimuli import PRFStimulus
+
+num_frames_train = num_frames // 2
+
+# The training stimulus contains the first half of the design and the same grid
+stimulus_train = PRFStimulus(
+    design=stimulus.design[:num_frames_train],
+    grid=stimulus.grid,
+    frame_duration=stimulus.frame_duration,
+    dimension_labels=stimulus.dimension_labels,
+)
+
+response_train = response_psc[:, :num_frames_train]
+response_test = response_psc[:, num_frames_train:]
+
+print(stimulus_train)
+```
+
+Some voxels in the mask do not have valid timecourses, that is, their timecourses are constant and do not contain
+any signal. We filter out all voxels that have a constant timecourse in either half of the data.
+
+```{code-cell} ipython3
+response_is_valid = (response_train.std(axis=1) > 0.0) & (response_test.std(axis=1) > 0.0)
+
+response_train_valid = response_train[response_is_valid]
+response_test_valid = response_test[response_is_valid]
+
+response_is_valid.mean()  # Fraction of valid voxels
+```
 
 ## Defining the pRF model
 
@@ -331,41 +318,40 @@ Gaussian shape in two-dimensional visual space. This response is convolved with 
 that follows the shape of the hemodynamic response in the brain. Finally, a baseline and amplitude parameter shift and scale
 our predicted response to match the observed BOLD response.
 
-The {py:class}`prfmodel.models.gaussian.Gaussian2DPRFModel` class performs all these steps to make a combined prediction. However, we need to add a custom impulse
-response model to account for the fact that each time frame is one TR (1.5 seconds; the default in prfmodel is 1.0 seconds). Thus, we set the resolution
-of our predicted impulse response to the TR.
+The {py:class}`prfmodel.models.prf.Gaussian2DPRFModel` class performs all these steps to make a combined prediction.
+
+**Important**: Each time frame in the stimulus design (and in the observed timecourses) is one TR of 0.9 seconds. The
+dataset stores the TR as the `frame_duration` of the stimulus, and the pRF model samples its impulse response at this
+frame duration, so that the final predicted model response has the same sampling rate as the observed timecourses (see
+also the section [](../../important_details.md)).
 
 ```{code-cell} ipython3
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.prf import Gaussian2DPRFModel
 
-# Define repetition time (TR)
-tr = 1.5
+# The repetition time (TR) is stored as the frame duration of the stimulus
+print(stimulus.frame_duration)
 
-# Create custom impulse model
-impulse_model = DerivativeTwoGammaImpulse(
-    resolution=tr,
-    offset=tr / 2.0,
-)
+# Create the impulse model. Without a resolution, it is sampled at the frame duration of the stimulus.
+# Each frame is sampled at its leading edge, so the first frame sits at t = 0 (where the response is zero)
+# and no offset is needed.
+impulse_model = DerivativeTwoGammaImpulse()
 ```
 
-We can visualize the predicted impulse response for a set of default parameters.
+We can visualize the predicted impulse response. The two-gamma parameters (`delay`, `dispersion`, `undershoot`,
+`u_dispersion`, `ratio`) default to the Glover HRF parameter set
+(see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only need to set `weight_deriv`.
+On its own, the impulse model does not know the stimulus, so we sample it at the frame duration of the stimulus with
+{py:meth}`~prfmodel.impulse.base.BaseImpulse.at_resolution` before plotting.
 
 ```{code-cell} ipython3
-import pandas as pd
-
-# Define default parameters for impulse response
+# Only weight_deriv is set; the two-gamma parameters use the model's default Glover HRF values
 impulse_default_params = pd.DataFrame({
-    "delay": [6.0],
-    "dispersion": [0.9],
-    "undershoot": [12.0],
-    "u_dispersion": [0.9],
-    "ratio": [0.48],
     "weight_deriv": [-0.5],
 })
 
-# Predict impulse response with default parameters
-impulse_response = np.asarray(impulse_model(impulse_default_params))
+# Predict impulse response at the frame duration of the stimulus
+impulse_response = impulse_model.at_resolution(stimulus.frame_duration)(impulse_default_params)
 
 fig = px.line(
     pd.DataFrame({
@@ -380,16 +366,16 @@ fig.update_layout(height=450)
 fig.show()
 ```
 
-We insert the impulse model into the {py:class}`prfmodel.models.gaussian.Gaussian2DPRFModel` that makes combined model predictions.
+We insert the impulse model into the {py:class}`prfmodel.models.prf.Gaussian2DPRFModel` that makes combined model predictions.
 
 ```{code-cell} ipython3
-# Define pRF model with custom impulse response submodel
+# Define pRF model with the impulse response submodel
 prf_model = Gaussian2DPRFModel(
     impulse_model=impulse_model,
 )
 ```
 
-We define a set of starting parameters to make a combined prediction with our pRF model.
+We define a set of starting parameters to make a combined prediction for the training stimulus with our pRF model.
 
 ```{code-cell} ipython3
 # Combine pRF starting parameters with impulse response default parameters
@@ -404,7 +390,7 @@ start_params = pd.concat([pd.DataFrame(
 ), impulse_default_params], axis=1)
 
 # Make prediction with pRF model
-simulated_response = np.asarray(prf_model(stimulus, start_params))
+simulated_response = prf_model(stimulus_train, start_params)
 
 fig = px.line(
     pd.DataFrame({
@@ -413,23 +399,15 @@ fig = px.line(
     }),
     x="Time frame (in TR)",
     y="BOLD response (in PSC)",
-    title="Predicted timecourse",
+    title="Predicted timecourse (training stimulus)",
 )
 fig.update_layout(height=450)
 fig.show()
 ```
 
-Some vertices do not have valid timecourses, that is, they contain `NaN` values. We filter out all vertices that have
-missing BOLD response measurements.
-
-```{code-cell} ipython3
-response_is_valid = np.all(np.isfinite(response_psc), axis=1)
-response_valid = response_psc[response_is_valid]
-```
-
 ## Fitting the pRF model
 
-We will fit the pRF model to our BOLD response data using two stages. We begin with a grid search to find good values for our parameters of interest (`mu_x`, `mu_y`, and `sigma`). Then, we use least squares to estimate the `baseline` and `amplitude` of
+We will fit the pRF model to the training set using two stages. We begin with a grid search to find good values for our parameters of interest (`mu_x`, `mu_y`, and `sigma`). Then, we use least squares to estimate the `baseline` and `amplitude` of
 our model.
 
 > **Note**: Typically, we would also use stochastic gradient descent (SGD) to finetune our model fits after the least-squares stage. To keep the example computationally simple, we omit this step here but encourage readers to explore this approach at the end.
@@ -437,46 +415,59 @@ our model.
 +++
 
 Let's start with the grid search by defining ranges of `mu_x`, `mu_y`, and `sigma` that we want to construct a grid
-of parameter values from. For `baseline` and `amplitude`, we only provide a single value so that they will stay constant
-across the entire grid. The parameters of the HRF model also remain constant at their default value.
+of parameter values from. We create them from the stimulus with {py:func}`prfmodel.fitters.grid_values_2d_prf`. For the
+pRF center coordinates `mu_x`, `mu_y`, we extend the grid to twice the range of the visual field that is covered by the
+stimulus coordinates (`mu_extent=2.0`). Later, we will filter out voxels for which the estimated pRF center lies outside
+the stimulus coordinates. For pRF size `sigma`, we define a log-spaced grid between 0.05 and 10 degrees.
+
+For `baseline` and `amplitude`, we only provide a single value so that they will stay constant
+across the entire grid. The two-gamma parameters of the impulse model are omitted entirely. Instead, the impulse model supplies
+them from its default Glover HRF parameter set. However, if we wanted to override the default parameters, we could also
+add ranges for them here.
 
 ```{code-cell} ipython3
-param_ranges = {
-    "mu_x": np.linspace(-10, 10, 20),  # Range of visual field in experiment
-    "mu_y": np.linspace(-10, 10, 20),
-    "sigma": np.linspace(0.005, 10.0, 20),
-    "delay": [6.0],
-    "dispersion": [0.9],
-    "undershoot": [12.0],
-    "u_dispersion": [0.9],
-    "ratio": [0.48],
+from prfmodel.fitters import grid_values_2d_prf
+
+param_ranges = grid_values_2d_prf(
+    stimulus,
+    num_mu=21,
+    mu_extent=2.0,  # 2 x range of visual field in experiment
+    num_sigma=20,
+    sigma_range=(0.05, 10.0),  # log-spaced by default
+) | {
+    # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-0.5],
     "baseline": [0.0],
     "amplitude": [1.0],
 }
+param_ranges
 ```
 
-For all three parameters, we defined ranges of 20 values that will be used to construct the grid. That is, the
-grid search will evaluate all possible combinations of these values and return the combination that fits the simulated
-data best. This will result in a grid containing $20 ^ 3 = 8000$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
+For all three parameters, we defined ranges of values that will be used to construct the grid: 21 values for `mu_x` and
+`mu_y`, and 20 values for `sigma`. We used 21 values for `mu_x` and `mu_y` so that the stimulus center (0 degrees) and
+edges ($\pm 4$ degrees) land on grid points. If they did not, {py:func}`prfmodel.fitters.grid_values_2d_prf` would
+warn us and suggest a number of values that aligns them. The grid search will evaluate all possible combinations of these values and
+return the combination that fits the observed data best. This will result in a grid containing
+$21 \times 21 \times 20 = 8820$ parameter combinations. This is still a relatively small grid and we recommend
+specifying finer grids in practice.
 
-Let's construct the {py:class}`prfmodel.fitters.grid.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.grid.GridFitter`
-evaluate 20 parameter combinations at the same time (which saves us some memory). As the `loss` (i.e., the metric to minimize between model predictions and data), we use cosine similarity which ignores differences in scale between model predictions and observed data.
+Let's construct the {py:class}`prfmodel.fitters.GridFitter` and perform the grid search. Note that we pass the
+training stimulus and set `batch_size=20` to let the {py:class}`prfmodel.fitters.GridFitter`
+evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is the negative correlation, which ignores differences in baseline and amplitude between model predictions and observed data. This means the data do not need to be demeaned or converted to percent signal change first, but also that `baseline` and `amplitude` cannot be estimated by the grid search itself. We fix them here and estimate them with least squares in the next step.
 
 ```{code-cell} ipython3
-from keras.losses import CosineSimilarity
 from prfmodel.fitters import GridFitter
 
 # Create grid fitter object
 grid_fitter = GridFitter(
     model=prf_model,
-    stimulus=stimulus,
-    loss=CosineSimilarity(reduction="none"),  # Grid fitter needs no aggregation of loss
+    stimulus=stimulus_train,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 # Run grid search
 grid_history, grid_params = grid_fitter.fit(
-    data=response_valid,
+    data=response_train_valid,
     parameter_values=param_ranges,
     batch_size=20,
 )
@@ -488,10 +479,13 @@ We can print the parameters estimated by the grid search.
 grid_params
 ```
 
-We can see that the estimates for `mu_x`, `mu_y`, and `sigma` are one combination in our grid. In the second step,
-we also optimize the `amplitude` of the pRF model together with the `baseline` using least squares. This adjusts the
+We can see that the estimates for `mu_x`, `mu_y`, and `sigma` are one combination in our grid.
+
++++
+
+In the second step, we optimize the `amplitude` of the pRF model together with the `baseline` using least squares. This adjusts the
 scale of our model predictions to scale the observed data. We set `batch_size=200` to estimate least-squares fits
-for batches of vertices sequentially and save memory.
+for batches of voxels sequentially and save memory.
 
 ```{code-cell} ipython3
 from prfmodel.fitters import LeastSquaresFitter
@@ -499,12 +493,12 @@ from prfmodel.fitters import LeastSquaresFitter
 # Create least-squares fitter
 ls_fitter = LeastSquaresFitter(
     model=prf_model,
-    stimulus=stimulus,
+    stimulus=stimulus_train,
 )
 
 # Run least squares fit
 ls_history, ls_params = ls_fitter.fit(
-    data=response_valid,
+    data=response_train_valid,
     parameters=grid_params,
     slope_name="amplitude",  # Names of parameters to be optimized with least squares
     intercept_name="baseline",
@@ -516,123 +510,229 @@ ls_history, ls_params = ls_fitter.fit(
 ls_params
 ```
 
-We can see that the amplitudes are substantially lower compared to the starting value (and our initial guess) for many vertices.
+We can see that the amplitudes are substantially lower compared to the starting value (and our initial guess) for many voxels.
+
++++
+
+## Evaluating the pRF model
 
 Now that the core pRF parameters and the auxiliary baseline and amplitude parameters are optimized, we can
-compare the model predictions against the observed responses. Because we want to make predictions for all vertices in
+compare the model predictions against the observed responses. Because we want to make predictions for all voxels in
 the brain, we wrap our `prf_model` in the {py:func}`prfmodel.utils.batched` modifier function. The modifier changes the behavior of the model
-to make predictions for batches of vertices sequentially. This saves us a lot of memory at the expense of minimal runtime
+to make predictions for batches of voxels sequentially. This saves us a lot of memory at the expense of minimal runtime
 overhead.
+
+For the test set, we need to be careful: the hemodynamic response to the bar at the end of the first half carries
+over into the beginning of the second half. If we made predictions with the second half of the design alone, the model
+would miss this carry-over. Therefore, we make predictions for the *full* stimulus and split the predicted timecourses
+in the same way as the observed ones. The predictions for the first half are identical to the predictions for the
+training stimulus because nothing precedes the first time frame.
 
 ```{code-cell} ipython3
 from prfmodel.utils import batched
 
 predict_batched = batched(prf_model)
 
-# Make predictions with optimized parameters
+# Make predictions for the full stimulus with the parameters estimated on the training set
 pred_response = np.asarray(predict_batched(stimulus, ls_params, batch_size=200))
+
+pred_response_train = pred_response[:, :num_frames_train]
+pred_response_test = pred_response[:, num_frames_train:]
 ```
 
-We can quantify how well the predictions align with the observed timecourses using the R-squared metric. This metric indicates the proportion of variance in the observed data explained by our model predictions.
+We can quantify how well the predictions align with the observed timecourses using the R-squared metric, which we
+compute with {py:func}`prfmodel.utils.calculate_r_squared`. This metric indicates the proportion of variance in the
+observed data explained by our model predictions. We start by comparing the model predictions to the observed
+timecourses of the training set. Because we used the training set to fit our pRF model, we are assessing its in-sample
+fit.
 
 ```{code-cell} ipython3
-from keras.metrics import R2Score
+from prfmodel.utils import calculate_r_squared
 
-r2_metric = R2Score(class_aggregation=None)  # Don't aggregate score over vertices
-
-r_squared = np.asarray(r2_metric(response_valid.T, pred_response.T))  # Transpose to compute score across time frames
-r_squared.shape
+r_squared_train = calculate_r_squared(response_train_valid, pred_response_train)  # One score per voxel
+r_squared_train.shape
 ```
 
-We can look at the distribution of R-squared values across vertices.
+We also compute the R-squared on the test set to assess the out-of-sample fit. Note that the out-of-sample R-squared can
+be negative when the predictions are worse than a flat line at the mean of the observed timecourse.
 
 ```{code-cell} ipython3
-fig = px.histogram(
-    x=r_squared,
-    nbins=15,
-    labels={"x": "R-squared"},
-).update_layout(yaxis_title="Frequency", height=450)
-fig.show()
+r_squared_test = calculate_r_squared(response_test_valid, pred_response_test)
+r_squared_test.shape
 ```
 
-We can see that many vertices have a score close to zero meaning that the pRF model does not predict the observed response well. This is expected since not the entire brain responds to our relatively simple visual stimulus.
-However, a substantial amount of vertices also have higher scores, suggesting that some brain areas do respond to it.
+We can look at the distribution of R-squared values across voxels for both sets with
+{py:func}`prfmodel.plotting.plot_r_squared_hist`.
 
-Let's plot the predicted and the observed timecourses for a subsample of vertices.
+```{code-cell} ipython3
+from prfmodel.plotting import plot_r_squared_hist
+
+plot_r_squared_hist(
+    {
+        "Training set (in-sample)": r_squared_train,
+        "Test set (out-of-sample)": r_squared_test,
+    },
+    log=True,  # Many voxels have scores close to zero; a log scale also shows the voxels with higher scores
+);
+```
+
+We can see that many voxels have a score close to zero meaning that the pRF model does not predict the observed response well. This is expected since not the entire brain responds to our relatively simple visual stimulus.
+However, a substantial amount of voxels also have higher scores, suggesting that some brain areas do respond to it.
+The scores on the test set are slightly lower than on the training set, because the model partly fits the noise in the
+training set, which does not generalize to the test set.
+
+We can compare the in-sample and out-of-sample R-squared for each voxel directly with
+{py:func}`prfmodel.plotting.plot_r_squared_comparison`.
+
+```{code-cell} ipython3
+from prfmodel.plotting import plot_r_squared_comparison
+
+plot_r_squared_comparison(r_squared_train, r_squared_test, figsize=(6, 5));
+```
+
+Voxels whose pRF model explains a large proportion of variance in the training set also tend to explain a large
+proportion in the test set, so the pRF model generalizes well to the second half of the experiment.
+
+Because the grid search can only return values that are in the grid, it is worth checking how the estimated pRF
+parameters are distributed across the grid. Many voxels in our data do not respond to the stimulus, so we compare the
+estimates of all voxels with those of voxels whose pRF model explains more than 30% of the variance in the training
+set. We plot the distribution of the pRF centers with {py:func}`prfmodel.plotting.plot_2d_prf_centers` and the distribution of the pRF sizes
+with {py:func}`prfmodel.plotting.plot_grid_parameter_distribution`.
+
+```{code-cell} ipython3
+from prfmodel.plotting import plot_2d_prf_centers, plot_grid_parameter_distribution
+
+fig, axes = plt.subplots(2, 2, figsize=(10, 9), layout="constrained")
+
+for row, (voxel_mask, label) in enumerate([
+    (np.full(len(grid_params), True), "All voxels"),
+    (r_squared_train > 0.3, "R-squared (train) > 0.3"),
+]):
+    params_subset = grid_params[voxel_mask]
+
+    # Count estimates for each combination of pRF center coordinates in the grid
+    plot_2d_prf_centers(params_subset, param_ranges, stimulus=stimulus, ax=axes[row, 0])
+    axes[row, 0].set(xlabel="mu_x (in degrees)", ylabel="mu_y (in degrees)", title=f"pRF centers: {label}")
+
+    # Count estimates for each pRF size in the grid
+    plot_grid_parameter_distribution(params_subset, param_ranges, "sigma", ax=axes[row, 1])  # Detects log spacing
+    axes[row, 1].set(xlabel="sigma (in degrees)", title=f"pRF sizes: {label}")
+```
+
+The rectangle marks the part of the visual field that is covered by the stimulus. Note that the color scale of the
+pRF centers is logarithmic. In the histograms of the pRF sizes, estimates at the smallest or largest value of the grid are
+highlighted in red. For all voxels (top row), many pRF sizes lie at the
+smallest values in the grid (0.05 and 0.07 degrees). These are mostly voxels that do not respond to the stimulus:
+A tiny pRF covers only a few cells of the stimulus, which allows its predicted timecourse to match noise in the observed
+timecourse.
+
+For the well-fitting voxels (bottom row), the pRF centers concentrate inside the stimulus around the center of the visual
+field, and most pRF sizes lie between 0.5 and 10 degrees. However, some well-fitting voxels have pRF centers at the edges of
+the grid ($\pm 8$ degrees) or a pRF size at the ceiling of the grid (10 degrees). For these voxels, the best fitting
+parameters might lie outside the grid, so we will exclude them when we analyze the pRF parameters. The plots also show
+that the estimates are limited to the resolution of the grid. A finer grid or an additional optimization step (e.g., with
+SGD) can refine the estimates.
+
+Let's plot the predicted and the observed timecourses for a subsample of voxels. We sort the voxels according to their
+out-of-sample R-squared and select them at logarithmically spaced ranks. This way, the subsample contains more voxels
+with a high R-squared, which are rare compared to voxels with an R-squared close to zero. The dashed line marks the split
+between the training and the test set.
 
 ```{code-cell} ipython3
 import plotly.graph_objects as go
 
-each_k = 500
+num_examples = 100
 
-# Sort vertices that are not in V1 according to R-squared
-best_vertices = np.flip(np.argsort(r_squared))[::each_k]
+# Sort voxels according to out-of-sample R-squared (highest first)
+sorted_voxels = np.flip(np.argsort(r_squared_test))
 
-response_valid_best_vertices = response_valid[best_vertices]
-pred_response_best_vertices = pred_response[best_vertices]
-r_squared_valid_best_vertices = r_squared[best_vertices]
-sigma_best_vertices = ls_params["sigma"].values[best_vertices]
+# Select voxels at log-spaced ranks so that the subsample contains more voxels with a high R-squared
+example_ranks = np.unique(np.geomspace(1, len(sorted_voxels), num_examples).astype(int)) - 1
+best_voxels = sorted_voxels[example_ranks]
 
-df_valid = pd.DataFrame(response_valid_best_vertices.T)
-df_pred = pd.DataFrame(pred_response_best_vertices.T)
+response_best_voxels = response_psc[response_is_valid][best_voxels]
+pred_response_best_voxels = pred_response[best_voxels]
+r_squared_test_best_voxels = r_squared_test[best_voxels]
+sigma_best_voxels = ls_params["sigma"].values[best_voxels]
 
-df_valid["source"] = "Observed"
+df_obs = pd.DataFrame(response_best_voxels.T)
+df_pred = pd.DataFrame(pred_response_best_voxels.T)
+
+df_obs["source"] = "Observed"
 df_pred["source"] = "Predicted"
 
-df = pd.concat([df_valid, df_pred], axis=0)
-df["time"] = np.tile(np.arange(df_valid.shape[0]), 2)
+df = pd.concat([df_obs, df_pred], axis=0)
+df["time"] = np.tile(np.arange(df_obs.shape[0]), 2)
 
-df_melted = df.melt(id_vars=["source", "time"], var_name="vertex", value_name="response")
+df_melted = df.melt(id_vars=["source", "time"], var_name="voxel", value_name="response")
 
 fig = px.line(
     df_melted,
     x="time",
     y="response",
     color="source",
-    animation_frame="vertex",
-    range_y=[-5, 5],
+    animation_frame="voxel",
+    range_y=[-5, 10],
     labels={
         "time": "Time frame (in TR)",
         "response": "BOLD response (in PSC)",
-        "vertex": "Vertex",
+        "voxel": "Voxel",
         "source": "",
     },
-    title=f"Observed and predicted vertex responses (subsampled vertices)",
+    title="Observed and predicted voxel responses (subsampled voxels)",
 )
 
-# Add a text trace to display per-vertex stats; this will be updated in each animation frame
+# Mark the split between the training and test set
+fig.add_vline(x=num_frames_train, line_dash="dash", line_color="gray")
+
+# Add a text trace to display per-voxel stats; this will be updated in each animation frame
 fig.add_trace(go.Scatter(
-    x=[60],
-    y=[4.7],
+    x=[num_frames / 2],
+    y=[9.5],
     mode="text",
-    text=[f"R-squared = {r_squared_valid_best_vertices[0]:.3f}, sigma = {sigma_best_vertices[0]:.3f}"],
+    text=[f"R-squared (test) = {r_squared_test_best_voxels[0]:.3f}, sigma = {sigma_best_voxels[0]:.3f}"],
     showlegend=False,
     hoverinfo="skip",
     textfont=dict(size=13),
 ))
-stats_trace_idx = len(fig.data) - 1
 
 # Append a stats text update to each animation frame's trace data
 for i, frame in enumerate(fig.frames):
-    r2 = r_squared_valid_best_vertices[i]
-    sigma = sigma_best_vertices[i]
+    r2 = r_squared_test_best_voxels[i]
+    sigma = sigma_best_voxels[i]
     frame.data = list(frame.data) + [go.Scatter(
-        text=[f"R-squared = {r2:.3f}, sigma = {sigma:.3f}"],
+        text=[f"R-squared (test) = {r2:.3f}, sigma = {sigma:.3f}"],
     )]
 
 fig.update_layout(showlegend=True, height=450)
 fig.show()
 ```
 
-We can see that the model predicts the observed timecourses for these vertices very well.
+We can see that the model predicts the observed timecourses for the best voxels very well, not only in the training
+set but also in the test set that it has not seen during fitting. For voxels with a lower R-squared, the observed
+timecourses contain more noise, and the regular peaks become harder to see.
 
-We can also visualize the R-squared score on the flat surface mesh.
+We can also visualize the out-of-sample R-squared on the flat surface mesh. To do this, we first fill the scores into an
+array with one value per voxel in the mask, leaving invalid voxels as `NaN` so that they are ignored in the projection.
 
 ```{code-cell} ipython3
-r_squared_full = np.full((response_psc.shape[0],), fill_value=np.nan)
-r_squared_full[response_is_valid] = r_squared
+def fill_valid_voxels(values: np.ndarray) -> np.ndarray:
+    """Fill values for the valid voxels into an array with one value per voxel in the mask."""
+    values_full = np.full((response_psc.shape[0],), fill_value=np.nan)
+    values_full[response_is_valid] = values
+    return values_full
 
-plot_surf_stat_map_helper(r_squared_full, vmin=0.0, vmax=1.0, title="Variance explained (R-squared)");
+
+r_squared_test_surf = project_to_surface(fill_valid_voxels(r_squared_test))
+
+plot_surface_stat_map(
+    mesh,
+    r_squared_test_surf,
+    view=SURF_VIEW,
+    vmin=0.0,
+    vmax=1.0,
+    title="Out-of-sample variance explained (R-squared)",
+);
 ```
 
 We can see that the vertices with the highest scores are located in the visual areas of both hemispheres.
@@ -641,62 +741,111 @@ We can see that the vertices with the highest scores are located in the visual a
 
 ## Analyzing the pRF results
 
-To analyze and interpret the pRF parameters, we will zoom in on vertices with R-squared > 0.6 which is roughly 7% of the vertices in the brain (note that this threshold is somewhat arbitrary).
+To analyze and interpret the pRF parameters, we zoom in on voxels for which we can trust the pRF estimates. We select
+voxels that fulfill three criteria:
+
+- The out-of-sample R-squared is above 0.3 (note that this threshold is somewhat arbitrary). Because we select voxels
+  based on the test set, which was not used for fitting, the selection is not biased towards voxels whose fits mostly
+  capture noise.
+- The pRF center lies inside the visual field covered by the stimulus. We extended the grid for `mu_x` and `mu_y`
+  beyond the stimulus, but pRF centers outside the stimulus are only weakly constrained by the data.
+- The pRF size is below the largest `sigma` value in the grid. An estimate at the ceiling of the grid suggests
+  that the best fitting pRF size lies outside the grid.
+
+We select voxels instead of surface vertices because we fitted the pRF model to the timecourse of each voxel. The
+projection onto the surface averages neighboring voxels, so selecting vertices would mix the parameters of poorly fitting
+voxels into the selected vertices. Instead, we set the parameters of voxels that are not selected to `NaN` before
+the projection, so that they are ignored.
 
 ```{code-cell} ipython3
-# Create mask for vertices above R-squared threshold
-is_above_threshold = r_squared > 0.6
+mu_x = ls_params["mu_x"].to_numpy()
+mu_y = ls_params["mu_y"].to_numpy()
+sigma = ls_params["sigma"].to_numpy()
 
-# Compute proportion of vertices above threshold
-is_above_threshold.mean()
+r_squared_threshold = 0.3
+edge_tolerance = 1e-3  # in degrees
+
+selection_criteria = pd.DataFrame({
+    f"r_squared_test > {r_squared_threshold}": r_squared_test > r_squared_threshold,
+    # The tolerance includes the grid values at the stimulus edges, which can be off due to rounding
+    "center inside stimulus": (
+        (mu_x >= grid_min_xy[1] - edge_tolerance)
+        & (mu_x <= grid_max_xy[1] + edge_tolerance)
+        & (mu_y >= grid_min_xy[0] - edge_tolerance)
+        & (mu_y <= grid_max_xy[0] + edge_tolerance)
+    ),
+    # Least squares does not change sigma, so it is always one of the grid values
+    "sigma below grid ceiling": ~np.isclose(sigma, np.max(param_ranges["sigma"])),
+})
+
+is_selected = selection_criteria.all(axis=1).to_numpy()
+
+
+def project_selected(voxel_values: np.ndarray) -> np.ndarray:
+    """Project values of the selected voxels onto the surface, ignoring all other voxels."""
+    return project_to_surface(fill_valid_voxels(np.where(is_selected, voxel_values, np.nan)))
+
+
+# Fraction of valid voxels that fulfill each criterion and all criteria together
+selection_criteria.assign(all_criteria=is_selected).mean()
 ```
 
-For these vertices, we can look at different quantities to interpret the pRFs estimated by our model.
+For the selected voxels, we can look at different quantities to interpret the pRFs estimated by our model.
 
 First, we look at the pRF size indicated by `sigma` and plot it on the surface.
 
 ```{code-cell} ipython3
-# Allocate size vector for the entire surface
-size = np.full((response_psc.shape[0],), fill_value=np.nan)
+size_surf = project_selected(sigma)
 
-# Fill valid vertices with estimated size parameters
-size[response_is_valid] = np.where(is_above_threshold, ls_params["sigma"], np.nan)
-
-plot_surf_stat_map_helper(size, vmin=0.0, vmax=10.0, title="pRF size (sigma)");
+plot_surface_stat_map(mesh, size_surf, view=SURF_VIEW, vmin=0.0, vmax=5.0, title="pRF size (sigma)");
 ```
 
-We can see that vertices in the early visual pathway (e.g., V1) have smaller sizes than those in the higher areas.
+We can see that vertices in the early visual pathway (e.g., V1) tend to have smaller sizes than those in the higher areas.
 
-Besides the pRF size, we can also look at the position of the pRF relative to the center of the screen. First, we compute the angle of the center of the pRF relative to the center (i.e., the polar angle).
+Besides the pRF size, we can also look at the position of the pRF relative to the center of the screen. First, we
+compute the angle of the center of the pRF relative to the center (i.e., the polar angle) with
+{py:func}`prfmodel.utils.calculate_polar_angle`. Because the projection onto
+the surface averages the values of neighboring voxels, we project the x- and y-coordinates of the pRF centers
+separately and compute the angle on the surface. Averaging angles directly would give wrong results where they wrap
+around from $-\pi$ to $+\pi$.
 
 ```{code-cell} ipython3
-def calc_angle(mu_x: float, mu_y: float) -> float:
-    """Compute the polar angle of a pRF from the x- and y-coordinate of its center."""
-    return np.angle(mu_x + mu_y * 1j)
+from prfmodel.utils import calculate_polar_angle
 
-angle = np.full((response_psc.shape[0],), fill_value=np.nan)
+mu_x_surf = project_selected(mu_x)
+mu_y_surf = project_selected(mu_y)
 
-angle_valid = calc_angle(ls_params["mu_x"], ls_params["mu_y"])
-angle[response_is_valid] = np.where(is_above_threshold, angle_valid, np.nan)
+angle_surf = calculate_polar_angle(mu_x_surf, mu_y_surf)
 
-plot_surf_stat_map_helper(angle, vmin=-np.pi, vmax=np.pi, title="pRF center polar angle");
+# The polar angle is cyclic (-pi and +pi are the same direction), so we use a cyclic colormap
+plot_surface_stat_map(mesh, angle_surf, view=SURF_VIEW, cyclic=True, title="pRF center polar angle");
 ```
 
-The surface plot shows that vertices in the left hemisphere have a positive pRF angle, meaning that their pRF center is on the right side of the screen. In contrast, vertices in the right hemisphere have negative pRF angle, thus, their pRF center is located on the left side of the screen.
+The polar angle runs counterclockwise from the right side of the screen: an angle of 0 means that the pRF center lies
+to the right of the center of the screen, an angle of $\pm\pi$ that it lies to the left. The sign of the angle
+distinguishes the upper (positive) from the lower (negative) half of the screen.
 
-We can also look at the eccentricity, that is, the distance of the pRF center from the center of the screen.
+The surface plot shows that vertices in the left hemisphere have angles around 0, meaning that their pRF center is on
+the right side of the screen. In contrast, vertices in the right hemisphere have angles around $\pm\pi$, thus, their
+pRF center is located on the left side of the screen. This is what we expect from the visual system: Each hemisphere
+represents the opposite half of the visual field.
+
+Note that the angles around $\pm\pi$ in the right hemisphere wrap around. That is, $-\pi$ and $+\pi$ point in the same
+direction, so the apparent jump between them is a property of the angle definition and not a discontinuity in the
+estimated pRF centers. The cyclic colormap gives both ends the same color, which keeps the transition smooth.
+
+We can also look at the eccentricity, that is, the distance of the pRF center from the center of the screen, which we
+compute with {py:func}`prfmodel.utils.calculate_eccentricity`.
 
 ```{code-cell} ipython3
-def calc_eccentricity(mu_x: float, mu_y: float) -> float:
-    """Compute the eccentricity of a pRF from the x- and y-coordinate of its center."""
-    return np.abs(mu_x + mu_y * 1j)
+from prfmodel.utils import calculate_eccentricity
 
-eccentricity = np.full((response_psc.shape[0],), fill_value=np.nan)
+eccentricity_surf = calculate_eccentricity(mu_x_surf, mu_y_surf)
 
-eccentricity_valid = calc_eccentricity(ls_params["mu_x"], ls_params["mu_y"])
-eccentricity[response_is_valid] = np.where(is_above_threshold, eccentricity_valid, np.nan)
-
-plot_surf_stat_map_helper(eccentricity, vmin=0.0, vmax=10.0, title="pRF center eccentricity");
+# The corners of the stimulus have an eccentricity of 4 * sqrt(2) degrees
+plot_surface_stat_map(
+    mesh, eccentricity_surf, view=SURF_VIEW, vmin=0.0, vmax=4.0 * np.sqrt(2), title="pRF center eccentricity"
+);
 ```
 
 For eccentricity, we can see segments with gradual transitions in both hemispheres that correspond to pRFs that are closer or further away from the center of the screen.
@@ -705,26 +854,18 @@ For eccentricity, we can see segments with gradual transitions in both hemispher
 
 ## Conclusion
 
-This example showed how to fit a two-dimensional Gaussian pRF model to empirical fMRI data collected from an experiment in the visual domain. First, we plotted the raw BOLD response data on the cortical surface. Second, we created the experimental stimulus. Then, we defined a pRF model and optimized its parameters using a grid search followed by least-squares to adjust for baseline and amplitude differences. Finally, we visualized model fit, the estimated parameters, and derived measures on the cortical surface.
+This example showed how to fit a two-dimensional Gaussian pRF model to empirical fMRI data collected from an experiment in the visual domain. First, we projected the BOLD response data from the volume onto the cortical surface. Second, we loaded the experimental stimulus and split the stimulus and the data in half for cross-validation. Then, we defined a pRF model and optimized its parameters on the first half using a grid search followed by least-squares to adjust for baseline and amplitude differences. Finally, we evaluated the model fit on both halves and visualized the out-of-sample fit, the estimated parameters, and derived measures on the cortical surface.
 
-## Next steps
+## Next Steps
 
 The predictions by our pRF model can potentially be improved. We suggest different directions for improving the pRF model fit:
 
 - Increasing the number of points in the parameter grid for the grid search
-- Finetuning the pRF model parameters with stochastic gradient descent with {py:class}`prfmodel.fitters.sgd.SGDFitter`
-- Applying preprocessing steps before fitting the pRF model (e.g., high-pass filtering)
-- Optimizing the impulse model parameters in the grid search
+- Finetuning the pRF model parameters with stochastic gradient descent with {py:class}`prfmodel.fitters.SGDFitter`
 - Building a more complex pRF model (e.g., compressive spatial summation, see Kay et al., 2013)
 
-+++
-
-## Stay Tuned
-
-More tutorials on fitting models to empirical data and creating custom models are in the making.
-
-For questions and issues, please make an issue on [GitHub](https://github.com/popylar-org/prfmodel/issues) or
-contact Malte Lüken (m.luken@esciencecenter.nl).
+The cross-validation can also be extended. For example, we could swap the training and test sets, fit the model on the
+second half, evaluate it on the first half, and average the out-of-sample R-squared over both folds.
 
 +++
 
@@ -733,5 +874,3 @@ contact Malte Lüken (m.luken@esciencecenter.nl).
 Dumoulin, S. O., & Wandell, B. A. (2008). Population receptive field estimates in human visual cortex. *NeuroImage, 39*(2), 647–660. https://doi.org/10.1016/j.neuroimage.2007.09.034
 
 Kay, K. N., Winawer, J., Mezer, A., & Wandell, B. A. (2013). Compressive spatial summation in human visual cortex. Journal of Neurophysiology, 110(2), 481–494. https://doi.org/10.1152/jn.00105.2013
-
-Van Essen, D. C., Ugurbil, K., Auerbach, E., Barch, D., Behrens, T. E. J., Bucholz, R., Chang, A., Chen, L., Corbetta, M., Curtiss, S. W., Della Penna, S., Feinberg, D., Glasser, M. F., Harel, N., Heath, A. C., Larson-Prior, L., Marcus, D., Michalareas, G., Moeller, S., … WU-Minn HCP Consortium. (2012). The Human Connectome Project: A data acquisition perspective. *NeuroImage, 62*(4), 2222–2231. https://doi.org/10.1016/j.neuroimage.2012.02.018

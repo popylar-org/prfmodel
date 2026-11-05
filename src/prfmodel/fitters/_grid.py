@@ -4,17 +4,26 @@ import math
 import warnings
 from collections.abc import Callable
 from itertools import product
+from typing import cast
 import keras
 import numpy as np
 import pandas as pd
 from keras import ops
 from more_itertools import chunked
 from tqdm.auto import tqdm
+from prfmodel._backend import compile_fun
 from prfmodel._docstring import doc
+from prfmodel.fitters._validation import _find_valid_units
+from prfmodel.fitters._validation import _validate_data_shape
+from prfmodel.fitters._validation import _validate_parameter_names
+from prfmodel.fitters.losses import CorrelationLoss
 from prfmodel.models.base import BaseCanonical
+from prfmodel.regressors.base import BaseRegressors
+from prfmodel.regressors.base import _extract_regressor_design
+from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
-from prfmodel.utils import ParamsDict
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import get_dtype
 
 
@@ -38,6 +47,7 @@ class GridHistory:
         self.history = history
 
 
+@doc
 class GridFitter:
     """Fit population receptive field models with grid search.
 
@@ -48,17 +58,40 @@ class GridFitter:
     ----------
     %(model_fitter)s
     %(stimulus)s
-    loss : keras.optimizers.Loss or Callable, optional
-        Loss instance or function with the signature `f(y, y_pred)`, where `y` is the target data and `y_pred` are the
-        model predicitons. Default is `None` where a `keras.optimizers.MeanSquaredError` loss is used. Note that, when
-        a `keras.losses.Loss` instance is used, the argument `reduction` must be set to `"none"` to enable loss
-        computation for all data batches.
+    loss : keras.losses.Loss or Callable, optional
+        Loss instance or function with the signature `f(y_true, y_pred)`, where `y_true` is the target data and
+        `y_pred` are the model predictions. Default is `None` where a
+        :class:`~prfmodel.fitters.losses.CorrelationLoss` loss is used. Note that, when a
+        :class:`keras.losses.Loss` instance is used, the argument `reduction` must be set to `"none"` to enable
+        loss computation for all data batches. When a function is used, it must return a loss value for every unit in
+        `y_true` and `y_pred`.
+    compile_step : bool, default=False
+        Whether to compile the evaluation of each grid batch with the backend's native primitive: `jax.jit` on JAX,
+        `tf.function` on TensorFlow and `torch.compile` on PyTorch. With `False` (the default) the evaluation
+        runs eagerly, which is slower but makes it inspectable and produces Python
+        tracebacks that point at the offending line. Whether compiling pays off depends on the backend
+        and on the problem size.
     %(dtype)s
+
+    Warns
+    -----
+    %(warns_resolution_mismatch)s
 
     Notes
     -----
     Depending on the size of the parameter grid and the number of batches in the data, the search can be very
     memory-intensive. For this reason, the grid is first split into batches that are evaluated iteratively.
+
+    When `compile_step` is enabled, the batch evaluation is compiled once and reused for every batch. When the
+    grid size is not a multiple of `batch_size` the final batch is smaller and is traced a second time.
+
+    The default :class:`~prfmodel.fitters.losses.CorrelationLoss` is invariant to the baseline and amplitude of the
+    prediction, so the target data does not need to be demeaned or converted to percent signal change beforehand.
+    The flip side is that parameters which only shift or scale the prediction (typically `baseline` and `amplitude`)
+    are not identifiable: all their grid values yield the same loss, and the returned estimate is an arbitrary one
+    among them. Fix such parameters to a single placeholder value in the grid and estimate them afterwards with
+    :class:`~prfmodel.fitters.LeastSquaresFitter`, or pass a loss that is sensitive to scale (e.g.,
+    :class:`keras.losses.MeanSquaredError`) if they must be estimated by the grid search itself.
 
     Examples
     --------
@@ -68,8 +101,6 @@ class GridFitter:
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> from prfmodel.models.prf import Gaussian2DPRFModel
     >>> stimulus = load_2d_prf_bar_stimulus()
-    >>> print(stimulus)
-    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> # Only fit response model
     >>> model = Gaussian2DPRFModel(
     ...     impulse_model=None,
@@ -77,11 +108,11 @@ class GridFitter:
     ... )
     >>> fitter = GridFitter(model=model, stimulus=stimulus)
     >>> # Create dummy data for a single unit
-    >>> data = np.zeros((1, 200))
+    >>> data = np.random.default_rng(0).standard_normal((1, stimulus.design.shape[0]))
     >>> # Define possible parameters in grid
-    >>> params_dict = {"mu_y": [0.0], "mu_x": [0.0], "sigma": [1.0]}
+    >>> param_values = {"mu_y": [0.0], "mu_x": [0.0], "sigma": [1.0]}
     >>> # Fit model parameters
-    >>> history, params_grid = fitter.fit(data, params_dict)
+    >>> history, params_grid = fitter.fit(data, param_values)
     >>> print(list(params_grid.columns))
     ['mu_y', 'mu_x', 'sigma']
     >>> print(params_grid.shape)
@@ -95,15 +126,19 @@ class GridFitter:
         model: BaseCanonical,
         stimulus: Stimulus,
         loss: keras.losses.Loss | Callable | None = None,
+        compile_step: bool = False,
         dtype: str | None = None,
     ):
         self.model = model
         self.stimulus = stimulus
 
+        self.model.check_stimulus(self.stimulus)
+
         if loss is None:
-            loss = keras.losses.MeanSquaredError(reduction="none")
+            loss = CorrelationLoss(reduction="none")
 
         self.loss = loss
+        self.compile_step = compile_step
         self.dtype = dtype
 
     @property
@@ -115,6 +150,7 @@ class GridFitter:
     def dtype(self, value: str | None) -> None:
         self._dtype = get_dtype(value)
 
+    @doc
     def fit(
         self,
         data: Tensor,
@@ -145,7 +181,20 @@ class GridFitter:
         GridHistory
             A history object that contains loss and metric values for each data batch.
         pandas.DataFrame
-            A dataframe with final model parameters.
+            A dataframe with final model parameters. All parameters are NaN for units that are excluded from the
+            fit (see Warns).
+
+        Raises
+        ------
+        ShapeError
+            If `data` does not have two dimensions or if its number of columns does not match the number of frames
+            in the model prediction.
+        ValueError
+            If a key of `parameter_values` is not a parameter of the model.
+
+        Warns
+        -----
+        %(warns_invalid_units)s
 
         """
         data = ops.convert_to_tensor(data, dtype=self.dtype)
@@ -154,8 +203,44 @@ class GridFitter:
         arrays = [ops.convert_to_numpy(val) for val in parameter_values.values()]
         total_grid_size = int(np.prod([len(x) for x in arrays]))
 
+        _validate_regressors_argument(self.model.models.get("regressors_model"), regressors)
+        grid = self._validate_grid(parameter_names, arrays)
+
+        # One prediction for a single grid combination before the loop, so that data with the wrong number of
+        # frames is reported here rather than as a broadcasting error from inside the loss.
+        prediction = self.model(self.stimulus, grid.iloc[:1], regressors=regressors, dtype=self.dtype)
+        _validate_data_shape(data, num_frames=prediction.shape[1])
+
+        valid_units = _find_valid_units(data)
+
         if batch_size is None:
             batch_size = total_grid_size
+
+        best_params = np.full((len(parameter_names), data.shape[0]), fill_value=np.nan, dtype=self.dtype)
+        best_loss = np.full((data.shape[0],), fill_value=np.nan, dtype=self.dtype)
+
+        if len(valid_units) > 0:
+            best_params[:, valid_units], best_loss[valid_units] = self._search_grid(
+                ops.take(data, valid_units, axis=0),
+                arrays,
+                parameter_names,
+                batch_size,
+                regressors,
+            )
+
+        best_params_df = pd.DataFrame(best_params.T, columns=parameter_names)
+        return GridHistory({"loss": best_loss}), best_params_df
+
+    def _search_grid(
+        self,
+        data: Tensor,
+        arrays: list[np.ndarray],
+        parameter_names: list[str],
+        batch_size: int,
+        regressors: pd.DataFrame | None,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Find the best parameter combination in the grid for each unit in `data`."""
+        total_grid_size = int(np.prod([len(x) for x in arrays]))
 
         best_params = np.full((len(parameter_names), data.shape[0]), fill_value=np.nan, dtype=self.dtype)
         best_loss = np.full((data.shape[0],), fill_value=np.inf, dtype=self.dtype)
@@ -164,37 +249,81 @@ class GridFitter:
         param_iter = chunked(product(*arrays), n=batch_size)
         num_batches = math.ceil(total_grid_size / batch_size)
 
+        # Built once and reused for every batch, so the cost of tracing is paid once rather than
+        # 'num_batches' times. The data and the regressors are the same on every batch, so they are
+        # captured here instead of being passed per batch, which leaves the parameter tensors as the only
+        # argument: a 'pandas.DataFrame' is not a valid argument to a compiled function.
+        evaluate = self._make_evaluate_fun(data, regressors)
+
         with tqdm(param_iter, desc="Processing parameter grid", total=num_batches) as pbar:
             for batch in pbar:
-                self._evaluate_parameter_batch(batch, parameter_names, data, best_params, best_loss, regressors)
+                self._evaluate_parameter_batch(evaluate, batch, parameter_names, best_params, best_loss)
                 pbar.set_postfix({"loss": float(best_loss.mean())})
 
         if not all(ops.isfinite(best_loss)):
             msg = "Non-finite loss values and NaN parameter estimates returned for some data batches"
             warnings.warn(msg, category=InfiniteLossWarning)
 
-        best_params_df = pd.DataFrame(best_params.T, columns=parameter_names)
-        return GridHistory({"loss": best_loss}), best_params_df
+        return best_params, best_loss
 
-    def _evaluate_parameter_batch(  # noqa: PLR0913 (too many arguments)
+    def _validate_grid(
         self,
+        parameter_names: list[str],
+        arrays: list[np.ndarray],
+    ) -> pd.DataFrame:
+        # The batches are evaluated through 'call', which must stay traceable and so validates nothing. These
+        # are the checks the public model facade would have run, before the loop. The grid is a
+        # cartesian product and every domain check is elementwise on a single parameter, so checking each axis
+        # once covers every combination the loop will evaluate. Each axis is tiled to a common length rather
+        # than expanded into the product, which keeps this proportional to the longest axis.
+        #
+        # An extra name would multiply the size of the grid without changing any prediction, and a misspelled
+        # name for a parameter with a default would pass the check for missing names, so both raise here.
+        _validate_parameter_names(parameter_names, self.model.parameter_names, "parameter_values")
+
+        num_rows = max((len(array) for array in arrays), default=0)
+        grid = pd.DataFrame(
+            {name: np.resize(array, num_rows) for name, array in zip(parameter_names, arrays, strict=True)},
+        )
+
+        self.model.check_parameter_names(grid)
+        self.model.check_parameter_values(grid)
+
+        return grid
+
+    def _make_evaluate_fun(self, data: Tensor, regressors: pd.DataFrame | None) -> Callable:
+        stimulus = self.stimulus.to_tensors(self.dtype)
+        regressors_model = cast("BaseRegressors | None", self.model.models.get("regressors_model"))
+        regressors_consumed = _extract_regressor_design(regressors_model, regressors, self.dtype)
+
+        def evaluate(param_tensors: dict[str, Tensor]) -> tuple[Tensor, Tensor]:
+            params = TensorFrame(param_tensors, dtype=self.dtype)
+            pred = ops.expand_dims(self.model.call(stimulus, params, regressors=regressors_consumed), 1)
+            losses = self.loss(data, pred)
+
+            return ops.amin(losses, axis=0), ops.argmin(losses, axis=0)
+
+        return compile_fun(evaluate) if self.compile_step else evaluate
+
+    def _evaluate_parameter_batch(
+        self,
+        evaluate: Callable,
         batch: list[tuple],
         parameter_names: list[str],
-        data: Tensor,
         best_params: np.ndarray,
         best_loss: np.ndarray,
-        regressors: pd.DataFrame | None,
     ) -> None:
         """Evaluate a batch of parameter combinations and update best parameters if improved."""
         params = np.stack(batch).T
-        param_dict = ParamsDict(dict(zip(parameter_names, params, strict=True)))
+        param_tensors = {
+            name: ops.convert_to_tensor(values, dtype=self.dtype)
+            for name, values in zip(parameter_names, params, strict=True)
+        }
 
-        # We ignore the arg type here because a ParamsDict is used internally (instead of pandas.DataFrame)
-        pred = ops.expand_dims(self.model(self.stimulus, param_dict, regressors=regressors), 1)  # type: ignore[arg-type]
-        losses = self.loss(data, pred)
+        min_loss, min_loss_idx = evaluate(param_tensors)
 
-        min_loss = ops.convert_to_numpy(ops.amin(losses, axis=0))
-        min_loss_idx = ops.convert_to_numpy(ops.argmin(losses, axis=0))
+        min_loss = ops.convert_to_numpy(min_loss)
+        min_loss_idx = ops.convert_to_numpy(min_loss_idx)
         is_better = min_loss < best_loss
         best_loss[is_better] = min_loss[is_better]
         best_params[:, is_better] = params[:, min_loss_idx[is_better]]

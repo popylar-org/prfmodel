@@ -18,10 +18,12 @@ def _make_grid(  # noqa: PLR0913 (too many arguments)
     if dim == "1d":
         return np.expand_dims(np.linspace(lower, upper, num=num_height), axis=1)
 
+    # The last grid axis follows the array axes, so the row (y) coordinate is stacked before the
+    # column (x) coordinate. See prfmodel.stimuli.PRFStimulus.
     if dim == "2d":
         xv, yv = np.meshgrid(np.linspace(lower, upper, num=num_width), np.linspace(lower, upper, num=num_height))
 
-        return np.stack((xv, yv), axis=-1)
+        return np.stack((yv, xv), axis=-1)
 
     xv, yv, zv = np.meshgrid(
         np.linspace(lower, upper, num=num_width),
@@ -29,7 +31,7 @@ def _make_grid(  # noqa: PLR0913 (too many arguments)
         np.linspace(lower, upper, num=num_depth),
     )
 
-    return np.stack((xv, yv, zv), axis=-1)
+    return np.stack((yv, xv, zv), axis=-1)
 
 
 class PRFStimulusGridSetup:

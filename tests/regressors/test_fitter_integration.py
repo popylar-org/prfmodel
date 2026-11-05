@@ -3,7 +3,6 @@
 import numpy as np
 import pandas as pd
 import pytest
-from prfmodel.examples import load_2d_prf_bar_stimulus
 from prfmodel.fitters import GridFitter
 from prfmodel.fitters import LeastSquaresFitter
 from prfmodel.fitters import SGDFitter
@@ -14,15 +13,10 @@ from prfmodel.regressors import AdditiveRegressors
 from prfmodel.regressors import ConvolvedRegressors
 from prfmodel.regressors import RegressorsList
 from prfmodel.stimuli import PRFStimulus
+from tests.conftest import PRFStimulusSetup
 
 _LOSS_ATOL = 1e-6
 _SGD_NUM_STEPS = 3
-
-
-@pytest.fixture
-def stimulus():
-    """2D bar pRF stimulus."""
-    return load_2d_prf_bar_stimulus()
 
 
 @pytest.fixture
@@ -77,7 +71,7 @@ def regressor_design(stimulus: PRFStimulus):
     )
 
 
-class TestLeastSquaresIntegration:
+class TestLeastSquaresIntegration(PRFStimulusSetup):
     """Verify LeastSquaresFitter recovers beta coefficients alongside the pRF amplitude."""
 
     def test_recover_betas(
@@ -147,7 +141,7 @@ class TestLeastSquaresIntegration:
             )
 
 
-class TestGridIntegration:
+class TestGridIntegration(PRFStimulusSetup):
     """Smoke test for GridFitter with a regressors_model."""
 
     def test_grid_smoke(
@@ -185,8 +179,28 @@ class TestGridIntegration:
         assert np.isfinite(history.history["loss"]).all()
         assert grid_params.shape == (1, len(parameter_values))
 
+    def test_missing_regressors_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        true_params: pd.DataFrame,
+    ):
+        """Forgetting to pass regressors when fitting a regressor model raises.
 
-class TestSGDIntegration:
+        The grid is evaluated through `call`, which drops the regressor term when no design reaches it.
+        Without an explicit check the search would silently score an incomplete model instead of raising.
+
+        """
+        parameter_values: dict = {name: np.array([float(true_params[name].iloc[0])]) for name in true_params.columns}
+
+        fitter = GridFitter(model=model, stimulus=stimulus)
+        observed = np.zeros((1, stimulus.design.shape[0]))
+
+        with pytest.raises(ValueError, match="regressors_model"):
+            fitter.fit(observed, parameter_values)
+
+
+class TestSGDIntegration(PRFStimulusSetup):
     """Smoke test for SGDFitter with a regressors_model (3 steps)."""
 
     def test_sgd_smoke(

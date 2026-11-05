@@ -7,7 +7,7 @@ from pytest_regressions.num_regression import NumericRegressionFixture
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.models.cf import CFStimulusEncoder
 from prfmodel.models.cf import GaussianCFModel
-from prfmodel.models.cf import GaussianCFResponse
+from prfmodel.models.cf import GaussianCFTuning
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import CFStimulus
@@ -15,21 +15,21 @@ from tests.models.conftest import CFSetup
 from tests.models.conftest import parametrize_dtype
 
 
-class TestGaussianCFResponse(CFSetup):
-    """Tests for GaussianCFResponse class."""
+class TestGaussianCFTuning(CFSetup):
+    """Tests for GaussianCFTuning class."""
 
     @pytest.fixture
     def response_model(self):
         """Response model object."""
-        return GaussianCFResponse()
+        return GaussianCFTuning()
 
-    def test_parameter_names(self, response_model: GaussianCFResponse):
+    def test_parameter_names(self, response_model: GaussianCFTuning):
         """Test that correct parameter names are returned."""
         # Order of parameter names does not matter
         assert set(response_model.parameter_names) & {"center_index", "sigma"}
 
     @parametrize_dtype
-    def test_predict(self, response_model: GaussianCFResponse, stimulus: CFStimulus, dtype: str):
+    def test_predict(self, response_model: GaussianCFTuning, stimulus: CFStimulus, dtype: str):
         """Test that response prediction returns correct shape."""
         # 3 units
         params = pd.DataFrame(
@@ -44,8 +44,46 @@ class TestGaussianCFResponse(CFSetup):
         # Check result shape
         assert preds.shape == (params.shape[0], self.num_source)  # (num_units, distance_matrix.shape[0])
 
+    @parametrize_dtype
+    def test_non_integer_center_index_error(
+        self,
+        response_model: GaussianCFTuning,
+        stimulus: CFStimulus,
+        dtype: str,
+    ):
+        """Test that non-integer center_index parameters raise an error."""
+        # 3 units
+        params = pd.DataFrame(
+            {
+                "center_index": [0.5, 1, 2],
+                "sigma": [1.0, 2.0, 3.0],
+            },
+        )
 
-class TestGaussianCFModel(TestGaussianCFResponse):
+        with pytest.raises(ValueError, match=r"center_index.*whole number"):
+            response_model(stimulus, params, dtype)
+
+    @parametrize_dtype
+    def test_negative_center_index_error(
+        self,
+        response_model: GaussianCFTuning,
+        stimulus: CFStimulus,
+        dtype: str,
+    ):
+        """Test that negative center_index parameters raise an error."""
+        # 3 units
+        params = pd.DataFrame(
+            {
+                "center_index": [-1, 1, 2],
+                "sigma": [1.0, 2.0, 3.0],
+            },
+        )
+
+        with pytest.raises(ValueError, match=r"center_index.*non-negative"):
+            response_model(stimulus, params, dtype)
+
+
+class TestGaussianCFModel(TestGaussianCFTuning):
     """Tests for the GaussianCFModel class."""
 
     @pytest.fixture
@@ -79,7 +117,7 @@ class TestGaussianCFModel(TestGaussianCFResponse):
         self,
         cf_model: GaussianCFModel,
         temporal_model: BaselineAmplitude,
-        response_model: GaussianCFResponse,
+        response_model: GaussianCFTuning,
     ):
         """Test that parameter names of composite model match parameter names of submodels."""
         param_names = response_model.parameter_names

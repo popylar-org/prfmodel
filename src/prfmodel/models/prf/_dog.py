@@ -1,54 +1,50 @@
 """Difference of Gaussians population receptive field models."""
 
 import pandas as pd
+from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.regressors.base import BaseRegressors
-from prfmodel.scaling import DoGAmplitude
+from prfmodel.scaling import Baseline
 from prfmodel.scaling.base import BaseScaling
-from ._gaussian import Gaussian2DPRFResponse
+from ._gaussian import Gaussian2DPRFTuning
 from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import CenterSurroundPRFModel
 
 
+@doc
 class DoG2DPRFModel(CenterSurroundPRFModel):
     r"""
-    Two-dimensional difference of Gaussians population receptive field model.
+    Two-dimensional Difference of Gaussians (DoG) population receptive field (pRF) model.
 
-    Runs two Gaussian 2D PRF responses (center and surround) through stimulus encoding and impulse
-    response convolution independently, then combines them as a linear model.
+    This class combines the difference between two 2D Gaussian pRF tuning models (center and surround) with an impulse,
+    scaling, and regressors model. The two 2D Gaussian pRF tuning models share the same center but have different
+    sizes.
 
     Parameters
     ----------
     %(model_encoding_prf)s
     %(model_impulse)s
-    scaling_model : BaseScaling or type or None, default=DoGAmplitude, optional
+    scaling_model : BaseScaling or type or None, default=Baseline, optional
         A scaling model class or instance. Model classes will be instantiated during initialization.
-        The default creates a :class:`~prfmodel.scaling.DoGAmplitude` instance.
+        The default creates a :class:`~prfmodel.scaling.Baseline` instance.
     %(model_regressors)s
 
     Notes
     -----
+    %(gaussian_norm_note)s
+
     The canonical DoG model follows the following steps [1]_:
 
-    1. The center and surround 2D Gaussian population receptive field response models make separate predictions for
-        the stimulus grid. The two response models have the same center but different sizes.
-    2. The encoding model encodes each response with the stimulus design.
-    3. An impulse model generates an impulse response.
-    4. Each encoded response is convolved with the impulse response.
-    5. The scaling model modifies the convolved response. By default it subtracts the surround from the center
-        response after multiplying the responses with separate amplitude parameters.
-    6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
-
-    Let :math:`p_{\text{center}}(t)` and :math:`p_{\text{surround}}(t)` be the predicted temporal
-    responses for the center and surround Gaussians. With :math:`a_c = \text{amplitude\_center}`,
-    :math:`a_s = \text{amplitude\_surround}`, and :math:`\beta = \text{baseline}`, the predicted
-    response is:
-
-    .. math::
-
-        y(t) = a_c \, p_{\text{center}}(t) + a_s \, p_{\text{surround}}(t) + \beta
+    1. The center and surround 2D Gaussian pRF tuning models make separate predictions for
+       the stimulus grid.
+    2. The encoding model encodes the responses with the stimulus design.
+    3. The encoded responses are scaled with separate amplitudes. The surround response is subtracted from the
+       center response yielding the combined response.
+    4. The combined response is convolved with an impulse response (optional).
+    5. The scaling model modifies the convolved response (optional).
+    6. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
 
     Using the default impulse and scaling models, the following columns are expected in the
     :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
@@ -74,19 +70,19 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
          - Standard deviation of the surround Gaussian (must be > ``sigma_center``).
        * - ``delay``
          - Impulse
-         - Peak time of the positive gamma component (in seconds).
+         - Mean time of the positive gamma component (in seconds; optional).
        * - ``dispersion``
          - Impulse
-         - Rate parameter of the positive gamma component.
+         - Scale parameter of the positive gamma component (optional).
        * - ``undershoot``
          - Impulse
-         - Peak time of the negative gamma component (in seconds).
+         - Mean time of the negative gamma component (in seconds; optional).
        * - ``u_dispersion``
          - Impulse
-         - Rate parameter of the negative gamma component.
+         - Scale parameter of the negative gamma component (optional).
        * - ``ratio``
          - Impulse
-         - Weight of the negative gamma component.
+         - Weight of the negative gamma component (optional).
        * - ``weight_deriv``
          - Impulse
          - Weight of the derivative component.
@@ -95,7 +91,8 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
          - Amplitude of the center response.
        * - ``amplitude_surround``
          - Scaling
-         - Amplitude of the surround response (typically negative).
+         - Amplitude of the surround response (positive; the surround is subtracted from the center, typically
+           with ``amplitude_surround < amplitude_center``).
        * - ``baseline``
          - Scaling
          - Additive constant.
@@ -112,8 +109,6 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> stimulus = load_2d_prf_bar_stimulus()
-    >>> print(stimulus)
-    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> model = DoG2DPRFModel()
     >>> # Define all model parameters for 3 units
     >>> params = pd.DataFrame({
@@ -122,22 +117,18 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
     ...     "mu_y": [1.0, 0.0, 0.0],
     ...     "sigma_center": [1.0, 1.5, 2.0],
     ...     "sigma_surround": [5.0, 7.5, 10.0],
-    ...     # Impulse model parameters
-    ...     "delay": [6.0, 6.0, 6.0],
-    ...     "dispersion": [0.9, 0.9, 0.9],
-    ...     "undershoot": [12.0, 12.0, 12.0],
-    ...     "u_dispersion": [0.9, 0.9, 0.9],
-    ...     "ratio": [0.48, 0.48, 0.48],
+    ...     # Impulse model parameters (delay, dispersion, undershoot, u_dispersion,
+    ...     # and ratio use the default Glover HRF parameters)
     ...     "weight_deriv": [0.5, 0.5, 0.5],
     ...     # Scaling model parameters
     ...     "amplitude_center": [2.0, 1.2, 0.1],
-    ...     "amplitude_surround": [-0.5, -0.3, -0.1],
+    ...     "amplitude_surround": [0.5, 0.3, 0.05],
     ...     "baseline": [0.1, -0.1, 0.5],
     ... })
     >>> # Predict model response
     >>> resp = model(stimulus, params)
     >>> print(resp.shape)  # (num_units, num_frames)
-    (3, 200)
+    (3, 170)
 
     """
 
@@ -145,16 +136,16 @@ class DoG2DPRFModel(CenterSurroundPRFModel):
         self,
         encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
         impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
-        scaling_model: BaseScaling | type[BaseScaling] | None = DoGAmplitude,
+        scaling_model: BaseScaling | type[BaseScaling] | None = Baseline,
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
-            prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFTuning(),
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             scaling_model=scaling_model,
             regressors_model=regressors_model,
-            change_params=["sigma"],
+            shared_params=["mu_x", "mu_y"],
         )
 
 
@@ -162,18 +153,19 @@ def init_dog_from_gaussian(
     gaussian_params: pd.DataFrame,
     sigma_ratio: float = 5.0,
     sigma_surround: float | None = None,
+    amplitude_surround: float = 1e-3,
 ) -> pd.DataFrame:
     """
     Initialize DoG model parameters from fitted Gaussian model parameters.
 
-    Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
-    into starting parameters for a :class:`~prfmodel.models.dog.DoG2DPRFModel`, suitable for
+    Converts the output of a fitted :class:`~prfmodel.models.prf.Gaussian2DPRFModel`
+    into starting parameters for a :class:`~prfmodel.models.prf.DoG2DPRFModel`, suitable for
     subsequent SGD.
 
     Parameters
     ----------
     gaussian_params : pandas.DataFrame
-        DataFrame of fitted parameters from a :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`.
+        DataFrame of fitted parameters from a :class:`~prfmodel.models.prf.Gaussian2DPRFModel`.
         Must contain columns: ``sigma`` and ``amplitude`` (plus all shared columns).
     sigma_ratio : float, default=5.0
         Ratio used to set the surround size: ``sigma_surround = sigma_center * sigma_ratio``.
@@ -181,19 +173,22 @@ def init_dog_from_gaussian(
     sigma_surround : float, optional
         Fixed surround size applied to all rows. Must be >= ``sigma`` for every row in
         ``gaussian_params``. When provided, overrides ``sigma_ratio``.
+    amplitude_surround : float, default=1e-3
+        Starting value for ``amplitude_surround``. Must be strictly positive; see Notes.
 
     Returns
     -------
     pandas.DataFrame
         DataFrame of DoG initial parameters with columns:
         ``sigma_center`` (= ``sigma``), ``sigma_surround``,
-        ``amplitude_center`` (= ``amplitude``), ``amplitude_surround`` (= 0.0),
+        ``amplitude_center`` (= ``amplitude``), ``amplitude_surround``,
         plus all shared columns unchanged.
 
     Raises
     ------
     ValueError
-        If ``sigma_surround`` is smaller than ``sigma`` for any row in ``gaussian_params``.
+        If ``sigma_surround`` is smaller than ``sigma`` for any row in ``gaussian_params``, or if
+        ``amplitude_surround`` is not strictly positive.
 
     Examples
     --------
@@ -213,12 +208,16 @@ def init_dog_from_gaussian(
 
     Notes
     -----
-    ``amplitude_surround`` is initialized to ``0.0``, which is the boundary of the constraint
-    ``amplitude_surround < 0`` enforced by a :class:`~prfmodel.adapter.ParameterConstraint`
-    with ``upper=0.0``. The constraint transform maps ``amplitude_surround=0`` to optimizer
-    variable ``raw=-1.0`` (no NaN), so SGD starts cleanly near zero and moves negative.
+    The surround is subtracted from the center, so a positive ``amplitude_surround`` yields a
+    suppressive surround. It is therefore typically paired with a
+    :class:`~prfmodel.fitters.adapter.ParameterTransform` with ``transform_fun=keras.ops.log`` and
+    ``inverse_fun=keras.ops.exp``, which keeps it positive throughout SGD.
 
     """
+    if amplitude_surround <= 0.0:
+        msg = f"'amplitude_surround' must be strictly positive, but was {amplitude_surround}"
+        raise ValueError(msg)
+
     dog_params = gaussian_params.copy()
     dog_params["sigma_center"] = dog_params["sigma"]
 
@@ -235,5 +234,5 @@ def init_dog_from_gaussian(
         dog_params["sigma_surround"] = dog_params["sigma"] * sigma_ratio
 
     dog_params["amplitude_center"] = dog_params["amplitude"]
-    dog_params["amplitude_surround"] = 0.0
+    dog_params["amplitude_surround"] = amplitude_surround
     return dog_params.drop(columns=["sigma", "amplitude"])

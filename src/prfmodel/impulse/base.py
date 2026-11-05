@@ -1,26 +1,56 @@
 """Impulse model base classes.
 
-Classes in this module inherit from :class:`~prfmodel.utils.ModelProtocol` that requires them to implement a
-:attr:`~prfmodel.utils.ModelProtocol.parameter_names` property.
+Classes in this module inherit from :class:`~prfmodel.protocols.ModelProtocol` that requires them to implement a
+:attr:`~prfmodel.protocols.ModelProtocol.parameter_names` property.
 
 They are abstract base classes, meaning that they
 cannot be instantiated on their own but are intended as parent classes that define attributes and methods that are
-shared by all child classes. For example, :class:`~prfmodel.models.base.BaseImpulse` defines that all child classes
-must implement a :meth:`~prfmodel.models.base.BaseImpulse.__call__` method that takes a set of parameters
+shared by all child classes. For example, :class:`~prfmodel.impulse.base.BaseImpulse` defines that all child classes
+must implement a :meth:`~prfmodel.impulse.base.BaseImpulse.call` method that takes a set of parameters
 as input. However, it leaves it up to each child class to define how input parameters are used to make
 model predictions.
 
+All base classes have a concrete user-facing ``__call__`` method
+(e.g., :meth:`~prfmodel.impulse.base.BaseImpulse.__call__`) that takes non-tensor arguments and
+performs validation checks. This method calls the abstract ``call`` method that must be implemented by each child
+class and only accepts tensor arguments to enable backend compilation.
+
+The user-facing :meth:`__call__` returns a :class:`numpy.ndarray`, while ``call`` returns a backend tensor.
+Use ``call`` when a backend tensor is required, for example inside a fitter or another model's ``call``.
+
+Impulse models can have default parameters that are defined during initialization. The default parameters are
+added to the user-supplied parameter dataframe (replicating the default value for each unit) in the `__call__`
+method if not already present.
+
+Impulse models sample their response at a time `resolution`. By default the resolution is `None`, which means that
+a canonical model samples the impulse model at the frame duration of its stimulus (e.g., `frame_duration` of a
+:class:`~prfmodel.stimuli.PRFStimulus`), and that the impulse model is sampled at
+:data:`DEFAULT_RESOLUTION` when it is used on its own.
+
 """
 
+import copy
 from abc import abstractmethod
+from typing import TypeVar
+import numpy as np
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.protocols import ModelProtocol
 from prfmodel.typing import Tensor
-from prfmodel.utils import ModelProtocol
+from prfmodel.utils import TensorFrame
 from prfmodel.utils import _get_norm_fun
+from prfmodel.utils import as_tensor_frame
+from prfmodel.utils import get_dtype
+
+P = TypeVar("P", pd.DataFrame, TensorFrame)
+"""Either representation of a parameter table: the user-facing data frame or its tensor-holding counterpart."""
+
+DEFAULT_RESOLUTION = 1.0
+"""Time resolution (in seconds) of an impulse model without an explicit resolution when it is used on its own."""
 
 
+@doc
 class BaseImpulse(ModelProtocol):
     """
     Abstract base class for impulse models.
@@ -30,40 +60,61 @@ class BaseImpulse(ModelProtocol):
 
     Parameters
     ----------
-    duration : float, default=32.0
-        The duration of the impulse response (in seconds).
-    offset : float, default=0.0001
-        The offset of the impulse response (in seconds). By default a very small offset is added to prevent infinite
-        response values at t = 0.
-    resolution : float, default=1.0
-        The time resultion of the impulse response (in seconds), that is the number of points per second at which the
-        impulse response function is evaluated.
-    norm : str, optional, default="sum"
-        The normalization of the response. Can be `"sum"` (default), `"mean"`, `"max"`, `"norm"`, or `None`.
-        If `None`, no normalization is performed.
-    default_parameters : dict of float, optional
-        Dictionary with scalar default parameter values. Keys must be valid parameter names.
+    %(impulse_duration)s
+    %(impulse_offset)s
+    %(impulse_resolution)s
+    %(impulse_norm)s
+    %(impulse_default_parameters)s
 
     Notes
     -----
     This class cannot be instantiated on its own. It can only be used as a parent class to create custom response
-    models. Subclasses must override the abstract :attr:`parameter_names` and :meth:`__call__` method.
+    models. Subclasses must override the abstract :attr:`parameter_names` property and the :meth:`call`
+    method.
+
+    Each frame is sampled at its leading edge: frame `i` is the point sample `offset + i * resolution`.
+    At the defaults that is 32 samples at t = 0, 1, ..., 31 seconds. See :doc:`Important details </important_details>`.
+
+    An explicit `resolution` is never overridden. If it differs from the frame duration of the stimulus that a
+    canonical model is called with, the canonical model warns with a
+    :class:`~prfmodel.exceptions.ResolutionMismatchWarning`, because the impulse response and the stimulus are then
+    convolved on different time axes.
+
+    `duration` is an upper bound: the time frames array holds `num_frames = int(duration / resolution)` samples
+    spaced exactly `resolution` apart, so it ends at the last whole sample at or below `duration` rather than at
+    `duration` itself.
+
+    `duration` and `resolution` must be positive, checked once at construction. `offset` is
+    unconstrained and may be negative. Note that `num_frames` is derived from `duration` alone,
+    so a negative `offset` shifts the sampling window rather than widening it, and the far tail of the
+    response is truncated by the same amount.
 
     """
 
     def __init__(
         self,
         duration: float = 32.0,
-        offset: float = 0.0001,
-        resolution: float = 1.0,
+        offset: float = 0.0,
+        resolution: float | None = None,
         norm: str | None = "sum",
-        default_parameters: dict[str, float] | None = None,
+        default_parameters: dict[str, float] | str | None = None,
     ):
         super().__init__()
 
-        self.duration = duration
-        self.offset = offset
-        self.resolution = resolution
+        # The time axis is fixed at construction, so it is checked once here rather than on every
+        # evaluation. 'offset' is deliberately unconstrained: the densities are zero below their
+        # support, so a frame at or below zero contributes zero rather than a 'NaN'.
+        if duration <= 0.0:
+            msg = f"Argument 'duration' must be > 0 but is {duration}"
+            raise ValueError(msg)
+
+        if resolution is not None and resolution <= 0.0:
+            msg = f"Argument 'resolution' must be > 0 but is {resolution}"
+            raise ValueError(msg)
+
+        self._duration = duration
+        self._offset = offset
+        self._resolution = resolution
 
         # Check if norm arg is valid
         if norm is not None:
@@ -71,7 +122,9 @@ class BaseImpulse(ModelProtocol):
 
         self.norm = norm
 
-        if default_parameters is not None:
+        if isinstance(default_parameters, dict):
+            # Reads the subclass declaration directly, which is safe only because it is a literal:
+            # 'self.default_parameters' is not assigned until below, and 'parameter_names' would read it.
             if any(key not in self.parameter_names for key in default_parameters):
                 msg = "Invalid default parameter name, please provide valid parameter default parameter names"
                 raise ValueError(msg)
@@ -82,53 +135,213 @@ class BaseImpulse(ModelProtocol):
 
         self.default_parameters = default_parameters
 
-        self._frames: Tensor | None = None
+        self._frames: dict[str, np.ndarray] = {}
+        self._resolved: dict[float, BaseImpulse] = {}
+
+    @property
+    def duration(self) -> float:
+        """The duration of the impulse response (in seconds). Read-only."""
+        return self._duration
+
+    @property
+    def offset(self) -> float:
+        """The offset of the impulse response (in seconds). Read-only."""
+        return self._offset
+
+    @property
+    def resolution(self) -> float | None:
+        """The time resolution of the impulse response (in seconds) or `None` if it is not set. Read-only."""
+        return self._resolution
 
     @property
     def num_frames(self) -> int:
         """The total number of time frames at which the impulse response function is evaluated."""
-        return int(self.duration / self.resolution)
+        return int(self.duration / self._sampling_resolution)
 
     @property
-    def frames(self) -> Tensor:
-        """
-        The time frames at which the impulse response function is evaluated.
+    def _sampling_resolution(self) -> float:
+        return self._resolution if self._resolution is not None else DEFAULT_RESOLUTION
 
-        Time frames are linearly interpolated between `offset` and `duration` and have shape `(1, num_frames)`.
+    def at_resolution(self, resolution: float) -> "BaseImpulse":
+        """Get the impulse model sampled at a time resolution unless it has an explicit resolution.
 
-        """
-        if self._frames is None:
-            self._frames = ops.expand_dims(ops.linspace(self.offset, self.duration, self.num_frames), 0)
-
-        return self._frames
-
-    def _join_default_parameters(self, parameters: pd.DataFrame) -> pd.DataFrame:
-        if self.default_parameters is not None:
-            parameters = parameters.copy()
-
-            for key, val in self.default_parameters.items():
-                parameters[key] = val
-
-        return parameters
-
-    @property
-    @abstractmethod
-    def parameter_names(self) -> list[str]:
-        """A list with names of parameters that are used by the model."""
-
-    @doc
-    @abstractmethod
-    def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
-        """
-        Compute the impulse response.
+        Canonical models call this method with the frame duration of their stimulus, so that an impulse model
+        without an explicit :attr:`resolution` is sampled at the same rate as the stimulus.
 
         Parameters
         ----------
-        %(parameters)s
+        resolution : float
+            The time resolution (in seconds) to sample the impulse response at if :attr:`resolution` is `None`.
+
+        Returns
+        -------
+        BaseImpulse
+            The impulse model itself if :attr:`resolution` is set. Otherwise, a copy of the impulse model with
+            `resolution` as its time resolution. The copy is created once per resolution and reused afterwards.
+
+        Examples
+        --------
+        >>> from prfmodel.impulse import TwoGammaImpulse
+        >>> impulse_model = TwoGammaImpulse()
+        >>> impulse_model.at_resolution(1.5).resolution
+        1.5
+        >>> impulse_model.resolution is None
+        True
+        >>> TwoGammaImpulse(resolution=0.5).at_resolution(1.5).resolution
+        0.5
+
+        """
+        if self._resolution is not None:
+            return self
+
+        if resolution <= 0.0:
+            msg = f"Argument 'resolution' must be > 0 but is {resolution}"
+            raise ValueError(msg)
+
+        if resolution not in self._resolved:
+            # A shallow copy is safe because the time axis is read-only after construction. The copy gets its
+            # own caches, so its frames are built at the new resolution.
+            resolved = copy.copy(self)
+            resolved._resolution = resolution  # noqa: SLF001 (private member of the same class)
+            resolved._frames = {}  # noqa: SLF001 (private member of the same class)
+            resolved._resolved = {}  # noqa: SLF001 (private member of the same class)
+            self._resolved[resolution] = resolved
+
+        return self._resolved[resolution]
+
+    @doc
+    def get_frames(self, dtype: str | None = None) -> Tensor:
+        """
+        Build the time frames at which the impulse response function is evaluated.
+
+        Parameters
+        ----------
         %(dtype)s
 
         Returns
         -------
+        :data:`prfmodel.typing.Tensor`
+            Time frames of shape `(1, num_frames)` and dtype `dtype`. The first frame is at
+            `offset` and frames are spaced `resolution` apart (or :data:`DEFAULT_RESOLUTION` apart if
+            `resolution` is `None`).
+
+        Notes
+        -----
+        The time frames are cached as a `numpy.ndarray` rather than as a backend tensor, and converted on every
+        call.
+
+        """
+        dtype = get_dtype(dtype)
+
+        if dtype not in self._frames:
+            steps = np.arange(self.num_frames, dtype=dtype)
+            self._frames[dtype] = np.expand_dims(steps * self._sampling_resolution + self.offset, 0)
+
+        return ops.convert_to_tensor(self._frames[dtype], dtype=dtype)
+
+    def _join_default_parameters(self, parameters: P) -> P:
+        if not isinstance(self.default_parameters, dict):
+            return parameters
+
+        missing = {key: val for key, val in self.default_parameters.items() if key not in parameters.columns}
+
+        if not missing:
+            return parameters
+
+        parameters = parameters.copy()
+
+        for key, val in missing.items():
+            parameters[key] = val
+
+        return parameters
+
+    @doc
+    def __call__(self, parameters: pd.DataFrame, dtype: str | None = None) -> np.ndarray:
+        """
+        Compute the impulse response.
+
+        This is the public entry point. It merges :attr:`default_parameters` into `parameters`, validates the
+        result, converts it to tensors and delegates to :meth:`call`, then returns the result as a
+        :class:`numpy.ndarray`. Subclasses implement :meth:`call`. Use :meth:`call` when a backend tensor is
+        required.
+
+        Parameters
+        ----------
+        %(parameters)s Parameter values override default parameters.
+        %(dtype)s
+
+        Returns
+        -------
+        %(predicted_response_2d_array)s
+
+        Raises
+        ------
+        %(raises_missing_parameters)s
+
+        """
+        dtype = get_dtype(dtype)
+        parameters = self._join_default_parameters(parameters)
+        self.check_parameter_names(parameters)
+        self.check_parameter_values(parameters)
+
+        return ops.convert_to_numpy(self.call(as_tensor_frame(parameters[self.parameter_names], dtype)))
+
+    @doc
+    def check_parameter_names(self, parameters: pd.DataFrame) -> None:
+        """Check that required parameter names are supplied.
+
+        If not already present, adds default parameter columns to ``parameters``.
+
+        Parameters
+        ----------
+        %(parameters)s
+
+        Raises
+        ------
+        ValueError
+            When a parameter name in the :attr:`parameters_names` attribute is not a column in ``parameters``.
+
+        """
+        super().check_parameter_names(self._join_default_parameters(parameters))
+
+    @doc
+    def check_parameter_values(self, parameters: pd.DataFrame) -> None:
+        """Check that the parameter values lie inside the domain the model is defined on.
+
+        If not already present, adds default parameter columns to ``parameters``.
+
+        Parameters
+        ----------
+        %(parameters)s
+
+        Raises
+        ------
+        ValueError
+            When a parameter that must be ``> 0`` is zero or negative.
+
+        """
+        super().check_parameter_values(self._join_default_parameters(parameters))
+
+    @doc
+    @abstractmethod
+    def call(self, parameters: TensorFrame) -> Tensor:
+        """
+        Compute the impulse response from tensors.
+
+        Parameters
+        ----------
+        %(parameters_tensors)s
+
+        Returns
+        -------
         %(predicted_response_2d)s
+
+        Notes
+        -----
+        Implementations must begin by calling :meth:`_join_default_parameters`, because a canonical model
+        reaches its impulse submodel through this method rather than through :meth:`__call__`.
+
+        Implementations must also be traceable by a backend compiler. See
+        :meth:`~prfmodel.models.base.BaseTuning.call`.
 
         """

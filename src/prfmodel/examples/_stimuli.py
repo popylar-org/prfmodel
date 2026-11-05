@@ -1,0 +1,208 @@
+"""Bundled example stimuli."""
+
+from fractions import Fraction
+from importlib.resources import files
+from os import PathLike
+import numpy as np
+from scipy.io import loadmat
+from prfmodel.stimuli import CSFStimulus
+from prfmodel.stimuli import PRFStimulus
+
+# The packaged bar stimulus was presented with one design frame per repetition time of 0.9 s (see the 7t-aot-visual
+# dataset, which was measured with it)
+_BAR_STIMULUS_FRAME_DURATION = 0.9
+
+# The numerosity experiment was measured with a repetition time of 2.1 s and one design frame per repetition time
+_LOGNUMEROSITY_STIMULUS_FRAME_DURATION = 2.1
+
+# Both tasks of the 7t-ncsf-visual dataset were measured with a repetition time of 1.5 s and one frame per repetition
+# time
+_NCSF_FRAME_DURATION = 1.5
+
+
+def _load_ncsf_csf_stimulus() -> CSFStimulus:
+    path = files("prfmodel.data.stimuli").joinpath("csf_stimulus.npz")
+
+    # Blank frames are kept as they were recorded, with zero spatial frequency and zero contrast, which the CSF models
+    # and plots handle
+    with np.load(str(path)) as archive:
+        return CSFStimulus(sf=archive["sf"], contrast=archive["contrast"], frame_duration=_NCSF_FRAME_DURATION)
+
+
+def _load_2d_bar_design_and_grid() -> tuple[np.ndarray, np.ndarray]:
+    path = files("prfmodel.data.stimuli").joinpath("2d_bar_stimulus.npz")
+
+    with np.load(str(path)) as archive:
+        return archive["design"], archive["grid"]
+
+
+def _resample_frames(design: np.ndarray, source_duration: float, target_duration: float, num_frames: int) -> np.ndarray:
+    """Average the frames of a design over the bins of a coarser frame duration, weighting by their overlap."""
+    # With a duration ratio of p / q, repeating every source frame q times puts both on a common step of which p make
+    # up one target frame, so averaging blocks of p weights each source frame by its overlap with the target frame
+    ratio = Fraction(target_duration / source_duration).limit_denominator(1000)
+    num_repeats = ratio.denominator
+    bin_size = ratio.numerator
+
+    upsampled = np.repeat(design, num_repeats, axis=0)
+
+    if upsampled.shape[0] < num_frames * bin_size:
+        msg = (
+            f"Design with {design.shape[0]} frames of {source_duration} s does not cover {num_frames} frames of "
+            f"{target_duration} s"
+        )
+        raise ValueError(msg)
+
+    binned = upsampled[: num_frames * bin_size].reshape(num_frames, bin_size, *design.shape[1:])
+
+    return binned.mean(axis=1)
+
+
+def _load_chn_aperture_stimulus(
+    path: str | PathLike,
+    num_frames: int,
+    frame_duration: float = 1.2,
+    aperture_duration: float = 1.0,
+) -> PRFStimulus:
+    stim = loadmat(path, squeeze_me=True)["stim"]
+    aperture = np.asarray(stim["img"].item(), dtype=np.float64)
+
+    # The aperture is stored as (rows, columns, frames) but the design has frames first
+    # The aperture is sampled at 1 Hz (366 frames) while the response is sampled at the repetition time of 1.2 s
+    # (305 frames) over the same 366 s, so we average the aperture into repetition time bins to get one design frame
+    # per response frame without shifting the bar in time
+    design = _resample_frames(aperture.transpose(2, 0, 1), aperture_duration, frame_duration, num_frames)
+    grid = np.stack((stim["y"].item(), stim["x"].item()), axis=-1).astype(np.float64)
+
+    return PRFStimulus(design=design, grid=grid, frame_duration=frame_duration, dimension_labels=["y", "x"])
+
+
+def load_2d_prf_bar_stimulus(return_test: bool = False) -> PRFStimulus | tuple[PRFStimulus, PRFStimulus]:
+    """
+    Load a two-dimensional population receptive field bar stimulus.
+
+    Loads an example stimulus in which a bar moves in four directions (top-bottom, left-right, bottom-top, right-left)
+    through a two-dimensional space.
+
+    Parameters
+    ----------
+    return_test : bool, default=True
+        Whether to return a test stimulus. If ``False``, returns a single stimulus with the first half of the design
+        matrix. If ``True``, returns a train and test stimulus with the first and second half of the design matrix
+        (split in the time axis).
+
+    Returns
+    -------
+    PRFStimulus
+        If ``return_test=False`` (the default), a single stimulus object with a ``design`` with shape
+        ``(170, 128, 128)`` and a ``grid`` with shape ``(128, 128, 2)``. If ``return_test=True``, two stimulus objects
+        with a ``design`` with shape ``(170, 128, 128)`` and a ``grid`` with shape ``(128, 128, 2)``.
+
+    Notes
+    -----
+    The full stimulus has 340 time frames, with 128 cells in the x- and y-dimension, spanning a visual field of
+    approximately -4 to 4 degrees of visual angle vertically and horizontally. The stimulus coordinate grid has been
+    transformed from a rectangular into a quadratic shape. The moving bar patterns is mirrored in the time axis
+    which means that it can be split in two almost identical halfs. The stimulus was presented with one time frame
+    per repetition time of 0.9 seconds, so its ``frame_duration`` is 0.9.
+
+    The ``grid`` holds visual field coordinates. The horizontal coordinate increases across the design columns, so a
+    bar in the leftmost columns falls in the left visual hemifield (negative ``mu_x``), and the vertical coordinate
+    increases down the rows, so the first row is the lower edge of the visual field (negative ``mu_y``).
+
+    See Also
+    --------
+    prfmodel.plotting.animate_2d_prf_stimulus : Create an animation for a two-dimensional stimulus.
+    prfmodel.stimuli.PRFStimulus.create_2d_bar_stimulus : Create a two-dimensional bar stimulus.
+
+    Examples
+    --------
+    Load a single stimulus with the first half of the design matrix.
+
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], frame_duration=0.9, dimension_labels=['y', 'x'])
+
+    Load a train and test stimulus with the first and second half of the design matrix.
+
+    >>> stimulus_train, stimulus_test = load_2d_prf_bar_stimulus(return_test=True)
+    >>> print(stimulus_train)
+    PRFStimulus(design=array[170, 128, 128], grid=array[128, 128, 2], frame_duration=0.9, dimension_labels=['y', 'x'])
+
+    """
+    design, grid = _load_2d_bar_design_and_grid()
+    dimension_labels = ["y", "x"]
+
+    num_split = design.shape[0] // 2
+    design_train = design[:num_split]
+    design_test = design[num_split:]
+
+    stimulus_train = PRFStimulus(
+        design=design_train,
+        grid=grid,
+        frame_duration=_BAR_STIMULUS_FRAME_DURATION,
+        dimension_labels=dimension_labels,
+    )
+
+    if not return_test:
+        return stimulus_train
+
+    stimulus_test = PRFStimulus(
+        design=design_test,
+        grid=np.copy(grid),
+        frame_duration=_BAR_STIMULUS_FRAME_DURATION,
+        dimension_labels=dimension_labels.copy(),
+    )
+
+    return stimulus_train, stimulus_test
+
+
+def load_1d_prf_lognumerosity_stimulus() -> PRFStimulus:
+    """Load a one-dimensional population receptive field log numerosity stimulus.
+
+    Loads an example stimulus that includes a one-dimensional sequence of log integers (numerosities) from a numerosity
+    experiment [1]_.
+
+    Returns
+    -------
+    PRFStimulus
+        A stimulus object with a ``design`` with shape ``(182, 8)`` that one-hot encodes which numerosity is shown at
+        each time frame and a ``grid`` with shape ``(8, 1)`` that contains the unique log integers.
+
+    Notes
+    -----
+    The stimulus contains four cycles of the same sequence of unique numerosities 1, 2, 3, 4, 5, 6, 7, and 20.
+    Each numerosity is presented for two consecutive frames. The numerosities 1 to 7 first ascend in order followed by
+    numerosity 20 presented for eight frames and then descend in order followed by 20 for eight frames.
+    The first six frames also contain numerosity 20 and serve as a prescan interval in the experiment. Each frame
+    lasts one repetition time of 2.1 seconds, so the ``frame_duration`` of the stimulus is 2.1.
+
+    References
+    ----------
+    .. [1] Hendrikx, E., Paul, J. M., van Ackooij, M., van der Stoep, N., & Harvey, B. M. (2024). Cortical quantity
+        representations of visual numerosity and timing overlap increasingly into superior cortices but remain
+        distinct. *NeuroImage*, 286, 120515. https://doi.org/10.1016/j.neuroimage.2024.120515
+
+    Examples
+    --------
+    >>> stimulus = load_1d_prf_lognumerosity_stimulus()
+    >>> print(stimulus)
+    PRFStimulus(design=array[182, 8], grid=array[8, 1], frame_duration=2.1, dimension_labels=['log_numerosity'])
+
+    """
+    path = files("prfmodel.data.stimuli").joinpath("1d_lognumerosity_stimulus.npz")
+
+    archive = np.load(str(path))
+
+    design = archive["design"]
+    grid = archive["grid"]
+
+    dimension_labels = ["log_numerosity"]
+
+    return PRFStimulus(
+        design=design,
+        grid=grid,
+        frame_duration=_LOGNUMEROSITY_STIMULUS_FRAME_DURATION,
+        dimension_labels=dimension_labels,
+    )

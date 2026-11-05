@@ -15,6 +15,8 @@ a response from a population receptive field (pRF) response model.
 """
 
 from ._convolve import convolve_prf_impulse_response
+from ._cst_channels import SustainedImpulse
+from ._cst_channels import TransientImpulse
 from ._shifted_gamma import ShiftedGammaImpulse
 from ._two_gamma import TwoGammaImpulse
 from ._two_gamma_deriv import DerivativeTwoGammaImpulse
@@ -22,6 +24,8 @@ from ._two_gamma_deriv import DerivativeTwoGammaImpulse
 __all__ = [
     "DerivativeTwoGammaImpulse",
     "ShiftedGammaImpulse",
+    "SustainedImpulse",
+    "TransientImpulse",
     "TwoGammaImpulse",
     "convolve_prf_impulse_response",
 ]

@@ -97,7 +97,7 @@ class TestPRFStimulusEncoder(TestSetup):
     ):
         """Test that 1D encoding returns the same result as encode_prf_response."""
         design = np.ones((self.num_frames, self.num_height))
-        stimulus = PRFStimulus(design, grid_1d)
+        stimulus = PRFStimulus(design, grid_1d, frame_duration=1.0)
 
         response_encoded_ref = np.asarray(encode_prf_response(response_1d, design, dtype))
         response_encoded = np.asarray(prf_stimulus_encoder(stimulus, response_1d, parameters, dtype))
@@ -114,7 +114,7 @@ class TestPRFStimulusEncoder(TestSetup):
     ):
         """Test that 2D encoding returns the same result as encode_prf_response."""
         design = np.ones((self.num_frames, self.num_height, self.num_width))
-        stimulus = PRFStimulus(design, grid_2d)
+        stimulus = PRFStimulus(design, grid_2d, frame_duration=1.0)
 
         response_encoded_ref = np.asarray(encode_prf_response(response_2d, design, dtype))
         response_encoded = np.asarray(prf_stimulus_encoder(stimulus, response_2d, parameters, dtype))
@@ -131,7 +131,7 @@ class TestPRFStimulusEncoder(TestSetup):
     ):
         """Test that 3D encoding returns the same result as encode_prf_response."""
         design = np.ones((self.num_frames, self.num_height, self.num_width, self.num_depth))
-        stimulus = PRFStimulus(design, grid_3d)
+        stimulus = PRFStimulus(design, grid_3d, frame_duration=1.0)
 
         response_encoded_ref = np.asarray(encode_prf_response(response_3d, design, dtype))
         response_encoded = np.asarray(prf_stimulus_encoder(stimulus, response_3d, parameters, dtype))
@@ -148,7 +148,6 @@ class TestCompressiveEncoder(TestSetup):
         """Compressive encoder parameters."""
         return pd.DataFrame(
             {
-                "gain": [1.2, 0.9, 0.1],
                 "n": [0.8, 1.2, 0.5],
             },
         )
@@ -162,7 +161,7 @@ class TestCompressiveEncoder(TestSetup):
     ):
         """Test that compressive encoding for PRFStimulus returns same shape as normal encoding."""
         design = np.ones((self.num_frames, self.num_height, self.num_width))
-        stimulus = PRFStimulus(design, grid_2d)
+        stimulus = PRFStimulus(design, grid_2d, frame_duration=1.0)
 
         encoder = PRFStimulusEncoder()
         compressive_encoder = CompressiveEncoder(encoding_model=encoder)

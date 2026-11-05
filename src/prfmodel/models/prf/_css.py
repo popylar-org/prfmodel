@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
+from prfmodel._docstring import doc
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
 from prfmodel.models.compression import CompressiveEncoder
@@ -16,14 +17,15 @@ if TYPE_CHECKING:
     from prfmodel.models.base import BaseStimulusEncoder
 
 
+@doc
 class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     """
     Two-dimensional isotropic Gaussian population receptive field model with compressive spatial summation (CSS).
 
     This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
-    and scaling model response. In contrast to :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`, it
+    and scaling model response. In contrast to :class:`~prfmodel.models.prf.Gaussian2DPRFModel`, it
     encodes the stimulus response using compressive spatial summation (see
-    :class:`~prfmodel.models.encoding.CompressiveEncoder`).
+    :class:`~prfmodel.models.compression.CompressiveEncoder`).
 
     Parameters
     ----------
@@ -33,6 +35,8 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
 
     Notes
     -----
+    %(gaussian_norm_note)s
+
     The canonical CSS model follows the following steps [1]_:
 
     1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
@@ -42,6 +46,9 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     4. The encoded neuron population response is convolved with the impulse response.
     5. The scaling model modifies the convolved response.
     6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
+
+    The gain factor of the CSS model in [1]_ is the ``amplitude`` of the scaling model, so the encoding model has no
+    separate gain parameter.
 
     Using the default impulse and scaling models, the following columns are expected in the
     :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
@@ -62,27 +69,24 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
        * - ``sigma``
          - pRF
          - Standard deviation of the isotropic Gaussian.
-       * - ``gain``
-         - Encoding
-         - Amplification factor for the compressive encoder.
        * - ``n``
          - Encoding
          - Compression exponent (must be > 0).
        * - ``delay``
          - Impulse
-         - Peak time of the positive gamma component (in seconds).
+         - Mean time of the positive gamma component (in seconds; optional).
        * - ``dispersion``
          - Impulse
-         - Rate parameter of the positive gamma component.
+         - Scale parameter of the positive gamma component (optional).
        * - ``undershoot``
          - Impulse
-         - Peak time of the negative gamma component (in seconds).
+         - Mean time of the negative gamma component (in seconds; optional).
        * - ``u_dispersion``
          - Impulse
-         - Rate parameter of the negative gamma component.
+         - Scale parameter of the negative gamma component (optional).
        * - ``ratio``
          - Impulse
-         - Weight of the negative gamma component.
+         - Weight of the negative gamma component (optional).
        * - ``weight_deriv``
          - Impulse
          - Weight of the derivative component.
@@ -106,8 +110,6 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> stimulus = load_2d_prf_bar_stimulus()
-    >>> print(stimulus)
-    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> model = Gaussian2DCSSPRFModel()
     >>> # Define all model parameters for 3 units
     >>> params = pd.DataFrame({
@@ -116,14 +118,9 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     ...     "mu_y": [1.0, 0.0, 0.0],
     ...     "sigma": [1.0, 1.5, 2.0],
     ...     # CSS parameters
-    ...     "gain": [1.0, 1.0, 1.0],
     ...     "n": [0.5, 0.5, 0.5],
-    ...     # Impulse model parameters
-    ...     "delay": [6.0, 6.0, 6.0],
-    ...     "dispersion": [0.9, 0.9, 0.9],
-    ...     "undershoot": [12.0, 12.0, 12.0],
-    ...     "u_dispersion": [0.9, 0.9, 0.9],
-    ...     "ratio": [0.48, 0.48, 0.48],
+    ...     # Impulse model parameters (delay, dispersion, undershoot, u_dispersion,
+    ...     # and ratio use the default Glover HRF parameters)
     ...     "weight_deriv": [0.5, 0.5, 0.5],
     ...     # Scaling model parameters
     ...     "baseline": [0.1, -0.1, 0.5],
@@ -132,7 +129,7 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
     >>> # Predict model response
     >>> resp = model(stimulus, params)
     >>> print(resp.shape)  # (num_units, num_frames)
-    (3, 200)
+    (3, 170)
 
     """
 
@@ -153,31 +150,29 @@ class Gaussian2DCSSPRFModel(Gaussian2DPRFModel):
         )
 
 
-def init_css_from_gaussian(gaussian_params: pd.DataFrame, gain: float = 1.0, n: float = 0.5) -> pd.DataFrame:
+def init_css_from_gaussian(gaussian_params: pd.DataFrame, n: float = 0.5) -> pd.DataFrame:
     """
     Initialize compressive spatial summation parameters from fitted Gaussian parameters.
 
-    Converts the output of a fitted :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`
-    into starting parameters for a :class:`~prfmodel.models.css.Gaussian2DCSSPRFModel`.
+    Converts the output of a fitted :class:`~prfmodel.models.prf.Gaussian2DPRFModel`
+    into starting parameters for a :class:`~prfmodel.models.prf.Gaussian2DCSSPRFModel`.
 
     Parameters
     ----------
     gaussian_params : pandas.DataFrame
-        DataFrame of fitted parameters from a :class:`~prfmodel.models.gaussian.Gaussian2DPRFModel`.
-    gain : float, default=1.0
-        Amplification parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`.
+        DataFrame of fitted parameters from a :class:`~prfmodel.models.prf.Gaussian2DPRFModel`.
     n : float, default=0.5
-        Compression exponent parameter for the :class:`~prfmodel.models.encoding.CompressiveEncoder`. Must be > 0.
+        Compression exponent parameter for the :class:`~prfmodel.models.compression.CompressiveEncoder`. Must be > 0.
 
     Returns
     -------
     pandas.DataFrame
-        DataFrame with two additional columns: ``gain`` and ``m``.
+        DataFrame with one additional column: ``n``.
 
     Raises
     ------
     ValueError
-        If ``n`` <= 0 or if ``n`` or ``gain`` are not finite.
+        If ``n`` <= 0 or not finite.
 
     Examples
     --------
@@ -189,23 +184,19 @@ def init_css_from_gaussian(gaussian_params: pd.DataFrame, gain: float = 1.0, n: 
     ...     "baseline": [0.0, 0.1],
     ...     "amplitude": [1.0, -1.0],
     ... })
-    >>> css_params = init_css_from_gaussian(gaussian_params, gain=1.0, n=0.5)
+    >>> css_params = init_css_from_gaussian(gaussian_params, n=0.5)
     >>> print(sorted(css_params.columns.tolist()))
-    ['amplitude', 'baseline', 'gain', 'mu_x', 'mu_y', 'n', 'sigma']
+    ['amplitude', 'baseline', 'mu_x', 'mu_y', 'n', 'sigma']
 
     """
     if not np.isfinite(n):
         msg = "'n' must be finite."
-        raise ValueError(msg)
-    if not np.isfinite(gain):
-        msg = "'gain' must be finite."
         raise ValueError(msg)
     if n <= 0:
         msg = f"'n' must be > 0 but is {n}"
         raise ValueError(msg)
 
     css_params = gaussian_params.copy()
-    css_params["gain"] = gain
     css_params["n"] = n
 
     return css_params

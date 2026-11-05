@@ -1,0 +1,12 @@
+# Configuration for the lychee link checker (https://lychee.cli.rs), which checks the links in the documentation
+# (see .github/workflows/documentation.yml). lychee reads this file when it is run from the repository root.
+
+# Many publishers block automated requests (e.g., Science, PNAS, and MIT Press answer with 403), so checking a DOI by
+# following it to the publisher fails even when the DOI is valid. The DOI handle API returns 200 for a registered DOI
+# and 404 for an unknown one without contacting the publisher.
+remap = ['^https://doi\.org/(.+)$ https://doi.org/api/handles/$1']
+
+# CHANGELOG.md links to the tag of each release and compares the latest tag with HEAD. A release is created only after
+# its CHANGELOG.md entry was merged into main (see README.dev.md), so these links point to a tag that does not exist yet
+# while the release is being prepared.
+exclude = ['^https://github\.com/popylar-org/prfmodel/(releases/tag|compare)/']

@@ -25,17 +25,22 @@ Let's start with the first step: Defining the stimulus. We load an example stimu
 The stimulus simulates a bar moving in different directions through a two-dimensional visual field.
 
 ```{code-cell} ipython3
+import pandas as pd
 from prfmodel.examples import load_2d_prf_bar_stimulus
 
-num_frames = 200  # Simulate 200 time frames
+# Print parameter DataFrames with three decimals
+pd.set_option("display.precision", 3)
 
 stimulus = load_2d_prf_bar_stimulus()
 print(stimulus)
 ```
 
-When printing the `stimulus` object, we can see that it has three attributes. The `design` attribute defines how
-the visual field changes over time. It has shape `(num_frames, width, height)`, where width and hight define the number of pixels at which the visual field is recorded.
-The `grid` attribute maps each pixel to its xy-coordinate in the visual field (i.e., the degree of visual angle).
+When printing the `stimulus` object, we can see that it has four attributes. The `design` attribute defines how
+the visual field changes over time. It has shape `(num_frames, height, width)`, where height and width define the number of pixels at which the visual field is recorded.
+The `grid` attribute maps each pixel to its coordinate in the visual field (i.e., the degree of visual angle). Its last
+axis follows the axes of the design, so `grid[..., 0]` holds the vertical (`y`) coordinate and `grid[..., 1]` the
+horizontal (`x`) coordinate. The `frame_duration` attribute is the duration of each frame in seconds (e.g., one TR),
+at which the model samples its impulse response, and `dimension_labels` names the grid axes.
 
 ## Defining the pRF model
 
@@ -44,6 +49,8 @@ Now that we defined our stimulus, we can create a pRF model to predict a neural 
 by Dumoulin and Wandell (2008).
 
 The `Gaussian2DPRFModel` class performs all these steps to make a combined prediction.
+
+**Important**: In prfmodel, we often need to add a custom impulse response model to match the sampling rate of predicted impulse responses to the sampling rate (i.e., TR) of observed data (the default in prfmodel is 1.0 seconds; see also the section [](important_details.md)).
 
 ```{code-cell} ipython3
 from prfmodel.models.prf import Gaussian2DPRFModel
@@ -62,7 +69,10 @@ prf_model.parameter_names
 The parameters `mu_x`, `mu_y`, and `sigma` define the location and size of the predicted Gaussian pRF and are of primary interest.
 We simulate a pRF with its center at (-2.1, 1.45) and a size of 1.35. The parameters
 `delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the impulse response that is
-convolved with our pRF response. The parameters `baseline` and `amplitude` shift and scale our convolved
+convolved with our pRF response. The two-gamma parameters (`delay`, `dispersion`,
+`undershoot`, `u_dispersion`, `ratio`) default to the Glover HRF parameter set
+(see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`),
+so we only set `weight_deriv` here. The parameters `baseline` and `amplitude` shift and scale our convolved
 response, respectively. We store the parameter values in a `pandas.DataFrame` object.
 
 ```{code-cell} ipython3
@@ -73,11 +83,6 @@ true_params = pd.DataFrame(
         "mu_x": [-2.1],
         "mu_y": [1.45],
         "sigma": [1.35],
-        "delay": [6.0],
-        "dispersion": [0.9],
-        "undershoot": [12.0],
-        "u_dispersion": [0.9],
-        "ratio": [0.48],
         "weight_deriv": [-0.5],
         "baseline": [10.0],
         "amplitude": [1.2],
@@ -111,6 +116,10 @@ Let's start with the grid search by defining ranges of `mu_x`, `mu_y`, and `sigm
 of parameter values from. For all other parameters, we only provide a single value so that they will stay constant
 across the entire grid.
 
+Note that we set `baseline` to `0.0` and `amplitude` to `1.0` even though we simulated the data with a `baseline` of
+`10.0`. This difference is on purpose because, by default, the `GridFitter` minimizes the negative correlation between prediction and data, which is unaffected by the baseline and amplitude of the prediction. Any value works here, and we estimate
+both parameters properly with least squares in the next step.
+
 ```{code-cell} ipython3
 import numpy as np
 
@@ -118,11 +127,6 @@ param_ranges = {
     "mu_x": np.linspace(-3.0, 3.0, 10),
     "mu_y": np.linspace(-3.0, 3.0, 10),
     "sigma": np.linspace(0.5, 3.0, 10),
-    "delay": [6.0],
-    "dispersion": [0.9],
-    "undershoot": [12.0],
-    "u_dispersion": [0.9],
-    "ratio": [0.48],
     "weight_deriv": [-0.5],
     "baseline": [0.0],
     "amplitude": [1.0],
@@ -133,7 +137,7 @@ For all three parameters, we defined ranges of 10 values that will be used to co
 grid search will evaluate all possible combinations of these values and return the combination that fits the simulated
 data best. This will result in a grid containing $10 \times 10 \times 10 = 1000$ parameter combinations.
 
-Let's construct the `GridFitter` and perform the grid search. Note that we set `chunk_size=20` to let the `GridFitter`
+Let's construct the `GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the `GridFitter`
 evaluate 20 parameter combinations at the same time (which saves us some memory).
 
 ```{code-cell} ipython3
@@ -213,7 +217,7 @@ fig.legend();
 ```
 
 To finetune our model fits, we use SGD to iteratively optimize model parameters using the gradient of a loss function
-that is computed between data and model predictions. The default loss function in prfmodel is the means squared error.
+that is computed between data and model predictions. The default loss function in prfmodel is the mean squared error.
 As initial parameters, we use the result from the grid search and least squares fit. We fix the parameters related to
 the impulse response to their initial values (which are the "true" values).
 
@@ -228,7 +232,7 @@ sgd_fitter = SGDFitter(
 sgd_history, sgd_params = sgd_fitter.fit(
     data=simulated_response,
     init_parameters=ls_params,
-    fixed_parameters=["delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv"],
+    fixed_parameters=["weight_deriv"],
 )
 ```
 

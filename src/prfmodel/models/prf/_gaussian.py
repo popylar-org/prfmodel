@@ -1,23 +1,22 @@
 """Gaussian response models."""
 
-import math
-import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
+from prfmodel.density import normal_density
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse.base import BaseImpulse
-from prfmodel.models.base import BasePopulationResponse
 from prfmodel.models.base import BaseStimulusEncoder
+from prfmodel.models.base import BaseTuning
 from prfmodel.regressors.base import BaseRegressors
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
+from prfmodel.stimuli import PRFStimulusTensors
 from prfmodel.typing import Tensor
 from prfmodel.utils import _EXPECTED_NDIM
-from prfmodel.utils import convert_parameters_to_tensor
-from prfmodel.utils import get_dtype
+from prfmodel.utils import TensorFrame
 from ._stimulus_encoding import PRFStimulusEncoder
 from .canonical import CanonicalPRFModel
 
@@ -58,7 +57,7 @@ def _expand_gaussian_args(grid: Tensor, mu: Tensor, sigma: Tensor) -> tuple[Tens
 
 def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor:
     """
-    Predict a isotropic Gaussian population receptive field response.
+    Predict an isotropic Gaussian population receptive field (pRF) response.
 
     The dimensionality of the Gaussian depends on the number of dimensions of `grid` and `mu`. All dimensions have
     the same size `sigma`.
@@ -71,7 +70,10 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
         Centroid of the population receptive field. Must have at least two dimensions.
         The first dimension corresponds to the number of units.
         The second dimension corresponds to the number of grid dimensions and must match the size of the
-        last `grid` dimension.
+        last `grid` dimension. Its order must match the order of the last `grid` dimension, that is,
+        `mu[:, i]` is paired with `grid[..., i]`. For a 2D grid built as described in
+        :class:`~prfmodel.stimuli.PRFStimulus`, this means `mu[:, 0]` is the vertical (`y`) centre and
+        `mu[:, 1]` the horizontal (`x`) centre.
     sigma : :data:`prfmodel.typing.Tensor`
         Size of the population receptive field. Must have at least two dimensions.
         The first dimension corresponds to the number of units,
@@ -81,8 +83,14 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     Returns
     -------
     :data:`prfmodel.typing.Tensor`
-        The predicted Gaussian population receptive field response with shape (num_units, ...)
+        The predicted Gaussian pRF response with shape (num_units, ...)
         where `...` corresponds to the dimensions of the Gaussian.
+
+    Notes
+    -----
+    This function predicts a proper Gaussian density that is normalized by its volume.
+    This differs from other Gaussian pRF model implementations. See :doc:`Important details </important_details>`
+    for details.
 
     Raises
     ------
@@ -99,12 +107,12 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     Predict a 2D Gaussian response.
 
     >>> import numpy as np
-    >>> # Define a 2D grid
-    >>> num_x, num_y = 10, 10
+    >>> # Define a 2D grid; y comes first to match the row-major design axes
+    >>> num_x, num_y = 10, 6
     >>> x = np.linspace(-3, 3, num_x)
     >>> y = np.linspace(-4, 4, num_y)
     >>> xv, yv = np.meshgrid(x, y)
-    >>> grid = np.stack((xv, yv), axis=-1)  # shape (10, 10, 2)
+    >>> grid = np.stack((yv, xv), axis=-1)  # shape (6, 10, 2)
     >>> # Define 2D centroids of Gaussian for 3 units
     >>> mu = np.array([  # shape (3, 2), first column y, second column x
     ...     [0.0, 1.0],
@@ -115,55 +123,49 @@ def predict_gaussian_response(grid: Tensor, mu: Tensor, sigma: Tensor) -> Tensor
     >>> sigma = np.array([[1.0], [1.5], [2.0]])  # shape (3, 1)
     >>> resp = predict_gaussian_response(grid, mu, sigma)
     >>> print(resp.shape)  # (num_units, num_y, num_x)
-    (3, 10, 10)
+    (3, 6, 10)
 
     """
     grid = ops.convert_to_tensor(grid)
     mu = ops.convert_to_tensor(mu)
     sigma = ops.convert_to_tensor(sigma)
 
-    num_dims = grid.shape[-1]
-
     _check_gaussian_args(grid, mu, sigma)
 
     # Expand axes to enable keras.ops autocasting
     grid, mu, sigma = _expand_gaussian_args(grid, mu, sigma)
 
-    sigma_squared = ops.square(sigma)
-
-    # Gaussian response
-    resp = ops.sum(ops.square(grid - mu), axis=-1)
-    resp /= 2 * sigma_squared
-
-    # Divide by volume to normalize
-    volume = (2 * math.pi * sigma_squared) ** (num_dims / 2)
-
-    return ops.exp(-resp) / volume
+    return normal_density(grid, mu, sigma)
 
 
-class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus]):
+class Gaussian2DPRFTuning(BaseTuning[PRFStimulus, PRFStimulusTensors]):
     """
-    Two-dimensional isotropic Gaussian neuron population receptive field response model.
+    Two-dimensional isotropic Gaussian neuron population receptive field tuning model.
 
-    Predicts a neuron population response to a stimulus grid.
+    Predicts a neuron population tuning profile to a 2D stimulus grid.
     The model has three parameters: `mu_y` and `mu_x` for the center and `sigma` for the width of the Gaussian.
+
+    Notes
+    -----
+    This model predicts a proper Gaussian density that is normalized by its volume (so that it integrates to one).
+    This differs from other Gaussian pRF model implementations. See :doc:`Important details </important_details>`.
 
     Examples
     --------
+    Predict a tuning profile for a 2D stimulus grid.
+
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> stimulus = load_2d_prf_bar_stimulus()
-    >>> print(stimulus)
-    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> params = pd.DataFrame({
     ...     "mu_x": [0.0, 1.0, 0.0],
     ...     "mu_y": [1.0, 0.0, 0.0],
     ...     "sigma": [1.0, 1.5, 2.0],
     ... })
-    >>> model = Gaussian2DPRFResponse()
+    >>> model = Gaussian2DPRFTuning()
     >>> resp = model(stimulus, params)
     >>> print(resp.shape)  # (num_units, num_y, num_x)
-    (3, 101, 101)
+    (3, 128, 128)
     """
 
     @property
@@ -172,15 +174,14 @@ class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus]):
         return ["mu_y", "mu_x", "sigma"]
 
     @doc
-    def __call__(self, stimulus: PRFStimulus, parameters: pd.DataFrame, dtype: str | None = None) -> Tensor:
+    def call(self, stimulus: PRFStimulusTensors, parameters: TensorFrame) -> Tensor:
         """
-        Predict the model response for a stimulus with a 2D grid.
+        Predict the model tuning profile for a stimulus with a 2D grid.
 
         Parameters
         ----------
-        %(stimulus_prf)s
-        %(parameters)s
-        %(dtype)s
+        %(stimulus_prf_tensors)s
+        %(parameters_tensors)s
 
         Returns
         -------
@@ -190,21 +191,71 @@ class Gaussian2DPRFResponse(BasePopulationResponse[PRFStimulus]):
             x and y stimulus grid dimension.
 
         """
-        dtype = get_dtype(dtype)
         # Convention is y-dimension first
-        mu = convert_parameters_to_tensor(parameters[["mu_y", "mu_x"]], dtype=dtype)
-        sigma = convert_parameters_to_tensor(parameters[["sigma"]], dtype=dtype)
-        grid = ops.convert_to_tensor(stimulus.grid, dtype=dtype)
-
-        return predict_gaussian_response(grid, mu, sigma)
+        return predict_gaussian_response(stimulus.grid, parameters[["mu_y", "mu_x"]], parameters[["sigma"]])
 
 
+class Gaussian1DPRFTuning(BaseTuning[PRFStimulus, PRFStimulusTensors]):
+    """
+    One-dimensional Gaussian neuron population receptive field tuning model.
+
+    Predicts a neuron population tuning profile to a 1D stimulus grid.
+    The model has two parameters: `mu` for the location and `sigma` for the width of the Gaussian.
+
+    Notes
+    -----
+    This model predicts a proper Gaussian density that is normalized by its volume (so that it integrates to one).
+    This differs from other Gaussian pRF model implementations. See :doc:`Important details </important_details>`.
+
+    Examples
+    --------
+    Predict a tuning profile for a 1D log numerosity stimulus grid.
+
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
+    >>> stimulus = load_1d_prf_lognumerosity_stimulus()
+    >>> params = pd.DataFrame({
+    ...     "mu": [0.0, 1.0, 0.0],
+    ...     "sigma": [1.0, 1.5, 2.0],
+    ... })
+    >>> model = Gaussian1DPRFTuning()
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_coordinates)
+    (3, 8)
+    """
+
+    @property
+    def parameter_names(self) -> list[str]:
+        """Names of parameters used by the model: `mu` and `sigma`."""
+        return ["mu", "sigma"]
+
+    @doc
+    def call(self, stimulus: PRFStimulusTensors, parameters: TensorFrame) -> Tensor:
+        """
+        Predict the model tuning profile for a stimulus with a 1D grid.
+
+        Parameters
+        ----------
+        %(stimulus_prf_tensors)s
+        %(parameters_tensors)s
+
+        Returns
+        -------
+        Tensor
+            Model predictions of shape `(num_units, num_coordinates)` and dtype `dtype`.
+            `num_units` is the number of rows in `parameters` and `num_coordinates` is the size of the
+            stimulus grid dimension.
+
+        """
+        return predict_gaussian_response(stimulus.grid, parameters[["mu"]], parameters[["sigma"]])
+
+
+@doc
 class Gaussian2DPRFModel(CanonicalPRFModel):
     """
-    Two-dimensional isotropic Gaussian population receptive field model.
+    Two-dimensional isotropic Gaussian population receptive field (pRF) model.
 
-    This is a generic class that combines a 2D isotropic Gaussian population receptive field, impulse,
-    and scaling model response.
+    This class combines a 2D isotropic Gaussian pRF, impulse, scaling, and regressors model response.
 
     Parameters
     ----------
@@ -215,14 +266,15 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
 
     Notes
     -----
-    The canonical model follows the following steps: [1]_:
+    %(gaussian_norm_note)s
 
-    1. The 2D Gaussian population receptive field response model makes a prediction for the stimulus grid.
-    2. The encoding model encodes the neuron population response with the stimulus design.
-    3. An impulse model generates an impulse response.
-    4. The encoded neuron population response is convolved with the impulse response.
-    5. The scaling model modifies the convolved response.
-    6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
+    The canonical model follows the following steps [1]_:
+
+    1. The 2D Gaussian pRF tuning model makes a prediction for the stimulus grid.
+    2. The encoding model encodes the tuning profile with the stimulus design.
+    3. The encoded response is convolved with an impulse response (optional).
+    4. The scaling model modifies the convolved response (optional).
+    5. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
 
     Using the default impulse and scaling models, the following columns are expected in the
     :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
@@ -245,19 +297,19 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
          - Standard deviation of the isotropic Gaussian.
        * - ``delay``
          - Impulse
-         - Peak time of the positive gamma component (in seconds).
+         - Mean time of the positive gamma component (in seconds; optional).
        * - ``dispersion``
          - Impulse
-         - Rate parameter of the positive gamma component.
+         - Scale parameter of the positive gamma component (optional).
        * - ``undershoot``
          - Impulse
-         - Peak time of the negative gamma component (in seconds).
+         - Mean time of the negative gamma component (in seconds; optional).
        * - ``u_dispersion``
          - Impulse
-         - Rate parameter of the negative gamma component.
+         - Scale parameter of the negative gamma component (optional).
        * - ``ratio``
          - Impulse
-         - Weight of the negative gamma component.
+         - Weight of the negative gamma component (optional).
        * - ``weight_deriv``
          - Impulse
          - Weight of the derivative component.
@@ -275,13 +327,11 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
 
     Examples
     --------
-    Predict a model response for multiple units.
+    Predict a model response for a 2D bar stimulus.
 
     >>> import pandas as pd
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> stimulus = load_2d_prf_bar_stimulus()
-    >>> print(stimulus)
-    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> model = Gaussian2DPRFModel()
     >>> # Define all model parameters for 3 units
     >>> params = pd.DataFrame({
@@ -289,12 +339,8 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
     ...     "mu_x": [0.0, 1.0, 0.0],
     ...     "mu_y": [1.0, 0.0, 0.0],
     ...     "sigma": [1.0, 1.5, 2.0],
-    ...     # Impulse model parameters
-    ...     "delay": [6.0, 6.0, 6.0],
-    ...     "dispersion": [0.9, 0.9, 0.9],
-    ...     "undershoot": [12.0, 12.0, 12.0],
-    ...     "u_dispersion": [0.9, 0.9, 0.9],
-    ...     "ratio": [0.48, 0.48, 0.48],
+    ...     # Impulse model parameters (delay, dispersion, undershoot, u_dispersion,
+    ...     # and ratio use the default Glover HRF parameters)
     ...     "weight_deriv": [0.5, 0.5, 0.5],
     ...     # Scaling model parameters
     ...     "baseline": [0.1, -0.1, 0.5],
@@ -303,7 +349,7 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
     >>> # Predict model response
     >>> resp = model(stimulus, params)
     >>> print(resp.shape)  # (num_units, num_frames)
-    (3, 200)
+    (3, 170)
 
     """
 
@@ -315,7 +361,123 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
         regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
     ):
         super().__init__(
-            prf_model=Gaussian2DPRFResponse(),
+            prf_model=Gaussian2DPRFTuning(),
+            encoding_model=encoding_model,
+            impulse_model=impulse_model,
+            scaling_model=scaling_model,
+            regressors_model=regressors_model,
+        )
+
+
+@doc
+class Gaussian1DPRFModel(CanonicalPRFModel):
+    """
+    One-dimensional Gaussian population receptive field (pRF) model.
+
+    This class combines a 1D Gaussian pRF, impulse, scaling, and regressors model response.
+
+    Parameters
+    ----------
+    %(model_encoding_prf)s
+    %(model_impulse)s
+    %(model_scaling)s
+    %(model_regressors)s
+
+    Notes
+    -----
+    %(gaussian_norm_note)s
+
+    The canonical model follows the following steps [1]_:
+
+    1. The 1D Gaussian pRF tuning model makes a prediction for the stimulus grid.
+    2. The encoding model encodes the tuning profile with the stimulus design.
+    3. The encoded response is convolved with an impulse response (optional).
+    4. The scaling model modifies the convolved response (optional).
+    5. The regressors model adds a linear combination of fixed regressors to the scaled response (optional).
+
+    Using the default impulse and scaling models, the following columns are expected in the
+    :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
+
+    .. list-table::
+       :header-rows: 1
+       :widths: 20 12 53
+
+       * - Parameter
+         - Model
+         - Description
+       * - ``mu``
+         - pRF
+         - Center of the Gaussian.
+       * - ``sigma``
+         - pRF
+         - Standard deviation of the Gaussian.
+       * - ``delay``
+         - Impulse
+         - Mean time of the positive gamma component (in seconds; optional).
+       * - ``dispersion``
+         - Impulse
+         - Scale parameter of the positive gamma component (optional).
+       * - ``undershoot``
+         - Impulse
+         - Mean time of the negative gamma component (in seconds; optional).
+       * - ``u_dispersion``
+         - Impulse
+         - Scale parameter of the negative gamma component (optional).
+       * - ``ratio``
+         - Impulse
+         - Weight of the negative gamma component (optional).
+       * - ``weight_deriv``
+         - Impulse
+         - Weight of the derivative component.
+       * - ``baseline``
+         - Scaling
+         - Additive constant.
+       * - ``amplitude``
+         - Scaling
+         - Multiplicative scale factor.
+
+    References
+    ----------
+    .. [1] Harvey, B. M., Klein, B. P., Petridou, N., & Dumoulin, S. O. (2013). Topographic representation of
+        numerosity in the human parietal cortex. *Science*, 341(6150), 1123-1126. https://doi.org/10.1126/science.1239052
+
+
+    Examples
+    --------
+    Predict a model response for a 1D log numerosity stimulus.
+
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
+    >>> stimulus = load_1d_prf_lognumerosity_stimulus()
+    >>> model = Gaussian1DPRFModel()
+    >>> # Define all model parameters for 3 units
+    >>> params = pd.DataFrame({
+    ...     # Gaussian parameters
+    ...     "mu": [0.0, 1.0, 0.0],
+    ...     "sigma": [1.0, 1.5, 2.0],
+    ...     # Impulse model parameters (delay, dispersion, undershoot, u_dispersion,
+    ...     # and ratio use the default Glover HRF parameters)
+    ...     "weight_deriv": [0.5, 0.5, 0.5],
+    ...     # Scaling model parameters
+    ...     "baseline": [0.1, -0.1, 0.5],
+    ...     "amplitude": [-2.0, 1.2, 0.1],
+    ... })
+    >>> # Predict model response
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 182)
+
+    """
+
+    def __init__(
+        self,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
+    ):
+        super().__init__(
+            prf_model=Gaussian1DPRFTuning(),
             encoding_model=encoding_model,
             impulse_model=impulse_model,
             scaling_model=scaling_model,

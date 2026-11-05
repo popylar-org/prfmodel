@@ -9,7 +9,7 @@ with the stimulus design matrix, summed over the spatial dimensions.
 The pre-HRF comparison isolates the spatial encoding step,
 the meaningful invariant between packages.
 
-- prfmodel: Gaussian2DPRFModel(impulse_model=None, temporal_model=None)
+- prfmodel: Gaussian2DPRFModel(impulse_model=None, scaling_model=None)
   normalised RF: exp(-d^2/2*sigma^2) / (2*pi*sigma^2)
 - prfpy:    gauss2D_iso_cart -> unnormalised RF: exp(-d^2/2*sigma^2)
 
@@ -30,12 +30,17 @@ Two subtleties to be aware of when reading the prfpy-side implementation:
    *oversampled* grid (1600 points at 0.02 s for TR=1).  Using oversampling=1
    instead shifts the gamma evaluation by loc=dt=1 s, misaligning the peak by a
    full second.  We therefore fetch the oversampled kernel and downsample by
-   slicing every 50th point, making the shift only 0.02 s (negligible).
+   slicing every 50th point, making the shift only TR/50 (negligible).
 
 2. prfmodel includes baseline and amplitude in its full prediction.  A non-zero
    baseline adds a constant offset that, after normalisation, changes the shape
    of the normalised timeseries.  We set baseline=0 and amplitude=1 in the
    SPM-params DataFrame so both sides return a raw convolved signal.
+
+3. prfmodel samples its impulse kernel at the frame duration of the stimulus
+   (0.9 s for the bar stimulus), so the nilearn kernel is built with t_r set to
+   that same frame duration.  A kernel at any other TR convolves the two
+   predictions on different time axes.
 
 Coordinate conventions
 ----------------------
@@ -46,6 +51,7 @@ prfpy gauss2D_iso_cart(x, y, mu=(x_pos, y_pos), sigma):
 """
 
 import sys
+from collections.abc import Callable
 from pathlib import Path
 import numpy as np
 import pandas as pd
@@ -64,6 +70,7 @@ except ImportError:
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from shared import BASE_MODEL_PARAMS
+from shared import RTOL
 from shared import PRFStimulus
 from shared import compare_predictions
 from shared import load_stimulus
@@ -82,11 +89,24 @@ _SPM_HRF_PARAMS = {
     "weight_deriv": 0.0,
 }
 
-# Looser tolerance for the with-HRF check: different convolution backends
-# (prfmodel uses Keras depthwise conv, prfpy side uses scipy fftconvolve) and
-# the residual 0.02 s loc shift from the oversampling approach introduce small
-# numerical differences not present in the pre-HRF comparison.
-RTOL_WITH_HRF: float = 1e-3
+# Looser tolerance for the with-HRF check, set from the measured floor rather than chosen. The figures
+# below were measured on the bar stimulus, so both kernels are sampled at its 0.9 s frame duration.
+#
+# The convolution is not the reason: prfmodel's Keras depthwise convolution and the scipy
+# fftconvolve used on the prfpy side agree to 3.0e-07 of peak when handed the same kernel. Nor is
+# prfmodel's kernel: an exact scipy kernel on prfmodel's own grid agrees to 3.3e-07. The residual is
+# how nilearn lays out its time axis, and it has two parts that partly cancel: a `loc=dt` shift of
+# one oversampled step (3.46e-03 on its own) and a `linspace` grid whose downsampled spacing is
+# 0.90039 s rather than 0.9 s (5.29e-04 on its own). Downsampling removes neither, and no change on
+# the prfmodel side can close either. Together they measure 2.97e-03 of peak in the convolved
+# prediction; on the leading-edge grid the two kernels agree to 6.56e-03 of peak on their own, so the
+# convolved floor is of the same order.
+#
+# 5e-3 sits above that floor and well below a real defect: against the same edge-sampled
+# reference, the class of error this check exists to catch measures 8.35e-02 when the kernel is
+# mis-sampled by half a step and 1.70e-01 when it is off by a full one. Building the reference
+# kernel at 1 s instead of the 0.9 s frame duration measures 1.22e-01.
+RTOL_WITH_HRF: float = 5e-3
 
 
 def _prfpy_response(stimulus: PRFStimulus) -> np.ndarray:
@@ -130,42 +150,86 @@ def _make_spm_params() -> pd.DataFrame:
     )
 
 
-def _prfpy_response_with_hrf(pre_hrf: np.ndarray) -> np.ndarray:
+def _prfpy_response_with_hrf(pre_hrf: np.ndarray, t_r: float) -> np.ndarray:
     """Convolve pre-HRF neural response with the SPM canonical HRF via scipy.
 
     nilearn's spm_hrf returns the kernel on an oversampled grid (default 50x).
-    Calling it with oversampling=1 introduces a loc=dt=1 s shift that misaligns
-    the kernel by a full second relative to prfmodel's gamma evaluation. Instead
-    we oversample at the default rate and then downsample to 1 s/sample (every 50th
-    point), so the loc shift is only 0.02 s and its effect is negligible.
+    Calling it with oversampling=1 introduces a loc=dt=t_r shift that misaligns
+    the kernel by a full frame relative to prfmodel's gamma evaluation. Instead
+    we oversample at the default rate and then downsample to one sample per frame,
+    so the loc shift is only t_r/50 and its effect is negligible.
 
-    TR=1 s is assumed — the resolution at which prfmodel samples its impulse kernel.
+    The downsample starts at index 0, because prfmodel now samples each frame at its leading
+    edge (0, t_r, 2*t_r, ...) as nilearn does. Both kernels therefore sit on the same grid, and
+    comparing them compares the two implementations rather than the two conventions; reading
+    one of them half a step out puts them 8.35e-02 of peak apart.
+
+    t_r must be the frame duration of the stimulus, the resolution at which prfmodel samples its
+    impulse kernel.
     """
     oversampling = 50
-    kernel = spm_hrf(t_r=1.0, oversampling=oversampling)[::oversampling]
+    kernel = spm_hrf(t_r=t_r, oversampling=oversampling)[::oversampling]
     pad_len = len(kernel) - 1
     padded = np.pad(pre_hrf, (pad_len, 0), mode="edge")
     convolved = signal.fftconvolve(padded, kernel)
     return convolved[pad_len : pad_len + len(pre_hrf)]
 
 
+def check_pre_hrf(stimulus: PRFStimulus) -> None:
+    """Assert that prfmodel and prfpy agree on the spatial encoding step."""
+    params = make_params()
+    ref = prfmodel_response(stimulus, params, with_hrf=False)
+    prfpy = _prfpy_response(stimulus)
+    if not compare_predictions(ref, prfpy, "prfpy (pre-HRF)"):
+        msg = (
+            f"prfmodel and prfpy disagree on the pre-HRF response by more than {RTOL:.0e} of peak. "
+            "This is the spatial encoding step: the Gaussian receptive field projected onto the "
+            "stimulus design. A failure here means the receptive field, the stimulus grid "
+            "convention, or the projection disagrees with prfpy."
+        )
+        raise AssertionError(msg)
+
+
+def check_with_hrf(stimulus: PRFStimulus) -> None:
+    """Assert that prfmodel and prfpy agree on the full prediction, HRF included.
+
+    Together with ``check_pre_hrf`` this localises a disagreement: if the pre-HRF check passes and
+    this one fails, the cause is the impulse response or the convolution. Both kernels are read at
+    prfmodel's leading edge frames (see ``_prfpy_response_with_hrf``), on which they agree to 2.97e-03 of
+    peak, the floor set by nilearn's time-axis layout; see ``RTOL_WITH_HRF``.
+
+    """
+    spm_params = _make_spm_params()
+    ref_hrf = prfmodel_response(stimulus, spm_params, with_hrf=True)
+    prfpy_hrf = _prfpy_response_with_hrf(_prfpy_response(stimulus), stimulus.frame_duration)
+    if not compare_predictions(ref_hrf, prfpy_hrf, "prfpy (with HRF)", rtol=RTOL_WITH_HRF):
+        msg = (
+            f"prfmodel and prfpy disagree on the full prediction by more than {RTOL_WITH_HRF:.0e} "
+            "of peak. The pre-HRF check isolates whether the cause is spatial or temporal: if that "
+            "one passes and this one fails, the discrepancy is in the impulse response or the "
+            "convolution. See this function's docstring for the known cause."
+        )
+        raise AssertionError(msg)
+
+
+def _run(check: Callable[[PRFStimulus], None], stimulus: PRFStimulus) -> str | None:
+    """Run a single check, returning its failure message, or None if it passed."""
+    try:
+        check(stimulus)
+    except AssertionError as exc:
+        return str(exc)
+    return None
+
+
 def main() -> None:
     """Run prfpy comparisons and exit with 0 if all pass, 1 if any fail."""
     stimulus = load_stimulus()
 
-    # Pre-HRF check: spatial encoding only.
-    params = make_params()
-    ref = prfmodel_response(stimulus, params, with_hrf=False)
-    prfpy = _prfpy_response(stimulus)
-    passed_pre = compare_predictions(ref, prfpy, "prfpy (pre-HRF)")
+    failures = [msg for msg in (_run(check, stimulus) for check in (check_pre_hrf, check_with_hrf)) if msg]
+    for msg in failures:
+        print(f"\n{msg}\n")
 
-    # Full-prediction check: spatial encoding + SPM canonical HRF convolution.
-    spm_params = _make_spm_params()
-    ref_hrf = prfmodel_response(stimulus, spm_params, with_hrf=True)
-    prfpy_hrf = _prfpy_response_with_hrf(_prfpy_response(stimulus))
-    passed_hrf = compare_predictions(ref_hrf, prfpy_hrf, "prfpy (with HRF)", rtol=RTOL_WITH_HRF)
-
-    sys.exit(0 if passed_pre and passed_hrf else 1)
+    sys.exit(1 if failures else 0)
 
 
 if __name__ == "__main__":

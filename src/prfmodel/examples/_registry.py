@@ -1,0 +1,662 @@
+"""Specifications of the available example datasets."""
+
+from __future__ import annotations
+import json
+from dataclasses import dataclass
+from dataclasses import field
+from importlib.resources import files
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from collections.abc import Mapping
+    from prfmodel.examples._dataset import Dataset
+    from prfmodel.examples._fetch import FileFetcher
+    from prfmodel.examples._options import Options
+
+_FIGSHARE_URL = "https://ndownloader.figshare.com/files"
+
+# Download sizes below this are reported in kilobytes rather than as '0 MB'
+_BYTES_PER_MEGABYTE = 1_000_000
+
+_OPENNEURO_CHN_URL = "https://s3.amazonaws.com/openneuro.org/ds004698/derivatives/prf-estimation"
+
+# OpenNeuro serves the latest version of a file unless a version is given, so we pin each file to ds004698 v1.0.1
+_CHN_VERSION_IDS = {
+    "response_fixedbar_ses-01_run-01_L": "P_skpwTDq63Fj2vwtUNRWn1t5VGnpEJj",
+    "response_fixedbar_ses-01_run-01_R": "IgzEz4D73tUMn2v.73HCz.4Jg.Cd0.hF",
+    "response_fixedbar_ses-01_run-02_L": "oZxMtde_YRCNPRpyvR3azRo1zxv9QOLV",
+    "response_fixedbar_ses-01_run-02_R": "RCD7YSVLBB4P8n0yCEgSCqN7tCn1YJvz",
+    "response_fixedbar_ses-02_run-01_L": "f5y3VlzEx7wEJxdVqWZaoJc5PkkDigJS",
+    "response_fixedbar_ses-02_run-01_R": "sYv_PYxpjkgxSSDhwQPxtpgK_gIV5177",
+    "response_logbar_ses-01_run-01_L": "dtR30Dl4gW.tqQbssS7MqzuTxHn_7_U_",
+    "response_logbar_ses-01_run-01_R": "IB7ekisbIDU7lilso7_Yax.iP5TOW1IH",
+    "response_logbar_ses-01_run-02_L": "6n30eVisTPQFMoJntPC2N.CUmcIfqEXk",
+    "response_logbar_ses-01_run-02_R": "3fvnoJ1kmCg6cIGmF.ftTQCdzksVNMY7",
+    "response_logbar_ses-02_run-01_L": "QCR9Deka2rRUVgz4ZPchPnDQwwycSUI1",
+    "response_logbar_ses-02_run-01_R": "VqVnpEaeFmgXmtee2tA7o_obDwmE2DjO",
+    "aperture_fixedbar_run-01": "6qlxLM8jYBkBROjA0bs7n2ow4DXONnSh",
+    "aperture_fixedbar_run-02": "yeOOd5ToKtK1JzmpyhYIr.n9X3uhIfo9",
+    "aperture_logbar_run-01": "tapQvwLFQt0bOrgTiUgSqJz_MibDtc4.",
+    "aperture_logbar_run-02": "28BNSulFlmYq5EV5n_vSC2OMpV2nUTt7",
+    "v1_L": "mjNORGYirlmF06GwNe_plhwSmeGgIk_Z",
+    "v1_R": "Fp9lgchWq57TkYM7sBQLXhfXDVdiyCQJ",
+    "v2_L": "L7cGmp75FyLvb5onXBo3zqfvSVbUaFvS",
+    "v2_R": "fbYJhlucI8yE6mUBFIueg7GjKDbulcAx",
+    "v3_L": "K9OGCiz15d9.ZNjTkYpgu7.vpu9FOoER",
+    "v3_R": "r1SCgV5lrX5gtMyO.J5Fu426XSbZCxLY",
+    "inflated_L": "neA6erSssHoGD65IjNwnxe1DuoQTtz72",
+    "inflated_R": "KcebigZeJt772fSfAyYHX62H4USz9wro",
+}
+
+# Figshare file identifiers of the files of the 7t-ncsf-visual dataset
+_NCSF_FIGSHARE_IDS = {
+    "response_csf_all_L": 70993131,
+    "response_csf_all_R": 70993122,
+    "response_csf_odd_L": 70993128,
+    "response_csf_odd_R": 70993119,
+    "response_csf_even_L": 70993125,
+    "response_csf_even_R": 70993116,
+    "response_prf_all_L": 70993113,
+    "response_prf_all_R": 70993110,
+    "benson14_angle_L": 70993107,
+    "benson14_angle_R": 70993095,
+    "benson14_eccen_L": 70993101,
+    "benson14_eccen_R": 70993092,
+    "benson14_sigma_L": 70993104,
+    "benson14_sigma_R": 70993086,
+    "roi_L": 70993098,
+    "roi_R": 70993089,
+    "stimulus_prf": 70993083,
+}
+
+# OpenNeuro addresses a file of a dataset snapshot by its path with the separators replaced by colons
+_OPENNEURO_ECOG_URL = (
+    "https://openneuro.org/crn/datasets/ds004194/snapshots/3.0.0/files/derivatives:Yuasa2023AlphaPRF:pRFmodel"
+)
+
+
+@dataclass(frozen=True)
+class DatasetSpec:
+    """
+    Specification of an example dataset.
+
+    A dataset is distributed either as a single archive, given by `url`, or as individual files, given by
+    `file_urls`. Exactly one of the two must be set.
+
+    Parameters
+    ----------
+    name : str
+        Name of the dataset, as passed to :func:`~prfmodel.examples.load_dataset`.
+    summary : str
+        One-paragraph description of what the dataset contains.
+    url : str, optional
+        URL of the archive that holds the dataset files, for a dataset distributed as one archive.
+    files : collections.abc.Mapping of str to str
+        Mapping from the logical name of a file to its path relative to the data directory. For a dataset
+        distributed as one archive, this path is also the path of the file inside the archive.
+    file_urls : collections.abc.Mapping of str to str
+        Mapping from the logical name of a file to the URL it is downloaded from, for a dataset distributed
+        as individual files. Only the files that are actually loaded are downloaded.
+    loader : collections.abc.Callable
+        Function that turns a file fetcher and a set of options into a :class:`~prfmodel.examples.Dataset`.
+    options : frozenset of str
+        Names of the :func:`~prfmodel.examples.load_dataset` options that this dataset accepts.
+    splits : tuple of str
+        Names of the data splits that this dataset provides. When non-empty, a split must be requested unless
+        `default_split` is set.
+    default_split : str, optional
+        Split that is used when none is requested. If `None` (the default), a dataset with splits requires one.
+    hemispheres : tuple of str
+        Hemisphere selections that this dataset accepts.
+    surface_types : tuple of str
+        Surface types that this dataset accepts. The first one is used when none is requested.
+    tasks : tuple of str
+        Experimental tasks that this dataset provides. The first one is used when none is requested.
+    default_hemisphere : str
+        Hemisphere selection that is used when none is requested.
+    licence : str
+        Licence that the dataset is distributed under.
+    citation : str
+        Reference that should be cited when the dataset is used.
+    homepage : str
+        URL of the page that describes the dataset.
+    download_size : int
+        Total size of the dataset in bytes. A dataset distributed as one archive downloads all of it even
+        when only part of it is loaded, while a dataset distributed as individual files downloads only the
+        files that are loaded.
+
+    """
+
+    name: str
+    summary: str
+    files: Mapping[str, str]
+    loader: Callable[[FileFetcher, Options], Dataset]
+    url: str | None = None
+    file_urls: Mapping[str, str] = field(default_factory=dict)
+    options: frozenset[str] = frozenset()
+    splits: tuple[str, ...] = ()
+    default_split: str | None = None
+    hemispheres: tuple[str, ...] = ()
+    surface_types: tuple[str, ...] = ()
+    tasks: tuple[str, ...] = ()
+    default_hemisphere: str = "both"
+    licence: str = ""
+    citation: str = ""
+    homepage: str = ""
+    download_size: int = 0
+
+    def __post_init__(self) -> None:
+        if (self.url is None) == (not self.file_urls):
+            msg = f"Dataset '{self.name}' must set either 'url' or 'file_urls' but not both"
+            raise ValueError(msg)
+
+        if self.file_urls and set(self.file_urls) != set(self.files):
+            msg = f"Dataset '{self.name}' must give a URL for every file in 'files'"
+            raise ValueError(msg)
+
+        if self.default_split is not None and self.default_split not in self.splits:
+            msg = f"Dataset '{self.name}' must have its default split '{self.default_split}' in 'splits'"
+            raise ValueError(msg)
+
+    @property
+    def is_archive(self) -> bool:
+        """Whether this dataset is distributed as a single archive rather than as individual files."""
+        return self.url is not None
+
+
+def _make_registry() -> dict[str, DatasetSpec]:
+    # Imported here because the loaders import this module for its specifications
+    from prfmodel.examples import _loaders  # noqa: PLC0415 (deliberate to break an import cycle)
+
+    aot_files = {
+        "response": (
+            "7t_aot_sub-003/sub-003_ses-pRF_task-pRF_rec-nordicstc_run-medianpsc_part-mag_bold_space-T1w_res-2p0mm.nii.gz"
+        ),
+        "mask": "7t_aot_sub-003/sub-003_FScortexGM_dil_T2BM_crop_resampled.nii.gz",
+        **{
+            f"{surface_type}_{hemi}": f"7t_aot_sub-003/surfaces/{surface_type}_{hemi}.gii"
+            for surface_type in ("flat", "inflated", "pia", "wm")
+            for hemi in ("lh", "rh")
+        },
+    }
+
+    # Paths relative to the prf-estimation derivatives of the CHN dataset
+    # Splits are named with zero-padded run numbers but the files are not
+    chn_splits = {"ses-01_run-01": ("ses-01", 1), "ses-01_run-02": ("ses-01", 2), "ses-02_run-01": ("ses-02", 1)}
+    chn_paths = {
+        **{
+            f"response_{task}_{split}_{hemi}": (
+                f"sub-01/func/sub-01_{session}_task-{task}_run-{run}_hemi-{hemi}_space-fsnative_desc-preproc_bold.func.gii"
+            )
+            for task in ("fixedbar", "logbar")
+            for split, (session, run) in chn_splits.items()
+            for hemi in ("L", "R")
+        },
+        **{
+            f"aperture_{task}_run-{run:02d}": f"stimuli/task-{task}_run-{run}_desc-down_aperture.mat"
+            for task in ("fixedbar", "logbar")
+            for run in (1, 2)
+        },
+        **{
+            f"{roi}_{hemi}": f"sub-01/rois/sub-01_hemi-{hemi}_space-fsnative_{roi}.label"
+            for roi in ("v1", "v2", "v3")
+            for hemi in ("L", "R")
+        },
+        **{
+            f"inflated_{hemi}": f"sub-01/anat/sub-01_ses-01_acq-MEMPRvNav_rec-RMS_hemi-{hemi}_inflated.surf.gii"
+            for hemi in ("L", "R")
+        },
+    }
+
+    ecog_file = "p10_freq_spectra-timeseries_avg-runs_bbS.mat"
+
+    # The odd and even splits exist for the CSF task only
+    ncsf_prefix = "sub-16112020"
+    ncsf_space = "space-fsLR_den-59k"
+    ncsf_responses = {
+        "csf_all": "task-csf",
+        "csf_odd": "task-csf_split-odd",
+        "csf_even": "task-csf_split-even",
+        "prf_all": "task-prf",
+    }
+    ncsf_paths = {
+        **{
+            f"response_{key}_{hemi}": f"{ncsf_prefix}_{entities}_hemi-{hemi}_{ncsf_space}_desc-detrend3_bold.func.gii"
+            for key, entities in ncsf_responses.items()
+            for hemi in ("L", "R")
+        },
+        **{
+            f"benson14_{key}_{hemi}": f"{ncsf_prefix}_hemi-{hemi}_{ncsf_space}_atlas-benson14_{key}.func.gii"
+            for key in ("angle", "eccen", "sigma")
+            for hemi in ("L", "R")
+        },
+        **{
+            f"roi_{hemi}": f"{ncsf_prefix}_hemi-{hemi}_{ncsf_space}_atlas-benson14_dseg.label.gii"
+            for hemi in ("L", "R")
+        },
+        "stimulus_prf": "task-prf_stimulus.npz",
+    }
+
+    specs = (
+        DatasetSpec(
+            name="3t-chn-visual",
+            summary=(
+                "Blood oxygenation level-dependent response of a single subject (sub-01) to a moving bar stimulus, "
+                "measured with a repetition time of 1.2 s for 305 frames, preprocessed with fMRIPrep, denoised, and "
+                "sampled onto the 221,709 (left) and 223,660 (right) vertices of the native cortical surface "
+                "of the subject. The bar is either of a fixed width ('fixedbar' task) or warped logarithmically with "
+                "eccentricity ('logbar' task). The splits are the first two runs of the first session and the "
+                "first run of the second session. The first runs of both sessions show the identical stimulus, so "
+                "they can be used for cross-validation, while the second run shows a different sequence of bar "
+                "positions, so it can be used to test predictions for a new stimulus. The stimulus is the binary "
+                "aperture on a 108 x 108 grid spanning -8 to 8 degrees of visual angle, averaged from 1 Hz to the "
+                "repetition time; its first row is the upper edge of the visual field. Each row of the response "
+                "carries a V1, V2, or V3 region of interest index, and the inflated surfaces of the subject are "
+                "included for plotting. Every hemisphere downloads about 360 MB per split and task."
+            ),
+            files={key: f"chn_sub-01/{path}" for key, path in chn_paths.items()},
+            file_urls={
+                key: f"{_OPENNEURO_CHN_URL}/{path}?versionId={_CHN_VERSION_IDS[key]}" for key, path in chn_paths.items()
+            },
+            loader=_loaders.load_chn_visual,
+            options=frozenset({"hemisphere", "split", "task"}),
+            splits=tuple(chn_splits),
+            tasks=("fixedbar", "logbar"),
+            hemispheres=("both", "left", "right"),
+            default_hemisphere="left",
+            licence="CC0",
+            citation=(
+                "Chang, K., Fine, I., & Boynton, G. M. (2025). Improving the reliability and accuracy of population "
+                "receptive field measures using a logarithmically warped stimulus. Journal of Vision, 25(1), 5. "
+                "https://doi.org/10.1167/jov.25.1.5 -- and the dataset as: Chang, K., Fine, I., & Boynton, G. M. "
+                "(2024). CHN Retinotopic Mapping Dataset. OpenNeuro. https://doi.org/10.18112/openneuro.ds004698.v1.0.1"
+            ),
+            homepage="https://openneuro.org/datasets/ds004698/versions/1.0.1",
+            download_size=4_359_634_346,
+        ),
+        DatasetSpec(
+            name="7t-retbar-visual",
+            summary=(
+                "Blood oxygenation level-dependent response of a single subject to a moving bar stimulus, "
+                "measured in a 7T scanner with a repetition time of 1.5 s and averaged over 43 runs across "
+                "four sessions. The response is given for the 59k vertices of each hemisphere of a "
+                "standardized cortical surface. The raw MATLAB design matrix of the stimulus is included as "
+                "the 'design' file; it needs to be padded, binarized, and smoothed before it can be turned "
+                "into a stimulus, which is why this dataset provides no ready-made one."
+            ),
+            url=f"{_FIGSHARE_URL}/26577941",
+            files={
+                "response_L": "sub-02_task-prf_space-59k_hemi-L_run-median_desc-bold.func.gii",
+                "response_R": "sub-02_task-prf_space-59k_hemi-R_run-median_desc-bold.func.gii",
+                "design": "vis_design.mat",
+            },
+            loader=_loaders.load_retbar_visual,
+            options=frozenset({"hemisphere"}),
+            hemispheres=("both", "left", "right"),
+            default_hemisphere="both",
+            licence="CC BY 4.0",
+            citation="Knapen, T. (2021). fMRI Teaching Materials. figshare. https://doi.org/10.6084/m9.figshare.14096209",
+            homepage="https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209",
+            download_size=51_000_000,
+        ),
+        DatasetSpec(
+            name="7t-aot-visual",
+            summary=(
+                "Blood oxygenation level-dependent response of a single subject (sub-003) to a moving bar stimulus, "
+                "measured with a repetition time of 0.9 s, converted to percent signal change, and taken as the "
+                "median over runs. The response is given for the voxels of a 2 mm volume that fall inside a dilated "
+                "gray matter mask. The mask is included so that results can be mapped back into the volume. The "
+                "stimulus is the full 340 frames of the bar stimulus included in the package. The cortical surfaces of "
+                "the subject share the world coordinates of the volume, so the volume can be projected onto them with "
+                "nilearn.surface.vol_to_surf using the 'pia' and 'wm' surfaces, which are always downloaded."
+            ),
+            files=aot_files,
+            file_urls={
+                "response": f"{_FIGSHARE_URL}/69496476",
+                "mask": f"{_FIGSHARE_URL}/69496449",
+                "flat_lh": f"{_FIGSHARE_URL}/69496467",
+                "flat_rh": f"{_FIGSHARE_URL}/69496452",
+                "inflated_lh": f"{_FIGSHARE_URL}/69496455",
+                "inflated_rh": f"{_FIGSHARE_URL}/69496458",
+                "pia_lh": f"{_FIGSHARE_URL}/69496473",
+                "pia_rh": f"{_FIGSHARE_URL}/69496464",
+                "wm_lh": f"{_FIGSHARE_URL}/69496461",
+                "wm_rh": f"{_FIGSHARE_URL}/69496470",
+            },
+            loader=_loaders.load_aot_visual,
+            options=frozenset({"surface_type"}),
+            surface_types=("inflated", "flat", "pia", "wm"),
+            licence="CC BY 4.0",
+            citation=(
+                "Knapen, T. (2026). Single-subject arrow-of-time example dataset. figshare. "
+                "https://doi.org/10.6084/m9.figshare.34032573"
+            ),
+            homepage="https://doi.org/10.6084/m9.figshare.34032573",
+            download_size=284_074_080,
+        ),
+        DatasetSpec(
+            name="numerosity-timing",
+            summary=(
+                "Blood oxygenation level-dependent response of a single subject to a sequence of visual "
+                "numerosities, averaged separately over the two odd and the two even runs so that the two "
+                "splits can be used for cross-validation. Rows are the gray nodes of the eight "
+                "numerosity-selective regions of interest rather than surface vertices, so concatenating "
+                "both hemispheres carries no anatomical adjacency."
+            ),
+            files={
+                "response_odd_L": "sub-S1_hemi-L_desc-odd_bold.func.gii",
+                "response_even_L": "sub-S1_hemi-L_desc-even_bold.func.gii",
+                "response_odd_R": "sub-S1_hemi-R_desc-odd_bold.func.gii",
+                "response_even_R": "sub-S1_hemi-R_desc-even_bold.func.gii",
+                "roi_L": "sub-S1_hemi-L_desc-numerosity_dseg.label.gii",
+                "roi_R": "sub-S1_hemi-R_desc-numerosity_dseg.label.gii",
+            },
+            file_urls={
+                "response_odd_L": f"{_FIGSHARE_URL}/68359336",
+                "response_even_L": f"{_FIGSHARE_URL}/68359342",
+                "response_odd_R": f"{_FIGSHARE_URL}/68359327",
+                "response_even_R": f"{_FIGSHARE_URL}/68359333",
+                "roi_L": f"{_FIGSHARE_URL}/68359339",
+                "roi_R": f"{_FIGSHARE_URL}/68359330",
+            },
+            loader=_loaders.load_numerosity_timing,
+            options=frozenset({"hemisphere", "split"}),
+            splits=("odd", "even"),
+            hemispheres=("both", "left", "right"),
+            default_hemisphere="left",
+            licence="CC BY 4.0",
+            citation=(
+                "Hendrikx, E., Paul, J. M., van Ackooij, M., van der Stoep, N., & Harvey, B. M. (2024). "
+                "Cortical quantity representations of visual numerosity and timing overlap increasingly into "
+                "superior cortices but remain distinct. NeuroImage, 286, 120515. "
+                "https://doi.org/10.1016/j.neuroimage.2024.120515 -- and the derived files as: "
+                "Luken, M. (2026). Single-subject numerosity-timing example dataset. figshare. "
+                "https://doi.org/10.6084/m9.figshare.33481645"
+            ),
+            homepage="https://doi.org/10.6084/m9.figshare.33481645",
+            download_size=17_447_831,
+        ),
+        DatasetSpec(
+            name="7t-ncsf-visual",
+            summary=(
+                "Blood oxygenation level-dependent response of a single subject (sub-16112020), measured in a 7T "
+                "scanner with a repetition time of 1.5 s, detrended, converted to percent signal change, averaged "
+                "over runs, and projected onto the 59,292 vertices of each hemisphere of the HCP fs_LR 59k surface, "
+                "so it can be drawn on the meshes of the 'hcp-999999-surface' dataset. In the 'csf' task, for "
+                "fitting neural contrast sensitivity function models, full-screen gratings show one of six spatial "
+                "frequencies (0.5 to 18 cycles per degree) at one of fourteen Michelson contrasts (0.25 to 80 "
+                "percent) per frame, for 214 frames. Blank frames have zero spatial frequency and zero contrast. In "
+                "the 'prf' task, bars filled with natural images sweep across the screen in eight directions, for 248 "
+                "frames, on a grid of 100 by 100 pixels from about -5.1 to 5.1 degrees of visual angle, whose outer "
+                "pixels lie on the edges of the screen and whose first row is the upper edge of the visual field. "
+                "The 'csf' task also provides the averages of the odd and of the even runs as splits, for "
+                "cross-validation or a split-half noise ceiling; the 'prf' task provides only the average of all "
+                "runs. Each row of the response carries a visual area index from the Benson et al. (2014) template "
+                "atlas of the subject, and the 'units' frame holds the hemisphere of each vertex and the template "
+                "polar angle, eccentricity, and pRF size, which are zero where the template does not reach. The polar "
+                "angle runs from 0 degrees at the upper to 180 degrees at the lower vertical meridian in both "
+                "hemispheres, so it lies in the right visual field for the left hemisphere and in the left visual "
+                "field for the right one. Every hemisphere downloads about 57 MB for the 'csf' task and 22 to 26 MB "
+                "for the 'prf' task."
+            ),
+            files={key: f"7t_ncsf_sub-16112020/{path}" for key, path in ncsf_paths.items()},
+            file_urls={key: f"{_FIGSHARE_URL}/{_NCSF_FIGSHARE_IDS[key]}" for key in ncsf_paths},
+            loader=_loaders.load_ncsf_visual,
+            options=frozenset({"hemisphere", "split", "task"}),
+            splits=("all", "odd", "even"),
+            default_split="all",
+            tasks=("csf", "prf"),
+            hemispheres=("both", "left", "right"),
+            default_hemisphere="both",
+            licence="CC BY 4.0",
+            citation=(
+                "Roelofzen, C., Daghlian, M., van Dijk, J. A., de Jong, M. C., & Dumoulin, S. O. (2025). Modeling "
+                "neural contrast sensitivity functions in human visual cortex. Imaging Neuroscience, 3, "
+                "imag_a_00469. https://doi.org/10.1162/imag_a_00469"
+            ),
+            homepage="https://doi.org/10.6084/m9.figshare.34887324",
+            download_size=391_892_568,
+        ),
+        DatasetSpec(
+            name="numerosity-four-conditions",
+            summary=(
+                "Preprocessed fMRI time-course data for four experimental "
+                "conditions (Area, Size, Circumference, and Density) and their "
+                "average, accompanied by FreeSurfer surface files for flatmap "
+                "visualisation of both hemispheres."
+            ),
+            files={
+                "responses": "fmri_full_grid_dataset.pkl",
+                "lh_flat": "Surfaces/lh.flat.gii",
+                "lh_vertex_indices": "Surfaces/lh.flat.vertex_indices.npy",
+                "lh_white": "Surfaces/lh.white",
+                "rh_flat": "Surfaces/rh.flat.gii",
+                "rh_vertex_indices": "Surfaces/rh.flat.vertex_indices.npy",
+                "rh_white": "Surfaces/rh.white",
+            },
+            file_urls={
+                "responses": f"{_FIGSHARE_URL}/71024598",
+                "lh_flat": f"{_FIGSHARE_URL}/71025390",
+                "lh_vertex_indices": f"{_FIGSHARE_URL}/71025384",
+                "lh_white": f"{_FIGSHARE_URL}/71025375",
+                "rh_flat": f"{_FIGSHARE_URL}/71025378",
+                "rh_vertex_indices": f"{_FIGSHARE_URL}/71025381",
+                "rh_white": f"{_FIGSHARE_URL}/71025387",
+            },
+            loader=_loaders.load_numerosity_four_conditions,
+            licence="CC BY 4.0",
+            citation=(
+                "Mauro, K. (2026). Four Condition Numerosity Dataset. "
+                "figshare. https://doi.org/10.6084/m9.figshare.34898940"
+            ),
+            homepage="https://doi.org/10.6084/m9.figshare.34898940",
+            download_size=673939692,
+        ),
+        DatasetSpec(
+            name="hcp-999999-surface",
+            summary=(
+                "Standardized cortical surface meshes based on the Human Connectome Project, together with "
+                "the multi-modal parcellation atlas that belongs to them. Each hemisphere has 59k vertices, "
+                "so responses from the '7t-retbar-visual' and '7t-ncsf-visual' datasets can be projected onto these "
+                "meshes."
+            ),
+            url=f"{_FIGSHARE_URL}/25768841",
+            files={
+                "flat_lh": "hcp_999999/surfaces/flat_lh.gii",
+                "flat_rh": "hcp_999999/surfaces/flat_rh.gii",
+                "inflated_lh": "hcp_999999/surfaces/inflated_lh.gii",
+                "inflated_rh": "hcp_999999/surfaces/inflated_rh.gii",
+                "pia_lh": "hcp_999999/surfaces/pia_lh.gii",
+                "pia_rh": "hcp_999999/surfaces/pia_rh.gii",
+                "wm_lh": "hcp_999999/surfaces/wm_lh.gii",
+                "wm_rh": "hcp_999999/surfaces/wm_rh.gii",
+                "atlas": "hcp_999999/surface-info/mmp_atlas.npz",
+            },
+            loader=_loaders.load_hcp_surface,
+            options=frozenset({"surface_type"}),
+            surface_types=("flat", "inflated", "pia", "wm"),
+            licence="CC BY 4.0",
+            citation=(
+                "Van Essen, D. C., Ugurbil, K., Auerbach, E., Barch, D., Behrens, T. E. J., Bucholz, R., "
+                "Chang, A., Chen, L., Corbetta, M., Curtiss, S. W., Della Penna, S., Feinberg, D., Glasser, "
+                "M. F., Harel, N., Heath, A. C., Larson-Prior, L., Marcus, D., Michalareas, G., Moeller, S., "
+                "... WU-Minn HCP Consortium. (2012). The Human Connectome Project: A data acquisition "
+                "perspective. NeuroImage, 62(4), 2222-2231. https://doi.org/10.1016/j.neuroimage.2012.02.018"
+            ),
+            homepage="https://doi.org/10.6084/m9.figshare.13372958",
+            download_size=61_000_000,
+        ),
+        DatasetSpec(
+            name="visual-ecog-broadband",
+            summary=(
+                "Broadband power change in electrocorticography, in percent, measured as the mean power "
+                "between 70 and 180 Hz relative to the blank-screen baseline, with the line-noise harmonics "
+                "left out. It was recorded in a single subject with a high-density grid and with standard "
+                "grids and strips over right occipital and lateral cortex, while a bar swept across the "
+                "visual field. Rows are the 136 channels over visual cortex, columns are the 224 bar "
+                "positions of the experiment, averaged over its four runs and not decimated any further. "
+                "The 'units' frame is the BIDS channels table, whose 'wangprob_' columns hold the Wang "
+                "atlas probabilities that the source study thresholded at 0.05 to arrive at the electrodes "
+                "it reports. There is no haemodynamic delay to model, so a pRF model for these responses "
+                "needs no impulse response."
+            ),
+            files={"response": ecog_file},
+            file_urls={"response": f"{_OPENNEURO_ECOG_URL}:{ecog_file}"},
+            loader=_loaders.load_visual_ecog_broadband,
+            licence="CC0 1.0",
+            citation=(
+                "Yuasa, K., Groen, I. I. A., Piantoni, G., Montenegro, S., Flinker, A., Devore, S., Devinsky, O., "
+                "Doyle, W., Dugan, P., Friedman, D., Ramsey, N., Petridou, N., & Winawer, J. (2023). Precise spatial "
+                "tuning of visually driven alpha oscillations in human visual cortex. eLife, 12, RP90387. "
+                "https://doi.org/10.7554/eLife.90387 -- and the dataset as: Groen, I., Yuasa, K., Brands, A., "
+                "Piantoni, G., Montenegro, S., Flinker, A., Devore, S., Devinsky, O., Doyle, W., Dugan, P., "
+                "Friedman, D., Ramsey, N., Petridou, N., & Winawer, J. (2024). Visual ECoG dataset. OpenNeuro. "
+                "https://doi.org/10.18112/openneuro.ds004194.v3.0.0"
+            ),
+            homepage="https://openneuro.org/datasets/ds004194/versions/3.0.0",
+            download_size=268_225,
+        ),
+    )
+
+    return {spec.name: spec for spec in specs}
+
+
+_REGISTRY: dict[str, DatasetSpec] = {}
+
+
+def _get_registry() -> dict[str, DatasetSpec]:
+    if not _REGISTRY:
+        _REGISTRY.update(_make_registry())
+
+    return _REGISTRY
+
+
+def _get_spec(name: str) -> DatasetSpec:
+    registry = _get_registry()
+
+    if name not in registry:
+        msg = f"Dataset must be one of {tuple(sorted(registry))} but was '{name}'"
+        raise ValueError(msg)
+
+    return registry[name]
+
+
+def load_checksums() -> dict[str, dict[str, object]]:
+    """
+    Load the expected checksums of all example dataset files.
+
+    Returns
+    -------
+    dict of str to dict
+        Mapping from the path of a file relative to the data directory to a dictionary with its `"sha256"`
+        digest and its `"size"` in bytes.
+
+    """
+    path = files("prfmodel.data").joinpath("checksums.json")
+
+    with path.open("r") as stream:
+        return json.load(stream)["files"]
+
+
+def list_datasets() -> list[str]:
+    """
+    List the names of the available example datasets.
+
+    Returns
+    -------
+    list of str
+        The dataset names, sorted alphabetically. Each can be passed to
+        :func:`~prfmodel.examples.load_dataset`.
+
+    Examples
+    --------
+    >>> from prfmodel.examples import list_datasets
+    >>> list_datasets()  # doctest: +NORMALIZE_WHITESPACE
+    ['3t-chn-visual', '7t-aot-visual', '7t-ncsf-visual', '7t-retbar-visual', 'hcp-999999-surface',
+     'numerosity-four-conditions', 'numerosity-timing', 'visual-ecog-broadband']
+
+    """
+    return sorted(_get_registry())
+
+
+def _download_amount(size: int) -> str:
+    """Render a download size, falling back to kilobytes for a dataset that is smaller than a megabyte."""
+    if size < _BYTES_PER_MEGABYTE:
+        return f"{size / 1e3:.0f} kB"
+
+    return f"{size / 1e6:.0f} MB"
+
+
+def _download_note(spec: DatasetSpec) -> str:
+    if spec.is_archive:
+        return "(the whole archive, also when loading part of it)"
+
+    return "(in total; only the files that are loaded are downloaded)"
+
+
+def describe_dataset(name: str) -> str:
+    """
+    Describe an example dataset without downloading it.
+
+    Parameters
+    ----------
+    name : str
+        Name of the dataset. Must be one of :func:`~prfmodel.examples.list_datasets`.
+
+    Returns
+    -------
+    str
+        A human-readable description with the contents, options, size, licence, and citation of the dataset.
+
+    Raises
+    ------
+    ValueError
+        If `name` is not the name of an available dataset.
+
+    Examples
+    --------
+    >>> from prfmodel.examples import describe_dataset
+    >>> print(describe_dataset("7t-retbar-visual"))  # doctest: +ELLIPSIS
+    7t-retbar-visual
+    ================
+    <BLANKLINE>
+    Blood oxygenation level-dependent response of a single subject to a moving bar stimulus, ...
+    <BLANKLINE>
+    Files: response_L, response_R, design
+    Hemispheres: both, left, right (default 'both')
+    Download: 51 MB (the whole archive, also when loading part of it)
+    Licence: CC BY 4.0
+    Homepage: https://figshare.com/articles/dataset/fMRI_Teaching_Materials/14096209
+    <BLANKLINE>
+    Cite as: Knapen, T. (2021). fMRI Teaching Materials. figshare. https://doi.org/10.6084/m9.figshare.14096209
+
+    """
+    spec = _get_spec(name)
+
+    lines = [f"{spec.name}", "=" * len(spec.name), "", spec.summary, ""]
+
+    lines += [f"Files: {', '.join(spec.files)}"]
+
+    if spec.hemispheres:
+        lines += [f"Hemispheres: {', '.join(spec.hemispheres)} (default '{spec.default_hemisphere}')"]
+
+    if spec.splits:
+        split_note = "required" if spec.default_split is None else f"default '{spec.default_split}'"
+        lines += [f"Splits: {', '.join(spec.splits)} ({split_note})"]
+
+    if spec.surface_types:
+        lines += [f"Surface types: {', '.join(spec.surface_types)}"]
+
+    if spec.tasks:
+        lines += [f"Tasks: {', '.join(spec.tasks)} (default '{spec.tasks[0]}')"]
+
+    lines += [
+        f"Download: {_download_amount(spec.download_size)} {_download_note(spec)}",
+        f"Licence: {spec.licence}",
+        f"Homepage: {spec.homepage}",
+        "",
+        f"Cite as: {spec.citation}",
+    ]
+
+    return "\n".join(lines)

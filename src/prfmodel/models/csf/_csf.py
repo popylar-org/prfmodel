@@ -1,0 +1,435 @@
+"""Contrast sensitivity function response models."""
+
+import math
+from keras import ops
+from prfmodel._docstring import doc
+from prfmodel.exceptions import ShapeError
+from prfmodel.exceptions import ShapeMismatchError
+from prfmodel.impulse import DerivativeTwoGammaImpulse
+from prfmodel.impulse.base import BaseImpulse
+from prfmodel.models.base import BaseTuning
+from prfmodel.regressors.base import BaseRegressors
+from prfmodel.scaling import BaselineAmplitude
+from prfmodel.scaling.base import BaseScaling
+from prfmodel.stimuli import CSFStimulus
+from prfmodel.stimuli import CSFStimulusTensors
+from prfmodel.typing import Tensor
+from prfmodel.utils import _EXPECTED_NDIM
+from prfmodel.utils import TensorFrame
+from prfmodel.utils import get_dtype
+from .canonical import CanonicalCSFModel
+
+
+def predict_contrast_sensitivity(  # noqa: PLR0913 (too many arguments)
+    sf: Tensor,
+    cs_peak: Tensor,
+    sf_peak: Tensor,
+    width_l: float | Tensor,
+    width_r: Tensor,
+    dtype: str | None = None,
+) -> Tensor:
+    r"""
+    Predict a neural contrast sensitivity function response.
+
+    Computes the response using an asymmetric log-parabolic (aLP) contrast sensitivity function (CSF).
+
+    Parameters
+    ----------
+    sf : Tensor
+        Spatial frequency at each time frame, with shape ``(num_frames,)``.
+    cs_peak : Tensor
+        Peak contrast sensitivity with shape ``(num_batches, 1)``.
+    sf_peak : Tensor
+        Peak spatial frequency with shape ``(num_batches, 1)``.
+    width_l : float or Tensor
+        Curvature of the left branch of the aLP CSF (for spatial frequencies below ``sf_peak``).
+        Scalar or tensor broadcastable to ``(num_batches, num_frames)``.
+    width_r : Tensor
+        Curvature of the right branch of the aLP CSF (for spatial frequencies at or above ``sf_peak``),
+        with shape ``(num_batches, 1)``.
+    dtype : str, optional
+        The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+        :func:`prfmodel.utils.get_dtype`.
+
+    Returns
+    -------
+    Tensor
+        Predicted response with shape ``(num_batches, num_frames)`` and dtype ``dtype``.
+
+    Notes
+    -----
+    The asymmetric log-parabolic CSF :math:`S(f)` with `cs_peak` :math:`C_{sp}`, `sf_peak` :math:`f_p`,
+    `width_l` :math:`w_L`, and `width_r` :math:`w_R` is:
+
+    .. math::
+
+        S(f) =
+        \begin{cases}
+        10^{\log_{10}(C_{sp}) - (\log_{10}(f) - \log_{10}(f_p))^2 \cdot w_L^2} & \text{if } f < f_p \\
+        10^{\log_{10}(C_{sp}) - (\log_{10}(f) - \log_{10}(f_p))^2 \cdot w_R^2} & \text{if } f \geq f_p
+        \end{cases}
+
+    """
+    dtype = get_dtype(dtype)
+
+    return ops.power(10.0, _log10_contrast_sensitivity(sf, cs_peak, sf_peak, width_l, width_r, dtype))
+
+
+# Every argument needs a batch dimension, and the arguments with more than one batch must agree on its size
+def _check_batch_shapes(args: list[tuple[str, Tensor]]) -> None:
+    for name, arg in args:
+        if hasattr(arg, "ndim") and arg.ndim < _EXPECTED_NDIM:
+            raise ShapeError(name, tuple(arg.shape), f"must have at least {_EXPECTED_NDIM} dimensions")
+
+    batched = [
+        (name, arg)
+        for name, arg in args
+        if hasattr(arg, "shape") and len(arg.shape) >= _EXPECTED_NDIM and arg.shape[0] != 1
+    ]
+
+    for name, arg in batched[1:]:
+        ref_name, ref_arg = batched[0]
+
+        if arg.shape[0] != ref_arg.shape[0]:
+            raise ShapeMismatchError(ref_name, tuple(ref_arg.shape), name, tuple(arg.shape))
+
+
+# Base-10 log of the aLP CSF (see predict_contrast_sensitivity), with shape (num_batches, num_frames)
+def _log10_contrast_sensitivity(  # noqa: PLR0913 (too many arguments)
+    sf: Tensor,
+    cs_peak: Tensor,
+    sf_peak: Tensor,
+    width_l: float | Tensor,
+    width_r: Tensor,
+    dtype: str,
+) -> Tensor:
+    _check_batch_shapes([("cs_peak", cs_peak), ("sf_peak", sf_peak), ("width_r", width_r)])
+
+    log10 = math.log(10.0)
+
+    sf = ops.expand_dims(ops.convert_to_tensor(sf, dtype=dtype), 0)  # (1, num_frames)
+
+    cs_peak = ops.convert_to_tensor(cs_peak, dtype=dtype)  # (num_batches, 1)
+    sf_peak = ops.convert_to_tensor(sf_peak, dtype=dtype)  # (num_batches, 1)
+    width_l = ops.convert_to_tensor(width_l, dtype=dtype)  # scalar or (num_batches, 1)
+    width_r = ops.convert_to_tensor(width_r, dtype=dtype)  # (num_batches, 1)
+
+    # Log-domain: (num_batches, num_frames) via broadcasting
+    log_sf = ops.log(sf) / log10
+    log_sf_peak = ops.log(sf_peak) / log10
+    log_cs_peak = ops.log(cs_peak) / log10
+    log_diff_sq = ops.square(log_sf - log_sf_peak)
+
+    # Asymmetric branches of the aLP CSF; select the left branch where sf < sfp, the right where sf >= sfp
+    log_sensitivity_l = log_cs_peak - log_diff_sq * ops.square(width_l)
+    log_sensitivity_r = log_cs_peak - log_diff_sq * ops.square(width_r)
+    return ops.where(sf < sf_peak, log_sensitivity_l, log_sensitivity_r)
+
+
+# Naka-Rushton response C^q / (C^q + Q^q) to the contrast C in percent, with the threshold Q = 100 / S taken from the
+# natural log of the sensitivity S, which is bounded below by eps. It is evaluated as the equivalent
+# sigmoid(q * (log C - log Q)), which forms no power of C or Q and so cannot overflow. Blank frames (C <= 0) respond
+# with exactly zero; their log is taken of a placeholder, which keeps the gradients finite.
+def _contrast_response(
+    contrast: Tensor,
+    log_sensitivity: Tensor,
+    slope_crf: Tensor,
+    dtype: str,
+    eps: float,
+) -> Tensor:
+    _check_batch_shapes([("sensitivity", log_sensitivity), ("slope_crf", slope_crf)])
+
+    contrast = ops.expand_dims(ops.convert_to_tensor(contrast, dtype=dtype), 0)  # (1, num_frames)
+    log_sensitivity = ops.convert_to_tensor(log_sensitivity, dtype=dtype)  # (num_batches, num_frames)
+    slope_crf = ops.convert_to_tensor(slope_crf, dtype=dtype)  # (num_batches, 1)
+
+    is_shown = contrast > 0
+    log_contrast = ops.log(ops.where(is_shown, contrast, ops.ones_like(contrast)))
+    log_threshold = math.log(100.0) - ops.maximum(log_sensitivity, math.log(eps))
+    response = ops.sigmoid(slope_crf * (log_contrast - log_threshold))
+
+    return ops.where(is_shown, response, ops.zeros_like(response))
+
+
+def predict_contrast_response(
+    contrast: Tensor,
+    sensitivity: Tensor,
+    slope_crf: Tensor,
+    dtype: str | None = None,
+    eps: float = 1e-10,
+) -> Tensor:
+    r"""
+    Predict a neural contrast response from contrast sensitivity.
+
+    Computes the response using a contrast sensitivity function combined with a Naka-Rushton
+    contrast response function (CRF).
+
+    Parameters
+    ----------
+    contrast : Tensor
+        Michelson contrast in percent (0 to 100) at each time frame, with shape ``(num_frames,)``.
+    sensitivity : Tensor
+        Contrast sensitivity for each voxel at each time frame, with shape ``(num_voxels, num_frames)``.
+    slope_crf : Tensor
+        Exponent :math:`q` of the Naka-Rushton CRF with shape ``(num_batches, 1)``.
+    dtype : str, optional
+        The dtype of the prediction result. If ``None`` (the default), uses the dtype from
+        :func:`prfmodel.utils.get_dtype`.
+    eps : float, default=1e-10
+        Minimum contrast sensitivity, which keeps the log of a zero sensitivity finite.
+
+    Returns
+    -------
+    Tensor
+        Predicted response with shape ``(num_batches, num_frames)`` and dtype ``dtype``.
+
+    Notes
+    -----
+    The Naka-Rushton CRF combines contrast :math:`C` (in percent) with the contrast threshold :math:`Q = 100 / S(f)`
+    (also in percent) derived from the CSF :math:`S(f)`:
+
+    .. math::
+
+        R(t) = \frac{C(t)^q}{C(t)^q + Q(t)^q}
+
+    Contrast sensitivity is the reciprocal of the threshold contrast as a fraction, so the threshold in percent is
+    :math:`100 / S(f)`. The response is half-maximal where the contrast equals the threshold, :math:`C(t) = Q(t)`.
+    Frames with zero contrast (blank frames) have a response of exactly zero.
+
+    For numerical stability, the CRF is evaluated in the log domain as the algebraically equivalent
+    :math:`R(t) = \sigma(q \cdot (\log C(t) - \log Q(t)))`, where :math:`\sigma` is the logistic sigmoid. This avoids
+    forming :math:`C^q` and :math:`Q^q`, which overflow for high contrasts, low sensitivities, or steep slopes.
+
+    """
+    dtype = get_dtype(dtype)
+    sensitivity = ops.convert_to_tensor(sensitivity, dtype=dtype)  # (num_batches, num_frames)
+
+    return _contrast_response(contrast, ops.log(ops.maximum(sensitivity, eps)), slope_crf, dtype, eps)
+
+
+class CSFTuning(BaseTuning[CSFStimulus, CSFStimulusTensors]):
+    r"""
+    Neural contrast sensitivity function tuning model.
+
+    Predicts the tuning response to a contrast sensitivity function stimulus using
+    an asymmetric log-parabolic CSF combined with a Naka-Rushton contrast response function.
+
+    Parameters
+    ----------
+    width_l : float, default=0.68
+        Curvature of the left branch of the asymmetric log-parabolic CSF (for spatial frequencies
+        below the peak). Not a fitted parameter; fixed at construction time.
+    eps : float, default=1e-10
+        Minimum contrast sensitivity, as in :func:`predict_contrast_response`.
+
+    Notes
+    -----
+    The stimulus contrast (:attr:`CSFStimulus.contrast <prfmodel.stimuli.CSFStimulus.contrast>`) must be Michelson
+    contrast in percent (0 to 100), because the Naka-Rushton threshold is :math:`100 / S(f)` (see
+    :func:`predict_contrast_response`). Contrast given as a fraction (0 to 1) yields near-floor responses.
+
+    Blank frames, which have zero contrast or zero spatial frequency, have a tuning response of exactly zero, so they
+    can be stored as they were recorded. Their gradients stay finite.
+
+    The model has four fitted parameters:
+
+    ``cs_peak``
+        Peak contrast sensitivity.
+    ``sf_peak``
+        Peak spatial frequency (cycles/degree) at which sensitivity is maximal.
+    ``width_r``
+        Curvature of the right branch of the aLP CSF.
+    ``slope_crf``
+        Exponent :math:`q` of the Naka-Rushton CRF, controlling response steepness.
+
+    See Also
+    --------
+    predict_contrast_sensitivity : Predict a contrast sensitivity function.
+    predict_contrast_response : Predict a contrast response based on a contrast sensitivity function.
+
+    """
+
+    def __init__(self, width_l: float = 0.68, eps: float = 1e-10):
+        self.width_l = width_l
+        self.eps = eps
+
+    @property
+    def parameter_names(self) -> list[str]:
+        """Names of parameters used by the model: ``cs_peak``, ``sf_peak``, ``width_r``, ``slope_crf``."""
+        return ["cs_peak", "sf_peak", "width_r", "slope_crf"]
+
+    @doc
+    def call(self, stimulus: CSFStimulusTensors, parameters: TensorFrame) -> Tensor:
+        """
+        Predict the tuning response for a CSF stimulus.
+
+        Parameters
+        ----------
+        %(stimulus_csf_tensors)s
+        %(parameters_tensors)s
+
+        Returns
+        -------
+        Tensor
+            Model predictions of shape ``(num_voxels, num_frames)``.
+            ``num_voxels`` is the number of rows in ``parameters`` and ``num_frames`` is the length of
+            the stimulus sf and contrast arrays.
+
+        """
+        dtype = parameters.dtype
+        sf = ops.convert_to_tensor(stimulus.sf, dtype=dtype)
+
+        # A zero spatial frequency (a blank frame) has no log, so its sensitivity is computed at a placeholder that
+        # keeps the gradients finite, and its response is set to zero, the limit as the spatial frequency goes to zero
+        is_grating = ops.expand_dims(sf > 0, 0)  # (1, num_frames)
+
+        # Stay in the log domain: forming the sensitivity 10^x underflows for low sensitivities, which yields NaN
+        # gradients
+        log10_sensitivity = _log10_contrast_sensitivity(
+            sf=ops.where(sf > 0, sf, ops.ones_like(sf)),
+            cs_peak=parameters[["cs_peak"]],
+            sf_peak=parameters[["sf_peak"]],
+            width_l=self.width_l,
+            width_r=parameters[["width_r"]],
+            dtype=dtype,
+        )
+
+        response = _contrast_response(
+            contrast=stimulus.contrast,
+            log_sensitivity=math.log(10.0) * log10_sensitivity,
+            slope_crf=parameters[["slope_crf"]],
+            dtype=dtype,
+            eps=self.eps,
+        )
+
+        return ops.where(is_grating, response, ops.zeros_like(response))
+
+
+@doc
+class CSFModel(CanonicalCSFModel):
+    """
+    Contrast sensitivity function model.
+
+    Convenience wrapper around :class:`~prfmodel.models.csf.canonical.CanonicalCSFModel` with a
+    :class:`CSFTuning` as the CSF model.
+
+    Parameters
+    ----------
+    width_l : float, default=0.68
+        Curvature of the left branch of the asymmetric log-parabolic (aLP) CSF. Not fitted.
+    %(model_impulse)s
+    %(model_scaling)s
+    %(model_regressors)s
+
+    Notes
+    -----
+    The model follows the following steps:
+
+    1. The CSF tuning model predicts the temporal tuning response from per-frame spatial frequency and contrast.
+    3. The impulse model generates an impulse response.
+    4. The CSF tuning response is convolved with the impulse response.
+    5. The scaling model modifies the convolved response.
+    6. The regressors model (optional) adds a linear combination of fixed regressors to the scaled response.
+
+    Using the default impulse and scaling models, the following columns are expected in the
+    :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
+
+    .. list-table::
+       :header-rows: 1
+       :widths: 20 12 53
+
+       * - Parameter
+         - Model
+         - Description
+       * - ``cs_peak``
+         - CSF
+         - Peak contrast sensitivity.
+       * - ``sf_peak``
+         - CSF
+         - Peak spatial frequency.
+       * - ``width_r``
+         - CSF
+         - Curvature of the right branch of the aLP CSF.
+       * - ``slope_crf``
+         - CSF
+         - Exponent of the Naka-Rushton contrast response function.
+       * - ``delay``
+         - Impulse
+         - Mean time of the positive gamma component (in seconds; optional).
+       * - ``dispersion``
+         - Impulse
+         - Scale parameter of the positive gamma component (optional).
+       * - ``undershoot``
+         - Impulse
+         - Mean time of the negative gamma component (in seconds; optional).
+       * - ``u_dispersion``
+         - Impulse
+         - Scale parameter of the negative gamma component (optional).
+       * - ``ratio``
+         - Impulse
+         - Weight of the negative gamma component (optional).
+       * - ``weight_deriv``
+         - Impulse
+         - Weight of the derivative component.
+       * - ``baseline``
+         - Scaling
+         - Additive constant.
+       * - ``amplitude``
+         - Scaling
+         - Multiplicative scale factor.
+
+    References
+    ----------
+    .. [1] Roelofzen, C., Daghlian, M., van Dijk, J. A., de Jong, M. C., & Dumoulin, S. O. (2025). Modeling neural
+        contrast sensitivity functions in human visual cortex. *Imaging Neuroscience*, 3, imag_a_00469.
+        https://doi.org/10.1162/imag_a_00469
+
+    Examples
+    --------
+    Predict a model response for multiple units.
+
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> stimulus = CSFStimulus(
+    ...    # Simulate data for 4 time frames
+    ...    sf=np.array([1.0, 3.0, 6.0, 12.0]),
+    ...    # Michelson contrast in percent
+    ...    contrast=np.array([10.0, 20.0, 40.0, 80.0]),
+    ...    frame_duration=1.0,
+    ... )
+    >>> model = CSFModel()
+    >>> # Define all model parameters for 3 units
+    >>> params = pd.DataFrame({
+    ...     # CSF parameters
+    ...     "cs_peak": [100.0, 150.0, 80.0],
+    ...     "sf_peak": [2.5, 3.0, 4.0],
+    ...     "width_r": [1.28, 1.5, 1.0],
+    ...     "slope_crf": [2.0, 2.0, 3.0],
+    ...     # Impulse model parameters (delay, dispersion, undershoot, u_dispersion,
+    ...     # and ratio use the default Glover HRF parameters)
+    ...     "weight_deriv": [0.5, 0.5, 0.5],
+    ...     # Scaling model parameters
+    ...     "baseline": [0.1, -0.1, 0.5],
+    ...     "amplitude": [-2.0, 1.2, 0.1],
+    ... })
+    >>> # Predict model response
+    >>> resp = model(stimulus, params)
+    >>> print(resp.shape)  # (num_units, num_frames)
+    (3, 4)
+
+    """
+
+    def __init__(
+        self,
+        width_l: float = 0.68,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
+    ):
+        super().__init__(
+            csf_model=CSFTuning(width_l=width_l),
+            impulse_model=impulse_model,
+            scaling_model=scaling_model,
+            regressors_model=regressors_model,
+        )

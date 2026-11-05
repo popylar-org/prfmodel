@@ -1,15 +1,28 @@
-"""Linear fitters."""
+"""Least-squares fitters."""
 
-import keras
+from typing import cast
 import numpy as np
 import pandas as pd
 from keras import ops
 from tqdm.auto import tqdm
 from prfmodel._docstring import doc
+from prfmodel.fitters._validation import _find_valid_units
+from prfmodel.fitters._validation import _merge_unit_estimates
+from prfmodel.fitters._validation import _validate_data_shape
+from prfmodel.fitters._validation import _validate_parameter_names
 from prfmodel.models.base import BaseCanonical
+from prfmodel.regressors.base import BaseRegressors
+from prfmodel.regressors.base import _extract_regressor_design
+from prfmodel.regressors.base import _validate_regressors_argument
 from prfmodel.stimuli import Stimulus
 from prfmodel.typing import Tensor
+from prfmodel.utils import as_tensor_frame
 from prfmodel.utils import get_dtype
+
+
+def _eps(dtype: str) -> float:
+    """Machine epsilon of a floating point dtype, used as the relative cutoff on singular values."""
+    return float(np.finfo(dtype).eps)
 
 
 class LeastSquaresHistory:
@@ -28,6 +41,7 @@ class LeastSquaresHistory:
         self.history = history
 
 
+@doc
 class LeastSquaresFitter:
     """Fit population receptive field models with least squares.
 
@@ -39,6 +53,10 @@ class LeastSquaresFitter:
     %(stimulus)s
     %(dtype)s
 
+    Warns
+    -----
+    %(warns_resolution_mismatch)s
+
     Notes
     -----
     This fitter optimizes one or more slope parameters (and optionally an intercept) by estimating a general linear
@@ -46,7 +64,9 @@ class LeastSquaresFitter:
     slope names are given, each basis function is isolated by setting that slope to 1.0 and all others to 0.0, and
     the resulting design matrix is solved with least squares in one shot.
 
-    Internally, the fitter applies `keras.ops.lstsq` to each data batch.
+    Internally, each data batch is solved for all of its units at once with a batched singular value
+    decomposition, which gives the same coefficients as :func:`numpy.linalg.lstsq` per unit, including the
+    minimum-norm solution when a unit's design matrix is rank deficient.
 
     Examples
     --------
@@ -57,8 +77,6 @@ class LeastSquaresFitter:
     >>> from prfmodel.examples import load_2d_prf_bar_stimulus
     >>> from prfmodel.models.prf import Gaussian2DPRFModel
     >>> stimulus = load_2d_prf_bar_stimulus()
-    >>> print(stimulus)
-    PRFStimulus(design=array[200, 101, 101], grid=array[101, 101, 2], dimension_labels=['y', 'x'])
     >>> # Only fit response and temporal model
     >>> model = Gaussian2DPRFModel(impulse_model=None)
     >>> # Define init parameters
@@ -67,7 +85,7 @@ class LeastSquaresFitter:
     ...     "baseline": [0.0], "amplitude": [0.0],
     ... })
     >>> # Create dummy data for a single unit
-    >>> data = np.zeros((1, 200))
+    >>> data = np.random.default_rng(0).standard_normal((1, stimulus.design.shape[0]))
     >>> fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
     >>> # Fit model parameters
     >>> history, params_ls = fitter.fit(
@@ -90,6 +108,8 @@ class LeastSquaresFitter:
     ):
         self.model = model
         self.stimulus = stimulus
+
+        self.model.check_stimulus(self.stimulus)
         self.dtype = dtype
 
     @property
@@ -101,6 +121,7 @@ class LeastSquaresFitter:
     def dtype(self, value: str | None) -> None:
         self._dtype = get_dtype(value)
 
+    @doc
     def fit(  # noqa: PLR0913 (too many arguments)
         self,
         data: Tensor,
@@ -140,19 +161,47 @@ class LeastSquaresFitter:
             A history object that contains a dict with the key `loss` and the residual sum of squares
             for each data batch.
         pandas.DataFrame
-            A dataframe with final model parameters.
+            A dataframe with final model parameters. The slope and intercept parameters are NaN for units that are
+            excluded from the fit (see Warns). Other parameters are returned unchanged.
+
+        Raises
+        ------
+        ShapeError
+            If `data` does not have two dimensions, if its number of rows does not match the number of rows in
+            `parameters`, or if its number of columns does not match the number of frames in the model prediction.
+        ValueError
+            If a name in `slope_name` is not a parameter of the model or not a column in `parameters`.
+
+        Warns
+        -----
+        %(warns_invalid_units)s
 
         """
+        data = ops.convert_to_tensor(data, dtype=self.dtype)
+
+        _validate_data_shape(data, num_units=len(parameters))
+
         slope_names = [slope_name] if not isinstance(slope_name, list) else slope_name
+
+        # The basis of a slope the model does not read is the same as with the slope at zero, so the design matrix
+        # would be degenerate
+        _validate_parameter_names(slope_names, self.model.parameter_names, "slope_name")
 
         for name in slope_names:
             if name not in parameters.columns:
                 msg = f"Slope name '{name}' must be a column in 'parameters'"
                 raise ValueError(msg)
 
-        if regressors is not None:
-            # Beta weights must be in slope names if regressors are present, otherwise estimates are biased
-            name_diff = {f"beta_{name}" for name in regressors.columns}.difference(set(slope_names))
+        regressors_model = cast("BaseRegressors | None", self.model.models.get("regressors_model"))
+
+        _validate_regressors_argument(regressors_model, regressors)
+
+        if regressors is not None and regressors_model is not None:
+            # Beta weights must be in slope names if regressors are present, otherwise estimates are biased.
+            # Only the columns the regressors model actually reads imply a beta weight; a column the caller
+            # carried along in the same frame has none and must not be demanded as a slope.
+            regressor_names = regressors_model.regressor_names
+            name_diff = {f"beta_{name}" for name in regressor_names}.difference(set(slope_names))
             if len(name_diff) > 0:
                 msg = f"No beta weight parameters found for regressors: {list(name_diff)}"
                 raise ValueError(msg)
@@ -161,27 +210,37 @@ class LeastSquaresFitter:
             msg = "Argument 'intercept_name' must be a column in 'parameters'"
             raise ValueError(msg)
 
+        valid_units = _find_valid_units(data)
+
         num_units = len(parameters)
         if batch_size is None:
             batch_size = num_units
 
-        residual_sums = []
-        new_parameters = parameters.copy()
+        residual_sums = np.full((num_units,), fill_value=np.nan, dtype=self.dtype)
+        param_batches = []
 
-        batch_starts = range(0, num_units, batch_size)
+        batch_starts = range(0, len(valid_units), batch_size)
         for start in tqdm(batch_starts, desc="Processing data batches", total=len(batch_starts)):
-            end = min(start + batch_size, num_units)
+            rows = valid_units[start : start + batch_size]
             batch_residuals, batch_params = self._fit_batch(
-                data[start:end],
-                new_parameters.iloc[start:end],
+                ops.take(data, rows, axis=0),
+                parameters.iloc[rows],
                 slope_names,
                 intercept_name,
                 regressors,
             )
-            new_parameters.iloc[start:end] = batch_params
-            residual_sums.append(batch_residuals)
+            residual_sums[rows] = batch_residuals
+            param_batches.append(batch_params)
 
-        return LeastSquaresHistory({"loss": np.concatenate(residual_sums)}), new_parameters
+        estimated_names = slope_names if intercept_name is None else [intercept_name, *slope_names]
+        estimates = pd.concat(param_batches, ignore_index=True) if param_batches else parameters.iloc[:0]
+        # The estimates take the dtype of their column in 'parameters' rather than the dtype of the fitter
+        estimates = estimates.astype(
+            {name: np.result_type(parameters[name].to_numpy().dtype, np.float32) for name in estimated_names},
+        )
+        new_parameters = _merge_unit_estimates(parameters, estimates, valid_units, estimated_names)
+
+        return LeastSquaresHistory({"loss": residual_sums}), new_parameters
 
     def _fit_batch(
         self,
@@ -203,13 +262,25 @@ class LeastSquaresFitter:
         for name in slope_names:
             parameter_batch[name] = 0.0
 
-        # Build design matrix by isolating each basis function
+        # Build design matrix by isolating each basis function.
+        # The stimulus is converted once and the model is entered through 'call', because this loop runs the
+        # same model once per slope and the facade would re-validate and re-convert the stimulus every time.
+        stimulus = self.stimulus.to_tensors(self.dtype)
+        regressors_model = cast("BaseRegressors | None", self.model.models.get("regressors_model"))
+        regressors_consumed = _extract_regressor_design(regressors_model, regressors, self.dtype)
+
         x_list = []
 
         for name in slope_names:
             parameter_batch[name] = 1.0
-            predictions = self.model(self.stimulus, parameter_batch, regressors=regressors, dtype=self.dtype)
-            x_list.append(predictions)
+            # Validate parameters outside of the models call method
+            self.model.check_parameter_names(parameter_batch)
+            self.model.check_parameter_values(parameter_batch)
+            params = as_tensor_frame(
+                parameter_batch[self.model.get_consumed_parameter_names(parameter_batch)],
+                self.dtype,
+            )
+            x_list.append(self.model.call(stimulus, params, regressors=regressors_consumed))
             parameter_batch[name] = 0.0
 
         if intercept_name is not None:
@@ -217,9 +288,24 @@ class LeastSquaresFitter:
 
         x_matrix = ops.stack(x_list, axis=-1)
 
+        _validate_data_shape(data_batch, num_frames=x_matrix.shape[1])
+
         targets = ops.expand_dims(data_batch, axis=-1)
 
-        best_params = keras.ops.map(lambda x: keras.ops.lstsq(x[0], x[1]), (x_matrix, targets))
+        # One least-squares problem per unit, solved for all units at once with a batched singular value
+        # decomposition.
+        u_factor, singular_values, vt_factor = ops.linalg.svd(x_matrix, full_matrices=False)
+
+        # Singular values at or below the cutoff count as zero, which is what 'numpy.linalg.lstsq' does
+        # with 'rcond=None'. A unit whose design matrix is rank deficient (i.e., a prediction that is constant,
+        # alongside an estimated intercept) then gets the minimum-norm solution rather than an infinity.
+        # The reciprocal is guarded so that the discarded branch never divides by zero.
+        cutoff = ops.amax(singular_values, axis=-1, keepdims=True) * (max(x_matrix.shape[-2:]) * _eps(self.dtype))
+        is_nonzero = singular_values > cutoff
+        inverse_values = ops.where(is_nonzero, 1.0 / ops.where(is_nonzero, singular_values, 1.0), 0.0)
+
+        projected = ops.expand_dims(inverse_values, axis=-1) * (ops.transpose(u_factor, (0, 2, 1)) @ targets)
+        best_params = ops.transpose(vt_factor, (0, 2, 1)) @ projected
 
         residual_sum = ops.convert_to_numpy(ops.sum(ops.square(targets - x_matrix @ best_params), axis=(-2, -1)))
 

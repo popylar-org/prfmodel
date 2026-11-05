@@ -1,16 +1,25 @@
 """Tests for linear fitting."""
 
+import warnings
 import numpy as np
 import pandas as pd
 import pytest
+from prfmodel.exceptions import InvalidUnitsWarning
+from prfmodel.exceptions import ShapeError
 from prfmodel.fitters import LeastSquaresFitter
 from prfmodel.fitters import LeastSquaresHistory
 from prfmodel.models.prf import DoG2DPRFModel
+from prfmodel.models.prf import Gaussian2DCSTPRFModel
 from prfmodel.models.prf import Gaussian2DPRFModel
+from prfmodel.regressors import AdditiveRegressors
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
 from tests.conftest import TestSetup
 from tests.conftest import parametrize_impulse_model
+from tests.reference import _oracle
+from .conftest import INVALID_UNITS_MESSAGE
+from .conftest import insert_invalid_parameters
+from .conftest import insert_invalid_units
 from .conftest import parametrize_dtype
 from .conftest import skip_torch
 from .conftest import skip_windows
@@ -62,16 +71,30 @@ class TestLeastSquaresFitter(TestSetup):
         intercept_name: str | None,
         dtype: str,
     ):
-        """Test that the fitter recovers amplitude (and baseline) from synthetic data."""
+        """Test that the fitter recovers amplitude (and baseline) from independently generated data.
+
+        The target comes from `tests.reference._oracle` rather than from `model`. With a
+        self-generated target the recovery is circular -- the least-squares basis is built from the
+        same model that produced the data, so the true coefficients sit at the optimum whether or not
+        the forward model is right. Generating the target independently means recovering `amplitude`
+        is evidence that the basis is correct, not only that `lstsq` works.
+
+        """
         # When no intercept is fit, the model retains the baseline from the input parameters,
         # so any non-zero baseline gets folded into the basis and the slope cannot recover.
         true_params = params.copy()
         if intercept_name is None:
             true_params["baseline"] = 0.0
 
+        # Give each unit its own HRF. The shared fixture uses one delay for all units, which hides any
+        # defect that pairs a unit with another unit's impulse response -- the basis would still be
+        # built from the right kernel by accident. These are fixed, not fitted, so varying them costs
+        # nothing here.
+        true_params["delay"] = [5.0, 6.0, 7.0]
+
         fitter = LeastSquaresFitter(model=model, stimulus=stimulus, dtype=dtype)
 
-        observed = model(stimulus, true_params)
+        observed = _oracle.predict(stimulus, true_params, frames=_oracle.impulse_frames())
 
         history, ls_params = fitter.fit(observed, true_params, slope_name="amplitude", intercept_name=intercept_name)
 
@@ -88,6 +111,72 @@ class TestLeastSquaresFitter(TestSetup):
                 true_params[intercept_name].to_numpy(),
                 atol=_ATOL,
             )
+
+    def test_batched_solve_matches_per_unit_numpy_lstsq(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Test that solving every unit at once gives what solving them one at a time gives.
+
+        The units are solved together with a batched singular value decomposition, because
+        `keras.ops.lstsq` is not batched on every backend and the `keras.ops.map` loop it would need costs
+        an order of magnitude more than the predictions it solves for. This pins the batched coefficients
+        and the residual sums against a per-unit :func:`numpy.linalg.lstsq` reference.
+
+        """
+        rng = np.random.default_rng(0)
+        basis = np.asarray(model(stimulus, params.assign(baseline=0.0, amplitude=1.0)))
+        observed = 2.5 * basis + 0.75 + rng.normal(0.0, 0.05, basis.shape)
+
+        fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
+
+        history, ls_params = fitter.fit(observed, params, slope_name="amplitude", intercept_name="baseline")
+
+        for unit in range(len(params)):
+            design = np.stack([np.ones_like(basis[unit]), basis[unit]], axis=-1)
+            expected, *_ = np.linalg.lstsq(design, observed[unit], rcond=None)
+
+            np.testing.assert_allclose(ls_params["baseline"].to_numpy()[unit], expected[0], atol=1e-4)
+            np.testing.assert_allclose(ls_params["amplitude"].to_numpy()[unit], expected[1], atol=1e-4)
+            np.testing.assert_allclose(
+                history.history["loss"][unit],
+                np.sum((observed[unit] - design @ expected) ** 2),
+                rtol=1e-3,
+            )
+
+    def test_a_unit_outside_the_aperture_gets_the_minimum_norm_solution(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Test that a rank-deficient unit returns finite coefficients rather than an infinity.
+
+        A pRF centred far outside the aperture predicts a flat zero response, so its design matrix is an
+        intercept column beside a zero column and the fit has no unique solution. Solving that by
+        triangular substitution returns NaN; the singular value cutoff instead gives the minimum-norm
+        solution, which puts the mean in the intercept and leaves the slope at zero, exactly as
+        :func:`numpy.linalg.lstsq` does.
+
+        """
+        rng = np.random.default_rng(0)
+        far_params = params.copy()
+        far_params.loc[0, "mu_x"] = 1e3
+
+        basis = np.asarray(model(stimulus, far_params.assign(baseline=0.0, amplitude=1.0)))
+        assert not np.any(basis[0]), "The unit outside the aperture must predict a flat zero response"
+
+        observed = 2.5 * basis + 3.0 + rng.normal(0.0, 0.05, basis.shape)
+
+        fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
+
+        _, ls_params = fitter.fit(observed, far_params, slope_name="amplitude", intercept_name="baseline")
+
+        assert np.all(np.isfinite(ls_params.to_numpy()))
+        np.testing.assert_allclose(ls_params["amplitude"].to_numpy()[0], 0.0, atol=1e-6)
+        np.testing.assert_allclose(ls_params["baseline"].to_numpy()[0], observed[0].mean(), atol=1e-4)
 
     @skip_windows
     @skip_torch
@@ -150,7 +239,7 @@ class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
                 "ratio": [0.48, 0.48, 0.48],
                 "weight_deriv": [0.5, 0.5, 0.5],
                 "amplitude_center": [1.1, 1.0, 0.9],
-                "amplitude_surround": [-0.5, -0.3, -0.1],
+                "amplitude_surround": [0.5, 0.3, 0.1],
                 "baseline": [0.0, 0.1, 0.2],
             },
         )
@@ -165,14 +254,25 @@ class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
         dog_params: pd.DataFrame,
         intercept_name: str | None,
     ):
-        """Test that the fitter recovers both DoG amplitudes (and baseline) from synthetic data."""
+        """Test that the fitter recovers both DoG amplitudes (and baseline) from independent data.
+
+        As in `test_fit`, the target is generated by `tests.reference._oracle` so that recovering the
+        two amplitudes says something about the centre and surround bases rather than only about the
+        solver. This is the stronger of the two cases: with two slopes the basis has to be right in
+        two independent directions for both coefficients to come back.
+
+        """
         true_params = dog_params.copy()
         if intercept_name is None:
             true_params["baseline"] = 0.0
 
+        # See `TestLeastSquaresFitter.test_fit`: one HRF per unit, so that a unit paired with another
+        # unit's impulse response cannot pass unnoticed.
+        true_params["delay"] = [5.0, 6.0, 7.0]
+
         fitter = LeastSquaresFitter(model=dog_model, stimulus=stimulus)
 
-        observed = dog_model(stimulus, true_params)
+        observed = _oracle.predict(stimulus, true_params, frames=_oracle.impulse_frames(), surround=True)
 
         history, ls_params = fitter.fit(
             observed,
@@ -234,3 +334,316 @@ class TestLeastSquaresFitterMultiSlope(PRFStimulusSetup):
 
         pd.testing.assert_frame_equal(params_full, params_batched, atol=_ATOL)
         np.testing.assert_allclose(history_full.history["loss"], history_batched.history["loss"], atol=_ATOL)
+
+
+class TestLeastSquaresFitterCST(PRFStimulusSetup):
+    """Tests for LeastSquaresFitter with the compressive spatiotemporal model's channel weights.
+
+    The reference estimates the sustained and transient scaling factors "in each voxel ... using a GLM
+    approach". Those weights enter linearly once the spatial, timing and compression parameters are held
+    fixed, so this fitter is where that step of the reference's procedure lives.
+
+    """
+
+    @pytest.fixture
+    def cst_model(self):
+        """CST 2D pRF model instance."""
+        return Gaussian2DCSTPRFModel()
+
+    @pytest.fixture
+    def cst_params(self):
+        """Parameters dataframe for the CST model, with per-unit weights to be recovered."""
+        return pd.DataFrame(
+            {
+                "mu_x": [0.0, 1.0, -1.0],
+                "mu_y": [1.0, 0.0, 0.5],
+                "sigma": [1.0, 1.5, 2.0],
+                "time_to_peak": [4.0, 5.0, 4.0],
+                "n": [0.5, 0.8, 0.6],
+                # Per-unit impulse responses, so a unit paired with another unit's HRF cannot pass unnoticed
+                "delay": [5.0, 6.0, 7.0],
+                "dispersion": [0.9, 0.9, 0.9],
+                "undershoot": [12.0, 12.0, 12.0],
+                "u_dispersion": [0.9, 0.9, 0.9],
+                "ratio": [0.48, 0.48, 0.48],
+                "weight_deriv": [0.5, 0.5, 0.5],
+                "amplitude_sustained": [2.0, -1.5, 0.7],
+                "amplitude_transient": [-0.5, 3.0, 1.4],
+                "baseline": [0.3, -0.2, 0.0],
+            },
+        )
+
+    @skip_windows
+    @skip_torch
+    @pytest.mark.parametrize("intercept_name", [None, "baseline"])
+    def test_fit_recovers_channel_weights(
+        self,
+        stimulus: PRFStimulus,
+        cst_model: Gaussian2DCSTPRFModel,
+        cst_params: pd.DataFrame,
+        intercept_name: str | None,
+    ):
+        """Test that both channel weights (and the baseline) are recovered by the linear solve.
+
+        Unlike the DoG case above there is no oracle for this model, so the target is generated by the
+        model under test. That makes this a statement about the solver and about the two channel bases
+        being linearly independent, not about the forward model, which is pinned separately by the
+        reduction identities in `tests/reference/test_model_identities.py`. Independence is the part worth
+        asserting: the sustained and transient channels share a receptive field and a timing parameter, so
+        collinear bases would make the solve degenerate and the weights unrecoverable.
+
+        Negative weights are included deliberately. The channels are rectified before they are weighted,
+        so a sign error in the rectifier cannot be absorbed by a positive-only solution.
+
+        """
+        true_params = cst_params.copy()
+        if intercept_name is None:
+            true_params["baseline"] = 0.0
+
+        observed = cst_model(stimulus, true_params)
+
+        init_params = true_params.assign(amplitude_sustained=0.0, amplitude_transient=0.0, baseline=0.0)
+
+        fitter = LeastSquaresFitter(model=cst_model, stimulus=stimulus)
+
+        history, ls_params = fitter.fit(
+            observed,
+            init_params,
+            slope_name=["amplitude_sustained", "amplitude_transient"],
+            intercept_name=intercept_name,
+        )
+
+        assert isinstance(history, LeastSquaresHistory)
+        assert isinstance(ls_params, pd.DataFrame)
+        assert ls_params.shape == true_params.shape
+
+        for name in ("amplitude_sustained", "amplitude_transient"):
+            np.testing.assert_allclose(
+                ls_params[name].to_numpy(),
+                true_params[name].to_numpy(),
+                atol=_ATOL,
+            )
+        if intercept_name is not None:
+            np.testing.assert_allclose(
+                ls_params[intercept_name].to_numpy(),
+                true_params[intercept_name].to_numpy(),
+                atol=_ATOL,
+            )
+
+
+class TestLeastSquaresFitterIgnoresExtraColumns(TestSetup):
+    """Tests that a frame column no model reads passes through the fitter untouched."""
+
+    def test_ignores_extra_columns(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """A label column is neither converted nor mistaken for a parameter, and survives into the result."""
+        labelled = params.assign(roi=["V1"] * len(params))
+        observed = np.asarray(model(stimulus, params))
+
+        _, fit_params = LeastSquaresFitter(model=model, stimulus=stimulus).fit(
+            observed,
+            labelled,
+            slope_name="amplitude",
+            intercept_name="baseline",
+        )
+
+        assert list(fit_params["roi"]) == list(labelled["roi"])
+
+    def test_does_not_demand_a_beta_for_an_unread_design_column(
+        self,
+        stimulus: PRFStimulus,
+        params: pd.DataFrame,
+    ):
+        """An extra design column implies no beta weight, so it must not be required among the slope names."""
+        model = Gaussian2DPRFModel(regressors_model=AdditiveRegressors(names=["mx"]))
+        num_frames = stimulus.design.shape[0]
+        design = pd.DataFrame({"mx": np.zeros(num_frames), "trial_type": ["rest"] * num_frames})
+
+        init = params.assign(beta_mx=1.0)
+        observed = np.asarray(model(stimulus, init, regressors=design))
+
+        _, fit_params = LeastSquaresFitter(model=model, stimulus=stimulus).fit(
+            observed,
+            init,
+            slope_name=["amplitude", "beta_mx"],
+            intercept_name="baseline",
+            regressors=design,
+        )
+
+        assert np.isfinite(fit_params["beta_mx"]).all()
+
+
+class TestLeastSquaresFitterDataShape(TestSetup):
+    """Tests that target data of the wrong shape is reported before any unit is fit."""
+
+    @pytest.mark.parametrize("ndim", [1, 3])
+    def test_data_without_two_dimensions_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        ndim: int,
+    ):
+        """Data that is not `(num_units, num_frames)` raises rather than being sliced along the wrong axis."""
+        observed = np.asarray(model(stimulus, params))
+        data = observed[0] if ndim == 1 else observed[..., np.newaxis]
+
+        with pytest.raises(ShapeError, match="must have exactly 2 dimensions"):
+            LeastSquaresFitter(model=model, stimulus=stimulus).fit(data, params, slope_name="amplitude")
+
+    def test_data_with_wrong_number_of_units_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Data with more rows than the parameters raises rather than leaving the extra rows unfit."""
+        data = np.zeros((len(params) + 1, stimulus.design.shape[0]))
+
+        with pytest.raises(ShapeError, match=f"must have {len(params)} rows"):
+            LeastSquaresFitter(model=model, stimulus=stimulus).fit(data, params, slope_name="amplitude")
+
+    @pytest.mark.parametrize("batch_size", [None, 1])
+    def test_data_with_wrong_number_of_frames_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        batch_size: int | None,
+    ):
+        """Data whose frames do not match the model prediction raises instead of failing inside the solve."""
+        num_frames = stimulus.design.shape[0]
+        # Not constant, so that the units are fit rather than excluded before the frames are checked
+        data = np.random.default_rng(0).standard_normal((len(params), num_frames - 1))
+
+        with pytest.raises(ShapeError, match=f"must have {num_frames} columns"):
+            LeastSquaresFitter(model=model, stimulus=stimulus).fit(
+                data,
+                params,
+                slope_name="amplitude",
+                batch_size=batch_size,
+            )
+
+
+class TestLeastSquaresFitterInvalidUnits(TestSetup):
+    """Tests that units with a constant or non-finite time series are excluded from the fit."""
+
+    estimated_names: tuple[str, ...] = ("baseline", "amplitude")
+
+    @pytest.mark.parametrize("batch_size", [None, 1, 2])
+    def test_invalid_units_are_excluded(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        batch_size: int | None,
+    ):
+        """Excluded units get NaN estimates and losses, and the other units get what they get on their own.
+
+        The excluded units start from NaN pRF parameters, as a grid search returns them, which must not reach the
+        parameter checks of the model.
+
+        """
+        params = params.assign(roi=["V1", "V2", "V3"])
+        observed = np.asarray(model(stimulus, params))
+        data, is_valid = insert_invalid_units(observed)
+        init = insert_invalid_parameters(params, is_valid, ["mu_x", "mu_y", "sigma"])
+        init.index = init.index * 10
+
+        fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
+
+        with pytest.warns(InvalidUnitsWarning, match=INVALID_UNITS_MESSAGE):
+            history, ls_params = fitter.fit(
+                data,
+                init,
+                slope_name="amplitude",
+                intercept_name="baseline",
+                batch_size=batch_size,
+            )
+
+        expected_history, expected_params = fitter.fit(
+            observed,
+            params,
+            slope_name="amplitude",
+            intercept_name="baseline",
+            batch_size=batch_size,
+        )
+
+        estimated = list(self.estimated_names)
+        other = [name for name in init.columns if name not in estimated]
+
+        assert ls_params.index.equals(init.index)
+        assert list(ls_params.columns) == list(init.columns)
+        assert ls_params.loc[~is_valid, estimated].isna().all().all()
+        pd.testing.assert_frame_equal(ls_params.loc[~is_valid, other], init.loc[~is_valid, other])
+        pd.testing.assert_frame_equal(ls_params[is_valid].reset_index(drop=True), expected_params)
+
+        assert np.all(np.isnan(history.history["loss"][~is_valid]))
+        np.testing.assert_allclose(history.history["loss"][is_valid], expected_history.history["loss"])
+
+    def test_all_units_excluded(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Data in which no unit can be fit returns NaN estimates for every unit instead of raising."""
+        data = np.zeros((len(params), stimulus.design.shape[0]))
+
+        with pytest.warns(InvalidUnitsWarning, match=f"Excluded {len(params)} of {len(params)} units"):
+            history, ls_params = LeastSquaresFitter(model=model, stimulus=stimulus).fit(
+                data,
+                params,
+                slope_name="amplitude",
+                intercept_name="baseline",
+            )
+
+        other = [name for name in params.columns if name not in self.estimated_names]
+
+        assert ls_params[list(self.estimated_names)].isna().all().all()
+        pd.testing.assert_frame_equal(ls_params[other], params[other])
+        assert np.all(np.isnan(history.history["loss"]))
+
+    def test_valid_units_do_not_warn(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Data in which every unit can be fit does not warn."""
+        observed = np.asarray(model(stimulus, params))
+
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", InvalidUnitsWarning)
+            LeastSquaresFitter(model=model, stimulus=stimulus).fit(observed, params, slope_name="amplitude")
+
+
+class TestLeastSquaresFitterParameterNames(TestSetup):
+    """Tests that slope names are checked against the parameters of the model."""
+
+    @pytest.mark.parametrize(
+        ("slope_name", "message"),
+        [
+            ("amplitud", r"'amplitud' \(did you mean 'amplitude'\?\)"),
+            # A column the model does not read would give a degenerate design matrix
+            ("gain", r"unknown parameter names: 'gain'"),
+        ],
+    )
+    def test_unknown_slope_name_raises(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        slope_name: str,
+        message: str,
+    ):
+        """A slope that is not a model parameter raises rather than returning meaningless estimates."""
+        init = params.assign(gain=1.0)
+        observed = np.asarray(model(stimulus, params))
+
+        with pytest.raises(ValueError, match=message):
+            LeastSquaresFitter(model=model, stimulus=stimulus).fit(observed, init, slope_name=slope_name)

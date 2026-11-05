@@ -9,39 +9,37 @@ build-backend = "setuptools.build_meta"
 
 [project]
 authors = [
-    { name = "Malte Luken", email = "m.luken@esciencecenter.nl" },
-    { name = "Flavio Hafner", email = "f.hafner@esciencecenter.nl" },
-    { name = "Gilles de Hollander", email = "gilles.de.hollander@gmail.com" },
-    { name = "Tomas Knapen", email = "t.knapen@spinozacentre.nl" }
+    { name = "Popylar Team", email = "t.knapen@spinozacentre.nl" }
 ]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 dependencies = [
-    "keras",
+    "keras>=3.5.0",
     "matplotlib",
     "more-itertools",
+    "nibabel",
     "nilearn",
-    "numpy<2.0.0",
+    "numpy>=2.0.0",
     "pandas",
-    "scipy",
-    "tqdm"
+    "scipy<1.18",  # 1.18 changed how loadmat returns MATLAB objects, which breaks read_matlab_tables
+    "tqdm",
 ]
 description = "A modern Python implementation for population receptive field modelling."
-keywords = [""]
+keywords = ["connective field", "contrast sentivity function", "GPU-accelerated", "computational neuroscience"]
 license = {file = "LICENSE"}
 name = "prfmodel"
 readme = {file = "README.md", content-type = "text/markdown"}
-requires-python = ">=3.10,<3.13"
-version = "0.0.1"
+requires-python = ">=3.10,<3.14"
+version = "0.2.0"
 
 [project.optional-dependencies]
 dev = [
@@ -51,11 +49,10 @@ dev = [
     "pytest",
     "pytest-cov",
     "pytest-regressions[dataframe,num]",  # install pandas and numpy extensions
-    "ruff",
+    "ruff==0.16.9",
     "tox",
     "myst_nb",
     "myst_parser",
-    "pre-commit",
     "sphinx",
     "sphinx-autoapi",
     "sphinx-copybutton",
@@ -68,6 +65,8 @@ dev = [
     "types-tqdm",
     "ipykernel",
     "plotly",
+    "prek",
+    "jupytext>=1.19.5",
 ]
 publishing = [
     "build",
@@ -83,7 +82,7 @@ Repository = "https://github.com/popylar-org/prfmodel"
 Issues = "https://github.com/popylar-org/prfmodel/issues"
 
 [tool.setuptools.package-data]
-"prfmodel.data" = ["*.nii.gz"]
+"prfmodel.data" = ["checksums.json", "stimuli/*.npz"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -117,6 +116,8 @@ select = ["ALL"]
 ignore = [
     "ANN204", # Missing return type annotation for special (dunder) method
     "ANN003", # Missing type annotation for `**kwargs`
+    "CPY",    # Missing copyright notice at top of file (project uses a repo-level NOTICE/LICENSE instead)
+    "PLR0917", # Too many positional arguments (project already tolerates this via per-function PLR0913 noqas)
     "FBT",    # Using boolean function arguments
     "TD",     # TODOs
     "FIX001", # Resolve FIXMEs
@@ -134,6 +135,7 @@ pydocstyle.convention = "numpy"
 # Tests can ignore a few extra rules
 "tests/**.py" = [
     "ANN201", # Missing return type annotation for public function
+    "ARG",    # Unused arguments (a fixture is often requested only for its side effect)
     "PT011",  # Missing `match` parameter in `pytest.raises()`
     "S101",   # Use of assert is detected
 ]
@@ -141,6 +143,9 @@ pydocstyle.convention = "numpy"
     "ERA001", # Found commented-out code
     "INP001", # Part of implicit namespace package
     "A001", # Variable `copyright` is shadowing Python builtin. See https://github.com/sphinx-doc/sphinx/issues/8132
+]
+"scripts/**.py" = [
+    "INP001", # Part of implicit namespace package
 ]
 "validation/**.py" = [
     "T201",  # print() is intentional for script output
@@ -154,14 +159,20 @@ force-single-line = true
 no-lines-before = ["future","standard-library","third-party","first-party","local-folder"]
 
 [tool.bumpversion]
-current_version = "0.0.1"
+current_version = "0.2.0"
 
 [[tool.bumpversion.files]]
 filename = "src/prfmodel/__init__.py"
 
 [[tool.bumpversion.files]]
+filename = "docs/conf.py"
+
+[[tool.bumpversion.files]]
 filename = "pyproject.toml"
+# Only replace the package version, not a dependency that happens to be pinned to the same version
+search = 'version = "{current_version}"'
+replace = 'version = "{new_version}"'
 
 [[tool.mypy.overrides]]
-module = ["keras.*", "nilearn.*"]
+module = ["keras.*", "nilearn.*", "scipy.*"]
 ignore_missing_imports = true

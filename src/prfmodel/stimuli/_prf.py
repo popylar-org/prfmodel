@@ -2,12 +2,43 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
+from dataclasses import field
 import numpy as np
+from keras import ops
+from prfmodel._docstring import doc
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
+from prfmodel.typing import Tensor
+from prfmodel.utils import get_dtype
 from .base import Stimulus
+from .base import StimulusTensors
+from .base import _check_frame_duration
 
 
+@dataclass(frozen=True, eq=False)
+class PRFStimulusTensors(StimulusTensors):
+    """Tensor-holding counterpart of a :class:`~prfmodel.stimuli.PRFStimulus`.
+
+    Holds the population receptive field stimulus arrays as backend tensors. Should be created with
+    :meth:`PRFStimulus.to_tensors`.
+
+    Parameters
+    ----------
+    design : :data:`prfmodel.typing.Tensor`
+        The :attr:`PRFStimulus.design` array as a tensor.
+    grid : :data:`prfmodel.typing.Tensor`
+        The :attr:`PRFStimulus.grid` array as a tensor.
+    frame_duration : float
+        The :attr:`PRFStimulus.frame_duration` as a Python float.
+
+    """
+
+    design: Tensor
+    grid: Tensor
+    frame_duration: float
+
+
+@doc
 @dataclass(frozen=True, eq=False)
 class PRFStimulus(Stimulus):
     """
@@ -22,8 +53,15 @@ class PRFStimulus(Stimulus):
         The coordinate system of the design. The last axis is the number of design dimensions
         excluding the time frame dimension. The shape excluding the last axis must match the shape
         of the design excluding the first axis.
+
+        The order of the last axis must follow the array axes of the design: `grid[..., i]` holds the
+        coordinate that varies along design axis `i + 1`. For a 2D stimulus with a design of shape
+        `(num_frames, height, width)` this means `grid[..., 0]` is the vertical (`y`) coordinate and
+        `grid[..., 1]` is the horizontal (`x`) coordinate. See Notes.
+    %(frame_duration)s
     dimension_labels : Sequence[str] or None, optional
-        Names of the grid dimensions (e.g., `["y", "x"]`). If given, the number of labels must match the last grid axis.
+        Names of the grid dimensions (e.g., `["y", "x"]`). If given, the number of labels must match the last grid
+        axis. Label `i` names the coordinate stored in `grid[..., i]`.
 
     Raises
     ------
@@ -32,7 +70,8 @@ class PRFStimulus(Stimulus):
     ShapeMismatchError
         If the design and grid dimensions do not match.
     ValueError
-        If the number of dimension labels does not match the last grid dimension.
+        If the number of dimension labels does not match the last grid dimension or if `frame_duration` is not
+        positive.
 
     Notes
     -----
@@ -40,36 +79,52 @@ class PRFStimulus(Stimulus):
     That is, all design dimensions but the first must have the same size as the grid
     dimensions excluding the last grid dimension.
 
+    **Coordinate order.** The last grid axis is ordered to match the design's array axes, so
+    `grid[..., i]` is the coordinate that varies along design axis `i + 1`. Because NumPy uses
+    row-major order, the first design axis after time is rows (height), which means the vertical
+    (`y`) coordinate comes first and the horizontal (`x`) coordinate second.
+
+    This is why response models read their centre parameters in the same order, for example
+    :class:`~prfmodel.models.prf.Gaussian2DPRFTuning` pairs `mu_y` with `grid[..., 0]` and `mu_x`
+    with `grid[..., 1]`. Building a grid with `numpy.meshgrid` therefore requires stacking `yv`
+    before `xv`, as in the example below.
+
     Examples
     --------
     Create a population receptive field stimulus on a 2D grid.
 
     >>> import numpy as np
-    >>> num_frames, width, height = 10, 16, 16
-    >>> design = np.ones((num_frames, width, height))
-    >>> pixel_size = 0.05
+    >>> # Deliberately different height and width so the axis order is unambiguous
+    >>> num_frames, height, width = 10, 8, 16
+    >>> design = np.ones((num_frames, height, width))  # time first, then rows, then columns
+    >>> pixel_size = 0.5
     >>> x = (np.arange(width) - (width - 1) / 2) * pixel_size
     >>> y = (np.arange(height) - (height - 1) / 2) * pixel_size
     >>> xv, yv = np.meshgrid(x, y)
-    >>> grid = np.stack((xv, yv), axis=-1)  # shape (height, width, 2)
-    >>> grid = np.stack((xv, yv), axis=-1)  # shape (height, width, 2)
-    >>> # The coordinates of the bottom-left corner:
+    >>> # y comes first because design axis 1 is the row (height) axis
+    >>> grid = np.stack((yv, xv), axis=-1)  # shape (height, width, 2)
+    >>> # The (y, x) coordinates of the bottom-left corner:
     >>> grid[0, 0, :]
-    array([-0.375, -0.375])
-    >>> # The coordinates of the top-right corner:
-    >>> grid[15, 15, :]
-    array([0.375, 0.375])
-    >>> stimulus = PRFStimulus(design=design, grid=grid, dimension_labels=["y", "x"])
+    array([-1.75, -3.75])
+    >>> # The (y, x) coordinates of the top-right corner:
+    >>> grid[7, 15, :]
+    array([1.75, 3.75])
+    >>> # Moving along the last column changes x only:
+    >>> grid[0, 15, :]
+    array([-1.75,  3.75])
+    >>> stimulus = PRFStimulus(design=design, grid=grid, frame_duration=1.5, dimension_labels=["y", "x"])
     >>> print(stimulus)
-    PRFStimulus(design=array[10, 16, 16], grid=array[16, 16, 2], dimension_labels=['y', 'x'])
+    PRFStimulus(design=array[10, 8, 16], grid=array[8, 16, 2], frame_duration=1.5, dimension_labels=['y', 'x'])
 
     """
 
     design: np.ndarray
     grid: np.ndarray
+    frame_duration: float = field(kw_only=True)
     dimension_labels: Sequence[str] | None = None
 
     def __post_init__(self):
+        _check_frame_duration(self.frame_duration)
         self._check_grid_design_shape()
         self._check_grid_dimensions()
         self._check_dimension_labels()
@@ -93,6 +148,7 @@ class PRFStimulus(Stimulus):
             raise ValueError(msg)
 
     @classmethod
+    @doc
     def create_2d_bar_stimulus(  # noqa: PLR0913 (too many arguments)
         cls,
         num_frames: int = 100,
@@ -101,6 +157,8 @@ class PRFStimulus(Stimulus):
         bar_width: int = 20,
         direction: str = "horizontal",
         pixel_size: float = 0.05,
+        *,
+        frame_duration: float,
     ) -> "PRFStimulus":
         """
         Create a population receptive field bar stimulus that moves across a 2D screen.
@@ -121,6 +179,7 @@ class PRFStimulus(Stimulus):
             Direction in which the bar moves.
         pixel_size : float, optional
             Size of a pixel in spatial units.
+        %(frame_duration)s
 
         Returns
         -------
@@ -132,25 +191,59 @@ class PRFStimulus(Stimulus):
         ValueError
             If `direction` is not "horizontal" or "vertical".
 
+        Notes
+        -----
+        The `grid` holds **visual field** coordinates in degrees of visual angle. The horizontal
+        coordinate increases across the design columns: `grid[0, 0, 1]` is the smallest (most
+        negative) `x` and `grid[0, -1, 1]` the largest. The vertical coordinate increases down the
+        rows, so the first row is the lower edge of the visual field.
+
+        Concretely, a bar drawn in the leftmost columns of `design` falls in the **left** visual
+        hemifield (negative `mu_x`), and a bar in the rightmost columns falls in the right hemifield
+        (positive `mu_x`). A ``direction="horizontal"`` bar sweeps from left to right through the
+        visual field (increasing `mu_x`).
+
+        This is the same convention as the packaged stimulus returned by
+        :func:`~prfmodel.examples.load_2d_prf_bar_stimulus`.
+
         Examples
         --------
-        >>> stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=200)
-        >>> print(stimulus)
-        PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], dimension_labels=['y', 'x'])
+        >>> stimulus = PRFStimulus.create_2d_bar_stimulus(num_frames=200, frame_duration=1.0)
+        >>> print(stimulus)  # doctest: +NORMALIZE_WHITESPACE
+        PRFStimulus(design=array[200, 128, 128], grid=array[128, 128, 2], frame_duration=1.0,
+                    dimension_labels=['y', 'x'])
+
+        Both coordinates increase with their design axis, the horizontal one across the columns and
+        the vertical one down the rows:
+
+        >>> stimulus = PRFStimulus.create_2d_bar_stimulus(width=5, height=3, pixel_size=1.0, frame_duration=1.0)
+        >>> stimulus.grid[..., 1]  # x, constant down each column
+        array([[-2., -1.,  0.,  1.,  2.],
+               [-2., -1.,  0.,  1.,  2.],
+               [-2., -1.,  0.,  1.,  2.]])
+        >>> stimulus.grid[..., 0]  # y, constant across each row
+        array([[-1., -1., -1., -1., -1.],
+               [ 0.,  0.,  0.,  0.,  0.],
+               [ 1.,  1.,  1.,  1.,  1.]])
 
         """
-        # Create a centered grid of x and y coordinates
+        # Create a centered grid of x and y coordinates that increase across the columns and down the
+        # rows (see Notes). This matches the packaged stimulus from
+        # :func:`~prfmodel.examples.load_2d_prf_bar_stimulus`.
         x = (np.arange(width) - (width - 1) / 2) * pixel_size
         y = (np.arange(height) - (height - 1) / 2) * pixel_size
         xv, yv = np.meshgrid(x, y)
-        grid = np.stack((xv, yv), axis=-1)  # shape (height, width, 2)
+        # Dimension y comes first because numpy uses row-major order (i.e., the first design axis
+        # after time represents rows or height), so grid[..., 0] must vary along that axis
+        grid = np.stack((yv, xv), axis=-1)  # shape (height, width, 2)
 
-        # Create the design array
+        # Create the design array. Positions below are design columns/rows, not visual field coordinates.
         design = np.zeros((num_frames, height, width), dtype=np.float32)
 
         for frame in range(num_frames):
             if direction == "horizontal":
-                # Bar moves left to right, starting and ending just outside the screen
+                # Bar moves across the columns in index order (left to right through the visual field),
+                # starting and ending just outside the screen
                 bar_start = int(np.round(-bar_width + frame * (width + bar_width) / (num_frames - 1)))
                 bar_end = bar_start + bar_width
                 # Only draw within screen bounds
@@ -160,7 +253,8 @@ class PRFStimulus(Stimulus):
                 if screen_start < screen_end:
                     design[frame, :, screen_start:screen_end] = 1.0
             elif direction == "vertical":
-                # Bar moves top to bottom, starting and ending just outside the screen
+                # Bar moves across the rows in index order (upward through the visual field, since
+                # y increases down the rows), starting and ending just outside the screen
                 bar_start = int(np.round(-bar_width + frame * (height + bar_width) / (num_frames - 1)))
                 bar_end = bar_start + bar_width
                 screen_start = max(bar_start, 0)
@@ -172,11 +266,44 @@ class PRFStimulus(Stimulus):
                 msg = "Direction must be 'horizontal' or 'vertical'"
                 raise ValueError(msg)
 
-        # Dimension y comes first because numpy uses row-major order (i.e., the first axis represents rows or height)
         dimension_labels = ["y", "x"]
 
         return cls(
             design=design,
             grid=grid,
+            frame_duration=frame_duration,
             dimension_labels=dimension_labels,
+        )
+
+    def to_tensors(self, dtype: str | None = None) -> PRFStimulusTensors:
+        """Convert the stimulus arrays into backend tensors.
+
+        Parameters
+        ----------
+        dtype : str, optional
+            The dtype to convert the stimulus arrays to. If `None` (the default), uses the dtype from
+            :func:`prfmodel.utils.get_dtype`.
+
+        Returns
+        -------
+        PRFStimulusTensors
+            The stimulus arrays as tensors.
+
+        Examples
+        --------
+        >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+        >>> stimulus = load_2d_prf_bar_stimulus()
+        >>> tensors = stimulus.to_tensors("float32")
+        >>> print(tuple(tensors.design.shape) == stimulus.design.shape)
+        True
+        >>> print(tuple(tensors.grid.shape) == stimulus.grid.shape)
+        True
+
+        """
+        dtype = get_dtype(dtype)
+
+        return PRFStimulusTensors(
+            design=ops.convert_to_tensor(self.design, dtype=dtype),
+            grid=ops.convert_to_tensor(self.grid, dtype=dtype),
+            frame_duration=float(self.frame_duration),
         )

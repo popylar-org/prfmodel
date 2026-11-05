@@ -49,7 +49,13 @@ class TestDerivativeTwoGammaImpulse(TestImpulseSetup):
     @pytest.fixture
     def irf_model(self):
         """Impulse model object."""
-        return DerivativeTwoGammaImpulse(self.duration, self.offset, self.resolution, self.norm)
+        return DerivativeTwoGammaImpulse(
+            duration=self.duration,
+            offset=self.offset,
+            resolution=self.resolution,
+            norm=self.norm,
+            default_parameters=None,
+        )
 
     @pytest.fixture
     def irf_model_default(self):
@@ -63,4 +69,10 @@ class TestDerivativeTwoGammaImpulse(TestImpulseSetup):
             "weight_deriv": -0.5,
         }
 
-        return DerivativeTwoGammaImpulse(self.duration, self.offset, self.resolution, self.norm, default_params)
+        return DerivativeTwoGammaImpulse(
+            duration=self.duration,
+            offset=self.offset,
+            resolution=self.resolution,
+            norm=self.norm,
+            default_parameters=default_params,
+        )

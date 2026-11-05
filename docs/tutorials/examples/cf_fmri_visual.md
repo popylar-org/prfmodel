@@ -30,13 +30,15 @@ In this example, we use the TensorFlow backend.
 import os
 from importlib.util import find_spec
 
+import pandas as pd
+
 # Set keras backend to 'tensorflow' (this is normally the default)
 os.environ["KERAS_BACKEND"] = "tensorflow"
-# Hide tensorflow info messages
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
+# Print parameter DataFrames with three decimals
+pd.set_option("display.precision", 3)
 
 if find_spec("tensorflow") is None:
-    msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
+    msg = 'Could not find the tensorflow package. Please install it with: pip install "prfmodel[tensorflow]"'
     raise ImportError(msg)
 ```
 
@@ -46,10 +48,12 @@ Before we start modelling, we need to make sure that we have all the requirement
 surface of the Human Connectome Project (see https://doi.org/10.6084/m9.figshare.13372958). For visualization, we use the nilearn package. We download the surface and load the flat meshes for both hemispheres.
 
 ```{code-cell} ipython3
-from prfmodel.examples import load_surface_mesh
+from prfmodel.examples import load_dataset
 
-# Download surface mesh and load as nilearn.surface.PolyMesh object
-mesh = load_surface_mesh(dest_dir="data", surface_type="flat")
+# Downloads on first use and caches in a user data directory (see prfmodel.examples.get_data_dir)
+surface = load_dataset("hcp-999999-surface", surface_type="flat")
+
+mesh = surface.mesh
 ```
 
 ## Loading the BOLD response
@@ -59,9 +63,10 @@ Now that we have the flat surface, we load the raw BOLD response data from a sin
 ```{code-cell} ipython3
 %matplotlib inline
 import matplotlib.pyplot as plt
-from prfmodel.examples import load_single_subject_fmri_data
 
-response_raw = load_single_subject_fmri_data(dest_dir="data", hemisphere="both")
+dataset = load_dataset("7t-retbar-visual", hemisphere="both")
+
+response_raw = dataset.response
 response_raw.shape  # shape (num_vertices, num_frames)
 ```
 
@@ -73,54 +78,17 @@ response_psc = ((response_raw.T / response_raw.mean(axis=1)).T - 1.0) * 100.0
 
 The `response_psc` object contains the BOLD response timecourse for each voxel on the surface mesh. It has shape `(num_vertices, num_frames)` where `num_vertices` is the number of vertices on the surface mesh and `num_frames` the number of time frames of the recording. The timecourses from the left and right hemispheres are concatenated (left is first). Because the data has been converted to PSC, each timecourse should have a mean of zero.
 
-First, we define a helper function to plot a statistic on the surface.
+We can plot the standard deviation of each timecourse on the surface with
+{py:func}`prfmodel.plotting.plot_surface_stat_map`.
 
 ```{code-cell} ipython3
 import numpy as np
-from nilearn.plotting import plot_surf_stat_map
+from prfmodel.plotting import plot_surface_stat_map
 
-SURF_VIEW = (90, 270)
-
-
-def plot_surf_stat_map_helper(
-        stat_map: np.ndarray,
-        vmin: float | None = None,
-        vmax: float | None = None,
-        title: str | None = None,
-    ) -> tuple[plt.Figure, plt.Axes]:
-    """Helper function to plot a surface with a stat map."""
-    fig, ax = plt.subplots(subplot_kw={"projection": "3d"}, figsize=(8, 6))
-
-    plot_surf_stat_map(
-        mesh,
-        stat_map,
-        vmin=vmin,
-        vmax=vmax,
-        hemi="both",
-        view=SURF_VIEW,
-        cmap="inferno",
-        axes=ax,
-        figure=fig,
-        title=title,
-    )
-
-    # Expand the 3D axes to fill the space to the left of the colorbar
-    surf_axes = [a for a in fig.axes if a.name == "3d"]
-    cbar_axes = [a for a in fig.axes if a.name != "3d"]
-    cbar_x0 = min(a.get_position().x0 for a in cbar_axes)
-    for a in surf_axes:
-        a.set_position([0.0, 0.0, cbar_x0 - 0.01, 0.97])
-
-    return fig, ax
-```
-
-We can then plot the standard deviation of each timecourse on the surface.
-
-```{code-cell} ipython3
 # Calculate standard deviation of each timecourse
 response_sd = response_psc.std(axis=1)
 
-plot_surf_stat_map_helper(response_sd, vmax=5.0, title="Response standard deviation");
+plot_surface_stat_map(mesh, response_sd, vmax=5.0, title="Response standard deviation");
 ```
 
 We can see that there is high variation in the signal in the visual areas (e.g., V1-V3) as we would expect for a visual stimulus.
@@ -141,7 +109,7 @@ pio.renderers.default = "notebook_connected"  # Requires internet connection to 
 pio.templates.default = "simple_white"
 
 # The atlas comes with the surface mesh
-atlas = np.load("data/hcp_999999/surface-info/mmp_atlas.npz")
+atlas = surface.atlas
 
 # V1 has label 1
 label_v1 = 1
@@ -178,24 +146,21 @@ fig.show()
 While the timecourses are quite noisy, we can see that, for some vertices, there are four regular peaks in the signal. These peaks originate from the visual stimulus that was shown during the fMRI recording. The visual stimulus contained four corresponding
 bars moving through the visual field in different directions (see [](prf_2d_fmri_visual.md)). The goal of our CF model is to map these responses to the responses from other vertices in the brain.
 
-We can get an overview of all vertices by plotting all timecourses at once in a heatmap.
+We can get an overview of all vertices by plotting all timecourses at once in a heatmap with
+{py:func}`prfmodel.plotting.plot_response_heatmap`.
 
 ```{code-cell} ipython3
-aspect_ratio = response_psc.shape[1] / response_psc.shape[0]
+from prfmodel.plotting import plot_response_heatmap
 
-fig, ax = plt.subplots(1, 1, figsize=(8, 6))
-
-im = ax.imshow(
+plot_response_heatmap(
     response_psc,
-    aspect=aspect_ratio,
-    cmap="inferno",
     vmin=-2,
     vmax=5,
-)
-
-ax.set_xlabel("Time frame (in TR)")
-ax.set_ylabel("Vertex index")
-fig.colorbar(im, ax=ax, label="BOLD response (in PSC)");
+    xlabel="Time frame (in TR)",
+    ylabel="Vertex index",
+    colorbar_label="BOLD response (in PSC)",
+    figsize=(8, 6),
+);
 ```
 
 ## Creating the Distance Matrix
@@ -215,7 +180,7 @@ import nibabel as nib
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import dijkstra
 
-def calculate_distance_matrix_dijkstra(surface_path: str, source_indices: Sequence) -> np.ndarray:
+def calculate_distance_matrix_dijkstra(surface_path: str | os.PathLike, source_indices: Sequence) -> np.ndarray:
     """Calculate the distance matrix for a sequence of source region vertex indices from a surface file."""
     img = nib.load(surface_path)
 
@@ -251,8 +216,8 @@ to infinity indicating that connective fields cannot map across hemispheres.
 idx_v1_left = np.where(atlas["left"] == label_v1)[0]
 idx_v1_right = np.where(atlas["right"] == label_v1)[0]
 
-dist_matrix_lh = calculate_distance_matrix_dijkstra("data/hcp_999999/surfaces/wm_lh.gii", idx_v1_left)
-dist_matrix_rh = calculate_distance_matrix_dijkstra("data/hcp_999999/surfaces/wm_rh.gii", idx_v1_right)
+dist_matrix_lh = calculate_distance_matrix_dijkstra(surface.files["wm_lh"], idx_v1_left)
+dist_matrix_rh = calculate_distance_matrix_dijkstra(surface.files["wm_rh"], idx_v1_right)
 
 # We pad both matrices with infinity values and then concatenate
 dist_matrix = np.concatenate([
@@ -300,7 +265,7 @@ It assumes that the stimulus (a vertex in the distance matrix) elicits a respons
 Gaussian shape in two-dimensional cortical space. A baseline and amplitude parameter shift and scale
 the predicted response to match the observed BOLD response.
 
-The {py:class}`prfmodel.models.gaussian.GaussianCFModel` class performs these steps to make a combined prediction.
+The {py:class}`prfmodel.models.cf.GaussianCFModel` class performs these steps to make a combined prediction.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -309,7 +274,7 @@ from prfmodel.models.cf import GaussianCFModel
 cf_model = GaussianCFModel()
 ```
 
-The {py:class}`prfmodel.models.gaussian.GaussianCFModel` class requires two core parameters: `center_index` indicates the location of the CF in the
+The {py:class}`prfmodel.models.cf.GaussianCFModel` class requires two core parameters: `center_index` indicates the location of the CF in the
 source region. With the current CF implementation in prfmodel, this must be a vertex index in the distance matrix/source
 region. This means that the center of a CF must be a vertex on the surface mesh (i.e., it cannot be in between vertices).
 
@@ -324,7 +289,7 @@ preview_params = pd.DataFrame({
     "baseline": 0.0,
     "amplitude": 1.0,
 })
-preview_predictions = np.asarray(cf_model(stimulus, preview_params))
+preview_predictions = cf_model(stimulus, preview_params)
 
 fig = px.line(
     preview_predictions.T,
@@ -354,7 +319,7 @@ response_valid = response_psc[response_is_valid]
 is_v1_valid = is_v1[response_is_valid]
 ```
 
-We will fit the CF model to our BOLD response data using two stages. We begin with a grid search using {py:class}`prfmodel.fitters.grid.GridFitter` to find good values for our parameters of interest (`center_index`, and `sigma`). Then, we use {py:class}`prfmodel.fitters.linear.LeastSquaresFitter` to estimate the `baseline` and `amplitude` of
+We will fit the CF model to our BOLD response data using two stages. We begin with a grid search using {py:class}`prfmodel.fitters.GridFitter` to find good values for our parameters of interest (`center_index`, and `sigma`). Then, we use {py:class}`prfmodel.fitters.LeastSquaresFitter` to estimate the `baseline` and `amplitude` of
 our model.
 
 > **Note**: Typically, we would also use stochastic gradient descent (SGD) to finetune our model fits after the least-squares stage. To keep the example computationally simple, we omit this step here but encourage readers to explore this approach at the end.
@@ -378,18 +343,17 @@ param_ranges = {
 The grid search will evaluate all possible combinations of the defined ranges and return the combination that fits the simulated
 data best. Note that this is still a relatively small grid and we recommend specifying finer grids in practice.
 
-Let's construct the {py:class}`prfmodel.fitters.grid.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.grid.GridFitter`
-evaluate 20 parameter combinations at the same time (which saves us some memory). As the `loss` (i.e., the metric to minimize between model predictions and data), we use cosine similarity which ignores differences in scale between model predictions and observed data.
+Let's construct the {py:class}`prfmodel.fitters.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.GridFitter`
+evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is the negative correlation, which ignores differences in baseline and amplitude between model predictions and observed data. This means the data do not need to be demeaned or converted to percent signal change first, but also that `baseline` and `amplitude` cannot be estimated by the grid search itself. We fix them here and estimate them with least squares in the next step.
 
 ```{code-cell} ipython3
-from keras.losses import CosineSimilarity
 from prfmodel.fitters import GridFitter
 
 # Create grid fitter object
 grid_fitter = GridFitter(
     model=cf_model,
     stimulus=stimulus,
-    loss=CosineSimilarity(reduction="none"),  # Grid fitter needs no aggregation of loss
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 # Run grid search
@@ -445,29 +409,24 @@ from prfmodel.utils import batched
 predict_batched = batched(cf_model)
 
 # Make predictions with optimized parameters
-pred_response = np.asarray(predict_batched(stimulus, ls_params, batch_size=200))
+pred_response = predict_batched(stimulus, ls_params, batch_size=200)
 ```
 
-We can quantify how well the predictions align with the observed timecourses using the R-squared metric. This metric indicates the proportion of variance in the observed data explained by our model predictions.
+We can quantify how well the predictions align with the observed timecourses using the R-squared metric, which we compute with {py:func}`prfmodel.utils.calculate_r_squared`. This metric indicates the proportion of variance in the observed data explained by our model predictions.
 
 ```{code-cell} ipython3
-from keras.metrics import R2Score
+from prfmodel.utils import calculate_r_squared
 
-r2_metric = R2Score(class_aggregation=None)  # Don't aggregate score over vertices
-
-r_squared = np.asarray(r2_metric(response_valid.T, pred_response.T))  # Transpose to compute score across time frames
+r_squared = calculate_r_squared(response_valid, pred_response)  # One score per vertex
 r_squared.shape
 ```
 
-We can look at the distribution of R-squared values across vertices.
+We can look at the distribution of R-squared values across vertices with {py:func}`prfmodel.plotting.plot_r_squared_hist`.
 
 ```{code-cell} ipython3
-fig = px.histogram(
-    x=r_squared,
-    nbins=15,
-    labels={"x": "R-squared"},
-).update_layout(yaxis_title="Frequency", height=450)
-fig.show()
+from prfmodel.plotting import plot_r_squared_hist
+
+plot_r_squared_hist(r_squared, bins=15, value_range=(0.0, 1.0), clip=True);
 ```
 
 We can see that many vertices have a score above zero meaning that the response of the CF model matches the observed response.
@@ -549,7 +508,9 @@ We can also visualize the R-squared score on the flat surface mesh.
 r_squared_full = np.full((response_psc.shape[0],), fill_value=np.nan)
 r_squared_full[response_is_valid] = r_squared
 
-plot_surf_stat_map_helper(r_squared_full, vmin=0.0, vmax=1.0, title="Variance explained (R-squared)");
+plot_surface_stat_map(
+    mesh, r_squared_full, vmin=0.0, vmax=1.0, title="Variance explained (R-squared)"
+);
 ```
 
 We can see that the vertices with the highest scores are located in the visual areas of both hemispheres. This means
@@ -576,7 +537,7 @@ size = np.full((response_psc.shape[0],), fill_value=np.nan)
 # Fill valid vertices with estimated size parameters
 size[response_is_valid] = np.where(is_above_threshold, ls_params["sigma"], np.nan)
 
-plot_surf_stat_map_helper(size, vmin=0.0, vmax=20.0, title="CF size (sigma, in mm)");
+plot_surface_stat_map(mesh, size, vmin=0.0, vmax=20.0, title="CF size (sigma, in mm)");
 ```
 
 We can see that vertices in higher areas in the visual pathway have larger CF sizes.
@@ -587,23 +548,14 @@ We can see that vertices in higher areas in the visual pathway have larger CF si
 
 This example showed how to fit a Gaussian CF model to empirical fMRI data collected from an experiment in the visual domain. First, we plotted the raw BOLD response data on the cortical surface. Second, we calculated a distance matrix from a white matter surface using Dijkstra's algorithm. Then, we defined a CF model and optimized its parameters using a grid search followed by least-squares to adjust for baseline and amplitude differences. Finally, we visualized model fit, the estimated parameters, and derived measures on the cortical surface.
 
-## Next steps
+## Next Steps
 
 The predictions by our CF model can potentially be improved. We suggest different directions for improving the pRF model fit:
 
 - Increasing the number of points in the parameter grid for the grid search
-- Finetuning `sigma` with stochastic gradient descent with {py:class}`prfmodel.fitters.sgd.SGDFitter`
+- Finetuning `sigma` with stochastic gradient descent with {py:class}`prfmodel.fitters.SGDFitter`
 - Applying preprocessing steps before fitting the pRF model (e.g., high-pass filtering)
 - Building a more complex CF model (e.g., difference of Gaussian, see Zuiderbaan et al., 2012)
-
-+++
-
-## Stay Tuned
-
-More tutorials on fitting models to empirical data and creating custom models are in the making.
-
-For questions and issues, please make an issue on [GitHub](https://github.com/popylar-org/prfmodel/issues) or
-contact Malte Lüken (m.luken@esciencecenter.nl).
 
 +++
 

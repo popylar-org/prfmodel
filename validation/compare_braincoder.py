@@ -9,7 +9,7 @@ HRF comparison is not possible with braincoder: GaussianPRF2D has no HRF
 convolution option, so the only meaningful cross-package check is the spatial
 encoding step.
 
-- prfmodel: Gaussian2DPRFModel(impulse_model=None, temporal_model=None)
+- prfmodel: Gaussian2DPRFModel(impulse_model=None, scaling_model=None)
 - braincoder: GaussianPRF2D.predict() - this class has no HRF convolution option,
   so it matches prfmodel's no-HRF setup.
 
@@ -50,6 +50,7 @@ tf.keras.backend.set_floatx("float32")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from shared import BASE_MODEL_PARAMS
+from shared import RTOL
 from shared import PRFStimulus
 from shared import compare_predictions
 from shared import load_stimulus
@@ -75,7 +76,7 @@ def _braincoder_response(stimulus: PRFStimulus) -> np.ndarray:
             "y": [BASE_MODEL_PARAMS["mu_y"]],
             "sd": [BASE_MODEL_PARAMS["sigma"]],
             "amplitude": [BASE_MODEL_PARAMS["amplitude"]],
-            "baseline": [0.0],  # no baseline: matches prfmodel with temporal_model=None
+            "baseline": [0.0],  # no baseline: matches prfmodel with scaling_model=None
         },
     ).astype("float32")
 
@@ -88,14 +89,32 @@ def _braincoder_response(stimulus: PRFStimulus) -> np.ndarray:
     return np.asarray(prediction).ravel()
 
 
-def main() -> None:
-    """Run braincoder comparison and exit with 0 on pass, 1 on fail."""
-    stimulus = load_stimulus()
+def check_pre_hrf(stimulus: PRFStimulus) -> None:
+    """Assert that prfmodel and braincoder agree on the spatial encoding step."""
     params = make_params()
     ref = prfmodel_response(stimulus, params, with_hrf=False)
     bc = _braincoder_response(stimulus)
-    passed = compare_predictions(ref, bc, "braincoder (pre-HRF)")
-    sys.exit(0 if passed else 1)
+    if not compare_predictions(ref, bc, "braincoder (pre-HRF)"):
+        msg = (
+            f"prfmodel and braincoder disagree on the pre-HRF response by more than {RTOL:.0e} of "
+            "peak. This is the spatial encoding step. braincoder's GaussianPRF2D has no HRF "
+            "convolution, so this is the only cross-check available against it; a failure means "
+            "the receptive field, the stimulus grid convention, or the projection disagrees."
+        )
+        raise AssertionError(msg)
+
+
+def main() -> None:
+    """Run braincoder comparison and exit with 0 on pass, 1 on fail."""
+    stimulus = load_stimulus()
+
+    try:
+        check_pre_hrf(stimulus)
+    except AssertionError as exc:
+        print(f"\n{exc}\n")
+        sys.exit(1)
+
+    sys.exit(0)
 
 
 if __name__ == "__main__":

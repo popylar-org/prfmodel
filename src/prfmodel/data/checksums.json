@@ -1,0 +1,313 @@
+{
+  "files": {
+    "7t_aot_sub-003/sub-003_FScortexGM_dil_T2BM_crop_resampled.nii.gz": {
+      "sha256": "7cd00b7a5a94a908bbd713be34ce957395d4dd27fdee42db561a29658c69f913",
+      "size": 28456
+    },
+    "7t_aot_sub-003/sub-003_ses-pRF_task-pRF_rec-nordicstc_run-medianpsc_part-mag_bold_space-T1w_res-2p0mm.nii.gz": {
+      "sha256": "2123fdd2d01f55151caca33d27e70f74d3d1ec8d9e0daeec57c0d94974c49c65",
+      "size": 242573793
+    },
+    "7t_aot_sub-003/surfaces/flat_lh.gii": {
+      "sha256": "fc2bfb19e135b539d87e7ffc9d8fe2f7ebe9474b8e73e5a3a4cac518e5057575",
+      "size": 4498873
+    },
+    "7t_aot_sub-003/surfaces/flat_rh.gii": {
+      "sha256": "6929fa8f6886b0f81a16165aaa97c97fdabfb863423f32b719c625a4ce461d4c",
+      "size": 4542417
+    },
+    "7t_aot_sub-003/surfaces/inflated_lh.gii": {
+      "sha256": "173baf881a80fa94d63668ba948a110d2cf6bcb25a38296ea067aeabb7246eec",
+      "size": 5402617
+    },
+    "7t_aot_sub-003/surfaces/inflated_rh.gii": {
+      "sha256": "b00e649695d704be78bbf74c0d60c6d0bc90489a6fc4729340dbd647f8c60720",
+      "size": 5433962
+    },
+    "7t_aot_sub-003/surfaces/pia_lh.gii": {
+      "sha256": "0f02debc4af31b8db9dacc7a27a7bef309df139b8dc95796c3a5c94c76b269e1",
+      "size": 5404919
+    },
+    "7t_aot_sub-003/surfaces/pia_rh.gii": {
+      "sha256": "0ea7e8f4ed52e8b17c9a397c96c872e635c61a6f0e57ff309ad3f536ad1758f3",
+      "size": 5406691
+    },
+    "7t_aot_sub-003/surfaces/wm_lh.gii": {
+      "sha256": "f03ab40a6b4d16b55f56e9ba867f9552e2470ca02ac4c5d5c996edb473dd736d",
+      "size": 5392080
+    },
+    "7t_aot_sub-003/surfaces/wm_rh.gii": {
+      "sha256": "ae0269ff0b14b930622e3ea0ebaf059ca11d497d93610a4d5bdc453ef0927786",
+      "size": 5390272
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_angle.func.gii": {
+      "sha256": "9cdda063b0f4a7f8dd946fbced115d8e9e6daf8ed5e5cefa3f671936c6080517",
+      "size": 34703
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_dseg.label.gii": {
+      "sha256": "761d1319ecb93c67c0954b9363a134d82be6bbfe53171967574f191d9baf6d8b",
+      "size": 4188
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_eccen.func.gii": {
+      "sha256": "489807ef3708df5b1f3f3c6fd7c9cb54eb8ae2a21f7cb509a46d9f428b3d6458",
+      "size": 35223
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-L_space-fsLR_den-59k_atlas-benson14_sigma.func.gii": {
+      "sha256": "f75a0dcc3587b285140aa4b118a81e91715b35fde3f5c3141ca669cf2a028b2a",
+      "size": 35015
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-R_space-fsLR_den-59k_atlas-benson14_angle.func.gii": {
+      "sha256": "9b15ff575af7a322e09967016faa851c152b02d6f848e117091add9c0d39520f",
+      "size": 34100
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-R_space-fsLR_den-59k_atlas-benson14_dseg.label.gii": {
+      "sha256": "df4d75068a90499f05088740557e273fb1dc73bf7a48e103672a5f4cdf86866e",
+      "size": 4173
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-R_space-fsLR_den-59k_atlas-benson14_eccen.func.gii": {
+      "sha256": "ddfe4e91a33559cdd4f612a10ef71e8bc0af7834371dd64b55c3e01869276e94",
+      "size": 34552
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_hemi-R_space-fsLR_den-59k_atlas-benson14_sigma.func.gii": {
+      "sha256": "fa1ca36732cf8d1759578da31cfc2448c2cbd1721fa2433d1436a8793b36d4e2",
+      "size": 34420
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_hemi-L_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "5e4ab621ff9396c49185015f82a06b952fe98095c48263449416d1fa4649ec29",
+      "size": 57510028
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_hemi-R_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "5e77127ec681fbadbbb012503b3b28e14220049a532b5090584a4e22cf133f53",
+      "size": 56999381
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_split-even_hemi-L_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "90492d2824951606b31fd75474d220a277b559f575bab59571904da1a6152eb7",
+      "size": 57512784
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_split-even_hemi-R_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "3e1990d7f6a43f151ded6d63fda8779e99c092a363258566fab91f0684913efc",
+      "size": 57014745
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_split-odd_hemi-L_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "097bd6fe9bd13fbca505951d8141e96aec6aeb4fa9347a28ee9502cbfd016463",
+      "size": 57461992
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-csf_split-odd_hemi-R_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "61ceb2aec31e78f87dff2977464da56b9cecb4d94bcc31ae5b63ddf69775dff2",
+      "size": 56973069
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-prf_hemi-L_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "58563b650171a27a1f3c13990c83c964ec6469bc2a490afa9f7e013d2159588b",
+      "size": 26210408
+    },
+    "7t_ncsf_sub-16112020/sub-16112020_task-prf_hemi-R_space-fsLR_den-59k_desc-detrend3_bold.func.gii": {
+      "sha256": "3be33d149f7ea0869bf456211c1e46e619a2d0459f8e450f884f500cc2e8d402",
+      "size": 21844241
+    },
+    "7t_ncsf_sub-16112020/task-prf_stimulus.npz": {
+      "sha256": "787c6772050d05fea95f440579438e6f7dc1d6f48c5ad2ec20ceba39830477f9",
+      "size": 149546
+    },
+    "chn_sub-01/stimuli/task-fixedbar_run-1_desc-down_aperture.mat": {
+      "sha256": "21dcd3b461ccfe78f87dc74244f65b32ffb66b84c364bb8d4621585f94d68261",
+      "size": 57540
+    },
+    "chn_sub-01/stimuli/task-fixedbar_run-2_desc-down_aperture.mat": {
+      "sha256": "f4e838f7b365eeec4a65e3b57daebc87757d3173a9ae03a769e11993ea5e0f49",
+      "size": 58427
+    },
+    "chn_sub-01/stimuli/task-logbar_run-1_desc-down_aperture.mat": {
+      "sha256": "5ab7883400c35640a232364e66a8cb543c8e39ae1c6902864f70e3a1a2c3655c",
+      "size": 70960
+    },
+    "chn_sub-01/stimuli/task-logbar_run-2_desc-down_aperture.mat": {
+      "sha256": "40b319c51434e49918f5507a1230077edf336ee649f66a77a9ce4719bc1f3fe2",
+      "size": 71915
+    },
+    "chn_sub-01/sub-01/anat/sub-01_ses-01_acq-MEMPRvNav_rec-RMS_hemi-L_inflated.surf.gii": {
+      "sha256": "7ac8e180955720c113171ba337081f768af3320f38ac5557d27d3ebfec0406f0",
+      "size": 5459956
+    },
+    "chn_sub-01/sub-01/anat/sub-01_ses-01_acq-MEMPRvNav_rec-RMS_hemi-R_inflated.surf.gii": {
+      "sha256": "886356b074cdda41a7e62f3fc06ab6812ab22e36747d284fea5eebc3fd99b23e",
+      "size": 5504705
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-fixedbar_run-1_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "0f9af7c76c25f5f1569ff22ba38e3da430563b5019d80e567d056667b3380e04",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-fixedbar_run-1_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "d8ebcbe971f596a8efd54159e472a003f60f78ec096ff4803b13031562cc674d",
+      "size": 363820921
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-fixedbar_run-2_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "ce1742910a8b0b34ec100988be0281f2718367d6304c195fb01b87256de22d53",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-fixedbar_run-2_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "5e6cf221988a11ea1725d375ae50992a681439f95b887b391ca436e045d5919e",
+      "size": 363820921
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-logbar_run-1_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "79daeeb0cf72f2d89fb776bb898ff78b2ba2adcd923053dd75233ed6abd89056",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-logbar_run-1_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "72fa108f45fe3cb5a7c80632efd780e798096fd2523f73b50ed894cc3906e493",
+      "size": 363820921
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-logbar_run-2_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "54421cee997240f230873bc866571723e187948b3cc0fb578582086305c237c1",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-01_task-logbar_run-2_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "5e1f153e90cfb5ec27ea2def78892bb80ad585766ebe78d10940485a3d4a8c2f",
+      "size": 363820921
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-02_task-fixedbar_run-1_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "58beb7b697ac3af9b6dc069a678fa9b6b4edd28c42bfdcf0396952ee1cbb6223",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-02_task-fixedbar_run-1_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "8f978306938ecc78343cddcf8f8eb256e2ab3a30583bb05ecd4ffdd3c7c08795",
+      "size": 363820921
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-02_task-logbar_run-1_hemi-L_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "a5db530d922b546a13f722180767c305e9f45dbf513d82957edd727cccf0d655",
+      "size": 360647293
+    },
+    "chn_sub-01/sub-01/func/sub-01_ses-02_task-logbar_run-1_hemi-R_space-fsnative_desc-preproc_bold.func.gii": {
+      "sha256": "522165b5cb6e2e5e83d9f87c720079be2f30e01d996e4e8514f913eb9fe3bbb6",
+      "size": 363820921
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-L_space-fsnative_v1.label": {
+      "sha256": "efa4a83140308c8a1ffe3e13b03c9db18e6d0c5524e7e6dd09a7f7afd10ebad0",
+      "size": 354776
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-L_space-fsnative_v2.label": {
+      "sha256": "4dc89d48933fa6da9cebf0769d0d8676797c4fa6d7118efae6805bf4cce61b26",
+      "size": 245339
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-L_space-fsnative_v3.label": {
+      "sha256": "5dae1e18a42c332c8ce2a648c16a0005d9cd5cba344a933030fee07fe555c744",
+      "size": 175421
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-R_space-fsnative_v1.label": {
+      "sha256": "ffd7e0a87dde2beb4424431addfaacdd5ebb4b04ac04b0cdd196c8f68d410a68",
+      "size": 375710
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-R_space-fsnative_v2.label": {
+      "sha256": "d7ca97b061a0798f4eb9595bcfbb1566858f8886437035e2640a3dd90a887cf5",
+      "size": 254839
+    },
+    "chn_sub-01/sub-01/rois/sub-01_hemi-R_space-fsnative_v3.label": {
+      "sha256": "38a2cbdc151413ac3dc9cb39e51c9ea6111910eb66f64c505a32ba095689f5cf",
+      "size": 195474
+    },
+    "hcp_999999/surface-info/mmp_atlas.npz": {
+      "sha256": "6c760f3446a9cd13986da143285d72e6532df4c7df6d4713ee79e9fcb7af629a",
+      "size": 474840
+    },
+    "hcp_999999/surfaces/flat_lh.gii": {
+      "sha256": "6882925bc1ea7a8da18381ab56678a91895b6be9d13ffc0a964ea12a7dec7aec",
+      "size": 1051644
+    },
+    "hcp_999999/surfaces/flat_rh.gii": {
+      "sha256": "c815880346310364cd102748da8140133002ca4e0cb1120175c8868fb4ab32ae",
+      "size": 945488
+    },
+    "hcp_999999/surfaces/inflated_lh.gii": {
+      "sha256": "d853d8a47e3b326421c7cb60fd2171e0b4613f9ce3364205959689169002ae12",
+      "size": 1401300
+    },
+    "hcp_999999/surfaces/inflated_rh.gii": {
+      "sha256": "1eec2f9197508353496110841b97643a022cec40261432ac7e5607a0d0625e98",
+      "size": 1282997
+    },
+    "hcp_999999/surfaces/pia_lh.gii": {
+      "sha256": "a0e273b3aa925408c7b0713326e79b66ae5fdf2e8f76f221734a968ca30c341d",
+      "size": 1374860
+    },
+    "hcp_999999/surfaces/pia_rh.gii": {
+      "sha256": "f51541432aa54f0bbfa7cdeaafd6ffdcbc10d7f83f46be9073cfe2b1873b96a6",
+      "size": 1337888
+    },
+    "hcp_999999/surfaces/wm_lh.gii": {
+      "sha256": "cc4d524c953aca73537eed1f684515891b85324070282c7dbdcc07a67534c7b1",
+      "size": 1373416
+    },
+    "hcp_999999/surfaces/wm_rh.gii": {
+      "sha256": "28ce263052dc14ac3a7e48b74f377d94c96480f69fcfbf1228432e7df14f87a1",
+      "size": 1335600
+    },
+    "p10_freq_spectra-timeseries_avg-runs_bbS.mat": {
+      "sha256": "667f3ce78cc39f23259076f3d519917fac8084c38b33a35ea10cef2dfdea4dcc",
+      "size": 268225
+    },
+    "sub-02_task-prf_space-59k_hemi-L_run-median_desc-bold.func.gii": {
+      "sha256": "c60e155cdc1c490ea09fe1fa414cec4cddd36308a4622d08e8d451fdfcb40038",
+      "size": 26873342
+    },
+    "sub-02_task-prf_space-59k_hemi-R_run-median_desc-bold.func.gii": {
+      "sha256": "66f48b7917bf650c2dd29e77699bafd52628d1c90d5c27ef98fb1ede1de3753a",
+      "size": 26158174
+    },
+    "sub-S1_hemi-L_desc-even_bold.func.gii": {
+      "sha256": "8502ab2ba7d68f823c88598758f2623253c10f667823df9007ed2fcea63afaee",
+      "size": 4589914
+    },
+    "sub-S1_hemi-L_desc-numerosity_dseg.label.gii": {
+      "sha256": "51a4fa177c559598ab4a6cf83508df1b9f0a44bf5a73449e434c00694bfcce4c",
+      "size": 2180
+    },
+    "sub-S1_hemi-L_desc-odd_bold.func.gii": {
+      "sha256": "73ccf3653037e239303947a3430aa23dcd4678909f18088f91e4e75d84dbd373",
+      "size": 4589668
+    },
+    "sub-S1_hemi-R_desc-even_bold.func.gii": {
+      "sha256": "caeab5abd52b61f3718773101e0fd840ca238340242b9ebdd1214d521f91be53",
+      "size": 4131855
+    },
+    "sub-S1_hemi-R_desc-numerosity_dseg.label.gii": {
+      "sha256": "67dc21818af40eeb5a24c5338f7071fc5f99ededbc868d38c3284ed8cb65dd7d",
+      "size": 2177
+    },
+    "sub-S1_hemi-R_desc-odd_bold.func.gii": {
+      "sha256": "ee09634fd2ead78401f9cb43c9860082098bd2b0f14d76d6281125f9c0a42596",
+      "size": 4132037
+    },
+    "vis_design.mat": {
+      "sha256": "3c269e74c12cc79044184b47cf6803205045305687f2f30fe73e8bccd62835d3",
+      "size": 475048
+    },
+    "fmri_full_grid_dataset.pkl": {
+      "sha256": "70f4a2c4985c0036b0b37ffd9798526c86ae61e03d995d052ef1ea3308f2c0a3",
+      "size": 651625350
+    },
+    "Surfaces/lh.flat.gii": {
+      "sha256": "1ef37ed133185dd4f9231c0a15301119dcd3d03413ba8e891e394e8ff4383b8c",
+      "size": 4381665
+    },
+    "Surfaces/lh.flat.vertex_indices.npy": {
+      "sha256": "5a66d5c8904d0f372a2539ec5583a6362839687daabb447216426c25736081ac",
+      "size": 1178344
+    },
+    "Surfaces/lh.white": {
+      "sha256": "839444d66a0e29b4330b308217233f3e0bb6fc4fa64cad87d2f7ff49665a7744",
+      "size": 5610756
+    },
+    "Surfaces/rh.flat.gii": {
+      "sha256": "a15f62023d2768d468dcd5f96d80fab5a374ef8cb29d63b919ad968b4aa4c76b",
+      "size": 4361533
+    },
+    "Surfaces/rh.flat.vertex_indices.npy": {
+      "sha256": "ecab0647ac0682174dc865b01d133a126c42c02061b3cf7e66059161d11a030f",
+      "size": 1175248
+    },
+    "Surfaces/rh.white": {
+      "sha256": "058ce0b1515b87a65af91635827a8e02f72638cb695f97376d0185540098ca16",
+      "size": 5606796
+    }
+  },
+  "version": 1
+}

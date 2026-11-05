@@ -1,17 +1,14 @@
 """Documentation about prfmodel."""
 
 import logging
-from prfmodel.stimuli import PRFStimulus
-from prfmodel.typing import Tensor
-from prfmodel.utils import convert_parameters_to_tensor
+from prfmodel._backend_check import check_backend
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-__version__ = "0.0.1"
+# Every module imports keras, so this must run first to replace a failed backend import with installation instructions
+check_backend()
+
+__version__ = "0.2.0"
 
 
-__all__ = [
-    "PRFStimulus",
-    "Tensor",
-    "convert_parameters_to_tensor",
-]
+__all__ = []

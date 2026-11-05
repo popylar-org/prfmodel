@@ -4,9 +4,9 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.19.1
+    jupytext_version: 1.18.1
 kernelspec:
-  display_name: .venv-prf
+  display_name: prfmodel (3.12.3.final.0)
   language: python
   name: python3
 ---
@@ -35,13 +35,15 @@ In this tutorial, we use the TensorFlow backend.
 import os
 from importlib.util import find_spec
 
+import pandas as pd
+
 # Set keras backend to 'tensorflow' (this is normally the default)
 os.environ["KERAS_BACKEND"] = "tensorflow"
-# Hide tensorflow info messages
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
+# Print parameter DataFrames with three decimals
+pd.set_option("display.precision", 3)
 
 if find_spec("tensorflow") is None:
-    msg = "Could not find the tensorflow package. Please install tensorflow with 'pip install .[tensorflow]'"
+    msg = 'Could not find the tensorflow package. Please install it with: pip install "prfmodel[tensorflow]"'
     raise ImportError(msg)
 ```
 
@@ -54,18 +56,16 @@ The stimulus simulates a bar moving in different directions through a two-dimens
 ```{code-cell} ipython3
 from prfmodel.examples import load_2d_prf_bar_stimulus
 
-num_frames = 200  # Simulate 200 time frames
-
 stimulus = load_2d_prf_bar_stimulus()
 print(stimulus)
 ```
 
-When printing the `stimulus` object, we can see that it has three attributes. The `design` attribute defines how
-the visual field changes over time. It has shape `(num_frames, width, height)`, where width and hight define the number of pixels at which the visual field is recorded. The `grid` attribute maps each pixel to its xy-coordinate in the visual field (i.e., the degree of visual angle).
+When printing the `stimulus` object, we can see that it has four attributes. The `design` attribute defines how
+the visual field changes over time. It has shape `(num_frames, height, width)`, where height and width define the number of pixels at which the visual field is recorded. The `grid` attribute maps each pixel to its coordinate in the visual field (i.e., the degree of visual angle). Its last axis follows the axes of the design, so `grid[..., 0]` holds the vertical (`y`) coordinate and `grid[..., 1]` the horizontal (`x`) coordinate. The `frame_duration` attribute is the duration of each frame in seconds (e.g., one TR), at which the model samples its impulse response, and `dimension_labels` names the grid axes.
 
 +++
 
-We can visualize the stimulus using `animate_2d_stimulus`.
+We can visualize the stimulus using {py:func}`prfmodel.plotting.animate_2d_prf_stimulus`.
 
 ```{code-cell} ipython3
 from IPython.display import HTML
@@ -73,20 +73,21 @@ from prfmodel.plotting import animate_2d_prf_stimulus
 
 ani = animate_2d_prf_stimulus(stimulus, interval=25)  # Pause 25 ms between time frames
 
-HTML(ani.to_html5_video())
+HTML(ani.to_jshtml())
 ```
 
 ## Defining the DoG pRF model
 
 Now that we defined our stimulus, we can create a DoG pRF model to predict a neural response to this stimulus.
-The `DoG2DPRFModel` runs two independent Gaussian pipelines sharing the same center (`mu_x`, `mu_y`) but with
-different widths (`sigma_center` for the center, `sigma_surround` for the surround). Each pipeline is encoded with the stimulus,
-convolved with a haemodynamic impulse response, and then combined linearly:
+The `DoG2DPRFModel` runs two Gaussian responses sharing the same center (`mu_x`, `mu_y`) but with
+different widths (`sigma_center` for the center, `sigma_surround` for the surround). Each response is encoded with the
+stimulus, the surround is subtracted from the center, and the combined response is convolved with a haemodynamic impulse
+response:
 
-$$y(t) = p_1(t) \cdot \text{amplitude\_center} + p_2(t) \cdot \text{amplitude\_surround} + \text{baseline}$$
+$$y(t) = \text{amplitude\_center} \cdot p_\text{center}(t) - \text{amplitude\_surround} \cdot p_\text{surround}(t) + \text{baseline}$$
 
-For a surround-suppression model, `amplitude_center > 0` (excitatory center) and `amplitude_surround < 0` (inhibitory surround),
-with `|amplitude_surround| < amplitude_center` so the center response dominates.
+For a surround-suppression model, `amplitude_center > 0` (excitatory center) and `amplitude_surround > 0` (inhibitory surround,
+subtracted), with `amplitude_surround < amplitude_center` so the center response dominates.
 
 ```{code-cell} ipython3
 from prfmodel.models.prf import DoG2DPRFModel
@@ -104,10 +105,12 @@ prf_model.parameter_names
 
 The parameters `mu_x` and `mu_y` define the center of the pRF. `sigma_center` and `sigma_surround` set the widths of the
 center and surround Gaussians (a hard requirement is that `sigma_surround` must be larger than `sigma_center`). The parameters `delay`, `dispersion`,
-`undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the haemodynamic impulse response.
-`amplitude_center` scales the center response (positive), `amplitude_surround` scales the surround (negative, with
-`|amplitude_surround| < amplitude_center`), and `baseline` shifts the whole response. We store the parameter values in a
-`pandas.DataFrame`.
+`undershoot`, `u_dispersion`, `ratio`, and `weight_deriv` determine the haemodynamic impulse response; the two-gamma
+parameters (`delay`, `dispersion`, `undershoot`, `u_dispersion`, `ratio`) default to the Glover HRF parameter set (see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so
+we only set `weight_deriv` here.
+`amplitude_center` scales the center response (positive), `amplitude_surround` scales the surround that is subtracted
+(positive, with `amplitude_surround < amplitude_center`), and `baseline` shifts the whole response. We store the
+parameter values in a `pandas.DataFrame`.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -118,15 +121,11 @@ true_params = pd.DataFrame(
         "mu_y": [1.45],
         "sigma_center": [1.35],
         "sigma_surround": [5.1], # sigma_surround should be larger than or equal to sigma_center
-        "delay": [6.0],
-        "dispersion": [0.9],
-        "undershoot": [12.0],
-        "u_dispersion": [0.9],
-        "ratio": [0.48],
+        # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
         "weight_deriv": [-0.5],
         "baseline": [10.0],
         "amplitude_center": [1.2],
-        "amplitude_surround": [-0.5], # amplitude_surround should be negative with absolute value less than amplitude_center
+        "amplitude_surround": [0.5], # amplitude_surround should be positive and less than amplitude_center
     },
 )
 ```
@@ -149,7 +148,7 @@ The predicted response contains increased activation followed by decreased activ
 
 We will fit the DoG pRF model using a two-step approach.
 - In **Step 1**, we fit a vanilla Gaussian model to locate the pRF center (`mu_x`, `mu_y`) and size (`sigma`) using a grid search and least squares to determine the `amplitude`.
-- In **Step 2**, we initialize the DoG model parameters from the Gaussian fit in the following way: `mu_x` and `mu_y` stay the same; `sigma` becomes `sigma_center` and `amplitude` becomes `amplitude_center`, we determine that `sigma_surround` should be larger that `sigma_center`. We then fine-tune the whole model it with SGD, constraining `amplitude_surround < 0`.
+- In **Step 2**, we initialize the DoG model parameters from the Gaussian fit in the following way: `mu_x` and `mu_y` stay the same; `sigma` becomes `sigma_center` and `amplitude` becomes `amplitude_center`, we determine that `sigma_surround` should be larger that `sigma_center`. We then fine-tune the whole model it with SGD, constraining `amplitude_surround > 0`.
 
 +++
 
@@ -161,33 +160,40 @@ simultaneously, and gives us a good initialisation point for the DoG model.
 
 ```{code-cell} ipython3
 import numpy as np
+from prfmodel.fitters import grid_values_2d_prf
 from prfmodel.models.prf import Gaussian2DPRFModel
 
 # Step 1: fit a plain Gaussian model to locate the center and size of the pRF
 gaussian_center_model = Gaussian2DPRFModel()
 
-param_ranges_gaussian = {
-    "mu_x": np.linspace(-3.0, 3.0, 10),
-    "mu_y": np.linspace(-3.0, 3.0, 10),
-    "sigma": np.linspace(0.5, 3.0, 10),
-    "delay": [6.0],
-    "dispersion": [0.9],
-    "undershoot": [12.0],
-    "u_dispersion": [0.9],
-    "ratio": [0.48],
+param_ranges_gaussian = grid_values_2d_prf(
+    stimulus,
+    num_mu=11,
+    mu_extent=1.0,  # Centers span the stimulus
+    num_sigma=10,
+    sigma_range=(0.5, 3.0),
+    log_sigma=False,
+) | {
+    # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-0.5],
     "baseline": [0.0],
     "amplitude": [1.0],
 }
 ```
 
-For all three parameters, we defined ranges of 10 values, giving $10 \times 10 \times 10 = 1000$
+We create the values for `mu_x`, `mu_y`, and `sigma` from the stimulus with
+{py:func}`prfmodel.fitters.grid_values_2d_prf`: 11 values for `mu_x` and `mu_y` that span the stimulus (so that its
+center and edges are grid points) and 10 linearly spaced values for `sigma`, giving $11 \times 11 \times 10 = 1210$
 parameter combinations to evaluate. Let's construct the `GridFitter` and run the grid search.
 
 ```{code-cell} ipython3
 from prfmodel.fitters import GridFitter
 
-grid_fitter = GridFitter(model=gaussian_center_model, stimulus=stimulus)
+grid_fitter = GridFitter(
+    model=gaussian_center_model,
+    stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
+)
 
 grid_history, grid_params = grid_fitter.fit(
     data=simulated_response,
@@ -201,17 +207,17 @@ grid_params
 ```
 
 The grid search returns the best-matching combination. The estimates for `mu_x`, `mu_y`, and
-`sigma` are close to the true values but constrained to the grid.
+`sigma` are close to the true values but constrained to the grid. We make a prediction with the estimated parameters
+and compare it against the true response with {py:func}`prfmodel.plotting.plot_observed_predicted`.
 
 ```{code-cell} ipython3
+from prfmodel.plotting import plot_observed_predicted
+
 gaussian_pred_response = gaussian_center_model(stimulus, grid_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(gaussian_pred_response[0], label="Predicted (Gaussian, least-squares)")
-
-fig.legend();
+plot_observed_predicted(
+    simulated_response[0], {"Predicted (Gaussian, least-squares)": gaussian_pred_response[0]}, observed_label="True"
+);
 ```
 
 The Gaussian fit already captures the main shape of the response. Next we use least squares
@@ -241,12 +247,9 @@ The Gaussian least-squares fit adjusts the scale and baseline to match the simul
 ```{code-cell} ipython3
 gaussian_pred_response = gaussian_center_model(stimulus, gaussian_center_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(gaussian_pred_response[0], label="Predicted (Gaussian, least-squares)")
-
-fig.legend();
+plot_observed_predicted(
+    simulated_response[0], {"Predicted (Gaussian, least-squares)": gaussian_pred_response[0]}, observed_label="True"
+);
 ```
 
 ### Step 2: Fit the DoG model (include surround gaussian)
@@ -256,18 +259,14 @@ We now initialize a DoG model from the fitted Gaussian parameters.
 - `sigma_center = sigma`
 - `sigma_surround = 5 × sigma_center`
 - `amplitude_center = amplitude`
-- `amplitude_surround = 0`
+- `amplitude_surround` = a small positive value (`1e-3` by default)
 
 We then run SGD directly on the DoG model. To enforce the constraint that
-`amplitude_surround` must be negative we pass a `ParameterConstraint(upper=0.0)` adapter.
-Starting `amplitude_surround` near zero and with a large positive `amplitude_center` from the Gaussian fit
-also ensures `|amplitude_surround| < amplitude_center` at initialization.
-
-> **Note — one-shot alternative:** It would be possible to skip the Gaussian
-> pre-fit and run a joint grid search over `sigma_center` and `sigma_surround` followed
-> by LeastSquares for both amplitudes, and then SGD. This one-shot approach
-> works but is slower, the `amplitude_surround < 0` constraint is not
-> automatically enforced, and could lead to non-interpretable amplitudes.
+`amplitude_surround` must be positive we pass a `ParameterTransform(transform_fun=ops.log, inverse_fun=ops.exp)`
+adapter. The adapter maps `amplitude_surround` onto an unbounded scale for the optimizer and maps it back before
+every prediction, so the model only ever sees a positive value no matter where the optimizer moves.
+Starting `amplitude_surround` near zero with a large positive `amplitude_center` from the Gaussian fit
+also ensures `amplitude_surround < amplitude_center` at initialization.
 
 ```{code-cell} ipython3
 from prfmodel.models.prf import init_dog_from_gaussian
@@ -279,24 +278,26 @@ dog_init_params
 ```
 
 ```{code-cell} ipython3
-from prfmodel.fitters.adapter import Adapter, ParameterConstraint
+from keras import ops
+from prfmodel.fitters.adapter import Adapter, ParameterTransform
 
-# Constrain amplitude_surround < 0 during SGD
-# (|amplitude_surround| < amplitude_center is satisfied by initializing amplitude_surround near 0)
+# Constrain amplitude_surround > 0 during SGD
+# (amplitude_surround < amplitude_center is satisfied by initializing amplitude_surround near 0)
 dog_adapter = Adapter(transforms=[
-    ParameterConstraint(["amplitude_surround"], upper=0.0),
+    ParameterTransform(["amplitude_surround"], transform_fun=ops.log, inverse_fun=ops.exp),
 ])
 
 sgd_fitter = SGDFitter(
     model=prf_model,
     stimulus=stimulus,
     adapter=dog_adapter,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 sgd_history, sgd_params = sgd_fitter.fit(
     data=simulated_response,
     init_parameters=dog_init_params,
-    fixed_parameters=["delay", "dispersion", "undershoot", "u_dispersion", "ratio", "weight_deriv"],
+    fixed_parameters=["weight_deriv"],
 )
 ```
 
@@ -309,12 +310,7 @@ We can plot the predicted model response and see that it matches the original si
 ```{code-cell} ipython3
 sgd_pred_response = prf_model(stimulus, sgd_params)
 
-fig, ax = plt.subplots()
-
-ax.plot(simulated_response[0], label="True")
-ax.plot(sgd_pred_response[0], "--", label="Predicted (SGD)")
-
-fig.legend();
+plot_observed_predicted(simulated_response[0], {"Predicted (SGD)": sgd_pred_response[0]}, observed_label="True");
 ```
 
 ## Conclusion
@@ -324,9 +320,9 @@ two-step workflow.
 
 In **Step 1**, we fitted a plain Gaussian model with a grid search and least squares to efficiently locate the pRF center and size.
 
-In **Step 2**, we used `init_dog_from_gaussian` to seed the DoG model from the Gaussian fit. We set the surround size to five times the center size and initialized `amplitude_surround = 0`.
+In **Step 2**, we used `init_dog_from_gaussian` to seed the DoG model from the Gaussian fit. We set the surround size to five times the center size and initialized `amplitude_surround` to a small positive value.
 
-We then ran SGD with a `ParameterConstraint` that enforced `amplitude_surround < 0` throughout optimisation. At each stage, we compared the predicted model response against the original simulated response to check the quality of the fit.
+We then ran SGD with a `ParameterTransform` that enforced `amplitude_surround > 0` throughout optimisation. At each stage, we compared the predicted model response against the original simulated response to check the quality of the fit.
 
 +++
 

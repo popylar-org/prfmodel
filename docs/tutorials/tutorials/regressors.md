@@ -45,7 +45,11 @@ Let's illustrate with a simulated example how to include regressors in a populat
 We first load a pRF stimulus that contains a bar moving vertically and horizontally on a 2D screen.
 
 ```{code-cell} ipython3
+import pandas as pd
 from prfmodel.examples import load_2d_prf_bar_stimulus
+
+# Print parameter DataFrames with three decimals
+pd.set_option("display.precision", 3)
 
 stimulus = load_2d_prf_bar_stimulus()
 print(stimulus)
@@ -107,11 +111,7 @@ true_params = pd.DataFrame({
     "mu_x": [-1.4],
     "mu_y": [2.3],
     "sigma": [2.0],
-    "delay": [6.0],
-    "dispersion": [0.9],
-    "undershoot": [12.0],
-    "u_dispersion": [0.9],
-    "ratio": [0.48],
+    # delay, dispersion, undershoot, u_dispersion, and ratio use the default Glover HRF parameters
     "weight_deriv": [-1.5],
     "amplitude": [2.0],
     "baseline": [0.0],
@@ -124,11 +124,11 @@ regressors = pd.DataFrame({
     "reg_event": regressor_event,
 })
 
-true_response = np.asarray(prf_model(
+true_response = prf_model(
     stimulus=stimulus,
     parameters=true_params,
     regressors=regressors,
-))
+)
 ```
 
 We can plot the predicted response and the regressors.
@@ -149,32 +149,35 @@ fig.legend();
 We can see that the predicted neural response contains some "noise" coming from the two regressors.
 
 Our next goal is to fit the model back to its own predicted neural timecourse. We first use a grid search to optimize
-the center and size of the Gaussian pRF (i.e., `mu_x`, `mu_y`, `sigma`).
+the center and size of the Gaussian pRF (i.e., `mu_x`, `mu_y`, `sigma`). By default, the `GridFitter` uses a
+correlation loss function that ignores differences in baseline and amplitude between model predictions and data. Note
+that the beta weights of the regressors are set to zero in the grid search so that the regressors do not influence the
+grid estimates for `mu_x`, `mu_y`, and `sigma`. We will estimate the beta weights in the following least-squares step.
+We create the values for `mu_x`, `mu_y`, and `sigma` from the stimulus with
+{py:func}`prfmodel.fitters.grid_values_2d_prf`.
 
 ```{code-cell} ipython3
-from keras.losses import CosineSimilarity
-from prfmodel.fitters import GridFitter
+from prfmodel.fitters import GridFitter, grid_values_2d_prf
 
-param_grid = {
-    "mu_x": np.linspace(-3.0, 3.0, 20),
-    "mu_y": np.linspace(-3.0, 3.0, 20),
-    "sigma": np.linspace(0.5, 5.0, 20),
-    "delay": [6.0],
-    "dispersion": [0.9],
-    "undershoot": [12.0],
-    "u_dispersion": [0.9],
-    "ratio": [0.48],
+param_grid = grid_values_2d_prf(
+    stimulus,
+    num_mu=21,
+    mu_extent=1.0,  # Centers span the stimulus
+    num_sigma=20,
+    sigma_range=(0.5, 5.0),
+    log_sigma=False,
+) | {
     "weight_deriv": [0.5],
     "amplitude": [1.0],
     "baseline": [0.0],
-    "beta_reg_phys": [1.0],
-    "beta_reg_event": [1.0],
+    "beta_reg_phys": [0.0],
+    "beta_reg_event": [0.0],
 }
 
 grid_fitter = GridFitter(
     model=prf_model,
     stimulus=stimulus,
-    loss=CosineSimilarity(reduction="none"),
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 _, grid_params = grid_fitter.fit(
@@ -191,11 +194,11 @@ We can use the estimated parameters from the grid search to predict a neural res
 neural time course.
 
 ```{code-cell} ipython3
-grid_response = np.asarray(prf_model(
+grid_response = prf_model(
     stimulus=stimulus,
     parameters=grid_params,
     regressors=regressors,
-))
+)
 
 fig, ax = plt.subplots()
 
@@ -234,11 +237,11 @@ ls_params
 Again, we can make a prediction with the least squares parameters and compare it against the true timecourse.
 
 ```{code-cell} ipython3
-ls_response = np.asarray(prf_model(
+ls_response = prf_model(
     stimulus=stimulus,
     parameters=ls_params,
     regressors=regressors,
-))
+)
 
 fig, ax = plt.subplots()
 
@@ -262,6 +265,7 @@ from prfmodel.fitters import SGDFitter
 sgd_fitter = SGDFitter(
     model=prf_model,
     stimulus=stimulus,
+    compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
 _, sgd_params = sgd_fitter.fit(
@@ -275,11 +279,11 @@ _, sgd_params = sgd_fitter.fit(
 We compare predicted SGD timecourses against the true signal and see that they almost perfectly align.
 
 ```{code-cell} ipython3
-sgd_response = np.asarray(prf_model(
+sgd_response = prf_model(
     stimulus=stimulus,
     parameters=sgd_params,
     regressors=regressors,
-))
+)
 
 fig, ax = plt.subplots()
 

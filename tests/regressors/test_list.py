@@ -3,7 +3,9 @@
 import numpy as np
 import pandas as pd
 import pytest
+from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.regressors import AdditiveRegressors
+from prfmodel.regressors import ConvolvedRegressors
 from prfmodel.regressors import RegressorsList
 
 
@@ -70,3 +72,20 @@ class TestRegressorsList:
         b = AdditiveRegressors(names=["x", "y"])
         with pytest.raises(ValueError, match="unique"):
             RegressorsList([a, b])
+
+    def test_child_parameter_domain_is_checked(self):
+        """A child's domain check runs even though the list is what the caller holds.
+
+        A child is reached through its `call` method, which is traceable and validates nothing, so the list has
+        to forward the check. A :class:`~prfmodel.regressors.ConvolvedRegressors` is used because it owns an
+        impulse model whose domain check would otherwise be two levels out of reach.
+
+        """
+        impulse_model = DerivativeTwoGammaImpulse()
+        regressors = RegressorsList([ConvolvedRegressors(names=["x"], impulse_model=impulse_model)])
+
+        design = pd.DataFrame({"x": np.zeros(self.num_frames)})
+        params = pd.DataFrame({"beta_x": [1.0], "weight_deriv": [0.5], "delay": [-1.0]})
+
+        with pytest.raises(ValueError, match="must be > 0"):
+            regressors(design, params)

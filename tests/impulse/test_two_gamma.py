@@ -40,17 +40,21 @@ class TestTwoGammaImpulse(TestImpulseSetup):
     @pytest.fixture
     def irf_model(self):
         """Impulse model object."""
-        return TwoGammaImpulse(self.duration, self.offset, self.resolution, self.norm)
+        return TwoGammaImpulse(
+            duration=self.duration,
+            offset=self.offset,
+            resolution=self.resolution,
+            norm=self.norm,
+            default_parameters=None,
+        )
 
     @pytest.fixture
     def irf_model_default(self):
         """Impulse model object with default parameters."""
-        default_params = {
-            "delay": 6.0,
-            "dispersion": 0.9,
-            "undershoot": 12.0,
-            "u_dispersion": 0.9,
-            "ratio": 0.35,
-        }
-
-        return TwoGammaImpulse(self.duration, self.offset, self.resolution, self.norm, default_params)
+        return TwoGammaImpulse(
+            duration=self.duration,
+            offset=self.offset,
+            resolution=self.resolution,
+            norm=self.norm,
+            default_parameters="glover_hrf",
+        )
