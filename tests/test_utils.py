@@ -233,6 +233,23 @@ class TestTensorFrame:
         x = new_tensor_frame[tensor_frame.columns]
         assert x.shape == (self.shape[0], len(tensor_frame.columns))
 
+    def test_to_dataframe(self, tensor_frame: TensorFrame):
+        """Test that converting to a dataframe gives NumPy columns with the correct values.
+
+        The tensors can live on an accelerator (e.g., CUDA or Apple MPS), which pandas cannot read directly, so
+        this also checks that the conversion goes through the host.
+
+        """
+        df = tensor_frame.to_dataframe()
+
+        assert isinstance(df, pd.DataFrame)
+        assert list(df.columns) == tensor_frame.columns
+        assert df.shape == (self.shape[0], len(tensor_frame.columns))
+
+        for key in tensor_frame.columns:
+            assert isinstance(df[key].to_numpy(), np.ndarray)
+            np.testing.assert_array_equal(df[key].to_numpy(), keras.ops.convert_to_numpy(tensor_frame[key]))
+
 
 class TestBatched(TestSetup):
     """Tests for the batched decorator."""

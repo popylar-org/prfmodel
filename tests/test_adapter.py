@@ -1,5 +1,6 @@
 """Tests for adapter and transformations."""
 
+from collections.abc import Callable
 import numpy as np
 import pandas as pd
 import pytest
@@ -70,6 +71,35 @@ def test_parameter_transform_inverse(params_wrapper: type, params: dict):
     result_inverse = transform.inverse(result_transformed)
 
     np.testing.assert_allclose(np.asarray(result_inverse["z"]), np.asarray(params["z"]))
+
+
+@pytest.mark.parametrize(("transform_fun", "inverse_fun"), [(ops.log, ops.exp), (np.log, np.exp)])
+def test_parameter_transform_dataframe_holds_host_values(
+    transform_fun: Callable,
+    inverse_fun: Callable,
+    params: dict,
+):
+    """Test that transforming a dataframe stores NumPy values, whichever kind of function is used.
+
+    A `keras.ops` function returns a backend tensor, which can live on an accelerator (e.g., CUDA or Apple MPS)
+    that pandas cannot read directly. The transformed dataframe must hold host values either way, and the columns
+    that are not transformed must be left as they are. The float64 columns are transformed in float32, as
+    `SGDFitter` requests by default, which also works on accelerators without float64 support (e.g., Apple MPS).
+
+    """
+    params = pd.DataFrame(params)
+    transform = ParameterTransform(["z"], transform_fun, inverse_fun)
+
+    result_transformed = transform.transform(params, dtype="float32")
+    result_inverse = transform.inverse(result_transformed, dtype="float32")
+
+    for result in (result_transformed, result_inverse):
+        assert isinstance(result, pd.DataFrame)
+        assert isinstance(result["z"].to_numpy(), np.ndarray)
+        pd.testing.assert_frame_equal(result[["x", "y"]], params[["x", "y"]])
+
+    np.testing.assert_allclose(result_transformed["z"].to_numpy(), np.log(params["z"].to_numpy()), rtol=1e-6)
+    np.testing.assert_allclose(result_inverse["z"].to_numpy(), params["z"].to_numpy(), rtol=1e-6)
 
 
 @pytest.fixture

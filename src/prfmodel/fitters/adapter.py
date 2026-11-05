@@ -18,6 +18,27 @@ from prfmodel.utils import TensorFrame
 P = TypeVar("P", pd.DataFrame, TensorFrame)
 
 
+def _apply_to_column(fun: Callable, parameters: P, param: str, dtype: str | None) -> pd.Series | Tensor:
+    """Apply `fun` to one parameter column and return a value that can be stored back in `parameters`.
+
+    The function receives the column itself, so it can be a NumPy function or a :mod:`keras.ops` function.
+    A :mod:`keras.ops` function returns a backend tensor, which can live on an accelerator (e.g., a CUDA or
+    Apple MPS device). Pandas copies whatever is assigned to a column through NumPy, which fails for tensors that
+    are not on the host, so for a dataframe the result is converted to a NumPy array first.
+
+    A dataframe column is cast to `dtype` (if given) before `fun` is applied, so that a :mod:`keras.ops` function
+    computes at the caller's precision rather than at the column's. This matters for float64 columns (the pandas
+    default) on devices without float64 support, such as Apple MPS. A
+    :class:`~prfmodel.utils.TensorFrame` carries its own dtype and is passed through as is.
+
+    """
+    if isinstance(parameters, pd.DataFrame):
+        column = parameters[param] if dtype is None else parameters[param].astype(dtype)
+        return ops.convert_to_numpy(fun(column))
+
+    return fun(parameters[param])
+
+
 class ParameterTransform:
     """
     Apply transformations to parameters.
@@ -81,7 +102,7 @@ class ParameterTransform:
         self.inverse_fun = inverse_fun
 
     @doc
-    def transform(self, parameters: P, dtype: str | None = None) -> P:  # noqa: ARG002 (unused argument)
+    def transform(self, parameters: P, dtype: str | None = None) -> P:
         """
         Apply the transformation.
 
@@ -89,9 +110,9 @@ class ParameterTransform:
         ----------
         %(parameters)s
         dtype : str, optional
-            Dtype to compute the transformation in. Unused here, because the transformation is applied to the
-            parameter values as they come in. Subclasses that convert the parameters into tensors use it to keep
-            that conversion at the caller's precision.
+            Dtype to compute the transformation in. For a dataframe, the columns in `parameter_names` are cast to it
+            before the transformation is applied, and the other columns are left untouched. If `None`, the columns
+            are used as they come in. Ignored for a :class:`~prfmodel.utils.TensorFrame`, which carries its own.
 
         Returns
         -------
@@ -102,12 +123,12 @@ class ParameterTransform:
         parameters = parameters.copy()
 
         for param in self.parameter_names:
-            parameters[param] = self.transform_fun(parameters[param])
+            parameters[param] = _apply_to_column(self.transform_fun, parameters, param, dtype)
 
         return parameters
 
     @doc
-    def inverse(self, parameters: P, dtype: str | None = None) -> P:  # noqa: ARG002 (unused argument)
+    def inverse(self, parameters: P, dtype: str | None = None) -> P:
         """
         Apply the inverse transformation.
 
@@ -115,7 +136,7 @@ class ParameterTransform:
         ----------
         %(parameters)s
         dtype : str, optional
-            Dtype to compute the transformation in. Unused here, for the same reason as in :meth:`transform`.
+            Dtype to compute the inverse transformation in, in the same way as in :meth:`transform`.
 
         Returns
         -------
@@ -126,7 +147,7 @@ class ParameterTransform:
         parameters = parameters.copy()
 
         for param in self.parameter_names:
-            parameters[param] = self.inverse_fun(parameters[param])
+            parameters[param] = _apply_to_column(self.inverse_fun, parameters, param, dtype)
 
         return parameters
 

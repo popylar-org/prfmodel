@@ -660,6 +660,39 @@ class TestSGDFitterCompiledStep(PRFStimulusSetup):
 
         assert np.all(np.isfinite(fitted.to_numpy())), f"Fit produced non-finite parameters: {fitted}"
 
+    def test_batches_of_different_sizes_stay_traceable(self, stimulus: PRFStimulus):
+        """Test that a compiled fit runs when its batches differ in size.
+
+        The last batch is smaller than the others, so the compiled step is called with a second shape and
+        PyTorch recompiles it with dynamic shapes. The number of units then becomes symbolic, including the
+        `groups` of the depthwise convolution with the impulse response, which Inductor's layout optimization
+        could not handle on accelerators. A batch of one unit would not do, because PyTorch specializes on size
+        one instead of treating it as dynamic.
+
+        """
+        model = Gaussian2DPRFModel()
+
+        rng = np.random.default_rng(0)
+        num_units = 5
+        params = pd.DataFrame(
+            {
+                "mu_y": rng.uniform(-1.0, 1.0, num_units),
+                "mu_x": rng.uniform(-1.0, 1.0, num_units),
+                "sigma": rng.uniform(1.0, 2.0, num_units),
+                "baseline": np.zeros(num_units),
+                "amplitude": np.ones(num_units),
+            },
+        )
+        params = params.assign(**{name: 0.5 for name in model.parameter_names if name not in params.columns})
+
+        fitter = SGDFitter(model=model, stimulus=stimulus, compile_step=True)
+
+        # Batches of 3 and 2 units
+        _, fitted = fitter.fit(model(stimulus, params), params, num_steps=2, batch_size=3)
+
+        assert fitted.shape == params.shape
+        assert np.all(np.isfinite(fitted.to_numpy())), f"Fit produced non-finite parameters: {fitted}"
+
     @pytest.mark.parametrize(
         "impulse_model",
         [DerivativeTwoGammaImpulse, ShiftedGammaImpulse, TwoGammaImpulse],
