@@ -1,8 +1,8 @@
 """Test Gaussian CF model classes."""
 
-import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from pytest_regressions.num_regression import NumericRegressionFixture
 from prfmodel.models.base import BaseStimulusEncoder
 from prfmodel.models.cf import CFStimulusEncoder
@@ -39,7 +39,7 @@ class TestGaussianCFTuning(CFSetup):
             },
         )
 
-        preds = np.asarray(response_model(stimulus, params, dtype))
+        preds = ops.convert_to_numpy(response_model(stimulus, params, dtype))
 
         # Check result shape
         assert preds.shape == (params.shape[0], self.num_source)  # (num_units, distance_matrix.shape[0])

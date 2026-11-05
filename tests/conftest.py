@@ -4,6 +4,8 @@ import matplotlib as mpl
 
 mpl.use("Agg")
 
+from collections.abc import Iterator
+import keras
 import pandas as pd
 import pytest
 from prfmodel.examples import load_2d_prf_bar_stimulus
@@ -24,6 +26,42 @@ def pytest_configure(config: pytest.Config) -> None:
     """Add a marker to the pytest config."""
     config.addinivalue_line("markers", "examples: mark test as example test")
     config.addinivalue_line("markers", "heavy: mark test as computation-heavy test")
+    config.addinivalue_line("markers", "float64: mark test as using float64 (runs on the CPU on Apple MPS)")
+
+
+def _default_device_supports_float64() -> bool:
+    # Apple MPS has no float64 support, and the PyTorch backend uses it by default when it is available
+    return keras.backend.backend() != "torch" or keras.ops.convert_to_tensor(0.0).device.type != "mps"
+
+
+DEFAULT_DEVICE_SUPPORTS_FLOAT64 = _default_device_supports_float64()
+
+
+def _uses_float64(item: pytest.Item) -> bool:
+    if item.get_closest_marker("float64") is not None:
+        return True
+
+    callspec = getattr(item, "callspec", None)
+
+    return callspec is not None and any(
+        isinstance(value, str) and value == "float64" for value in callspec.params.values()
+    )
+
+
+@pytest.fixture(autouse=True)
+def _float64_on_cpu(request: pytest.FixtureRequest) -> Iterator[None]:
+    """Run float64 tests on the CPU if the default device does not support float64.
+
+    A test uses float64 if it is parametrized with the value `"float64"` or has the `float64` marker. Autouse
+    fixtures are set up before the other function-scoped fixtures, so these create their tensors on the CPU as well.
+
+    """
+    if DEFAULT_DEVICE_SUPPORTS_FLOAT64 or not _uses_float64(request.node):
+        yield
+        return
+
+    with keras.device("cpu"):
+        yield
 
 
 def pytest_collection_modifyitems(config: pytest.Config, items: dict) -> None:

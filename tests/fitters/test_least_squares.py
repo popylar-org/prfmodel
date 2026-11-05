@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.exceptions import InvalidUnitsWarning
 from prfmodel.exceptions import ShapeError
 from prfmodel.fitters import LeastSquaresFitter
@@ -127,7 +128,7 @@ class TestLeastSquaresFitter(TestSetup):
 
         """
         rng = np.random.default_rng(0)
-        basis = np.asarray(model(stimulus, params.assign(baseline=0.0, amplitude=1.0)))
+        basis = ops.convert_to_numpy(model(stimulus, params.assign(baseline=0.0, amplitude=1.0)))
         observed = 2.5 * basis + 0.75 + rng.normal(0.0, 0.05, basis.shape)
 
         fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
@@ -165,7 +166,7 @@ class TestLeastSquaresFitter(TestSetup):
         far_params = params.copy()
         far_params.loc[0, "mu_x"] = 1e3
 
-        basis = np.asarray(model(stimulus, far_params.assign(baseline=0.0, amplitude=1.0)))
+        basis = ops.convert_to_numpy(model(stimulus, far_params.assign(baseline=0.0, amplitude=1.0)))
         assert not np.any(basis[0]), "The unit outside the aperture must predict a flat zero response"
 
         observed = 2.5 * basis + 3.0 + rng.normal(0.0, 0.05, basis.shape)
@@ -442,7 +443,7 @@ class TestLeastSquaresFitterIgnoresExtraColumns(TestSetup):
     ):
         """A label column is neither converted nor mistaken for a parameter, and survives into the result."""
         labelled = params.assign(roi=["V1"] * len(params))
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         _, fit_params = LeastSquaresFitter(model=model, stimulus=stimulus).fit(
             observed,
@@ -464,7 +465,7 @@ class TestLeastSquaresFitterIgnoresExtraColumns(TestSetup):
         design = pd.DataFrame({"mx": np.zeros(num_frames), "trial_type": ["rest"] * num_frames})
 
         init = params.assign(beta_mx=1.0)
-        observed = np.asarray(model(stimulus, init, regressors=design))
+        observed = ops.convert_to_numpy(model(stimulus, init, regressors=design))
 
         _, fit_params = LeastSquaresFitter(model=model, stimulus=stimulus).fit(
             observed,
@@ -489,7 +490,7 @@ class TestLeastSquaresFitterDataShape(TestSetup):
         ndim: int,
     ):
         """Data that is not `(num_units, num_frames)` raises rather than being sliced along the wrong axis."""
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
         data = observed[0] if ndim == 1 else observed[..., np.newaxis]
 
         with pytest.raises(ShapeError, match="must have exactly 2 dimensions"):
@@ -549,7 +550,7 @@ class TestLeastSquaresFitterInvalidUnits(TestSetup):
 
         """
         params = params.assign(roi=["V1", "V2", "V3"])
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
         data, is_valid = insert_invalid_units(observed)
         init = insert_invalid_parameters(params, is_valid, ["mu_x", "mu_y", "sigma"])
         init.index = init.index * 10
@@ -615,7 +616,7 @@ class TestLeastSquaresFitterInvalidUnits(TestSetup):
         params: pd.DataFrame,
     ):
         """Data in which every unit can be fit does not warn."""
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         with warnings.catch_warnings():
             warnings.simplefilter("error", InvalidUnitsWarning)
@@ -643,7 +644,7 @@ class TestLeastSquaresFitterParameterNames(TestSetup):
     ):
         """A slope that is not a model parameter raises rather than returning meaningless estimates."""
         init = params.assign(gain=1.0)
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         with pytest.raises(ValueError, match=message):
             LeastSquaresFitter(model=model, stimulus=stimulus).fit(observed, init, slope_name=slope_name)

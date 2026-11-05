@@ -3,6 +3,7 @@
 import warnings
 import numpy as np
 import pytest
+from keras import ops
 from prfmodel.fitters import GridAlignmentWarning
 from prfmodel.fitters import grid_values_1d_prf
 from prfmodel.fitters import grid_values_2d_prf
@@ -17,7 +18,11 @@ def _stimulus_2d(x: np.ndarray, y: np.ndarray) -> PRFStimulus:
 
 
 def _stimulus_1d(coordinates: np.ndarray) -> PRFStimulus:
-    return PRFStimulus(design=np.eye(len(coordinates)), grid=np.asarray(coordinates)[:, np.newaxis], frame_duration=1.0)
+    return PRFStimulus(
+        design=np.eye(len(coordinates)),
+        grid=ops.convert_to_numpy(coordinates)[:, np.newaxis],
+        frame_duration=1.0,
+    )
 
 
 @pytest.fixture

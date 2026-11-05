@@ -10,6 +10,7 @@ convention `delay` and `dispersion` are meant to follow.
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from nilearn.glm.first_level.hemodynamic_models import glover_hrf
 from nilearn.glm.first_level.hemodynamic_models import spm_hrf
 from scipy import stats
@@ -17,6 +18,9 @@ from prfmodel.impulse import ShiftedGammaImpulse
 from prfmodel.impulse import TwoGammaImpulse
 from prfmodel.impulse.defaults import default_two_gamma_impulse_glover_hrf
 from prfmodel.impulse.defaults import default_two_gamma_impulse_spm_hrf
+
+# Reference values are computed in float64
+pytestmark = pytest.mark.float64
 
 DURATION = 32.0
 
@@ -39,7 +43,7 @@ class TestGammaScaleConvention:
 
         """
         model = TwoGammaImpulse(duration=DURATION, resolution=1.0, norm=None, default_parameters=None)
-        frames = np.asarray(model.get_frames())[0]
+        frames = ops.convert_to_numpy(model.get_frames())[0]
 
         parameters = pd.DataFrame(
             {
@@ -51,7 +55,7 @@ class TestGammaScaleConvention:
             },
         )
 
-        observed = np.asarray(model(parameters, dtype="float64"))[0]
+        observed = ops.convert_to_numpy(model(parameters, dtype="float64"))[0]
         expected = stats.gamma.pdf(frames, a=delay / dispersion, scale=dispersion)
 
         np.testing.assert_allclose(
@@ -74,7 +78,7 @@ class TestGammaScaleConvention:
         """
         # A fine grid so the numerical integral is accurate out into the tail
         model = TwoGammaImpulse(duration=120.0, resolution=0.01, norm=None, default_parameters=None)
-        frames = np.asarray(model.get_frames())[0]
+        frames = ops.convert_to_numpy(model.get_frames())[0]
 
         parameters = pd.DataFrame(
             {
@@ -86,7 +90,7 @@ class TestGammaScaleConvention:
             },
         )
 
-        density = np.asarray(model(parameters, dtype="float64"))[0]
+        density = ops.convert_to_numpy(model(parameters, dtype="float64"))[0]
         # The frames are evenly spaced and the density has decayed to ~0 at both ends, so a weighted
         # average over the samples is an accurate estimate of the mean (and is numpy-version agnostic)
         mean = float(np.sum(frames * density) / np.sum(density))
@@ -98,11 +102,11 @@ class TestGammaScaleConvention:
         delay, dispersion, shift = 6.0, 0.9, 2.0
 
         model = ShiftedGammaImpulse(duration=DURATION, resolution=1.0, norm=None)
-        frames = np.asarray(model.get_frames())[0]
+        frames = ops.convert_to_numpy(model.get_frames())[0]
 
         parameters = pd.DataFrame({"delay": [delay], "dispersion": [dispersion], "shift": [shift]})
 
-        observed = np.asarray(model(parameters, dtype="float64"))[0]
+        observed = ops.convert_to_numpy(model(parameters, dtype="float64"))[0]
         expected = stats.gamma.pdf(frames, a=delay / dispersion, loc=shift, scale=dispersion)
 
         np.testing.assert_allclose(
@@ -147,7 +151,7 @@ class TestDefaultsMatchNilearn:
 
         # The named default set and the function that produces it must agree
         assert model.default_parameters == defaults_fun()
-        observed = np.asarray(model(pd.DataFrame(index=range(1)), dtype="float64"))[0]
+        observed = ops.convert_to_numpy(model(pd.DataFrame(index=range(1)), dtype="float64"))[0]
 
         num_samples = min(len(observed), len(reference))
         observed, reference = _normalize(observed[:num_samples]), _normalize(reference[:num_samples])
@@ -186,7 +190,7 @@ class TestKernelSampleSpacing:
     def test_frame_spacing_equals_resolution(self, resolution: float, dtype: str):
         """Test that consecutive impulse frames are exactly `resolution` seconds apart."""
         model = TwoGammaImpulse(duration=DURATION, resolution=resolution)
-        frames = np.asarray(model.get_frames(dtype)).ravel()
+        frames = ops.convert_to_numpy(model.get_frames(dtype)).ravel()
 
         spacing = np.diff(frames)
 
@@ -210,8 +214,8 @@ class TestKernelSampleSpacing:
         model = TwoGammaImpulse(duration=DURATION, resolution=0.1)
         exact = np.arange(model.num_frames) * 0.1 + model.offset
 
-        as_32 = np.asarray(model.get_frames("float32")).ravel()
-        as_64 = np.asarray(model.get_frames("float64")).ravel()
+        as_32 = ops.convert_to_numpy(model.get_frames("float32")).ravel()
+        as_64 = ops.convert_to_numpy(model.get_frames("float64")).ravel()
 
         assert np.abs(as_64 - exact).max() < double_precision_limit
         # And the float32 axis is genuinely coarser, so the assertion above has content.
@@ -231,7 +235,7 @@ class TestKernelSampleSpacing:
         reference = spm_hrf(t_r=1.0, oversampling=oversampling, time_length=DURATION)[::oversampling]
 
         model = TwoGammaImpulse(duration=DURATION, resolution=1.0, norm="sum", default_parameters="spm_hrf")
-        observed = np.asarray(model(pd.DataFrame(index=range(1)), dtype="float64"))[0]
+        observed = ops.convert_to_numpy(model(pd.DataFrame(index=range(1)), dtype="float64"))[0]
 
         num_samples = min(len(observed), len(reference))
         observed, reference = _normalize(observed[:num_samples]), _normalize(reference[:num_samples])

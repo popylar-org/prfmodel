@@ -14,8 +14,12 @@ never measured when frame 0 is non-zero, so it is asserted here rather than left
 
 import numpy as np
 import pytest
+from keras import ops
 from prfmodel.impulse._convolve import convolve_prf_impulse_response
 from tests.reference._oracle import convolve
+
+# Reference values are computed in float64
+pytestmark = pytest.mark.float64
 
 
 @pytest.fixture
@@ -33,7 +37,7 @@ class TestDeltaKernels:
         kernel = np.zeros(8)
         kernel[0] = 1.0
 
-        observed = np.asarray(
+        observed = ops.convert_to_numpy(
             convolve_prf_impulse_response(response[None, :], kernel[None, :], dtype="float64"),
         ).ravel()
 
@@ -51,7 +55,7 @@ class TestDeltaKernels:
         kernel = np.zeros(12)
         kernel[delay] = 1.0
 
-        observed = np.asarray(
+        observed = ops.convert_to_numpy(
             convolve_prf_impulse_response(response[None, :], kernel[None, :], dtype="float64"),
         ).ravel()
 
@@ -68,7 +72,7 @@ class TestAgainstNumpy:
         rng = np.random.default_rng(11)
         kernel = rng.uniform(0.0, 1.0, size=9)
 
-        observed = np.asarray(
+        observed = ops.convert_to_numpy(
             convolve_prf_impulse_response(response[None, :], kernel[None, :], dtype="float64"),
         ).ravel()
 
@@ -86,7 +90,7 @@ class TestAgainstNumpy:
         responses = rng.uniform(0.5, 2.0, size=(num_units, response.size))
         kernels = rng.uniform(0.0, 1.0, size=(num_units, 6))
 
-        observed = np.asarray(convolve_prf_impulse_response(responses, kernels, dtype="float64"))
+        observed = ops.convert_to_numpy(convolve_prf_impulse_response(responses, kernels, dtype="float64"))
 
         expected = np.stack([convolve(responses[i], kernels[i]) for i in range(num_units)])
 
@@ -103,10 +107,10 @@ class TestAgainstNumpy:
         responses = rng.uniform(0.5, 2.0, size=(3, response.size))
         kernels = rng.uniform(0.0, 1.0, size=(3, 6))
 
-        batched = np.asarray(convolve_prf_impulse_response(responses, kernels, dtype="float64"))
+        batched = ops.convert_to_numpy(convolve_prf_impulse_response(responses, kernels, dtype="float64"))
         alone = np.stack(
             [
-                np.asarray(
+                ops.convert_to_numpy(
                     convolve_prf_impulse_response(responses[i][None, :], kernels[i][None, :], dtype="float64"),
                 ).ravel()
                 for i in range(3)

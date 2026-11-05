@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.regressors import AdditiveRegressors
 from tests.models.conftest import parametrize_dtype
 
@@ -53,7 +54,7 @@ class TestAdditiveRegressors:
     ):
         """Test that the output is `betas @ design.T` with the correct shape."""
         regressors = AdditiveRegressors(names=names)
-        resp = np.asarray(regressors(design, params, dtype))
+        resp = ops.convert_to_numpy(regressors(design, params, dtype))
 
         assert resp.shape == (params.shape[0], self.num_frames)
 
@@ -69,10 +70,10 @@ class TestAdditiveRegressors:
     ):
         """Test that shuffling design column order does not change the result."""
         regressors = AdditiveRegressors(names=names)
-        resp_orig = np.asarray(regressors(design, params))
+        resp_orig = ops.convert_to_numpy(regressors(design, params))
 
         shuffled = design[list(reversed(names))]
-        resp_shuffled = np.asarray(regressors(shuffled, params))
+        resp_shuffled = ops.convert_to_numpy(regressors(shuffled, params))
 
         assert np.allclose(resp_orig, resp_shuffled, atol=1e-5)
 
@@ -87,8 +88,8 @@ class TestAdditiveRegressors:
         augmented = design.copy()
         augmented["irrelevant"] = np.arange(self.num_frames, dtype=float)
 
-        resp_base = np.asarray(regressors(design, params))
-        resp_aug = np.asarray(regressors(augmented, params))
+        resp_base = ops.convert_to_numpy(regressors(design, params))
+        resp_aug = ops.convert_to_numpy(regressors(augmented, params))
 
         assert np.allclose(resp_base, resp_aug, atol=1e-5)
 

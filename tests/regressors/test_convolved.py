@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
 from prfmodel.regressors import ConvolvedRegressors
@@ -79,16 +80,16 @@ class TestConvolvedRegressors:
     ):
         """Test that output equals the manual sum of beta_k * (regressor_k * HRF)(t)."""
         regressors = ConvolvedRegressors(names=names, impulse_model=impulse_model)
-        resp = np.asarray(regressors(design, params, dtype))
+        resp = ops.convert_to_numpy(regressors(design, params, dtype))
 
         assert resp.shape == (self.num_units, self.num_frames)
 
-        impulse = np.asarray(impulse_model(params, dtype=dtype))
+        impulse = ops.convert_to_numpy(impulse_model(params, dtype=dtype))
         design_np = design[names].to_numpy()
         expected = np.zeros((self.num_units, self.num_frames))
         for idx in range(self.num_regressors):
             reg = np.broadcast_to(design_np[:, idx], (self.num_units, self.num_frames))
-            convolved = np.asarray(convolve_prf_impulse_response(reg, impulse, dtype=dtype))
+            convolved = ops.convert_to_numpy(convolve_prf_impulse_response(reg, impulse, dtype=dtype))
             beta = params[f"beta_{names[idx]}"].to_numpy()[:, None]
             expected = expected + beta * convolved
 
@@ -103,10 +104,10 @@ class TestConvolvedRegressors:
     ):
         """Test that shuffling design column order does not change the result."""
         regressors = ConvolvedRegressors(names=names, impulse_model=impulse_model)
-        resp_orig = np.asarray(regressors(design, params))
+        resp_orig = ops.convert_to_numpy(regressors(design, params))
 
         shuffled = design[list(reversed(names))]
-        resp_shuffled = np.asarray(regressors(shuffled, params))
+        resp_shuffled = ops.convert_to_numpy(regressors(shuffled, params))
 
         assert np.allclose(resp_orig, resp_shuffled, atol=1e-5)
 
@@ -122,8 +123,8 @@ class TestConvolvedRegressors:
         augmented = design.copy()
         augmented["irrelevant"] = np.arange(self.num_frames, dtype=float)
 
-        resp_base = np.asarray(regressors(design, params))
-        resp_aug = np.asarray(regressors(augmented, params))
+        resp_base = ops.convert_to_numpy(regressors(design, params))
+        resp_aug = ops.convert_to_numpy(regressors(augmented, params))
 
         assert np.allclose(resp_base, resp_aug, atol=1e-5)
 

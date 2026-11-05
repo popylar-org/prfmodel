@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.impulse import TwoGammaImpulse
 from prfmodel.impulse import convolve_prf_impulse_response
@@ -15,7 +16,7 @@ def test_pad_response():
     response = np.expand_dims(np.arange(5), 0)  # shape (1, 5)
     pad_len = 2
 
-    response_padded = np.asarray(_pad_response(response, pad_len))
+    response_padded = ops.convert_to_numpy(_pad_response(response, pad_len))
 
     assert response_padded.shape == (1, response.shape[1] + pad_len)
     assert np.all(response_padded[:, :pad_len] == response[:, 0])
@@ -32,8 +33,8 @@ def test_prepare_prf_impulse_response():
         prf_response,
         impulse_response,
     )
-    prf_response_transposed = np.asarray(prf_response_transposed)
-    impulse_response_transposed = np.asarray(impulse_response_transposed)
+    prf_response_transposed = ops.convert_to_numpy(prf_response_transposed)
+    impulse_response_transposed = ops.convert_to_numpy(impulse_response_transposed)
 
     assert prf_response_transposed.shape == (1, prf_response.shape[1] + pad_len, 1)  # shape (1, 22, 1)
     assert np.all(prf_response_transposed[:, pad_len:, 0] == prf_response)
@@ -74,8 +75,8 @@ def test_negative_impulse_offset_shifts_the_kernel_exactly(offset: float):
     params = pd.DataFrame(index=range(1))
     lag = int(-offset)
 
-    baseline = np.asarray(TwoGammaImpulse(norm=None)(params))
-    shifted = np.asarray(TwoGammaImpulse(offset=offset, norm=None)(params))
+    baseline = ops.convert_to_numpy(TwoGammaImpulse(norm=None)(params))
+    shifted = ops.convert_to_numpy(TwoGammaImpulse(offset=offset, norm=None)(params))
 
     assert np.all(shifted[:, :lag] == 0.0)
     np.testing.assert_allclose(shifted[:, lag:], baseline[:, :-lag], rtol=1e-6)
@@ -97,8 +98,10 @@ def test_negative_impulse_offset_delays_the_response_by_that_many_frames(offset:
     stimulus = np.zeros((1, 40))
     stimulus[0, 10] = 1.0
 
-    baseline = np.asarray(convolve_prf_impulse_response(stimulus, TwoGammaImpulse(norm=None)(params)))
-    delayed = np.asarray(convolve_prf_impulse_response(stimulus, TwoGammaImpulse(offset=offset, norm=None)(params)))
+    baseline = ops.convert_to_numpy(convolve_prf_impulse_response(stimulus, TwoGammaImpulse(norm=None)(params)))
+    delayed = ops.convert_to_numpy(
+        convolve_prf_impulse_response(stimulus, TwoGammaImpulse(offset=offset, norm=None)(params)),
+    )
 
     assert int(delayed.argmax()) == int(baseline.argmax()) + lag
     np.testing.assert_allclose(delayed[0, lag:], baseline[0, :-lag], atol=1e-6)
@@ -113,6 +116,6 @@ def test_negative_impulse_offset_keeps_a_sum_normalized_kernel_normalized():
     """
     params = pd.DataFrame(index=range(1))
 
-    resp = np.asarray(TwoGammaImpulse(offset=-5.0)(params))
+    resp = ops.convert_to_numpy(TwoGammaImpulse(offset=-5.0)(params))
 
     np.testing.assert_allclose(resp.sum(axis=1), 1.0, rtol=1e-5)

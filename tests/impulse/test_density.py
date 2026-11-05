@@ -4,6 +4,7 @@ from functools import partial
 from itertools import product
 import numpy as np
 import pytest
+from keras import ops
 from scipy import differentiate
 from scipy import integrate
 from scipy import special
@@ -42,6 +43,7 @@ class TestGammaDensitySetup:
         return stats.gamma.pdf(x, a=shape, loc=shift, scale=scale)
 
 
+@pytest.mark.float64
 class TestGammaDensity(TestGammaDensitySetup):
     """Tests for gamma_density function."""
 
@@ -62,7 +64,7 @@ class TestGammaDensity(TestGammaDensitySetup):
         shape = np.expand_dims(parameters[:, 0], 1)
         scale = np.expand_dims(parameters[:, 1], 1)
 
-        resp = np.asarray(gamma_density(frames, shape, scale))
+        resp = ops.convert_to_numpy(gamma_density(frames, shape, scale))
 
         ref = self._calc_gamma_pdf(frames, shape, scale)
 
@@ -74,7 +76,7 @@ class TestGammaDensity(TestGammaDensitySetup):
         shape = 2.0
         scale = 1.0
 
-        resp = np.asarray(gamma_density(frames, shape, scale))
+        resp = ops.convert_to_numpy(gamma_density(frames, shape, scale))
 
         ref = self._calc_gamma_pdf(frames, shape, scale)
 
@@ -90,8 +92,8 @@ class TestGammaDensity(TestGammaDensitySetup):
         """Test that the normalized density is equal to the unnormalized density times the normalizing constant."""
         shape = np.array([[2.0]])
         scale = np.array([[1.0]])
-        dens_norm = np.asarray(gamma_density(frames, shape, scale))
-        dens_unnorm = np.asarray(gamma_density(frames, shape, scale, norm=False))
+        dens_norm = ops.convert_to_numpy(gamma_density(frames, shape, scale))
+        dens_unnorm = ops.convert_to_numpy(gamma_density(frames, shape, scale, norm=False))
 
         assert np.all(dens_norm == dens_unnorm / (scale**shape * special.gamma(shape)))
 
@@ -126,7 +128,7 @@ class TestGammaDensity(TestGammaDensitySetup):
         shape = np.array([[2.0], [4.0]])
         scale = np.array([[1.0], [1.5]])
 
-        dens = np.asarray(gamma_density(frames, shape, scale))
+        dens = ops.convert_to_numpy(gamma_density(frames, shape, scale))
 
         np.testing.assert_allclose(dens, self._calc_gamma_pdf(frames, shape, scale), atol=1e-7)
         assert not np.any(np.isnan(dens))
@@ -163,7 +165,7 @@ class TestGammaDensity(TestGammaDensitySetup):
         shape = np.array([[-1.5], [2.0]])
         scale = np.array([[1.0], [1.0]])
 
-        dens = np.asarray(gamma_density(frames, shape, scale))
+        dens = ops.convert_to_numpy(gamma_density(frames, shape, scale))
 
         assert np.all(np.isfinite(dens))
 
@@ -194,7 +196,7 @@ class TestGammaDensity(TestGammaDensitySetup):
         shape = np.array([[1.0], [2.0]])
         scale = np.array([[-1.0], [1.0]])
 
-        dens = np.asarray(gamma_density(frames, shape, scale))
+        dens = ops.convert_to_numpy(gamma_density(frames, shape, scale))
 
         assert np.all(np.isnan(dens[0]))
         assert not np.any(np.isnan(dens[1]))
@@ -208,6 +210,7 @@ class TestGammaDensity(TestGammaDensitySetup):
             gamma_density(frames, shape, scale)
 
 
+@pytest.mark.float64
 class TestShiftedGammaDensity(TestGammaDensitySetup):
     """Tests for shifted_gamma_density function."""
 
@@ -229,7 +232,7 @@ class TestShiftedGammaDensity(TestGammaDensitySetup):
         scale = np.expand_dims(parameters[:, 1], 1)
         shift = np.expand_dims(parameters[:, 2], 1)
 
-        resp = np.asarray(shifted_gamma_density(frames, shape, scale, shift))
+        resp = ops.convert_to_numpy(shifted_gamma_density(frames, shape, scale, shift))
 
         ref = self._calc_gamma_pdf(frames, shape, scale, shift)
 
@@ -242,7 +245,7 @@ class TestShiftedGammaDensity(TestGammaDensitySetup):
         scale = 1.0
         shift = 2.0
 
-        resp = np.asarray(shifted_gamma_density(frames, shape, scale, shift))
+        resp = ops.convert_to_numpy(shifted_gamma_density(frames, shape, scale, shift))
 
         ref = self._calc_gamma_pdf(frames, shape, scale, shift)
 
@@ -278,6 +281,7 @@ class TestShiftedGammaDensity(TestGammaDensitySetup):
             shifted_gamma_density(frames, shape, scale, shift)
 
 
+@pytest.mark.float64
 class TestDerivativeGammaDensity(TestGammaDensitySetup):
     """Tests for derivative_gamma_density function."""
 
@@ -299,7 +303,7 @@ class TestDerivativeGammaDensity(TestGammaDensitySetup):
 
         frames = frames[:, 1:]  # Don't compare at first frame because non-analytic derivative is not stable
 
-        resp = np.asarray(derivative_gamma_density(frames, shape, scale)).squeeze()
+        resp = ops.convert_to_numpy(derivative_gamma_density(frames, shape, scale)).squeeze()
 
         frames = frames.squeeze()  # Omit first dimension for approximate derivative
 

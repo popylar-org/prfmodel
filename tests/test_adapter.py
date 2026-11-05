@@ -33,6 +33,7 @@ def transform(request: pytest.FixtureRequest):
     )
 
 
+@pytest.mark.float64
 @parameterize_params_wrapper
 @pytest.mark.parametrize("transform", [(["x"], ops.log, ops.exp), (["y", "z"], ops.sqrt, ops.square)], indirect=True)
 def test_parameter_transform(transform: ParameterTransform, params_wrapper: type, params: dict):
@@ -43,8 +44,8 @@ def test_parameter_transform(transform: ParameterTransform, params_wrapper: type
     result_inverse = transform.inverse(params)
 
     for param in transform.parameter_names:
-        ref_transformed = np.asarray(transform.transform_fun(params[param]))
-        result_transformed_param = np.asarray(result_transformed[param])
+        ref_transformed = ops.convert_to_numpy(transform.transform_fun(params[param]))
+        result_transformed_param = ops.convert_to_numpy(result_transformed[param])
         np.testing.assert_allclose(
             result_transformed_param,
             ref_transformed,
@@ -52,8 +53,8 @@ def test_parameter_transform(transform: ParameterTransform, params_wrapper: type
             err_msg="Transform does not give correct results",
         )
 
-        ref_inverse = np.asarray(transform.inverse_fun(params[param]))
-        result_inverse_param = np.asarray(result_inverse[param])
+        ref_inverse = ops.convert_to_numpy(transform.inverse_fun(params[param]))
+        result_inverse_param = ops.convert_to_numpy(result_inverse[param])
         np.testing.assert_allclose(
             result_inverse_param[np.isfinite(result_inverse_param)],
             ref_inverse[np.isfinite(ref_inverse)],
@@ -62,6 +63,7 @@ def test_parameter_transform(transform: ParameterTransform, params_wrapper: type
         )
 
 
+@pytest.mark.float64
 @parameterize_params_wrapper
 def test_parameter_transform_inverse(params_wrapper: type, params: dict):
     """Test that transform(inverse(input)) == input for valid transform ranges."""
@@ -70,7 +72,7 @@ def test_parameter_transform_inverse(params_wrapper: type, params: dict):
     result_transformed = transform.transform(params)
     result_inverse = transform.inverse(result_transformed)
 
-    np.testing.assert_allclose(np.asarray(result_inverse["z"]), np.asarray(params["z"]))
+    np.testing.assert_allclose(ops.convert_to_numpy(result_inverse["z"]), ops.convert_to_numpy(params["z"]))
 
 
 @pytest.mark.parametrize(("transform_fun", "inverse_fun"), [(ops.log, ops.exp), (np.log, np.exp)])
@@ -157,8 +159,8 @@ def test_parameter_constraint_lower_inverse_enforces_bound(
 
     result = constraint.inverse(params)
 
-    bound = np.asarray(result[bound_key]) if bound_key else bound_kwargs["lower"]
-    np.testing.assert_array_less(bound, np.asarray(result["x"]))
+    bound = ops.convert_to_numpy(result[bound_key]) if bound_key else bound_kwargs["lower"]
+    np.testing.assert_array_less(bound, ops.convert_to_numpy(result["x"]))
 
 
 @parameterize_params_wrapper
@@ -175,8 +177,8 @@ def test_parameter_constraint_upper_inverse_enforces_bound(
 
     result = constraint.inverse(params)
 
-    bound = np.asarray(result[bound_key]) if bound_key else bound_kwargs["upper"]
-    np.testing.assert_array_less(np.asarray(result["x"]), bound)
+    bound = ops.convert_to_numpy(result[bound_key]) if bound_key else bound_kwargs["upper"]
+    np.testing.assert_array_less(ops.convert_to_numpy(result["x"]), bound)
 
 
 @parameterize_params_wrapper
@@ -206,11 +208,15 @@ def test_parameter_constraint_inverse_never_violates_bound(
     params = params_wrapper(unbounded_params_extreme)
     constraint = ParameterConstraint(parameter_names=["x"], **bound_kwargs)
 
-    result = np.asarray(constraint.inverse(params)["x"])
+    result = ops.convert_to_numpy(constraint.inverse(params)["x"])
 
     assert np.all(np.isfinite(result)), "Inverse must never produce NaN or infinity"
 
-    bound = np.asarray(params_wrapper(dict(unbounded_params_extreme))[bound_key]) if bound_key else bound_kwargs[side]
+    bound = (
+        ops.convert_to_numpy(params_wrapper(dict(unbounded_params_extreme))[bound_key])
+        if bound_key
+        else bound_kwargs[side]
+    )
 
     if side == "lower":
         assert np.all(result >= bound), "Inverse produced a value below the lower bound"
@@ -238,8 +244,8 @@ def test_parameter_constraint_round_trip(params_wrapper: type, bound_kwargs: dic
     result = constraint.inverse(constraint.transform(params))
 
     np.testing.assert_allclose(
-        np.asarray(result["x"]),
-        np.asarray(bounded_params["x"]),
+        ops.convert_to_numpy(result["x"]),
+        ops.convert_to_numpy(bounded_params["x"]),
         # Loose enough for float32: a bound much larger than the value costs precision to cancellation
         rtol=1e-5,
         err_msg="Constraint does not round-trip",
@@ -278,7 +284,7 @@ def test_parameter_constraint_bound_fun_applied(params_wrapper: type, bounded_pa
 
     result = constraint.inverse(params)
 
-    np.testing.assert_array_less(np.asarray(result["low"]) + 1.0, np.asarray(result["x"]))
+    np.testing.assert_array_less(ops.convert_to_numpy(result["low"]) + 1.0, ops.convert_to_numpy(result["x"]))
 
 
 def test_parameter_constraint_no_bound_error():
@@ -324,6 +330,7 @@ def test_parameter_constraint_value_error(params_wrapper: type, params: dict):
         _ = transform_upper.inverse(params)
 
 
+@pytest.mark.float64
 @parameterize_params_wrapper
 def test_adapter(params_wrapper: type, bounded_params: dict):
     """Test that Adapter returns the correct object type and round-trips through mixed transforms."""
@@ -346,8 +353,8 @@ def test_adapter(params_wrapper: type, bounded_params: dict):
 
     for name in ["x", "high"]:
         np.testing.assert_allclose(
-            np.asarray(result_inverse[name]),
-            np.asarray(bounded_params[name]),
+            ops.convert_to_numpy(result_inverse[name]),
+            ops.convert_to_numpy(bounded_params[name]),
             rtol=1e-6,
             err_msg=f"Adapter does not round-trip '{name}'",
         )

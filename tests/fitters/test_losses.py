@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+from keras import ops
 from prfmodel.fitters.losses import CorrelationLoss
 
 
@@ -21,14 +22,14 @@ class TestCorrelationLoss:
         y_true = np.linspace(-5.0, 5.0, self.num_units)
         y_pred = np.copy(y_true)
 
-        assert np.isclose(loss(y_true, y_pred), -1.0)  # loss is negative correlation
+        assert np.isclose(ops.convert_to_numpy(loss(y_true, y_pred)), -1.0)  # loss is negative correlation
 
     def test_perfect_inverse_correlation(self, loss: CorrelationLoss):
         """Test that two flipped signals are perfectly negatively correlated."""
         y_true = np.linspace(-5.0, 5.0, self.num_units)
         y_pred = np.flip(np.copy(y_true))
 
-        assert np.isclose(loss(y_true, y_pred), 1.0)
+        assert np.isclose(ops.convert_to_numpy(loss(y_true, y_pred)), 1.0)
 
     def test_random_matches_pearson_correlation(self, loss: CorrelationLoss):
         """Test that the loss of two random signals is the negative of their Pearson correlation."""
@@ -36,7 +37,7 @@ class TestCorrelationLoss:
         y_true = rng.random(self.num_units)
         y_pred = rng.random(self.num_units)
 
-        loss_val = loss(y_true, y_pred)
+        loss_val = ops.convert_to_numpy(loss(y_true, y_pred))
 
         assert np.isclose(loss_val, -np.corrcoef(y_true, y_pred)[0, 1], atol=1e-6)
 
@@ -45,28 +46,28 @@ class TestCorrelationLoss:
         y_true = np.ones((self.num_units,))
         y_pred = np.copy(y_true)
 
-        assert np.isclose(loss(y_true, y_pred), 0.0)
+        assert np.isclose(ops.convert_to_numpy(loss(y_true, y_pred)), 0.0)
 
     def test_baseline_shift(self, loss: CorrelationLoss):
         """Test that two baseline-shifted signals are perfectly positively correlated."""
         y_true = np.linspace(-5.0, 5.0, self.num_units)
         y_pred = np.copy(y_true) + 10
 
-        assert np.isclose(loss(y_true, y_pred), -1.0)
+        assert np.isclose(ops.convert_to_numpy(loss(y_true, y_pred)), -1.0)
 
     def test_amplitude_scaling(self, loss: CorrelationLoss):
         """Test that two amplitude-scaled signals are perfectly positively correlated."""
         y_true = np.linspace(-5.0, 5.0, self.num_units)
         y_pred = np.copy(y_true) * 10
 
-        assert np.isclose(loss(y_true, y_pred), -1.0)
+        assert np.isclose(ops.convert_to_numpy(loss(y_true, y_pred)), -1.0)
 
     def test_batching_with_reduction(self, loss: CorrelationLoss):
         """Test that reduction returns a single loss value for a batch."""
         y_true = np.ones((self.num_units, self.num_frames))
         y_pred = np.copy(y_true)
 
-        loss_val = loss(y_true, y_pred)
+        loss_val = ops.convert_to_numpy(loss(y_true, y_pred))
 
         assert loss_val.shape == ()
 

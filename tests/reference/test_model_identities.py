@@ -16,6 +16,7 @@ stimulus encoding, HRF convolution, scaling -- it constrains the composition, no
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from scipy import integrate
 from scipy import spatial
 from scipy import special
@@ -30,6 +31,9 @@ from prfmodel.models.prf._gaussian import predict_gaussian_response
 from prfmodel.stimuli import CFStimulus
 from prfmodel.stimuli import PRFStimulus
 from tests.conftest import PRFStimulusSetup
+
+# Reference values are computed in float64
+pytestmark = pytest.mark.float64
 
 HRF_PARAMS: dict[str, list[float]] = {
     "delay": [6.0, 5.0],
@@ -108,7 +112,7 @@ class TestReductionToGaussian(PRFStimulusSetup):
     @pytest.fixture
     def reference(self, stimulus: PRFStimulus) -> np.ndarray:
         """Return the prediction of the externally anchored `Gaussian2DPRFModel`."""
-        return np.asarray(Gaussian2DPRFModel()(stimulus, _gaussian_params(), dtype="float64"))
+        return ops.convert_to_numpy(Gaussian2DPRFModel()(stimulus, _gaussian_params(), dtype="float64"))
 
     def test_dog_with_zero_surround_is_gaussian(self, stimulus: PRFStimulus, reference: np.ndarray):
         """Test that a difference of Gaussians with no surround is a plain Gaussian.
@@ -132,7 +136,7 @@ class TestReductionToGaussian(PRFStimulusSetup):
             },
         )
 
-        observed = np.asarray(DoG2DPRFModel()(stimulus, params, dtype="float64"))
+        observed = ops.convert_to_numpy(DoG2DPRFModel()(stimulus, params, dtype="float64"))
 
         np.testing.assert_allclose(observed, reference, rtol=1e-10)
 
@@ -157,7 +161,7 @@ class TestReductionToGaussian(PRFStimulusSetup):
             },
         )
 
-        observed = np.asarray(Gaussian2DCSSPRFModel()(stimulus, params, dtype="float64"))
+        observed = ops.convert_to_numpy(Gaussian2DCSSPRFModel()(stimulus, params, dtype="float64"))
 
         np.testing.assert_allclose(observed, reference, rtol=1e-8, atol=1e-9)
 
@@ -193,7 +197,7 @@ class TestReductionToGaussian(PRFStimulusSetup):
             sustained_model=_pass_through_sustained_channel(),
         )
 
-        observed = np.asarray(prf_model(stimulus, params, dtype="float64"))
+        observed = ops.convert_to_numpy(prf_model(stimulus, params, dtype="float64"))
 
         np.testing.assert_allclose(observed, reference, rtol=1e-8, atol=1e-9)
 
@@ -226,8 +230,8 @@ class TestReductionToGaussian(PRFStimulusSetup):
             sustained_model=_pass_through_sustained_channel(),
         )
 
-        observed = np.asarray(prf_model(stimulus, cst_params, dtype="float64"))
-        expected = np.asarray(Gaussian2DCSSPRFModel()(stimulus, css_params, dtype="float64"))
+        observed = ops.convert_to_numpy(prf_model(stimulus, cst_params, dtype="float64"))
+        expected = ops.convert_to_numpy(Gaussian2DCSSPRFModel()(stimulus, css_params, dtype="float64"))
 
         np.testing.assert_allclose(observed, expected, rtol=1e-10)
 
@@ -259,7 +263,7 @@ class TestReductionToGaussian(PRFStimulusSetup):
             },
         )
 
-        observed = np.asarray(DivNormGaussian2DPRFModel()(stimulus, params, dtype="float64"))
+        observed = ops.convert_to_numpy(DivNormGaussian2DPRFModel()(stimulus, params, dtype="float64"))
 
         np.testing.assert_allclose(observed, reference, rtol=1e-8, atol=1e-9)
 
@@ -283,7 +287,7 @@ class TestGaussianNormalization:
         yv, xv = np.meshgrid(axis, axis, indexing="ij")
         grid = np.stack((yv, xv), axis=-1)
 
-        response = np.asarray(
+        response = ops.convert_to_numpy(
             predict_gaussian_response(grid, np.array([[0.0, 0.0]]), np.array([[sigma]])),
         )[0]
 
@@ -324,7 +328,7 @@ class TestGaussianNormalization:
         centre = int(np.argmin(np.linalg.norm(vertices, axis=1)))
         params = pd.DataFrame({"center_index": [centre], "sigma": [sigma]})
 
-        response = np.asarray(GaussianCFTuning()(stimulus, params, dtype="float64"))[0]
+        response = ops.convert_to_numpy(GaussianCFTuning()(stimulus, params, dtype="float64"))[0]
 
         # Rectangle rule: each vertex stands for a square patch of side `spacing`. It converges
         # very quickly for a Gaussian, so the tolerance is dominated by the truncated tail.

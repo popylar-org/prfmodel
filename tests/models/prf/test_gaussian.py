@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from pytest_regressions.num_regression import NumericRegressionFixture
 from scipy import stats
 from prfmodel.examples import load_2d_prf_bar_stimulus
@@ -87,6 +88,7 @@ class TestSetup(PRFStimulusGridSetup):
         return np.expand_dims(np.array([1.0, 1.5, 2.0]), axis=1)  # (num_units, 1)
 
 
+@pytest.mark.float64
 class TestExpandGaussianArgs(TestSetup):
     """Tests for _expand_gaussian_args function."""
 
@@ -103,6 +105,7 @@ class TestExpandGaussianArgs(TestSetup):
         self._check_shapes(grid, mu, sigma)
 
 
+@pytest.mark.float64
 class TestPredictGaussianResponse(TestSetup):
     """Tests for predict_gaussian_response function."""
 
@@ -124,7 +127,7 @@ class TestPredictGaussianResponse(TestSetup):
 
     def test_predict_gaussian_response(self, grid: np.ndarray, mu: np.ndarray, sigma: np.ndarray):
         """Test that response prediction returns correct result for 1D, 2D, and 3D cases."""
-        preds = np.asarray(predict_gaussian_response(grid, mu, sigma))
+        preds = ops.convert_to_numpy(predict_gaussian_response(grid, mu, sigma))
 
         assert preds.shape == (mu.shape[0], *grid.shape[:-1])
         self._validate_gaussian(preds, grid, mu, sigma)
@@ -154,7 +157,7 @@ class TestGaussian2DPRFTuning(PRFStimulusSetup):
             },
         )
 
-        preds = np.asarray(response_model(stimulus, params, dtype))
+        preds = ops.convert_to_numpy(response_model(stimulus, params, dtype))
 
         # Check result shape (num_units, height, width)
         assert preds.shape == (params.shape[0], stimulus.design.shape[1], stimulus.design.shape[2])
@@ -195,7 +198,7 @@ class TestGaussian1DPRFTuning:
             },
         )
 
-        preds = np.asarray(response_model(stimulus, params, dtype))
+        preds = ops.convert_to_numpy(response_model(stimulus, params, dtype))
 
         # Check result shape (num_units, num_coordinates)
         assert preds.shape == (params.shape[0], stimulus.design.shape[1])
@@ -466,8 +469,8 @@ class TestCoordinateConvention:
         off_bar = {"mu_x": on_bar["mu_y"], "mu_y": on_bar["mu_x"], "sigma": 0.3}
 
         params = pd.DataFrame([on_bar, off_bar])
-        resp = np.asarray(Gaussian2DPRFTuning()(stimulus, params))
-        encoded = np.asarray(PRFStimulusEncoder()(stimulus, resp, params))
+        resp = ops.convert_to_numpy(Gaussian2DPRFTuning()(stimulus, params))
+        encoded = ops.convert_to_numpy(PRFStimulusEncoder()(stimulus, resp, params))
 
         assert encoded[0, 0] > self.on_bar_min_response, (
             f"pRF at mu_{axis}={position} does not respond to a bar on the {axis} axis; "

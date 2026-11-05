@@ -59,6 +59,17 @@ We recommend running the existing tests with [uv](https://docs.astral.sh/uv/conc
 uv run pytest
 ```
 
+With the PyTorch backend, the tests run on the GPU if PyTorch finds one, including Apple MPS on Macs with Apple
+silicon. The GitHub runners have no GPU, so run the tests locally after changes that could behave differently on one.
+Two rules keep the tests device-independent:
+
+- Convert backend tensors with `keras.ops.convert_to_numpy` rather than `np.asarray`, which fails for tensors on a
+  GPU.
+- Apple MPS does not support float64. Tests that are parametrized with `"float64"` therefore run on the CPU there.
+  Mark tests that use float64 in another way (e.g., NumPy or pandas inputs in float64, or a hard-coded
+  `dtype="float64"`) with `@pytest.mark.float64` so that they do the same. To run all tests on the CPU, set
+  `KERAS_TORCH_DEVICE=cpu`.
+
 The package uses [GitHub action workflows](https://docs.github.com/en/actions) to automatically run tests on GitHub infrastructure against multiple Python versions. Existing workflows can be found in [`.github/workflows`](.github/workflows/)
 
 These workflows install the dependency versions in `uv.lock`. The [`fresh-install.yml`](.github/workflows/fresh-install.yml)

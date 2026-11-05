@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.regressors import AdditiveRegressors
 from prfmodel.regressors import ConvolvedRegressors
@@ -50,8 +51,10 @@ class TestRegressorsList:
             },
         )
 
-        resp = np.asarray(regressors(design, params))
-        expected = np.asarray(regressor_a(design[["x"]], params)) + np.asarray(regressor_b(design[["y", "z"]], params))
+        resp = ops.convert_to_numpy(regressors(design, params))
+        expected = ops.convert_to_numpy(regressor_a(design[["x"]], params)) + ops.convert_to_numpy(
+            regressor_b(design[["y", "z"]], params),
+        )
 
         assert resp.shape == (1, self.num_frames)
         assert np.allclose(resp, expected)

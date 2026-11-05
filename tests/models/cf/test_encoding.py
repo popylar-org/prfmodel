@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.models.cf import CFStimulusEncoder
 from prfmodel.models.compression import CompressiveEncoder
 from prfmodel.stimuli import CFStimulus
@@ -55,7 +56,7 @@ class TestCFStimulusEncoder(TestSetup):
         dtype: str,
     ):
         """Test that CF encoding returns shape (num_units, num_frames)."""
-        result = np.asarray(cf_stimulus_encoder(cf_stimulus, cf_response, parameters, dtype))
+        result = ops.convert_to_numpy(cf_stimulus_encoder(cf_stimulus, cf_response, parameters, dtype))
 
         assert result.shape == (self.num_units, self.num_frames)
 
@@ -69,7 +70,7 @@ class TestCFStimulusEncoder(TestSetup):
         dtype: str,
     ):
         """Test that CF encoding matches manual matrix multiplication over vertices."""
-        result = np.asarray(cf_stimulus_encoder(cf_stimulus, cf_response, parameters, dtype))
+        result = ops.convert_to_numpy(cf_stimulus_encoder(cf_stimulus, cf_response, parameters, dtype))
         expected = cf_response @ cf_stimulus.source_response
 
         # Encoder uses tensordot operation which leads to slight numerical differences
@@ -112,7 +113,7 @@ class TestCompressiveEncoderCF(TestSetup):
         encoder = CFStimulusEncoder()
         compressive_encoder = CompressiveEncoder(encoding_model=encoder)
 
-        encoded_response = np.asarray(encoder(cf_stimulus, cf_response, pd.DataFrame(), dtype))
-        compressed_response = np.asarray(compressive_encoder(cf_stimulus, cf_response, parameters, dtype))
+        encoded_response = ops.convert_to_numpy(encoder(cf_stimulus, cf_response, pd.DataFrame(), dtype))
+        compressed_response = ops.convert_to_numpy(compressive_encoder(cf_stimulus, cf_response, parameters, dtype))
 
         assert encoded_response.shape == compressed_response.shape

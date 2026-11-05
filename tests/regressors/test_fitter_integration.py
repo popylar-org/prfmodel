@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.fitters import GridFitter
 from prfmodel.fitters import LeastSquaresFitter
 from prfmodel.fitters import SGDFitter
@@ -82,7 +83,7 @@ class TestLeastSquaresIntegration(PRFStimulusSetup):
         regressor_design: pd.DataFrame,
     ):
         """Fit jointly for amplitude + betas and recover the ground-truth values."""
-        observed = np.asarray(model(stimulus, true_params, regressors=regressor_design))
+        observed = ops.convert_to_numpy(model(stimulus, true_params, regressors=regressor_design))
 
         init_params = true_params.copy()
         init_params["amplitude"] = 0.0
@@ -127,7 +128,7 @@ class TestLeastSquaresIntegration(PRFStimulusSetup):
         regressor_design: pd.DataFrame,
     ):
         """Omitting a regressor beta from slope_name raises, since LS would otherwise bias the estimates."""
-        observed = np.asarray(model(stimulus, true_params, regressors=regressor_design))
+        observed = ops.convert_to_numpy(model(stimulus, true_params, regressors=regressor_design))
 
         fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
         # 'beta_reg_conv' is left out of the slope names even though 'reg_conv' is in the design.
@@ -152,7 +153,7 @@ class TestGridIntegration(PRFStimulusSetup):
         regressor_design: pd.DataFrame,
     ):
         """GridFitter runs and returns finite losses when regressors are supplied."""
-        observed = np.asarray(model(stimulus, true_params, regressors=regressor_design))
+        observed = ops.convert_to_numpy(model(stimulus, true_params, regressors=regressor_design))
 
         parameter_values: dict = {
             name: np.array([float(true_params[name].iloc[0])])
@@ -211,7 +212,7 @@ class TestSGDIntegration(PRFStimulusSetup):
         regressor_design: pd.DataFrame,
     ):
         """SGDFitter runs without raising when regressors are supplied."""
-        observed = np.asarray(model(stimulus, true_params, regressors=regressor_design))
+        observed = ops.convert_to_numpy(model(stimulus, true_params, regressors=regressor_design))
 
         fitter = SGDFitter(model=model, stimulus=stimulus, adapter=Adapter())
         history, sgd_params = fitter.fit(
