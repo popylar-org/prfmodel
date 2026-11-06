@@ -154,7 +154,7 @@ class TestGridFitter(TestSetup):
             loss=infinite_loss,
         )
 
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         with pytest.warns(InfiniteLossWarning):
             history, grid_params = fitter.fit(observed, param_ranges, batch_size=20)
@@ -181,7 +181,7 @@ class TestGridFitterInvalidUnits(TestSetup):
         param_ranges: dict[str, list],
     ):
         """Excluded units get NaN parameters and losses, and the other units get what they get on their own."""
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
         data, is_valid = insert_invalid_units(observed)
         fitter = GridFitter(model=model, stimulus=stimulus)
 
@@ -220,7 +220,7 @@ class TestGridFitterInvalidUnits(TestSetup):
         param_ranges: dict[str, list],
     ):
         """Data in which every unit can be fit does not warn."""
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         with warnings.catch_warnings():
             warnings.simplefilter("error", InvalidUnitsWarning)
@@ -499,7 +499,7 @@ class TestGridFitterIgnoresExtraColumns(TestSetup):
         grid["beta_mx"] = np.array([1.0])
 
         # Not constant, so that the units are searched rather than excluded before the design is used
-        observed = np.asarray(model(stimulus, params.assign(beta_mx=1.0), regressors=design))
+        observed = ops.convert_to_numpy(model(stimulus, params.assign(beta_mx=1.0), regressors=design))
         _, grid_params = GridFitter(model=model, stimulus=stimulus).fit(observed, grid, regressors=design)
 
         assert grid_params.shape == (len(params), len(grid))

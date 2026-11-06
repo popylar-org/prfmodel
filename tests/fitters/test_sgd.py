@@ -5,6 +5,7 @@ import keras
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.exceptions import InvalidUnitsWarning
 from prfmodel.exceptions import ShapeError
 from prfmodel.fitters import GridFitter
@@ -242,7 +243,7 @@ class TestSGDFitter(_SGDGradientChecks, TestSetup):
     ):
         """A label column becomes no optimization variable and is carried through to the estimates."""
         params_extra = params.assign(min_sigma=[0.05] * len(params))
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         adapter = Adapter([ParameterConstraint(["sigma"], lower="min_sigma")])
 
@@ -660,6 +661,39 @@ class TestSGDFitterCompiledStep(PRFStimulusSetup):
 
         assert np.all(np.isfinite(fitted.to_numpy())), f"Fit produced non-finite parameters: {fitted}"
 
+    def test_batches_of_different_sizes_stay_traceable(self, stimulus: PRFStimulus):
+        """Test that a compiled fit runs when its batches differ in size.
+
+        The last batch is smaller than the others, so the compiled step is called with a second shape and
+        PyTorch recompiles it with dynamic shapes. The number of units then becomes symbolic, including the
+        `groups` of the depthwise convolution with the impulse response, which Inductor's layout optimization
+        could not handle on accelerators. A batch of one unit would not do, because PyTorch specializes on size
+        one instead of treating it as dynamic.
+
+        """
+        model = Gaussian2DPRFModel()
+
+        rng = np.random.default_rng(0)
+        num_units = 5
+        params = pd.DataFrame(
+            {
+                "mu_y": rng.uniform(-1.0, 1.0, num_units),
+                "mu_x": rng.uniform(-1.0, 1.0, num_units),
+                "sigma": rng.uniform(1.0, 2.0, num_units),
+                "baseline": np.zeros(num_units),
+                "amplitude": np.ones(num_units),
+            },
+        )
+        params = params.assign(**{name: 0.5 for name in model.parameter_names if name not in params.columns})
+
+        fitter = SGDFitter(model=model, stimulus=stimulus, compile_step=True)
+
+        # Batches of 3 and 2 units
+        _, fitted = fitter.fit(model(stimulus, params), params, num_steps=2, batch_size=3)
+
+        assert fitted.shape == params.shape
+        assert np.all(np.isfinite(fitted.to_numpy())), f"Fit produced non-finite parameters: {fitted}"
+
     @pytest.mark.parametrize(
         "impulse_model",
         [DerivativeTwoGammaImpulse, ShiftedGammaImpulse, TwoGammaImpulse],
@@ -734,7 +768,7 @@ class TestSGDFitterIgnoresExtraColumns(TestSetup):
     ):
         """A label column becomes no optimization variable and is carried through to the estimates."""
         labelled = params.assign(roi=["V1"] * len(params))
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         _, fit_params = SGDFitter(model=model, stimulus=stimulus, adapter=Adapter()).fit(
             observed,
@@ -760,7 +794,7 @@ class TestSGDFitterDataShape(TestSetup):
         ndim: int,
     ):
         """Data that is not `(num_units, num_frames)` raises rather than being sliced along the wrong axis."""
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
         data = observed[0] if ndim == 1 else observed[..., np.newaxis]
 
         with pytest.raises(ShapeError, match="must have exactly 2 dimensions"):
@@ -828,7 +862,7 @@ class TestSGDFitterInvalidUnits(TestSetup):
 
         """
         params = params.assign(roi=["V1", "V2", "V3"])
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
         data, is_valid = insert_invalid_units(observed)
         init = insert_invalid_parameters(params, is_valid, ["mu_x", "mu_y", "sigma"])
         init.index = init.index * 10
@@ -893,7 +927,7 @@ class TestSGDFitterInvalidUnits(TestSetup):
         params: pd.DataFrame,
     ):
         """Data in which every unit can be fit does not warn."""
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         with warnings.catch_warnings():
             warnings.simplefilter("error", InvalidUnitsWarning)
@@ -912,7 +946,7 @@ class TestSGDFitterInvalidUnits(TestSetup):
         so these NaN values never reach the parameter checks of the model.
 
         """
-        data, is_valid = insert_invalid_units(np.asarray(model(stimulus, params)))
+        data, is_valid = insert_invalid_units(ops.convert_to_numpy(model(stimulus, params)))
 
         grid = {name: [float(params[name].iloc[0])] for name in fixed_parameters}
         grid |= {"mu_x": [-1.0, 0.0, 1.0], "mu_y": [-1.0, 0.0, 1.0], "sigma": [1.0, 2.0, 3.0]}
@@ -953,7 +987,7 @@ class TestSGDFitterParameterNames(TestSetup):
         params: pd.DataFrame,
     ):
         """A misspelled name raises rather than leaving the parameter it was meant to fix to be optimized."""
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         with pytest.raises(ValueError, match=r"'weight_derive' \(did you mean 'weight_deriv'\?\)"):
             SGDFitter(model=model, stimulus=stimulus).fit(
@@ -970,7 +1004,7 @@ class TestSGDFitterParameterNames(TestSetup):
         params: pd.DataFrame,
     ):
         """A single string is one name rather than a sequence of characters."""
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
         init = params.assign(sigma=params["sigma"] + 0.2, weight_deriv=0.3)
 
         _, fit_params = SGDFitter(model=model, stimulus=stimulus).fit(
@@ -991,7 +1025,7 @@ class TestSGDFitterParameterNames(TestSetup):
         """A parameter of the model is a valid name even when its default is used instead of a column."""
         # Unlike the 'model' fixture, the default impulse model has default values for its parameters
         model = Gaussian2DPRFModel()
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
         init = params.drop(columns=["delay"])
 
         _, fit_params = SGDFitter(model=model, stimulus=stimulus).fit(
@@ -1010,7 +1044,7 @@ class TestSGDFitterParameterNames(TestSetup):
         params: pd.DataFrame,
     ):
         """A parameter that only the adapter reads is a valid name."""
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
         init = params.assign(min_sigma=0.05)
         adapter = Adapter([ParameterConstraint(["sigma"], lower="min_sigma")])
 

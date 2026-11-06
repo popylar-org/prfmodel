@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `ParameterTransform` and `ParameterConstraint` work with dataframes when the PyTorch backend runs on an accelerator
+  (e.g., Apple MPS). A `keras.ops` transformation such as `ops.log` returned a device tensor that pandas could not
+  store (`TypeError: can't convert mps:0 device type tensor to numpy`). `ParameterTransform` now converts the result
+  to NumPy, and `TensorFrame.to_dataframe` converts its tensors to NumPy as well.
+- `ParameterTransform` computes the transformation of dataframe columns in the requested `dtype` (`SGDFitter`
+  passes its own), instead of ignoring it. Before, float64 columns (the pandas default) failed on devices without
+  float64 support, such as Apple MPS.
+- Compiling the fitting step (`compile_step=True`) with the PyTorch backend works on Apple MPS. Inductor's layout
+  optimization is disabled, because it failed when a fit recompiled the step for a batch of a different size
+  (`TypeError: '>' not supported between instances of 'Node' and 'int'`, torch 2.15). On MPS, the number of buffers
+  per fused kernel is also capped below Metal's limit of 31, which kernels could exceed
+  (`number of constant buffers exceeds maximum supported (31)`).
+- `LeastSquaresFitter` works with the PyTorch backend on Apple MPS when a unit predicts a tiny but non-zero response
+  (e.g., a narrow pRF just outside the stimulus aperture). The singular value decomposition on MPS (torch >= 2.14)
+  failed to converge for such units (`linalg.svd: The algorithm failed to converge`), so it is now computed on the
+  CPU when the tensors are on MPS.
+
 ## [0.2.0] - 2026-11-03
 
 ### Added

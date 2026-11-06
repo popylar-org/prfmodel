@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import SustainedImpulse
 from prfmodel.impulse import TransientImpulse
@@ -84,7 +85,7 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
         """Test that both channels are switched off by their weights, leaving the scaling model's baseline."""
         params = params.assign(amplitude_sustained=0.0, amplitude_transient=0.0)
 
-        resp = np.asarray(prf_model(stimulus, params))
+        resp = ops.convert_to_numpy(prf_model(stimulus, params))
 
         assert resp == pytest.approx(np.repeat(params[["baseline"]].to_numpy(), resp.shape[1], axis=1))
 
@@ -95,8 +96,8 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
         params: pd.DataFrame,
     ):
         """Test that the transient channel contributes to the response rather than being discarded."""
-        resp_with = np.asarray(prf_model(stimulus, params.assign(amplitude_transient=1.0)))
-        resp_without = np.asarray(prf_model(stimulus, params.assign(amplitude_transient=0.0)))
+        resp_with = ops.convert_to_numpy(prf_model(stimulus, params.assign(amplitude_transient=1.0)))
+        resp_without = ops.convert_to_numpy(prf_model(stimulus, params.assign(amplitude_transient=0.0)))
 
         assert not np.allclose(resp_with, resp_without)
 
@@ -114,7 +115,7 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
         prf_model = Gaussian2DCSTPRFModel(impulse_model=None)
         params = params.assign(amplitude_sustained=0.0, amplitude_transient=1.0, n=1.0, baseline=0.0)
 
-        resp = np.asarray(prf_model(stimulus, params))
+        resp = ops.convert_to_numpy(prf_model(stimulus, params))
 
         assert np.all(resp >= 0.0)
         # The transient response is not trivially flat at the rectifier floor
@@ -129,10 +130,11 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
         prf_model = Gaussian2DCSTPRFModel(impulse_model=None)
         params = params.assign(amplitude_sustained=1.0, amplitude_transient=0.0, baseline=0.0)
 
-        resp = np.asarray(prf_model(stimulus, params))
+        resp = ops.convert_to_numpy(prf_model(stimulus, params))
 
         assert np.all(resp >= 0.0)
 
+    @pytest.mark.float64
     def test_transient_channels_sum_to_the_absolute_channel_response(
         self,
         stimulus: PRFStimulus,
@@ -167,9 +169,9 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
             dtype="float64",
         )
 
-        observed = np.asarray(prf_model(stimulus, params, dtype="float64"))
+        observed = ops.convert_to_numpy(prf_model(stimulus, params, dtype="float64"))
 
-        np.testing.assert_allclose(observed, np.abs(np.asarray(channel)), rtol=1e-6, atol=1e-9)
+        np.testing.assert_allclose(observed, np.abs(ops.convert_to_numpy(channel)), rtol=1e-6, atol=1e-9)
 
     def test_exponent_compresses_the_response(
         self,
@@ -178,8 +180,8 @@ class TestGaussian2DCSTPRFModel(PRFStimulusSetup):
         params: pd.DataFrame,
     ):
         """Test that `n` is applied as an exponent rather than ignored."""
-        resp_linear = np.asarray(prf_model(stimulus, params.assign(n=1.0)))
-        resp_compressed = np.asarray(prf_model(stimulus, params.assign(n=0.5)))
+        resp_linear = ops.convert_to_numpy(prf_model(stimulus, params.assign(n=1.0)))
+        resp_compressed = ops.convert_to_numpy(prf_model(stimulus, params.assign(n=0.5)))
 
         assert not np.allclose(resp_linear, resp_compressed)
 

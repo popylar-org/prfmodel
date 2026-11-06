@@ -9,6 +9,7 @@ from collections.abc import Callable
 from collections.abc import Sequence
 from typing import TypeVar
 from typing import cast
+import numpy as np
 import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
@@ -16,6 +17,25 @@ from prfmodel.typing import Tensor
 from prfmodel.utils import TensorFrame
 
 P = TypeVar("P", pd.DataFrame, TensorFrame)
+
+
+def _apply_to_dataframe_column(fun: Callable, column: pd.Series, dtype: str | None) -> np.ndarray:
+    """Apply `fun` to a dataframe column and return a NumPy array that can be stored back in the dataframe.
+
+    The function receives the column itself, so it can be a NumPy function or a :mod:`keras.ops` function.
+    A :mod:`keras.ops` function returns a backend tensor, which can live on an accelerator (e.g., a CUDA or
+    Apple MPS device). Pandas copies whatever is assigned to a column through NumPy, which fails for tensors that
+    are not on the host, so the result is converted to a NumPy array first.
+
+    The column is cast to `dtype` (if given) before `fun` is applied, so that a :mod:`keras.ops` function computes at
+    the caller's precision rather than at the column's. This matters for float64 columns (the pandas default) on
+    devices without float64 support, such as Apple MPS.
+
+    """
+    if dtype is not None:
+        column = column.astype(np.dtype(dtype))
+
+    return ops.convert_to_numpy(fun(column))
 
 
 class ParameterTransform:
@@ -81,7 +101,7 @@ class ParameterTransform:
         self.inverse_fun = inverse_fun
 
     @doc
-    def transform(self, parameters: P, dtype: str | None = None) -> P:  # noqa: ARG002 (unused argument)
+    def transform(self, parameters: P, dtype: str | None = None) -> P:
         """
         Apply the transformation.
 
@@ -89,9 +109,9 @@ class ParameterTransform:
         ----------
         %(parameters)s
         dtype : str, optional
-            Dtype to compute the transformation in. Unused here, because the transformation is applied to the
-            parameter values as they come in. Subclasses that convert the parameters into tensors use it to keep
-            that conversion at the caller's precision.
+            Dtype to compute the transformation in. For a dataframe, the columns in `parameter_names` are cast to it
+            before the transformation is applied, and the other columns are left untouched. If `None`, the columns
+            are used as they come in. Ignored for a :class:`~prfmodel.utils.TensorFrame`, which carries its own.
 
         Returns
         -------
@@ -102,12 +122,15 @@ class ParameterTransform:
         parameters = parameters.copy()
 
         for param in self.parameter_names:
-            parameters[param] = self.transform_fun(parameters[param])
+            if isinstance(parameters, pd.DataFrame):
+                parameters[param] = _apply_to_dataframe_column(self.transform_fun, parameters[param], dtype)
+            else:
+                parameters[param] = self.transform_fun(parameters[param])
 
         return parameters
 
     @doc
-    def inverse(self, parameters: P, dtype: str | None = None) -> P:  # noqa: ARG002 (unused argument)
+    def inverse(self, parameters: P, dtype: str | None = None) -> P:
         """
         Apply the inverse transformation.
 
@@ -115,7 +138,7 @@ class ParameterTransform:
         ----------
         %(parameters)s
         dtype : str, optional
-            Dtype to compute the transformation in. Unused here, for the same reason as in :meth:`transform`.
+            Dtype to compute the inverse transformation in, in the same way as in :meth:`transform`.
 
         Returns
         -------
@@ -126,7 +149,10 @@ class ParameterTransform:
         parameters = parameters.copy()
 
         for param in self.parameter_names:
-            parameters[param] = self.inverse_fun(parameters[param])
+            if isinstance(parameters, pd.DataFrame):
+                parameters[param] = _apply_to_dataframe_column(self.inverse_fun, parameters[param], dtype)
+            else:
+                parameters[param] = self.inverse_fun(parameters[param])
 
         return parameters
 

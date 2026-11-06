@@ -198,6 +198,7 @@ class TestInitDogFromGaussian:
         with pytest.raises(ValueError, match="strictly positive"):
             _ = init_dog_from_gaussian(gaussian_params, amplitude_surround=amplitude_surround)
 
+    @pytest.mark.float64
     def test_amplitude_surround_is_transformable(self, gaussian_params: pd.DataFrame):
         """The default start must be accepted by the constraint it is designed to be used with."""
         dog_params = init_dog_from_gaussian(gaussian_params)

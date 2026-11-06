@@ -5,6 +5,7 @@ from abc import abstractmethod
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.impulse.base import DEFAULT_RESOLUTION
 from prfmodel.impulse.base import BaseImpulse
 from tests.models.conftest import parametrize_dtype
@@ -53,7 +54,7 @@ class TestImpulseSetup(ABC):
 
         assert model.resolution is None
         assert model.num_frames == int(model.duration / DEFAULT_RESOLUTION)
-        np.testing.assert_allclose(np.diff(np.asarray(model.get_frames())[0]), DEFAULT_RESOLUTION)
+        np.testing.assert_allclose(np.diff(ops.convert_to_numpy(model.get_frames())[0]), DEFAULT_RESOLUTION)
 
     def test_at_resolution_resamples_a_model_without_resolution(
         self,
@@ -74,7 +75,7 @@ class TestImpulseSetup(ABC):
         assert resolved.resolution == resolution
         assert model.resolution is None
         assert model.at_resolution(resolution) is resolved
-        np.testing.assert_allclose(np.diff(np.asarray(resolved.get_frames())[0]), resolution, rtol=1e-6)
+        np.testing.assert_allclose(np.diff(ops.convert_to_numpy(resolved.get_frames())[0]), resolution, rtol=1e-6)
         np.testing.assert_array_equal(resolved(parameters), irf_model.__class__(resolution=resolution)(parameters))
 
     def test_at_resolution_keeps_an_explicit_resolution(self, irf_model: BaseImpulse):
@@ -123,12 +124,12 @@ class TestImpulseSetup(ABC):
         """
         model = irf_model.__class__(offset=0.0, resolution=self.resolution)
 
-        assert np.asarray(model.get_frames())[0, 0] == 0.0
+        assert ops.convert_to_numpy(model.get_frames())[0, 0] == 0.0
 
         causal = (
             (parameters["shift"].to_numpy() >= 0.0) if "shift" in parameters.columns else np.ones(len(parameters), bool)
         )
-        resp = np.asarray(model(parameters))
+        resp = ops.convert_to_numpy(model(parameters))
 
         assert causal.any(), "at least one unit should have its support at or above zero"
         assert np.all(resp[causal, 0] == 0.0)
@@ -142,9 +143,9 @@ class TestImpulseSetup(ABC):
         """
         model = irf_model.__class__(offset=-5.0, resolution=1.0)
 
-        assert np.asarray(model.get_frames())[0, 0] == pytest.approx(-5.0)
+        assert ops.convert_to_numpy(model.get_frames())[0, 0] == pytest.approx(-5.0)
 
-        resp = np.asarray(model(parameters))
+        resp = ops.convert_to_numpy(model(parameters))
 
         assert np.all(np.isfinite(resp))
 
@@ -164,13 +165,13 @@ class TestImpulseSetup(ABC):
         """
         model = irf_model.__class__(offset=-5.0, resolution=1.0)
 
-        frames = np.asarray(model.get_frames())
+        frames = ops.convert_to_numpy(model.get_frames())
         support_start = (
             parameters[["shift"]].to_numpy() if "shift" in parameters.columns else np.zeros((len(parameters), 1))
         )
         outside_support = frames <= support_start
 
-        resp = np.asarray(model(parameters))
+        resp = ops.convert_to_numpy(model(parameters))
 
         assert np.all(resp[outside_support] == 0.0)
         assert np.any(resp[~outside_support] != 0.0)
@@ -187,7 +188,7 @@ class TestImpulseSetup(ABC):
 
         model = irf_model.__class__(offset=-5.0, resolution=1.0, norm="sum")
 
-        resp = np.asarray(model(parameters))
+        resp = ops.convert_to_numpy(model(parameters))
 
         # float32: the response is normalized in the model's dtype, not in float64
         np.testing.assert_allclose(resp.sum(axis=1), 1.0, rtol=1e-3)
@@ -217,4 +218,6 @@ class TestImpulseSetup(ABC):
         for key, val in irf_model_default.default_parameters.items():
             parameters_with_default[key] = val
 
-        assert np.all(np.asarray(resp_without_default) == np.asarray(irf_model(parameters_with_default)))
+        assert np.all(
+            ops.convert_to_numpy(resp_without_default) == ops.convert_to_numpy(irf_model(parameters_with_default)),
+        )

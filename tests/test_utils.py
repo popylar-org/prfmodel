@@ -5,6 +5,7 @@ import keras
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
@@ -18,23 +19,25 @@ from prfmodel.utils import normalize_response
 from .conftest import TestSetup
 
 
+@pytest.mark.float64
 @pytest.mark.parametrize("norm", [None, "sum", "mean", "max", "norm"])
 def test_normalize_response(norm: str):
     """Test that normalize_response returns correct result."""
     response = np.expand_dims(np.linspace(-5, 5, 100), 0)
-    response_norm = np.asarray(normalize_response(response, norm=norm))
+    response_norm = ops.convert_to_numpy(normalize_response(response, norm=norm))
 
     assert response_norm.shape == response.shape
 
     if norm is not None:
         norm_fun = _get_norm_fun(norm)
-        response_norm_ref = response / np.asarray(norm_fun(response, axis=1, keepdims=True))
+        response_norm_ref = response / ops.convert_to_numpy(norm_fun(response, axis=1, keepdims=True))
     else:
         response_norm_ref = response
 
     assert np.allclose(response_norm, response_norm_ref)
 
 
+@pytest.mark.float64
 def test_normalize_response_error():
     """Test that normalize_response raises an error for wrong input shape."""
     response = np.ones((10,))
@@ -138,6 +141,7 @@ def test_calculate_center_shape(fn: Callable):
     assert fn(rng.normal(size=(4, 5)), rng.normal(size=(4, 5))).shape == (4, 5)
 
 
+@pytest.mark.float64
 def test_calculate_r_squared_matches_keras_metric():
     """Test that the R-squared matches the per-unit score of the Keras R2Score metric."""
     rng = np.random.default_rng(0)
@@ -155,6 +159,7 @@ def test_calculate_r_squared_values():
     np.testing.assert_allclose(calculate_r_squared(observed, predicted), [1.0, 0.0, -3.0])
 
 
+@pytest.mark.float64
 def test_calculate_r_squared_tensor_input():
     """Test that backend tensors are accepted and a numpy array is returned."""
     observed = np.array([[1.0, 2.0, 3.0], [3.0, 1.0, 2.0]])
@@ -201,8 +206,8 @@ class TestTensorFrame:
             assert x.shape == self.shape[:1]
 
         # torch requires us to convert tensors to numpy arrays before we can compare against floats
-        assert np.all(np.asarray(tensor_frame["a"]) == 0.0)
-        assert np.all(np.asarray(tensor_frame["b"]) == 1.0)
+        assert np.all(ops.convert_to_numpy(tensor_frame["a"]) == 0.0)
+        assert np.all(ops.convert_to_numpy(tensor_frame["b"]) == 1.0)
 
     def test_get_item_list(self, tensor_frame: TensorFrame):
         """Test that getting items with a list of keys returns the correct shapes and values."""
@@ -233,6 +238,23 @@ class TestTensorFrame:
         x = new_tensor_frame[tensor_frame.columns]
         assert x.shape == (self.shape[0], len(tensor_frame.columns))
 
+    def test_to_dataframe(self, tensor_frame: TensorFrame):
+        """Test that converting to a dataframe gives NumPy columns with the correct values.
+
+        The tensors can live on an accelerator (e.g., CUDA or Apple MPS), which pandas cannot read directly, so
+        this also checks that the conversion goes through the host.
+
+        """
+        df = tensor_frame.to_dataframe()
+
+        assert isinstance(df, pd.DataFrame)
+        assert list(df.columns) == tensor_frame.columns
+        assert df.shape == (self.shape[0], len(tensor_frame.columns))
+
+        for key in tensor_frame.columns:
+            assert isinstance(df[key].to_numpy(), np.ndarray)
+            np.testing.assert_array_equal(df[key].to_numpy(), keras.ops.convert_to_numpy(tensor_frame[key]))
+
 
 class TestBatched(TestSetup):
     """Tests for the batched decorator."""
@@ -247,7 +269,7 @@ class TestBatched(TestSetup):
         result_unbatched = model(stimulus, params)
         result_batched = batched(model)(stimulus, params, batch_size=None)
 
-        assert np.array_equal(np.asarray(result_batched), np.asarray(result_unbatched))
+        assert np.array_equal(ops.convert_to_numpy(result_batched), ops.convert_to_numpy(result_unbatched))
 
     def test_batched_matches_unbatched(
         self,
@@ -259,7 +281,7 @@ class TestBatched(TestSetup):
         result_unbatched = model(stimulus, params)
         result_batched = batched(model)(stimulus, params, batch_size=3)
 
-        assert np.allclose(np.asarray(result_batched), np.asarray(result_unbatched))
+        assert np.allclose(ops.convert_to_numpy(result_batched), ops.convert_to_numpy(result_unbatched))
 
     def test_output_shape(
         self,
@@ -282,7 +304,7 @@ class TestBatched(TestSetup):
         result = batched(model)(stimulus, params, batch_size=100)
         expected = model(stimulus, params)
 
-        assert np.allclose(np.asarray(result), np.asarray(expected))
+        assert np.allclose(ops.convert_to_numpy(result), ops.convert_to_numpy(expected))
 
     def test_exact_batch_division(
         self,
@@ -294,8 +316,9 @@ class TestBatched(TestSetup):
         result = batched(model)(stimulus, params, batch_size=3)
         expected = model(stimulus, params)
 
-        assert np.allclose(np.asarray(result), np.asarray(expected))
+        assert np.allclose(ops.convert_to_numpy(result), ops.convert_to_numpy(expected))
 
+    @pytest.mark.float64
     def test_passes_kwargs(
         self,
         stimulus: PRFStimulus,
@@ -323,4 +346,4 @@ class TestBatched(TestSetup):
         result = batched_call(stimulus, params, batch_size=3)
         expected = model(stimulus, params)
 
-        assert np.allclose(np.asarray(result), np.asarray(expected))
+        assert np.allclose(ops.convert_to_numpy(result), ops.convert_to_numpy(expected))

@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.models.compression import CompressiveEncoder
 from prfmodel.models.prf import PRFStimulusEncoder
 from prfmodel.models.prf import encode_prf_response
@@ -45,14 +46,15 @@ class TestEncodePRFResponse(TestSetup):
 
     def _check_encoding(self, x: np.ndarray) -> None:
         assert x.shape == (self.num_units, self.num_frames)
-        # Check that all units have identical encoding for identical response and design
-        assert np.unique(x, axis=1).shape == (self.num_units, 1)
+        # Check that every frame has the same encoding, because all frames of the design are identical. The
+        # comparison allows for rounding, because BLAS libraries can sum the frames in different orders.
+        np.testing.assert_allclose(x, np.broadcast_to(x[:, :1], x.shape), rtol=1e-6)
 
     def test_call_1d(self, response_1d: np.ndarray, dtype: str):
         """Test that 1D encoding returns the correct shape."""
         design = np.ones((self.num_frames, self.num_height))
 
-        x = np.asarray(encode_prf_response(response_1d, design, dtype))
+        x = ops.convert_to_numpy(encode_prf_response(response_1d, design, dtype))
 
         self._check_encoding(x)
 
@@ -60,7 +62,7 @@ class TestEncodePRFResponse(TestSetup):
         """Test that 2D encoding returns the correct shape."""
         design = np.ones((self.num_frames, self.num_height, self.num_width))
 
-        x = np.asarray(encode_prf_response(response_2d, design, dtype))
+        x = ops.convert_to_numpy(encode_prf_response(response_2d, design, dtype))
 
         self._check_encoding(x)
 
@@ -68,7 +70,7 @@ class TestEncodePRFResponse(TestSetup):
         """Test that 3D encoding returns the correct shape."""
         design = np.ones((self.num_frames, self.num_height, self.num_width, self.num_depth))
 
-        x = np.asarray(encode_prf_response(response_3d, design, dtype))
+        x = ops.convert_to_numpy(encode_prf_response(response_3d, design, dtype))
 
         self._check_encoding(x)
 
@@ -99,8 +101,8 @@ class TestPRFStimulusEncoder(TestSetup):
         design = np.ones((self.num_frames, self.num_height))
         stimulus = PRFStimulus(design, grid_1d, frame_duration=1.0)
 
-        response_encoded_ref = np.asarray(encode_prf_response(response_1d, design, dtype))
-        response_encoded = np.asarray(prf_stimulus_encoder(stimulus, response_1d, parameters, dtype))
+        response_encoded_ref = ops.convert_to_numpy(encode_prf_response(response_1d, design, dtype))
+        response_encoded = ops.convert_to_numpy(prf_stimulus_encoder(stimulus, response_1d, parameters, dtype))
 
         assert np.array_equal(response_encoded_ref, response_encoded)
 
@@ -116,8 +118,8 @@ class TestPRFStimulusEncoder(TestSetup):
         design = np.ones((self.num_frames, self.num_height, self.num_width))
         stimulus = PRFStimulus(design, grid_2d, frame_duration=1.0)
 
-        response_encoded_ref = np.asarray(encode_prf_response(response_2d, design, dtype))
-        response_encoded = np.asarray(prf_stimulus_encoder(stimulus, response_2d, parameters, dtype))
+        response_encoded_ref = ops.convert_to_numpy(encode_prf_response(response_2d, design, dtype))
+        response_encoded = ops.convert_to_numpy(prf_stimulus_encoder(stimulus, response_2d, parameters, dtype))
 
         assert np.array_equal(response_encoded_ref, response_encoded)
 
@@ -133,8 +135,8 @@ class TestPRFStimulusEncoder(TestSetup):
         design = np.ones((self.num_frames, self.num_height, self.num_width, self.num_depth))
         stimulus = PRFStimulus(design, grid_3d, frame_duration=1.0)
 
-        response_encoded_ref = np.asarray(encode_prf_response(response_3d, design, dtype))
-        response_encoded = np.asarray(prf_stimulus_encoder(stimulus, response_3d, parameters, dtype))
+        response_encoded_ref = ops.convert_to_numpy(encode_prf_response(response_3d, design, dtype))
+        response_encoded = ops.convert_to_numpy(prf_stimulus_encoder(stimulus, response_3d, parameters, dtype))
 
         assert np.array_equal(response_encoded_ref, response_encoded)
 
@@ -166,7 +168,7 @@ class TestCompressiveEncoder(TestSetup):
         encoder = PRFStimulusEncoder()
         compressive_encoder = CompressiveEncoder(encoding_model=encoder)
 
-        encoded_response = np.asarray(encoder(stimulus, response_2d, pd.DataFrame(), dtype))
-        compressed_response = np.asarray(compressive_encoder(stimulus, response_2d, parameters, dtype))
+        encoded_response = ops.convert_to_numpy(encoder(stimulus, response_2d, pd.DataFrame(), dtype))
+        compressed_response = ops.convert_to_numpy(compressive_encoder(stimulus, response_2d, parameters, dtype))
 
         assert encoded_response.shape == compressed_response.shape

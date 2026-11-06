@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.exceptions import InvalidUnitsWarning
 from prfmodel.exceptions import ShapeError
 from prfmodel.fitters import LeastSquaresFitter
@@ -25,6 +26,8 @@ from .conftest import skip_torch
 from .conftest import skip_windows
 
 _ATOL = 1e-3
+# Upper bound of a prediction that counts as tiny but non-zero
+_TINY_PREDICTION = 1e-15
 
 
 class TestLeastSquaresFitter(TestSetup):
@@ -127,7 +130,7 @@ class TestLeastSquaresFitter(TestSetup):
 
         """
         rng = np.random.default_rng(0)
-        basis = np.asarray(model(stimulus, params.assign(baseline=0.0, amplitude=1.0)))
+        basis = ops.convert_to_numpy(model(stimulus, params.assign(baseline=0.0, amplitude=1.0)))
         observed = 2.5 * basis + 0.75 + rng.normal(0.0, 0.05, basis.shape)
 
         fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
@@ -165,7 +168,7 @@ class TestLeastSquaresFitter(TestSetup):
         far_params = params.copy()
         far_params.loc[0, "mu_x"] = 1e3
 
-        basis = np.asarray(model(stimulus, far_params.assign(baseline=0.0, amplitude=1.0)))
+        basis = ops.convert_to_numpy(model(stimulus, far_params.assign(baseline=0.0, amplitude=1.0)))
         assert not np.any(basis[0]), "The unit outside the aperture must predict a flat zero response"
 
         observed = 2.5 * basis + 3.0 + rng.normal(0.0, 0.05, basis.shape)
@@ -173,6 +176,38 @@ class TestLeastSquaresFitter(TestSetup):
         fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
 
         _, ls_params = fitter.fit(observed, far_params, slope_name="amplitude", intercept_name="baseline")
+
+        assert np.all(np.isfinite(ls_params.to_numpy()))
+        np.testing.assert_allclose(ls_params["amplitude"].to_numpy()[0], 0.0, atol=1e-6)
+        np.testing.assert_allclose(ls_params["baseline"].to_numpy()[0], observed[0].mean(), atol=1e-4)
+
+    def test_a_unit_at_the_edge_of_the_aperture_gets_the_minimum_norm_solution(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+    ):
+        """Test that a unit with a tiny but non-zero prediction is solved like a unit with a zero prediction.
+
+        A narrow pRF just outside the aperture predicts values around 1e-19. The singular value decomposition on
+        Apple MPS (torch >= 2.14) fails to converge for the design matrix of this unit, which the fitter has to
+        work around. The prediction lies below the singular value cutoff, so the fit gives the minimum-norm
+        solution, as for a flat zero prediction.
+
+        """
+        rng = np.random.default_rng(0)
+        edge_params = params.copy()
+        edge_params.loc[0, ["mu_x", "mu_y", "sigma"]] = [5.4, 0.0, 0.15]
+
+        basis = ops.convert_to_numpy(model(stimulus, edge_params.assign(baseline=0.0, amplitude=1.0)))
+        largest_prediction = np.abs(basis[0]).max()
+        assert 0.0 < largest_prediction < _TINY_PREDICTION, "The unit at the edge must predict a tiny non-zero response"
+
+        observed = 2.5 * basis + 3.0 + rng.normal(0.0, 0.05, basis.shape)
+
+        fitter = LeastSquaresFitter(model=model, stimulus=stimulus)
+
+        _, ls_params = fitter.fit(observed, edge_params, slope_name="amplitude", intercept_name="baseline")
 
         assert np.all(np.isfinite(ls_params.to_numpy()))
         np.testing.assert_allclose(ls_params["amplitude"].to_numpy()[0], 0.0, atol=1e-6)
@@ -442,7 +477,7 @@ class TestLeastSquaresFitterIgnoresExtraColumns(TestSetup):
     ):
         """A label column is neither converted nor mistaken for a parameter, and survives into the result."""
         labelled = params.assign(roi=["V1"] * len(params))
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         _, fit_params = LeastSquaresFitter(model=model, stimulus=stimulus).fit(
             observed,
@@ -464,7 +499,7 @@ class TestLeastSquaresFitterIgnoresExtraColumns(TestSetup):
         design = pd.DataFrame({"mx": np.zeros(num_frames), "trial_type": ["rest"] * num_frames})
 
         init = params.assign(beta_mx=1.0)
-        observed = np.asarray(model(stimulus, init, regressors=design))
+        observed = ops.convert_to_numpy(model(stimulus, init, regressors=design))
 
         _, fit_params = LeastSquaresFitter(model=model, stimulus=stimulus).fit(
             observed,
@@ -489,7 +524,7 @@ class TestLeastSquaresFitterDataShape(TestSetup):
         ndim: int,
     ):
         """Data that is not `(num_units, num_frames)` raises rather than being sliced along the wrong axis."""
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
         data = observed[0] if ndim == 1 else observed[..., np.newaxis]
 
         with pytest.raises(ShapeError, match="must have exactly 2 dimensions"):
@@ -549,7 +584,7 @@ class TestLeastSquaresFitterInvalidUnits(TestSetup):
 
         """
         params = params.assign(roi=["V1", "V2", "V3"])
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
         data, is_valid = insert_invalid_units(observed)
         init = insert_invalid_parameters(params, is_valid, ["mu_x", "mu_y", "sigma"])
         init.index = init.index * 10
@@ -615,7 +650,7 @@ class TestLeastSquaresFitterInvalidUnits(TestSetup):
         params: pd.DataFrame,
     ):
         """Data in which every unit can be fit does not warn."""
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         with warnings.catch_warnings():
             warnings.simplefilter("error", InvalidUnitsWarning)
@@ -643,7 +678,7 @@ class TestLeastSquaresFitterParameterNames(TestSetup):
     ):
         """A slope that is not a model parameter raises rather than returning meaningless estimates."""
         init = params.assign(gain=1.0)
-        observed = np.asarray(model(stimulus, params))
+        observed = ops.convert_to_numpy(model(stimulus, params))
 
         with pytest.raises(ValueError, match=message):
             LeastSquaresFitter(model=model, stimulus=stimulus).fit(observed, init, slope_name=slope_name)

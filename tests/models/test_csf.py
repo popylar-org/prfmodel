@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.exceptions import ShapeError
 from prfmodel.exceptions import ShapeMismatchError
 from prfmodel.fitters import SGDFitter
@@ -103,7 +104,7 @@ class TestPredictContrastSensitivity(TestSetup):
         sf_peak = np.array([[sf_peak_val]])
         width_r = np.array([[1.28]])
 
-        result = float(np.asarray(predict_contrast_sensitivity(sf, cs_peak, sf_peak, 0.68, width_r)).flat[0])
+        result = float(ops.convert_to_numpy(predict_contrast_sensitivity(sf, cs_peak, sf_peak, 0.68, width_r)).flat[0])
 
         assert np.allclose(result, cs_peak_val)
 
@@ -114,8 +115,8 @@ class TestPredictContrastSensitivity(TestSetup):
         sf_peak = np.array([[sf_peak_val]])
         width_r = np.array([[1.28]])
 
-        result_wide_l = np.asarray(predict_contrast_sensitivity(sf, cs_peak, sf_peak, 10.0, width_r))
-        result_narrow_l = np.asarray(predict_contrast_sensitivity(sf, cs_peak, sf_peak, 0.1, width_r))
+        result_wide_l = ops.convert_to_numpy(predict_contrast_sensitivity(sf, cs_peak, sf_peak, 10.0, width_r))
+        result_narrow_l = ops.convert_to_numpy(predict_contrast_sensitivity(sf, cs_peak, sf_peak, 0.1, width_r))
 
         # Wider left branch drops sensitivity faster → lower values left of peak
         left_frames = sf < sf_peak_val
@@ -171,7 +172,7 @@ class TestPredictContrastResponse(TestSetup):
         slope_crf: np.ndarray,
     ) -> None:
         """Test that output values are in [0, 1] as expected from the Naka-Rushton CRF."""
-        result = np.asarray(predict_contrast_response(contrast, sensitivity, slope_crf))
+        result = ops.convert_to_numpy(predict_contrast_response(contrast, sensitivity, slope_crf))
         assert np.all(result >= 0.0)
         assert np.all(result <= 1.0)
 
@@ -186,7 +187,7 @@ class TestPredictContrastResponse(TestSetup):
         sensitivity = np.array([[s]])
         slope_crf = np.array([[q]])
 
-        result = float(np.asarray(predict_contrast_response(contrast, sensitivity, slope_crf)).flat[0])
+        result = float(ops.convert_to_numpy(predict_contrast_response(contrast, sensitivity, slope_crf)).flat[0])
         expected = c**q / (c**q + (100.0 / s) ** q)
 
         assert np.allclose(result, expected)
@@ -202,11 +203,12 @@ class TestPredictContrastResponse(TestSetup):
         sensitivity = np.array([[100.0, 1e-3]])
         slope_crf = np.array([[20.0]])
 
-        result = np.asarray(predict_contrast_response(contrast, sensitivity, slope_crf, dtype="float32"))
+        result = ops.convert_to_numpy(predict_contrast_response(contrast, sensitivity, slope_crf, dtype="float32"))
 
         assert np.all(np.isfinite(result))
         assert np.allclose(result, [[1.0, 0.0]])
 
+    @pytest.mark.float64
     def test_zero_contrast_gives_zero_response(self) -> None:
         """Test that a blank frame, with zero contrast, responds with exactly zero even for a shallow slope.
 
@@ -217,7 +219,7 @@ class TestPredictContrastResponse(TestSetup):
         sensitivity = np.array([[100.0, 100.0]])
         slope_crf = np.array([[0.1]])
 
-        result = np.asarray(predict_contrast_response(contrast, sensitivity, slope_crf, dtype="float64"))
+        result = ops.convert_to_numpy(predict_contrast_response(contrast, sensitivity, slope_crf, dtype="float64"))
 
         assert result[0, 0] == 0.0
         assert result[0, 1] > 0.0
@@ -250,6 +252,7 @@ class TestCSFTuning(TestSetup):
         result = model(stimulus, params, dtype=dtype)
         assert result.shape == (self.num_voxels, self.num_frames)
 
+    @pytest.mark.float64
     def test_matches_composed_functions(self, stimulus: CSFStimulus, params: pd.DataFrame) -> None:
         """Test that the log-domain tuning response equals composing the public CSF and CRF functions."""
         model = CSFTuning()
@@ -270,7 +273,7 @@ class TestCSFTuning(TestSetup):
             dtype="float64",
         )
 
-        assert np.allclose(result, np.asarray(expected))
+        assert np.allclose(result, ops.convert_to_numpy(expected))
 
     def test_extreme_parameters_fit_to_finite_parameters(self) -> None:
         """Test that extreme CSF parameters do not poison the gradient in float32.
@@ -330,7 +333,7 @@ class TestCSFTuning(TestSetup):
         )
         is_blank = stimulus.sf == 0
 
-        response = np.asarray(CSFTuning()(stimulus, params, dtype="float32"))
+        response = ops.convert_to_numpy(CSFTuning()(stimulus, params, dtype="float32"))
 
         np.testing.assert_array_equal(response[:, is_blank], 0.0)
         assert np.all(response[:, ~is_blank] > 0.0)

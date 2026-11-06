@@ -347,8 +347,13 @@ class TensorFrame:
         return dict(self._data)
 
     def to_dataframe(self) -> pd.DataFrame:
-        """Convert the object into a dataframe."""
-        return pd.DataFrame(self._data)
+        """Convert the object into a dataframe.
+
+        The tensors are converted to NumPy arrays first, because pandas cannot read tensors that live on an
+        accelerator (e.g., a CUDA or Apple MPS device).
+
+        """
+        return pd.DataFrame({key: ops.convert_to_numpy(value) for key, value in self._data.items()})
 
 
 @doc

@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import ShiftedGammaImpulse
 from prfmodel.impulse import TwoGammaImpulse
@@ -71,8 +72,8 @@ class TestPRFIntegration(PRFStimulusSetup):
         for name in regressors.parameter_names:
             assert name in model.parameter_names
 
-        baseline_resp = np.asarray(baseline_model(stimulus, base_params))
-        full_resp = np.asarray(model(stimulus, params, regressors=design))
+        baseline_resp = ops.convert_to_numpy(baseline_model(stimulus, base_params))
+        full_resp = ops.convert_to_numpy(model(stimulus, params, regressors=design))
 
         betas = params[regressors.parameter_names].to_numpy()
         expected_contribution = betas @ design[["mx", "my", "mz"]].to_numpy().T
@@ -119,7 +120,7 @@ class TestPRFIntegration(PRFStimulusSetup):
         params["beta_nuisance_a"] = [0.5, 0.5]
         params["beta_nuisance_b"] = [-1.0, 1.5]
 
-        resp = np.asarray(model(stimulus, params, regressors=confounds))
+        resp = ops.convert_to_numpy(model(stimulus, params, regressors=confounds))
         assert resp.shape == (self.num_units, num_frames)
         assert np.isfinite(resp).all()
 
@@ -250,8 +251,8 @@ class TestDoGIntegration(PRFStimulusSetup):
         params = base_params.copy()
         params["beta_nuisance"] = [1.0, -1.0]
 
-        baseline_resp = np.asarray(baseline_model(stimulus, base_params))
-        full_resp = np.asarray(model(stimulus, params, regressors=design))
+        baseline_resp = ops.convert_to_numpy(baseline_model(stimulus, base_params))
+        full_resp = ops.convert_to_numpy(model(stimulus, params, regressors=design))
 
         betas = params[["beta_nuisance"]].to_numpy()
         expected_contribution = betas @ design[["nuisance"]].to_numpy().T
@@ -299,8 +300,8 @@ class TestCFIntegration(PRFStimulusSetup):
         params["beta_nuisance_a"] = [1.0, -0.5]
         params["beta_nuisance_b"] = [-0.5, 1.0]
 
-        baseline_resp = np.asarray(baseline_model(stimulus, base_params))
-        full_resp = np.asarray(model(stimulus, params, regressors=design))
+        baseline_resp = ops.convert_to_numpy(baseline_model(stimulus, base_params))
+        full_resp = ops.convert_to_numpy(model(stimulus, params, regressors=design))
 
         betas = params[["beta_nuisance_a", "beta_nuisance_b"]].to_numpy()
         expected_contribution = betas @ design[["nuisance_a", "nuisance_b"]].to_numpy().T

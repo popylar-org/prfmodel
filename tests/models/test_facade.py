@@ -14,6 +14,7 @@ import keras
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.impulse import ShiftedGammaImpulse
 from prfmodel.impulse import TwoGammaImpulse
@@ -291,14 +292,14 @@ class TestExtraColumnsAreIgnored(PRFStimulusSetup):
         model = Gaussian2DPRFModel()
         params = _prf_params().assign(roi=["V1", "V2", "V3"])
 
-        assert np.isfinite(np.asarray(model(stimulus, params))).all()
+        assert np.isfinite(ops.convert_to_numpy(model(stimulus, params))).all()
 
     def test_response_facade_ignores_a_label_column(self, stimulus: PRFStimulus):
         """A response model reads its own parameters only, so the rest need not be numeric."""
         response = Gaussian2DPRFTuning()
         params = _prf_params().assign(roi=["V1", "V2", "V3"])
 
-        assert np.isfinite(np.asarray(response(stimulus, params))).all()
+        assert np.isfinite(ops.convert_to_numpy(response(stimulus, params))).all()
 
     def test_regressors_facade_ignores_an_extra_design_column(self):
         """A design column outside :attr:`names` need not be numeric."""
@@ -308,7 +309,7 @@ class TestExtraColumnsAreIgnored(PRFStimulusSetup):
 
         resp = regressors_model(design, pd.DataFrame({"beta_mx": [1.0]}))
 
-        assert np.asarray(resp).shape == (1, num_frames)
+        assert ops.convert_to_numpy(resp).shape == (1, num_frames)
 
     def test_a_defaulted_impulse_parameter_can_still_be_overridden(self):
         """Test that narrowing the conversion does not drop an override of a defaulted parameter.
@@ -321,8 +322,8 @@ class TestExtraColumnsAreIgnored(PRFStimulusSetup):
         impulse_model = TwoGammaImpulse()
         labels = {"roi": ["V1"]}
 
-        default = np.asarray(impulse_model(pd.DataFrame({"undershoot": [12.0], **labels})))
-        overridden = np.asarray(impulse_model(pd.DataFrame({"undershoot": [30.0], **labels})))
+        default = ops.convert_to_numpy(impulse_model(pd.DataFrame({"undershoot": [12.0], **labels})))
+        overridden = ops.convert_to_numpy(impulse_model(pd.DataFrame({"undershoot": [30.0], **labels})))
 
         assert not np.allclose(default, overridden)
 
@@ -330,6 +331,7 @@ class TestExtraColumnsAreIgnored(PRFStimulusSetup):
 class TestKernelTakesTensorsOnly(PRFStimulusSetup):
     """Test that the tensor side is reachable, and stays reachable, without pandas or numpy."""
 
+    @pytest.mark.float64
     def test_kernel_runs_from_a_hand_built_tensor_frame(self, stimulus: PRFStimulus):
         """Test that a TensorFrame assembled from tensors is enough to drive a model.
 

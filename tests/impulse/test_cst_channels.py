@@ -3,6 +3,7 @@
 import numpy as np
 import pandas as pd
 import pytest
+from keras import ops
 from prfmodel.impulse import SustainedImpulse
 from prfmodel.impulse import TransientImpulse
 from .conftest import TestImpulseSetup
@@ -17,8 +18,8 @@ class TestSustainedImpulsePeak:
         resolution = 0.001
         irf_model = SustainedImpulse(duration=2.0, resolution=resolution)
 
-        resp = np.asarray(irf_model(pd.DataFrame({"time_to_peak": [time_to_peak]})))
-        peak_time = np.asarray(irf_model.get_frames())[0, resp.argmax()]
+        resp = ops.convert_to_numpy(irf_model(pd.DataFrame({"time_to_peak": [time_to_peak]})))
+        peak_time = ops.convert_to_numpy(irf_model.get_frames())[0, resp.argmax()]
 
         assert peak_time == pytest.approx(time_to_peak, abs=resolution)
 
@@ -40,7 +41,7 @@ class TestTransientImpulseShape:
         """Transient impulse response of a single unit."""
         irf_model = TransientImpulse(duration=self.duration, resolution=self.resolution)
 
-        return np.asarray(irf_model(parameters))[0]
+        return ops.convert_to_numpy(irf_model(parameters))[0]
 
     def test_response_is_biphasic(self, transient: np.ndarray):
         """Test that the response has both a positive and a negative lobe."""
@@ -67,16 +68,16 @@ class TestTransientImpulseShape:
         transient_model = TransientImpulse(duration=self.duration, resolution=self.resolution)
         sustained_model = SustainedImpulse(duration=self.duration, resolution=self.resolution)
 
-        transient = np.asarray(transient_model(parameters))[0]
-        sustained = np.asarray(sustained_model(parameters))[0]
+        transient = ops.convert_to_numpy(transient_model(parameters))[0]
+        sustained = ops.convert_to_numpy(sustained_model(parameters))[0]
 
         assert transient.argmax() < sustained.argmax()
 
     def test_inhibitory_component_peaks_later_than_excitatory(self, parameters: pd.DataFrame):
         """Test that the inhibitory lobe peaks at the ratio the reference prescribes."""
         irf_model = TransientImpulse(duration=self.duration, resolution=self.resolution)
-        frames = np.asarray(irf_model.get_frames())[0]
-        transient = np.asarray(irf_model(parameters))[0]
+        frames = ops.convert_to_numpy(irf_model.get_frames())[0]
+        transient = ops.convert_to_numpy(irf_model(parameters))[0]
 
         # The trough of the biphasic response is dominated by the inhibitory component
         expected_ratio = (irf_model.inhibitory_shape - 1) * irf_model.inhibitory_time_constant_ratio
@@ -109,7 +110,7 @@ class TestChannelsAreUnitWise:
         time_to_peak = [4.0, 6.0, 8.0]
         irf_model = impulse_class(duration=32.0, resolution=0.5)
 
-        resp = np.asarray(irf_model(pd.DataFrame({"time_to_peak": time_to_peak})))
+        resp = ops.convert_to_numpy(irf_model(pd.DataFrame({"time_to_peak": time_to_peak})))
 
         assert resp.shape[0] == len(time_to_peak)
         assert len(np.unique(resp.argmax(axis=1))) == len(time_to_peak)
