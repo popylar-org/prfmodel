@@ -9,6 +9,7 @@ from nibabel.gifti import GiftiImage
 from nibabel.nifti1 import Nifti1Image
 from nilearn.surface import PolyMesh
 from nilearn.surface import load_surf_data
+from scipy import sparse as sp
 from scipy.io import loadmat
 from prfmodel.examples._dataset import Dataset
 from prfmodel.examples._fetch import FileFetcher
@@ -58,6 +59,8 @@ _ECOG_ROI_OF_WANG_AREA = {
     "FEF": "FEF",
     "none": "none",
 }  # fmt: skip
+
+_NUMEROSITY_HEMISPHERE_IDS = {"left": 0, "right": 1}
 
 
 def load_retbar_visual(fetch: FileFetcher, options: Options) -> Dataset:
@@ -298,21 +301,99 @@ def load_visual_ecog_broadband(fetch: FileFetcher, options: Options) -> Dataset:
     )
 
 
-def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dataset:  # noqa: ARG001 (loaders take options)
-    """Load the four-condition numerosity workshop dataset."""
-    for key in (
-        "responses",
-        "lh_flat",
-        "lh_vertex_indices",
-        "lh_white",
-        "rh_flat",
-        "rh_vertex_indices",
-        "rh_white",
-    ):
+def _voxels_to_vertices(
+    response: np.ndarray, valid: np.ndarray, offsets: np.ndarray, rows: np.ndarray,
+) -> np.ndarray:
+    """Convert voxel timecourses to percent-signal-change (PSC).
+
+    Average them over the voxels assigned to each vertex.
+    Vertices without any valid voxel get NaN.
+    """
+    mean = response.mean(axis=1)
+    keep = valid & np.isfinite(response).all(axis=1) & (mean != 0)
+
+    psc = np.zeros_like(response)
+    psc[keep] = (response[keep] / mean[keep, None] - 1.0) * 100.0
+
+    num_vertices = len(offsets) - 1
+    vertex_of_entry = np.repeat(np.arange(num_vertices), np.diff(offsets))
+    is_kept = keep[rows]
+
+    # Sparse assignment matrix: entry (v, r) is 1 if voxel r is assigned to vertex v and is valid
+    assignment = sp.csr_matrix(
+        (np.ones(is_kept.sum()), (vertex_of_entry[is_kept], rows[is_kept])),
+        shape=(num_vertices, len(keep)),
+    )
+    count = np.asarray(assignment.sum(axis=1)).ravel()
+
+    vertex_response = np.full((num_vertices, response.shape[1]), np.nan)
+    has_voxels = count > 0
+    vertex_response[has_voxels] = (assignment @ psc)[has_voxels] / count[has_voxels, None]
+
+    return vertex_response
+
+
+def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dataset:
+    """Load the surface response of a single subject to numerosity stimuli in four stimulus conditions."""
+    if options.task is None:
+        msg = "Dataset 'numerosity-four-conditions' requires a task"
+        raise ValueError(msg)
+
+    task = options.task
+    task_label = task.capitalize()  # Keys inside validity.npz, e.g. "Circ_valid"
+
+    with np.load(fetch(f"response_{task}")) as archive:
+        response = np.asarray(archive["response"], dtype=np.float64)
+
+    with np.load(fetch("validity")) as archive:
+        valid = np.asarray(archive[f"{task_label}_valid"], dtype=bool)
+
+    with np.load(fetch("surface_mapping_method2")) as archive:
+        offsets = np.asarray(archive["method2_vertex_voxel_offsets"], dtype=np.int64)
+        rows = np.asarray(archive["method2_vertex_voxel_rows"], dtype=np.int64)
+
+    with np.load(fetch("surface_metadata")) as archive:
+        vertex_roi_index = np.asarray(archive["vertex_roi_index"], dtype=np.int32)
+        vertex_hemisphere_id = np.asarray(archive["vertex_hemisphere_id"], dtype=np.int8)
+
+    with np.load(fetch("label_names")) as archive:
+        roi_ids = np.asarray(archive["roi_ids"], dtype=np.int32)
+        roi_names = np.asarray(archive["roi_names"])
+
+    # Project all voxels first, then select the hemisphere (the mapping refers to all voxels)
+    vertex_response = _voxels_to_vertices(response, valid, offsets, rows)
+
+    if len(vertex_response) != len(vertex_roi_index):
+        msg = "The number of vertices in the voxel-to-vertex mapping and the surface metadata differ"
+        raise ValueError(msg)
+
+    # Left vertices come first, matching the white surfaces
+    if options.hemisphere == "both":
+        order = np.concatenate([np.flatnonzero(vertex_hemisphere_id == h) for h in (0, 1)])
+        mesh_files = {"left": fetch("lh_white"), "right": fetch("rh_white")}
+    else:
+        order = np.flatnonzero(vertex_hemisphere_id == _NUMEROSITY_HEMISPHERE_IDS[options.hemisphere])
+        side = "lh" if options.hemisphere == "left" else "rh"
+        mesh_files = {options.hemisphere: fetch(f"{side}_white")}
+
+    roi_mapping = {
+        -2: "overlap",
+        -1: "unassigned",
+        **{int(i): str(name) for i, name in zip(roi_ids, roi_names, strict=True)},
+    }
+
+    # Expose files needed for the flatmaps and the distances along the maps (keeps them in `files`)
+    for key in ("lh_flat", "rh_flat", "lh_vertex_indices", "rh_vertex_indices", "lh_white", "rh_white", "roi_data"):
         fetch(key)
 
     return Dataset(
         name="numerosity-four-conditions",
+        response=vertex_response[order],
+        roi_index=vertex_roi_index[order],
+        roi_mapping=roi_mapping,
+        mesh=PolyMesh(**mesh_files),
+        hemisphere=options.hemisphere,
+        task=task,
         files=fetch.files,
     )
 
