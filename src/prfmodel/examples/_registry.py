@@ -116,6 +116,8 @@ class DatasetSpec:
         Surface types that this dataset accepts. The first one is used when none is requested.
     tasks : tuple of str
         Experimental tasks that this dataset provides. The first one is used when none is requested.
+    requires_task : bool
+        Whether a task must be requested. If `True`, there is no default task.
     default_hemisphere : str
         Hemisphere selection that is used when none is requested.
     licence : str
@@ -143,6 +145,7 @@ class DatasetSpec:
     hemispheres: tuple[str, ...] = ()
     surface_types: tuple[str, ...] = ()
     tasks: tuple[str, ...] = ()
+    requires_task : bool = False
     default_hemisphere: str = "both"
     licence: str = ""
     citation: str = ""
@@ -427,7 +430,10 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "Preprocessed fMRI time-course data for four experimental "
                 "conditions (Area, Size, Circumference, and Density) and their "
                 "average, accompanied by FreeSurfer surface files for flatmap "
-                "visualisation of both hemispheres."
+                "visualisation of both hemispheres. The responses are stored as whole-brain voxels, so they "
+                "are downloaded in full for every hemisphere; the hemisphere option selects the vertices and "
+                "surfaces that are returned. The task option selects the condition: 'area', 'size', "
+                "'circ' (circumference), 'dens' (density), or 'average' (the mean of the four)."
             ),
             files={
                 # Responses
@@ -494,6 +500,7 @@ def _make_registry() -> dict[str, DatasetSpec]:
             loader=_loaders.load_numerosity_four_conditions,
             options=frozenset({"task", "hemisphere"}),
             tasks=("area", "average", "circ", "dens", "size"),
+            requires_task = True,
             hemispheres=("both", "left", "right"),
             default_hemisphere="both",
             licence="CC BY 4.0",
@@ -700,7 +707,8 @@ def describe_dataset(name: str) -> str:
         lines += [f"Surface types: {', '.join(spec.surface_types)}"]
 
     if spec.tasks:
-        lines += [f"Tasks: {', '.join(spec.tasks)} (default '{spec.tasks[0]}')"]
+        task_note = "required" if spec.requires_task else f"default '{spec.tasks[0]}'"
+        lines += [f"Tasks: {', '.join(spec.tasks)} ({task_note})"]
 
     lines += [
         f"Download: {_download_amount(spec.download_size)} {_download_note(spec)}",

@@ -60,7 +60,8 @@ _ECOG_ROI_OF_WANG_AREA = {
     "none": "none",
 }  # fmt: skip
 
-_NUMEROSITY_HEMISPHERE_IDS = {"left": 0, "right": 1}
+# Hemisphere code -> (id in vertex_hemisphere_id, file prefix, PolyMesh part name)
+_NUMEROSITY_HEMISPHERES = {"L": (0, "lh", "left"), "R": (1, "rh", "right")}
 
 
 def load_retbar_visual(fetch: FileFetcher, options: Options) -> Dataset:
@@ -334,7 +335,7 @@ def _voxels_to_vertices(
 
 
 def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dataset:
-    """Load the surface response of a single subject to numerosity stimuli in four stimulus conditions."""
+    """Load the fMRI response of a single subject to numerosity stimuli in four stimulus conditions (surface data)."""
     if options.task is None:
         msg = "Dataset 'numerosity-four-conditions' requires a task"
         raise ValueError(msg)
@@ -342,6 +343,7 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
     task = options.task
     task_label = task.capitalize()  # Keys inside validity.npz, e.g. "Circ_valid"
 
+    # These files cover the whole brain (voxels), so they are fetched whichever hemisphere is requested
     with np.load(fetch(f"response_{task}")) as archive:
         response = np.asarray(archive["response"], dtype=np.float64)
 
@@ -360,6 +362,8 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
         roi_ids = np.asarray(archive["roi_ids"], dtype=np.int32)
         roi_names = np.asarray(archive["roi_names"])
 
+    fetch("roi_data")
+
     # Project all voxels first, then select the hemisphere (the mapping refers to all voxels)
     vertex_response = _voxels_to_vertices(response, valid, offsets, rows)
 
@@ -367,14 +371,32 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
         msg = "The number of vertices in the voxel-to-vertex mapping and the surface metadata differ"
         raise ValueError(msg)
 
-    # Left vertices come first, matching the white surfaces
-    if options.hemisphere == "both":
-        order = np.concatenate([np.flatnonzero(vertex_hemisphere_id == h) for h in (0, 1)])
-        mesh_files = {"left": fetch("lh_white"), "right": fetch("rh_white")}
-    else:
-        order = np.flatnonzero(vertex_hemisphere_id == _NUMEROSITY_HEMISPHERE_IDS[options.hemisphere])
-        side = "lh" if options.hemisphere == "left" else "rh"
-        mesh_files = {options.hemisphere: fetch(f"{side}_white")}
+    # Only the surface files of the requested hemispheres are fetched; left comes first
+    order_parts = []
+    mesh_files = {}
+
+    for code in options.hemisphere_codes:
+        hemi_id, prefix, part = _NUMEROSITY_HEMISPHERES[code]
+        order_parts.append(np.flatnonzero(vertex_hemisphere_id == hemi_id))
+        mesh_files[part] = fetch(f"{prefix}_white")
+
+        # Expose the files needed for the flatmaps and the distances along the maps (keeps them in `files`)
+        fetch(f"{prefix}_flat")
+        fetch(f"{prefix}_vertex_indices")
+
+    order = np.concatenate(order_parts)
+    mesh = PolyMesh(**mesh_files)
+
+    # The response rows must line up with the mesh vertices of each hemisphere
+    for indices, part in zip(order_parts, mesh_files, strict=True):
+        num_mesh_vertices = mesh.parts[part].n_vertices
+
+        if num_mesh_vertices != len(indices):
+            msg = (
+                f"The {part} hemisphere has {len(indices)} vertices in the surface metadata but "
+                f"{num_mesh_vertices} in its white surface"
+            )
+            raise ValueError(msg)
 
     roi_mapping = {
         -2: "overlap",
@@ -382,16 +404,12 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
         **{int(i): str(name) for i, name in zip(roi_ids, roi_names, strict=True)},
     }
 
-    # Expose files needed for the flatmaps and the distances along the maps (keeps them in `files`)
-    for key in ("lh_flat", "rh_flat", "lh_vertex_indices", "rh_vertex_indices", "lh_white", "rh_white", "roi_data"):
-        fetch(key)
-
     return Dataset(
         name="numerosity-four-conditions",
         response=vertex_response[order],
         roi_index=vertex_roi_index[order],
         roi_mapping=roi_mapping,
-        mesh=PolyMesh(**mesh_files),
+        mesh=mesh,
         hemisphere=options.hemisphere,
         task=task,
         files=fetch.files,
