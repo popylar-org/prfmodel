@@ -432,8 +432,10 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "average, accompanied by FreeSurfer surface files for flatmap "
                 "visualisation of both hemispheres. The responses are stored as whole-brain voxels, so they "
                 "are downloaded in full for every hemisphere; the hemisphere option selects the vertices and "
-                "surfaces that are returned. The task option selects the condition: 'area', 'size', "
-                "'circ' (circumference), 'dens' (density), or 'average' (the mean of the four)."
+                "surfaces that are returned. The returned response has one row per surface vertex in percent "
+                "signal change (NaN for vertices without valid voxels), and the four stimulus conditions are already "
+                "averaged with the pre-scan frames removed. The task option selects the condition: 'area', "
+                "'size', 'circ' (circumference), 'dens' (density), or 'average' (the mean of the four)."
             ),
             files={
                 # Responses
