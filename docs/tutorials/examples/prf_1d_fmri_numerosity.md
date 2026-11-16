@@ -15,13 +15,19 @@ kernelspec:
 
 **Author**: Malte Lüken (m.luken@esciencecenter.nl)
 
-This examples shows how to fit a population receptive field (pRF) model to blood oxygenation level-dependent (BOLD) functional magnetic resonance imaging
-(fMRI) data.
+This example shows how to fit a population receptive field (pRF) model to blood oxygenation level-dependent (BOLD)
+functional magnetic resonance imaging (fMRI) data from an experiment in which a subject viewed displays with different
+numbers of dots.
 
-A pRF model maps neural activity in a brain region of interest (ROI; e.g., V1 in the human visual cortex)
-to an experimental stimulus. Here, we use numerosity (e.g., the number of circles displayed on a screen) as an example,
-where the pRF defines a distribution in numerosity space that stimulates activity in the region of interest.
-Because the numerosity space is one-dimensional, the pRF model also has one dimension.
+A pRF model maps the recorded activity of neuron populations to an experimental stimulus. Here, we use the model by
+Harvey et al. (2013), in which the pRF is defined in the *numerosity* space of the stimulus: Some neuron populations
+respond most strongly to a particular number of items, their *preferred numerosity*, and less strongly to numerosities
+that are further away from it. Numerosity is a single number, so the pRF model has one dimension. Following Harvey et
+al. (2013), we define the pRF on the logarithm of numerosity (*log numerosity*).
+
+The example first prepares the recorded responses for model fitting, then fits the model in three stages (grid search,
+least squares, and stochastic gradient descent), and finally interprets the estimated parameters: between numerosity
+maps, on flattened cortical surfaces, and along a single numerosity map in four stimulus conditions.
 
 Because prfmodel uses Keras for model fitting, we need to make sure that a backend is installed before we begin.
 In this example, we use the TensorFlow backend.
@@ -30,6 +36,7 @@ In this example, we use the TensorFlow backend.
 import os
 from importlib.util import find_spec
 
+import numpy as np
 import pandas as pd
 
 # Set keras backend to 'tensorflow' (this is normally the default)
@@ -44,9 +51,9 @@ if find_spec("tensorflow") is None:
 
 ## Loading the stimulus
 
-In this example, we use a public dataset by [Hendrikx et al. (2024)](https://doi.org/10.1016/j.neuroimage.2024.120515) that is available on [Fig Share](https://doi.org/10.6084/m9.figshare.24126663).
-
-The numerosity stimulus that belongs to this dataset is already included in the package and can be loaded with {py:func}`prfmodel.examples.load_1d_prf_lognumerosity_stimulus`. It is also available as the `stimulus` attribute of the loaded dataset.
+In this example, we use data from Hendrikx et al. (2024) that is publicly available on
+[figshare](https://doi.org/10.6084/m9.figshare.24126663). The numerosity stimulus of this dataset is included in the
+package and can be loaded with {py:func}`prfmodel.examples.load_1d_prf_lognumerosity_stimulus`.
 
 ```{code-cell} ipython3
 from prfmodel.examples import load_1d_prf_lognumerosity_stimulus
@@ -55,19 +62,19 @@ stimulus = load_1d_prf_lognumerosity_stimulus()
 print(stimulus)
 ```
 
-The stimulus design is a matrix with shape `(num_frames, num_coordinates)` that one-hot encodes which numerosity index is active at which time frame. The stimulus grid maps each numerosity index to its corresponding log numerosity value. There are eight unique numerosities. We can look at them on the natural scale.
+The stimulus design is a matrix with shape `(num_frames, num_coordinates)` that one-hot encodes which numerosity is
+shown at which time frame. The stimulus grid contains the log numerosity of each column. There are eight unique
+numerosities. We can look at them on the natural scale.
 
 ```{code-cell} ipython3
-import numpy as np
-
 unique_log_numerosities = stimulus.grid.squeeze()
 unique_numerosities = np.round(np.exp(unique_log_numerosities))
 
 unique_numerosities
 ```
 
-We can also plot the stimulus design with {py:func}`prfmodel.plotting.plot_1d_prf_stimulus` to see how numerosity
-changes over time.
+We plot the stimulus design with {py:func}`prfmodel.plotting.plot_1d_prf_stimulus` to see how numerosity changes over
+time.
 
 ```{code-cell} ipython3
 from prfmodel.plotting import plot_1d_prf_stimulus
@@ -81,253 +88,345 @@ plot_1d_prf_stimulus(
 );
 ```
 
-We can see that the design contains ascending and descending numerosity sequences from one to seven that are interleaved with sequences of the "baseline" numerosity 20. The ascend-descend cycle is repeated four times. Before the first cycle, there is a short baseline interval that was shown before the fMRI recording started (pre-scan interval). We will take both the cycles and the pre-scan interval into account when fitting the pRF model.
+The stimulus consists of a cycle that is repeated four times: The numerosities 1 to 7 are shown in ascending order,
+followed by numerosity 20, then the numerosities 7 to 1 in descending order, followed by numerosity 20 again. Each
+numerosity from 1 to 7 is shown for two time frames and numerosity 20 for eight time frames, so one cycle lasts 44 time
+frames. Numerosity 20 serves as a baseline. Before the first cycle, there is a pre-scan interval of six time frames
+that also shows numerosity 20, which gives $6 + 4 \times 44 = 182$ time frames in total.
+
+This design determines when a neuron population responds: A population that prefers numerosity 2 responds early in
+the ascending sequence and again late in the descending sequence, so its two responses per cycle lie far apart. A
+population that prefers numerosity 6 responds shortly before and after the baseline, so its two responses lie close
+together. The baseline shows numerosity 20 rather than a blank screen, so that dots are visible throughout the
+experiment. Numerosity 20 is far from the numerosities that most populations prefer, so it elicits only a weak
+response, and a change in the response reflects a change in numerosity rather than the appearance or disappearance of
+dots on the screen.
+
+```{code-cell} ipython3
+NUM_PRESCAN_FRAMES = 6
+NUM_CYCLES = 4
+NUM_CYCLE_FRAMES = 44
+
+assert stimulus.design.shape[0] == NUM_PRESCAN_FRAMES + NUM_CYCLES * NUM_CYCLE_FRAMES
+```
 
 +++
 
 ## Loading the BOLD response
 
-Now that we have the numerosity stimulus, we load the raw BOLD response data from a single subject. For simplicity, we only use the data
-from the left hemisphere. In the experiment, the subject was recorded for four runs, and we load the averaged neural time courses from the two even and the two odd runs. We will use the even and odd runs to do cross-validation.
+Now that we have the stimulus, we load the recorded BOLD responses of a single subject. We use a preprocessed version
+of the dataset (Mauro, 2026) that has the tag `numerosity-four-conditions`. It contains the responses to four stimulus
+conditions and their average (see below), and the cortical surfaces of both hemispheres. We start with the `average`
+condition. The dataset is downloaded on first use and cached in a user data directory.
 
 ```{code-cell} ipython3
 from prfmodel.examples import load_dataset
 
-# Downloads on first use and caches in a user data directory; the second call reuses the cache
-dataset_odd = load_dataset("numerosity-timing", hemisphere="left", split="odd")
-dataset_even = load_dataset("numerosity-timing", hemisphere="left", split="even")
-
-response_raw_odd = dataset_odd.response
-response_raw_even = dataset_even.response
-
-response_raw_odd.shape, response_raw_even.shape
+dataset = load_dataset("numerosity-four-conditions", task="average")
+print(dataset)
 ```
 
-Both the even and odd averaged responses have 176 time frames. When combined with the pre-scan interval of six time frames, this matches the `176 + 6 = 182` time frames of the stimulus.
-
-Importantly, the response objects only contain time courses for vertices in ROIs that were shown to respond to the numerosity stimulus. Hence the small number of vertices. We can also load the indices of the ROI labels for the vertices.
+The loader already prepared the responses for us: The responses were recorded in a volume of voxels, and the loader
+excluded the voxels that fell outside the scanned volume at some time frames, converted the remaining voxels to
+percent signal change (PSC), and averaged the voxels that belong to each vertex of the cortical surface. Thus,
+`dataset.response` contains one timecourse per vertex, with the vertices of the left hemisphere first. Moreover, the six
+time frames of the pre-scan interval were removed and the four cycles were averaged, which leaves a single cycle of 44
+time frames.
 
 ```{code-cell} ipython3
-roi_index = dataset_odd.roi_index
-roi_index.shape
+response = dataset.response
+
+assert response.shape[1] == NUM_CYCLE_FRAMES
+
+response.shape
 ```
 
-We can look at the unique ROI indices.
+The scan only covered part of the brain. Vertices outside the scanned volume have no valid voxels and their
+timecourse is NaN. We keep track of the vertices that have a response.
 
 ```{code-cell} ipython3
-np.unique_counts(roi_index)
+has_response = ~np.isnan(response).any(axis=1)
+
+has_response.mean()  # Fraction of vertices with a response
 ```
 
-The mapping between ROI indices and labels comes with the dataset as well.
+The dataset also contains the region of interest (ROI) of each vertex and the names of the ROIs.
 
 ```{code-cell} ipython3
-roi_mapping = dataset_odd.roi_mapping
+roi_index = dataset.roi_index
+roi_mapping = dataset.roi_mapping
+
 roi_mapping
 ```
 
-The ROI labels start with the letter "N" to indicate that they refer to a numerosity map. NTO, NLO, and NPO are
-occipital regions; NPCI, NPCM, and NPCS are regions around the central sulcus; NFI and NFS are located around the
-frontal sulcus (see Hendrikx et al., 2024, for details).
+The ROIs are numerosity maps that were delineated in a previous study. Their names start with their hemisphere (`lh`
+for left and `rh` for right), followed by `Num` to indicate that they are numerosity maps. NumTO (temporal-occipital)
+and NumPO (parietal-occipital) lie in the occipital cortex, NumPC1, NumPC2, and NumPC3 in the parietal cortex, and NumF
+in the frontal cortex (see Hendrikx et al., 2024, for details). Vertices outside the maps are `unassigned`.
 
-Before we inspect the data, we convert the responses from the raw signal into percent signal change (PSC).
+In this example, we only fit the vertices inside the numerosity maps that have a response. We store their indices so
+that we can map the results back onto the surface later.
 
 ```{code-cell} ipython3
-def convert_psc(response_raw: np.ndarray) -> np.ndarray:
-    """Convert raw neural responses into percent signal change."""
-    return ((response_raw.T / response_raw.mean(axis=1)).T - 1.0) * 100.0
+roi_labels = [label for label in roi_mapping if label > 0]  # The numerosity maps
+roi_names = [roi_mapping[label] for label in roi_labels]
 
+fit_vertices = np.flatnonzero(has_response & np.isin(roi_index, roi_labels))
 
-response_psc_odd = convert_psc(response_raw_odd)
-response_psc_even = convert_psc(response_raw_even)
+pd.Series(roi_index[fit_vertices]).value_counts().sort_index().rename(index=roi_mapping)  # Vertices per map
 ```
+
+## Removing slow trends
+
+BOLD responses often contain slow fluctuations that are not related to the stimulus. We remove these slow trends from
+each timecourse with a basis of cosine functions (i.e., a discrete cosine transform basis): We fit the cosine functions
+to each timecourse with least squares (using the pseudoinverse of the basis) and subtract the fitted trend. `N_DCT` sets
+the highest frequency of the cosine functions in cycles per timecourse. With `N_DCT = 0.5`, the basis contains a
+constant and a cosine that completes half a cycle over the 44 time frames. Later, we apply the same detrending to the
+model predictions, so that the observed and predicted responses are processed in the same way.
+
+We keep the basis this small on purpose. The response to the stimulus itself changes slowly: A population that prefers
+a small numerosity responds at the beginning and the end of the cycle but not in the middle, which resembles a cosine
+that completes a full cycle over the 44 time frames. If the basis contained frequencies close to those of the response
+to the stimulus (e.g., with `N_DCT = 1.0`), detrending would remove part of the signal that we want to model.
+
+```{code-cell} ipython3
+N_DCT = 0.5
+
+# Cosine basis with frequencies from 0 (a constant) to N_DCT in steps of half a cycle
+time = np.linspace(0, 2 * np.pi, NUM_CYCLE_FRAMES)
+frequencies = np.arange(0, N_DCT + 0.25, 0.5)
+trends = np.cos(np.outer(time, frequencies))
+pinv_trends = np.linalg.pinv(trends)
+
+
+def detrend(response: np.ndarray) -> np.ndarray:
+    """Fit the cosine basis to each timecourse and subtract the fitted trend."""
+    return response - (response @ pinv_trends.T) @ trends.T
+
+
+response_fit = detrend(response[fit_vertices])
+
+response_fit.shape
+```
+
+We compare the timecourse of a single vertex before and after detrending.
+
+```{code-cell} ipython3
+import matplotlib.pyplot as plt
+
+BLUE, ORANGE, GRAY = "#2a78d6", "#eb6834", "#8c8c8c"
+
+example = 0  # First vertex that we fit
+time_frames = np.arange(NUM_CYCLE_FRAMES)
+
+fig, ax = plt.subplots(figsize=(10, 3.5), layout="constrained")
+ax.axhline(0.0, color="#bdbdbd", linewidth=1)
+ax.plot(time_frames, response[fit_vertices[example]], color=BLUE, linewidth=2, label="Before detrending")
+ax.plot(time_frames, response_fit[example], color=ORANGE, linewidth=2, label="After detrending")
+ax.set(
+    xlabel="Time frame (in TR)",
+    ylabel="BOLD response (in PSC)",
+    title=f"Vertex {fit_vertices[example]} ({roi_mapping[roi_index[fit_vertices[example]]]})",
+)
+ax.legend(frameon=False)
+plt.show()
+```
+
+Detrending removes slow changes of the response over the cycle that are not related to the stimulus.
+
++++
 
 ## Inspecting the data
 
-Before we model the BOLD response, we look at the timecourses and inspect the quality of the data. To do this we select a subset of vertices and plot their BOLD response over time. Note that the unit of time frames is repetition time (TR) which is
-2.1 seconds for this dataset.
-
-```{code-cell} ipython3
-import plotly.io as pio
-import plotly.express as px
-
-pio.renderers.default = "notebook_connected"  # Requires internet connection to work
-pio.templates.default = "simple_white"
-
-fig = px.line(
-    response_psc_odd[::50, :].T,
-    animation_frame="variable",
-    range_x=(0, 176),
-    range_y=(-5, 5),
-    labels={
-        "index": "Time frame (in TR)",
-        "value": "BOLD response (in PSC)",
-        "variable": "Vertex",
-    },
-    title="Vertex time courses",
-)
-fig.update_layout(showlegend=False, height=450)
-fig.show()
-```
-
-Only for very few vertices, we can see response patterns that approximately match the ascend-descend cycle of the numerosity stimulus. We can get a better overview by plotting all timecourses at once in a heatmap with
-{py:func}`prfmodel.plotting.plot_response_heatmap`.
+Before we model the BOLD response, we look at all timecourses at once in a heatmap with
+{py:func}`prfmodel.plotting.plot_response_heatmap`. Note that the unit of the time frames is the repetition time (TR),
+which is 2.1 seconds for this dataset.
 
 ```{code-cell} ipython3
 from prfmodel.plotting import plot_response_heatmap
 
-plot_response_heatmap(
-    response_psc_odd,
+# Sort the vertices by numerosity map (in the order of the mapping) so that each map forms one block of rows
+by_map = np.argsort(roi_index[fit_vertices], kind="stable")
+
+fig, ax = plot_response_heatmap(
+    response_fit[by_map],
     vmin=-2,
-    vmax=5,
+    vmax=2,
+    cmap="RdBu_r",
     xlabel="Time frame (in TR)",
-    ylabel="Vertex index",
+    ylabel="Numerosity map",
     colorbar_label="BOLD response (in PSC)",
-    figsize=(6, 6),
-);
+    figsize=(8, 7),
+)
+
+# Mark the borders between the maps and label each map in the middle of its rows
+map_sizes = np.array([(roi_index[fit_vertices] == label).sum() for label in roi_labels])
+map_ends = np.cumsum(map_sizes)
+for end in map_ends[:-1]:
+    ax.axhline(end - 0.5, color="black", linewidth=0.8)
+ax.set_yticks(map_ends - map_sizes / 2, labels=roi_names)
+plt.show()
 ```
 
-In the heatmap, the four ascend-descend cycles in the timecourses are better visible, although their exact timing varies between vertices.
-
-+++
-
-The goal of our pRF model is to predict these cycles as closely as possible. By comparing how similar the pRF model predictions are to the observed timecourses, we can identify vertices and areas of the brain that respond to our visual stimulus. This allows us to create a stimulus-specific pRF map of the brain. In this example, however, we already know that the selected vertices respond to our stimulus. For an example that analyzes timecourses from all vertices in a recording, take a look at [](prf_2d_fmri_visual.md).
+A vertex that responds to numerosity should show two peaks per cycle, one during the ascending and one during the
+descending sequence, with a distance between the peaks that depends on its preferred numerosity (see above). Vertices
+whose responses do not follow the stimulus show noise without such peaks. The vertices are sorted by numerosity map, so
+the heatmap also shows whether the maps differ in how clearly their vertices follow the stimulus.
 
 +++
 
 ## Defining the pRF model
 
-Now that we have our BOLD response data and stimulus in place, we can create a pRF model to *predict* a response to this stimulus. We use the canonical 1D pRF model proposed by Harvey et al. (2013): It assumes that the stimulus (numerosity) elicits a response that follows a
-Gaussian shape in one-dimensional log-numerosity space. This response is convolved with an impulse response
-that follows the shape of the hemodynamic response in the brain. Finally, a baseline and amplitude parameter shift and scale
-our predicted response to match the observed BOLD response.
+Now that the stimulus and the BOLD response are in place, we can define a pRF model that *predicts* the response to the
+stimulus. We use the Gaussian 1D pRF model by Harvey et al. (2013): The stimulus elicits a response that follows a
+Gaussian in log-numerosity space with a center `mu` (the preferred log numerosity) and a size `sigma`. This response is
+convolved with an impulse response that follows the shape of the hemodynamic response in the brain. Finally, a
+`baseline` and an `amplitude` parameter shift and scale the prediction.
 
-The {py:class}`prfmodel.models.prf.Gaussian1DPRFModel` class performs all these steps to make a combined prediction. Each time frame is one TR of 2.1 seconds, which the example stimulus stores as its `frame_duration`. The pRF model samples its impulse response at this frame duration, so the predicted response has the same sampling rate as the observed timecourses (see also the section [](../../important_details.md)).
+The {py:class}`prfmodel.models.prf.Gaussian1DPRFModel` class performs all these steps. Each time frame is one TR of
+2.1 seconds, which the stimulus stores as its `frame_duration`. The pRF model samples its impulse response at this frame
+duration, so the predicted response has the same sampling rate as the observed timecourses (see also the section
+[](../../important_details.md)).
+
+The parameters of the impulse response default to the Glover hemodynamic response function (see
+{py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only need to set `weight_deriv`. This
+parameter weights the temporal derivative of the impulse response and absorbs small differences in the timing of the
+BOLD response between vertices: Negative values shift the response earlier in time, positive values later.
 
 ```{code-cell} ipython3
 from prfmodel.impulse import DerivativeTwoGammaImpulse
 from prfmodel.models.prf import Gaussian1DPRFModel
 
-# The repetition time (TR) is stored as the frame duration of the stimulus
-print(stimulus.frame_duration)
-
-# Create the impulse model. Without a resolution, it is sampled at the frame duration of the stimulus.
-# Each frame is sampled at its leading edge, so the first frame sits at t = 0 (where the response is zero)
-# and no offset is needed.
+# Without a resolution, the impulse model is sampled at the frame duration of the stimulus
 impulse_model = DerivativeTwoGammaImpulse()
+
+prf_model = Gaussian1DPRFModel(impulse_model=impulse_model)
 ```
 
-We can visualize the predicted impulse response. The two-gamma parameters (`delay`, `dispersion`, `undershoot`,
-`u_dispersion`, `ratio`) default to the Glover HRF parameter set
-(see {py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only need to set `weight_deriv`. This parameter weights the temporal derivative of the two-gamma response and absorbs small differences in hemodynamic latency between vertices. Negative values shift the response earlier in time, positive values later. We start from `-0.5` and let the fitter refine it per vertex further below. On its own, the impulse model does not know the stimulus, so we sample it at the frame duration of the stimulus with {py:meth}`~prfmodel.impulse.base.BaseImpulse.at_resolution` before plotting.
+### Matching the predictions to the preprocessed responses
+
+The pRF model predicts the response to the full stimulus with 182 time frames, but the observed responses only contain
+a single averaged cycle of 44 time frames. To compare them, we process the predictions in the same way as the observed
+responses:
+
+1. We remove the six time frames of the pre-scan interval. We do not remove them from the stimulus itself: The subject
+   already saw the stimulus during the pre-scan interval, and because the BOLD response is slow, this affects the
+   response at the beginning of the first cycle.
+2. We average the four cycles in the remaining 176 time frames.
+3. We detrend the averaged predictions with the same cosine basis as the observed responses.
+
+We implement these steps in a function that wraps the prediction function of the model (i.e., its `call` method) and
+replace the original prediction function with the wrapped one. This way, the fitters below automatically compare the
+processed predictions against the observed responses.
 
 ```{code-cell} ipython3
-import pandas as pd
+from collections.abc import Callable
 
-# Only weight_deriv is set; the two-gamma parameters use the model's default Glover HRF values
-impulse_default_params = pd.DataFrame(
-    {
-        "weight_deriv": [-0.5],
-    }
-)
-
-# Predict impulse response (two-gamma parameters use the default Glover HRF values)
-impulse_response = np.asarray(impulse_model.at_resolution(stimulus.frame_duration)(impulse_default_params))
-
-fig = px.line(
-    pd.DataFrame({"Time frame (in TR)": np.arange(impulse_response.shape[1]), "Impulse response": impulse_response[0]}),
-    x="Time frame (in TR)",
-    y="Impulse response",
-    title="Predicted impulse response",
-)
-fig.update_layout(height=450)
-fig.show()
-```
-
-We insert the impulse model into the {py:class}`~prfmodel.models.prf.Gaussian1DPRFModel` that makes combined model predictions.
-
-```{code-cell} ipython3
-# Define pRF model with the impulse response submodel
-prf_model = Gaussian1DPRFModel(
-    impulse_model=impulse_model,
-)
-```
-
-As mentioned above, the numerosity stimulus includes a pre-scan interval of six time frames during which no BOLD response was recorded. However, the subject has still seen the pre-scan interval and thus it also elicits a neural response that carries over to the recorded interval. We need to include it in our model prediction even though this interval of the prediction cannot be compared against the observed neural time courses. Instead, we remove the first six time frames of all model predictions using a small wrapper function for the models `call` method. The resulting predictions match the timing of the recorded responses.
-
-```{code-cell} ipython3
-from typing import Callable
+from keras import ops
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
 
 
-def remove_prescan(fn: Callable, num_prescan_frames: int) -> Callable:
-    """Modify a model ``call`` function so that the first ``num_prescan_frames`` are removed from its predictions."""
+def average_cycles_and_detrend(fn: Callable) -> Callable:
+    """Wrap a prediction function to remove the pre-scan frames, average the cycles, and detrend the predictions."""
 
     def wrapper(stimulus: PRFStimulus, parameters: pd.DataFrame, *args, **kwargs) -> Tensor:
         predictions = fn(stimulus, parameters, *args, **kwargs)
-        return predictions[:, num_prescan_frames:]
+
+        # 1. Remove the pre-scan frames
+        predictions = predictions[:, NUM_PRESCAN_FRAMES:]
+
+        # 2. Average the repeated stimulus cycles
+        predictions = ops.mean(ops.reshape(predictions, (-1, NUM_CYCLES, NUM_CYCLE_FRAMES)), axis=1)
+
+        # 3. Fit the trends to each prediction and subtract them (same basis as for the observed responses)
+        beta = ops.matmul(predictions, ops.transpose(ops.cast(pinv_trends, predictions.dtype)))
+        fitted_trend = ops.matmul(beta, ops.transpose(ops.cast(trends, predictions.dtype)))
+
+        return predictions - fitted_trend
 
     return wrapper
 
 
-prf_model.call = remove_prescan(prf_model.call, 6)
+prf_model.call = average_cycles_and_detrend(prf_model.call)
 ```
 
-We define a set of starting parameters to make a combined prediction with our pRF model. Specifically, we predict the
-model response for each unique numerosity value in the stimulus.
+To see what the processed predictions look like, we predict the response of pRFs that prefer different numerosities.
 
 ```{code-cell} ipython3
-# Combine pRF starting parameters with impulse response default parameters
-num_unique_numerosities = len(unique_log_numerosities)
+num_unique = len(unique_log_numerosities)
 
 start_params = pd.DataFrame(
     {
         "mu": unique_log_numerosities,
-        "sigma": [1.0] * num_unique_numerosities,
-        "baseline": [0.0] * num_unique_numerosities,
-        "amplitude": [1.0] * num_unique_numerosities,
-        "weight_deriv": [-0.5] * num_unique_numerosities,
+        "sigma": [0.5] * num_unique,
+        "weight_deriv": [-0.5] * num_unique,
+        "baseline": [0.0] * num_unique,
+        "amplitude": [1.0] * num_unique,
     },
 )
 
-# Make prediction with pRF model
 simulated_response = np.asarray(prf_model(stimulus, start_params))
 
-# Convert to data frame for plotting
-simulated_response_df = pd.DataFrame(
-    simulated_response.T,
-    columns=unique_numerosities.astype(int),
-)
-
-fig = px.line(
-    simulated_response_df,
-    animation_frame="variable",
-    range_x=(0, stimulus.design.shape[0]),
-    labels={
-        "index": "Time frame",
-        "value": "Predicted neural response",
-        "variable": "Numerosity (natural scale)",
-    },
-)
-fig.update_layout(showlegend=False, height=450)
-fig.show()
+fig, ax = plt.subplots(figsize=(10, 3.5), layout="constrained")
+for numerosity, prediction in zip(unique_numerosities.astype(int), simulated_response, strict=True):
+    ax.plot(time_frames, prediction, linewidth=1.5, label=str(numerosity))
+ax.set(xlabel="Time frame (in TR)", ylabel="Predicted response", title="Predicted response for one stimulus cycle")
+ax.legend(title="Preferred\nnumerosity", frameon=False, loc="upper left", bbox_to_anchor=(1.01, 1))
+plt.show()
 ```
 
-## Fitting the pRF model
+The preferred numerosity `mu` sets the timing of the peaks: pRFs that prefer small numerosities respond at the
+beginning and the end of the cycle, when small numerosities are shown, whereas pRFs that prefer larger numerosities
+respond closer to the middle of the cycle, around the baseline.
 
-In this example, we will evaluate our pRF model using cross-validation by fitting it on the BOLD responses from the odd runs and evaluating its predictions on the even runs. This will give us an indication of how well our model can predict out-of-sample time courses.
+The pRF size `sigma` sets how sharply a pRF is tuned. We compare a narrow and a wide pRF that both prefer numerosity 3.
 
-We will fit the pRF model to our BOLD response data using two stages. We begin with a grid search to find good values for our parameters of interest (`mu` and `sigma`). Then, we use least squares to estimate the `baseline` and `amplitude` of
-our model. Finally, we use stochastic gradient descent (SGD) to finetune our model fits after the least-squares stage.
+```{code-cell} ipython3
+sigmas = [0.2, 2.0]
+
+sigma_params = pd.DataFrame(
+    {
+        "mu": [np.log(3.0)] * len(sigmas),
+        "sigma": sigmas,
+        "weight_deriv": [-0.5] * len(sigmas),
+        "baseline": [0.0] * len(sigmas),
+        "amplitude": [1.0] * len(sigmas),
+    },
+)
+
+sigma_response = np.asarray(prf_model(stimulus, sigma_params))
+
+fig, ax = plt.subplots(figsize=(10, 3.5), layout="constrained")
+for sigma, prediction, color in zip(sigmas, sigma_response, [BLUE, ORANGE], strict=True):
+    ax.plot(time_frames, prediction, color=color, linewidth=2, label=f"sigma = {sigma}")
+ax.set(
+    xlabel="Time frame (in TR)",
+    ylabel="Predicted response",
+    title="Predicted response for a preferred numerosity of 3",
+)
+ax.legend(frameon=False)
+plt.show()
+```
+
+A narrow pRF only responds to numerosities close to 3, which gives two distinct peaks per cycle. A wide pRF responds to
+many numerosities, so its response changes less over the cycle and its peaks merge. Because a wide pRF predicts an
+almost flat response, its preferred numerosity is hard to estimate from the data.
 
 +++
 
-Let's start with the grid search by defining ranges of `mu` and `sigma` that we want to construct a grid
-of parameter values from. We create them from the stimulus with {py:func}`prfmodel.fitters.grid_values_1d_prf`. For
-`baseline` and `amplitude`, we only provide a single value so that they will stay constant
-across the entire grid. The two-gamma parameters of the impulse model are omitted entirely: the impulse model supplies
-them from its default Glover HRF parameter set. However, if we wanted to override the default parameters, we could also
-add ranges for them here.
+## Fitting the pRF model
+
+We fit the pRF model to the detrended responses in three stages. We begin with a grid search to find good values for
+the parameters of interest (`mu` and `sigma`). Then, we use least squares to estimate the `baseline` and `amplitude`.
+Finally, we use stochastic gradient descent (SGD) to finetune all parameters at once.
+
+### Grid search
+
+We define ranges of `mu` and `sigma` to construct a grid of parameter values from. We create them from the stimulus
+with {py:func}`prfmodel.fitters.grid_values_1d_prf`. For `weight_deriv`, `baseline`, and `amplitude`, we only provide a
+single value so that they stay constant across the entire grid.
 
 ```{code-cell} ipython3
 from prfmodel.fitters import grid_values_1d_prf
@@ -338,39 +437,40 @@ param_ranges = grid_values_1d_prf(stimulus) | {
     "baseline": [0.0],
     "amplitude": [1.0],
 }
+
+{name: len(values) for name, values in param_ranges.items()}  # Number of values for each parameter
 ```
 
 By default, the function creates 49 values for `mu` that span twice the range of the stimulus around its midpoint and
 50 log-spaced values for `sigma` that range from the smallest spacing between the stimulus coordinates to their full
-range. The grid search will evaluate all possible combinations of these values and return the combination that fits the
-observed data best. This will result in a grid containing $49 \times 50 = 2450$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
+range, which gives $49 \times 50 = 2450$ parameter combinations. This is still a relatively small grid and we recommend
+specifying finer grids in practice.
 
 Two properties of the stimulus bound what these ranges can achieve. First, the range of `mu` extends beyond the
-displayed numerosities, from about 0.2 to 90 on the natural scale. Estimates outside the displayed numerosities 1 to 7
-(which includes the baseline numerosity 20) are only weakly constrained by the data, and we will exclude them when we
-analyze the pRF parameters. Extending the grid beyond the stimulus prevents such vertices from piling up at the edge of
-the grid. Second, the stimulus samples log-numerosity space at only eight points, the closest of which are
+displayed numerosities, from about 0.2 to 90 on the natural scale. Estimates outside the numerosities 1 to 7 (numerosity
+20 is only shown as a baseline) are only weakly constrained by the data, and we will exclude them when we analyze the
+pRF parameters. Extending the grid beyond the stimulus prevents such vertices from piling up at the edge of the grid.
+Second, the stimulus samples log-numerosity space at only eight points, the closest of which are
 $\log(7) - \log(6) \approx 0.15$ apart. This spacing is the smallest value of `sigma` in the grid. A pRF much narrower
-than the spacing responds to a single numerosity no matter how small `sigma` becomes, so the lower end of the `sigma`
-range is not identifiable from these data and estimates near the floor should be read as "no wider than one stimulus
-level".
+than the spacing responds to a single numerosity no matter how small `sigma` becomes, so estimates near the smallest
+value should be read as "no wider than one stimulus level".
 
-Let's construct the {py:class}`prfmodel.fitters.GridFitter` and perform the grid search. Note that we set `batch_size=20` to let the {py:class}`prfmodel.fitters.GridFitter`
-evaluate 20 parameter combinations at the same time (which saves us some memory). By default, the `loss` (i.e., the metric to minimize between model predictions and data) is the negative correlation, which ignores differences in baseline and amplitude between model predictions and observed data. This means the data do not need to be demeaned or converted to percent signal change first, but also that `baseline` and `amplitude` cannot be estimated by the grid search itself. We fix them here and estimate them with least squares in the next step.
+We construct the {py:class}`prfmodel.fitters.GridFitter` and perform the grid search. We set `batch_size=20` to
+evaluate 20 parameter combinations at the same time, which saves memory. By default, the `loss` is the negative
+correlation, which ignores differences in baseline and amplitude between predictions and observed data, so the grid
+search cannot estimate `baseline` and `amplitude`.
 
 ```{code-cell} ipython3
 from prfmodel.fitters import GridFitter
 
-# Create grid fitter object
 grid_fitter = GridFitter(
     model=prf_model,
     stimulus=stimulus,
     compile_step=True,  # Setting 'compile_step=True' speeds up the fitting
 )
 
-# Run grid search
 grid_history, grid_params = grid_fitter.fit(
-    data=response_psc_odd,
+    data=response_fit,
     parameter_values=param_ranges,
     batch_size=20,
 )
@@ -378,23 +478,22 @@ grid_history, grid_params = grid_fitter.fit(
 grid_params
 ```
 
-We can see that the estimates for `mu`, and `sigma` are one combination in our grid. In the second step,
-we also optimize the `amplitude` of the pRF model together with the `baseline` using least squares. This adjusts the
-scale of our model predictions to scale the observed data. We set `batch_size=200` to estimate least-squares fits
-for batches of vertices sequentially and save memory.
+### Least squares
+
+We estimate `baseline` and `amplitude` with least squares by regressing the observed responses on the predicted
+responses of each vertex. Because the observed and the predicted responses are both detrended, which also removes their
+mean, the `baseline` estimates are close to zero.
 
 ```{code-cell} ipython3
 from prfmodel.fitters import LeastSquaresFitter
 
-# Create least-squares fitter
 ls_fitter = LeastSquaresFitter(
     model=prf_model,
     stimulus=stimulus,
 )
 
-# Run least squares fit
 ls_history, ls_params = ls_fitter.fit(
-    data=response_psc_odd,
+    data=response_fit,
     parameters=grid_params,
     slope_name="amplitude",
     intercept_name="baseline",
@@ -404,18 +503,17 @@ ls_history, ls_params = ls_fitter.fit(
 ls_params
 ```
 
-We can see that the amplitudes are different compared to the starting value (and our initial guess) for many vertices.
+### Stochastic gradient descent
 
-To finetune the parameter estimates with SGD, we use the {py:class}`~prfmodel.fitters.SGDFitter` with the
-least-squares parameters as starting values. Because the size of the pRF `sigma` is a strictly positive parameter
-(always > 0), we include an adapter with a log-transformation in the fitter. The adapter log-transforms `sigma` so that
-the fitter can optimize it on an unconstrained scale, and transforms it back to the strictly positive scale before
-model predictions are compared against the observed data.
+To finetune all parameters, we use the {py:class}`~prfmodel.fitters.SGDFitter` with the least-squares parameters as
+starting values. Because `sigma` is strictly positive, we include an adapter that lets the fitter optimize `sigma` on
+an unconstrained log scale and transforms it back before making predictions.
 
-By default, {py:class}`~prfmodel.fitters.SGDFitter` optimizes every parameter column it is given, so `weight_deriv` is refined per vertex here as well. This lets each vertex have a slightly different hemodynamic latency, but it also means that the shape of the impulse response is no longer fixed while `mu` and `sigma` are estimated. Pass `fixed_parameters=["weight_deriv"]` to `fit` to keep the impulse response identical across vertices instead.
+By default, {py:class}`~prfmodel.fitters.SGDFitter` optimizes every parameter it is given, so `weight_deriv` is
+estimated per vertex as well. Pass `fixed_parameters=["weight_deriv"]` to `fit` to keep the impulse response identical
+across vertices instead.
 
 ```{code-cell} ipython3
-from keras import ops
 from prfmodel.fitters import SGDFitter
 from prfmodel.fitters.adapter import Adapter, ParameterTransform
 
@@ -429,229 +527,410 @@ sgd_fitter = SGDFitter(
 )
 
 sgd_history, sgd_params = sgd_fitter.fit(
-    data=response_psc_odd,
+    data=response_fit,
     init_parameters=ls_params,
 )
 
 sgd_params
 ```
 
-We can see that SGD has substantially changed parameter estimates for some vertices.
+## Evaluating the model fit
 
-Now that the core pRF parameters and the auxiliary baseline and amplitude parameters are optimized, we can
-compare the model predictions against the observed responses. Because we want to make predictions for all vertices in
-the brain, we wrap our `prf_model` in the {py:func}`prfmodel.utils.batched` modifier function. The modifier changes the behavior of the model
-to make predictions for batches of vertices sequentially. This saves us a lot of memory at the expense of minimal runtime
-overhead.
+We compare the model predictions against the observed responses. We wrap the model in
+{py:func}`prfmodel.utils.batched` to make predictions for batches of vertices sequentially, which saves memory. We
+quantify the fit with the R-squared, computed with {py:func}`prfmodel.utils.calculate_r_squared`, which is the
+proportion of variance in the observed responses explained by the predictions. Because we compare the predictions
+against the responses that we fitted the model to, the scores describe the in-sample fit.
 
 ```{code-cell} ipython3
-from prfmodel.utils import batched
+from prfmodel.utils import batched, calculate_r_squared
 
 prf_model_batched = batched(prf_model)
 
 pred_response = np.asarray(prf_model_batched(stimulus, sgd_params, batch_size=100))
+r_squared = calculate_r_squared(response_fit, pred_response)  # One score per vertex
+
+r_squared.shape
 ```
 
-We can quantify how well the predictions align with the observed timecourses using the R-squared metric, which we compute with {py:func}`prfmodel.utils.calculate_r_squared`. This metric indicates the proportion of variance in the observed data explained by our model predictions. We start by comparing the model predictions to the observed timecourses from the odd runs. We used the odd runs to fit our pRF model so we are assessing its in-sample fit.
-
-```{code-cell} ipython3
-from prfmodel.utils import calculate_r_squared
-
-r_squared_odd = calculate_r_squared(response_psc_odd, pred_response)  # One score per vertex
-r_squared_odd.shape
-```
-
-We can also compute the R-squared on the even runs to assess the out-of-sample fit.
-
-```{code-cell} ipython3
-r_squared_even = calculate_r_squared(response_psc_even, pred_response)
-r_squared_even.shape
-```
-
-We can look at the distribution of R-squared values across vertices with {py:func}`prfmodel.plotting.plot_r_squared_hist`.
+We look at the distribution of the scores with {py:func}`prfmodel.plotting.plot_r_squared_hist`. We clip the scores to
+$[0, 1]$: R-squared is negative whenever a prediction fits worse than the mean of the data, and those vertices end up
+in the leftmost bin.
 
 ```{code-cell} ipython3
 from prfmodel.plotting import plot_r_squared_hist
 
-plot_r_squared_hist(
-    {"Odd runs (in-sample)": r_squared_odd, "Even runs (out-of-sample)": r_squared_even},
-    bins=10,
-    value_range=(0.0, 1.0),
-    clip=True,
-);
+plot_r_squared_hist(r_squared, bins=20, value_range=(0.0, 1.0), clip=True);
 ```
 
-Note that we clip the scores to $[0, 1]$: R-squared is negative whenever a prediction fits worse than the mean of the data, and those vertices all end up in the leftmost bin.
-
-For both odd and even runs, we can see that quite a few vertices have a score at or close to zero meaning that the pRF model does not predict the observed response well. This means that, given the model, not all vertices in the selected ROIs respond to our numerosity stimulus. However, a substantial amount of vertices also have higher scores, suggesting that the model successfully mapped their responses to the stimulus. Moreover, the R-squared distribution does not differ much between in-sample and out-of-sample predictions, suggesting that our pRF model generalizes well.
-
-Let's plot the predicted and the observed timecourses for a subsample of vertices from the even (out-of-sample) runs.
+We also compare the observed and predicted timecourses of the best-fitting vertex in four numerosity maps. We only
+consider vertices whose preferred numerosity lies between 1 and 7, the numerosities that the stimulus shows (we explain
+this choice below).
 
 ```{code-cell} ipython3
-import plotly.graph_objects as go
+fig, axes = plt.subplots(2, 2, figsize=(12, 6), sharex=True, sharey=True, layout="constrained")
 
-each_k = 50
+numerosity_estimates = np.exp(sgd_params["mu"].to_numpy())
+is_in_stimulus_range = (numerosity_estimates >= 1) & (numerosity_estimates <= 7)
 
-# Sort vertices according to R-squared
-best_vertices = np.flip(np.argsort(r_squared_even))[::each_k]
+for ax, label in zip(axes.flat, [1, 3, 7, 9], strict=True):  # lh_NumTO, lh_NumPC1, rh_NumTO, rh_NumPC1
+    in_roi = np.flatnonzero((roi_index[fit_vertices] == label) & is_in_stimulus_range)
+    best = in_roi[np.argmax(r_squared[in_roi])]
+    numerosity = numerosity_estimates[best]
 
-response_valid_best_vertices = response_psc_even[best_vertices]
-pred_response_best_vertices = pred_response[best_vertices]
-r_squared_valid_best_vertices = r_squared_even[best_vertices]
-sigma_best_vertices = sgd_params["sigma"].values[best_vertices]
-mu_exp_best_vertices = np.exp(sgd_params["mu"].values[best_vertices])
-
-df_valid = pd.DataFrame(response_valid_best_vertices.T)
-df_pred = pd.DataFrame(pred_response_best_vertices.T)
-
-df_valid["source"] = "Observed"
-df_pred["source"] = "Predicted"
-
-df = pd.concat([df_valid, df_pred], axis=0)
-df["time"] = np.tile(np.arange(df_valid.shape[0]), 2)
-
-df_melted = df.melt(id_vars=["source", "time"], var_name="vertex", value_name="response")
-
-fig = px.line(
-    df_melted,
-    x="time",
-    y="response",
-    color="source",
-    animation_frame="vertex",
-    range_y=[-5, 5],
-    labels={
-        "time": "Time frame (in TR)",
-        "response": "BOLD response (in PSC)",
-        "vertex": "Vertex",
-        "source": "",
-    },
-    title="Observed and predicted vertex responses (subsampled vertices; even runs)",
-)
-
-# Add a text trace to display per-vertex stats; this will be updated in each animation frame
-fig.add_trace(
-    go.Scatter(
-        x=[60],
-        y=[4.7],
-        mode="text",
-        text=[
-            f"R-squared = {r_squared_valid_best_vertices[0]:.3f}, sigma = {sigma_best_vertices[0]:.3f}, pref numerosity = {mu_exp_best_vertices[0]:.3f}"
-        ],
-        showlegend=False,
-        hoverinfo="skip",
-        textfont=dict(size=13),
+    ax.axhline(0.0, color="#bdbdbd", linewidth=1)
+    ax.plot(time_frames, response_fit[best], color=GRAY, linewidth=1.5, label="Observed")
+    ax.plot(time_frames, pred_response[best], color=BLUE, linewidth=2, label="Predicted")
+    ax.set_title(
+        f"{roi_mapping[label]}: R-squared = {r_squared[best]:.2f}, preferred numerosity = {numerosity:.1f}",
+        loc="left",
+        fontsize=10,
     )
-)
 
-# Append a stats text update to each animation frame's trace data
-for i, frame in enumerate(fig.frames):
-    r2 = r_squared_valid_best_vertices[i]
-    sigma = sigma_best_vertices[i]
-    mu_exp = mu_exp_best_vertices[i]
-    frame.data = list(frame.data) + [
-        go.Scatter(
-            text=[f"R-squared = {r2:.3f}, sigma = {sigma:.3f}, pref numerosity = {mu_exp:.3f}"],
-        )
-    ]
-
-fig.update_layout(showlegend=True, height=450)
-fig.show()
+axes[0, 0].legend(frameon=False)
+fig.supxlabel("Time frame (in TR)")
+fig.supylabel("BOLD response (in PSC)")
+plt.show()
 ```
-
-The plot confirms a high alignment between model predictions and observed responses for vertices with high R-squared.
 
 +++
 
-## Analyzing the pRF results
+## Interpreting the model parameters
 
-To analyze and interpret the pRF parameters, we will zoom in on vertices with out-of-sample R-squared > 0.1 which is roughly 55% of the vertices in the selected ROIs (note that this threshold is somewhat arbitrary).
+To interpret the pRF parameters, we zoom in on vertices for which we can trust the estimates. We select vertices that
+fulfill three criteria:
 
-```{code-cell} ipython3
-# Create mask for vertices above R-squared threshold
-is_above_threshold = r_squared_even > 0.1
+- The R-squared is above 0.2 (note that this threshold is somewhat arbitrary).
+- The preferred numerosity lies between 1 and 7, the numerosities that the stimulus shows (excluding the baseline 20).
+- The pRF size (`sigma`) is below 2.8, which is close to the range of the log numerosities in the stimulus
+  ($\log(20) \approx 3.0$). Such a wide Gaussian predicts an almost flat response, so its center `mu` cannot be
+  identified. Note that SGD optimizes `sigma` on an unconstrained log scale, so the estimates are no longer limited by
+  the grid.
 
-# Compute proportion of vertices above threshold
-is_above_threshold.mean()
-```
-
-We further exclude vertices whose preferred numerosity falls outside the displayed numerosities 1 to 7, excluding 20
-because it served as the baseline. We also remove vertices whose pRF size (`sigma`) approaches the span of the
-log-numerosity space ($\log(20) \approx 3.0$), because such a wide Gaussian predicts an almost flat line, which leaves
-`mu` unidentifiable. Note that SGD optimizes `sigma` on an unconstrained log scale, so the estimates are no longer
-capped by the grid we defined above.
+We define the selection as a function because we will apply it again to the four stimulus conditions later.
 
 ```{code-cell} ipython3
-is_valid = (
-    is_above_threshold
-    & (np.exp(sgd_params["mu"]).between(1, 7))
-    & (sgd_params["sigma"] < 2.8)
-)
-is_valid.mean()
+def select_vertices(
+    params: pd.DataFrame,
+    r_squared: np.ndarray,
+    r_squared_threshold: float = 0.2,
+) -> np.ndarray:
+    """Select vertices with a good fit, a preferred numerosity between 1 and 7, and an identifiable pRF center."""
+    numerosity = np.exp(params["mu"].to_numpy())
+    return (
+        (r_squared > r_squared_threshold)
+        & (numerosity >= 1)
+        & (numerosity <= 7)
+        & (params["sigma"].to_numpy() < 2.8)
+    )
+
+
+is_selected = select_vertices(sgd_params, r_squared)
+
+is_selected.mean()  # Fraction of fitted vertices that are selected
 ```
 
-We add the ROI labels to each vertex in the parameters dataframe and transform `mu` into preferred numerosity.
+We add the name of the numerosity map to the parameters of each vertex and convert `mu` into the preferred numerosity
+on the natural scale.
 
 ```{code-cell} ipython3
 final_params = sgd_params.copy()
-final_params["roi"] = [roi_mapping[idx] for idx in roi_index]
+final_params["roi"] = pd.Categorical(
+    [roi_mapping[label] for label in roi_index[fit_vertices]],
+    categories=roi_names,  # Keep the order of the maps from the mapping
+    ordered=True,
+)
 final_params["numerosity"] = np.exp(final_params["mu"])
 
-params_valid = final_params.loc[is_valid].copy()
+params_selected = final_params.loc[is_selected]
 
-# Order the ROIs anatomically (occipital -> central sulcus -> frontal). Without this, 'groupby'
-# below would sort them alphabetically and no longer match the order of 'roi_mapping'.
-roi_order = list(roi_mapping.values())
-params_valid["roi"] = pd.Categorical(params_valid["roi"], categories=roi_order, ordered=True)
+params_selected.groupby("roi", observed=False)[["numerosity", "sigma"]].agg(["mean", "std", "count"]).round(2)
 ```
 
-Now, we can compare the average preferred numerosity between ROIs. We also keep the number of surviving
-vertices per ROI, because it varies by an order of magnitude and tells us how many data points go into each average.
-
-```{code-cell} ipython3
-params_agg_roi = params_valid.groupby("roi", observed=False)[["numerosity", "sigma"]].agg(
-    ["mean", "std", "count"]
-)
-
-params_agg_roi.round(2)
-```
-
-We plot the average preferred numerosity of each ROI with {py:func}`prfmodel.plotting.plot_parameter_by_roi`.
+We plot the average preferred numerosity and pRF size of each map with
+{py:func}`prfmodel.plotting.plot_parameter_by_roi`. The error bars show the standard deviation across vertices (not the
+standard error of the mean).
 
 ```{code-cell} ipython3
 from prfmodel.plotting import plot_parameter_by_roi
 
-plot_parameter_by_roi(
-    params_valid, "numerosity", params_valid["roi"], order=roi_order, ylabel="Preferred numerosity"
-);
+fig, ax = plot_parameter_by_roi(
+    params_selected,
+    "numerosity",
+    params_selected["roi"],
+    order=roi_names,
+    xlabel="Numerosity map",
+    ylabel="Preferred numerosity",
+    figsize=(12, 4.5),
+)
+ax.tick_params(axis="x", labelrotation=45)
+plt.show()
 ```
-
-The error bars show the standard deviation across vertices, not the standard error of the mean. Average preferred
-numerosity is highest in the occipital maps NLO (lateral occipital) and NTO (temporal occipital) and lowest in NFS
-(superior frontal), while the maps around the central sulcus (NPCI, NPCM, NPCS) sit close together in between.
-However, the variation within each ROI is large relative to these differences, and the number of surviving vertices
-differs strongly between maps.
-
-We can also look at the average pRF size of each ROI.
 
 ```{code-cell} ipython3
-plot_parameter_by_roi(
-    params_valid, "sigma", params_valid["roi"], order=roi_order, ylabel="pRF size (sigma, in log-numerosity units)"
+fig, ax = plot_parameter_by_roi(
+    params_selected,
+    "sigma",
+    params_selected["roi"],
+    order=roi_names,
+    xlabel="Numerosity map",
+    ylabel="pRF size (sigma, in log numerosity)",
+    figsize=(12, 4.5),
+)
+ax.tick_params(axis="x", labelrotation=45)
+plt.show()
+```
+
+When comparing the maps, keep in mind the variation within each map (the error bars) and the number of selected vertices
+in each map (see the table above): A difference between two maps is only meaningful if it is large relative to the
+variation within the maps, and an average over few vertices is less reliable than an average over many.
+
++++
+
+## Preferred numerosity on the cortical surface
+
+We can also look at the preferred numerosity on the cortical surface. We use flattened surfaces (flatmaps) of both
+hemispheres, which show the entire cortex at once. A flat surface covers fewer vertices than the full cortical surface
+because a part of it (e.g., the medial wall) was cut away to flatten it. The function
+{py:func}`prfmodel.plotting.make_flat_mesh` builds the flat surface mesh and returns, for each vertex of the flat
+mesh, the row of `dataset.response` that it belongs to. The orientation of a flat surface is arbitrary, so we rotate
+the hemispheres to show them upright.
+
+```{code-cell} ipython3
+from prfmodel.plotting import make_flat_mesh
+
+flat_mesh, flat_indices = make_flat_mesh(dataset, rotation={"left": -100, "right": -80})
+```
+
+We fill the preferred numerosity of the selected vertices into an array with one value per vertex of the cortical
+surface (NaN for all other vertices) and plot it on the flat mesh with
+{py:func}`prfmodel.plotting.plot_surface_stat_map`.
+
+```{code-cell} ipython3
+from prfmodel.plotting import plot_surface_stat_map
+
+numerosity_surface = np.full(len(response), np.nan)
+numerosity_surface[fit_vertices[is_selected]] = params_selected["numerosity"]
+
+plot_surface_stat_map(
+    flat_mesh,
+    numerosity_surface[flat_indices],
+    vmin=1.0,
+    vmax=7.0,
+    cmap="viridis",
+    title="Preferred numerosity",
+    figsize=(12, 6),
 );
 ```
 
-Average pRF size is roughly constant across the occipital (NTO, NLO, NPO) and central sulcus (NPCI, NPCM, NPCS) maps
-and somewhat smaller in the frontal maps (NFI, NFS).
+Each colored patch is a numerosity map. Numerosity maps are topographic: Neighboring vertices prefer similar
+numerosities, so the preferred numerosity should change gradually from one end of a map to the other rather than
+randomly between vertices. We quantify this change along a single map in the next section.
+
++++
+
+## Preferred numerosity along a numerosity map
+
+To measure the position of a vertex within a map, the dataset contains the geodesic distance of each vertex in mm,
+which is measured along the cortical surface rather than in a straight line through the brain. The distance is 0 mm at
+the end of the map with low preferred numerosities and increases towards the end with high preferred numerosities. It
+is stored in the `units` table of the dataset, in the same order as the response. We look at the right NumTO.
+
+```{code-cell} ipython3
+roi_label = 7  # rh_NumTO
+roi_distance = dataset.units["roi_distance_mm"].to_numpy()
+
+roi_mapping[roi_label]
+```
+
+We select the fitted vertices of the map with the same criteria as above, but with a stricter R-squared threshold of
+0.3, and look up their geodesic distance.
+
+```{code-cell} ipython3
+in_roi = roi_index[fit_vertices] == roi_label
+keep = in_roi & select_vertices(sgd_params, r_squared, r_squared_threshold=0.3)
+
+distance_data = pd.DataFrame(
+    {
+        "distance": roi_distance[fit_vertices[keep]],
+        "numerosity": np.exp(sgd_params["mu"].to_numpy()[keep]),
+    },
+)
+
+len(distance_data)  # Number of selected vertices
+```
+
+We group the vertices into distance bins of 2 mm and compute the mean preferred numerosity of each bin.
+
+```{code-cell} ipython3
+BIN_WIDTH = 2.0  # in mm
+
+bin_edges = np.arange(0.0, distance_data["distance"].max() + BIN_WIDTH, BIN_WIDTH)
+
+
+def bin_numerosity(data: pd.DataFrame) -> pd.DataFrame:
+    """Compute the mean preferred numerosity and its standard error in each distance bin."""
+    bins = pd.cut(data["distance"], bins=bin_edges, include_lowest=True)
+    binned = data.groupby(bins, observed=True)["numerosity"].agg(["mean", "sem", "count"]).reset_index()
+    binned["distance"] = [interval.mid for interval in binned["distance"]]
+    return binned
+
+
+binned_data = bin_numerosity(distance_data)
+```
+
+We fit a logarithmic function to the mean preferred numerosity of the bins. To estimate the uncertainty of this fit,
+we use bootstrap resampling: We sample vertices with replacement, recompute the bins, and fit the logarithmic function
+again. We repeat this 1,000 times. The 2.5th and 97.5th percentiles of the resulting curves give a 95% confidence
+interval.
+
+```{code-cell} ipython3
+from scipy.optimize import curve_fit
+
+
+def log_function(x: np.ndarray, a: float, b: float, c: float) -> np.ndarray:
+    """Logarithmic function of the distance."""
+    return a * np.log(x + c) + b
+
+
+def fit_log_function(binned: pd.DataFrame, p0: tuple[float, ...] = (1.0, 1.0, 1.0)) -> np.ndarray:
+    """Fit the logarithmic function to the mean preferred numerosity of the distance bins."""
+    params, _ = curve_fit(
+        log_function,
+        binned["distance"],
+        binned["mean"],
+        p0=p0,
+        bounds=([-np.inf, -np.inf, 0.01], [np.inf, np.inf, 100.0]),
+        maxfev=10000,
+    )
+    return params
+
+
+fit_params = fit_log_function(binned_data)
+
+rng = np.random.default_rng(22)
+x_fit = np.linspace(distance_data["distance"].min(), distance_data["distance"].max(), 200)
+bootstrap_curves = []
+
+for _ in range(1000):
+    resampled = distance_data.sample(len(distance_data), replace=True, random_state=rng)
+    resampled_binned = bin_numerosity(resampled)
+    if len(resampled_binned) < 3:  # Too few bins for three parameters
+        continue
+    try:
+        bootstrap_curves.append(log_function(x_fit, *fit_log_function(resampled_binned, p0=fit_params)))
+    except RuntimeError:  # The fit did not converge
+        continue
+
+lower, upper = np.percentile(bootstrap_curves, [2.5, 97.5], axis=0)
+
+len(bootstrap_curves)  # Number of successful bootstrap fits
+```
+
+Finally, we plot the mean preferred numerosity of the bins. The error bars show the standard error of the mean within
+each bin. The solid line shows the logarithmic fit and the dashed lines its 95% bootstrap confidence interval.
+
+```{code-cell} ipython3
+fig, ax = plt.subplots(figsize=(10, 5), layout="constrained")
+
+ax.errorbar(
+    binned_data["distance"],
+    binned_data["mean"],
+    yerr=binned_data["sem"],
+    fmt="o",
+    color="black",
+    capsize=3,
+    label="Mean of distance bin",
+    zorder=5,
+)
+ax.plot(x_fit, log_function(x_fit, *fit_params), color="black", linewidth=2.5, label="Logarithmic fit", zorder=4)
+ax.plot(x_fit, lower, color="black", linestyle="--", linewidth=1)
+ax.plot(x_fit, upper, color="black", linestyle="--", linewidth=1)
+
+ax.set(
+    xlabel="Geodesic distance (in mm)",
+    ylabel="Preferred numerosity",
+    ylim=(1, 7),
+    title=f"Preferred numerosity along {roi_mapping[roi_label]}",
+)
+ax.legend(frameon=False)
+plt.show()
+```
+
+In a topographic numerosity map, the preferred numerosity increases with the distance from the low end of the map. The
+logarithmic function describes an increase that is steep near the low end and flattens towards the high end, so that
+small numerosities take up more of the map than large ones.
+
+### Controlling for other visual properties of the stimulus
+
+Changing the number of dots also changes other visual properties of the stimulus, for example, the total area covered
+by the dots. Consequently, a neuron population whose response appears to be tuned to numerosity might instead be tuned
+to one of these properties. To control for this, the dataset contains responses to four stimulus conditions, each of
+which keeps a different visual property constant across numerosities:
+
+- **Area (constant area):** The total area of all dots is the same for all numerosities.
+- **Size (constant dot size):** The size of each dot is the same for all numerosities.
+- **Dens (high density):** The same dots as in the constant area condition are shown in a smaller region of the screen,
+  which increases their density.
+- **Circ (constant circumference):** The total circumference of all dots is the same for all numerosities.
+
+The `average` condition that we fitted above is the average of these four conditions. The conditions make the
+properties testable. Consider a population that responds to the total area of the dots rather than to their number: In
+the constant area and high density conditions, its response would not change with numerosity, because the total area
+stays the same. In the constant dot size condition, the total area grows with numerosity, so the population would
+appear to be tuned to numerosity. A population that is tuned to numerosity, in contrast, responds in the same way in
+all conditions. Thus, if a map represents numerosity, the preferred numerosity should change in the same way along the
+map in all four conditions.
+
+The responses of each condition are loaded with the `task` option of
+{py:func}`~prfmodel.examples.load_dataset`. All conditions share the same vertices in the same order, so the ROI labels,
+the geodesic distances, and the model from above apply to every condition. For example, the following code fits the
+constant area condition in the same map; repeating the steps of this section for its estimates gives the preferred
+numerosity along the map in this condition. We do not run it here because fitting all four conditions takes a while.
+
+```python
+area_response = load_dataset("numerosity-four-conditions", task="area").response
+
+# Vertices of the map that have a response in this condition
+area_vertices = np.flatnonzero((roi_index == roi_label) & ~np.isnan(area_response).any(axis=1))
+area_response_fit = detrend(area_response[area_vertices])
+
+_, area_grid_params = grid_fitter.fit(data=area_response_fit, parameter_values=param_ranges, batch_size=20)
+_, area_ls_params = ls_fitter.fit(
+    data=area_response_fit,
+    parameters=area_grid_params,
+    slope_name="amplitude",
+    intercept_name="baseline",
+    batch_size=200,
+)
+_, area_params = sgd_fitter.fit(data=area_response_fit, init_parameters=area_ls_params)
+
+area_r_squared = calculate_r_squared(
+    area_response_fit, np.asarray(prf_model_batched(stimulus, area_params, batch_size=100))
+)
+```
 
 +++
 
 ## Conclusion
 
-This example showed how to fit a one-dimensional Gaussian pRF model to empirical fMRI data collected from a numerosity experiment. We only looked at a subset of vertices in ROIs that previously were shown to respond to the numerosity stimulus used in the experiment. We plotted the raw BOLD response data and we created the experimental stimulus. Then, we defined a pRF model and optimized its parameters using a grid search, followed by least-squares to adjust for baseline and amplitude differences and stochastic gradient descent to finetune all parameters. Finally, we visualized model fit and compared estimated parameters between ROIs.
+This example showed how to fit a one-dimensional Gaussian pRF model to fMRI data from a numerosity experiment. We
+loaded responses that were already projected onto the cortical surface and converted to percent signal change, removed
+slow trends, and adapted the model predictions to this preprocessing by wrapping the prediction function of the model.
+We optimized the model parameters with a grid search, least squares, and stochastic gradient descent, evaluated the
+model fit, and compared the estimated parameters between numerosity maps. Finally, we showed the preferred numerosity on
+flattened cortical surfaces, investigated how it changes along a numerosity map, and showed how the four stimulus
+conditions of the dataset control for other visual properties of the dots.
 
 +++
 
 ## References
 
-Harvey, B. M., Klein, B. P., Petridou, N., & Dumoulin, S. O. (2013). Topographic representation of numerosity in the human parietal cortex. *Science*, *341*(6150), 1123–1126. https://doi.org/10.1126/science.1239052
+Harvey, B. M., Klein, B. P., Petridou, N., & Dumoulin, S. O. (2013). Topographic representation of numerosity in the
+human parietal cortex. *Science*, *341*(6150), 1123–1126. https://doi.org/10.1126/science.1239052
 
-Hendrikx, E., Paul, J. M., van Ackooij, M., van der Stoep, N., & Harvey, B. M. (2024). Cortical quantity representations of visual numerosity and timing overlap increasingly into superior cortices but remain distinct. *NeuroImage*, *286*, 120515. https://doi.org/10.1016/j.neuroimage.2024.120515
+Hendrikx, E., Paul, J. M., van Ackooij, M., van der Stoep, N., & Harvey, B. M. (2024). Cortical quantity
+representations of visual numerosity and timing overlap increasingly into superior cortices but remain distinct.
+*NeuroImage*, *286*, 120515. https://doi.org/10.1016/j.neuroimage.2024.120515
+
+Mauro, K. (2026). Four condition numerosity dataset. *figshare*. https://doi.org/10.6084/m9.figshare.34898940
