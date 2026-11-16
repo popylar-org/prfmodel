@@ -346,7 +346,8 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
         remaining voxel are NaN.
 
     The requested hemispheres are returned with the left hemisphere first. The FreeSurfer white surfaces share
-    this vertex order and are returned as the mesh.
+    this vertex order and are returned as the mesh. The table in `units` holds the hemisphere of each vertex and
+    its geodesic distance in mm within its ROI (`roi_distance_mm`, NaN for vertices outside the ROIs).
     """
     if options.task is None:
         msg = "Dataset 'numerosity-four-conditions' requires a task"
@@ -374,7 +375,20 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
         roi_ids = np.asarray(archive["roi_ids"], dtype=np.int32)
         roi_names = np.asarray(archive["roi_names"])
 
-    fetch("roi_data")
+    # Geodesic distance of each vertex within its ROI (NaN outside); the ROIs do not overlap
+    roi_distance = np.full(len(vertex_roi_index), np.nan)
+
+    with np.load(fetch("roi_data")) as archive:
+        for key in archive.files:
+            if key.endswith("_distances_mm"):
+                distances = np.asarray(archive[key], dtype=np.float64)
+                is_in_roi = np.isfinite(distances)
+
+                if np.isfinite(roi_distance[is_in_roi]).any():
+                    msg = f"The ROI distances in '{key}' overlap with the distances of another ROI"
+                    raise ValueError(msg)
+
+                roi_distance[is_in_roi] = distances[is_in_roi]
 
     # Project all voxels first, then select the hemisphere (the mapping refers to all voxels)
     vertex_response = _voxels_to_vertices(response, valid, offsets, rows)
@@ -392,7 +406,7 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
         order_parts.append(np.flatnonzero(vertex_hemisphere_id == hemi_id))
         mesh_files[part] = fetch(f"{prefix}_white")
 
-        # Expose the files needed for the flatmaps and the distances along the maps (keeps them in `files`)
+        # Expose the flat surfaces and their vertex indices on the full surface (kept in `files`)
         fetch(f"{prefix}_flat")
         fetch(f"{prefix}_vertex_indices")
 
@@ -416,11 +430,17 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
         **{int(i): str(name) for i, name in zip(roi_ids, roi_names, strict=True)},
     }
 
+    units = pd.DataFrame({
+        "hemisphere": np.where(vertex_hemisphere_id[order] == 0, "left", "right"),
+        "roi_distance_mm": roi_distance[order],
+    })
+
     return Dataset(
         name="numerosity-four-conditions",
         response=vertex_response[order],
         roi_index=vertex_roi_index[order],
         roi_mapping=roi_mapping,
+        units=units,
         mesh=mesh,
         hemisphere=options.hemisphere,
         task=task,
