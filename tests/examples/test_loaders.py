@@ -76,6 +76,8 @@ _FAKE_NUMEROSITY_FOUR_INVALID_VOXEL = 6
 # Voxel v of task t has the percent signal change (10 v + t + 1, -(10 v + t + 1), 0), so the first frame of a vertex
 # is this base plus t + 1, which shows both which vertex and which task was loaded
 _FAKE_NUMEROSITY_FOUR_FIRST_FRAME_BASE = np.array([0.0, 10.0, 20.0, np.nan, 35.0, 50.0])
+_FAKE_NUMEROSITY_FOUR_ROI_DISTANCE = np.array([0.5, 1.5, 2.5, np.nan, np.nan, 5.5])
+
 
 _NUMEROSITY_FOUR_HEMISPHERE_IDS = {"left": [0], "right": [1], "both": [0, 1]}
 _NUMEROSITY_FOUR_PREFIXES = {"left": "lh", "right": "rh"}
@@ -146,6 +148,17 @@ def _write_fake_numerosity_four_files(data_dir: Path, num_left_white_vertices: i
             )
         elif key == "label_names":
             np.savez(path, roi_ids=np.array([0, 1, 2]), roi_names=np.array(["NTO", "NLO", "NPO"]))
+        elif key == "roi_data":
+            # One distance array over all vertices per ROI (NaN outside it), like the real file
+            np.savez(
+                path,
+                **{
+                    f"roi_{roi}_distances_mm": np.where(
+                        roi == _FAKE_NUMEROSITY_FOUR_ROI_INDEX, _FAKE_NUMEROSITY_FOUR_ROI_DISTANCE, np.nan,
+                    )
+                    for roi in (0, 1, 2)
+                },
+            )
         elif key.endswith("_white"):
             num_vertices = (
                 num_left_white_vertices if key == "lh_white" else _NUM_FAKE_NUMEROSITY_FOUR_VERTICES_PER_HEMISPHERE
