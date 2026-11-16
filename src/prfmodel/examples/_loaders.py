@@ -335,7 +335,19 @@ def _voxels_to_vertices(
 
 
 def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dataset:
-    """Load the fMRI response of a single subject to numerosity stimuli in four stimulus conditions (surface data)."""
+    """Load the fMRI response of a single subject to numerosity stimuli in four stimulus conditions (surface data).
+
+    The voxel responses of the requested task are assigned to the vertices of the cortical surface:
+
+    1. Exclude the voxels that the dataset marks as invalid because they have zeros at some time frames (they fell
+        outside the scanned volume).
+    2. Convert the remaining voxels to percent signal change (PSC) relative to their mean over time.
+    3. Take the mean PSC of the voxels assigned to each vertex (`surface_mapping_method2`). Vertices without any
+        remaining voxel are NaN.
+
+    The requested hemispheres are returned with the left hemisphere first. The FreeSurfer white surfaces share
+    this vertex order and are returned as the mesh.
+    """
     if options.task is None:
         msg = "Dataset 'numerosity-four-conditions' requires a task"
         raise ValueError(msg)
