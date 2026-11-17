@@ -81,6 +81,15 @@ def test_describe_dataset_reports_a_default_split():
     assert "Tasks: csf, prf (default 'csf')" in description
 
 
+
+def test_describe_dataset_reports_a_required_task():
+    """Test that a dataset without a default task says that a task is required."""
+    description = describe_dataset("numerosity-four-conditions")
+
+    assert "Tasks: area, average, circ, dens, size (required)" in description
+    assert "Hemispheres: both, left, right (default 'both')" in description
+
+
 def test_default_split_must_be_a_split():
     """Test that a default split that the dataset does not provide is refused."""
     spec = _get_registry()["7t-ncsf-visual"]

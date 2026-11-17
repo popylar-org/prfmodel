@@ -18,10 +18,12 @@ from ._stimuli import plot_1d_prf_stimulus
 from ._stimuli import plot_2d_prf_stimulus
 from ._stimuli import plot_csf_stimulus_curve
 from ._stimuli import plot_csf_stimulus_design
+from ._surface import make_flat_mesh
 from ._surface import plot_surface_stat_map
 
 __all__ = [
     "animate_2d_prf_stimulus",
+    "make_flat_mesh",
     "plot_1d_prf_stimulus",
     "plot_2d_prf_centers",
     "plot_2d_prf_stimulus",
