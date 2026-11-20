@@ -298,8 +298,8 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
     resolution = _resolution(coordinates)
     half_extent = _extent(coordinates) / 2.0
 
-   # The rings are centered on the point (0, 0) of the stimulus coordinates, because the polar model measures
-   # eccentricity and angle from there. The midpoint of the stimulus (normally the fixation point) must be at (0, 0).
+    # The rings are centered on the point (0, 0) of the stimulus coordinates, because the polar model measures
+    # eccentricity and angle from there. The midpoint of the stimulus (normally the fixation point) must be at (0, 0).
     midpoint_x, midpoint_y = ((float(np.min(coords)) + float(np.max(coords))) / 2.0 for coords in coordinates)
     if np.hypot(midpoint_x, midpoint_y) > resolution / 2.0:
         msg = (
@@ -327,7 +327,6 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
         # multiple of four, so that the angles include 0, pi/2, pi, and -pi/2 (the meridians) and the grid is symmetric
         num_angle = 4 * max(1, int(np.round(2.0 * np.pi / np.log(ecc[1] / ecc[0]) / 4.0)))
 
-
     angle = np.linspace(-np.pi, np.pi, num_angle, endpoint=False)
 
     return {
@@ -335,7 +334,6 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
         "angle": angle,
         "sigma": _sigma_values(coordinates, num_sigma, sigma_range, log_sigma),
     }
-
 
 
 def grid_values_1d_prf(  # noqa: PLR0913
