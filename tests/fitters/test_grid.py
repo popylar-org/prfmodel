@@ -10,9 +10,13 @@ from prfmodel.exceptions import InvalidUnitsWarning
 from prfmodel.exceptions import ShapeError
 from prfmodel.fitters import GridFitter
 from prfmodel.fitters import GridHistory
+from prfmodel.fitters import LeastSquaresFitter
+from prfmodel.fitters import grid_values_2d_prf_polar
 from prfmodel.fitters._grid import InfiniteLossWarning
 from prfmodel.fitters.losses import CorrelationLoss
 from prfmodel.models.prf import Gaussian2DPRFModel
+from prfmodel.models.prf import PolarGaussian2DPRFModel
+from prfmodel.models.prf import init_gaussian_from_polar
 from prfmodel.regressors import AdditiveRegressors
 from prfmodel.stimuli import PRFStimulus
 from prfmodel.typing import Tensor
@@ -503,3 +507,77 @@ class TestGridFitterIgnoresExtraColumns(TestSetup):
         _, grid_params = GridFitter(model=model, stimulus=stimulus).fit(observed, grid, regressors=design)
 
         assert grid_params.shape == (len(params), len(grid))
+
+
+_HRF_PARAMS = {
+    "delay": 6.0,
+    "dispersion": 0.9,
+    "undershoot": 12.0,
+    "u_dispersion": 0.9,
+    "ratio": 0.48,
+    "weight_deriv": 0.5,
+}
+
+
+class TestPolarGridSearch(TestSetup):
+    """Tests for a grid search with polar grid values, followed by least squares in cartesian coordinates."""
+
+    @pytest.fixture
+    def grid_values(self, stimulus: PRFStimulus):
+        """Polar grid values with the HRF fixed and placeholder values for baseline and amplitude."""
+        values = grid_values_2d_prf_polar(stimulus, num_ecc=5, mu_extent=1.0, num_angle=8, num_sigma=4)
+        fixed = {name: [value] for name, value in _HRF_PARAMS.items()}
+
+        return values | fixed | {"baseline": [0.0], "amplitude": [1.0]}
+
+
+    @pytest.fixture
+    def true_polar(self, grid_values: dict):
+        """Pick the true pRF centers and sizes from the grid, so that the grid search can recover them exactly."""
+        return pd.DataFrame(
+            {
+                "ecc": grid_values["ecc"][[3, 4, 2]],
+                # pi / 2, -3 pi / 4, and 0 for 8 angles starting at -pi
+                "angle": grid_values["angle"][[6, 1, 4]],
+                "sigma": grid_values["sigma"][[1, 2, 2]],
+            },
+        )
+
+
+    def test_polar_grid_search_pipeline(self, stimulus: PRFStimulus, grid_values: dict, true_polar: pd.DataFrame):
+        """Test that the polar grid search and the conversion recover the pRFs the data was generated from."""
+        true_params = pd.DataFrame(
+            {
+                "mu_x": true_polar["ecc"] * np.cos(true_polar["angle"]),
+                "mu_y": true_polar["ecc"] * np.sin(true_polar["angle"]),
+                "sigma": true_polar["sigma"],
+                "baseline": [0.1, -0.1, 0.5],
+                "amplitude": [2.0, 1.2, 0.5],
+            },
+        ).assign(**_HRF_PARAMS)
+
+        observed = _oracle.predict(stimulus, true_params, frames=_oracle.impulse_frames())
+
+        # Grid search in polar coordinates
+        _, grid_params = GridFitter(model=PolarGaussian2DPRFModel(), stimulus=stimulus).fit(observed, grid_values)
+
+        np.testing.assert_allclose(grid_params[["ecc", "angle", "sigma"]], true_polar, atol=1e-6)
+
+        # Conversion to cartesian coordinates
+        init_params = init_gaussian_from_polar(grid_params)
+
+        np.testing.assert_allclose(init_params[["mu_x", "mu_y"]], true_params[["mu_x", "mu_y"]], atol=1e-6)
+
+        # Least squares with the standard cartesian model
+        _, ls_params = LeastSquaresFitter(model=Gaussian2DPRFModel(), stimulus=stimulus).fit(
+            observed,
+            init_params,
+            slope_name="amplitude",
+            intercept_name="baseline",
+        )
+
+        np.testing.assert_allclose(
+            ls_params[["baseline", "amplitude"]],
+            true_params[["baseline", "amplitude"]],
+            atol=1e-3,
+        )

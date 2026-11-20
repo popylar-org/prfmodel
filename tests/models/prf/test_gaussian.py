@@ -15,13 +15,18 @@ from prfmodel.models.prf import Gaussian1DPRFModel
 from prfmodel.models.prf import Gaussian1DPRFTuning
 from prfmodel.models.prf import Gaussian2DPRFModel
 from prfmodel.models.prf import Gaussian2DPRFTuning
+from prfmodel.models.prf import PolarGaussian2DPRFModel
+from prfmodel.models.prf import PolarGaussian2DPRFTuning
 from prfmodel.models.prf import PRFStimulusEncoder
+from prfmodel.models.prf import init_gaussian_from_polar
 from prfmodel.models.prf import predict_gaussian_response
 from prfmodel.models.prf._gaussian import _check_gaussian_args
 from prfmodel.models.prf._gaussian import _expand_gaussian_args
 from prfmodel.scaling import BaselineAmplitude
 from prfmodel.scaling.base import BaseScaling
 from prfmodel.stimuli import PRFStimulus
+from prfmodel.utils import calculate_eccentricity
+from prfmodel.utils import calculate_polar_angle
 from tests.conftest import PRFStimulusSetup
 from tests.models.conftest import PRFStimulusGridSetup
 from tests.models.conftest import parametrize_dtype
@@ -527,3 +532,193 @@ class TestCoordinateConvention:
                 f"{name}: the leftmost design column must map to the left visual hemifield "
                 f"(negative x) and the rightmost column to the right hemifield"
             )
+
+
+class TestPolarGaussian2DPRFTuning(PRFStimulusSetup):
+    """Tests for the PolarGaussian2DPRFTuning class."""
+
+    @pytest.fixture
+    def response_model(self):
+        """Response model object."""
+        return PolarGaussian2DPRFTuning()
+
+    @pytest.fixture
+    def polar_params(self):
+        """Centers at (0, 0), on the meridians, and in the quadrants."""
+        return pd.DataFrame(
+            {
+                "ecc": [0.0, 1.0, 2.0, 1.5, 3.0, 2.5],
+                "angle": [0.0, 0.0, np.pi / 2, 3 * np.pi / 4, -np.pi / 3, -np.pi],
+                "sigma": [1.0, 0.5, 1.5, 1.0, 2.0, 0.8],
+            },
+        )
+
+    def test_parameter_names(self, response_model: PolarGaussian2DPRFTuning):
+        """Test that correct parameter names are returned."""
+        assert response_model.parameter_names == ["ecc", "angle", "sigma"]
+
+    @parametrize_dtype
+    def test_predict_matches_cartesian(
+        self,
+        response_model: PolarGaussian2DPRFTuning,
+        stimulus: PRFStimulus,
+        polar_params: pd.DataFrame,
+        dtype: str,
+    ):
+        """Test that the prediction equals that of Gaussian2DPRFTuning at the converted center."""
+        cartesian_params = pd.DataFrame(
+            {
+                "mu_x": polar_params["ecc"] * np.cos(polar_params["angle"]),
+                "mu_y": polar_params["ecc"] * np.sin(polar_params["angle"]),
+                "sigma": polar_params["sigma"],
+            },
+        )
+
+        preds = np.asarray(response_model(stimulus, polar_params, dtype))
+        expected = np.asarray(Gaussian2DPRFTuning()(stimulus, cartesian_params, dtype))
+
+        assert preds.shape == (len(polar_params), stimulus.design.shape[1], stimulus.design.shape[2])
+        np.testing.assert_allclose(preds, expected, rtol=1e-4, atol=1e-5)
+
+    @pytest.mark.parametrize(
+        ("angle", "expected_center"),
+        [
+            (0.0, (0.0, 2.0)),  # Right
+            (np.pi / 2, (2.0, 0.0)),  # Up
+            (np.pi, (0.0, -2.0)),  # Left
+            (-np.pi / 2, (-2.0, 0.0)),  # Down
+        ],
+    )
+    def test_angle_convention(
+        self,
+        response_model: PolarGaussian2DPRFTuning,
+        stimulus: PRFStimulus,
+        angle: float,
+        expected_center: tuple[float, float],
+    ):
+        """Test that the angle runs counterclockwise from the positive x-axis.
+
+        The expected center is given as (y, x), the order of the last grid dimension.
+
+        """
+        params = pd.DataFrame({"ecc": [2.0], "angle": [angle], "sigma": [0.3]})
+        preds = np.asarray(response_model(stimulus, params, "float64"))[0]
+
+        peak = np.unravel_index(np.argmax(preds), preds.shape)
+        spacing = np.abs(np.diff(stimulus.grid[0, :, 1])).max()
+
+        np.testing.assert_allclose(stimulus.grid[peak], expected_center, atol=spacing)
+
+
+class TestPolarGaussian2DPRFModel(PRFStimulusSetup):
+    """Tests for the PolarGaussian2DPRFModel class."""
+
+    @pytest.fixture
+    def polar_params(self):
+        """Dataframe with parameters."""
+        return pd.DataFrame(
+            {
+                "ecc": [1.0, 2.0, 0.5],
+                "angle": [0.0, np.pi / 2, -3 * np.pi / 4],
+                "sigma": [1.0, 2.0, 0.5],
+                "delay": [6.0, 7.0, 5.0],
+                "dispersion": [0.9, 1.0, 0.8],
+                "undershoot": [12.0, 11.0, 13.0],
+                "u_dispersion": [0.9, 1.0, 0.8],
+                "ratio": [0.48, 0.48, 0.48],
+                "weight_deriv": [0.5, 0.5, 0.5],
+                "baseline": [0.0, 0.1, 0.2],
+                "amplitude": [1.1, 1.0, 0.9],
+            },
+        )
+
+    def test_submodels_inherit_basemodel(self):
+        """Test that submodels that do not inherit from BaseModel raise an error."""
+        with pytest.raises(TypeError):
+            PolarGaussian2DPRFModel(impulse_model="test")
+
+        with pytest.raises(TypeError):
+            PolarGaussian2DPRFModel(scaling_model="test")
+
+    def test_parameter_names(self):
+        """Test that the parameter names are those of Gaussian2DPRFModel with ecc and angle instead of mu_y and mu_x."""
+        cartesian_names = Gaussian2DPRFModel().parameter_names
+        expected = ["ecc", "angle", *(name for name in cartesian_names if name not in {"mu_y", "mu_x"})]
+
+        assert PolarGaussian2DPRFModel().parameter_names == expected
+
+    @pytest.mark.parametrize("impulse_model", [None, DerivativeTwoGammaImpulse])
+    def test_predict_matches_cartesian(
+        self,
+        stimulus: PRFStimulus,
+        polar_params: pd.DataFrame,
+        impulse_model: type[BaseImpulse] | None,
+    ):
+        """Test that the prediction equals that of Gaussian2DPRFModel at the converted center."""
+        resp = np.asarray(PolarGaussian2DPRFModel(impulse_model=impulse_model)(stimulus, polar_params))
+        expected = np.asarray(
+            Gaussian2DPRFModel(impulse_model=impulse_model)(stimulus, init_gaussian_from_polar(polar_params)),
+        )
+
+        assert resp.shape == (len(polar_params), stimulus.design.shape[0])
+        np.testing.assert_allclose(resp, expected, rtol=1e-4, atol=1e-5)
+
+
+class TestInitGaussianFromPolar:
+    """Tests for the init_gaussian_from_polar function."""
+
+    @pytest.fixture
+    def polar_params(self):
+        """Polar parameters with centers on the meridians and in a quadrant, and one unit excluded from the fit."""
+        return pd.DataFrame(
+            {
+                "ecc": [1.0, 2.0, 1.0, 3.0, np.nan],
+                "angle": [0.0, np.pi / 2, np.pi, -np.pi / 4, np.nan],
+                "sigma": [0.5, 1.0, 1.5, 2.0, np.nan],
+                "baseline": [0.0, 0.1, 0.2, 0.3, np.nan],
+                "amplitude": [1.0, -1.0, 2.0, 0.5, np.nan],
+            },
+        )
+
+    def test_columns(self, polar_params: pd.DataFrame):
+        """Test that ecc and angle are replaced by mu_x and mu_y and the shared columns are unchanged."""
+        result = init_gaussian_from_polar(polar_params)
+        shared = ["sigma", "baseline", "amplitude"]
+
+        assert set(result.columns) == {"mu_x", "mu_y", *shared}
+        pd.testing.assert_frame_equal(result[shared], polar_params[shared])
+
+    def test_values(self, polar_params: pd.DataFrame):
+        """Test that the centers are right, up, left, and in the lower right quadrant."""
+        result = init_gaussian_from_polar(polar_params).iloc[:4]
+        diagonal = 3.0 / np.sqrt(2.0)
+
+        np.testing.assert_allclose(result["mu_x"], [1.0, 0.0, -1.0, diagonal], atol=1e-12)
+        np.testing.assert_allclose(result["mu_y"], [0.0, 2.0, 0.0, -diagonal], atol=1e-12)
+
+    def test_round_trip(self, polar_params: pd.DataFrame):
+        """Test that calculate_eccentricity and calculate_polar_angle recover ecc and angle."""
+        valid = polar_params.iloc[:4]
+        result = init_gaussian_from_polar(valid)
+
+        np.testing.assert_allclose(calculate_eccentricity(result["mu_x"], result["mu_y"]), valid["ecc"])
+        np.testing.assert_allclose(calculate_polar_angle(result["mu_x"], result["mu_y"]), valid["angle"], atol=1e-12)
+
+    def test_nan_rows_stay_nan(self, polar_params: pd.DataFrame):
+        """Test that units excluded from the grid search (NaN parameters) stay NaN."""
+        result = init_gaussian_from_polar(polar_params)
+
+        assert result[["mu_x", "mu_y"]].iloc[4].isna().all()
+
+    def test_input_not_modified(self, polar_params: pd.DataFrame):
+        """Test that the input dataframe is not changed."""
+        original = polar_params.copy()
+        init_gaussian_from_polar(polar_params)
+
+        pd.testing.assert_frame_equal(polar_params, original)
+
+    def test_missing_column(self, polar_params: pd.DataFrame):
+        """Test that a missing polar column raises an error naming it."""
+        with pytest.raises(KeyError, match="angle"):
+            init_gaussian_from_polar(polar_params.drop(columns=["angle"]))
+
