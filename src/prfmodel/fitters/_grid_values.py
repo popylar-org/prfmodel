@@ -11,7 +11,8 @@ _MAX_ALIGNMENT_SEARCH = 1000
 class GridAlignmentWarning(UserWarning):
     """Warning for when the edges or the midpoint of a stimulus do not fall on grid values.
 
-    For a polar grid, the warning is raised when the midpoint of the stimulus does not fall on the center of the rings.
+    For a polar grid, the warning is raised when the midpoint of the stimulus is not at (0, 0), the center of the rings,
+    or when a given number of angles does not include all meridians.
     """
 
 
@@ -211,8 +212,8 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
     num_angle : int or None, optional
         Number of values for `angle`. If `None`, it is chosen so that the grid cells are roughly square, that is, the
         distance between neighboring centers on a ring is about the same as the distance between neighboring rings.
-        It is rounded to a multiple of four, so that there are centers on the horizontal and vertical meridians and
-        the grid is symmetric to both. A given value is used as is.
+        It is rounded to a multiple of four, so that there are centers on the horizontal and vertical meridians.
+        A given value is used as is, with a warning if it is not a multiple of four.
     num_sigma : int, optional
         Number of values for `sigma`.
     sigma_range : tuple[float, float] or None, optional
@@ -226,7 +227,7 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
     dict[str, numpy.ndarray]
         Values for `ecc`, `angle`, and `sigma` that can be passed to :meth:`prfmodel.fitters.GridFitter.fit` for a
         model whose pRF center is parameterized by eccentricity and polar angle. The angle is in radians and runs
-        counterclockwise from the positive x-axis, in the range :math:`[-\\pi, \\pi)`, like
+        counterclockwise from the positive x-axis, in the range :math:`[-\pi, \pi)`, like
         :func:`prfmodel.utils.calculate_polar_angle`. The center coordinates are
         `mu_x = ecc * cos(angle)` and `mu_y = ecc * sin(angle)`. Values for the other model parameters (e.g.,
         `baseline` and `amplitude`) must be added, for example, with the `|` operator.
@@ -242,7 +243,8 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
     -----
     GridAlignmentWarning
         If the midpoint of the stimulus is not at (0, 0) (by more than half the spacing of the stimulus grid),
-        because the rings are centered on (0, 0).
+        because the rings are centered on (0, 0). Also if a given `num_angle` is not a multiple of four, so that not
+        all meridians fall on grid values. The warning suggests a value for `num_angle` that aligns them.
 
     See Also
     --------
@@ -253,10 +255,10 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
     Notes
     -----
     With log-spaced rings, the distance between two neighboring rings at eccentricity :math:`r` is about
-    :math:`r \\ln q`, where :math:`q` is the ratio between neighboring eccentricities. The distance between
-    neighboring centers on a ring is :math:`2 \\pi r / n`, where :math:`n` is the number of angles. Both grow in
+    :math:`r \ln q`, where :math:`q` is the ratio between neighboring eccentricities. The distance between
+    neighboring centers on a ring is :math:`2 \pi r / n`, where :math:`n` is the number of angles. Both grow in
     proportion to :math:`r`, so the grid cells keep their shape across eccentricities, and they are square for
-    :math:`n = 2 \\pi / \\ln q`, the default for `num_angle` is this value rounded to a multiple of four.
+    :math:`n = 2 \pi / \ln q`. The default for `num_angle` is this value rounded to a multiple of four.
 
     There is no center exactly at the origin; the smallest ring has a radius of one stimulus grid spacing by default.
     The outer edge of the grid is a circle, so with `mu_extent=1.0` the corners of a rectangular stimulus are not
@@ -277,7 +279,7 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
     """
     _check_dimensions(stimulus, 2)
 
-    # log spacing needs at least two rings to define the ratio between them
+    # Log spacing needs at least two rings to define the ratio between them
     if num_ecc < 2:  # noqa: PLR2004
         msg = f"'num_ecc' must be at least 2, but is {num_ecc}"
         raise ValueError(msg)
@@ -323,9 +325,15 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
     ecc = np.geomspace(ecc_min, ecc_max, num_ecc)
 
     if num_angle is None:
-        # Square grid cells: the spacing on a ring (2 pi r / n) equals the spacing between rings (r ln q)
-        # multiple of four, so that the angles include 0, pi/2, pi, and -pi/2 (the meridians) and the grid is symmetric
+        # Square grid cells: the spacing on a ring (2 pi r / n) equals the spacing between rings (r ln q).
+        # Rounded to a multiple of four, so that the angles include 0, pi/2, pi, and -pi/2 (the meridians)
         num_angle = 4 * max(1, int(np.round(2.0 * np.pi / np.log(ecc[1] / ecc[0]) / 4.0)))
+    elif num_angle % 4 != 0:
+        suggestion = 4 * max(1, round(num_angle / 4))
+        msg = f"Not all meridians fall on the grid values of 'angle'; use 'num_angle={suggestion}' to align them"
+        if num_angle % 2 != 0:
+            msg += " (an odd number also makes the grid asymmetric left and right)"
+        warnings.warn(msg, category=GridAlignmentWarning, stacklevel=2)
 
     angle = np.linspace(-np.pi, np.pi, num_angle, endpoint=False)
 

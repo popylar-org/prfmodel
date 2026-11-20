@@ -183,9 +183,17 @@ def test_grid_values_2d_prf_polar_angle_spacing(stimulus_centered: PRFStimulus):
 
 
 def test_grid_values_2d_prf_polar_explicit_num_angle(stimulus_centered: PRFStimulus):
-    """Test that a given number of angles is used as is, even if it is not a multiple of four."""
-    angle = grid_values_2d_prf_polar(stimulus_centered, num_angle=7)["angle"]
+    """Test that a given number of angles is used as is, with a warning if it is not a multiple of four."""
+    with pytest.warns(GridAlignmentWarning, match="num_angle=8"):
+        angle = grid_values_2d_prf_polar(stimulus_centered, num_angle=7)["angle"]
     assert len(angle) == 7  # noqa: PLR2004
+
+
+def test_grid_values_2d_prf_polar_aligned_num_angle_no_warning(stimulus_centered: PRFStimulus):
+    """Test that a given multiple of four does not raise a warning."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", GridAlignmentWarning)
+        grid_values_2d_prf_polar(stimulus_centered, num_angle=12)
 
 
 def test_grid_values_2d_prf_polar_symmetric(stimulus_centered: PRFStimulus):
