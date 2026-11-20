@@ -20,7 +20,9 @@ complex model. The CST model differs from the others in that it splits the respo
 transient temporal channels; see :class:`Gaussian2DCSTPRFModel` for its sampling limitations.
 
 There are also multiple helper functions that initialize starting parameters from parameter estimates obtained from a
-different model (e.g., :func:`init_css_from_gaussian`).
+different model (e.g., :func:`init_css_from_gaussian`, or :func:`init_gaussian_from_polar` after a grid search with
+:class:`PolarGaussian2DPRFModel`).
+
 
 The function :func:`encode_prf_response` can be used to stimulus-encode a pRF response with arbitray dimensions. This
 function is also internally used by :class:`PRFStimulusEncoder`.
@@ -66,7 +68,9 @@ from ._gaussian import Gaussian1DPRFModel
 from ._gaussian import Gaussian1DPRFTuning
 from ._gaussian import Gaussian2DPRFModel
 from ._gaussian import Gaussian2DPRFTuning
+from ._gaussian import PolarGaussian2DPRFModel
 from ._gaussian import PolarGaussian2DPRFTuning
+from ._gaussian import init_gaussian_from_polar
 from ._gaussian import predict_gaussian_response
 from ._stimulus_encoding import PRFStimulusEncoder
 from ._stimulus_encoding import encode_prf_response
@@ -85,6 +89,7 @@ __all__ = [
     "Gaussian2DPRFModel",
     "Gaussian2DPRFTuning",
     "PRFStimulusEncoder",
+    "PolarGaussian2DPRFModel",
     "PolarGaussian2DPRFTuning",
     "encode_prf_response",
     "init_css_from_gaussian",
@@ -92,5 +97,6 @@ __all__ = [
     "init_delayed_norm_from_gaussian",
     "init_div_norm_from_dog_css",
     "init_dog_from_gaussian",
+    "init_gaussian_from_polar",
     "predict_gaussian_response",
 ]

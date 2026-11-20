@@ -1,5 +1,7 @@
 """Gaussian response models."""
 
+import numpy as np
+import pandas as pd
 from keras import ops
 from prfmodel._docstring import doc
 from prfmodel.density import normal_density
@@ -436,6 +438,164 @@ class PolarGaussian2DPRFTuning(BaseTuning[PRFStimulus, PRFStimulusTensors]):
         # Convention is y-dimension first: mu[:, 0] is paired with grid[..., 0] (y), mu[:, 1] with grid[..., 1] (x)
         mu = ops.stack([ecc * ops.sin(angle), ecc * ops.cos(angle)], axis=1)
         return predict_gaussian_response(stimulus.grid, mu, parameters[["sigma"]])
+
+@doc
+class PolarGaussian2DPRFModel(CanonicalPRFModel):
+    r"""
+    Two-dimensional isotropic Gaussian population receptive field (pRF) model with its center in polar coordinates.
+
+    This class combines a 2D isotropic Gaussian pRF with its center described by eccentricity and polar angle
+    (:class:`PolarGaussian2DPRFTuning`), impulse, scaling, and regressors model response. It makes the same predictions
+    as :class:`Gaussian2DPRFModel` for the same center.
+
+    Parameters
+    ----------
+    %(model_encoding_prf)s
+    %(model_impulse)s
+    %(model_scaling)s
+    %(model_regressors)s
+
+    Notes
+    -----
+    %(gaussian_norm_note)s
+
+    The model is meant for a grid search with values from :func:`~prfmodel.fitters.grid_values_2d_prf_polar`, which
+    places the pRF centers on rings around the point (0, 0). Afterwards, convert the estimates with
+    :func:`init_gaussian_from_polar` and continue with :class:`Gaussian2DPRFModel` for least squares and stochastic
+    gradient descent, because the angle wraps around at :math:`\pm\pi` and the gradient of the angle vanishes when
+    `ecc` is zero.
+
+    Using the default impulse and scaling models, the following columns are expected in the
+    :class:`pandas.DataFrame` passed as the ``parameters`` argument to :meth:`__call__`:
+
+    .. list-table::
+       :header-rows: 1
+       :widths: 20 12 53
+
+       * - Parameter
+         - Model
+         - Description
+       * - ``ecc``
+         - pRF
+         - Eccentricity of the Gaussian center (distance from (0, 0)).
+       * - ``angle``
+         - pRF
+         - Polar angle of the Gaussian center (in radians, counterclockwise from the positive x-axis).
+       * - ``sigma``
+         - pRF
+         - Standard deviation of the isotropic Gaussian.
+       * - ``delay``
+         - Impulse
+         - Mean time of the positive gamma component (in seconds; optional).
+       * - ``dispersion``
+         - Impulse
+         - Scale parameter of the positive gamma component (optional).
+       * - ``undershoot``
+         - Impulse
+         - Mean time of the negative gamma component (in seconds; optional).
+       * - ``u_dispersion``
+         - Impulse
+         - Scale parameter of the negative gamma component (optional).
+       * - ``ratio``
+         - Impulse
+         - Weight of the negative gamma component (optional).
+       * - ``weight_deriv``
+         - Impulse
+         - Weight of the derivative component.
+       * - ``baseline``
+         - Scaling
+         - Additive constant.
+       * - ``amplitude``
+         - Scaling
+         - Multiplicative scale factor.
+
+    Examples
+    --------
+    The polar model predicts the same response as the cartesian model for the same center.
+
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> shared = {"sigma": [1.0, 1.5], "weight_deriv": [0.5, 0.5], "baseline": [0.0, 0.1], "amplitude": [1.0, -1.0]}
+    >>> polar = pd.DataFrame({"ecc": [1.0, 2.0], "angle": [0.0, np.pi / 2]} | shared)
+    >>> cartesian = pd.DataFrame({"mu_x": [1.0, 0.0], "mu_y": [0.0, 2.0]} | shared)
+    >>> resp_polar = PolarGaussian2DPRFModel()(stimulus, polar)
+    >>> resp_cartesian = Gaussian2DPRFModel()(stimulus, cartesian)
+    >>> print(resp_polar.shape)  # (num_units, num_frames)
+    (2, 170)
+    >>> bool(np.allclose(resp_polar, resp_cartesian, atol=1e-6))
+    True
+
+    """
+
+    def __init__(
+        self,
+        encoding_model: BaseStimulusEncoder | type[BaseStimulusEncoder] = PRFStimulusEncoder,
+        impulse_model: BaseImpulse | type[BaseImpulse] | None = DerivativeTwoGammaImpulse,
+        scaling_model: BaseScaling | type[BaseScaling] | None = BaselineAmplitude,
+        regressors_model: BaseRegressors | list[BaseRegressors] | None = None,
+    ):
+        super().__init__(
+            prf_model=PolarGaussian2DPRFTuning(),
+            encoding_model=encoding_model,
+            impulse_model=impulse_model,
+            scaling_model=scaling_model,
+            regressors_model=regressors_model,
+        )
+
+
+def init_gaussian_from_polar(polar_params: pd.DataFrame) -> pd.DataFrame:
+    """
+    Initialize Gaussian model parameters from fitted polar Gaussian model parameters.
+
+    Converts the output of a fitted :class:`~prfmodel.models.prf.PolarGaussian2DPRFModel`, typically from a grid search
+    with values from :func:`~prfmodel.fitters.grid_values_2d_prf_polar`, into starting parameters for a
+    :class:`~prfmodel.models.prf.Gaussian2DPRFModel`, suitable for subsequent least squares and SGD.
+
+    Parameters
+    ----------
+    polar_params : pandas.DataFrame
+        DataFrame of fitted parameters from a :class:`~prfmodel.models.prf.PolarGaussian2DPRFModel`. Must contain the
+        columns ``ecc`` and ``angle`` (plus all shared columns).
+
+    Returns
+    -------
+    pandas.DataFrame
+        DataFrame of Gaussian initial parameters with the columns ``mu_x`` (``= ecc * cos(angle)``) and ``mu_y``
+        (``= ecc * sin(angle)``) instead of ``ecc`` and ``angle``, plus all shared columns unchanged. Rows with NaN
+        parameters (e.g., units excluded from the grid search) stay NaN.
+
+    See Also
+    --------
+    prfmodel.utils.calculate_eccentricity : Eccentricity of two-dimensional pRF centers (the inverse for ``ecc``).
+    prfmodel.utils.calculate_polar_angle : Polar angle of two-dimensional pRF centers (the inverse for ``angle``).
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> polar_params = pd.DataFrame({
+    ...     "ecc": [1.0, 2.0],
+    ...     "angle": [0.0, np.pi / 2],
+    ...     "sigma": [0.5, 1.0],
+    ...     "baseline": [0.0, 0.1],
+    ...     "amplitude": [1.0, -1.0],
+    ... })
+    >>> gaussian_params = init_gaussian_from_polar(polar_params)
+    >>> print(list(gaussian_params.columns))
+    ['sigma', 'baseline', 'amplitude', 'mu_x', 'mu_y']
+    >>> print(np.round(gaussian_params[["mu_x", "mu_y"]].to_numpy(), 6).tolist())
+    [[1.0, 0.0], [0.0, 2.0]]
+
+    """
+    gaussian_params = polar_params.copy()
+    gaussian_params["mu_x"] = polar_params["ecc"] * np.cos(polar_params["angle"])
+    gaussian_params["mu_y"] = polar_params["ecc"] * np.sin(polar_params["angle"])
+    return gaussian_params.drop(columns=["ecc", "angle"])
+
+
+
 
 
 @doc
