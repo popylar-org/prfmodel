@@ -141,23 +141,26 @@ def test_grid_values_2d_prf_polar_keys(stimulus_centered: PRFStimulus):
     """Test that values are returned for the eccentricity, polar angle, and size."""
     values = grid_values_2d_prf_polar(stimulus_centered)
     assert list(values) == ["ecc", "angle", "sigma"]
-    assert len(values["ecc"]) == 19  # noqa: PLR2004
+    assert len(values["ecc"]) == 16  # noqa: PLR2004
     assert len(values["sigma"]) == 20  # noqa: PLR2004
 
 
 def test_grid_values_2d_prf_polar_default_ecc(stimulus_centered: PRFStimulus):
-    """Test that the rings are log-spaced from the grid spacing to twice half the largest stimulus extent."""
+    """Test that neighboring centers on the smallest ring are one grid spacing apart and the rings are log-spaced."""
     ecc = grid_values_2d_prf_polar(stimulus_centered, num_ecc=5)["ecc"]
-    np.testing.assert_allclose(ecc[[0, -1]], [0.5, 8.0])
-    # (8 / 0.5) ** (1 / 4) = 2
-    np.testing.assert_allclose(ecc[1:] / ecc[:-1], 2.0)
+    ratio = ecc[1] / ecc[0]
+
+    # Spacing on the smallest ring with square cells equals the grid spacing (0.5)
+    np.testing.assert_allclose(ecc[0] * np.log(ratio), 0.5)
+    np.testing.assert_allclose(ecc[-1], 8.0)
+    np.testing.assert_allclose(ecc[1:] / ecc[:-1], ratio)
 
 
 @pytest.mark.parametrize("mu_extent", [1.0, 1.5])
 def test_grid_values_2d_prf_polar_mu_extent(stimulus_centered: PRFStimulus, mu_extent: float):
     """Test that the largest ring is half the largest stimulus extent scaled by mu_extent."""
     ecc = grid_values_2d_prf_polar(stimulus_centered, mu_extent=mu_extent)["ecc"]
-    np.testing.assert_allclose(ecc[[0, -1]], [0.5, 4.0 * mu_extent])
+    np.testing.assert_allclose(ecc[-1], 4.0 * mu_extent)
 
 
 def test_grid_values_2d_prf_polar_ecc_range(stimulus_centered: PRFStimulus):
@@ -252,3 +255,8 @@ def test_grid_values_2d_prf_polar_invalid(stimulus_centered: PRFStimulus):
         with pytest.raises(ValueError, match="smallest eccentricity"):
             grid_values_2d_prf_polar(stimulus_centered, ecc_range=ecc_range)
 
+@pytest.mark.parametrize("num_ecc", [2, 40])
+def test_grid_values_2d_prf_polar_smallest_ecc_fallback(stimulus_centered: PRFStimulus, num_ecc: int):
+    """Test that the smallest ring is one grid spacing if centers there are already far enough apart or cannot be."""
+    ecc = grid_values_2d_prf_polar(stimulus_centered, num_ecc=num_ecc)["ecc"]
+    np.testing.assert_allclose(ecc[0], 0.5)

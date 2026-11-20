@@ -2,6 +2,7 @@
 
 import warnings
 import numpy as np
+from scipy.optimize import brentq
 from prfmodel._docstring import doc
 from prfmodel.stimuli import PRFStimulus
 
@@ -62,6 +63,27 @@ def _resolution(coordinates: list[np.ndarray]) -> float:
 def _extent(coordinates: list[np.ndarray]) -> float:
     """Return the largest range of the stimulus coordinates across all dimensions."""
     return float(max(np.ptp(coords) for coords in coordinates))
+
+
+def _smallest_ecc(resolution: float, ecc_max: float, num_ecc: int) -> float:
+    """Return the smallest ring for which neighboring centers on it are about one stimulus grid spacing apart.
+
+    With square grid cells, neighboring centers on the smallest ring r are about ``r * ln(q)`` apart, where
+    ``q = (ecc_max / r) ** (1 / (num_ecc - 1))`` is the ratio between neighboring rings. This solves
+    ``r * ln(ecc_max / r) / (num_ecc - 1) = resolution`` for r. It returns the resolution itself if the centers on a
+    ring of that radius are already further apart, or if no ring can achieve it (many rings in a small range).
+    """
+
+    def spacing_minus_resolution(r: float) -> float:
+        return r * np.log(ecc_max / r) / (num_ecc - 1) - resolution
+
+    # The spacing on the smallest ring is largest for r = ecc_max / e, so the solution lies below it
+    upper = ecc_max / np.e
+
+    if resolution >= upper or spacing_minus_resolution(resolution) >= 0.0 or spacing_minus_resolution(upper) < 0.0:
+        return resolution
+
+    return float(brentq(spacing_minus_resolution, resolution, upper))
 
 
 def _sigma_values(
@@ -180,7 +202,7 @@ def grid_values_2d_prf(  # noqa: PLR0913
 @doc
 def grid_values_2d_prf_polar(  # noqa: PLR0913
     stimulus: PRFStimulus,
-    num_ecc: int = 19,
+    num_ecc: int = 16,
     mu_extent: float = 2.0,
     ecc_range: tuple[float, float] | None = None,
     num_angle: int | None = None,
@@ -207,8 +229,9 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
         outer ring reaches the edges of the stimulus along its wider axis; with `2.0` (the default), it reaches as far
         as the default center values of :func:`grid_values_2d_prf` along that axis. Ignored if `ecc_range` is given.
     ecc_range : tuple[float, float] or None, optional
-        Smallest and largest value for `ecc`. If `None`, the smallest value is the spacing of the stimulus grid and
-        the largest value is set by `mu_extent`.
+        Smallest and largest value for `ecc`. If `None`, the largest value is set by `mu_extent` and the smallest
+        value is chosen so that neighboring centers on the smallest ring are about one stimulus grid spacing apart
+        (see Notes).
     num_angle : int or None, optional
         Number of values for `angle`. If `None`, it is chosen so that the grid cells are roughly square, that is, the
         distance between neighboring centers on a ring is about the same as the distance between neighboring rings.
@@ -260,7 +283,11 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
     proportion to :math:`r`, so the grid cells keep their shape across eccentricities, and they are square for
     :math:`n = 2 \pi / \ln q`. The default for `num_angle` is this value rounded to a multiple of four.
 
-    There is no center exactly at the origin; the smallest ring has a radius of one stimulus grid spacing by default.
+    By default, the smallest ring is placed where neighboring centers on it are about one stimulus grid spacing
+    apart, that is, where :math:`r \ln q` equals the grid spacing. Smaller rings would place centers closer together
+    than the stimulus can resolve, so their predictions would be nearly identical. pRFs closer to the origin than the
+    smallest ring still have candidates on it, at most its radius away. The smallest ring is never smaller than one
+    grid spacing, which is also used if no ring meets the condition (many rings in a small range).
     The outer edge of the grid is a circle, so with `mu_extent=1.0` the corners of a rectangular stimulus are not
     covered.
 
@@ -311,7 +338,8 @@ def grid_values_2d_prf_polar(  # noqa: PLR0913
         warnings.warn(msg, category=GridAlignmentWarning, stacklevel=2)
 
     if ecc_range is None:
-        ecc_min, ecc_max = resolution, mu_extent * half_extent
+        ecc_max = mu_extent * half_extent
+        ecc_min = _smallest_ecc(resolution, ecc_max, num_ecc)
     else:
         ecc_min, ecc_max = ecc_range
 
