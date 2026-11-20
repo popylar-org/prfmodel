@@ -11,7 +11,10 @@ with least-squares estimates or used as the starting point for SGD for finetunin
 Each fitting method returns a history object that stores final loss scores for all data units.
 
 The functions :func:`~prfmodel.fitters.grid_values_2d_prf` and :func:`~prfmodel.fitters.grid_values_1d_prf` create
-values for the pRF center and size parameters of a :class:`~prfmodel.fitters.GridFitter` from the stimulus.
+values for the pRF center and size parameters of a :class:`~prfmodel.fitters.GridFitter` from the stimulus. The
+function :func:`~prfmodel.fitters.grid_values_2d_prf_polar` creates values for a polar grid instead, where the pRF
+centers lie on rings around the point (0, 0) that are dense near it and sparse in the periphery. The pRF center is
+then described by its eccentricity `ecc` and polar angle `angle` instead of `mu_x` and `mu_y`.
 
 The :mod:`~prfmodel.fitters.adapter` submodule contains functionality to transform parameters during model fitting
 (e.g., to optimize a parameter on the log scale). Currently, this is only implemented for SGD.
@@ -27,6 +30,7 @@ from ._grid import GridHistory
 from ._grid_values import GridAlignmentWarning
 from ._grid_values import grid_values_1d_prf
 from ._grid_values import grid_values_2d_prf
+from ._grid_values import grid_values_2d_prf_polar
 from ._least_squares import LeastSquaresFitter
 from ._least_squares import LeastSquaresHistory
 from ._sgd import SGDFitter
@@ -42,4 +46,5 @@ __all__ = [
     "SGDHistory",
     "grid_values_1d_prf",
     "grid_values_2d_prf",
+    "grid_values_2d_prf_polar",
 ]
