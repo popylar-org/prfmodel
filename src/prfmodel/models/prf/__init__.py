@@ -1,7 +1,10 @@
 """Population receptive field (pRF) models.
 
 This module contains pRF tuning models that predict a pRF tuning profile over a stimulus grid
-(e.g., :class:`Gaussian2DPRFTuning`).
+(e.g., :class:`Gaussian2DPRFTuning`). :class:`PolarGaussian2DPRFTuning` predicts the same 2D Gaussian, but describes
+its center by eccentricity and polar angle instead of x- and y-coordinates, for a grid search with
+:func:`~prfmodel.fitters.grid_values_2d_prf_polar`.
+
 
 It also contains the
 :class:`PRFStimulusEncoder` class that encodes a pRF response with a stimulus design.
@@ -23,8 +26,9 @@ The function :func:`encode_prf_response` can be used to stimulus-encode a pRF re
 function is also internally used by :class:`PRFStimulusEncoder`.
 
 The function :func:`predict_gaussian_response` can be used to make Gaussian density predictions to stimulus grids with
-arbitrary dimensions. This function is also used internally by :class:`Gaussian2DPRFTuning` and
-:class:`Gaussian1DPRFTuning`.
+arbitrary dimensions. This function is also used internally by :class:`Gaussian2DPRFTuning`,
+:class:`PolarGaussian2DPRFTuning`, and :class:`Gaussian1DPRFTuning`.
+
 
 References
 ----------
@@ -62,6 +66,7 @@ from ._gaussian import Gaussian1DPRFModel
 from ._gaussian import Gaussian1DPRFTuning
 from ._gaussian import Gaussian2DPRFModel
 from ._gaussian import Gaussian2DPRFTuning
+from ._gaussian import PolarGaussian2DPRFTuning
 from ._gaussian import predict_gaussian_response
 from ._stimulus_encoding import PRFStimulusEncoder
 from ._stimulus_encoding import encode_prf_response
@@ -80,6 +85,7 @@ __all__ = [
     "Gaussian2DPRFModel",
     "Gaussian2DPRFTuning",
     "PRFStimulusEncoder",
+    "PolarGaussian2DPRFTuning",
     "encode_prf_response",
     "init_css_from_gaussian",
     "init_cst_from_gaussian",

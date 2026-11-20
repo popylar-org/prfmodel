@@ -369,6 +369,75 @@ class Gaussian2DPRFModel(CanonicalPRFModel):
         )
 
 
+class PolarGaussian2DPRFTuning(BaseTuning[PRFStimulus, PRFStimulusTensors]):
+    r"""Two-dimensional isotropic Gaussian pRF tuning model with its center in polar coordinates.
+
+    Predicts the same tuning profile as :class:`Gaussian2DPRFTuning`, but the center of the Gaussian is described by its
+    eccentricity `ecc`, the distance from the point (0, 0) of the stimulus coordinates, and its polar angle `angle`
+    instead of `mu_x` and `mu_y`. The model has three parameters: `ecc`, `angle`, and `sigma`.
+
+    Notes
+    -----
+    The center coordinates are ``mu_x = ecc * cos(angle)`` and ``mu_y = ecc * sin(angle)``. The angle is in radians
+    and runs counterclockwise from the positive x-axis, like :func:`prfmodel.utils.calculate_polar_angle`.
+
+    The model is meant for a grid search with values from :func:`prfmodel.fitters.grid_values_2d_prf_polar`. For
+    least squares and stochastic gradient descent, convert the estimates to `mu_x` and `mu_y` and use
+    :class:`Gaussian2DPRFTuning` instead, because the angle wraps around at :math:`\pm\pi` and the gradient of the
+    angle vanishes when `ecc` is zero.
+
+    This model predicts a proper Gaussian density that is normalized by its volume (so that it integrates to one).
+    This differs from other Gaussian pRF model implementations. See :doc:`Important details </important_details>`.
+
+    Examples
+    --------
+    The polar model makes the same prediction as the cartesian model for the same center.
+
+    >>> import numpy as np
+    >>> import pandas as pd
+    >>> from prfmodel.examples import load_2d_prf_bar_stimulus
+    >>> stimulus = load_2d_prf_bar_stimulus()
+    >>> polar = pd.DataFrame({"ecc": [1.0, 2.0], "angle": [0.0, np.pi / 2], "sigma": [1.0, 1.5]})
+    >>> cartesian = pd.DataFrame({"mu_x": [1.0, 0.0], "mu_y": [0.0, 2.0], "sigma": [1.0, 1.5]})
+    >>> resp_polar = PolarGaussian2DPRFTuning()(stimulus, polar)
+    >>> resp_cartesian = Gaussian2DPRFTuning()(stimulus, cartesian)
+    >>> print(resp_polar.shape)  # (num_units, num_y, num_x)
+    (2, 128, 128)
+    >>> bool(np.allclose(resp_polar, resp_cartesian, atol=1e-6))
+    True
+
+    """
+
+    @property
+    def parameter_names(self) -> list[str]:
+        """Names of parameters used by the model: `ecc`, `angle`, `sigma`."""
+        return ["ecc", "angle", "sigma"]
+
+    @doc
+    def call(self, stimulus: PRFStimulusTensors, parameters: TensorFrame) -> Tensor:
+        """
+        Predict the model tuning profile for a stimulus with a 2D grid.
+
+        Parameters
+        ----------
+        %(stimulus_prf_tensors)s
+        %(parameters_tensors)s
+
+        Returns
+        -------
+        Tensor
+            Model predictions of shape `(num_units, size_y, size_x)` and dtype `dtype`.
+            `num_units` is the number of rows in `parameters` and `size_y` and `size_x` are the sizes of the
+            y and x stimulus grid dimension.
+
+        """
+        ecc = parameters["ecc"]
+        angle = parameters["angle"]
+        # Convention is y-dimension first: mu[:, 0] is paired with grid[..., 0] (y), mu[:, 1] with grid[..., 1] (x)
+        mu = ops.stack([ecc * ops.sin(angle), ecc * ops.cos(angle)], axis=1)
+        return predict_gaussian_response(stimulus.grid, mu, parameters[["sigma"]])
+
+
 @doc
 class Gaussian1DPRFModel(CanonicalPRFModel):
     """
