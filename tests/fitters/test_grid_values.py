@@ -145,15 +145,41 @@ def test_grid_values_2d_prf_polar_keys(stimulus_centered: PRFStimulus):
     assert len(values["sigma"]) == 20  # noqa: PLR2004
 
 
-def test_grid_values_2d_prf_polar_default_ecc(stimulus_centered: PRFStimulus):
-    """Test that neighboring centers on the smallest ring are one grid spacing apart and the rings are log-spaced."""
-    ecc = grid_values_2d_prf_polar(stimulus_centered, num_ecc=5)["ecc"]
-    ratio = ecc[1] / ecc[0]
+@pytest.mark.parametrize("num_ecc", [2, 5, 16, 40])
+def test_grid_values_2d_prf_polar_default_ecc(stimulus_centered: PRFStimulus, num_ecc: int):
+    """Test that the smallest ring is two grid spacings for any number of rings and that the rings are log-spaced."""
+    ecc = grid_values_2d_prf_polar(stimulus_centered, num_ecc=num_ecc)["ecc"]
 
-    # Spacing on the smallest ring with square cells equals the grid spacing (0.5)
-    np.testing.assert_allclose(ecc[0] * np.log(ratio), 0.5)
+    # Two grid spacings of 0.5
+    np.testing.assert_allclose(ecc[0], 1.0)
     np.testing.assert_allclose(ecc[-1], 8.0)
-    np.testing.assert_allclose(ecc[1:] / ecc[:-1], ratio)
+    np.testing.assert_allclose(ecc[1:] / ecc[:-1], ecc[1] / ecc[0])
+
+
+def test_grid_values_2d_prf_polar_more_rings_cover_origin_better():
+    """Test that more rings never move the pRF centers near the origin further away.
+
+    The points lie within one unit of the origin, which has no center of its own. With a fine stimulus grid (spacing
+    0.0625, like real stimuli), a smallest ring that moved outward with the number of rings would leave these points
+    further from every center as rings are added.
+
+    """
+    stimulus = _stimulus_2d(np.linspace(-4.0, 4.0, 129), np.linspace(-4.0, 4.0, 129))
+
+    rng = np.random.default_rng(0)
+    radius = np.sqrt(rng.uniform(0.0, 1.0, 2000))
+    direction = rng.uniform(-np.pi, np.pi, 2000)
+    points = np.concatenate([[[0.0, 0.0]], np.stack([radius * np.cos(direction), radius * np.sin(direction)], axis=1)])
+
+    largest_distances = []
+    for num_ecc in [5, 8, 12, 16, 24]:
+        values = grid_values_2d_prf_polar(stimulus, num_ecc=num_ecc)
+        ecc, angle = np.meshgrid(values["ecc"], values["angle"], indexing="ij")
+        centers = np.stack([(ecc * np.cos(angle)).ravel(), (ecc * np.sin(angle)).ravel()], axis=1)
+        distances = np.linalg.norm(points[:, None, :] - centers[None, :, :], axis=-1).min(axis=1)
+        largest_distances.append(distances.max())
+
+    assert np.all(np.diff(largest_distances) <= 1e-9), largest_distances
 
 
 @pytest.mark.parametrize("mu_extent", [1.0, 1.5])
@@ -255,8 +281,8 @@ def test_grid_values_2d_prf_polar_invalid(stimulus_centered: PRFStimulus):
         with pytest.raises(ValueError, match="smallest eccentricity"):
             grid_values_2d_prf_polar(stimulus_centered, ecc_range=ecc_range)
 
-@pytest.mark.parametrize("num_ecc", [2, 40])
-def test_grid_values_2d_prf_polar_smallest_ecc_fallback(stimulus_centered: PRFStimulus, num_ecc: int):
-    """Test that the smallest ring is one grid spacing if centers there are already far enough apart or cannot be."""
-    ecc = grid_values_2d_prf_polar(stimulus_centered, num_ecc=num_ecc)["ecc"]
-    np.testing.assert_allclose(ecc[0], 0.5)
+def test_grid_values_2d_prf_polar_extent_below_smallest_ring(stimulus_centered: PRFStimulus):
+    """Test that an outer ring inside the default smallest ring (two grid spacings, 1.0) raises an error."""
+    # mu_extent=0.2 puts the outer ring at 0.2 * 4.0 = 0.8
+    with pytest.raises(ValueError, match="smallest eccentricity"):
+        grid_values_2d_prf_polar(stimulus_centered, mu_extent=0.2)
