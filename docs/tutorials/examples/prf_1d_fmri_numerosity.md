@@ -161,10 +161,47 @@ fit_vertices = np.flatnonzero(has_response & np.isin(roi_index, roi_labels))
 pd.Series(roi_index[fit_vertices]).value_counts().sort_index().rename(index=roi_mapping)  # Vertices per map
 ```
 
-To see where the maps lie, we show them on flattened surfaces (flatmaps) of both hemispheres, which show the entire cortex at once. A flat surface covers fewer vertices than the full cortical surface, because a part of it (e.g., the medial wall) was cut away to flatten it. The function {py:func}`prfmodel.plotting.make_flat_mesh` builds the flat surface mesh and returns, for each vertex of the flat mesh, the row of `dataset.response` that it belongs to. The orientation of a flat surface is arbitrary, so we rotate the hemispheres to show them upright.
+To see where the maps lie, we show them on flattened surfaces (flatmaps) of both hemispheres, which show the entire cortex at once. A flat surface covers fewer vertices than the full cortical surface, because a part of it (e.g., the medial wall) was cut away to flatten it. The dataset therefore provides, for each hemisphere, the flat surface (e.g., `dataset.files["lh_flat"]`) and the index of each of its vertices on the full surface (e.g., `dataset.files["lh_vertex_indices"]`).
+
+We write a function that builds a flat surface mesh with both hemispheres side by side and returns, for each vertex of the flat mesh, the row of `dataset.response` that it belongs to. The orientation of a flat surface is arbitrary, so we rotate the hemispheres to show them upright.
 
 ```{code-cell} ipython3
-from prfmodel.plotting import make_flat_mesh
+import nibabel as nib
+from nilearn.surface import InMemoryMesh
+from nilearn.surface import PolyMesh
+
+
+def rotate_xy(coords: np.ndarray, angle: float) -> np.ndarray:
+    """Rotate the x-y coordinates of a flat surface counter-clockwise by `angle` degrees around their center."""
+    angle = np.deg2rad(angle)
+    rotation = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+    rotated = coords.copy()
+    center = coords[:, :2].mean(axis=0)
+    rotated[:, :2] = (coords[:, :2] - center) @ rotation.T
+    return rotated
+
+
+def make_flat_mesh(dataset, rotation: dict[str, float], gap: float = 20.0) -> tuple[PolyMesh, np.ndarray]:
+    """Build a flat mesh of both hemispheres and the row of `dataset.response` of each of its vertices."""
+    parts, indices = {}, []
+    row_offset = 0  # The rows of the right hemisphere follow those of the left hemisphere
+
+    for hemi, prefix in (("left", "lh"), ("right", "rh")):
+        flat = nib.load(dataset.files[f"{prefix}_flat"])
+        coords = rotate_xy(np.asarray(flat.darrays[0].data, dtype=np.float64), rotation[hemi])
+
+        # Move the hemispheres apart along x, the left hemisphere to the left
+        if hemi == "left":
+            coords[:, 0] -= coords[:, 0].max() + gap / 2
+        else:
+            coords[:, 0] -= coords[:, 0].min() - gap / 2
+
+        parts[hemi] = InMemoryMesh(coords, np.asarray(flat.darrays[1].data, dtype=np.int64))
+        indices.append(np.load(dataset.files[f"{prefix}_vertex_indices"]) + row_offset)
+        row_offset += dataset.mesh.parts[hemi].n_vertices
+
+    return PolyMesh(**parts), np.concatenate(indices)
+
 
 flat_mesh, flat_indices = make_flat_mesh(dataset, rotation={"left": -100, "right": -80})
 ```
@@ -741,15 +778,7 @@ When comparing the maps, keep in mind the variation within each map (the error b
 
 ## Preferred numerosity on the cortical surface
 
-We can also look at the preferred numerosity on the cortical surface. We use flattened surfaces (flatmaps) of both hemispheres. The function {py:func}`prfmodel.plotting.make_flat_mesh` builds the flat surface mesh and returns, for each vertex of the flat mesh, the row of `dataset.response` that it belongs to. The orientation of a flat surface is arbitrary, so we rotate the hemispheres to show them upright.
-
-```{code-cell} ipython3
-from prfmodel.plotting import make_flat_mesh
-
-flat_mesh, flat_indices = make_flat_mesh(dataset, rotation={"left": -100, "right": -80})
-```
-
-We fill the preferred numerosity of the selected vertices into an array with one value per vertex of the cortical surface (NaN for all other vertices) and plot it on the flat mesh with {py:func}`prfmodel.plotting.plot_surface_stat_map`.
+We can also look at the preferred numerosity on the cortical surface, using the flat mesh (`flat_mesh` and `flat_indices`) that we built above to show the numerosity maps. We fill the preferred numerosity of the selected vertices into an array with one value per vertex of the cortical surface (NaN for all other vertices) and plot it on the flat mesh with {py:func}`prfmodel.plotting.plot_surface_stat_map`.
 
 ```{code-cell} ipython3
 from prfmodel.plotting import plot_surface_stat_map
