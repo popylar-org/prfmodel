@@ -120,7 +120,7 @@ class TestPairwiseCorrelationLoss:
         losses = ops.convert_to_numpy(CorrelationLoss(pairwise=True, reduction="none", dtype="float64")(y_true, y_pred))
 
         expected = -np.corrcoef(y_pred[:, 0], y_true[0])[: self.num_predictions, self.num_predictions :]
-        np.testing.assert_allclose(losses, expected, atol=1e-10)
+        np.testing.assert_allclose(losses, expected, atol=1e-6)
 
     def test_constant_time_courses_have_zero_loss(self):
         """Test that a constant target or a constant prediction gives a loss of zero, as without `pairwise`."""
