@@ -162,6 +162,10 @@ def make_flat_mesh(
     ...     flat_mesh, dataset.response[flat_indices, 0], vmin=-3, vmax=3, cmap="RdBu_r",
     ... )
     """
+    if dataset.mesh is None:
+        msg = "Dataset has no surface mesh"
+        raise ValueError(msg)
+
     rotation = rotation or {}
     parts, indices = {}, []
     row_offset = 0
@@ -170,6 +174,9 @@ def make_flat_mesh(
         if hemi not in dataset.mesh.parts:
             continue
         flat = nib.load(dataset.files[f"{prefix}_flat"])
+        if not isinstance(flat, nib.gifti.GiftiImage):
+            msg = f"Flat patch of the {hemi} hemisphere must be a GIFTI file, got {type(flat).__name__}"
+            raise TypeError(msg)
         coords = _rotate_xy(np.asarray(flat.darrays[0].data, dtype=np.float64), rotation.get(hemi, 0.0))
         if hemi == "left":
             coords[:, 0] -= coords[:, 0].max() + gap / 2
