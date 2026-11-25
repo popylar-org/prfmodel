@@ -23,6 +23,7 @@ Welcome to prfmodel's documentation. For a conceptual introduction to the packag
   important_details
   tutorials/index
   development/index
+  copyright
 
 Indices and tables
 ------------------

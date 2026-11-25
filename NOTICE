@@ -1,2 +1,6 @@
 This product includes prfmodel, software developed by
 Netherlands eScience Center.
+
+This product includes the canonical HRF library (src/prfmodel/data/hrf/getcanonicalhrflibrary.tsv)
+from GLMsingle (https://github.com/cvnlab/GLMsingle), Copyright (c) 2021, Kendrick Kay,
+licensed under the BSD 3-Clause License (see LICENSE-BSD).

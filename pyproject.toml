@@ -82,7 +82,7 @@ Repository = "https://github.com/popylar-org/prfmodel"
 Issues = "https://github.com/popylar-org/prfmodel/issues"
 
 [tool.setuptools.package-data]
-"prfmodel.data" = ["checksums.json", "stimuli/*.npz"]
+"prfmodel.data" = ["checksums.json", "stimuli/*.npz", "hrf/*.tsv"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

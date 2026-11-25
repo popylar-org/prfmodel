@@ -95,3 +95,10 @@ manually evaluated and approved by the authors.
 ## Copyright
 
 2026, Netherlands eScience Center, Vrije Universiteit Amsterdam, Netherlands Institute for Neuroscience
+
+All content of this repository is owned by the copyright holders listed above and licensed under the Apache License 2.0
+(see [LICENSE](LICENSE)), with the following exception:
+
+- [`src/prfmodel/data/hrf/getcanonicalhrflibrary.tsv`](src/prfmodel/data/hrf/getcanonicalhrflibrary.tsv) is copied
+  unmodified from [GLMsingle](https://github.com/cvnlab/GLMsingle). It is Copyright (c) 2021, Kendrick Kay, and
+  licensed under the BSD 3-Clause License (see [LICENSE-BSD](LICENSE-BSD)).
