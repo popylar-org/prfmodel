@@ -437,7 +437,7 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
         {
             "hemisphere": np.where(vertex_hemisphere_id[order] == 0, "left", "right"),
             "roi_distance_mm": roi_distance[order],
-        }
+        },
     )
 
     return Dataset(
