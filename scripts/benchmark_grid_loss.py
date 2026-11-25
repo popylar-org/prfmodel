@@ -68,8 +68,8 @@ def _run_single(args: argparse.Namespace) -> dict:
     # Imported here so that the parent process, which only spawns runs, never loads a backend
     import keras  # noqa: PLC0415 (the backend is loaded per run)
     import numpy as np  # noqa: PLC0415 (only needed per run)
-    import prfmodel  # noqa: PLC0415 (the backend is loaded per run)
     from keras import ops  # noqa: PLC0415 (the backend is loaded per run)
+    import prfmodel  # noqa: PLC0415 (the backend is loaded per run)
     from prfmodel.examples import load_2d_prf_bar_stimulus  # noqa: PLC0415 (the backend is loaded per run)
     from prfmodel.fitters import GridFitter  # noqa: PLC0415 (the backend is loaded per run)
     from prfmodel.fitters import grid_values_2d_prf  # noqa: PLC0415 (the backend is loaded per run)
