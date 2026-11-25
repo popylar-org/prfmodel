@@ -352,11 +352,8 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
     this vertex order and are returned as the mesh. The table in `units` holds the hemisphere of each vertex and
     its geodesic distance in mm within its ROI (`roi_distance_mm`, NaN for vertices outside the ROIs).
     """
-    if options.task is None:
-        msg = "Dataset 'numerosity-four-conditions' requires a task"
-        raise ValueError(msg)
-
-    task = options.task
+    # The options always resolve a task for this dataset ('average' when none is requested)
+    task: str = options.task  # type: ignore[assignment]
     task_label = task.capitalize()  # Keys inside validity.npz, e.g. "Circ_valid"
 
     # These files cover the whole brain (voxels), so they are fetched whichever hemisphere is requested

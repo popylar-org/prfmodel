@@ -288,12 +288,15 @@ def test_load_ncsf_visual_from_local_files(tmp_path: Path, hemisphere: str, task
         assert dataset.stimulus.dimension_labels == ["y", "x"]
 
 
-def test_load_numerosity_four_conditions_requires_a_task(tmp_path: Path):
-    """Test that the four-condition dataset refuses to load without a task before fetching anything."""
-    with pytest.raises(ValueError, match="requires the option 'task'"):
-        load_dataset("numerosity-four-conditions", hemisphere="left", dest_dir=tmp_path, download=False)
+def test_load_numerosity_four_conditions_defaults_to_the_average(tmp_path: Path):
+    """Test that the four-condition dataset loads the average of the conditions when no task is requested."""
+    _write_fake_numerosity_four_files(tmp_path)
 
-    assert not any(tmp_path.iterdir())
+    dataset = load_dataset("numerosity-four-conditions", hemisphere="left", dest_dir=tmp_path, download=False)
+
+    assert dataset.task == "average"
+    assert "response_average" in dataset.files
+    assert not any(key.startswith("response_") and key != "response_average" for key in dataset.files)
 
 
 def test_load_numerosity_four_conditions_invalid_task():
@@ -303,10 +306,12 @@ def test_load_numerosity_four_conditions_invalid_task():
 
 
 def test_validate_options_numerosity_four_conditions():
-    """Test that the four-condition dataset keeps the requested task and defaults to both hemispheres."""
-    options = validate_options(_get_spec("numerosity-four-conditions"), task="circ")
+    """Test that the four-condition dataset keeps the requested task and defaults to the average on both hemispheres."""
+    spec = _get_spec("numerosity-four-conditions")
+    options = validate_options(spec, task="circ")
 
     assert options.task == "circ"
+    assert validate_options(spec).task == "average"
     assert options.hemisphere == "both"
     assert options.hemisphere_codes == ("L", "R")
 

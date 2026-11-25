@@ -116,8 +116,6 @@ class DatasetSpec:
         Surface types that this dataset accepts. The first one is used when none is requested.
     tasks : tuple of str
         Experimental tasks that this dataset provides. The first one is used when none is requested.
-    requires_task : bool
-        Whether a task must be requested. If `True`, there is no default task.
     default_hemisphere : str
         Hemisphere selection that is used when none is requested.
     licence : str
@@ -145,7 +143,6 @@ class DatasetSpec:
     hemispheres: tuple[str, ...] = ()
     surface_types: tuple[str, ...] = ()
     tasks: tuple[str, ...] = ()
-    requires_task: bool = False
     default_hemisphere: str = "both"
     licence: str = ""
     citation: str = ""
@@ -435,7 +432,8 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "surfaces that are returned. The returned response has one row per surface vertex in percent "
                 "signal change (NaN for vertices without valid voxels), and the four stimulus conditions are already "
                 "averaged with the pre-scan frames removed. The task option selects the condition: 'area', "
-                "'size', 'circ' (circumference), 'dens' (density), or 'average' (the mean of the four)."
+                "'size', 'circ' (circumference), 'dens' (density), or 'average' (the mean of the four, used when "
+                "no task is requested)."
             ),
             files={
                 # Responses
@@ -493,8 +491,8 @@ def _make_registry() -> dict[str, DatasetSpec]:
             },
             loader=_loaders.load_numerosity_four_conditions,
             options=frozenset({"task", "hemisphere"}),
-            tasks=("area", "average", "circ", "dens", "size"),
-            requires_task=True,
+            # The first task is the default: the average of the four conditions
+            tasks=("average", "area", "circ", "dens", "size"),
             hemispheres=("both", "left", "right"),
             default_hemisphere="both",
             licence="CC BY 4.0",
@@ -701,8 +699,7 @@ def describe_dataset(name: str) -> str:
         lines += [f"Surface types: {', '.join(spec.surface_types)}"]
 
     if spec.tasks:
-        task_note = "required" if spec.requires_task else f"default '{spec.tasks[0]}'"
-        lines += [f"Tasks: {', '.join(spec.tasks)} ({task_note})"]
+        lines += [f"Tasks: {', '.join(spec.tasks)} (default '{spec.tasks[0]}')"]
 
     lines += [
         f"Download: {_download_amount(spec.download_size)} {_download_note(spec)}",

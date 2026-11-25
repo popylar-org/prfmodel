@@ -124,10 +124,6 @@ def validate_options(
     resolved_task = task
 
     if "task" in spec.options:
-        if task is None and spec.requires_task:
-            msg = f"Dataset '{spec.name}' requires the option 'task' to be one of {spec.tasks}"
-            raise ValueError(msg)
-
         resolved_task = task or spec.tasks[0]
         _check_value(spec, "task", resolved_task, spec.tasks)
 
