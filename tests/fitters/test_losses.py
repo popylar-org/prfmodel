@@ -130,8 +130,10 @@ class TestPairwiseCorrelationLoss:
 
         losses = ops.convert_to_numpy(CorrelationLoss(pairwise=True, reduction="none")(y_true, y_pred))
 
-        np.testing.assert_allclose(losses[:, 0], 0.0)
-        np.testing.assert_allclose(losses[0, :], 0.0)
+        # Zero only up to float32 precision: on some backends (e.g. JAX) the mean of a constant float32 series is
+        # off by one ulp, and normalizing the tiny residual left after centering gives products around 1e-8.
+        np.testing.assert_allclose(losses[:, 0], 0.0, atol=1e-6)
+        np.testing.assert_allclose(losses[0, :], 0.0, atol=1e-6)
 
     def test_reduction(self):
         """Test that the default reduction averages over all pairs."""
