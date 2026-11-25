@@ -68,7 +68,8 @@ class TestGridFitter(TestSetup):
     @pytest.mark.parametrize(
         ("loss", "check_params"),
         [
-            # Correlation loss (default) ignores differences in baseline and amplitude
+            # Correlation loss ignores differences in baseline and amplitude. The default computes it with a
+            # matrix product ('pairwise=True'), the explicit instance by broadcasting.
             (None, ["mu_x", "mu_y", "sigma"]),
             (CorrelationLoss(reduction="none"), ["mu_x", "mu_y", "sigma"]),
             # MSE is sensitive to baseline and amplitude
@@ -135,6 +136,46 @@ class TestGridFitter(TestSetup):
 
         self._check_history(history)
         self._check_grid_params(grid_params, params, ["mu_x", "mu_y", "sigma"])
+
+    def test_default_loss_is_pairwise(self, stimulus: PRFStimulus, model: Gaussian2DPRFModel):
+        """Test that the default loss compares every grid candidate with every unit as a matrix product."""
+        fitter = GridFitter(model=model, stimulus=stimulus)
+
+        assert type(fitter.loss) is CorrelationLoss
+        assert fitter.loss.pairwise
+
+    @parametrize_dtype
+    def test_pairwise_and_broadcast_searches_agree(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        param_ranges: dict[str, np.ndarray],
+        dtype: str,
+    ):
+        """Test that the matrix product and broadcasting find the same pRF with the same loss.
+
+        Only the pRF parameters are compared. `baseline` and `amplitude` are not identifiable under the
+        correlation loss, so which of their grid values wins is an arbitrary tie-break.
+
+        """
+        observed = _oracle.predict(stimulus, params, frames=_oracle.impulse_frames())
+
+        history_pairwise, params_pairwise = GridFitter(model=model, stimulus=stimulus, dtype=dtype).fit(
+            observed,
+            param_ranges,
+            batch_size=20,
+        )
+        history_broadcast, params_broadcast = GridFitter(
+            model=model,
+            stimulus=stimulus,
+            loss=CorrelationLoss(reduction="none"),
+            dtype=dtype,
+        ).fit(observed, param_ranges, batch_size=20)
+
+        prf_params = ["mu_x", "mu_y", "sigma"]
+        pd.testing.assert_frame_equal(params_pairwise[prf_params], params_broadcast[prf_params])
+        np.testing.assert_allclose(history_pairwise.history["loss"], history_broadcast.history["loss"], atol=1e-5)
 
     def test_fit_infinite_loss_warning(
         self,
@@ -460,6 +501,38 @@ class TestGridFitterCompiledStep(TestSetup):
         )
 
         pd.testing.assert_frame_equal(compiled, eager)
+
+    @pytest.mark.parametrize("batch_size", [20, 7])
+    def test_compiled_and_eager_searches_agree_with_default_loss(
+        self,
+        stimulus: PRFStimulus,
+        model: Gaussian2DPRFModel,
+        params: pd.DataFrame,
+        param_ranges: dict[str, np.ndarray],
+        batch_size: int,
+    ):
+        """Test that compiling does not change the result of the default loss, which uses a matrix product.
+
+        `baseline` and `amplitude` are fixed to a single value each, since the correlation loss cannot tell
+        their grid values apart and would otherwise leave the winner to an arbitrary tie-break.
+
+        """
+        observed = model(stimulus, params)
+        fixed_ranges = {**param_ranges, "baseline": [0.1], "amplitude": [1.2]}
+
+        history_compiled, compiled = GridFitter(model=model, stimulus=stimulus, compile_step=True).fit(
+            observed,
+            fixed_ranges,
+            batch_size=batch_size,
+        )
+        history_eager, eager = GridFitter(model=model, stimulus=stimulus, compile_step=False).fit(
+            observed,
+            fixed_ranges,
+            batch_size=batch_size,
+        )
+
+        pd.testing.assert_frame_equal(compiled, eager)
+        np.testing.assert_allclose(history_compiled.history["loss"], history_eager.history["loss"], atol=1e-6)
 
     def test_ragged_final_batch_recovers_the_data_generating_parameters(
         self,

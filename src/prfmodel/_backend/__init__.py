@@ -8,8 +8,10 @@ Importing it here would close that cycle.
 
 from ._compile import compile_fun
 from ._external import gammaln
+from ._matmul import full_precision_matmul
 
 __all__ = [
     "compile_fun",
+    "full_precision_matmul",
     "gammaln",
 ]

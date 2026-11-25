@@ -8,6 +8,9 @@ on:
     branches:
     - main
 
+env:
+  MPLBACKEND: Agg
+
 jobs:
 
   build:

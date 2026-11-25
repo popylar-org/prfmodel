@@ -12,6 +12,7 @@ from keras import ops
 from more_itertools import chunked
 from tqdm.auto import tqdm
 from prfmodel._backend import compile_fun
+from prfmodel._backend import full_precision_matmul
 from prfmodel._docstring import doc
 from prfmodel.fitters._validation import _find_valid_units
 from prfmodel.fitters._validation import _validate_data_shape
@@ -61,10 +62,11 @@ class GridFitter:
     loss : keras.losses.Loss or Callable, optional
         Loss instance or function with the signature `f(y_true, y_pred)`, where `y_true` is the target data and
         `y_pred` are the model predictions. Default is `None` where a
-        :class:`~prfmodel.fitters.losses.CorrelationLoss` loss is used. Note that, when a
+        :class:`~prfmodel.fitters.losses.CorrelationLoss` loss with `pairwise=True` is used. Note that, when a
         :class:`keras.losses.Loss` instance is used, the argument `reduction` must be set to `"none"` to enable
         loss computation for all data batches. When a function is used, it must return a loss value for every unit in
-        `y_true` and `y_pred`.
+        `y_true` and `y_pred`. When passing a :class:`~prfmodel.fitters.losses.CorrelationLoss` explicitly, set
+        `pairwise=True` as well: the result is the same, but it needs much less memory.
     compile_step : bool, default=False
         Whether to compile the evaluation of each grid batch with the backend's native primitive: `jax.jit` on JAX,
         `tf.function` on TensorFlow and `torch.compile` on PyTorch. With `False` (the default) the evaluation
@@ -135,7 +137,7 @@ class GridFitter:
         self.model.check_stimulus(self.stimulus)
 
         if loss is None:
-            loss = CorrelationLoss(reduction="none")
+            loss = CorrelationLoss(pairwise=True, reduction="none")
 
         self.loss = loss
         self.compile_step = compile_step
@@ -249,16 +251,20 @@ class GridFitter:
         param_iter = chunked(product(*arrays), n=batch_size)
         num_batches = math.ceil(total_grid_size / batch_size)
 
-        # Built once and reused for every batch, so the cost of tracing is paid once rather than
-        # 'num_batches' times. The data and the regressors are the same on every batch, so they are
-        # captured here instead of being passed per batch, which leaves the parameter tensors as the only
-        # argument: a 'pandas.DataFrame' is not a valid argument to a compiled function.
-        evaluate = self._make_evaluate_fun(data, regressors)
+        # Full float32 precision for every matrix product in the search, so that reduced TF32 precision on
+        # recent GPUs cannot change which grid candidate wins. The evaluation function is built and first
+        # called inside the context, which on JAX is where it is traced and where the setting takes effect.
+        with full_precision_matmul():
+            # Built once and reused for every batch, so the cost of tracing is paid once rather than
+            # 'num_batches' times. The data and the regressors are the same on every batch, so they are
+            # captured here instead of being passed per batch, which leaves the parameter tensors as the only
+            # argument: a 'pandas.DataFrame' is not a valid argument to a compiled function.
+            evaluate = self._make_evaluate_fun(data, regressors)
 
-        with tqdm(param_iter, desc="Processing parameter grid", total=num_batches) as pbar:
-            for batch in pbar:
-                self._evaluate_parameter_batch(evaluate, batch, parameter_names, best_params, best_loss)
-                pbar.set_postfix({"loss": float(best_loss.mean())})
+            with tqdm(param_iter, desc="Processing parameter grid", total=num_batches) as pbar:
+                for batch in pbar:
+                    self._evaluate_parameter_batch(evaluate, batch, parameter_names, best_params, best_loss)
+                    pbar.set_postfix({"loss": float(best_loss.mean())})
 
         if not all(ops.isfinite(best_loss)):
             msg = "Non-finite loss values and NaN parameter estimates returned for some data batches"
