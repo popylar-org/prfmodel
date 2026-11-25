@@ -173,6 +173,7 @@ We plot the selected vertices with {py:func}`prfmodel.plotting.plot_surface_stat
 
 ```{code-cell} ipython3
 import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 from prfmodel.plotting import plot_surface_stat_map
 
 # Number of each map within its hemisphere (1 for NumTO to 6 for NumF); NaN for vertices that we do not fit
@@ -180,12 +181,15 @@ num_maps_per_hemisphere = len(roi_labels) // 2
 map_surface = np.full(len(response), np.nan)
 map_surface[fit_vertices] = (roi_index[fit_vertices] - 1) % num_maps_per_hemisphere + 1
 
+# One color per map: the first colors of "tab10", which do not include gray (the color of the vertices we do not fit)
+map_cmap = ListedColormap(plt.get_cmap("tab10").colors[:num_maps_per_hemisphere])
+
 fig, ax = plot_surface_stat_map(
     flat_mesh,
     map_surface[flat_indices],
     vmin=0.5,
     vmax=num_maps_per_hemisphere + 0.5,
-    cmap="tab10",
+    cmap=map_cmap,
     title="Numerosity maps",
     figsize=(12, 6),
 )
