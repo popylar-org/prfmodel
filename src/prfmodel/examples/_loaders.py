@@ -303,7 +303,10 @@ def load_visual_ecog_broadband(fetch: FileFetcher, options: Options) -> Dataset:
 
 
 def _voxels_to_vertices(
-    response: np.ndarray, valid: np.ndarray, offsets: np.ndarray, rows: np.ndarray,
+    response: np.ndarray,
+    valid: np.ndarray,
+    offsets: np.ndarray,
+    rows: np.ndarray,
 ) -> np.ndarray:
     """Convert voxel timecourses to percent-signal-change (PSC).
 
@@ -430,10 +433,12 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
         **{int(i): str(name) for i, name in zip(roi_ids, roi_names, strict=True)},
     }
 
-    units = pd.DataFrame({
-        "hemisphere": np.where(vertex_hemisphere_id[order] == 0, "left", "right"),
-        "roi_distance_mm": roi_distance[order],
-    })
+    units = pd.DataFrame(
+        {
+            "hemisphere": np.where(vertex_hemisphere_id[order] == 0, "left", "right"),
+            "roi_distance_mm": roi_distance[order],
+        }
+    )
 
     return Dataset(
         name="numerosity-four-conditions",

@@ -131,7 +131,6 @@ def validate_options(
         resolved_task = task or spec.tasks[0]
         _check_value(spec, "task", resolved_task, spec.tasks)
 
-
     return Options(
         hemisphere=resolved_hemisphere,
         split=resolved_split,

@@ -81,7 +81,6 @@ def test_describe_dataset_reports_a_default_split():
     assert "Tasks: csf, prf (default 'csf')" in description
 
 
-
 def test_describe_dataset_reports_a_required_task():
     """Test that a dataset without a default task says that a task is required."""
     description = describe_dataset("numerosity-four-conditions")

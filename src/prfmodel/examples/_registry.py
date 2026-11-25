@@ -145,7 +145,7 @@ class DatasetSpec:
     hemispheres: tuple[str, ...] = ()
     surface_types: tuple[str, ...] = ()
     tasks: tuple[str, ...] = ()
-    requires_task : bool = False
+    requires_task: bool = False
     default_hemisphere: str = "both"
     licence: str = ""
     citation: str = ""
@@ -444,22 +444,18 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "response_circ": f"{_NUM_4_CON}/Circ.npz",
                 "response_dens": f"{_NUM_4_CON}/Dens.npz",
                 "response_size": f"{_NUM_4_CON}/Size.npz",
-
                 # Metadata
                 "dataset_metadata": f"{_NUM_4_CON}/dataset_metadata.npz",
                 "surface_metadata": f"{_NUM_4_CON}/surface_metadata.npz",
                 "voxel_metadata": f"{_NUM_4_CON}/voxel_metadata.npz",
-
                 # Masks, labels, validity
                 "mask": f"{_NUM_4_CON}/mask.npz",
                 "validity": f"{_NUM_4_CON}/validity.npz",
                 "label_names": f"{_NUM_4_CON}/label_names.npz",
                 "roi_data": f"{_NUM_4_CON}/roi_data.npz",
-
                 # Surface mappings
                 "surface_mapping_method1": f"{_NUM_4_CON}/surface_mapping_method1.npz",
                 "surface_mapping_method2": f"{_NUM_4_CON}/surface_mapping_method2.npz",
-
                 # Surfaces
                 "lh_flat": f"{_NUM_4_CON}/Surfaces/lh.flat.gii",
                 "lh_white": f"{_NUM_4_CON}/Surfaces/lh.white",
@@ -475,22 +471,18 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "response_circ": f"{_FIGSHARE_URL}/71349373",
                 "response_dens": f"{_FIGSHARE_URL}/71349379",
                 "response_size": f"{_FIGSHARE_URL}/71349382",
-
                 # Metadata
                 "dataset_metadata": f"{_FIGSHARE_URL}/71349391",
                 "surface_metadata": f"{_FIGSHARE_URL}/71349406",
                 "voxel_metadata": f"{_FIGSHARE_URL}/71349412",
-
                 # Masks, labels, validity
                 "mask": f"{_FIGSHARE_URL}/71349400",
                 "validity": f"{_FIGSHARE_URL}/71349409",
                 "label_names": f"{_FIGSHARE_URL}/71349394",
                 "roi_data": f"{_FIGSHARE_URL}/71349388",
-
                 # Surface mappings
                 "surface_mapping_method1": f"{_FIGSHARE_URL}/71349397",
                 "surface_mapping_method2": f"{_FIGSHARE_URL}/71349403",
-
                 # Surfaces
                 "lh_flat": f"{_FIGSHARE_URL}/71025390",
                 "lh_white": f"{_FIGSHARE_URL}/71025375",
@@ -502,7 +494,7 @@ def _make_registry() -> dict[str, DatasetSpec]:
             loader=_loaders.load_numerosity_four_conditions,
             options=frozenset({"task", "hemisphere"}),
             tasks=("area", "average", "circ", "dens", "size"),
-            requires_task = True,
+            requires_task=True,
             hemispheres=("both", "left", "right"),
             default_hemisphere="both",
             licence="CC BY 4.0",

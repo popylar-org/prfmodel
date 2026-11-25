@@ -154,7 +154,9 @@ def _write_fake_numerosity_four_files(data_dir: Path, num_left_white_vertices: i
                 path,
                 **{
                     f"roi_{roi}_distances_mm": np.where(
-                        roi == _FAKE_NUMEROSITY_FOUR_ROI_INDEX, _FAKE_NUMEROSITY_FOUR_ROI_DISTANCE, np.nan,
+                        roi == _FAKE_NUMEROSITY_FOUR_ROI_INDEX,
+                        _FAKE_NUMEROSITY_FOUR_ROI_DISTANCE,
+                        np.nan,
                     )
                     for roi in (0, 1, 2)
                 },
@@ -183,7 +185,6 @@ def _write_fake_numerosity_four_files(data_dir: Path, num_left_white_vertices: i
         else:
             # The loader only exposes the paths of the remaining files, so their contents do not matter
             path.write_bytes(b"placeholder")
-
 
 
 def test_load_dataset_unknown_name():
@@ -286,6 +287,7 @@ def test_load_ncsf_visual_from_local_files(tmp_path: Path, hemisphere: str, task
         assert isinstance(dataset.stimulus, PRFStimulus)
         assert dataset.stimulus.dimension_labels == ["y", "x"]
 
+
 def test_load_numerosity_four_conditions_requires_a_task(tmp_path: Path):
     """Test that the four-condition dataset refuses to load without a task before fetching anything."""
     with pytest.raises(ValueError, match="requires the option 'task'"):
@@ -343,7 +345,12 @@ def test_load_numerosity_four_conditions_from_local_files(tmp_path: Path, hemisp
         f"{_NUMEROSITY_FOUR_PREFIXES[part]}_{kind}" for part in parts for kind in ("white", "flat", "vertex_indices")
     }
     shared_keys = {
-        f"response_{task}", "validity", "surface_mapping_method2", "surface_metadata", "label_names", "roi_data",
+        f"response_{task}",
+        "validity",
+        "surface_mapping_method2",
+        "surface_metadata",
+        "label_names",
+        "roi_data",
     }
     assert set(dataset.files) == surface_keys | shared_keys
 
@@ -353,7 +360,11 @@ def test_load_numerosity_four_conditions_marks_vertices_without_valid_voxels(tmp
     _write_fake_numerosity_four_files(tmp_path)
 
     dataset = load_dataset(
-        "numerosity-four-conditions", hemisphere="right", task="area", dest_dir=tmp_path, download=False,
+        "numerosity-four-conditions",
+        hemisphere="right",
+        task="area",
+        dest_dir=tmp_path,
+        download=False,
     )
 
     # Vertex 3 is the second vertex of the right hemisphere and maps only to the invalid voxel
@@ -376,7 +387,11 @@ def test_load_numerosity_four_conditions_needs_no_surface_of_the_other_hemispher
 
     # With downloading disabled, fetching any of the deleted files would raise FileNotFoundError
     dataset = load_dataset(
-        "numerosity-four-conditions", hemisphere=hemisphere, task="area", dest_dir=tmp_path, download=False,
+        "numerosity-four-conditions",
+        hemisphere=hemisphere,
+        task="area",
+        dest_dir=tmp_path,
+        download=False,
     )
 
     assert sorted(dataset.mesh.parts) == [hemisphere]
@@ -724,4 +739,3 @@ def test_load_numerosity_four_conditions_downloads_only_what_is_loaded(tmp_path:
     ]  # fmt: skip
 
     assert sorted(p.name for p in tmp_path.rglob("*") if p.is_file()) == sorted(Path(spec.files[k]).name for k in keys)
-

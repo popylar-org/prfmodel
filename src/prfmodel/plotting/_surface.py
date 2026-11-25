@@ -24,6 +24,7 @@ def _rotate_xy(coords: np.ndarray, angle: float) -> np.ndarray:
     rotated[:, :2] = (coords[:, :2] - centre) @ rotation.T
     return rotated
 
+
 def plot_surface_stat_map(  # noqa: PLR0913
     mesh: PolyMesh,
     stat_map: np.ndarray,
@@ -187,5 +188,3 @@ def make_flat_mesh(
         row_offset += dataset.mesh.parts[hemi].n_vertices
 
     return PolyMesh(**parts), np.concatenate(indices)
-
-
