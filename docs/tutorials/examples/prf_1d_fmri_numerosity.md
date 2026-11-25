@@ -335,25 +335,90 @@ Now that the stimulus and the BOLD response are in place, we can define a pRF mo
 2. This neural response is convolved with an impulse response that follows the shape of the hemodynamic response in the brain, which turns it into a predicted BOLD response.
 3. A `baseline` and an `amplitude` parameter shift and scale the prediction.
 
-We first look at the pRF itself. The figure shows three pRFs together with the numerosities that the stimulus shows.
+We first look at the pRF itself. The figure shows two pRFs with different preferred numerosities together with the numerosities that the stimulus shows. Use the slider to change the pRF size `sigma` of both pRFs.
 
 ```{code-cell} ipython3
-numerosities = np.geomspace(0.5, 40.0, 300)
-example_prfs = [(2.0, 0.3), (2.0, 1.0), (6.0, 0.3)]  # (preferred numerosity, sigma)
+import plotly.graph_objects as go
+import plotly.io as pio
 
-fig, ax = plt.subplots(figsize=(10, 3.5), layout="constrained")
-for (preferred, sigma), color in zip(example_prfs, [BLUE, ORANGE, GRAY], strict=True):
-    tuning = np.exp(-((np.log(numerosities) - np.log(preferred)) ** 2) / (2 * sigma**2))
-    label = f"Preferred numerosity {preferred:.0f}, sigma = {sigma}"
-    ax.plot(numerosities, tuning, color=color, linewidth=2, label=label)
-for numerosity in unique_numerosities:
-    ax.axvline(numerosity, color="#bdbdbd", linewidth=1, zorder=0)
-ax.set_xscale("log")
-ax.set_xticks(unique_numerosities, labels=unique_numerosities.astype(int))
-ax.minorticks_off()
-ax.set(xlabel="Numerosity (log scale; gray lines: numerosities of the stimulus)", ylabel="Tuning (relative to peak)")
-ax.legend(frameon=False)
-plt.show()
+pio.renderers.default = "notebook_connected"  # Requires internet connection to work
+pio.templates.default = "simple_white"
+
+numerosities = np.geomspace(0.5, 40.0, 300)
+preferred_numerosities = [2.0, 6.0]
+sigmas = np.round(np.arange(0.1, 1.51, 0.1), 1)
+start = int(np.argmin(np.abs(sigmas - 0.3)))  # Slider position when the figure is first shown
+
+
+def tuning_curve(preferred: float, sigma: float) -> np.ndarray:
+    """Gaussian pRF in log-numerosity space, relative to its peak."""
+    return np.exp(-((np.log(numerosities) - np.log(preferred)) ** 2) / (2 * sigma**2))
+
+
+# Vertical lines at the numerosities of the stimulus, drawn as one trace (separated by None) that stays fixed
+stimulus_lines = go.Scatter(
+    x=np.repeat(unique_numerosities, 3),
+    y=np.tile([0.0, 1.05, None], len(unique_numerosities)),
+    mode="lines",
+    line={"color": "#bdbdbd", "width": 1},
+    name="Numerosities of the stimulus",
+    hoverinfo="skip",
+)
+prf_curves = [
+    go.Scatter(
+        x=numerosities,
+        y=tuning_curve(preferred, sigmas[start]),
+        mode="lines",
+        line={"color": color, "width": 2},
+        name=f"Preferred numerosity {preferred:.0f}",
+        hovertemplate="Numerosity %{x:.1f}<br>Tuning %{y:.2f}<extra></extra>",
+    )
+    for preferred, color in zip(preferred_numerosities, [BLUE, ORANGE], strict=True)
+]
+
+fig = go.Figure(
+    data=[stimulus_lines, *prf_curves],
+    # Each frame only updates the pRF curves (traces 1 and 2)
+    frames=[
+        go.Frame(
+            name=f"{sigma:.1f}",
+            traces=[1, 2],
+            data=[go.Scatter(y=tuning_curve(preferred, sigma)) for preferred in preferred_numerosities],
+        )
+        for sigma in sigmas
+    ],
+)
+fig.update_xaxes(
+    type="log",
+    range=np.log10([numerosities[0], numerosities[-1]]),  # Ranges of log axes are given in log10 units
+    tickvals=unique_numerosities,
+    ticktext=unique_numerosities.astype(int),
+    title="Numerosity (log scale)",
+)
+fig.update_yaxes(range=[0.0, 1.05], title="Tuning (relative to peak)")
+fig.update_layout(
+    height=450,
+    legend={"orientation": "h", "y": 1.1},
+    sliders=[
+        {
+            "active": start,
+            "currentvalue": {"prefix": "pRF size (sigma): "},
+            "pad": {"t": 50},
+            "steps": [
+                {
+                    "method": "animate",
+                    "label": f"{sigma:.1f}",
+                    "args": [
+                        [f"{sigma:.1f}"],
+                        {"mode": "immediate", "frame": {"duration": 0, "redraw": False}, "transition": {"duration": 0}},
+                    ],
+                }
+                for sigma in sigmas
+            ],
+        },
+    ],
+)
+fig.show()
 ```
 
 On the log scale, each pRF is symmetric around its preferred numerosity. On the natural scale, it extends further towards larger numerosities, so a pRF distinguishes small numerosities (e.g., 2 and 3) better than large ones (e.g., 6 and 7). A narrow pRF (small `sigma`) responds to only a few of the numerosities in the stimulus, a wide pRF to many.
@@ -660,32 +725,87 @@ from prfmodel.plotting import plot_r_squared_hist
 plot_r_squared_hist(r_squared, bins=20, value_range=(0.0, 1.0), clip=True);
 ```
 
-We also compare the observed and predicted timecourses of the best-fitting vertex in four numerosity maps. We only consider vertices whose preferred numerosity lies between 1 and 7, the numerosities that the stimulus shows (we explain this choice below).
+We also compare the observed and predicted timecourses of the best-fitting vertex in each numerosity map. Use the slider to switch between the maps. We only consider vertices whose preferred numerosity lies between 1 and 7, the numerosities that the stimulus shows (we explain this choice below).
 
 ```{code-cell} ipython3
-fig, axes = plt.subplots(2, 2, figsize=(12, 6), sharex=True, sharey=True, layout="constrained")
-
 numerosity_estimates = np.exp(sgd_params["mu"].to_numpy())
 is_in_stimulus_range = (numerosity_estimates >= 1) & (numerosity_estimates <= 7)
 
-for ax, label in zip(axes.flat, [1, 3, 7, 9], strict=True):  # lh_NumTO, lh_NumPC1, rh_NumTO, rh_NumPC1
+# Best-fitting vertex in each map (maps without a vertex in the stimulus range are left out)
+best_vertices = {}
+for label in roi_labels:
     in_roi = np.flatnonzero((roi_index[fit_vertices] == label) & is_in_stimulus_range)
-    best = in_roi[np.argmax(r_squared[in_roi])]
-    numerosity = numerosity_estimates[best]
+    if in_roi.size > 0:
+        best_vertices[label] = in_roi[np.argmax(r_squared[in_roi])]
 
-    ax.axhline(0.0, color="#bdbdbd", linewidth=1)
-    ax.plot(time_frames, response_fit[best], color=GRAY, linewidth=1.5, label="Observed")
-    ax.plot(time_frames, pred_response[best], color=BLUE, linewidth=2, label="Predicted")
-    ax.set_title(
-        f"{roi_mapping[label]}: R-squared = {r_squared[best]:.2f}, preferred numerosity = {numerosity:.1f}",
-        loc="left",
-        fontsize=10,
+
+def fit_title(label: int) -> str:
+    """Describe the best-fitting vertex of a map."""
+    best = best_vertices[label]
+    return (
+        f"{roi_mapping[label]}: R-squared = {r_squared[best]:.2f}, "
+        f"preferred numerosity = {numerosity_estimates[best]:.1f}"
     )
 
-axes[0, 0].legend(frameon=False)
-fig.supxlabel("Time frame (in TR)")
-fig.supylabel("BOLD response (in PSC)")
-plt.show()
+
+# Use the same y-axis range for all maps, so that their responses can be compared
+selected = list(best_vertices.values())
+y_limit = 1.05 * max(np.abs(response_fit[selected]).max(), np.abs(pred_response[selected]).max())
+
+first_label, first = next(iter(best_vertices.items()))
+fig = go.Figure(
+    data=[
+        go.Scatter(
+            x=time_frames,
+            y=response_fit[first],
+            mode="lines",
+            line={"color": GRAY, "width": 1.5},
+            name="Observed",
+        ),
+        go.Scatter(
+            x=time_frames,
+            y=pred_response[first],
+            mode="lines",
+            line={"color": BLUE, "width": 2},
+            name="Predicted",
+        ),
+    ],
+    frames=[
+        go.Frame(
+            name=roi_mapping[label],
+            data=[go.Scatter(y=response_fit[best]), go.Scatter(y=pred_response[best])],
+            layout={"title": {"text": fit_title(label)}},
+        )
+        for label, best in best_vertices.items()
+    ],
+)
+fig.add_hline(y=0.0, line={"color": "#bdbdbd", "width": 1}, layer="below")
+fig.update_xaxes(range=[time_frames[0], time_frames[-1]], title="Time frame (in TR)")
+fig.update_yaxes(range=[-y_limit, y_limit], title="BOLD response (in PSC)")
+fig.update_layout(
+    title={"text": fit_title(first_label)},
+    height=450,
+    legend={"orientation": "h", "y": 1.02, "x": 1.0, "xanchor": "right"},
+    sliders=[
+        {
+            "active": 0,
+            "currentvalue": {"prefix": "Map: "},
+            "pad": {"t": 50},
+            "steps": [
+                {
+                    "method": "animate",
+                    "label": roi_mapping[label],
+                    "args": [
+                        [roi_mapping[label]],
+                        {"mode": "immediate", "frame": {"duration": 0, "redraw": True}, "transition": {"duration": 0}},
+                    ],
+                }
+                for label in best_vertices
+            ],
+        },
+    ],
+)
+fig.show()
 ```
 
 +++
