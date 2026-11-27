@@ -427,11 +427,13 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "Preprocessed fMRI time-course data for four experimental "
                 "conditions (Area, Size, Circumference, and Density) and their "
                 "average, accompanied by FreeSurfer surface files for flatmap "
-                "visualisation of both hemispheres. The responses are stored as whole-brain voxels, so they "
-                "are downloaded in full for every hemisphere; the hemisphere option selects the vertices and "
-                "surfaces that are returned. The returned response has one row per surface vertex in percent "
-                "signal change (NaN for vertices without valid voxels), and the four stimulus conditions are already "
-                "averaged with the pre-scan frames removed. The task option selects the condition: 'area', "
+                "visualisation of both hemispheres. The returned response is in volume space: one row per voxel "
+                "of the whole-brain mask, in the C order of the mask. The four stimulus cycles are already "
+                "averaged with the pre-scan frames removed. "
+                "Voxels that are invalid for the requested task are flagged in the 'valid' column of the units "
+                "table, and the dataset's own voxel-to-vertex mapping is exposed for projecting results onto the "
+                "white surfaces. The affine of the mask is not in the coordinates of the surfaces, which lie "
+                "(-0.5, 17.5, -18.5) mm away. The task option selects the condition: 'area', "
                 "'size', 'circ' (circumference), 'dens' (density), or 'average' (the mean of the four, used when "
                 "no task is requested)."
             ),
@@ -490,11 +492,10 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "rh_white": f"{_FIGSHARE_URL}/71025387",
             },
             loader=_loaders.load_numerosity_four_conditions,
-            options=frozenset({"task", "hemisphere"}),
+            # The response covers the whole brain, so there is no hemisphere option
+            options=frozenset({"task"}),
             # The first task is the default: the average of the four conditions
             tasks=("average", "area", "circ", "dens", "size"),
-            hemispheres=("both", "left", "right"),
-            default_hemisphere="both",
             licence="CC BY 4.0",
             citation=(
                 "Mauro, K. (2026). Four Condition Numerosity Dataset. "

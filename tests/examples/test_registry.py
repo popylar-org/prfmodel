@@ -86,7 +86,9 @@ def test_describe_dataset_reports_the_default_task():
     description = describe_dataset("numerosity-four-conditions")
 
     assert "Tasks: average, area, circ, dens, size (default 'average')" in description
-    assert "Hemispheres: both, left, right (default 'both')" in description
+
+    # The response covers the whole brain, so the dataset has no hemisphere option
+    assert "Hemispheres:" not in description
 
 
 def test_default_split_must_be_a_split():

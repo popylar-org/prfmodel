@@ -9,7 +9,6 @@ from nibabel.gifti import GiftiImage
 from nibabel.nifti1 import Nifti1Image
 from nilearn.surface import PolyMesh
 from nilearn.surface import load_surf_data
-from scipy import sparse as sp
 from scipy.io import loadmat
 from prfmodel.examples._dataset import Dataset
 from prfmodel.examples._fetch import FileFetcher
@@ -60,8 +59,8 @@ _ECOG_ROI_OF_WANG_AREA = {
     "none": "none",
 }  # fmt: skip
 
-# Hemisphere code -> (id in vertex_hemisphere_id, file prefix, PolyMesh part name)
-_NUMEROSITY_HEMISPHERES = {"L": (0, "lh", "left"), "R": (1, "rh", "right")}
+# Values of voxel_hemisphere_id in the four-condition numerosity dataset
+_NUMEROSITY_HEMISPHERE_NAMES = {0: "left", 1: "right"}
 
 
 def load_retbar_visual(fetch: FileFetcher, options: Options) -> Dataset:
@@ -302,127 +301,64 @@ def load_visual_ecog_broadband(fetch: FileFetcher, options: Options) -> Dataset:
     )
 
 
-def _voxels_to_vertices(
-    response: np.ndarray,
-    valid: np.ndarray,
-    offsets: np.ndarray,
-    rows: np.ndarray,
-) -> np.ndarray:
-    """Convert voxel timecourses to percent-signal-change (PSC).
-
-    Average them over the voxels assigned to each vertex.
-    Vertices without any valid voxel get NaN.
-    """
-    mean = response.mean(axis=1)
-    keep = valid & np.isfinite(response).all(axis=1) & (mean != 0)
-
-    psc = np.zeros_like(response)
-    psc[keep] = (response[keep] / mean[keep, None] - 1.0) * 100.0
-
-    num_vertices = len(offsets) - 1
-    vertex_of_entry = np.repeat(np.arange(num_vertices), np.diff(offsets))
-    is_kept = keep[rows]
-
-    # Sparse assignment matrix: entry (v, r) is 1 if voxel r is assigned to vertex v and is valid
-    assignment = sp.csr_matrix(
-        (np.ones(is_kept.sum()), (vertex_of_entry[is_kept], rows[is_kept])),
-        shape=(num_vertices, len(keep)),
-    )
-    count = np.asarray(assignment.sum(axis=1)).ravel()
-
-    vertex_response = np.full((num_vertices, response.shape[1]), np.nan)
-    has_voxels = count > 0
-    vertex_response[has_voxels] = (assignment @ psc)[has_voxels] / count[has_voxels, None]
-
-    return vertex_response
-
-
 def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dataset:
-    """Load the fMRI response of a single subject to numerosity stimuli in four stimulus conditions (surface data).
+    """Load the voxel response of a single subject to numerosity stimuli in four stimulus conditions.
 
-    The voxel responses of the requested task are assigned to the vertices of the cortical surface:
+    The response is returned in volume space as stored in the source files: one row per voxel of the brain mask, in
+    the C order of the mask voxels. The source files append zero-filled subcortical voxels after the mask voxels;
+    these lie outside the mask and are dropped. Voxels that the dataset marks as invalid for the requested task
+    (they have zeros at some time frames because they fell outside the scanned volume) are kept and flagged in the
+    `valid` column of `units`.
 
-    1. Exclude the voxels that the dataset marks as invalid because they have zeros at some time frames (they fell
-        outside the scanned volume).
-    2. Convert the remaining voxels to percent signal change (PSC) relative to their mean over time.
-    3. Take the mean PSC of the voxels assigned to each vertex (`surface_mapping_method2`). Vertices without any
-        remaining voxel are NaN.
+    The ROIs were drawn on the cortical surface. Each voxel has the ROI of its nearest white surface vertex in
+    `roi_index`, and voxels without a nearby vertex are 'unassigned'. The table in `units` holds the hemisphere of
+    each voxel and whether it is valid.
 
-    The requested hemispheres are returned with the left hemisphere first. The FreeSurfer white surfaces share
-    this vertex order and are returned as the mesh. The table in `units` holds the hemisphere of each vertex and
-    its geodesic distance in mm within its ROI (`roi_distance_mm`, NaN for vertices outside the ROIs).
+    The voxel values can be projected onto the vertices of `mesh` (the FreeSurfer white surfaces, left first) with
+    the voxel-to-vertex mapping of the dataset in `files["surface_mapping_method2"]`, whose voxel rows are rows of
+    `response`. The geodesic distances of the vertices within their ROI are in `files["roi_data"]`.
+
+    Warning: the affine of `mask` is the affine of the volume grid as distributed with the dataset, and it does not
+    place the voxels in the FreeSurfer surface (tkRAS) coordinates of `mesh`. In surface coordinates, voxel
+    `(i, j, k)` lies at `affine @ (i, j, k, 1)` plus (-0.5, 17.5, -18.5) mm. Projecting the volume onto `mesh` with
+    a function that relies on the affine, such as :func:`nilearn.surface.vol_to_surf`, therefore samples voxels
+    about 25 mm away from each vertex unless the affine is shifted first. The voxel-to-vertex mapping in `files`
+    does not depend on the affine and is not affected.
     """
     # The options always resolve a task for this dataset ('average' when none is requested)
     task: str = options.task  # type: ignore[assignment]
-    task_label = task.capitalize()  # Keys inside validity.npz, e.g. "Circ_valid"
 
-    # These files cover the whole brain (voxels), so they are fetched whichever hemisphere is requested
+    with np.load(fetch("mask")) as archive:
+        is_in_mask = np.asarray(archive["mask"]).astype(bool)
+        affine = np.asarray(archive["affine"], dtype=np.float64)
+
+    mask = Nifti1Image(is_in_mask.astype(np.uint8), affine)
+    num_voxels = int(np.count_nonzero(is_in_mask))
+
+    with np.load(fetch("voxel_metadata")) as archive:
+        voxel_coordinates = np.asarray(archive["voxel_mapping"][:num_voxels], dtype=np.int64)
+        roi_index = np.asarray(archive["voxel_roi_index"][:num_voxels], dtype=np.int32)
+        hemisphere_id = np.asarray(archive["voxel_hemisphere_id"][:num_voxels], dtype=np.int8)
+
+    # The rows of the response must be the mask voxels in C order, which np.argwhere also yields
+    if not np.array_equal(voxel_coordinates, np.argwhere(is_in_mask)):
+        msg = "The first rows of the voxel table are not the voxels of the mask in C order"
+        raise ValueError(msg)
+
+    if not np.isin(hemisphere_id, list(_NUMEROSITY_HEMISPHERE_NAMES)).all():
+        msg = "Some voxels of the mask are assigned to neither the left nor the right hemisphere"
+        raise ValueError(msg)
+
     with np.load(fetch(f"response_{task}")) as archive:
-        response = np.asarray(archive["response"], dtype=np.float64)
+        response = np.asarray(archive["response"][:num_voxels], dtype=np.float64)
 
     with np.load(fetch("validity")) as archive:
-        valid = np.asarray(archive[f"{task_label}_valid"], dtype=bool)
-
-    with np.load(fetch("surface_mapping_method2")) as archive:
-        offsets = np.asarray(archive["method2_vertex_voxel_offsets"], dtype=np.int64)
-        rows = np.asarray(archive["method2_vertex_voxel_rows"], dtype=np.int64)
-
-    with np.load(fetch("surface_metadata")) as archive:
-        vertex_roi_index = np.asarray(archive["vertex_roi_index"], dtype=np.int32)
-        vertex_hemisphere_id = np.asarray(archive["vertex_hemisphere_id"], dtype=np.int8)
+        # Keys inside validity.npz are capitalized, e.g. "Circ_valid"
+        valid = np.asarray(archive[f"{task.capitalize()}_valid"][:num_voxels], dtype=bool)
 
     with np.load(fetch("label_names")) as archive:
         roi_ids = np.asarray(archive["roi_ids"], dtype=np.int32)
         roi_names = np.asarray(archive["roi_names"])
-
-    # Geodesic distance of each vertex within its ROI (NaN outside); the ROIs do not overlap
-    roi_distance = np.full(len(vertex_roi_index), np.nan)
-
-    with np.load(fetch("roi_data")) as archive:
-        for key in archive.files:
-            if key.endswith("_distances_mm"):
-                distances = np.asarray(archive[key], dtype=np.float64)
-                is_in_roi = np.isfinite(distances)
-
-                if np.isfinite(roi_distance[is_in_roi]).any():
-                    msg = f"The ROI distances in '{key}' overlap with the distances of another ROI"
-                    raise ValueError(msg)
-
-                roi_distance[is_in_roi] = distances[is_in_roi]
-
-    # Project all voxels first, then select the hemisphere (the mapping refers to all voxels)
-    vertex_response = _voxels_to_vertices(response, valid, offsets, rows)
-
-    if len(vertex_response) != len(vertex_roi_index):
-        msg = "The number of vertices in the voxel-to-vertex mapping and the surface metadata differ"
-        raise ValueError(msg)
-
-    # Only the surface files of the requested hemispheres are fetched; left comes first
-    order_parts = []
-    mesh_files = {}
-
-    for code in options.hemisphere_codes:
-        hemi_id, prefix, part = _NUMEROSITY_HEMISPHERES[code]
-        order_parts.append(np.flatnonzero(vertex_hemisphere_id == hemi_id))
-        mesh_files[part] = fetch(f"{prefix}_white")
-
-        # Expose the flat surfaces and their vertex indices on the full surface (kept in `files`)
-        fetch(f"{prefix}_flat")
-        fetch(f"{prefix}_vertex_indices")
-
-    order = np.concatenate(order_parts)
-    mesh = PolyMesh(**mesh_files)
-
-    # The response rows must line up with the mesh vertices of each hemisphere
-    for indices, part in zip(order_parts, mesh_files, strict=True):
-        num_mesh_vertices = mesh.parts[part].n_vertices
-
-        if num_mesh_vertices != len(indices):
-            msg = (
-                f"The {part} hemisphere has {len(indices)} vertices in the surface metadata but "
-                f"{num_mesh_vertices} in its white surface"
-            )
-            raise ValueError(msg)
 
     roi_mapping = {
         -2: "overlap",
@@ -432,19 +368,33 @@ def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dat
 
     units = pd.DataFrame(
         {
-            "hemisphere": np.where(vertex_hemisphere_id[order] == 0, "left", "right"),
-            "roi_distance_mm": roi_distance[order],
+            "hemisphere": pd.Series(hemisphere_id).map(_NUMEROSITY_HEMISPHERE_NAMES).to_numpy(),
+            "valid": valid,
         },
     )
 
+    mesh = PolyMesh(left=fetch("lh_white"), right=fetch("rh_white"))
+
+    # Exposed for projecting voxel values onto the surface and plotting them (kept in `files`)
+    for key in (
+        "surface_mapping_method2",
+        "surface_metadata",
+        "roi_data",
+        "lh_flat",
+        "rh_flat",
+        "lh_vertex_indices",
+        "rh_vertex_indices",
+    ):
+        fetch(key)
+
     return Dataset(
         name="numerosity-four-conditions",
-        response=vertex_response[order],
-        roi_index=vertex_roi_index[order],
+        response=response,
+        roi_index=roi_index,
         roi_mapping=roi_mapping,
         units=units,
+        mask=mask,
         mesh=mesh,
-        hemisphere=options.hemisphere,
         task=task,
         files=fetch.files,
     )
