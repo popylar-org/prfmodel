@@ -8,6 +8,10 @@ on:
     branches:
     - main
 
+env:
+  # Use a non-interactive matplotlib backend, so that tests do not depend on Tcl/Tk (broken on some Windows runners)
+  MPLBACKEND: Agg
+
 jobs:
 
   build:

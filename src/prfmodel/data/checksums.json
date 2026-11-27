@@ -240,6 +240,86 @@
       "sha256": "28ce263052dc14ac3a7e48b74f377d94c96480f69fcfbf1228432e7df14f87a1",
       "size": 1335600
     },
+    "numerosity_four_conditions/Area.npz": {
+      "sha256": "8aab410e67726e97f1789ade82f11ac3323c5dabcd4607b1e579b1206461271e",
+      "size": 58315708
+    },
+    "numerosity_four_conditions/Average.npz": {
+      "sha256": "55c6ae0b9add9b6bec17e97d78d3d56e33d92eeda8dc6231d6a442f6f6cd21be",
+      "size": 59077516
+    },
+    "numerosity_four_conditions/Circ.npz": {
+      "sha256": "b77c98e78ed17c8c0255ce3d2a21a5743eb674db774d050b6add63012fe94bc3",
+      "size": 52909714
+    },
+    "numerosity_four_conditions/Dens.npz": {
+      "sha256": "ecb0fde0c93ac783f679f0900a942755cbea522d572e827221a9da343b03012b",
+      "size": 57646335
+    },
+    "numerosity_four_conditions/Size.npz": {
+      "sha256": "372d4610c54ff680b74d3b3d2a4841ad72556cc782863e948ada5b488af9423b",
+      "size": 57596024
+    },
+    "numerosity_four_conditions/Surfaces/lh.flat.gii": {
+      "sha256": "1ef37ed133185dd4f9231c0a15301119dcd3d03413ba8e891e394e8ff4383b8c",
+      "size": 4381665
+    },
+    "numerosity_four_conditions/Surfaces/lh.flat.vertex_indices.npy": {
+      "sha256": "5a66d5c8904d0f372a2539ec5583a6362839687daabb447216426c25736081ac",
+      "size": 1178344
+    },
+    "numerosity_four_conditions/Surfaces/lh.white": {
+      "sha256": "839444d66a0e29b4330b308217233f3e0bb6fc4fa64cad87d2f7ff49665a7744",
+      "size": 5610756
+    },
+    "numerosity_four_conditions/Surfaces/rh.flat.gii": {
+      "sha256": "a15f62023d2768d468dcd5f96d80fab5a374ef8cb29d63b919ad968b4aa4c76b",
+      "size": 4361533
+    },
+    "numerosity_four_conditions/Surfaces/rh.flat.vertex_indices.npy": {
+      "sha256": "ecab0647ac0682174dc865b01d133a126c42c02061b3cf7e66059161d11a030f",
+      "size": 1175248
+    },
+    "numerosity_four_conditions/Surfaces/rh.white": {
+      "sha256": "058ce0b1515b87a65af91635827a8e02f72638cb695f97376d0185540098ca16",
+      "size": 5606796
+    },
+    "numerosity_four_conditions/dataset_metadata.npz": {
+      "sha256": "aae99531f71ffc576aab2b006887e35e32cc3cbea7a60d72e55b94235981a4dd",
+      "size": 4116
+    },
+    "numerosity_four_conditions/label_names.npz": {
+      "sha256": "6ca434d5876d3b1484a5533d1d892618317d208a4125589f36a448e3c4af209c",
+      "size": 1196
+    },
+    "numerosity_four_conditions/mask.npz": {
+      "sha256": "eb9a045af432c044fc6c36f23dd4ee97df7a2fbee1ccad4cbd488316dc365813",
+      "size": 167516
+    },
+    "numerosity_four_conditions/roi_data.npz": {
+      "sha256": "e0addeec01c900ff725f426c96fd1588646f4236fc618fa0c27dd7db739b4bbb",
+      "size": 101532
+    },
+    "numerosity_four_conditions/surface_mapping_method1.npz": {
+      "sha256": "902d2801b1545f0a3d71172c71133a6eecaf852a9d5e8bc242d83163ecaa56f1",
+      "size": 1201341
+    },
+    "numerosity_four_conditions/surface_mapping_method2.npz": {
+      "sha256": "82565deba12e631fa18bf5a25c879ba8f0e2c90c86bba3502ac74ca7ee1511b9",
+      "size": 1468641
+    },
+    "numerosity_four_conditions/surface_metadata.npz": {
+      "sha256": "8be3d4efb99f7a5c0934c62d64730986c886f461534ae7965229f6fb18b2b884",
+      "size": 3412545
+    },
+    "numerosity_four_conditions/validity.npz": {
+      "sha256": "e622d1fb3f0d70fe8cbbb8b85b8ea5dfde267e972604499867b46d09b2680bd3",
+      "size": 373658
+    },
+    "numerosity_four_conditions/voxel_metadata.npz": {
+      "sha256": "4904a78c91ad5825328c30619a6062db3a2864641de2e761d3b860fcec884313",
+      "size": 2069578
+    },
     "p10_freq_spectra-timeseries_avg-runs_bbS.mat": {
       "sha256": "667f3ce78cc39f23259076f3d519917fac8084c38b33a35ea10cef2dfdea4dcc",
       "size": 268225
@@ -279,34 +359,6 @@
     "vis_design.mat": {
       "sha256": "3c269e74c12cc79044184b47cf6803205045305687f2f30fe73e8bccd62835d3",
       "size": 475048
-    },
-    "fmri_full_grid_dataset.pkl": {
-      "sha256": "70f4a2c4985c0036b0b37ffd9798526c86ae61e03d995d052ef1ea3308f2c0a3",
-      "size": 651625350
-    },
-    "Surfaces/lh.flat.gii": {
-      "sha256": "1ef37ed133185dd4f9231c0a15301119dcd3d03413ba8e891e394e8ff4383b8c",
-      "size": 4381665
-    },
-    "Surfaces/lh.flat.vertex_indices.npy": {
-      "sha256": "5a66d5c8904d0f372a2539ec5583a6362839687daabb447216426c25736081ac",
-      "size": 1178344
-    },
-    "Surfaces/lh.white": {
-      "sha256": "839444d66a0e29b4330b308217233f3e0bb6fc4fa64cad87d2f7ff49665a7744",
-      "size": 5610756
-    },
-    "Surfaces/rh.flat.gii": {
-      "sha256": "a15f62023d2768d468dcd5f96d80fab5a374ef8cb29d63b919ad968b4aa4c76b",
-      "size": 4361533
-    },
-    "Surfaces/rh.flat.vertex_indices.npy": {
-      "sha256": "ecab0647ac0682174dc865b01d133a126c42c02061b3cf7e66059161d11a030f",
-      "size": 1175248
-    },
-    "Surfaces/rh.white": {
-      "sha256": "058ce0b1515b87a65af91635827a8e02f72638cb695f97376d0185540098ca16",
-      "size": 5606796
     }
   },
   "version": 1

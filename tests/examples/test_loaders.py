@@ -5,12 +5,15 @@ import nibabel as nib
 import numpy as np
 import pandas as pd
 import pytest
+from nibabel.affines import apply_affine
 from prfmodel.examples import Dataset
 from prfmodel.examples import load_dataset
+from prfmodel.examples._fetch import FileFetcher
 from prfmodel.examples._options import Options
 from prfmodel.examples._options import validate_options
 from prfmodel.examples._registry import DatasetSpec
 from prfmodel.examples._registry import _get_spec
+from prfmodel.examples._registry import load_checksums
 from prfmodel.stimuli import CSFStimulus
 from prfmodel.stimuli import PRFStimulus
 
@@ -57,6 +60,38 @@ _FAKE_NCSF_ROIS = {0: "unknown", 1: "V1"}
 # Values of the right hemisphere are offset from those of the left one, which shows the order of the hemispheres
 _FAKE_NCSF_HEMISPHERE_OFFSET = {"L": 0.0, "R": 100.0}
 
+# Numerosity four conditions dataset
+_NUMEROSITY_FOUR_TASKS = ("area", "average", "circ", "dens", "size")
+
+# The real 'numerosity-four-conditions' volume and surfaces
+_NUM_NUMEROSITY_FOUR_VOXELS = 597042
+_NUM_NUMEROSITY_FOUR_FRAMES = 44
+_NUMEROSITY_FOUR_VOLUME_SHAPE = (165, 192, 147)
+_NUM_NUMEROSITY_FOUR_VERTICES_L = 155826
+_NUM_NUMEROSITY_FOUR_VERTICES_R = 155716
+
+# In surface (tkRAS) coordinates, a voxel lies this far from where the affine of the mask places it
+_NUMEROSITY_FOUR_SURFACE_OFFSET = np.array([-0.5, 17.5, -18.5])
+
+# The synthetic 'numerosity-four-conditions' volume has five voxels in its mask. The voxel table lists them in C
+# order and then appends one zero-filled voxel outside the mask, like the real table appends subcortical voxels.
+_FAKE_NUMEROSITY_FOUR_MASK = np.zeros((2, 3, 2), dtype=np.uint8)
+_FAKE_NUMEROSITY_FOUR_MASK[[0, 0, 1, 1, 1], [0, 2, 0, 1, 2], [1, 0, 1, 0, 1]] = 1
+_FAKE_NUMEROSITY_FOUR_OUTSIDE_VOXEL = (0, 0, 0)
+_FAKE_NUMEROSITY_FOUR_AFFINE = np.array(
+    [[1.0, 0.0, 0.0, -84.0], [0.0, 1.0, 0.0, -124.0], [0.0, 0.0, 1.0, -59.0], [0.0, 0.0, 0.0, 1.0]],
+)
+_NUM_FAKE_NUMEROSITY_FOUR_VOXELS = 5
+_NUM_FAKE_NUMEROSITY_FOUR_FRAMES = 3
+_NUM_FAKE_NUMEROSITY_FOUR_VERTICES_PER_HEMISPHERE = 3
+
+# Values of the voxels in the mask, followed by those of the appended voxel, which the loader drops
+_FAKE_NUMEROSITY_FOUR_HEMISPHERE_ID = np.array([0, 1, 0, 1, 0, -1], dtype=np.int8)
+_FAKE_NUMEROSITY_FOUR_ROI_INDEX = np.array([0, 1, -1, 2, -1, -1], dtype=np.int32)
+_FAKE_NUMEROSITY_FOUR_ROIS = {-2: "overlap", -1: "unassigned", 0: "NTO", 1: "NLO", 2: "NPO"}
+_FAKE_NUMEROSITY_FOUR_INVALID_VOXEL = 2
+
+
 pytest_skip_examples = pytest.mark.examples
 
 
@@ -91,6 +126,77 @@ def _write_fake_ncsf_files(data_dir: Path) -> None:
         else:
             path.parent.mkdir(parents=True, exist_ok=True)
             np.savez(path, design=np.zeros((5, 2, 3)), grid=np.zeros((2, 3, 2)))
+
+
+def _fake_numerosity_four_response(task: str) -> np.ndarray:
+    """Return the response of the synthetic voxels in the mask to a task.
+
+    Voxel v of task t has the response (100 + c, 100 - c, 100) with c = 10 v + t + 1, which shows both which voxel
+    and which task was loaded, and that the values are returned as stored.
+    """
+    change = 10.0 * np.arange(_NUM_FAKE_NUMEROSITY_FOUR_VOXELS) + _NUMEROSITY_FOUR_TASKS.index(task) + 1
+    return np.stack([100.0 + change, 100.0 - change, np.full(_NUM_FAKE_NUMEROSITY_FOUR_VOXELS, 100.0)], axis=1)
+
+
+# Writes tiny stand-ins for the files of the four-condition numerosity dataset at the paths that the registry expects
+def _write_fake_numerosity_four_files(
+    data_dir: Path,
+    voxel_coordinates: np.ndarray | None = None,
+    hemisphere_id: np.ndarray = _FAKE_NUMEROSITY_FOUR_HEMISPHERE_ID,
+) -> None:
+    spec = _get_spec("numerosity-four-conditions")
+
+    if voxel_coordinates is None:
+        voxel_coordinates = np.argwhere(_FAKE_NUMEROSITY_FOUR_MASK)
+
+    # The appended voxel lies outside the mask, has a zero response, and is invalid, like in the real table
+    voxel_mapping = np.vstack([voxel_coordinates, _FAKE_NUMEROSITY_FOUR_OUTSIDE_VOXEL]).astype(np.int32)
+    valid = np.arange(_NUM_FAKE_NUMEROSITY_FOUR_VOXELS + 1) != _FAKE_NUMEROSITY_FOUR_INVALID_VOXEL
+    valid[-1] = False
+
+    for key, member in spec.files.items():
+        path = data_dir / member
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        if key.startswith("response_"):
+            response = _fake_numerosity_four_response(key.removeprefix("response_"))
+            np.savez(path, response=np.vstack([response, np.zeros((1, _NUM_FAKE_NUMEROSITY_FOUR_FRAMES))]))
+        elif key == "mask":
+            # The real mask is stored in Fortran order
+            np.savez(path, mask=np.asfortranarray(_FAKE_NUMEROSITY_FOUR_MASK), affine=_FAKE_NUMEROSITY_FOUR_AFFINE)
+        elif key == "voxel_metadata":
+            np.savez(
+                path,
+                voxel_mapping=voxel_mapping,
+                voxel_roi_index=_FAKE_NUMEROSITY_FOUR_ROI_INDEX,
+                voxel_hemisphere_id=hemisphere_id,
+            )
+        elif key == "validity":
+            np.savez(path, **{f"{task.capitalize()}_valid": valid for task in _NUMEROSITY_FOUR_TASKS})
+        elif key == "label_names":
+            np.savez(path, roi_ids=np.array([0, 1, 2]), roi_names=np.array(["NTO", "NLO", "NPO"]))
+        elif key.endswith("_white"):
+            num_vertices = _NUM_FAKE_NUMEROSITY_FOUR_VERTICES_PER_HEMISPHERE
+            coords = np.arange(num_vertices * 3, dtype=np.float32).reshape(num_vertices, 3)
+
+            # Real surfaces end with volume information, and nibabel warns when reading a surface without it
+            volume_info = {
+                "head": np.array([2, 0, 20], dtype=np.int32),
+                "valid": "1  # volume info valid",
+                "filename": "volume.nii",
+                "volume": np.array([256, 256, 256]),
+                "voxelsize": np.array([1.0, 1.0, 1.0]),
+                "xras": np.array([-1.0, 0.0, 0.0]),
+                "yras": np.array([0.0, 0.0, -1.0]),
+                "zras": np.array([0.0, 1.0, 0.0]),
+                "cras": np.array([0.0, 0.0, 0.0]),
+            }
+            nib.freesurfer.write_geometry(path, coords, np.array([[0, 1, 2]], dtype=np.int32), volume_info=volume_info)
+        elif key.endswith("_vertex_indices"):
+            np.save(path, np.arange(_NUM_FAKE_NUMEROSITY_FOUR_VERTICES_PER_HEMISPHERE))
+        else:
+            # The loader only exposes the paths of the remaining files, so their contents do not matter
+            path.write_bytes(b"placeholder")
 
 
 def test_load_dataset_unknown_name():
@@ -192,6 +298,100 @@ def test_load_ncsf_visual_from_local_files(tmp_path: Path, hemisphere: str, task
     else:
         assert isinstance(dataset.stimulus, PRFStimulus)
         assert dataset.stimulus.dimension_labels == ["y", "x"]
+
+
+def test_load_numerosity_four_conditions_defaults_to_the_average(tmp_path: Path):
+    """Test that the four-condition dataset loads the average of the conditions when no task is requested."""
+    _write_fake_numerosity_four_files(tmp_path)
+
+    dataset = load_dataset("numerosity-four-conditions", dest_dir=tmp_path, download=False)
+
+    assert dataset.task == "average"
+    assert "response_average" in dataset.files
+    assert not any(key.startswith("response_") and key != "response_average" for key in dataset.files)
+
+
+def test_load_numerosity_four_conditions_invalid_task():
+    """Test that a task name that the dataset does not provide is refused."""
+    with pytest.raises(ValueError, match="must be one of"):
+        load_dataset("numerosity-four-conditions", task="density")
+
+
+def test_load_numerosity_four_conditions_has_no_hemisphere_option():
+    """Test that the four-condition dataset, whose response covers the whole brain, refuses a hemisphere."""
+    with pytest.raises(ValueError, match="does not accept the option 'hemisphere'"):
+        load_dataset("numerosity-four-conditions", hemisphere="left")
+
+
+def test_validate_options_numerosity_four_conditions():
+    """Test that the four-condition dataset keeps the requested task and defaults to the average."""
+    spec = _get_spec("numerosity-four-conditions")
+
+    assert validate_options(spec, task="circ").task == "circ"
+    assert validate_options(spec).task == "average"
+
+
+@pytest.mark.parametrize("task", _NUMEROSITY_FOUR_TASKS)
+def test_load_numerosity_four_conditions_from_local_files(tmp_path: Path, task: str):
+    """Test that the loader returns the raw response of the mask voxels together with the mask and the surfaces."""
+    _write_fake_numerosity_four_files(tmp_path)
+
+    dataset = load_dataset("numerosity-four-conditions", task=task, dest_dir=tmp_path, download=False)
+
+    # The voxel appended after the mask voxels is dropped and the response is returned as stored
+    np.testing.assert_array_equal(dataset.response, _fake_numerosity_four_response(task))
+    assert dataset.task == task
+    assert dataset.hemisphere is None
+
+    # The rows of the response are the mask voxels in C order, as the contract of the mask requires
+    np.testing.assert_array_equal(np.asarray(dataset.mask.dataobj), _FAKE_NUMEROSITY_FOUR_MASK)
+    np.testing.assert_array_equal(dataset.mask.affine, _FAKE_NUMEROSITY_FOUR_AFFINE)
+    assert np.count_nonzero(dataset.mask.dataobj) == dataset.response.shape[0]
+
+    np.testing.assert_array_equal(dataset.roi_index, _FAKE_NUMEROSITY_FOUR_ROI_INDEX[:-1])
+    assert dataset.roi_mapping == _FAKE_NUMEROSITY_FOUR_ROIS
+
+    assert dataset.units.columns.tolist() == ["hemisphere", "valid"]
+    assert dataset.units["hemisphere"].tolist() == ["left", "right", "left", "right", "left"]
+    assert dataset.units["valid"].tolist() == [True, True, False, True, True]
+
+    assert sorted(dataset.mesh.parts) == ["left", "right"]
+    assert dataset.mesh.n_vertices == 2 * _NUM_FAKE_NUMEROSITY_FOUR_VERTICES_PER_HEMISPHERE
+
+    assert set(dataset.files) == {
+        f"response_{task}",
+        "mask",
+        "voxel_metadata",
+        "validity",
+        "label_names",
+        "surface_mapping_method2",
+        "surface_metadata",
+        "roi_data",
+        "lh_white",
+        "rh_white",
+        "lh_flat",
+        "rh_flat",
+        "lh_vertex_indices",
+        "rh_vertex_indices",
+    }
+
+
+def test_load_numerosity_four_conditions_refuses_a_voxel_table_out_of_mask_order(tmp_path: Path):
+    """Test that a voxel table whose rows are not the mask voxels in C order is refused."""
+    _write_fake_numerosity_four_files(tmp_path, voxel_coordinates=np.argwhere(_FAKE_NUMEROSITY_FOUR_MASK)[::-1])
+
+    with pytest.raises(ValueError, match="not the voxels of the mask in C order"):
+        load_dataset("numerosity-four-conditions", dest_dir=tmp_path, download=False)
+
+
+def test_load_numerosity_four_conditions_refuses_a_mask_voxel_without_hemisphere(tmp_path: Path):
+    """Test that a voxel of the mask on the midline, which belongs to neither hemisphere, is refused."""
+    hemisphere_id = _FAKE_NUMEROSITY_FOUR_HEMISPHERE_ID.copy()
+    hemisphere_id[0] = -1
+    _write_fake_numerosity_four_files(tmp_path, hemisphere_id=hemisphere_id)
+
+    with pytest.raises(ValueError, match="neither the left nor the right hemisphere"):
+        load_dataset("numerosity-four-conditions", dest_dir=tmp_path, download=False)
 
 
 def test_load_dataset_invalid_hemisphere():
@@ -475,3 +675,97 @@ def test_load_visual_ecog_broadband_puts_the_stimulus_in_degrees_of_visual_angle
     assert y[0, 0] > y[-1, 0]
     assert x[0, -1] - x[0, 0] == pytest.approx((_ECOG_GRID_SIZE - 1) * _ECOG_PIXEL_DEGREES)
     assert grid.mean() == pytest.approx(0.0)
+
+
+@pytest_skip_examples
+def test_load_numerosity_four_conditions():
+    """Test that the four-condition dataset returns the voxels of the mask with their ROIs, units, and the surfaces."""
+    dataset = load_dataset("numerosity-four-conditions", task="area")
+
+    assert dataset.response.shape == (_NUM_NUMEROSITY_FOUR_VOXELS, _NUM_NUMEROSITY_FOUR_FRAMES)
+    assert dataset.mask.shape == _NUMEROSITY_FOUR_VOLUME_SHAPE
+    assert np.count_nonzero(dataset.mask.dataobj) == _NUM_NUMEROSITY_FOUR_VOXELS
+    assert dataset.roi_index.shape == (_NUM_NUMEROSITY_FOUR_VOXELS,)
+    assert dataset.roi_mapping[-1] == "unassigned"
+    assert set(np.unique(dataset.roi_index)) <= set(dataset.roi_mapping)
+    assert len(dataset.units) == _NUM_NUMEROSITY_FOUR_VOXELS
+    assert set(dataset.units["hemisphere"]) == {"left", "right"}
+    assert dataset.mesh.parts["left"].n_vertices == _NUM_NUMEROSITY_FOUR_VERTICES_L
+    assert dataset.mesh.parts["right"].n_vertices == _NUM_NUMEROSITY_FOUR_VERTICES_R
+    assert dataset.task == "area"
+
+    # Invalid voxels fell outside the scanned volume in some runs, so they have zeros at some frames
+    assert (dataset.response[dataset.units["valid"]] != 0).all()
+
+
+@pytest_skip_examples
+def test_load_numerosity_four_conditions_tasks_share_the_voxels():
+    """Test that every task has a response on the same voxels but with different values."""
+    responses = {
+        task: load_dataset("numerosity-four-conditions", task=task).response for task in _NUMEROSITY_FOUR_TASKS
+    }
+
+    assert len({response.shape for response in responses.values()}) == 1
+    assert not np.allclose(responses["area"], responses["dens"])
+
+
+@pytest_skip_examples
+def test_load_numerosity_four_conditions_maps_vertices_to_rows_of_the_response():
+    """Test that the voxel-to-vertex mapping in the files refers to rows of the response and covers the mesh."""
+    dataset = load_dataset("numerosity-four-conditions")
+
+    with np.load(dataset.files["surface_mapping_method2"]) as archive:
+        offsets = archive["method2_vertex_voxel_offsets"]
+        rows = archive["method2_vertex_voxel_rows"]
+
+    assert len(offsets) == dataset.mesh.n_vertices + 1
+    assert rows.max() < dataset.response.shape[0]
+
+    # Every voxel that a vertex is mapped to has the ROI and the hemisphere of the vertices it is mapped to
+    with np.load(dataset.files["surface_metadata"]) as archive:
+        vertex_roi_index = archive["vertex_roi_index"]
+        vertex_hemisphere_id = archive["vertex_hemisphere_id"]
+
+    vertex_of_row = np.repeat(np.arange(dataset.mesh.n_vertices), np.diff(offsets))
+    voxel_hemisphere = dataset.units["hemisphere"].to_numpy()[rows]
+    np.testing.assert_array_equal(voxel_hemisphere == "right", vertex_hemisphere_id[vertex_of_row] == 1)
+    assert (dataset.roi_index[rows] == vertex_roi_index[vertex_of_row]).mean() > 0.99  # noqa: PLR2004
+
+
+@pytest_skip_examples
+def test_load_numerosity_four_conditions_documents_the_offset_of_the_affine():
+    """Test that the voxels lie at the documented offset from where the affine of the mask places them."""
+    spec = _get_spec("numerosity-four-conditions")
+    dataset = load_dataset("numerosity-four-conditions")
+    fetch = FileFetcher(spec, data_dir=dataset.files["mask"].parent.parent, checksums=load_checksums())
+
+    # The nearest voxel of each vertex and its distance in mm, as computed by the authors in surface coordinates
+    with np.load(fetch("surface_mapping_method1")) as archive:
+        voxel_of_vertex = archive["method1_vertex_to_voxel"]
+        distance = archive["method1_distance_mm"]
+
+    with np.load(fetch("surface_metadata")) as archive:
+        vertex_coordinates = archive["vertex_coordinates"]
+
+    has_voxel = voxel_of_vertex >= 0
+    voxels = np.argwhere(np.asarray(dataset.mask.dataobj))[voxel_of_vertex[has_voxel]]
+    voxel_coordinates = apply_affine(dataset.mask.affine, voxels)
+
+    shifted_voxel_coordinates = voxel_coordinates + _NUMEROSITY_FOUR_SURFACE_OFFSET
+    shifted = np.linalg.norm(vertex_coordinates[has_voxel] - shifted_voxel_coordinates, axis=1)
+    np.testing.assert_allclose(shifted, distance[has_voxel], atol=1e-3)
+
+
+@pytest_skip_examples
+def test_load_numerosity_four_conditions_downloads_only_what_is_loaded(tmp_path: Path):
+    """Test that loading one task downloads only its response and the files of the volume and the surfaces."""
+    load_dataset("numerosity-four-conditions", task="circ", dest_dir=tmp_path)
+
+    spec = _get_spec("numerosity-four-conditions")
+    keys = [
+        "response_circ", "mask", "voxel_metadata", "validity", "label_names",
+        "surface_mapping_method2", "surface_metadata", "roi_data",
+        "lh_white", "rh_white", "lh_flat", "rh_flat", "lh_vertex_indices", "rh_vertex_indices",
+    ]  # fmt: skip
+
+    assert sorted(p.name for p in tmp_path.rglob("*") if p.is_file()) == sorted(Path(spec.files[k]).name for k in keys)

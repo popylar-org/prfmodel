@@ -75,6 +75,9 @@ _OPENNEURO_ECOG_URL = (
     "https://openneuro.org/crn/datasets/ds004194/snapshots/3.0.0/files/derivatives:Yuasa2023AlphaPRF:pRFmodel"
 )
 
+# Prefix for the dataset of numrosity with four conditions
+_NUM_4_CON = "numerosity_four_conditions"
+
 
 @dataclass(frozen=True)
 class DatasetSpec:
@@ -424,34 +427,82 @@ def _make_registry() -> dict[str, DatasetSpec]:
                 "Preprocessed fMRI time-course data for four experimental "
                 "conditions (Area, Size, Circumference, and Density) and their "
                 "average, accompanied by FreeSurfer surface files for flatmap "
-                "visualisation of both hemispheres."
+                "visualisation of both hemispheres. The returned response is in volume space: one row per voxel "
+                "of the whole-brain mask, in the C order of the mask. The four stimulus cycles are already "
+                "averaged with the pre-scan frames removed. "
+                "Voxels that are invalid for the requested task are flagged in the 'valid' column of the units "
+                "table, and the dataset's own voxel-to-vertex mapping is exposed for projecting results onto the "
+                "white surfaces. The affine of the mask is not in the coordinates of the surfaces, which lie "
+                "(-0.5, 17.5, -18.5) mm away. The task option selects the condition: 'area', "
+                "'size', 'circ' (circumference), 'dens' (density), or 'average' (the mean of the four, used when "
+                "no task is requested)."
             ),
             files={
-                "responses": "fmri_full_grid_dataset.pkl",
-                "lh_flat": "Surfaces/lh.flat.gii",
-                "lh_vertex_indices": "Surfaces/lh.flat.vertex_indices.npy",
-                "lh_white": "Surfaces/lh.white",
-                "rh_flat": "Surfaces/rh.flat.gii",
-                "rh_vertex_indices": "Surfaces/rh.flat.vertex_indices.npy",
-                "rh_white": "Surfaces/rh.white",
+                # Responses
+                "response_area": f"{_NUM_4_CON}/Area.npz",
+                "response_average": f"{_NUM_4_CON}/Average.npz",
+                "response_circ": f"{_NUM_4_CON}/Circ.npz",
+                "response_dens": f"{_NUM_4_CON}/Dens.npz",
+                "response_size": f"{_NUM_4_CON}/Size.npz",
+                # Metadata
+                "dataset_metadata": f"{_NUM_4_CON}/dataset_metadata.npz",
+                "surface_metadata": f"{_NUM_4_CON}/surface_metadata.npz",
+                "voxel_metadata": f"{_NUM_4_CON}/voxel_metadata.npz",
+                # Masks, labels, validity
+                "mask": f"{_NUM_4_CON}/mask.npz",
+                "validity": f"{_NUM_4_CON}/validity.npz",
+                "label_names": f"{_NUM_4_CON}/label_names.npz",
+                "roi_data": f"{_NUM_4_CON}/roi_data.npz",
+                # Surface mappings
+                "surface_mapping_method1": f"{_NUM_4_CON}/surface_mapping_method1.npz",
+                "surface_mapping_method2": f"{_NUM_4_CON}/surface_mapping_method2.npz",
+                # Surfaces
+                "lh_flat": f"{_NUM_4_CON}/Surfaces/lh.flat.gii",
+                "lh_white": f"{_NUM_4_CON}/Surfaces/lh.white",
+                "lh_vertex_indices": f"{_NUM_4_CON}/Surfaces/lh.flat.vertex_indices.npy",
+                "rh_flat": f"{_NUM_4_CON}/Surfaces/rh.flat.gii",
+                "rh_white": f"{_NUM_4_CON}/Surfaces/rh.white",
+                "rh_vertex_indices": f"{_NUM_4_CON}/Surfaces/rh.flat.vertex_indices.npy",
             },
             file_urls={
-                "responses": f"{_FIGSHARE_URL}/71024598",
+                # Responses
+                "response_area": f"{_FIGSHARE_URL}/71349385",
+                "response_average": f"{_FIGSHARE_URL}/71349376",
+                "response_circ": f"{_FIGSHARE_URL}/71349373",
+                "response_dens": f"{_FIGSHARE_URL}/71349379",
+                "response_size": f"{_FIGSHARE_URL}/71349382",
+                # Metadata
+                "dataset_metadata": f"{_FIGSHARE_URL}/71349391",
+                "surface_metadata": f"{_FIGSHARE_URL}/71349406",
+                "voxel_metadata": f"{_FIGSHARE_URL}/71349412",
+                # Masks, labels, validity
+                "mask": f"{_FIGSHARE_URL}/71349400",
+                "validity": f"{_FIGSHARE_URL}/71349409",
+                "label_names": f"{_FIGSHARE_URL}/71349394",
+                "roi_data": f"{_FIGSHARE_URL}/71349388",
+                # Surface mappings
+                "surface_mapping_method1": f"{_FIGSHARE_URL}/71349397",
+                "surface_mapping_method2": f"{_FIGSHARE_URL}/71349403",
+                # Surfaces
                 "lh_flat": f"{_FIGSHARE_URL}/71025390",
-                "lh_vertex_indices": f"{_FIGSHARE_URL}/71025384",
                 "lh_white": f"{_FIGSHARE_URL}/71025375",
+                "lh_vertex_indices": f"{_FIGSHARE_URL}/71025384",
                 "rh_flat": f"{_FIGSHARE_URL}/71025378",
                 "rh_vertex_indices": f"{_FIGSHARE_URL}/71025381",
                 "rh_white": f"{_FIGSHARE_URL}/71025387",
             },
             loader=_loaders.load_numerosity_four_conditions,
+            # The response covers the whole brain, so there is no hemisphere option
+            options=frozenset({"task"}),
+            # The first task is the default: the average of the four conditions
+            tasks=("average", "area", "circ", "dens", "size"),
             licence="CC BY 4.0",
             citation=(
                 "Mauro, K. (2026). Four Condition Numerosity Dataset. "
-                "figshare. https://doi.org/10.6084/m9.figshare.34898940"
+                "figshare. https://doi.org/10.6084/m9.figshare.34898940.v2"
             ),
-            homepage="https://doi.org/10.6084/m9.figshare.34898940",
-            download_size=673939692,
+            homepage="https://doi.org/10.6084/m9.figshare.34898940.v2",
+            download_size=316_659_762,
         ),
         DatasetSpec(
             name="hcp-999999-surface",

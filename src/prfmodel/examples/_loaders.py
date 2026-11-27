@@ -59,6 +59,9 @@ _ECOG_ROI_OF_WANG_AREA = {
     "none": "none",
 }  # fmt: skip
 
+# Values of voxel_hemisphere_id in the four-condition numerosity dataset
+_NUMEROSITY_HEMISPHERE_NAMES = {0: "left", 1: "right"}
+
 
 def load_retbar_visual(fetch: FileFetcher, options: Options) -> Dataset:
     """Load the response of a single subject to a moving bar stimulus."""
@@ -298,21 +301,101 @@ def load_visual_ecog_broadband(fetch: FileFetcher, options: Options) -> Dataset:
     )
 
 
-def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dataset:  # noqa: ARG001 (loaders take options)
-    """Load the four-condition numerosity workshop dataset."""
+def load_numerosity_four_conditions(fetch: FileFetcher, options: Options) -> Dataset:
+    """Load the voxel response of a single subject to numerosity stimuli in four stimulus conditions.
+
+    The response is returned in volume space as stored in the source files: one row per voxel of the brain mask, in
+    the C order of the mask voxels. The source files append zero-filled subcortical voxels after the mask voxels;
+    these lie outside the mask and are dropped. Voxels that the dataset marks as invalid for the requested task
+    (they have zeros at some time frames because they fell outside the scanned volume) are kept and flagged in the
+    `valid` column of `units`.
+
+    The ROIs were drawn on the cortical surface. Each voxel has the ROI of its nearest white surface vertex in
+    `roi_index`, and voxels without a nearby vertex are 'unassigned'. The table in `units` holds the hemisphere of
+    each voxel and whether it is valid.
+
+    The voxel values can be projected onto the vertices of `mesh` (the FreeSurfer white surfaces, left first) with
+    the voxel-to-vertex mapping of the dataset in `files["surface_mapping_method2"]`, whose voxel rows are rows of
+    `response`. The geodesic distances of the vertices within their ROI are in `files["roi_data"]`.
+
+    Warning: the affine of `mask` is the affine of the volume grid as distributed with the dataset, and it does not
+    place the voxels in the FreeSurfer surface (tkRAS) coordinates of `mesh`. In surface coordinates, voxel
+    `(i, j, k)` lies at `affine @ (i, j, k, 1)` plus (-0.5, 17.5, -18.5) mm. Projecting the volume onto `mesh` with
+    a function that relies on the affine, such as :func:`nilearn.surface.vol_to_surf`, therefore samples voxels
+    about 25 mm away from each vertex unless the affine is shifted first. The voxel-to-vertex mapping in `files`
+    does not depend on the affine and is not affected.
+    """
+    # The options always resolve a task for this dataset ('average' when none is requested)
+    task: str = options.task  # type: ignore[assignment]
+
+    with np.load(fetch("mask")) as archive:
+        is_in_mask = np.asarray(archive["mask"]).astype(bool)
+        affine = np.asarray(archive["affine"], dtype=np.float64)
+
+    mask = Nifti1Image(is_in_mask.astype(np.uint8), affine)
+    num_voxels = int(np.count_nonzero(is_in_mask))
+
+    with np.load(fetch("voxel_metadata")) as archive:
+        voxel_coordinates = np.asarray(archive["voxel_mapping"][:num_voxels], dtype=np.int64)
+        roi_index = np.asarray(archive["voxel_roi_index"][:num_voxels], dtype=np.int32)
+        hemisphere_id = np.asarray(archive["voxel_hemisphere_id"][:num_voxels], dtype=np.int8)
+
+    # The rows of the response must be the mask voxels in C order, which np.argwhere also yields
+    if not np.array_equal(voxel_coordinates, np.argwhere(is_in_mask)):
+        msg = "The first rows of the voxel table are not the voxels of the mask in C order"
+        raise ValueError(msg)
+
+    if not np.isin(hemisphere_id, list(_NUMEROSITY_HEMISPHERE_NAMES)).all():
+        msg = "Some voxels of the mask are assigned to neither the left nor the right hemisphere"
+        raise ValueError(msg)
+
+    with np.load(fetch(f"response_{task}")) as archive:
+        response = np.asarray(archive["response"][:num_voxels], dtype=np.float64)
+
+    with np.load(fetch("validity")) as archive:
+        # Keys inside validity.npz are capitalized, e.g. "Circ_valid"
+        valid = np.asarray(archive[f"{task.capitalize()}_valid"][:num_voxels], dtype=bool)
+
+    with np.load(fetch("label_names")) as archive:
+        roi_ids = np.asarray(archive["roi_ids"], dtype=np.int32)
+        roi_names = np.asarray(archive["roi_names"])
+
+    roi_mapping = {
+        -2: "overlap",
+        -1: "unassigned",
+        **{int(i): str(name) for i, name in zip(roi_ids, roi_names, strict=True)},
+    }
+
+    units = pd.DataFrame(
+        {
+            "hemisphere": pd.Series(hemisphere_id).map(_NUMEROSITY_HEMISPHERE_NAMES).to_numpy(),
+            "valid": valid,
+        },
+    )
+
+    mesh = PolyMesh(left=fetch("lh_white"), right=fetch("rh_white"))
+
+    # Exposed for projecting voxel values onto the surface and plotting them (kept in `files`)
     for key in (
-        "responses",
+        "surface_mapping_method2",
+        "surface_metadata",
+        "roi_data",
         "lh_flat",
-        "lh_vertex_indices",
-        "lh_white",
         "rh_flat",
+        "lh_vertex_indices",
         "rh_vertex_indices",
-        "rh_white",
     ):
         fetch(key)
 
     return Dataset(
         name="numerosity-four-conditions",
+        response=response,
+        roi_index=roi_index,
+        roi_mapping=roi_mapping,
+        units=units,
+        mask=mask,
+        mesh=mesh,
+        task=task,
         files=fetch.files,
     )
 

@@ -7,9 +7,14 @@
 
 # -- Path setup --------------------------------------------------------------
 
+import os
 import pathlib
 import sys
 from sphinx.ext.inheritance_diagram import InheritanceGraph
+
+# Notebook kernels inherit the environment; a headless MPLBACKEND (e.g., Agg) would drop all figures
+os.environ["MPLBACKEND"] = "module://matplotlib_inline.backend_inline"
+
 
 sys.path.insert(0, pathlib.Path("../src").resolve().as_posix())
 from prfmodel._docstring import _PARAMS
