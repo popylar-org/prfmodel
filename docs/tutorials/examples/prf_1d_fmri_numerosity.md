@@ -13,7 +13,7 @@ kernelspec:
 
 # Fitting a 1D population receptive field model to fMRI data from a numerosity experiment
 
-**Author**: Malte Lüken (m.luken@esciencecenter.nl)
+**Author**: Malte Lüken (m.luken@esciencecenter.nl) & Blazej M. Baczkowski (b.baczkowski@esciencecenter.nl)
 
 This example shows how to fit a population receptive field (pRF) model to functional magnetic resonance imaging (fMRI) data. The data was recorded while a subject viewed displays with different numbers of dots.
 
