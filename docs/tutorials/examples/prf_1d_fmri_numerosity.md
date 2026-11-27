@@ -17,9 +17,9 @@ kernelspec:
 
 This example shows how to fit a population receptive field (pRF) model to functional magnetic resonance imaging (fMRI) data. The data was recorded while a subject viewed displays with different numbers of dots.
 
-A pRF model describes which part of a stimulus space drives the response at a single location in the brain. Here that location is a vertex on the cortical surface, and its response -- the BOLD signal -- reflects the pooled activity of the underlying neuronal population. In the visual domain, the stimulus space is the visual field, and the pRF is a region within it (see [the example on population receptive fields](prf_2d_fmri_visual.md)). In this example, the stimulus space is numerosity: the number of items in a display (Harvey et al., 2013). We investigate whether a cortical region has its preferred numerosity, i.e., it responds most strongly to one numerosity and more weakly as a numerosity moves away from that value, which defines a tuning curve. Because numerosity is a single quantity, this pRF is one-dimensional. Following Harvey et al. (2013), we define it over the logarithm scale (_log numerosity_). This follows from the behaviour of numerosity perception, which obeys Weber’s law: the discriminability of two numerosities depends on their ratio rather than their absolute difference, so tuning width grows roughly in proportion to preferred numerosity. On a logarithmic axis this scaling is absorbed, leaving tuning curves that are more symmetric -- approximately Gaussian -- and more uniform in width across the map, which makes them well suited to a Gaussian pRF model.
+A pRF model describes which part of a stimulus space drives the response at a single location in the brain. Here that location is a voxel (a three-dimensional pixel of the fMRI images), and its response -- the BOLD signal -- reflects the pooled activity of the underlying neuronal population. In the visual domain, the stimulus space is the visual field, and the pRF is a region within it (see [the example on population receptive fields](prf_2d_fmri_visual.md)). In this example, the stimulus space is numerosity: the number of items in a display (Harvey et al., 2013). We investigate whether a cortical region has its preferred numerosity, i.e., it responds most strongly to one numerosity and more weakly as a numerosity moves away from that value, which defines a tuning curve. Because numerosity is a single quantity, this pRF is one-dimensional. Following Harvey et al. (2013), we define it over the logarithm scale (_log numerosity_). This follows from the behaviour of numerosity perception, which obeys Weber’s law: the discriminability of two numerosities depends on their ratio rather than their absolute difference, so tuning width grows roughly in proportion to preferred numerosity. On a logarithmic axis this scaling is absorbed, leaving tuning curves that are more symmetric -- approximately Gaussian -- and more uniform in width across the map, which makes them well suited to a Gaussian pRF model.
 
-The example first prepares the recorded responses for model fitting, then fits the model in three stages (grid search, least squares, and stochastic gradient descent), and finally interprets the estimated parameters.
+The example first prepares the recorded responses for model fitting, then fits the model to the voxels in three stages (grid search, least squares, and stochastic gradient descent), and finally interprets the estimated parameters, both in the voxels and projected onto the cortical surface.
 
 Because prfmodel uses Keras for model fitting, we need to make sure that a backend is installed before we begin.
 In this example, we use the TensorFlow backend.
@@ -104,7 +104,7 @@ The baseline shows numerosity 20 rather than a blank screen. This way, dots are 
 
 ## Loading the BOLD response
 
-Now that we have the stimulus, we load the recorded BOLD responses of a single subject. We use a preprocessed version of the dataset (Mauro, 2026) that has the tag `numerosity-four-conditions`. It contains the responses to four stimulus conditions, projected to the cortical surfaces of both hemispheres. In this example, we will use the average of the four conditions stored in the `average` field. 
+Now that we have the stimulus, we load the recorded BOLD responses of a single subject. We use a preprocessed version of the dataset (Mauro, 2026) that has the tag `numerosity-four-conditions`. It contains the responses to four stimulus conditions. In this example, we will use the average of the four conditions, which is the `average` task of the dataset.
 
 ```{code-cell} ipython3
 from prfmodel.examples import load_dataset
@@ -114,31 +114,35 @@ dataset = load_dataset("numerosity-four-conditions", task="average")
 print(dataset)
 ```
 
-The responses were recorded in a volume of voxels (the three-dimensional pixels of the fMRI images). The dataset in prfmodel provides them in a format ready for the analysis on a cortical surface:
-
-1. Voxels that fell outside the scanned volume at any time frame are excluded entirely. These voxels have a value of zero at the affected time frames, and a single such time frame is enough to exclude a voxel. Because this is decided for each stimulus condition separately, a voxel can be excluded in one condition but not in another.
-2. The response of each remaining voxel is given in percent signal change (PSC) relative to its mean over time, so that the responses of different voxels are on the same scale.
-3. The responses of the voxels that belong to each vertex of the cortical surface are averaged, which gives one response per vertex. Vertices without any remaining voxel have a response of NaN.
-
-In addition, the six time frames of the pre-scan interval were removed and the four cycles were averaged. Thus, `dataset.response` contains one timecourse of 44 time frames for each vertex, with the vertices ordered by the left hemisphere first.
+The responses are given in volume space: `dataset.response` contains one timecourse for each voxel inside the brain mask `dataset.mask`, a three-dimensional image of the brain. The rows of the response follow the order of the voxels inside the mask, so results can be put back into the volume later. In the dataset, the six time frames of the pre-scan interval were already removed and the four cycles averaged, so each timecourse has 44 time frames.
 
 ```{code-cell} ipython3
 response = dataset.response
 
 assert response.shape[1] == NUM_CYCLE_FRAMES
+assert response.shape[0] == np.count_nonzero(dataset.mask.dataobj)
 
 response.shape
 ```
 
-The scan only covered part of the brain. Vertices outside the scanned volume have no valid voxels and their timecourse is NaN. We keep track of the vertices that have a response.
+The scan only covered part of the brain. Voxels that fell outside the scanned volume during a run have a value of zero at the affected time frames, and the dataset marks them as invalid in the `valid` column of the `units` table, which has one row per voxel. We only use the valid voxels.
 
 ```{code-cell} ipython3
-has_response = ~np.isnan(response).any(axis=1)
+is_valid = dataset.units["valid"].to_numpy()
 
-has_response.mean()  # Fraction of vertices with a response
+is_valid.mean()  # Fraction of valid voxels
 ```
 
-The dataset also contains the region of interest (ROI) of each vertex and the names of the ROIs.
+The scanner signal of a voxel has an arbitrary scale, which differs between voxels. To put all voxels on the same scale, we convert each timecourse into percent signal change (PSC): its deviation from its mean over time, in percent of that mean.
+
+```{code-cell} ipython3
+def percent_signal_change(response: np.ndarray) -> np.ndarray:
+    """Express each timecourse as its deviation from its mean over time, in percent of that mean."""
+    mean = response.mean(axis=1, keepdims=True)
+    return (response / mean - 1.0) * 100.0
+```
+
+The dataset also contains the region of interest (ROI) of each voxel and the names of the ROIs.
 
 ```{code-cell} ipython3
 roi_index = dataset.roi_index
@@ -147,23 +151,54 @@ roi_mapping = dataset.roi_mapping
 roi_mapping
 ```
 
-The ROIs are numerosity maps that were delineated in a previous study. Their names start with their hemisphere (`lh` for left and `rh` for right), followed by `Num` to indicate that they are numerosity maps. NumTO (temporal-occipital) and NumPO (parietal-occipital) lie in the occipital cortex, NumPC1, NumPC2, and NumPC3 in the parietal cortex, and NumF in the frontal cortex (see Hendrikx et al., 2024, for details). Vertices outside the maps are `unassigned`.
+The ROIs are numerosity maps that were delineated on the cortical surface in a previous study. Each voxel has the ROI of the closest vertex of the surface. The names of the ROIs start with their hemisphere (`lh` for left and `rh` for right), followed by `Num` to indicate that they are numerosity maps. NumTO (temporal-occipital) and NumPO (parietal-occipital) lie in the occipital cortex, NumPC1, NumPC2, and NumPC3 in the parietal cortex, and NumF in the frontal cortex (see Hendrikx et al., 2024, for details). Voxels outside the maps are `unassigned`.
 
-We only fit the vertices that lie inside a numerosity map and have a response. All analyses below interpret the results within the numerosity maps, so the vertices outside the maps are not needed. Moreover, fitting all vertices with a response (more than 190,000) takes a long time without a graphics processing unit (GPU), whereas the maps contain only about 12,000 of them. We store the indices of the selected vertices, so that we can map the results back onto the cortical surface later.
+We only fit the valid voxels that lie inside a numerosity map. All analyses below interpret the results within the numerosity maps, so the voxels outside the maps are not needed. Moreover, fitting all valid voxels (about 390,000) takes a long time without a graphics processing unit (GPU), whereas the maps contain only about 26,500 of them. We store the indices of the selected voxels, so that we can project the results onto the cortical surface later.
 
 ```{code-cell} ipython3
 roi_labels = [label for label in roi_mapping if label > 0]  # The numerosity maps (without -2 and -1)
 roi_names = [roi_mapping[label] for label in roi_labels]
 
-# Rows of the response that lie inside a numerosity map and have a response
-fit_vertices = np.flatnonzero(has_response & np.isin(roi_index, roi_labels))
+# Rows of the response that are valid and lie inside a numerosity map
+fit_voxels = np.flatnonzero(is_valid & np.isin(roi_index, roi_labels))
 
-pd.Series(roi_index[fit_vertices]).value_counts().sort_index().rename(index=roi_mapping)  # Vertices per map
+pd.Series(roi_index[fit_voxels]).value_counts().sort_index().rename(index=roi_mapping)  # Voxels per map
+```
+
+### Projecting voxels onto the cortical surface
+
+To show the results on the cortical surface, we need to know which voxels belong to each vertex of the surface `dataset.mesh`. The dataset provides this assignment in the file `dataset.files["surface_mapping_method2"]` in a compact form: `method2_vertex_voxel_rows` lists the voxels of all vertices one after another, and the voxels of vertex `v` are the entries from `offsets[v]` to `offsets[v + 1]` of this list, where `offsets` is `method2_vertex_voxel_offsets`. The voxels are given as rows of `dataset.response`, and the vertices are ordered with the left hemisphere first.
+
+We write a function that projects one value per voxel onto the surface by averaging the values of the voxels of each vertex. Voxels without a value (NaN) are left out, and a vertex without any voxel with a value is NaN.
+
+```{code-cell} ipython3
+with np.load(dataset.files["surface_mapping_method2"]) as archive:
+    offsets = archive["method2_vertex_voxel_offsets"]
+    mapped_voxels = archive["method2_vertex_voxel_rows"]
+
+num_vertices = dataset.mesh.n_vertices
+mapped_vertices = np.repeat(np.arange(num_vertices), np.diff(offsets))  # The vertex of each entry
+
+
+def project_to_surface(voxel_values: np.ndarray) -> np.ndarray:
+    """Average one value per voxel (NaN for voxels without a value) over the voxels of each vertex."""
+    values = voxel_values[mapped_voxels]
+    has_value = ~np.isnan(values)
+    total = np.bincount(mapped_vertices[has_value], weights=values[has_value], minlength=num_vertices)
+    count = np.bincount(mapped_vertices[has_value], minlength=num_vertices)
+    return np.where(count > 0, total / np.maximum(count, 1), np.nan)
+
+
+def fill_voxels(values: np.ndarray, rows: np.ndarray) -> np.ndarray:
+    """Put values for some rows of the response into an array with one value per voxel (NaN elsewhere)."""
+    voxel_values = np.full(len(response), np.nan)
+    voxel_values[rows] = values
+    return voxel_values
 ```
 
 To see where the maps lie, we show them on flattened surfaces (flatmaps) of both hemispheres, which show the entire cortex at once. A flat surface covers fewer vertices than the full cortical surface, because a part of it (e.g., the medial wall) was cut away to flatten it. The dataset therefore provides, for each hemisphere, the flat surface (e.g., `dataset.files["lh_flat"]`) and the index of each of its vertices on the full surface (e.g., `dataset.files["lh_vertex_indices"]`).
 
-We write a function that builds a flat surface mesh with both hemispheres side by side and returns, for each vertex of the flat mesh, the row of `dataset.response` that it belongs to. The orientation of a flat surface is arbitrary, so we rotate the hemispheres to show them upright.
+We write a function that builds a flat surface mesh with both hemispheres side by side and returns, for each vertex of the flat mesh, the index of the vertex on the full surface of both hemispheres (left first), which is the order of the values that `project_to_surface` returns. The orientation of a flat surface is arbitrary, so we rotate the hemispheres to show them upright.
 
 ```{code-cell} ipython3
 import nibabel as nib
@@ -182,9 +217,9 @@ def rotate_xy(coords: np.ndarray, angle: float) -> np.ndarray:
 
 
 def make_flat_mesh(dataset, rotation: dict[str, float], gap: float = 20.0) -> tuple[PolyMesh, np.ndarray]:
-    """Build a flat mesh of both hemispheres and the row of `dataset.response` of each of its vertices."""
+    """Build a flat mesh of both hemispheres and the index of each of its vertices on the full surface."""
     parts, indices = {}, []
-    row_offset = 0  # The rows of the right hemisphere follow those of the left hemisphere
+    row_offset = 0  # The vertices of the right hemisphere follow those of the left hemisphere
 
     for hemi, prefix in (("left", "lh"), ("right", "rh")):
         flat = nib.load(dataset.files[f"{prefix}_flat"])
@@ -206,19 +241,25 @@ def make_flat_mesh(dataset, rotation: dict[str, float], gap: float = 20.0) -> tu
 flat_mesh, flat_indices = make_flat_mesh(dataset, rotation={"left": -100, "right": -80})
 ```
 
-We plot the selected vertices with {py:func}`prfmodel.plotting.plot_surface_stat_map` and color them by their map. Each map exists in both hemispheres, so we give the same map the same color in both.
+The maps were delineated on the vertices of the surface, and the file `dataset.files["surface_metadata"]` contains the ROI of each vertex (`vertex_roi_index`), in the same order. We show the vertices that lie inside a map and receive at least one of the selected voxels with {py:func}`prfmodel.plotting.plot_surface_stat_map`, colored by their map. Each map exists in both hemispheres, so we give the same map the same color in both.
 
 ```{code-cell} ipython3
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 from prfmodel.plotting import plot_surface_stat_map
 
-# Number of each map within its hemisphere (1 for NumTO to 6 for NumF); NaN for vertices that we do not fit
-num_maps_per_hemisphere = len(roi_labels) // 2
-map_surface = np.full(len(response), np.nan)
-map_surface[fit_vertices] = (roi_index[fit_vertices] - 1) % num_maps_per_hemisphere + 1
+with np.load(dataset.files["surface_metadata"]) as archive:
+    vertex_roi_index = archive["vertex_roi_index"]
 
-# One color per map: the first colors of "tab10", which do not include gray (the color of the vertices we do not fit)
+# Vertices that receive at least one of the voxels that we fit
+has_fit_voxel = ~np.isnan(project_to_surface(fill_voxels(1.0, fit_voxels)))
+
+# Number of each map within its hemisphere (1 for NumTO to 6 for NumF); NaN for the other vertices
+num_maps_per_hemisphere = len(roi_labels) // 2
+is_map_vertex = has_fit_voxel & np.isin(vertex_roi_index, roi_labels)
+map_surface = np.where(is_map_vertex, (vertex_roi_index - 1) % num_maps_per_hemisphere + 1, np.nan)
+
+# One color per map: the first colors of "tab10", which do not include gray (the color of the other vertices)
 map_cmap = ListedColormap(plt.get_cmap("tab10").colors[:num_maps_per_hemisphere])
 
 fig, ax = plot_surface_stat_map(
@@ -262,27 +303,33 @@ def detrend(response: np.ndarray) -> np.ndarray:
     return response - (response @ pinv_trends.T) @ trends.T
 
 
-response_fit = detrend(response[fit_vertices])
+response_psc = percent_signal_change(response[fit_voxels])
+response_fit = detrend(response_psc)
 
 response_fit.shape
 ```
 
-We compare the timecourse of a single vertex before and after detrending.
+We compare the timecourse of a single voxel before and after detrending. The size of the slow trend differs between voxels, and some voxels have almost none. As an example, we pick a voxel whose trend is large relative to its signal (larger than in 90% of the voxels), so that the effect of detrending is clearly visible.
 
 ```{code-cell} ipython3
 BLUE, ORANGE, GRAY = "#2a78d6", "#eb6834", "#8c8c8c"
 
-example = 2
+# Size of the removed trend relative to the variation of the signal, for each voxel
+fitted_trend = response_psc - response_fit
+trend_size = np.abs(fitted_trend).max(axis=1) / response_psc.std(axis=1)
+example = np.argsort(trend_size)[int(0.9 * len(trend_size))]
+
 time_frames = np.arange(NUM_CYCLE_FRAMES)
 
 fig, ax = plt.subplots(figsize=(10, 3.5), layout="constrained")
 ax.axhline(0.0, color="#bdbdbd", linewidth=1)
-ax.plot(time_frames, response[fit_vertices[example]], color=BLUE, linewidth=2, label="Before detrending")
+ax.plot(time_frames, response_psc[example], color=BLUE, linewidth=2, label="Before detrending")
+ax.plot(time_frames, fitted_trend[example], color=GRAY, linewidth=1.5, linestyle="--", label="Removed trend")
 ax.plot(time_frames, response_fit[example], color=ORANGE, linewidth=2, label="After detrending")
 ax.set(
     xlabel="Time frame (in TR)",
     ylabel="BOLD response (in PSC)",
-    title=f"Vertex {fit_vertices[example]} ({roi_mapping[roi_index[fit_vertices[example]]]})",
+    title=f"Voxel {fit_voxels[example]} ({roi_mapping[roi_index[fit_voxels[example]]]})",
 )
 ax.legend(frameon=False)
 plt.show()
@@ -300,8 +347,8 @@ Before we model the BOLD response, we look at all timecourses at once in a heatm
 ```{code-cell} ipython3
 from prfmodel.plotting import plot_response_heatmap
 
-# Sort the vertices by numerosity map (in the order of the mapping) so that each map forms one block of rows
-by_map = np.argsort(roi_index[fit_vertices], kind="stable")
+# Sort the voxels by numerosity map (in the order of the mapping) so that each map forms one block of rows
+by_map = np.argsort(roi_index[fit_voxels], kind="stable")
 
 fig, ax = plot_response_heatmap(
     response_fit[by_map],
@@ -315,7 +362,7 @@ fig, ax = plot_response_heatmap(
 )
 
 # Mark the borders between the maps and label each map in the middle of its rows
-map_sizes = np.array([(roi_index[fit_vertices] == label).sum() for label in roi_labels])
+map_sizes = np.array([(roi_index[fit_voxels] == label).sum() for label in roi_labels])
 map_ends = np.cumsum(map_sizes)
 for end in map_ends[:-1]:
     ax.axhline(end - 0.5, color="black", linewidth=0.8)
@@ -323,7 +370,7 @@ ax.set_yticks(map_ends - map_sizes / 2, labels=roi_names)
 plt.show()
 ```
 
-A vertex that responds to numerosity should show two peaks per cycle, one during the ascending and one during the descending sequence, with a distance between the peaks that depends on its preferred numerosity (see above). Vertices whose responses do not follow the stimulus show noise without such peaks. The vertices are sorted by numerosity map, so the heatmap also shows whether the maps differ in how clearly their vertices follow the stimulus.
+A voxel that responds to numerosity should show two peaks per cycle, one during the ascending and one during the descending sequence, with a distance between the peaks that depends on its preferred numerosity (see above). Voxels whose responses do not follow the stimulus show noise without such peaks. The voxels are sorted by numerosity map, so the heatmap also shows whether the maps differ in how clearly their voxels follow the stimulus.
 
 +++
 
@@ -424,7 +471,7 @@ fig.show()
 On the log scale, each pRF is symmetric around its preferred numerosity. On the natural scale, it extends further towards larger numerosities, so a pRF distinguishes small numerosities (e.g., 2 and 3) better than large ones (e.g., 6 and 7). A narrow pRF (small `sigma`) responds to only a few of the numerosities in the stimulus, a wide pRF to many.
 
 The impulse response describes how the BOLD response follows a short burst of neural activity. Its parameters default to the Glover hemodynamic response function (see
-{py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only need to set `weight_deriv`. This parameter weights the temporal derivative of the impulse response and absorbs small differences in the timing of the BOLD response between vertices. Each time frame is one TR of 2.1 seconds, which the stimulus stores as its `frame_duration`. The impulse response is sampled at this frame duration, so the prediction has the same sampling rate as the observed responses (see also the section [](../../important_details.md)). We plot the impulse response for three values of `weight_deriv`. On its own, the impulse model does not know the stimulus, so we sample it at the frame duration of the stimulus with {py:meth}`~prfmodel.impulse.base.BaseImpulse.at_resolution`.
+{py:func}`~prfmodel.impulse.defaults.default_two_gamma_impulse_glover_hrf`), so we only need to set `weight_deriv`. This parameter weights the temporal derivative of the impulse response and absorbs small differences in the timing of the BOLD response between voxels. Each time frame is one TR of 2.1 seconds, which the stimulus stores as its `frame_duration`. The impulse response is sampled at this frame duration, so the prediction has the same sampling rate as the observed responses (see also the section [](../../important_details.md)). We plot the impulse response for three values of `weight_deriv`. On its own, the impulse model does not know the stimulus, so we sample it at the frame duration of the stimulus with {py:meth}`~prfmodel.impulse.base.BaseImpulse.at_resolution`.
 
 ```{code-cell} ipython3
 from prfmodel.impulse import DerivativeTwoGammaImpulse
@@ -447,7 +494,7 @@ ax.legend(frameon=False)
 plt.show()
 ```
 
-Negative values of `weight_deriv` shift the peak of the impulse response earlier in time and positive values later. We start with `weight_deriv = -0.5` and estimate it for each vertex during fitting.
+Negative values of `weight_deriv` shift the peak of the impulse response earlier in time and positive values later. We start with `weight_deriv = -0.5` and estimate it for each voxel during fitting.
 
 We insert the impulse model into the {py:class}`prfmodel.models.prf.Gaussian1DPRFModel`, which combines all three steps, and predict the response of a pRF that prefers numerosity 3 to the full stimulus.
 
@@ -629,7 +676,7 @@ param_ranges = grid_values_1d_prf(stimulus) | {
 
 By default, the function creates 49 values for `mu` that span twice the range of the stimulus around its midpoint and 50 log-spaced values for `sigma` that range from the smallest spacing between the stimulus coordinates to their full range, which gives $49 \times 50 = 2450$ parameter combinations. This is still a relatively small grid and we recommend specifying finer grids in practice.
 
-Two properties of the stimulus bound what these ranges can achieve. First, the range of `mu` extends beyond the displayed numerosities, from about 0.2 to 90 on the natural scale. Estimates outside the numerosities 1 to 7 (numerosity 20 is only shown as a baseline) are only weakly constrained by the data, and we will exclude them when we analyze the pRF parameters. Extending the grid beyond the stimulus prevents such vertices from piling up at the edge of the grid.
+Two properties of the stimulus bound what these ranges can achieve. First, the range of `mu` extends beyond the displayed numerosities, from about 0.2 to 90 on the natural scale. Estimates outside the numerosities 1 to 7 (numerosity 20 is only shown as a baseline) are only weakly constrained by the data, and we will exclude them when we analyze the pRF parameters. Extending the grid beyond the stimulus prevents such voxels from piling up at the edge of the grid.
 Second, the stimulus samples log-numerosity space at only eight points, the closest of which are $\log(7) - \log(6) \approx 0.15$ apart. This spacing is the smallest value of `sigma` in the grid. A pRF much narrower than the spacing responds to a single numerosity no matter how small `sigma` becomes, so estimates near the smallest value should be read as "no wider than one stimulus level".
 
 We construct the {py:class}`prfmodel.fitters.GridFitter` and perform the grid search. We set `batch_size=20` to evaluate 20 parameter combinations at the same time, which saves memory. By default, the `loss` is the negative correlation, which ignores differences in baseline and amplitude between predictions and observed data, so the grid search cannot estimate `baseline` and `amplitude`.
@@ -654,7 +701,7 @@ grid_params
 
 ### Least squares
 
-We estimate `baseline` and `amplitude` with least squares by regressing the observed responses on the predicted responses of each vertex. Because the observed and the predicted responses are both detrended, which also removes their mean, the `baseline` estimates are close to zero.
+We estimate `baseline` and `amplitude` with least squares by regressing the observed responses on the predicted responses of each voxel. Because the observed and the predicted responses are both detrended, which also removes their mean, the `baseline` estimates are close to zero.
 
 ```{code-cell} ipython3
 from prfmodel.fitters import LeastSquaresFitter
@@ -679,7 +726,7 @@ ls_params
 
 To finetune all parameters, we use the {py:class}`~prfmodel.fitters.SGDFitter` with the least-squares parameters as starting values. Because `sigma` is strictly positive, we include an adapter that lets the fitter optimize `sigma` on an unconstrained log scale and transforms it back before making predictions.
 
-By default, {py:class}`~prfmodel.fitters.SGDFitter` optimizes every parameter it is given, so `weight_deriv` is estimated per vertex as well. Pass `fixed_parameters=["weight_deriv"]` to `fit` to keep the impulse response identical  across vertices instead.
+By default, {py:class}`~prfmodel.fitters.SGDFitter` optimizes every parameter it is given, so `weight_deriv` is estimated per voxel as well. Pass `fixed_parameters=["weight_deriv"]` to `fit` to keep the impulse response identical across voxels instead.
 
 ```{code-cell} ipython3
 from prfmodel.fitters import SGDFitter
@@ -704,7 +751,7 @@ sgd_params
 
 ## Evaluating the model fit
 
-We compare the model predictions against the observed responses. We wrap the model in {py:func}`prfmodel.utils.batched` to make predictions for batches of vertices sequentially, which saves memory. We quantify the fit with the R-squared, computed with {py:func}`prfmodel.utils.calculate_r_squared`, which is the proportion of variance in the observed responses explained by the predictions. Because we compare the predictions against the responses that we fitted the model to, the scores describe the in-sample fit.
+We compare the model predictions against the observed responses. We wrap the model in {py:func}`prfmodel.utils.batched` to make predictions for batches of voxels sequentially, which saves memory. We quantify the fit with the R-squared, computed with {py:func}`prfmodel.utils.calculate_r_squared`, which is the proportion of variance in the observed responses explained by the predictions. Because we compare the predictions against the responses that we fitted the model to, the scores describe the in-sample fit.
 
 ```{code-cell} ipython3
 from prfmodel.utils import batched, calculate_r_squared
@@ -712,12 +759,12 @@ from prfmodel.utils import batched, calculate_r_squared
 prf_model_batched = batched(prf_model)
 
 pred_response = np.asarray(prf_model_batched(stimulus, sgd_params, batch_size=100))
-r_squared = calculate_r_squared(response_fit, pred_response)  # One score per vertex
+r_squared = calculate_r_squared(response_fit, pred_response)  # One score per voxel
 
 r_squared.shape
 ```
 
-We look at the distribution of the scores with {py:func}`prfmodel.plotting.plot_r_squared_hist`. We clip the scores to $[0, 1]$: R-squared is negative whenever a prediction fits worse than the mean of the data, and those vertices end up in the leftmost bin.
+We look at the distribution of the scores with {py:func}`prfmodel.plotting.plot_r_squared_hist`. We clip the scores to $[0, 1]$: R-squared is negative whenever a prediction fits worse than the mean of the data, and those voxels end up in the leftmost bin.
 
 ```{code-cell} ipython3
 from prfmodel.plotting import plot_r_squared_hist
@@ -725,23 +772,23 @@ from prfmodel.plotting import plot_r_squared_hist
 plot_r_squared_hist(r_squared, bins=20, value_range=(0.0, 1.0), clip=True);
 ```
 
-We also compare the observed and predicted timecourses of the best-fitting vertex in each numerosity map. Use the slider to switch between the maps. We only consider vertices whose preferred numerosity lies between 1 and 7, the numerosities that the stimulus shows (we explain this choice below).
+We also compare the observed and predicted timecourses of the best-fitting voxel in each numerosity map. Use the slider to switch between the maps. We only consider voxels whose preferred numerosity lies between 1 and 7, the numerosities that the stimulus shows (we explain this choice below).
 
 ```{code-cell} ipython3
 numerosity_estimates = np.exp(sgd_params["mu"].to_numpy())
 is_in_stimulus_range = (numerosity_estimates >= 1) & (numerosity_estimates <= 7)
 
-# Best-fitting vertex in each map (maps without a vertex in the stimulus range are left out)
-best_vertices = {}
+# Best-fitting voxel in each map (maps without a voxel in the stimulus range are left out)
+best_voxels = {}
 for label in roi_labels:
-    in_roi = np.flatnonzero((roi_index[fit_vertices] == label) & is_in_stimulus_range)
+    in_roi = np.flatnonzero((roi_index[fit_voxels] == label) & is_in_stimulus_range)
     if in_roi.size > 0:
-        best_vertices[label] = in_roi[np.argmax(r_squared[in_roi])]
+        best_voxels[label] = in_roi[np.argmax(r_squared[in_roi])]
 
 
 def fit_title(label: int) -> str:
-    """Describe the best-fitting vertex of a map."""
-    best = best_vertices[label]
+    """Describe the best-fitting voxel of a map."""
+    best = best_voxels[label]
     return (
         f"{roi_mapping[label]}: R-squared = {r_squared[best]:.2f}, "
         f"preferred numerosity = {numerosity_estimates[best]:.1f}"
@@ -749,10 +796,10 @@ def fit_title(label: int) -> str:
 
 
 # Use the same y-axis range for all maps, so that their responses can be compared
-selected = list(best_vertices.values())
+selected = list(best_voxels.values())
 y_limit = 1.05 * max(np.abs(response_fit[selected]).max(), np.abs(pred_response[selected]).max())
 
-first_label, first = next(iter(best_vertices.items()))
+first_label, first = next(iter(best_voxels.items()))
 fig = go.Figure(
     data=[
         go.Scatter(
@@ -776,7 +823,7 @@ fig = go.Figure(
             data=[go.Scatter(y=response_fit[best]), go.Scatter(y=pred_response[best])],
             layout={"title": {"text": fit_title(label)}},
         )
-        for label, best in best_vertices.items()
+        for label, best in best_voxels.items()
     ],
 )
 fig.add_hline(y=0.0, line={"color": "#bdbdbd", "width": 1}, layer="below")
@@ -800,7 +847,7 @@ fig.update_layout(
                         {"mode": "immediate", "frame": {"duration": 0, "redraw": True}, "transition": {"duration": 0}},
                     ],
                 }
-                for label in best_vertices
+                for label in best_voxels
             ],
         },
     ],
@@ -812,7 +859,7 @@ fig.show()
 
 ## Interpreting the model parameters
 
-To interpret the pRF parameters, we zoom in on vertices for which we can trust the estimates. We select vertices that fulfill three criteria:
+To interpret the pRF parameters, we zoom in on voxels for which we can trust the estimates. We select voxels that fulfill three criteria:
 
 - The R-squared is above 0.2 (note that this threshold is somewhat arbitrary).
 - The preferred numerosity lies between 1 and 7, the numerosities that the stimulus shows (excluding the baseline 20).
@@ -824,12 +871,12 @@ To interpret the pRF parameters, we zoom in on vertices for which we can trust t
 We define the selection as a function because we apply it again with a stricter R-squared threshold when we look at a single numerosity map below.
 
 ```{code-cell} ipython3
-def select_vertices(
+def select_voxels(
     params: pd.DataFrame,
     r_squared: np.ndarray,
     r_squared_threshold: float = 0.2,
 ) -> np.ndarray:
-    """Select vertices with a good fit, a preferred numerosity between 1 and 7, and an identifiable pRF center."""
+    """Select voxels with a good fit, a preferred numerosity between 1 and 7, and an identifiable pRF center."""
     numerosity = np.exp(params["mu"].to_numpy())
     return (
         (r_squared > r_squared_threshold)
@@ -839,17 +886,17 @@ def select_vertices(
     )
 
 
-is_selected = select_vertices(sgd_params, r_squared)
+is_selected = select_voxels(sgd_params, r_squared)
 
-is_selected.mean()  # Fraction of fitted vertices that are selected
+is_selected.mean()  # Fraction of fitted voxels that are selected
 ```
 
-We add the name of the numerosity map to the parameters of each vertex and convert `mu` into the preferred numerosity on the natural scale.
+We add the name of the numerosity map to the parameters of each voxel and convert `mu` into the preferred numerosity on the natural scale.
 
 ```{code-cell} ipython3
 final_params = sgd_params.copy()
 final_params["roi"] = pd.Categorical(
-    [roi_mapping[label] for label in roi_index[fit_vertices]],
+    [roi_mapping[label] for label in roi_index[fit_voxels]],
     categories=roi_names,  # Keep the order of the maps from the mapping
     ordered=True,
 )
@@ -860,7 +907,7 @@ params_selected = final_params.loc[is_selected]
 params_selected.groupby("roi", observed=False)[["numerosity", "sigma"]].agg(["mean", "std", "count"]).round(2)
 ```
 
-We plot the average preferred numerosity and pRF size of each map with {py:func}`prfmodel.plotting.plot_parameter_by_roi`. The error bars show the standard deviation across vertices (not the standard error of the mean).
+We plot the average preferred numerosity and pRF size of each map with {py:func}`prfmodel.plotting.plot_parameter_by_roi`. The error bars show the standard deviation across voxels (not the standard error of the mean).
 
 ```{code-cell} ipython3
 from prfmodel.plotting import plot_parameter_by_roi
@@ -892,19 +939,18 @@ ax.tick_params(axis="x", labelrotation=45)
 plt.show()
 ```
 
-When comparing the maps, keep in mind the variation within each map (the error bars) and the number of selected vertices in each map (see the table above): A difference between two maps is only meaningful if it is large relative to the variation within the maps, and an average over few vertices is less reliable than an average over many.
+When comparing the maps, keep in mind the variation within each map (the error bars) and the number of selected voxels in each map (see the table above): A difference between two maps is only meaningful if it is large relative to the variation within the maps, and an average over few voxels is less reliable than an average over many.
 
 +++
 
 ## Preferred numerosity on the cortical surface
 
-We can also look at the preferred numerosity on the cortical surface, using the flat mesh (`flat_mesh` and `flat_indices`) that we built above to show the numerosity maps. We fill the preferred numerosity of the selected vertices into an array with one value per vertex of the cortical surface (NaN for all other vertices) and plot it on the flat mesh with {py:func}`prfmodel.plotting.plot_surface_stat_map`.
+We can also look at the preferred numerosity on the cortical surface, using the flat mesh (`flat_mesh` and `flat_indices`) that we built above to show the numerosity maps. We project the preferred numerosity of the selected voxels onto the surface with `project_to_surface`, so each vertex shows the average over its selected voxels (NaN for vertices without any), and plot it on the flat mesh with {py:func}`prfmodel.plotting.plot_surface_stat_map`.
 
 ```{code-cell} ipython3
 from prfmodel.plotting import plot_surface_stat_map
 
-numerosity_surface = np.full(len(response), np.nan)
-numerosity_surface[fit_vertices[is_selected]] = params_selected["numerosity"]
+numerosity_surface = project_to_surface(fill_voxels(params_selected["numerosity"], fit_voxels[is_selected]))
 
 plot_surface_stat_map(
     flat_mesh,
@@ -923,29 +969,34 @@ Each colored patch is a numerosity map. Numerosity maps are topographic: Neighbo
 
 ## Preferred numerosity along a numerosity map
 
-To measure the position of a vertex within a map, the dataset contains the geodesic distance of each vertex in mm, which is measured along the cortical surface rather than in a straight line through the brain. The distance is 0 mm at the end of the map with low preferred numerosities and increases towards the end with high preferred numerosities. It is stored in the `units` table of the dataset, in the same order as the response. We look at the right NumTO.
+To measure positions within a map, we use the surface again. The dataset contains the geodesic distance of each vertex within its map in mm, which is measured along the cortical surface rather than in a straight line through the brain. The distance is 0 mm at the end of the map with low preferred numerosities and increases towards the end with high preferred numerosities. The file `dataset.files["roi_data"]` stores it for each map as an array with one value per vertex (`roi_<label>_distances_mm`, NaN outside the map). We look at the right NumTO.
 
 ```{code-cell} ipython3
 roi_label = 7  # rh_NumTO
-roi_distance = dataset.units["roi_distance_mm"].to_numpy()
+
+with np.load(dataset.files["roi_data"]) as archive:
+    roi_distance = archive[f"roi_{roi_label}_distances_mm"]
 
 roi_mapping[roi_label]
 ```
 
-We select the fitted vertices of the map with the same criteria as above, but with a stricter R-squared threshold of 0.3, and look up their geodesic distance.
+We select the fitted voxels of the map with the same criteria as above, but with a stricter R-squared threshold of 0.3, and project their preferred numerosity onto the surface. We keep the vertices of the map that receive at least one selected voxel, together with their geodesic distance.
 
 ```{code-cell} ipython3
-in_roi = roi_index[fit_vertices] == roi_label
-keep = in_roi & select_vertices(sgd_params, r_squared, r_squared_threshold=0.3)
+in_roi = roi_index[fit_voxels] == roi_label
+keep = in_roi & select_voxels(sgd_params, r_squared, r_squared_threshold=0.3)
+
+numerosity_vertices = project_to_surface(fill_voxels(np.exp(sgd_params["mu"].to_numpy()[keep]), fit_voxels[keep]))
+has_distance = ~np.isnan(roi_distance) & ~np.isnan(numerosity_vertices)
 
 distance_data = pd.DataFrame(
     {
-        "distance": roi_distance[fit_vertices[keep]],
-        "numerosity": np.exp(sgd_params["mu"].to_numpy()[keep]),
+        "distance": roi_distance[has_distance],
+        "numerosity": numerosity_vertices[has_distance],
     },
 )
 
-len(distance_data)  # Number of selected vertices
+len(distance_data)  # Number of vertices with a distance and a preferred numerosity
 ```
 
 We group the vertices into distance bins of 2 mm and compute the mean preferred numerosity of each bin.
@@ -1055,15 +1106,15 @@ Changing the number of dots also changes other visual properties of the stimulus
 
 The `average` condition that we fitted above is the average of these four conditions. The conditions make the properties testable. Consider a population that responds to the total area of the dots rather than to their number: In the constant area and high density conditions, its response would not change with numerosity, because the total area stays the same. In the constant dot size condition, the total area grows with numerosity, so the population would appear to be tuned to numerosity. A population that is tuned to numerosity, in contrast, responds in the same way in all conditions. Thus, if a map represents numerosity, the preferred numerosity should change in the same way along the map in all four conditions.
 
-The responses of each condition are loaded with the `task` option of {py:func}`~prfmodel.examples.load_dataset`. All conditions share the same vertices in the same order, so the ROI labels, the geodesic distances, and the model from above apply to every condition. For example, the following code fits the constant area condition in the same map; repeating the steps of this section for its estimates gives the preferred numerosity along the map in this condition. We do not run it here because fitting all four conditions takes a while.
+The responses of each condition are loaded with the `task` option of {py:func}`~prfmodel.examples.load_dataset`. All conditions share the same voxels in the same order, so the ROI labels, the projection onto the surface, the geodesic distances, and the model from above apply to every condition. Only the valid voxels differ, because a voxel can fall outside the scanned volume in some runs of one condition but not of another. For example, the following code fits the constant area condition in the same map; repeating the steps of this section for its estimates gives the preferred numerosity along the map in this condition. We do not run it here because fitting all four conditions takes a while.
 
 
 ```python
-area_response = load_dataset("numerosity-four-conditions", task="area").response
+area = load_dataset("numerosity-four-conditions", task="area")
 
-# Vertices of the map that have a response in this condition
-area_vertices = np.flatnonzero((roi_index == roi_label) & ~np.isnan(area_response).any(axis=1))
-area_response_fit = detrend(area_response[area_vertices])
+# Voxels of the map that are valid in this condition
+area_voxels = np.flatnonzero((roi_index == roi_label) & area.units["valid"].to_numpy())
+area_response_fit = detrend(percent_signal_change(area.response[area_voxels]))
 
 _, area_grid_params = grid_fitter.fit(data=area_response_fit, parameter_values=param_ranges, batch_size=20)
 _, area_ls_params = ls_fitter.fit(
@@ -1084,11 +1135,11 @@ area_r_squared = calculate_r_squared(
 
 ## Conclusion
 
-This example showed how to fit a one-dimensional Gaussian pRF model to fMRI data from a numerosity experiment. We loaded responses that were already projected onto the cortical surface and converted to percent signal change, removed slow trends, and adapted the model predictions to this preprocessing by wrapping the prediction function of the model.
+This example showed how to fit a one-dimensional Gaussian pRF model to fMRI data from a numerosity experiment. We loaded the responses of the voxels in a brain mask, converted them to percent signal change, removed slow trends, and adapted the model predictions to this preprocessing by wrapping the prediction function of the model.
 
-We optimized the model parameters with a grid search, least squares, and stochastic gradient descent, evaluated the model fit, and compared the estimated parameters between numerosity maps. 
+We optimized the model parameters of the voxels in the numerosity maps with a grid search, least squares, and stochastic gradient descent, evaluated the model fit, and compared the estimated parameters between numerosity maps.
 
-Finally, we showed the preferred numerosity on flattened cortical surfaces, investigated how it changes along a numerosity map, and showed how the four stimulus conditions of the dataset control for other visual properties of the dots.
+Finally, we projected the preferred numerosity from the voxels onto the cortical surface and showed it on flattened surfaces, investigated how it changes along a numerosity map, and showed how the four stimulus conditions of the dataset control for other visual properties of the dots.
 
 +++
 
