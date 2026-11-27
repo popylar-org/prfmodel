@@ -17,12 +17,14 @@ a response from a population receptive field (pRF) response model.
 from ._convolve import convolve_prf_impulse_response
 from ._cst_channels import SustainedImpulse
 from ._cst_channels import TransientImpulse
+from ._hrf_library import HRFLibraryImpulse
 from ._shifted_gamma import ShiftedGammaImpulse
 from ._two_gamma import TwoGammaImpulse
 from ._two_gamma_deriv import DerivativeTwoGammaImpulse
 
 __all__ = [
     "DerivativeTwoGammaImpulse",
+    "HRFLibraryImpulse",
     "ShiftedGammaImpulse",
     "SustainedImpulse",
     "TransientImpulse",
