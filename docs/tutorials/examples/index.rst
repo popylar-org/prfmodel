@@ -9,6 +9,7 @@ Here you can find a list of examples:
    :glob:
 
    prf_2d_fmri_visual.md
+   prf_2d_fmri_hrf_selection.md
    prf_1d_fmri_numerosity.md
    prf_2d_ecog_visual.md
    cf_fmri_visual.md
